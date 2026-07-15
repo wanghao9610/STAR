@@ -25,14 +25,14 @@ fail() {
 
 if [[ "${STAR_REF}" == "-h" || "${STAR_REF}" == "--help" ]]; then
     cat <<'EOF'
-Usage: bash execs/update-star.sh [ref]
+Usage: bash execs/update.sh [ref]
 
 Overwrite STAR-managed skills and documentation with files from upstream.
 The default ref is main; a branch or tag may be supplied instead.
 
 Examples:
-  bash execs/update-star.sh
-  bash execs/update-star.sh TAG_OR_BRANCH
+  bash execs/update.sh
+  bash execs/update.sh TAG_OR_BRANCH
 EOF
     exit 0
 fi

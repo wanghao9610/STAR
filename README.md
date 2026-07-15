@@ -32,7 +32,7 @@ STAR/
 │   └── plans/              # Research plans and executable sub-plans
 ├── execs/
 │   ├── run.sh              # Main experiment launcher
-│   ├── update-star.sh      # Sync upstream STAR skills and documentation
+│   ├── update.sh           # Sync upstream STAR skills and documentation
 │   └── scpts/              # Experiment-specific shell scripts
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
@@ -168,7 +168,7 @@ See [`docs/research-workflow-skills.md`](docs/research-workflow-skills.md) for i
 After creating a project from STAR, you can sync later STAR skill and documentation releases without changing project code, experiment configuration, or Git remotes:
 
 ```bash
-bash execs/update-star.sh
+bash execs/update.sh
 ```
 
 By default, the command updates these directories from STAR's `main` branch:
@@ -181,7 +181,7 @@ By default, the command updates these directories from STAR's `main` branch:
 To pin the update to a tag or branch, pass it as an argument:
 
 ```bash
-bash execs/update-star.sh TAG_OR_BRANCH
+bash execs/update.sh TAG_OR_BRANCH
 ```
 
 Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in these directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.

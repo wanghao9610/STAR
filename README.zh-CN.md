@@ -32,7 +32,7 @@ star-ai-research/
 │   └── plans/              # 研究计划及可执行子计划
 ├── execs/
 │   ├── run.sh              # 实验统一入口
-│   ├── update-star.sh      # 同步上游 STAR skill 与文档
+│   ├── update.sh           # 同步上游 STAR skill 与文档
 │   └── scpts/              # 各实验对应的 Shell 脚本
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
@@ -168,7 +168,7 @@ STAR 提供四个相互配合的技能，将研究想法转化为可追踪、可
 基于 STAR 创建项目后，可以只同步 STAR 后续发布的 skill 与文档，而不改动项目代码、实验配置或 Git remote：
 
 ```bash
-bash execs/update-star.sh
+bash execs/update.sh
 ```
 
 该命令默认从 STAR 的 `main` 分支更新以下目录：
@@ -181,7 +181,7 @@ bash execs/update-star.sh
 如需固定到某个 tag 或分支，可以将其作为参数传入：
 
 ```bash
-bash execs/update-star.sh TAG_OR_BRANCH
+bash execs/update.sh TAG_OR_BRANCH
 ```
 
 上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；这些目录中仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
