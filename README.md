@@ -20,7 +20,7 @@ The template is intentionally framework-agnostic: bring your own model stack, de
 ## Project structure
 
 ```text
-star-ai-research/
+STAR/
 ├── code/                   # Core project source code (configured by CODE_NAME)
 ├── docs/                   # Project documentation
 ├── datas/                  # Datasets and data-related files
