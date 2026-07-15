@@ -62,7 +62,7 @@ The abbreviated directory names are deliberate:
 
 ## Quick start
 
-### 1. Create a project from the template
+### 1. Start a project with STAR
 
 Use this repository as a GitHub template, or clone/copy it into a new project:
 
