@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/star-project-icon.png" alt="STAR 项目图标" width="128">
+  <img src="docs/srcs/star-project-icon.png" alt="STAR 项目图标" width="128">
   <h1>STAR</h1>
   <p><strong>结构化 AI 研究工具包</strong></p>
   <p><em>一个面向可复现、结构化 AI 研究的可复用项目基础。</em></p>
@@ -28,7 +28,11 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 ```text
 star-ai-research/
 ├── code/                   # 项目核心代码（目录名由 CODE_NAME 配置）
-├── docs/                   # 项目文档
+├── docs/                   # 项目文档站点
+│   ├── index.html          # GitHub Pages 文档入口
+│   ├── htmls/              # HTML 文档页面
+│   ├── mds/                # 按主题组织的 Markdown 文档
+│   └── srcs/               # 文档图片及其他静态资源
 ├── datas/                  # 数据集及相关文件
 ├── inits/                  # 模型权重、检查点和初始化文件
 ├── wkdrs/                  # 实验输出及每次运行产生的文件
@@ -36,7 +40,7 @@ star-ai-research/
 │   └── plans/              # 研究计划及可执行子计划
 ├── execs/
 │   ├── run.sh              # 实验统一入口
-│   ├── update.sh           # 同步上游 STAR skill 与文档
+│   ├── update.sh           # 同步上游 STAR skill 与工作流指南
 │   └── scpts/              # 各实验对应的 Shell 脚本
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
@@ -47,7 +51,7 @@ star-ai-research/
 └── README.md
 ```
 
-将安装指南、使用说明和设计参考等面向项目使用者的文档放在 `docs/` 中；研究计划、方法说明和研究设计记录则放在 `metds/` 中。
+HTML 页面放在 `docs/htmls/`，按主题组织的 Markdown 文档放在 `docs/mds/`，图片及其他静态资源放在 `docs/srcs/`；`docs/index.html` 作为文档入口。研究计划、方法说明和研究设计记录则放在 `metds/` 中。
 
 部分目录使用了缩写：
 
@@ -164,11 +168,11 @@ STAR 提供四个相互配合的技能，将研究想法转化为可追踪、可
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
-具体的调用方式、完整示例、生成文件和常见问题见 [`docs/research-workflow-skills.zh-CN.md`](docs/research-workflow-skills.zh-CN.md)。
+具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/rsch-workflow/research-workflow-skills.zh-CN.md)。
 
-## 更新 STAR 的 skill 与文档
+## 更新 STAR 的 skill 与工作流指南
 
-基于 STAR 创建项目后，可以只同步 STAR 后续发布的 skill 与文档，而不改动项目代码、实验配置或 Git remote：
+基于 STAR 创建项目后，可以只同步 STAR 后续发布的 skill 与研究工作流指南，而不改动项目代码、实验配置或 Git remote：
 
 ```bash
 bash execs/update.sh
@@ -179,7 +183,7 @@ bash execs/update.sh
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
-- `docs/`
+- `docs/mds/rsch-workflow/`
 
 如需固定到某个 tag 或分支，可以将其作为参数传入：
 

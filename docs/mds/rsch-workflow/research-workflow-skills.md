@@ -111,7 +111,7 @@ The plan contains six research sections and their statuses. When all sections ar
 - If you are unsure about an experiment or metric, say so. The skill will offer two or three concrete candidates.
 - Avoid decomposing the plan before its key sections are confirmed, or downstream sub-plans may contain many `[TBD]` items.
 
-See the complete definition in [`rsch-plan-coach/SKILL.md`](../.agents/skills/rsch-plan-coach/SKILL.md).
+See the complete definition in [`rsch-plan-coach/SKILL.md`](../../../.agents/skills/rsch-plan-coach/SKILL.md).
 
 ## 4. `$rsch-plan-decomposer`: create execution sub-plans
 
@@ -177,7 +177,7 @@ $rsch-plan-decomposer 01
 - Every sub-plan should have one check that clearly distinguishes success from failure. “Investigate” or “try to optimize” is not yet concrete enough.
 - Do not manually renumber existing prefixes; that can break deeper plans and dependency references.
 
-See the complete definition in [`rsch-plan-decomposer/SKILL.md`](../.agents/skills/rsch-plan-decomposer/SKILL.md).
+See the complete definition in [`rsch-plan-decomposer/SKILL.md`](../../../.agents/skills/rsch-plan-decomposer/SKILL.md).
 
 ## 5. `$rsch-plan-executor`: execute one leaf plan
 
@@ -248,7 +248,7 @@ wkdrs/00_mvp-3way-ablation/
 
 When the same plan is invoked again, the skill treats `EXEC_LOG.md` as the source of truth, skips completed steps, and resumes from the first unfinished action.
 
-See the complete definition in [`rsch-plan-executor/SKILL.md`](../.agents/skills/rsch-plan-executor/SKILL.md).
+See the complete definition in [`rsch-plan-executor/SKILL.md`](../../../.agents/skills/rsch-plan-executor/SKILL.md).
 
 ## 6. `$rsch-plan-status`: inspect the plan tree
 
@@ -284,7 +284,7 @@ $rsch-plan-status 01
 
 This skill is **strictly read-only**. It scans `metds/plans/` and `wkdrs/<run>/EXEC_LOG.md` without creating or modifying any file.
 
-See the complete definition in [`rsch-plan-status/SKILL.md`](../.agents/skills/rsch-plan-status/SKILL.md).
+See the complete definition in [`rsch-plan-status/SKILL.md`](../../../.agents/skills/rsch-plan-status/SKILL.md).
 
 ## 7. End-to-end example
 

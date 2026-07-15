@@ -111,7 +111,7 @@ metds/plans/0_open-vocab-det-seg_plan.md
 - 不确定实验或指标时可以直接说“不知道”，skill 会给出 2–3 个候选方案。
 - 关键章节尚未确认时不要急着拆解，否则下游子计划会出现较多 `【待定】`。
 
-完整定义见 [`rsch-plan-coach/SKILL.md`](../.agents/skills/rsch-plan-coach/SKILL.md)。
+完整定义见 [`rsch-plan-coach/SKILL.md`](../../../.agents/skills/rsch-plan-coach/SKILL.md)。
 
 ## 4. `$rsch-plan-decomposer`：拆解执行子计划
 
@@ -177,7 +177,7 @@ $rsch-plan-decomposer 01
 - 一个子计划应当有一条能明确判断成功或失败的完成判据；“调研一下”或“尝试优化”还不够具体。
 - 不要手工重排已使用的数字前缀，否则会破坏更深层计划和已有依赖引用。
 
-完整定义见 [`rsch-plan-decomposer/SKILL.md`](../.agents/skills/rsch-plan-decomposer/SKILL.md)。
+完整定义见 [`rsch-plan-decomposer/SKILL.md`](../../../.agents/skills/rsch-plan-decomposer/SKILL.md)。
 
 ## 5. `$rsch-plan-executor`：执行一个叶子计划
 
@@ -248,7 +248,7 @@ wkdrs/00_mvp-3way-ablation/
 
 再次执行同一计划时，skill 以 `EXEC_LOG.md` 为真源，跳过已完成步骤，从第一个未完成步骤续跑。
 
-完整定义见 [`rsch-plan-executor/SKILL.md`](../.agents/skills/rsch-plan-executor/SKILL.md)。
+完整定义见 [`rsch-plan-executor/SKILL.md`](../../../.agents/skills/rsch-plan-executor/SKILL.md)。
 
 ## 6. `$rsch-plan-status`：查看计划树状态
 
@@ -284,7 +284,7 @@ $rsch-plan-status 01
 
 这是一个**严格只读**的 skill：只扫描 `metds/plans/` 和 `wkdrs/<run>/EXEC_LOG.md`，不会创建或修改任何文件。
 
-完整定义见 [`rsch-plan-status/SKILL.md`](../.agents/skills/rsch-plan-status/SKILL.md)。
+完整定义见 [`rsch-plan-status/SKILL.md`](../../../.agents/skills/rsch-plan-status/SKILL.md)。
 
 ## 7. 一套完整的使用示例
 

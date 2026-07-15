@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/star-project-icon.png" alt="STAR project icon" width="128">
+  <img src="docs/srcs/star-project-icon.png" alt="STAR project icon" width="128">
   <h1>STAR</h1>
   <p><strong>Structured Toolkit for AI Research</strong></p>
   <p><em>A reusable foundation for reproducible and well-structured AI research.</em></p>
@@ -28,7 +28,11 @@ See [Research workflow](#research-workflow) for the responsibilities, invocation
 ```text
 STAR/
 ├── code/                   # Core project source code (configured by CODE_NAME)
-├── docs/                   # Project documentation
+├── docs/                   # Project documentation site
+│   ├── index.html          # Documentation entrypoint for GitHub Pages
+│   ├── htmls/              # HTML documentation pages
+│   ├── mds/                # Markdown documentation grouped by topic
+│   └── srcs/               # Documentation images and other static assets
 ├── datas/                  # Datasets and data-related files
 ├── inits/                  # Model weights, checkpoints, and initialization files
 ├── wkdrs/                  # Generated outputs and run-specific artifacts
@@ -36,7 +40,7 @@ STAR/
 │   └── plans/              # Research plans and executable sub-plans
 ├── execs/
 │   ├── run.sh              # Main experiment launcher
-│   ├── update.sh           # Sync upstream STAR skills and documentation
+│   ├── update.sh           # Sync upstream STAR skills and workflow guides
 │   └── scpts/              # Experiment-specific shell scripts
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
@@ -47,7 +51,7 @@ STAR/
 └── README.md
 ```
 
-Use `docs/` for project-facing documentation such as setup guides, usage guides, and design references. Keep research plans, methodology notes, and research design records under `metds/`.
+Use `docs/htmls/` for HTML pages, `docs/mds/` for Markdown documentation grouped by topic, and `docs/srcs/` for images and other static assets. `docs/index.html` is the documentation entrypoint. Keep research plans, methodology notes, and research design records under `metds/`.
 
 The abbreviated directory names are deliberate:
 
@@ -164,11 +168,11 @@ research idea
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 
-See [`docs/research-workflow-skills.md`](docs/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance.
+See the [Research Workflow Skills Guide](docs/mds/rsch-workflow/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance.
 
-## Updating STAR skills and documentation
+## Updating STAR skills and workflow guides
 
-After creating a project from STAR, you can sync later STAR skill and documentation releases without changing project code, experiment configuration, or Git remotes:
+After creating a project from STAR, you can sync later STAR skill and research workflow guide releases without changing project code, experiment configuration, or Git remotes:
 
 ```bash
 bash execs/update.sh
@@ -179,7 +183,7 @@ By default, the command updates these directories from STAR's `main` branch:
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
-- `docs/`
+- `docs/mds/rsch-workflow/`
 
 To pin the update to a tag or branch, pass it as an argument:
 

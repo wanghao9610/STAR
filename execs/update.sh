@@ -11,7 +11,7 @@ SYNC_PATHS=(
     ".agents/skills"
     ".claude/skills"
     ".cursor/skills"
-    "docs"
+    "docs/mds/rsch-workflow"
 )
 
 log() {
@@ -27,7 +27,7 @@ if [[ "${STAR_REF}" == "-h" || "${STAR_REF}" == "--help" ]]; then
     cat <<'EOF'
 Usage: bash execs/update.sh [ref]
 
-Overwrite STAR-managed skills and documentation with files from upstream.
+Overwrite STAR-managed skills and research workflow documentation with files from upstream.
 The default ref is main; a branch or tag may be supplied instead.
 
 Examples:
