@@ -66,10 +66,13 @@ rm -rf .git
 cd ..
 mv STAR YOUR_PROJ_NAME
 cd YOUR_PROJ_NAME
+mv code YOUR_CODE_NAME  # 也可以将现有代码库复制或克隆到 YOUR_CODE_NAME。
 git init
 git add .
 git commit -m "First commit."
 ```
+
+如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，并且需要将其文件直接纳入当前项目，请在执行 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 
 ### 2. 配置本地运行环境
 
@@ -82,7 +85,7 @@ cp .env.example .env
 然后编辑 `.env`：
 
 ```dotenv
-CODE_NAME=code
+CODE_NAME=YOUR_CODE_NAME
 CONDA_HOME=/path/to/conda
 PYTHON_HOME=/path/to/conda/envs/your-env
 ```

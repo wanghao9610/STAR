@@ -66,10 +66,13 @@ rm -rf .git
 cd ..
 mv STAR YOUR_PROJ_NAME
 cd YOUR_PROJ_NAME
+mv code YOUR_CODE_NAME  # Or copy or clone your existing codebase into YOUR_CODE_NAME.
 git init
 git add .
 git commit -m "First commit."
 ```
+
+If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should be included directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before running `git add .`.
 
 ### 2. Configure the local runtime
 
@@ -82,7 +85,7 @@ cp .env.example .env
 Then edit `.env`:
 
 ```dotenv
-CODE_NAME=code
+CODE_NAME=YOUR_CODE_NAME
 CONDA_HOME=/path/to/conda
 PYTHON_HOME=/path/to/conda/envs/your-env
 ```
