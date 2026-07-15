@@ -2,6 +2,8 @@
 
 > A reusable project template for reproducible and well-structured AI research.
 
+**Language:** English | [简体中文](README.zh-CN.md)
+
 STAR provides a lightweight starting point for artificial intelligence research projects. It keeps source code, datasets, model weights, experiment outputs, and methodology notes in predictable locations, while offering a single experiment entrypoint and shared instructions for both researchers and AI coding agents.
 
 The template is intentionally framework-agnostic: bring your own model stack, dependency manager, and experiment tracker.
