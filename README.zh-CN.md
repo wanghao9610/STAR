@@ -57,8 +57,15 @@ star-ai-research/
 可以将本仓库用作 GitHub 模板，也可以直接克隆或复制到新项目：
 
 ```bash
-git clone <你的新仓库地址>
-cd <你的项目目录>
+git clone https://github.com/wanghao9610/STAR
+cd STAR
+rm -rf .git
+cd ..
+mv STAR YOUR_PROJ_NAME
+cd YOUR_PROJ_NAME
+git init
+git add .
+git commit -m "First commit."
 ```
 
 ### 2. 配置本地运行环境

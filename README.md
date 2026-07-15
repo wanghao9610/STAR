@@ -59,6 +59,13 @@ Use this repository as a GitHub template, or clone/copy it into a new project:
 ```bash
 git clone https://github.com/wanghao9610/STAR
 cd STAR
+rm -rf .git
+cd ..
+mv STAR YOUR_PROJ_NAME
+cd YOUR_PROJ_NAME
+git init
+git add .
+git commit -m "First commit."
 ```
 
 ### 2. Configure the local runtime
