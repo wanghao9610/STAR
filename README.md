@@ -158,6 +158,8 @@ research idea
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 
+See [`docs/research-workflow-skills.md`](docs/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance.
+
 ## Project conventions
 
 1. Keep reusable implementation in `${CODE_NAME}/`.

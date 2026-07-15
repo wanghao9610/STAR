@@ -158,6 +158,8 @@ STAR 提供四个相互配合的技能，将研究想法转化为可追踪、可
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
+具体的调用方式、完整示例、生成文件和常见问题见 [`docs/research-workflow-skills.zh-CN.md`](docs/research-workflow-skills.zh-CN.md)。
+
 ## 项目约定
 
 1. 可复用的实现代码放在 `${CODE_NAME}/` 中。
