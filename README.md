@@ -3,8 +3,9 @@
   <h1>STAR</h1>
   <p><strong>Structured Toolkit for AI Research</strong></p>
   <p><em>A reusable project template for reproducible and well-structured AI research.</em></p>
-  <p><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
 </div>
+
+**Language:** English | [简体中文](README.zh-CN.md)
 
 STAR provides a lightweight starting point for artificial intelligence research projects. It keeps source code, datasets, model weights, experiment outputs, and methodology notes in predictable locations, while offering a single experiment entrypoint and shared instructions for both researchers and AI coding agents. Its built-in research workflow connects research ideas, plans, executable sub-plans, implementation and validation, and status tracking, while preserving key decisions, task dependencies, and validation records in project files for cross-session continuity and auditability.
 
