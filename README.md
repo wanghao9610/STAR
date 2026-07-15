@@ -13,7 +13,7 @@ The template is intentionally framework-agnostic: bring your own model stack, de
 - **A consistent project layout** for code, data, weights, outputs, and research notes.
 - **A portable runtime boundary**: machine-specific paths live in a local `.env` file rather than in scripts.
 - **A single experiment entrypoint** through `execs/run.sh`.
-- **AI-friendly project guidance** shared across Codex, Claude Code, and Cursor.
+- **AI-friendly project guidance** shared across Codex, Claude, and Cursor.
 - **A plan-to-execution workflow** for drafting, decomposing, executing, and tracking research plans.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
@@ -32,7 +32,7 @@ star-ai-research/
 │   ├── run.sh              # Main experiment launcher
 │   └── scpts/              # Experiment-specific shell scripts
 ├── .agents/skills/         # Research workflow skills for Codex
-├── .claude/skills/         # Research workflow skills for Claude Code
+├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .env.example            # Portable environment configuration template

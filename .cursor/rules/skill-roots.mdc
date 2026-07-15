@@ -17,7 +17,7 @@ Cursor does not prioritize or de-duplicate skills. It discovers every `SKILL.md`
 |------|------------|------------|
 | `.cursor/skills/` | **Cursor** | `SwitchMode` plan gate, `Task` subagents, plain-text Q&A |
 | `.agents/skills/` | **Codex** | `$skill` invoke, Codex progress-plan / selective delegation |
-| `.claude/skills/` | **Claude Code** | `/skill` invoke, AskUserQuestion, Enter/ExitPlanMode |
+| `.claude/skills/` | **Claude** | `/skill` invoke, AskUserQuestion, Enter/ExitPlanMode |
 
 Do not treat these three trees as interchangeable. Keep tool-specific wording in the matching root only.
 
@@ -26,7 +26,7 @@ Do not treat these three trees as interchangeable. Keep tool-specific wording in
 **When duplicate skills exist, Cursor Agent must use the copy under `.cursor/skills/`.**
 
 - For `rsch-plan-*`, and any other skill that exists in multiple roots, read and follow `.cursor/skills/<name>/`.
-- Ignore sibling copies under `.agents/skills/` and `.claude/skills/` unless the user explicitly asks to use Codex or Claude Code wording.
+- Ignore sibling copies under `.agents/skills/` and `.claude/skills/` unless the user explicitly asks to use Codex or Claude wording.
 - When linking hand-offs, keep `/rsch-plan-*` names, but still load instructions from `.cursor/skills/`.
 
 ## 3. Reduce Duplicate Discovery in the Cursor UI
