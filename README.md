@@ -2,14 +2,14 @@
   <img src="docs/assets/star-project-icon.png" alt="STAR project icon" width="128">
   <h1>STAR</h1>
   <p><strong>Structured Toolkit for AI Research</strong></p>
-  <p><em>A reusable project template for reproducible and well-structured AI research.</em></p>
+  <p><em>A reusable foundation for reproducible and well-structured AI research.</em></p>
 </div>
 
 **Language:** English | [简体中文](README.zh-CN.md)
 
 STAR provides a lightweight starting point for artificial intelligence research projects. It keeps source code, datasets, model weights, experiment outputs, and methodology notes in predictable locations, while offering a single experiment entrypoint and shared instructions for both researchers and AI coding agents. Its built-in research workflow connects research ideas, plans, executable sub-plans, implementation and validation, and status tracking, while preserving key decisions, task dependencies, and validation records in project files for cross-session continuity and auditability.
 
-The template is intentionally framework-agnostic: the research workflow defines only the process, file locations, and validation records, so you can still bring your own model stack, dependency manager, and experiment tracker.
+STAR is intentionally framework-agnostic: the research workflow defines only the process, file locations, and validation records, so you can still bring your own model stack, dependency manager, and experiment tracker.
 
 ## What STAR provides
 
@@ -42,7 +42,7 @@ STAR/
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
-├── .env.example            # Portable environment configuration template
+├── .env.example            # Portable environment configuration example
 ├── AGENTS.md               # Shared instructions for AI coding agents
 └── README.md
 ```
@@ -83,7 +83,7 @@ If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should
 
 ### 2. Configure the local runtime
 
-Copy the environment template:
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
@@ -213,8 +213,8 @@ When starting a new research repository from STAR:
 - Define the expected outputs, metrics, and reproduction commands for the project.
 - Update the copyright holder and year in `LICENCE`.
 
-Keep the structure only where it remains useful—the template should support the research, not constrain it.
+Keep only the structure that remains useful—STAR should support the research, not constrain it.
 
 ## License
 
-This template is released under the [MIT License](LICENCE).
+STAR is released under the [MIT License](LICENCE).
