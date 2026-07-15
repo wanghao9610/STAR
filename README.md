@@ -22,6 +22,7 @@ The template is intentionally framework-agnostic: bring your own model stack, de
 ```text
 star-ai-research/
 ├── code/                   # Core project source code (configured by CODE_NAME)
+├── docs/                   # Project documentation
 ├── datas/                  # Datasets and data-related files
 ├── inits/                  # Model weights, checkpoints, and initialization files
 ├── wkdrs/                  # Generated outputs and run-specific artifacts
@@ -38,6 +39,8 @@ star-ai-research/
 ├── AGENTS.md               # Shared instructions for AI coding agents
 └── README.md
 ```
+
+Use `docs/` for project-facing documentation such as setup guides, usage guides, and design references. Keep research plans, methodology notes, and research design records under `metds/`.
 
 The abbreviated directory names are deliberate:
 
