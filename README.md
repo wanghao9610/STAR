@@ -57,8 +57,8 @@ The abbreviated directory names are deliberate:
 Use this repository as a GitHub template, or clone/copy it into a new project:
 
 ```bash
-git clone <your-new-repository-url>
-cd <your-project>
+git clone https://github.com/wanghao9610/STAR
+cd STAR
 ```
 
 ### 2. Configure the local runtime
@@ -103,8 +103,8 @@ python "${CODE_DIR}/train.py" \
 The launcher activates the configured Conda environment and exports these paths for experiment scripts:
 
 ```text
-PROJ_HOME  ROOT_DIR  CODE_DIR  DATA_DIR
-INIT_DIR   WORK_DIR  SCPT_DIR
+ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR
+WORK_DIR  SCPT_DIR
 ```
 
 ### 4. Run it

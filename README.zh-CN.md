@@ -103,8 +103,8 @@ python "${CODE_DIR}/train.py" \
 启动器会激活配置好的 Conda 环境，并向实验脚本导出以下路径变量：
 
 ```text
-PROJ_HOME  ROOT_DIR  CODE_DIR  DATA_DIR
-INIT_DIR   WORK_DIR  SCPT_DIR
+ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR
+WORK_DIR  SCPT_DIR
 ```
 
 ### 4. 运行实验

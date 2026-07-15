@@ -20,8 +20,8 @@ fail() {
 # Project paths are derived from this launcher; machine-specific paths
 # are loaded from the project .env file.
 EXEC_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-PROJ_HOME="$(cd -- "${EXEC_DIR}/.." && pwd -P)"
-ENV_FILE="${PROJ_HOME}/.env"
+ROOT_DIR="$(cd -- "${EXEC_DIR}/.." && pwd -P)"
+ENV_FILE="${ROOT_DIR}/.env"
 
 [[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy .env.example to .env and configure it first."
 
@@ -51,17 +51,15 @@ conda activate "${PYTHON_ENV}"
 #######################################################################
 #                          PART 2  Project                            #
 #######################################################################
-CODE_DIR="${PROJ_HOME}/${CODE_NAME}"
-DATA_DIR="${PROJ_HOME}/datas"
-INIT_DIR="${PROJ_HOME}/inits"
-WORK_DIR="${PROJ_HOME}/wkdrs"
+CODE_DIR="${ROOT_DIR}/${CODE_NAME}"
+DATA_DIR="${ROOT_DIR}/datas"
+INIT_DIR="${ROOT_DIR}/inits"
+WORK_DIR="${ROOT_DIR}/wkdrs"
 SCPT_DIR="${EXEC_DIR}/scpts"
 
-export PROJ_HOME
-export ROOT_DIR="${PROJ_HOME}"
-export CODE_DIR DATA_DIR INIT_DIR WORK_DIR SCPT_DIR
+export ROOT_DIR CODE_DIR DATA_DIR INIT_DIR WORK_DIR SCPT_DIR
 
-cd "${PROJ_HOME}"
+cd "${ROOT_DIR}"
 
 #######################################################################
 #                          PART 3  Launcher                           #
