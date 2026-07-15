@@ -6,18 +6,21 @@
   <p><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
 </div>
 
-STAR provides a lightweight starting point for artificial intelligence research projects. It keeps source code, datasets, model weights, experiment outputs, and methodology notes in predictable locations, while offering a single experiment entrypoint and shared instructions for both researchers and AI coding agents.
+STAR provides a lightweight starting point for artificial intelligence research projects. It keeps source code, datasets, model weights, experiment outputs, and methodology notes in predictable locations, while offering a single experiment entrypoint and shared instructions for both researchers and AI coding agents. Its built-in research workflow connects research ideas, plans, executable sub-plans, implementation and validation, and status tracking, while preserving key decisions, task dependencies, and validation records in project files for cross-session continuity and auditability.
 
-The template is intentionally framework-agnostic: bring your own model stack, dependency manager, and experiment tracker.
+The template is intentionally framework-agnostic: the research workflow defines only the process, file locations, and validation records, so you can still bring your own model stack, dependency manager, and experiment tracker.
 
 ## What STAR provides
 
 - **A consistent project layout** for code, data, weights, outputs, and research notes.
 - **A portable runtime boundary**: machine-specific paths live in a local `.env` file rather than in scripts.
 - **A single experiment entrypoint** through `execs/run.sh`.
-- **AI-friendly project guidance** shared across Codex, Claude, and Cursor.
-- **A plan-to-execution workflow** for drafting, decomposing, executing, and tracking research plans.
+- **A complete research-plan lifecycle** through four complementary skills for drafting plans, recursively decomposing them, executing leaf plans, and summarizing global status.
+- **A traceable, resumable research process** that stores plan status, task dependencies, execution steps, and validation evidence under `metds/plans/` and `wkdrs/` instead of relying on chat history for context.
+- **AI-friendly project guidance and research workflows** shared across Codex, Claude, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
+
+See [Research workflow](#research-workflow) for the responsibilities, invocation patterns, and complete examples for all four skills.
 
 ## Project structure
 
@@ -119,8 +122,7 @@ python "${CODE_DIR}/train.py" \
 The launcher activates the configured Conda environment and exports these paths for experiment scripts:
 
 ```text
-ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR
-WORK_DIR  SCPT_DIR
+ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR WORK_DIR  SCPT_DIR
 ```
 
 ### 4. Run it
