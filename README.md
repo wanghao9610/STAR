@@ -1,4 +1,4 @@
-# STAR — Starter Template for AI Research
+# STAR — Starter Template for AI Research (Working In Progress)
 
 > A reusable project template for reproducible and well-structured AI research.
 

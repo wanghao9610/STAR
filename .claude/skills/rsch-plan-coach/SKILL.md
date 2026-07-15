@@ -1,5 +1,6 @@
 ---
 name: rsch-plan-coach
+disable-model-invocation: true
 description: >-
   Coach CS researchers through writing a research plan via staged Socratic questions
   (problem → related work → method → experiments → risks → milestones), writing each

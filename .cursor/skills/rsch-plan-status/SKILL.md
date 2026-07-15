@@ -1,5 +1,6 @@
 ---
 name: rsch-plan-status
+disable-model-invocation: true
 description: >-
   Read-only overview of the research-plan tree under metds/plans/. Scans every *_plan.md, rebuilds
   the decomposition tree from parent/prefix, reads each node's section status, children, depends_on,

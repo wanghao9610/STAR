@@ -1,5 +1,6 @@
 ---
 name: rsch-plan-executor
+disable-model-invocation: true
 description: >-
   Execute a leaf research sub-plan from metds/plans/ against the project code. Orient in the
   codebase using .env, turn the sub-plan into a concrete checked execution plan, implement it with

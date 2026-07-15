@@ -1,5 +1,6 @@
 ---
 name: rsch-plan-decomposer
+disable-model-invocation: true
 description: >-
   Decompose an existing research plan (written by rsch-plan-coach and living under
   metds/plans/) into concrete, executable sub-plans. Reads the parent plan, picks a

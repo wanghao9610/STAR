@@ -1,5 +1,6 @@
 ---
 name: rsch-plan-executor
+disable-model-invocation: true
 description: >-
   Execute a leaf execution sub-plan (produced by rsch-plan-decomposer and living under
   metds/plans/) against the project code. Orients in the codebase (${CODE_NAME}/, read from
