@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/star-project-icon.png" alt="STAR project icon" width="180">
+</p>
+
 # STAR — Starter Template for AI Research (Working In Progress)
 
 > A reusable project template for reproducible and well-structured AI research.

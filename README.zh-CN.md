@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/star-project-icon.png" alt="STAR 项目图标" width="180">
+</p>
+
 # STAR — AI 研究项目启动模板（开发中）
 
 > 一个面向可复现、结构化 AI 研究的通用项目模板。
