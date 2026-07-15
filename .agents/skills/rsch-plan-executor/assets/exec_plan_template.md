@@ -1,0 +1,42 @@
+---
+title: <Sub-topic> Executable Plan
+run: <prefix>_<slug>                 # = the wkdrs/<run>/ directory name
+source_plan: <prefix>_<slug>_plan.md # the leaf sub-plan under metds/plans/ this executes
+code_name: <CODE_NAME>               # resolved from .env
+created: <YYYY-MM-DD>
+started: <YYYY-MM-DD>                # date Codex started this authorized execution run
+done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
+---
+
+# <Sub-topic> Executable Plan
+
+## Orientation (current state vs required)
+
+<!-- The gap list from Step 2. For each area the plan touches, what exists in ${CODE_NAME}/ today
+     vs what must be created/changed. State "greenfield" if ${CODE_NAME}/ is empty. Point at real
+     paths, not guesses. -->
+
+## Actions
+
+<!-- Ordered. Each action binds a check. `owner` = `codex`, `delegate`, or `stop → user`
+     (Codex prepares the command, user runs it — see STOP line). Commands go through the .env conda
+     env; artifacts land under wkdrs/<run>/. -->
+
+| # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | owner |
+|---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
+| 1 | <create/modify …> | <path> | — | — | <import / smoke test> | codex |
+| 2 | <…> | <path> | <cmd> | <path> | <what proves it> | codex/delegate |
+| N | <heavy experiment> | — | <prepared cmd> | <path> | §5 done-criterion | stop → user |
+
+## STOP line
+
+<!-- Which actions cross the STOP line and why (long/multi-GPU training, full-dataset eval, costly
+     API). For each: the exact command through the conda env (via execs/run.sh where one exists),
+     what it produces and where, and what output the user should bring back so the done-criterion can
+     be verified. A reusable launch script may be written to execs/scpts/<run>.sh (writing it is fine;
+     running it stays with the user). -->
+
+## Done-criterion
+
+<!-- Restate the sub-plan §5 check that ends this run, with its threshold, tied back to the parent's
+     §4 metrics / §5 kill-criteria where relevant. This is what Step 6 verifies. -->

@@ -1,0 +1,33 @@
+---
+run: <prefix>_<slug>
+source_plan: <prefix>_<slug>_plan.md
+updated: <YYYY-MM-DD>
+status: in_progress   # in_progress / blocked / done
+---
+
+# 执行日志 — <prefix>_<slug>
+
+本轮进度的真源。全新 session 应能仅凭本文件续跑:跳过 `done` 步,从第一个未完成步继续。
+
+## 步骤状态
+
+<!-- 每个 EXEC_PLAN 动作一行。`检查结果` 由**主循环**重跑绑定 check 填写,不是 agent 自报。
+     合法 status:pending / in_progress / done / blocked / skipped。 -->
+
+| # | 步骤 | status | 产物(wkdrs/<run>/…) | 检查结果 | 备注 |
+|---|------|--------|----------------------|----------|------|
+| 1 | <…> | pending | | | |
+| 2 | <…> | pending | | | |
+
+## 待用户执行（STOP 线）
+
+<!-- 用户必须自己跑的命令(重实验)。某步越过 STOP 线时,把它移到这里而非直接执行。每条:确切的 conda 命令、
+     它产出什么、以及用户该带回什么输出以便验证完成判据。 -->
+
+- [ ] `<conda 命令>` → 产出 `wkdrs/<run>/…`;带回 <指标/输出> 以验证完成判据。
+
+## 备注 / 决策
+
+<!-- 续跑的 session 需要知道的一切:做过的假设、相对 EXEC_PLAN 的偏离、遇到的 blocker 及其解决方式。
+     若某结果撞上父计划 §5 的 kill-criterion,在此记为 **战略信号**,并注明推荐的反馈路径
+     (/rsch-plan-coach 或 /rsch-plan-decomposer)——执行器本身绝不改父计划。 -->

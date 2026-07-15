@@ -1,0 +1,41 @@
+---
+description: Skill root ownership and which copy Cursor Agent must follow
+alwaysApply: true
+---
+
+Guidelines for loading skills from tool-specific roots without mixing incompatible instructions.
+
+**Tradeoff:** These guidelines favor predictable tool behavior over treating every discovered skill as interchangeable.
+
+## 1. Respect Root Ownership
+
+**Use one authoritative copy per tool. Keep tool-specific instructions separate.**
+
+Cursor does not prioritize or de-duplicate skills. It discovers every `SKILL.md` under its scan roots and may list the same `name` more than once. This repo therefore assigns one owner per root:
+
+| Root | Owner tool | Adaptation |
+|------|------------|------------|
+| `.cursor/skills/` | **Cursor** | `SwitchMode` plan gate, `Task` subagents, plain-text Q&A |
+| `.agents/skills/` | **Codex** | `$skill` invoke, Codex progress-plan / selective delegation |
+| `.claude/skills/` | **Claude Code** | `/skill` invoke, AskUserQuestion, Enter/ExitPlanMode |
+
+Do not treat these three trees as interchangeable. Keep tool-specific wording in the matching root only.
+
+## 2. Follow the Cursor-Owned Copy
+
+**When duplicate skills exist, Cursor Agent must use the copy under `.cursor/skills/`.**
+
+- For `rsch-plan-*`, and any other skill that exists in multiple roots, read and follow `.cursor/skills/<name>/`.
+- Ignore sibling copies under `.agents/skills/` and `.claude/skills/` unless the user explicitly asks to use Codex or Claude Code wording.
+- When linking hand-offs, keep `/rsch-plan-*` names, but still load instructions from `.cursor/skills/`.
+
+## 3. Reduce Duplicate Discovery in the Cursor UI
+
+**Hide compatible third-party copies where possible. Prefer this rule when duplicates remain.**
+
+- Turn **off** Settings → Rules, Skills and Subagents → **Include third-party Plugins, Skills, and other configs** so `.claude/skills/` (compatibility) is not ingested.
+- `.agents/skills/` is a **native** Cursor root, not third-party, so that toggle does not hide it. Prefer `.cursor/skills/` via this rule when both appear.
+
+---
+
+**These guidelines are working if:** Cursor Agent consistently loads the Cursor-owned skill, preserves tool-specific wording, and avoids ambiguous duplicate entries where the UI allows it.
