@@ -32,6 +32,7 @@ star-ai-research/
 │   └── plans/              # 研究计划及可执行子计划
 ├── execs/
 │   ├── run.sh              # 实验统一入口
+│   ├── update-star.sh      # 同步上游 STAR skill 与文档
 │   └── scpts/              # 各实验对应的 Shell 脚本
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能

@@ -32,6 +32,7 @@ STAR/
 │   └── plans/              # Research plans and executable sub-plans
 ├── execs/
 │   ├── run.sh              # Main experiment launcher
+│   ├── update-star.sh      # Sync upstream STAR skills and documentation
 │   └── scpts/              # Experiment-specific shell scripts
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
