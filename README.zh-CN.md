@@ -1,12 +1,10 @@
-<p align="center">
-  <img src="docs/assets/star-project-icon.png" alt="STAR 项目图标" width="180">
-</p>
-
-# STAR — AI 研究项目启动模板（开发中）
-
-> 一个面向可复现、结构化 AI 研究的通用项目模板。
-
-**语言：** [English](README.md) | 简体中文
+<div align="center">
+  <img src="docs/assets/star-project-icon.png" alt="STAR 项目图标" width="128">
+  <h1>STAR</h1>
+  <p><strong>结构化 AI 研究工具包</strong></p>
+  <p><em>一个面向可复现、结构化 AI 研究的通用项目模板。</em></p>
+  <p><a href="README.md">English</a> · <strong>简体中文</strong></p>
+</div>
 
 STAR 为人工智能研究项目提供了一个轻量起点。它将源代码、数据集、模型权重、实验输出和方法文档分别放在约定好的目录中，并提供统一的实验入口，以及供研究者和 AI 编程助手共同遵循的项目规范。
 
