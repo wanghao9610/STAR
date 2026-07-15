@@ -44,6 +44,7 @@ STAR/
 │   └── scpts/              # Experiment-specific shell scripts
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
+├── .cursor/skills/         # Research workflow skills for Cursor
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .env.example            # Portable environment configuration example

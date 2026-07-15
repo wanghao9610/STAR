@@ -44,6 +44,7 @@ star-ai-research/
 │   └── scpts/              # 各实验对应的 Shell 脚本
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
+├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .env.example            # 本地运行环境配置示例
