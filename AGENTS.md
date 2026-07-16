@@ -69,6 +69,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Model weights and weight-related files belong in `inits/`.
 - Generated output files belong in `wkdrs/`.
 - Put methodology notes in `metds/` and research plans in `metds/plans/`.
+- Plan-execution intermediate files belong in `tasks/<plan-name>/`.
 - Output names must distinguish tasks, experiments, or runs.
 
 ## 6. Project Runtime
