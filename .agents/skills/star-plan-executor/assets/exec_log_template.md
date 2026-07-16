@@ -1,14 +1,16 @@
 ---
 run: <prefix>_<slug>
 source_plan: <prefix>_<slug>_plan.md
+task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 ---
 
 # Execution Log — <prefix>_<slug>
 
-Source of truth for this run's progress. A fresh session should be able to resume from this file
-alone: skip `done` steps, continue from the first unfinished one.
+Source of truth for this run's progress. Keep intermediate working files in `tasks/<plan-name>/`;
+keep this durable record and generated run artifacts in `wkdrs/<run>/`. A fresh session should be
+able to resume from this file alone: skip `done` steps, continue from the first unfinished one.
 
 ## Step status
 

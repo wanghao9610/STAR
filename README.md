@@ -17,7 +17,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - **A portable runtime boundary**: machine-specific paths live in a local `.env` file rather than in scripts.
 - **A single experiment entrypoint** through `execs/run.sh`.
 - **A complete research lifecycle** through eleven complementary skills for drafting plans, surveying the related work into analysis notes and a verified bibliography, recursively decomposing them, bootstrapping the codebase from a reference implementation, building the runtime environment, executing leaf plans, reviewing code against conventions and plan promises, analyzing run results against what the plan expected, revising plans against execution evidence, summarizing global status, and compiling the matured plans into method documents.
-- **A traceable, resumable research process** that stores plan status, task dependencies, execution steps, and validation evidence under `metds/plans/` and `wkdrs/` instead of relying on chat history for context.
+- **A traceable, resumable research process** that stores plans under `metds/plans/`, plan-execution intermediates under `tasks/`, and generated run artifacts under `wkdrs/` instead of relying on chat history for context.
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
@@ -35,6 +35,7 @@ STAR/
 │   └── srcs/               # Documentation images and other static assets
 ├── datas/                  # Datasets and data-related files
 ├── inits/                  # Model weights, checkpoints, and initialization files
+├── tasks/                  # Plan-specific execution-process intermediate files
 ├── wkdrs/                  # Generated outputs and run-specific artifacts
 ├── metds/
 │   ├── plans/              # Research plans and executable sub-plans
@@ -65,7 +66,10 @@ The abbreviated directory names are deliberate:
 | `metds/` | Methodologies | Research plans, design notes, and methodology records |
 | `execs/` | Executions | Launchers and experiment scripts |
 | `scpts/` | Scripts | Individual runnable experiment definitions |
-| `wkdrs/` | Work directories | Logs, metrics, predictions, and other generated outputs |
+| `tasks/` | Tasks | Intermediate files produced while executing plans, grouped by plan name |
+| `wkdrs/` | Work directories | Run logs, metrics, predictions, and other generated outputs |
+
+For example, executing `metds/plans/00_demo_plan.md` creates `tasks/00_demo/` for that plan's intermediate execution files; any generated experiment artifacts still go to the applicable `wkdrs/<run-name>/` directory.
 
 ## Quick start
 
@@ -159,7 +163,7 @@ STAR includes eleven complementary skills that turn a research idea into an audi
 | `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
 | `$star-code-architect` | Bootstrap `${CODE_NAME}/` from a scored reference implementation, or organize existing code, and record the architecture | `${CODE_NAME}/` with `UPSTREAM.md`, plus `metds/codearc.md` |
 | `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies through a uv > pip > conda ladder, and smoke-verify the result | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
-| `$star-plan-executor` | Implement and lightly validate one executable leaf plan | Code plus `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; confirmed deviations synced back into the plan with a Revision History entry |
+| `$star-plan-executor` | Implement and lightly validate one executable leaf plan | Intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
 | `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures |
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |
@@ -216,7 +220,7 @@ Files at matching paths are overwritten and new upstream files are added. Projec
 ## Project conventions
 
 1. Keep reusable implementation in `${CODE_NAME}/`.
-2. Keep data in `datas/`, weights in `inits/`, and generated artifacts in `wkdrs/`.
+2. Keep data in `datas/`, weights in `inits/`, plan-execution intermediates in a plan-named subdirectory under `tasks/`, and generated artifacts in `wkdrs/`.
 3. Keep research plans and methodology notes in `metds/`; plan files belong in `metds/plans/`.
 4. Use `execs/run.sh` as the main entrypoint and place experiment scripts in `execs/scpts/`.
 5. Read runtime paths from `.env`; do not hardcode machine-specific paths.

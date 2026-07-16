@@ -1,13 +1,15 @@
 ---
 run: <prefix>_<slug>
 source_plan: <prefix>_<slug>_plan.md
+task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 ---
 
 # 执行日志 — <prefix>_<slug>
 
-本轮进度的真源。全新 session 应能仅凭本文件续跑:跳过 `done` 步,从第一个未完成步继续。
+本轮进度的真源。执行过程的中间工作文件放在 `tasks/<plan-name>/`;本日志等持久记录及生成的 run 产物放在
+`wkdrs/<run>/`。全新 session 应能仅凭本文件续跑:跳过 `done` 步,从第一个未完成步继续。
 
 ## 步骤状态
 

@@ -7,14 +7,14 @@ Dispatched agents write code and run **light validation**. Anything **heavy or i
 - Unit / smoke tests, import checks, a forward pass on a tiny batch.
 - Small-scale, **no-finetune** inference on a small subset — e.g. an MVP done-criterion: "no training, small subset, swap the text input and compare."
 - Dry-runs, config validation, shape / dtype checks, a few-step overfit sanity run.
-- Anything that finishes in minutes on modest resources and writes only under `wkdrs/<run>/`.
+- Anything that finishes in minutes on modest resources, writes generated outputs and durable execution checkpoints only under `wkdrs/<run>/`, and keeps intermediate working files under `tasks/<plan-name>/`.
 
 ## Crosses the STOP line → hand to user
 
 - **Long or multi-GPU training / fine-tuning** — any full training run.
 - **Costly API calls** — large-volume LLM/VLM inference billed per call (e.g. generating descriptions over a full dataset).
 - **Full-dataset evaluation** that takes hours or significant compute.
-- Anything that **overwrites existing artifacts** the user may want to keep, or writes outside `wkdrs/<run>/`.
+- Anything that **overwrites existing artifacts** the user may want to keep, or writes generated run artifacts outside `wkdrs/<run>/`. Routine intermediate-file writes under `tasks/<plan-name>/` do not cross the STOP line.
 - Anything whose cost or runtime you **cannot bound** — when unsure, treat it as STOP.
 
 ## How to hand off

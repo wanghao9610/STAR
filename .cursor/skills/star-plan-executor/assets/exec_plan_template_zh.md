@@ -2,6 +2,7 @@
 title: <子主题> 可执行计划
 run: <prefix>_<slug>                 # = wkdrs/<run>/ 目录名
 source_plan: <prefix>_<slug>_plan.md # 本次执行的 metds/plans/ 下叶子子计划
+task_dir: tasks/<prefix>_<slug>      # 该计划执行过程的中间文件目录
 code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # 用户在 plan 模式审批门后批准的日期

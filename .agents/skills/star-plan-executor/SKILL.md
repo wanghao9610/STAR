@@ -4,7 +4,8 @@ disable-model-invocation: true
 description: >-
   Execute a leaf research sub-plan from metds/plans/ against the project code. Orient in the
   codebase using .env, turn the sub-plan into a concrete checked execution plan, implement it with
-  surgical changes, run light validation, checkpoint progress under a run-specific wkdrs directory, and stop before
+  surgical changes, run light validation, keep intermediate working files under a plan-specific
+  tasks directory, checkpoint progress under a run-specific wkdrs directory, and stop before
   long or costly experiments by handing the exact command to the user. Syncs user-confirmed
   deviations back into the sub-plan with a Revision History trail, keeping the plan file true to
   what was actually executed. Use when the user invokes
@@ -20,7 +21,7 @@ Invocation: `$star-plan-executor PLAN_NAME`, where `PLAN_NAME` is a slug (`open-
 
 ## Role
 
-Drive one **leaf execution sub-plan** to its done-criterion by changing code and running light validation. The upstream `$star-plan-decomposer` owns the sub-plan's strategy and task breakdown. This skill owns implementation results: code under `${CODE_NAME}/`, artifacts under `wkdrs/<run>/`, and verification evidence.
+Drive one **leaf execution sub-plan** to its done-criterion by changing code and running light validation. The upstream `$star-plan-decomposer` owns the sub-plan's strategy and task breakdown. This skill owns implementation results: code under `${CODE_NAME}/`, intermediate working files under `tasks/<plan-name>/`, and generated artifacts plus verification evidence under `wkdrs/<run>/`. Derive `<plan-name>` from the selected plan filename by removing `_plan.md` (for example, `00_demo_plan.md` → `tasks/00_demo/`).
 
 Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vague to execute, report the concrete gaps and route back to `$star-plan-decomposer`.
 
@@ -31,7 +32,7 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 3. **Delegate selectively.** Execute locally by default. Delegate only bounded, independent work when collaboration tools are available and delegation materially helps. Never create one subagent per trivial sequential step. Give each delegate the narrow contract in `references/agent_dispatch_spec.md`; the main agent remains responsible for integration and re-running checks.
 4. **Stop before heavy or irreversible work.** Long or multi-GPU training, full-dataset evaluation, costly API calls, unbounded jobs, and overwrites of valuable artifacts cross the STOP line. Prepare a reproducible command and hand it to the user; do not launch it. Follow `references/stop_line_rules.md`.
 5. **Checkpoint verified state — and keep the sub-plan true.** Store `EXEC_PLAN.md` and `EXEC_LOG.md` under `wkdrs/<run>/`. Update the log after each bound check. Keep only `exec_status`, `exec_run`, and `updated` in the sub-plan frontmatter — plus, when execution provably diverges from the sub-plan, a **user-confirmed sync-back** of the affected §2–§5 content with a `## Revision History` entry (`references/plan_sync_rules.md`), so the plan a user rereads later matches what was actually executed.
-6. **Use the project runtime and layout.** Read `CONDA_HOME`, `PYTHON_HOME`, and `CODE_NAME` from `.env`; never guess local paths or use system Python. Use `execs/run.sh` when it is the project entrypoint. Put reusable run scripts in `execs/scpts/`, generated output in `wkdrs/<run>/`, data in `datas/`, weights in `inits/`, and code in `${CODE_NAME}/`. Follow `AGENTS.md`.
+6. **Use the project runtime and layout.** Read `CONDA_HOME`, `PYTHON_HOME`, and `CODE_NAME` from `.env`; never guess local paths or use system Python. Use `execs/run.sh` when it is the project entrypoint. Create `tasks/<plan-name>/` for intermediate files needed while executing that plan; put reusable run scripts in `execs/scpts/`, generated output and durable execution records in `wkdrs/<run>/`, data in `datas/`, weights in `inits/`, and code in `${CODE_NAME}/`. Do not put generated run artifacts in `tasks/`. Follow `AGENTS.md`.
 
 ## Workflow
 
@@ -46,7 +47,7 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 
 1. Require concrete §3 Task Breakdown and §5 Done-Criteria. If they are mostly `[TBD]` / `【待定】`, report the missing decisions and ask whether to return to `$star-plan-decomposer` or continue with the remaining uncertainty explicitly recorded.
 2. Verify named datasets, weights, code modules, and every `depends_on` sibling. If a hard dependency is missing or an upstream sibling is not `exec_status: done`, stop and report the exact blocker.
-3. If the selected leaf already has `exec_run`, read that run's log and resume it. Otherwise use run name `<prefix>_<slug>`. If that directory already exists but is not a resumable run for this leaf, ask for a distinguishing suffix; never invent one.
+3. Derive the intermediate workspace as `tasks/<plan-name>/`, where `<plan-name>` is the selected filename without `_plan.md`. If the selected leaf already has `exec_run`, read `wkdrs/<exec_run>/EXEC_LOG.md` and resume it. Otherwise use run name `<prefix>_<slug>`. If that run directory already exists but is not a resumable run for this leaf, ask for a distinguishing suffix; never invent one.
 
 ### Step 2: Orient
 
@@ -63,7 +64,7 @@ Follow `references/orient_checklist.md`:
 2. Mark the STOP line explicitly and estimate runtime/cost when known.
 3. Collect material divergences from the sub-plan's §2–§5 into EXEC_PLAN's "Divergences from sub-plan" table, in delta form (ADDED / MODIFIED / REMOVED — `references/plan_sync_rules.md`). Extra concreteness is not a divergence; a contradiction at the sub-plan's own granularity is.
 4. Show a concise plan and expected side effects in commentary. Pause only for a material scope choice, a non-empty divergence table (confirm its rows with the user before executing), or a STOP-line action that requires user execution.
-5. Create `wkdrs/<run>/EXEC_PLAN.md` from the matching language template and initialize `EXEC_LOG.md`. Update the sub-plan frontmatter to `exec_status: in_progress` and set `exec_run`. Sync the confirmed divergence rows into the sub-plan now: update the affected §2–§5 passages in place, append a `## Revision History` entry, bump `updated`, and mark each row `synced`.
+5. Create `tasks/<plan-name>/` for this plan's intermediate working files. Create `wkdrs/<run>/EXEC_PLAN.md` from the matching language template and initialize `EXEC_LOG.md` there. Update the sub-plan frontmatter to `exec_status: in_progress` and set `exec_run`. Sync the confirmed divergence rows into the sub-plan now: update the affected §2–§5 passages in place, append a `## Revision History` entry, bump `updated`, and mark each row `synced`.
 
 ### Step 4: Execute and verify
 
@@ -85,7 +86,7 @@ For each unfinished action:
 
 ### Step 6: Report
 
-Lead with the outcome. State what was verified and its evidence, where artifacts and logs live, which commands await the user, which amendments were synced into the sub-plan, and any remaining risk. After a completed run, recommend `$star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands await the user at the STOP line, add that once their outputs exist, `$star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep the report under about 400 words.
+Lead with the outcome. State what was verified and its evidence, where the `tasks/<plan-name>/` intermediate workspace and `wkdrs/<run>/` records/artifacts live, which commands await the user, which amendments were synced into the sub-plan, and any remaining risk. After a completed run, recommend `$star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands await the user at the STOP line, add that once their outputs exist, `$star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep the report under about 400 words.
 
 ## State Rules
 

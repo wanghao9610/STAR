@@ -8,11 +8,11 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 
 3. **Nothing heavy ran autonomously** — every long/multi-GPU training, full-dataset eval, or costly API call is in "Awaiting user", not silently executed (`stop_line_rules.md`).
 
-4. **Artifacts are where they belong** — generated outputs under `wkdrs/<run>/`, data under `datas/`, weights under `inits/`, run scripts under `execs/scpts/`; code changes only under `${CODE_NAME}/`. Nothing generated left in `metds/plans/`.
+4. **Files are where they belong** — intermediate working files under `tasks/<plan-name>/`; `EXEC_PLAN.md`, `EXEC_LOG.md`, and generated outputs under `wkdrs/<run>/`; data under `datas/`; weights under `inits/`; run scripts under `execs/scpts/`; code changes only under `${CODE_NAME}/`. Nothing generated is left in `metds/plans/`.
 
 5. **Runtime is the project env** — commands went through `.env`'s conda env; no system python, no hardcoded local paths.
 
-6. **State is resumable** — EXEC_LOG reflects true per-step status and the sub-plan frontmatter has `exec_status` + `exec_run`. A fresh session could resume from the log alone.
+6. **State is resumable** — `wkdrs/<run>/EXEC_LOG.md` reflects true per-step status and the sub-plan frontmatter has `exec_status` + `exec_run`. A fresh session could resume from the log alone.
 
 7. **Changes are surgical** — code diffs trace to EXEC_PLAN steps; no unrelated refactors or "improvements" to adjacent code (CLAUDE.md §3).
 

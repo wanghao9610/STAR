@@ -2,6 +2,7 @@
 title: <Sub-topic> Executable Plan
 run: <prefix>_<slug>                 # = the wkdrs/<run>/ directory name
 source_plan: <prefix>_<slug>_plan.md # the leaf sub-plan under metds/plans/ this executes
+task_dir: tasks/<prefix>_<slug>      # plan-specific execution-process intermediate files
 code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # date the user approved this via ExitPlanMode

@@ -17,7 +17,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **可迁移的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
 - **完整的研究生命周期**：通过十一个相互配合的 skill，引导计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现奠基代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、以执行证据修订计划、全局状态汇总，以及把成熟计划编译成方法文档。
-- **可追踪、可恢复的研究过程**：将计划状态、任务依赖、执行步骤和验证证据保存在 `metds/plans/` 与 `wkdrs/` 中，不依赖聊天记录保存上下文。
+- **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
 - **面向 AI 协作的规范**：为 Codex、Claude 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
@@ -35,6 +35,7 @@ star-ai-research/
 │   └── srcs/               # 文档图片及其他静态资源
 ├── datas/                  # 数据集及相关文件
 ├── inits/                  # 模型权重、检查点和初始化文件
+├── tasks/                  # 按计划名称归档的执行过程中间文件
 ├── wkdrs/                  # 实验输出及每次运行产生的文件
 ├── metds/
 │   ├── plans/              # 研究计划及可执行子计划
@@ -65,7 +66,10 @@ HTML 页面放在 `docs/htmls/`，按主题组织的 Markdown 文档放在 `docs
 | `metds/` | Methodologies | 研究计划、设计说明和方法记录 |
 | `execs/` | Executions | 启动器和实验脚本 |
 | `scpts/` | Scripts | 可独立运行的实验定义 |
-| `wkdrs/` | Work directories | 日志、指标、预测结果及其他实验输出 |
+| `tasks/` | Tasks | 执行计划时产生的中间文件，按计划名称分目录保存 |
+| `wkdrs/` | Work directories | run 日志、指标、预测结果及其他实验输出 |
+
+例如，执行 `metds/plans/00_demo_plan.md` 时会新建 `tasks/00_demo/`，用于存放该计划执行过程的中间文件；生成的实验产物仍放在相应的 `wkdrs/<运行名称>/` 目录中。
 
 ## 快速开始
 
@@ -159,7 +163,7 @@ STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、
 | `$star-plan-decomposer` | 将战略研究计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-code-architect` | 从打分参考实现奠基 `${CODE_NAME}/` 或整理已有代码，并沉淀架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
 | `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 阶梯解析并安装依赖，并做冒烟验证 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
-| `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | 代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md` 和 `EXEC_LOG.md`；经确认的偏差同步写回计划并带 Revision History 记录 |
+| `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下的中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
 | `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落笔经批准的机械修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
 | `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对那条主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图 |
 | `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
@@ -216,7 +220,7 @@ bash execs/update.sh TAG_OR_BRANCH
 ## 项目约定
 
 1. 可复用的实现代码放在 `${CODE_NAME}/` 中。
-2. 数据放在 `datas/`，模型权重放在 `inits/`，生成的实验文件放在 `wkdrs/`。
+2. 数据放在 `datas/`，模型权重放在 `inits/`，计划执行过程的中间文件放在 `tasks/` 下与计划同名的子目录中，生成的实验文件放在 `wkdrs/`。
 3. 研究计划和方法记录放在 `metds/`，其中计划文件统一放在 `metds/plans/`。
 4. 使用 `execs/run.sh` 作为统一入口，并将实验脚本放在 `execs/scpts/`。
 5. 从 `.env` 读取运行环境路径，不要在代码或脚本中硬编码本机路径。

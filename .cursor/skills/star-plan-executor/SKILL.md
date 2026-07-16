@@ -8,7 +8,8 @@ description: >-
   the sub-plan's task breakdown into a concrete executable plan, gates it on user approval,
   then dispatches one Task subagent per step to modify code and run light validation — stopping
   before heavy experiments (long/multi-GPU training, costly API calls) and handing those
-  commands back to the user. Checkpoints execution state to wkdrs/<run>/ so runs resume across
+  commands back to the user. Keeps intermediate working files under tasks/<plan-name>/ and
+  checkpoints durable execution state plus generated artifacts under wkdrs/<run>/ so runs resume across
   sessions. Syncs user-confirmed deviations back into the sub-plan with a Revision History trail,
   keeping the plan file true to what was actually executed.
   Use when the user runs /star-plan-executor, or wants to execute / implement /
@@ -24,7 +25,7 @@ Invocation: `/star-plan-executor PLAN_NAME`, where `PLAN_NAME` is a slug (`open-
 
 ## Role
 
-You take a **leaf execution sub-plan** and drive it to its done-criterion by actually changing code and running light validation. The upstream skill `star-plan-decomposer` produces the executable sub-plan (§1 objective / §2 inputs & deps / §3 task breakdown / §4 deliverables / §5 done-criteria / §6 local risks). This skill produces the **result**: code under `${CODE_NAME}/`, artifacts under `wkdrs/<run>/`, and a verified done-criterion.
+You take a **leaf execution sub-plan** and drive it to its done-criterion by actually changing code and running light validation. The upstream skill `star-plan-decomposer` produces the executable sub-plan (§1 objective / §2 inputs & deps / §3 task breakdown / §4 deliverables / §5 done-criteria / §6 local risks). This skill produces the **result**: code under `${CODE_NAME}/`, intermediate working files under `tasks/<plan-name>/`, generated artifacts and durable execution records under `wkdrs/<run>/`, and a verified done-criterion. Derive `<plan-name>` from the selected plan filename by removing `_plan.md`.
 
 You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 is too vague to execute, send the user back to `star-plan-decomposer` — do not re-derive the strategy here.
 
@@ -33,9 +34,9 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 1. **Read before you write.** Always orient in `${CODE_NAME}/` first — read the modules/entrypoints the sub-plan's §2 names before planning any change. Produce a "current state vs §3 requirements" gap list. Never assume code exists; `code/` may be greenfield (only `.gitkeep`), in which case the plan scaffolds from scratch — or, better, bootstrap a reference codebase first with `/star-code-architect`. Reference: `references/orient_checklist.md`.
 2. **Plan behind a gate, execute behind an agent.** The detailed executable plan (EXEC_PLAN) is produced in **Cursor plan mode** (`SwitchMode` → `plan`) and must be **user-approved** before any side effect. After approval, switch back to agent mode (`SwitchMode` → `agent`) and delegate execution to **Task subagents, one per step / step-group** — the main loop orchestrates and verifies; it does not edit code or launch jobs itself. Reference: `references/agent_dispatch_spec.md`.
 3. **Stop before heavy experiments.** Agents write code and run **light validation only** (smoke tests, small-scale / no-finetune checks like an MVP done-criterion). Before any long/multi-GPU training run or costly API call, **stop**: write the prepared command into EXEC_LOG's "Awaiting user" area and hand it back. Never launch expensive or irreversible jobs autonomously. Rules: `references/stop_line_rules.md`.
-4. **Files are the source of truth; checkpoint every step — and keep the sub-plan true.** Execution state lives in `wkdrs/<run>/` (`EXEC_PLAN.md` + `EXEC_LOG.md`). After each verified step, update the log. The sub-plan file gets a lightweight `exec_status` + `exec_run` pointer — and, when execution provably diverges from it, a **user-confirmed sync-back** of the affected §2–§5 content plus a `## Revision History` entry (`references/plan_sync_rules.md`), so the plan a user rereads later matches what was actually executed. Chats end; files do not.
+4. **Files are the source of truth; checkpoint every step — and keep the sub-plan true.** Execution state lives in `wkdrs/<run>/` (`EXEC_PLAN.md` + `EXEC_LOG.md`); intermediate working files live in `tasks/<plan-name>/`. After each verified step, update the log. The sub-plan file gets a lightweight `exec_status` + `exec_run` pointer — and, when execution provably diverges from it, a **user-confirmed sync-back** of the affected §2–§5 content plus a `## Revision History` entry (`references/plan_sync_rules.md`), so the plan a user rereads later matches what was actually executed. Chats end; files do not.
 5. **Every step ends in a check; the run ends in the done-criterion.** Each step is verified narrowly before the next is dispatched; the whole run finishes on the sub-plan's §5 done-criterion. Reuse the project's `/verify` and `/run` skills where useful. This is the project's Goal-Driven Execution (AGENTS.md §4) and Verification (§7), executed.
-6. **Use the project runtime and run surface.** All run commands go through `.env`'s `CONDA_HOME` / `PYTHON_HOME` — never system python, never hardcoded local paths (AGENTS.md §6) — invoked via the project's run entrypoint `execs/run.sh` where one exists. Reusable launch scripts (including prepared STOP-line commands) go under `execs/scpts/<run>.sh`. Outputs land per the project layout (§5): `wkdrs/<run>/`, `datas/`, `inits/`.
+6. **Use the project runtime and run surface.** All run commands go through `.env`'s `CONDA_HOME` / `PYTHON_HOME` — never system python, never hardcoded local paths (AGENTS.md §6) — invoked via the project's run entrypoint `execs/run.sh` where one exists. Create `tasks/<plan-name>/` for intermediate files needed while executing that plan; put reusable launch scripts (including prepared STOP-line commands) under `execs/scpts/<run>.sh`, generated outputs and durable execution records in `wkdrs/<run>/`, data in `datas/`, and weights in `inits/`.
 
 ## Workflow
 
@@ -69,7 +70,7 @@ Follow `references/orient_checklist.md`:
 ### Step 4: Approval gate
 
 1. Present EXEC_PLAN + expected side effects: files to be written, commands to be run, where the STOP line falls, rough cost/runtime — and the divergence table, stated as "approving this plan also syncs these back into the sub-plan". Wait for explicit user approval before any side effect.
-2. On approval, call `SwitchMode` with `target_mode_id: agent`, then persist `wkdrs/<run>/EXEC_PLAN.md` from `assets/exec_plan_template.md` and initialize `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_template.md`. **Run name = `<prefix>_<slug>`**; append a user-supplied suffix (`_v2`, a date) to distinguish re-runs — never invent timestamps.
+2. On approval, call `SwitchMode` with `target_mode_id: agent`, derive `<plan-name>` from the selected filename without `_plan.md`, and create `tasks/<plan-name>/` for intermediate working files. Persist `wkdrs/<run>/EXEC_PLAN.md` from `assets/exec_plan_template.md` and initialize `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_template.md`. **Run name = `<prefix>_<slug>`**; append a user-supplied suffix (`_v2`, a date) to distinguish re-runs — never invent timestamps.
 3. **Sync divergences into the sub-plan.** If the divergence table is non-empty, the approval just given covers it: update the affected §2–§5 passages in place, append a `## Revision History` entry, bump `updated`, and mark each row `synced` (`references/plan_sync_rules.md`). The sub-plan now matches what is about to be executed.
 
 ### Step 5: Execute–verify loop (one Task subagent per step / step-group)
@@ -104,7 +105,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 
 ## State & File Rules
 
-- Execution state and artifacts live under `wkdrs/<run>/`. Never write execution logs into `metds/plans/` — the sub-plan gets only `exec_status` + `exec_run` + `updated`.
+- Intermediate working files live under `tasks/<plan-name>/`; execution state and generated artifacts live under `wkdrs/<run>/`. Never write execution logs into `metds/plans/` — the sub-plan gets only `exec_status` + `exec_run` + `updated`.
 - Code changes go under `${CODE_NAME}/`; data under `datas/`; weights under `inits/`; run scripts under `execs/scpts/` with `execs/run.sh` as the entrypoint (AGENTS.md §5).
 - Never launch heavy or irreversible jobs (long/multi-GPU training, full-dataset eval, costly API) autonomously; those cross the STOP line to the user.
 - All run commands go through `.env`'s conda env; never system python, never hardcoded local paths.
