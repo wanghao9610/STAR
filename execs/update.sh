@@ -11,7 +11,7 @@ SYNC_PATHS=(
     ".agents/skills"
     ".claude/skills"
     ".cursor/skills"
-    "docs/mds/rsch-workflow"
+    "docs/mds/star-workflow"
 )
 
 log() {

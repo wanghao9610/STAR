@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Env Builder"
+  short_description: "Build, install, and smoke-verify the project runtime environment"
+  default_prompt: "Use $star-env-builder to create the project environment and install verified dependencies."

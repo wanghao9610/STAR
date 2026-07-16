@@ -1,4 +1,0 @@
-interface:
-  display_name: "Research Plan Decomposer"
-  short_description: "Split a research plan into verifiable sub-plans"
-  default_prompt: "Use $rsch-plan-decomposer to break this research plan into executable sub-plans."

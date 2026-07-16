@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Plan Coach"
+  short_description: "Coach and draft a staged CS research plan"
+  default_prompt: "Use $star-plan-coach to turn my research idea into a rigorous, resumable plan."

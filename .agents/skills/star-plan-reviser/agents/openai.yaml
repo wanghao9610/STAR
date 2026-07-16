@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Plan Reviser"
+  short_description: "Review and revise one plan against execution evidence"
+  default_prompt: "Use $star-plan-reviser to review a plan against its execution evidence and revise it in place."

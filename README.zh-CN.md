@@ -16,12 +16,12 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的项目结构**：清晰组织代码、数据、权重、输出和研究记录。
 - **可迁移的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
-- **完整的研究计划生命周期**：通过四个相互配合的 skill，引导计划成稿、递归拆解、叶子计划执行和全局状态汇总。
+- **完整的研究生命周期**：通过十一个相互配合的 skill，引导计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现奠基代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、以执行证据修订计划、全局状态汇总，以及把成熟计划编译成方法文档。
 - **可追踪、可恢复的研究过程**：将计划状态、任务依赖、执行步骤和验证证据保存在 `metds/plans/` 与 `wkdrs/` 中，不依赖聊天记录保存上下文。
 - **面向 AI 协作的规范**：为 Codex、Claude 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
-四个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
+十一个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
 
 ## 项目结构
 
@@ -37,7 +37,9 @@ star-ai-research/
 ├── inits/                  # 模型权重、检查点和初始化文件
 ├── wkdrs/                  # 实验输出及每次运行产生的文件
 ├── metds/
-│   └── plans/              # 研究计划及可执行子计划
+│   ├── plans/              # 研究计划及可执行子计划
+│   ├── refs/               # 相关工作分析与可核验的 reference.bib
+│   └── overview.md …       # 由计划编译而成的方法文档
 ├── execs/
 │   ├── run.sh              # 实验统一入口
 │   ├── update.sh           # 同步上游 STAR skill 与工作流指南
@@ -148,32 +150,45 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ## 研究工作流
 
-STAR 提供四个相互配合的技能，将研究想法转化为可追踪、可审计的执行流程：
+STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、可审计的执行流程：
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$rsch-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/0_<主题>_plan.md` |
-| `$rsch-plan-decomposer` | 将战略研究计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
-| `$rsch-plan-executor` | 实现并初步验证一个可执行的叶子计划 | 代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md` 和 `EXEC_LOG.md` |
-| `$rsch-plan-status` | 汇总计划树进度并指出下一个可执行任务 | 只读状态摘要 |
+| `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/0_<主题>_plan.md` |
+| `$star-refs-reviewer` | 调研与方法相关的工作：精读最近邻论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md` |
+| `$star-plan-decomposer` | 将战略研究计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
+| `$star-code-architect` | 从打分参考实现奠基 `${CODE_NAME}/` 或整理已有代码，并沉淀架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
+| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 阶梯解析并安装依赖，并做冒烟验证 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+| `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | 代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md` 和 `EXEC_LOG.md`；经确认的偏差同步写回计划并带 Revision History 记录 |
+| `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落笔经批准的机械修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
+| `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对那条主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图 |
+| `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
+| `$star-metd-summarize` | 把计划树编译成可直接用于论文的方法文档，标注哪些尚未验证，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
+| `$star-plan-status` | 汇总计划树进度并指出下一个可执行任务 | 只读状态摘要 |
 
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。编写和拆解研究计划时，建议为 `$rsch-plan-coach` 和 `$rsch-plan-decomposer` 选用 Claude Fable5 Extra 或 ChatGPT 5.6 Sol High；执行计划和汇总进度时，建议为 `$rsch-plan-executor` 和 `$rsch-plan-status` 选用 Claude Sonnet 5、ChatGPT 5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，四个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+不同阶段对模型能力的侧重有所不同。编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-plan-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十一个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 典型流程如下：
 
 ```text
 研究想法
     → 研究计划
+    → 相关工作基座与可核验文献库
     → 可执行子计划
+    → 有架构记录的代码库
+    → 经过验证的运行环境
     → 实现与验证
+    → 对照规范与计划的代码审查
+    → 基于执行证据的审查与修订
     → 状态汇总与下一步行动
+    → 为论文编译的方法文档
 ```
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
-具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/rsch-workflow/research-workflow-skills.zh-CN.md)。
+具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
 
 ## 更新 STAR 的 skill 与工作流指南
 
@@ -188,7 +203,7 @@ bash execs/update.sh
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
-- `docs/mds/rsch-workflow/`
+- `docs/mds/star-workflow/`
 
 如需固定到某个 tag 或分支，可以将其作为参数传入：
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Plan Status"
+  short_description: "Summarize the plan tree and recommend what is next"
+  default_prompt: "Use $star-plan-status to show my research-plan progress and next runnable leaf."

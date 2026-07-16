@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Code Reviewer"
+  short_description: "Audit code against conventions and plan promises"
+  default_prompt: "Use $star-code-reviewer to review the codebase, a plan's code, a path, or a diff against project conventions."

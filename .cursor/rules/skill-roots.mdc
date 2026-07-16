@@ -25,9 +25,9 @@ Do not treat these three trees as interchangeable. Keep tool-specific wording in
 
 **When duplicate skills exist, Cursor Agent must use the copy under `.cursor/skills/`.**
 
-- For `rsch-plan-*`, and any other skill that exists in multiple roots, read and follow `.cursor/skills/<name>/`.
+- For `star-plan-*`, and any other skill that exists in multiple roots, read and follow `.cursor/skills/<name>/`.
 - Ignore sibling copies under `.agents/skills/` and `.claude/skills/` unless the user explicitly asks to use Codex or Claude wording.
-- When linking hand-offs, keep `/rsch-plan-*` names, but still load instructions from `.cursor/skills/`.
+- When linking hand-offs, keep `/star-plan-*` names, but still load instructions from `.cursor/skills/`.
 
 ## 3. Reduce Duplicate Discovery in the Cursor UI
 

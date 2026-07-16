@@ -1,4 +1,0 @@
-interface:
-  display_name: "Research Plan Executor"
-  short_description: "Execute and verify one research-plan leaf"
-  default_prompt: "Use $rsch-plan-executor to implement and verify the next runnable leaf plan."
