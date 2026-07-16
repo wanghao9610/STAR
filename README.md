@@ -157,6 +157,10 @@ STAR includes four complementary skills that turn a research idea into an audita
 | `$rsch-plan-executor` | Implement and lightly validate one executable leaf plan | Code plus `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md` |
 | `$rsch-plan-status` | Report plan-tree progress and the next runnable task | Read-only status summary |
 
+### Model selection
+
+Different stages benefit from different model strengths. For drafting and decomposing research plans, we recommend using Claude Fable5 Extra or ChatGPT 5.6 Sol High with `$rsch-plan-coach` and `$rsch-plan-decomposer`. For plan execution and progress summaries, we recommend using Claude Sonnet 5, ChatGPT 5.6 Sol Medium (Terra High), or Cursor Grok4.5 High with `$rsch-plan-executor` and `$rsch-plan-status`. When resources permit, using the strongest available model across all four workflows generally delivers the best overall results.
+
 A typical flow is:
 
 ```text

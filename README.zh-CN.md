@@ -157,6 +157,10 @@ STAR 提供四个相互配合的技能，将研究想法转化为可追踪、可
 | `$rsch-plan-executor` | 实现并初步验证一个可执行的叶子计划 | 代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md` 和 `EXEC_LOG.md` |
 | `$rsch-plan-status` | 汇总计划树进度并指出下一个可执行任务 | 只读状态摘要 |
 
+### 模型选择建议
+
+不同阶段对模型能力的侧重有所不同。编写和拆解研究计划时，建议为 `$rsch-plan-coach` 和 `$rsch-plan-decomposer` 选用 Claude Fable5 Extra 或 ChatGPT 5.6 Sol High；执行计划和汇总进度时，建议为 `$rsch-plan-executor` 和 `$rsch-plan-status` 选用 Claude Sonnet 5、ChatGPT 5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，四个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+
 典型流程如下：
 
 ```text
