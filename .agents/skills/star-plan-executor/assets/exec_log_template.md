@@ -39,11 +39,12 @@ able to resume from this file alone: skip `done` steps, continue from the first 
      sub-plan's §2–§5 + its `## Revision History`, then checked off here. -->
 
 - [ ] <ADDED/MODIFIED/REMOVED> §3.<n>: "<old>" → "<new>" — reason: <…>
+- [ ] ENRICHED §3.<n>: <what the plan left open> → <the value execution settled> — cited by: <document §>
 
 ## Notes / decisions
 
 <!-- Anything a resuming session needs: assumptions made, blockers hit and how they were resolved
      (material deviations from the sub-plan go under "Pending amendments" above, not here).
-     If a result hit a parent §5 kill-criterion, record it here as a
+     If a result hit a root §5 kill-criterion, record it here as a
      **Strategy signal** and note the recommended feedback path ($star-plan-coach or
      $star-plan-decomposer) — the executor never edits the parent plan itself. -->

@@ -17,6 +17,8 @@ Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
 Invocation: `/star-plan-status [PLAN_NAME]` — with no argument, report the whole `metds/plans/` forest; with a slug / numeric prefix / filename, scope the report to that plan's subtree.
 
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+
 ## Role
 
 You give the researcher a single, honest picture of where every plan and sub-plan stands, and one clear recommendation for what to run next. You are the map, not the driver: the coach sets strategy, the decomposer splits it, the executor does the work — you only **read and report**.
@@ -40,7 +42,7 @@ Link children to parents via `parent:`. Order siblings by `depends_on` (topologi
 
 ### Step 3: Read per-node state
 - **Strategy nodes** (root/internal): the coach `status:` map — how many of the six sections are `done` / `in_progress` / `pending` / `skipped`; whether `finalized:` is set; whether it has been decomposed (`children:` present).
-- **Leaves**: `exec_status` (default `pending` if absent) and `exec_run`. If `exec_run` points at a `wkdrs/<run>/EXEC_LOG.md`, read it for step-level progress (steps done / total, any `blocked`, any "Awaiting user" STOP-line commands, any recorded **Strategy signal**).
+- **Leaves**: `exec_status` (default `pending` if absent) and `exec_runs` (the last entry is the current run; earlier ones are re-runs worth naming when there are any). If the current run names a `wkdrs/<run>/EXEC_LOG.md`, read it for step-level progress (steps done / total, any `blocked`, any "Awaiting user" STOP-line commands, any recorded **Strategy signal**).
 
 ### Step 4: Render the tree
 One line per node, indented by level, each with a status glyph and a short state (see the spec for the glyph legend). Show `depends_on` on leaves and flag blocked / awaiting-user leaves.

@@ -13,8 +13,8 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 1. Scope & Evidence Base
 
-<!-- The run dir and how it resolved (plan name → exec_run, or a path → its plan). Expectations
-     loaded: sub-plan §4/§5, parent §4 metrics and §5 kill-criteria, EXEC_PLAN/EXEC_LOG — and which
+<!-- The run dir and how it resolved (plan name → the last exec_runs entry, or a path → its plan). Expectations
+     loaded: sub-plan §4/§5, root §4 metrics and §5 kill-criteria, EXEC_PLAN/EXEC_LOG — and which
      were absent. Files read (counts, not a listing). Sibling runs detected. Degradations: "no
      matplotlib — text-only", "tensorboard absent — TB metrics unread", "env unusable — reading
      only". -->
@@ -27,13 +27,13 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 3. Done-Criteria Scorecard
 
-<!-- The headline. One row per yardstick: sub-plan §5 first, then parent §4 metrics, then any
+<!-- The headline. One row per yardstick: sub-plan §5 first, then root §4 metrics, then any
      baseline the plan states. `threshold: none stated` → report the value, leave the verdict blank.
      Value as the source prints it — rounding that flips a verdict is an error, not a tidy-up. -->
 
 | Criterion (as written) | Origin | Metric | Value | Split | Threshold | Verdict | Source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <"…"> | §5 / parent §4 / baseline | <name> | <value> | train/val/test | <threshold or none stated> | met / not met / unmeasurable | <path:line or key> |
+| <"…"> | §5 / root §4 / baseline | <name> | <value> | train/val/test | <threshold or none stated> | met / not met / unmeasurable | <path:line or key> |
 
 ## 4. Artifacts & Completion
 
@@ -77,7 +77,7 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 7. Interpretation
 
-<!-- E: does the result support / refute / leave open the claim in `traces_to`? Any parent §5
+<!-- E: does the result support / refute / leave open the claim in `traces_to`? Any root §5
      kill-criterion hit (state it prominently — a strategy signal is the plan working). The leakage
      and too-good checks that were run and what they showed. Then the limits, as limits: seeds,
      split size, variance, what this run does NOT show. -->

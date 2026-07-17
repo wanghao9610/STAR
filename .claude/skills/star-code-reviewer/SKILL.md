@@ -23,6 +23,8 @@ Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
 Invocation: `/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed.
 
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+
 ## Role
 
 You are the family's code auditor. `star-plan-executor` writes code to satisfy a plan; `star-plan-reviser` audits the **plan text** against execution evidence. You audit the **code itself**: does it follow the project's written conventions, and — when a plan is in scope — does it implement what that plan promised? Your product is a persisted, evidence-backed review report; optionally, individually approved mechanical fixes.
@@ -42,14 +44,14 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ### Step 0: Resolve the scope
 
-1. Read `.env`; resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME`. If `.env` is missing, create it from `.env.example` and ask the user to fill machine-specific values first (CLAUDE.md §6).
+1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument, first match wins:
    - `diff` → files changed in the working tree vs HEAD (staged + unstaged + untracked source files); a git range (`HEAD~3..`, `main..feature`) → `git diff --name-only <range>`.
    - A plan name (slug / numeric prefix / filename against `metds/plans/*_plan.md`; a `metds/plans/` path counts) → **plan mode**.
-   - An existing file or directory → **path mode**; a `wkdrs/<run>/` directory back-resolves to the plan whose `exec_run` names it → plan mode.
+   - An existing file or directory → **path mode**; a `wkdrs/<run>/` directory back-resolves to the plan whose `exec_runs` names it → plan mode.
    - No argument → all of `${CODE_NAME}/`.
    - Nothing matches → list the nearest plan and path candidates and ask via AskUserQuestion.
-3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<exec_run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip.
+3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip.
 4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, say so and offer to narrow (one sub-package, or diff mode) via AskUserQuestion.
 
 ### Step 1: Load the yardsticks
@@ -72,7 +74,7 @@ Merge and dedup. For every blocker/major: re-open the cited file at the cited li
 
 ### Step 5: Persist the report
 
-Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.md`; the report follows the plan's `language` in plan mode, else the dialogue language): scope & evidence base, verdict, findings by severity (`blocker` / `major` / `minor` / `nit`, numbered F1, F2, …), the plan-conformance scorecard (plan mode), good practices (≤3), next actions. Write to `wkdrs/<exec_run>/CODE_REVIEW_<YYYY-MM-DD>.md` when plan mode has a run; else `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md` (`scope-slug` = plan prefix+slug, the path with `/`→`-`, `diff`, or `full`). Real dates only, never invented.
+Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.md`; the report follows the plan's `language` in plan mode, else the dialogue language): scope & evidence base, verdict, findings by severity (`blocker` / `major` / `minor` / `nit`, numbered F1, F2, …), the plan-conformance scorecard (plan mode), good practices (≤3), next actions. Write to `wkdrs/<run>/CODE_REVIEW_<YYYY-MM-DD>.md` when plan mode has a run; else `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md` (`scope-slug` = plan prefix+slug, the path with `/`→`-`, `diff`, or `full`). Real dates only, never invented.
 
 ### Step 6: Digest in chat
 
@@ -92,11 +94,10 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 - The only code writes are individually approved fix-pass items inside the reviewed scope. Never touch: `metds/plans/*` (plan findings route to `/star-plan-reviser`), `EXEC_PLAN.md` / `EXEC_LOG.md`, `UPSTREAM.md`, `LICENSE` / `CITATION*`, `metds/codearc.md`, `.env`.
 - Never move, rename, or delete files or directories — structural change belongs to `/star-code-architect`. Residual-list names are flagged, never renamed.
 - All commands run through `.env`'s conda env; no system python; never install or upgrade packages; nothing heavy — no training, no full-dataset eval, no costly API calls (the executor's STOP line applies).
-- Git usage is read-only (`status` / `diff` / `log`) plus the single optional fix commit staging only fix-pass files (never `git add -A`); no pushes, no history rewrites, no branch switches.
+- Git: read-only, plus the single optional fix commit staging only fix-pass files (conventions §1).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file plus the fix commit when one was made.
 
 ## Dialogue Discipline
 
-- Keep chat replies under ~400 words; the report file does not count.
 - All fix-pass approvals go through AskUserQuestion — one finding (or one same-type batch) per call. If it is unavailable (headless / scripted), fall back to plain text, still one at a time, and require an explicit approval before any write.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The report follows the plan's frontmatter `language` in plan mode (else the dialogue language); keep technical terms in English inside Chinese reports.

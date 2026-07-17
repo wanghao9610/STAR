@@ -4,14 +4,31 @@ When execution provably diverges from the sub-plan, the divergence is confirmed 
 
 ## Material (sync) vs detail (don't)
 
-EXEC_PLAN is *supposed* to be more concrete than the sub-plan — extra precision is **not** a divergence. Sync back only **material** deviations, judged at the sub-plan's own granularity:
+EXEC_PLAN is *supposed* to be more concrete than the sub-plan — extra precision is **not** a divergence, with one exception (**ENRICHED**, below). Sync back only **material** deviations, judged at the sub-plan's own granularity:
 
 - a §3 step is **added, dropped, replaced, or reordered**;
 - a §2 input/dependency turns out **wrong or missing** (a different dataset / weights / module than named);
 - a §4 deliverable **changes path or form**;
-- the §5 done-criterion is **adjusted** (threshold, metric, or check).
+- the §5 done-criterion is **adjusted** (threshold, metric, or check);
+- a value the sub-plan left unstated is **settled by execution** and a method document will cite it (**ENRICHED**, below).
 
-Not material: finer sub-steps inside one §3 step; commands/paths the sub-plan left unspecified; implementation choices within a step's stated scope. When unsure, treat it as detail and leave the sub-plan alone.
+Not material: finer sub-steps inside one §3 step; implementation choices, commands, and paths no method document cites. When unsure, treat it as detail and leave the sub-plan alone.
+
+## ENRICHED: values execution settled that a document will cite
+
+The sub-plans are also the **source** the method documents compile from — `star-metd-summarize` reads plans and nothing else, so a value that lives only in a run log can never reach them. A value the sub-plan left unstated, execution fixed, and a `metds/*.md` section would cite is therefore not detail: left unsynced it becomes a permanent `TBD` in that document.
+
+In scope — the value must be one a document section cites, and the row must name that section:
+
+| Value execution settled | Cited by |
+|---|---|
+| hyperparameters — lr, schedule, batch size, epochs | `training.md` §3 |
+| the initialization / backbone actually used | `training.md` §2 |
+| the reproduction entry point — the command and config a reader would rerun | `training.md` §5, `evaluation.md` §5 |
+| key config a component's behaviour depends on | `framework.md` §2 |
+| the split / preprocessing choice actually used | `dataset.md` §3 |
+
+Out of scope: anything no document cites — internal flags, scratch paths, seeds, environment detail (EXEC_LOG and `freeze.txt` hold those) — and any value the plan already states (changing that is MODIFIED, not ENRICHED). **If you cannot name the document section that would cite it, it is detail.** A sub-plan is not a config dump.
 
 ## Delta form
 
@@ -20,6 +37,7 @@ One row per deviation, typed like OpenSpec deltas:
 - **ADDED** — the sub-plan lacks it: `ADDED §3.5: "<new step>" — reason: <…>`
 - **MODIFIED** — done differently than written: `MODIFIED §3.2: "<old>" → "<new>" — reason: <…>`
 - **REMOVED** — written but will not be done: `REMOVED §3.4 — reason: <obsolete / covered by …>`
+- **ENRICHED** — the sub-plan was silent, execution settled it: `ENRICHED §3.2: lr unstated → 1e-4 — cited by: training.md §3`
 
 Rows found while planning go in EXEC_PLAN's "Divergences from sub-plan" table; rows that emerge during execution go in EXEC_LOG's "Pending amendments".
 
@@ -42,6 +60,7 @@ For each confirmed row:
    ### <YYYY-MM-DD> — star-plan-executor (run: <prefix>_<slug>, approval gate | finalize)
    - MODIFIED §3.2: "<old>" → "<new>" — <reason>
    - ADDED §3.5: "<new step>" — <reason>
+   - ENRICHED §3.3: lr unstated → 1e-4 — cited by: training.md §3
    ```
 
 4. **Bump frontmatter `updated`**; touch nothing else in the frontmatter.
@@ -53,7 +72,8 @@ Dates come from the user/session context — never invent timestamps.
 
 - **§1 Objective & Scope, §6 Local Risks** — an objective-level divergence means the task changed, not the tactics; that is re-decomposition (`star-plan-decomposer`), not sync-back.
 - **Any parent plan** — parents belong to `star-plan-coach` / `star-plan-decomposer` (feedback reflux).
-- **A §5 change that relaxes the criterion into conflict with the parent's §4 metrics / §5 kill-criteria** — that is a strategy signal: record it, surface it, route it through feedback reflux. Do not sync it.
+- **A §5 change that relaxes the criterion into conflict with the root's §4 metrics / §5 kill-criteria** — that is a strategy signal: record it, surface it, route it through feedback reflux. Do not sync it.
+- **A measured result** — an ENRICHED row carries a value execution *chose* (lr, backbone, split), never one it *measured*. Scores live in `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; a plan that records its own result reads as design intent in every document compiled from it.
 - **Post-hoc audit and evidence-based revision** — scoring what a run actually achieved and revising a plan (including §1/§6) from that evidence is `star-plan-reviser`'s job; sync-back only keeps §2–§5 current with user-confirmed execution reality during a run.
 
 A §5 sync-back must always quote old → new in the Revision History entry, so "what counts as done" never shifts silently.

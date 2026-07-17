@@ -58,7 +58,7 @@ Read every row as *source → the document section it fills*. A source that does
 |---|---|
 | 1. Training Pipeline | root §3 training strategy + training leaves' §1/§2 (stage order follows `depends_on`, then prefix) |
 | 2. Stage Detail | training leaves' §3 steps + §2 `inits/` initialization + root §4 compute budget |
-| 3. Hyperparameters | any value a plan states (leaves' §3, root §4); a value no plan fixes stays `TBD` and is listed as a gap — never fill it with a plausible default |
+| 3. Hyperparameters | any value a plan states (leaves' §3, root §4); a value no plan fixes stays `TBD` and is listed as a gap — never fill it with a plausible default. A value an executed leaf settled belongs in its §3 via the executor's ENRICHED sync-back |
 | 4. Practical Notes | training leaves' §6 local risks (failure modes, early signals, fallbacks) |
 | 5. Reproduction | training leaves' §3/§4 entry points and commands as the plans record them |
 
@@ -72,7 +72,7 @@ Read every row as *source → the document section it fills*. A source that does
 | 4. Ablations | root §4 ablation design + root §5 kill-criteria (the "refutes it if" column) |
 | 5. Running the Evaluation | eval leaves' §3/§4 entry points, commands, and output locations |
 
-**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`.
+**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`, and the cross-run ledger of those numbers is `metds/results.md` (`star-expt-analyst aggregate`).
 
 ## Merge & conflict rules
 

@@ -19,6 +19,8 @@ Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
 Invocation: `$star-plan-decomposer PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`).
 
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+
 ## Role
 
 You take a **strategic** research plan and turn it into **executable** sub-plans. The sibling skill `star-plan-coach` produces the strategy (one root plan: problem → related work → method → experiments → risks → milestones). This skill produces the execution: it splits the plan's concrete implementation into smaller sub-plans, each with steps a researcher can actually run and verify.
@@ -31,7 +33,7 @@ You **decompose, you do not re-strategize.** The parent plan already holds the t
 2. **Confirm the shape, then auto-draft the content.** Confirm two decisions, one at a time and with a recommendation: the **decomposition axis**, then the **sub-plan list**. Use structured user input when available; otherwise ask concise plain-text questions. After confirmation, draft each sub-plan autonomously from the parent. Mark genuine gaps `[TBD]`; ask a targeted follow-up only when a step is undecidable without the user. Do not re-elicit detail the parent already records.
 3. **Incremental writes.** Write each sub-plan file the moment it is drafted. Prefer more file writes over leaving results in chat — chats end, files do not.
 4. **Every sub-plan is verifiable.** A sub-plan is not done until it has concrete, verb-specific steps, a **done-criterion** (a test / metric / output that proves completion), and deliverables placed per the project layout (`datas/`, `inits/`, `code/`, `wkdrs/<run>`). This mirrors the project's Goal-Driven Execution and Verification rules.
-5. **Traceability both ways.** Every sub-plan names the parent section or claim it traces to (`traces_to`). The parent gets a `## Sub-plans` index and a `children:` frontmatter list. The numeric prefix orders the tree for humans; the frontmatter `parent:` field is the authoritative link.
+5. **Traceability both ways.** Every sub-plan names the root section or claim it traces to (`traces_to`). The parent gets a `## Sub-plans` index and a `children:` frontmatter list. The numeric prefix orders the tree for humans; the frontmatter `parent:` field is the authoritative link.
 6. **Dependencies are first-class, not prose-only.** Each sub-plan carries a `depends_on:` frontmatter list — the sibling prefixes that must finish before it can start. This is the machine-readable order the executor and `star-plan-status` consume to answer "what's runnable next". Keep it a **DAG** (no cycles) and consistent with the `## Sub-plans` index order.
 
 ## Naming Convention (summary)
@@ -53,7 +55,9 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 ### Step 1: Assess readiness
 
-Check the parent's frontmatter `status` and body. If key sections (especially **method** and **milestones**) are `pending`/`in_progress` or littered with `[TBD]`, tell the user that decomposition will be shallow, and offer: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `$star-plan-coach` to finish the parent first*. Respect the choice.
+Check the root's `finalized:` — the one signal that a strategy plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), and tell the user that decomposition will be shallow, and offer: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `$star-plan-coach` to finish the parent first*. Respect the choice.
+
+If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — its `exec_status` / `exec_runs` freeze as history, `star-plan-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer: *fold the execution evidence into the plan text with `$star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — and when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
 
 ### Step 2: Choose the decomposition axis
 
@@ -61,16 +65,17 @@ Propose 2–3 axes in one question and recommend the first. Details and how to p
 
 | Axis | Splits the plan by | Best when |
 |------|--------------------|-----------|
-| **Milestone / phase** (default) | the parent's §6 timeline stages | milestones are already well-formed (usually true) |
-| **Component / module** | system parts of the method (§3) | the method has clear separable modules |
-| **Claim → experiment** | each claim/experiment in §4 | the contribution is empirical, many ablations |
+| **Milestone / phase** (default) | the root's §6 timeline stages | milestones are already well-formed (usually true) |
+| **Component / module** | system parts of the method (root §3) | the method has clear separable modules |
+| **Claim → experiment** | each claim/experiment in root §4 | the contribution is empirical, many ablations |
 
 Mixed decomposition is allowed but confirm it explicitly.
 
 ### Step 3: Propose the sub-plan list
 
-From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the parent section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and ask the user to confirm, edit the list, or change granularity.
+From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and ask the user to confirm, edit the list, or change granularity.
 
+- **Give data its own leaf.** Where the root §4 names a dataset `datas/` does not yet hold, one unit is a data-readiness leaf: §3 acquires it, §4 places it under `datas/<name>/`, and §5's done-criterion is an integrity check — a manifest, a file count, a checksum — never "the download finished". The acquisition command itself crosses the STOP line, so `star-plan-executor` hands it back rather than running it. Every leaf that consumes the dataset `depends_on` this one. Without it, execution stops at a missing input no plan owns.
 - **Enforce N ≤ 10.** If you believe more than 10 units are needed, do not append a second digit — instead group them, or recommend a two-level split (decompose into ≤10 now, then recurse into the heavy ones). Say so explicitly.
 - Assign prefixes per the naming rule: parent prefix + `0..N-1`.
 - **Derive dependencies from the axis** (`references/decomposition_axes.md`): milestone/phase → a linear chain (each depends on the previous); component/module → a small DAG (shared interfaces); claim→experiment → mostly independent (often all `[]`). Record each unit's upstream as a `depends_on` list of sibling prefixes. Keep it acyclic.
@@ -109,7 +114,7 @@ Tell the user any sub-plan can be decomposed further with `$star-plan-decomposer
 
 ### Step 7: Rubric pass
 
-Read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`) and check the sub-plans you just wrote. Report failing items (at most 5, ranked), each with the file and a concrete fix, and ask whether to revise.
+Read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`) and check the sub-plans you just wrote. Report failing items (at most 5, ranked), each with the file and a concrete fix, and ask whether to revise. Then offer once to commit the plan files written this run (State & File Rules).
 
 ## State & File Rules
 
@@ -118,10 +123,9 @@ Read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`)
 - Never modify the parent's existing strategy sections; you only append the `## Sub-plans` index and `children:` frontmatter.
 - A plan body may end with an append-only `## Revision History` section, written by `star-plan-executor` (user-confirmed execution sync-back) and `star-plan-reviser`. Its §1–§6 already reflect those entries — decompose from the body as it stands, and preserve the section untouched.
 - Do not write plan files outside `metds/plans/`.
+- Git: at the end of the run, offer once to commit the sub-plans written plus the parent's updated index — `star-plan-decomposer: <parent slug> — <N> sub-plans` (conventions §1).
 
 ## Dialogue Discipline
 
-- Keep chat replies under ~400 words; sub-plan bodies written to files do not count.
 - Use structured input only when the current Codex surface exposes it; otherwise ask concise plain-text questions, one decision at a time.
-- Reply in the user's language. Load `*_zh.md` resources for Chinese dialogue.
 - A sub-plan's body language follows the **parent** plan's `language`; keep technical terms in English inside Chinese plans.

@@ -8,9 +8,9 @@
 
 - 战略计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`）与 `exec_run:`（一个 `wkdrs/<run>/` 目录）。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`）与 `exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
 
-对带 `exec_run` 的叶子，另读 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（STOP 线）"清单、以及 Notes 里的任何"战略信号"。
+对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（STOP 线）"清单、以及 Notes 里的任何"战略信号"。
 
 ## 节点分类
 
@@ -22,8 +22,8 @@
 
 ## 字形图例（每节点一个）
 
-- `✔` 完成 —— 战略节点设了 `finalized:`、或六节全 `done`；叶子 `exec_status: done`。
-- `◐` 进行中 —— 部分章节 `done`/`in_progress`，或叶子 `exec_status: in_progress`（有日志则显示 `k/n` 步）。
+- `✔` 完成 —— 战略节点设了 `finalized:`；叶子 `exec_status: done`。
+- `◐` 进行中 —— 部分章节 `done`/`in_progress`，或六节全 `done` 但未设 `finalized:`（rubric 还没跑），或叶子 `exec_status: in_progress`（有日志则显示 `k/n` 步）。
 - `○` 待办 —— 尚未开始（`exec_status` 缺失/`pending`，或全部章节 `pending`）。
 - `⊘` 受阻 —— 叶子 `exec_status: blocked`，或其 `depends_on` 未满足的叶子。
 - `⏸` 待用户 —— EXEC_LOG 里有未勾选"待用户执行"STOP 命令的叶子。
@@ -63,6 +63,6 @@
 - **可能过期的子计划** —— 某子计划 `updated` 早于其父计划 `updated`（父计划在拆解后被改）。建议 `$star-plan-decomposer <父计划>` 对账。
 - **悬挂链接** —— 某 `children:` 项找不到对应文件，或某计划文件的 `parent:` 指向不存在的文件、或未被其父计划 `## Sub-plans` 索引列出。
 - **坏依赖** —— 某 `depends_on` 前缀解析不到现存兄弟，或依赖图里有环。
-- **孤儿 run** —— 某 `exec_run` 指向不存在的 `wkdrs/<run>/` 目录，或某 EXEC_LOG 的 `source_plan` 与叶子不符。
+- **孤儿 run** —— 某个 `exec_runs` 条目指向不存在的 `wkdrs/<run>/` 目录，或某 EXEC_LOG 的 `source_plan` 与叶子不符。
 
 本段保持简短；无任何标记时整段省略。

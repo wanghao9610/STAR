@@ -18,6 +18,8 @@ description: >-
 
 调用方式：`/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。
 
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+
 ## 角色
 
 你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份落盘的、证据支撑的审查报告；可选地，加上逐项批准的机械修复。
@@ -37,14 +39,14 @@ description: >-
 
 ### Step 0：解析范围
 
-1. 读 `.env`；解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`。`.env` 缺失时，从 `.env.example` 创建并请用户先填好机器相关值（CLAUDE.md §6）。
+1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. 解释参数，先匹配者生效：
    - `diff` → working tree 相对 HEAD 的改动文件（staged + unstaged + 未跟踪源文件）；git range（`HEAD~3..`、`main..feature`）→ `git diff --name-only <range>`。
    - 计划名（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配；`metds/plans/` 路径也算）→ **计划模式**。
-   - 已存在的文件或目录 → **路径模式**；`wkdrs/<run>/` 目录经 `exec_run` 反查到对应计划 → 计划模式。
+   - 已存在的文件或目录 → **路径模式**；`wkdrs/<run>/` 目录经 `exec_runs` 反查到对应计划 → 计划模式。
    - 无参数 → `${CODE_NAME}/` 全部。
    - 都不匹配 → 列出最接近的计划与路径候选，经 AskUserQuestion 询问。
-3. 计划模式的范围是三者并集：§2 点名的代码模块、§4 交付物中的代码路径、`wkdrs/<exec_run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是 finding（维度 F），绝不静默跳过。
+3. 计划模式的范围是三者并集：§2 点名的代码模块、§4 交付物中的代码路径、`wkdrs/<run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是 finding（维度 F），绝不静默跳过。
 4. 收敛到可审源码：Python 文件走完整 rubric；范围内的 shell / YAML / 配置文件只查维度 D（路径与运行时）；`datas/`、`inits/`、`wkdrs/` 产物与生成文件不在范围内。审查前报出最终文件数；超过约 50 个文件时说明，并经 AskUserQuestion 提议收窄（某个子包，或 diff 模式）。
 
 ### Step 1：载入准绳
@@ -67,7 +69,7 @@ description: >-
 
 ### Step 5：落盘报告
 
-按 `assets/code_review_template_zh.md`（英文计划用 `assets/code_review_template.md`；计划模式下报告跟随计划的 `language`，否则跟随对话语言）填写：范围与证据基础、结论、按严重度分组的 findings（`blocker` / `major` / `minor` / `nit`，编号 F1、F2、…）、计划符合度记分卡（计划模式）、好实践（≤3）、下一步。计划模式且有 run 时写入 `wkdrs/<exec_run>/CODE_REVIEW_<YYYY-MM-DD>.md`；否则 `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md`（`scope-slug` = 计划前缀+slug、路径（`/`→`-`）、`diff` 或 `full`）。日期必须真实，绝不编造。
+按 `assets/code_review_template_zh.md`（英文计划用 `assets/code_review_template.md`；计划模式下报告跟随计划的 `language`，否则跟随对话语言）填写：范围与证据基础、结论、按严重度分组的 findings（`blocker` / `major` / `minor` / `nit`，编号 F1、F2、…）、计划符合度记分卡（计划模式）、好实践（≤3）、下一步。计划模式且有 run 时写入 `wkdrs/<run>/CODE_REVIEW_<YYYY-MM-DD>.md`；否则 `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md`（`scope-slug` = 计划前缀+slug、路径（`/`→`-`）、`diff` 或 `full`）。日期必须真实，绝不编造。
 
 ### Step 6：聊天摘要
 
@@ -87,11 +89,10 @@ description: >-
 - 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类 finding 路由给 `/star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
 - 绝不移动、重命名或删除文件与目录——结构性变更属于 `/star-code-architect`。残留清单名称只标记，绝不改名。
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的 STOP 线同样适用）。
-- git 只读使用（`status` / `diff` / `log`），外加可选的一次修复提交、只 stage 修复 pass 碰过的文件（绝不 `git add -A`）；不 push、不改历史、不切分支。
+- Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计痕迹就是报告文件，外加（若有）那次修复提交。
 
 ## 对话纪律
 
-- 聊天回复控制在约 400 字内；报告文件不计入。
 - 修复 pass 的批准一律经 AskUserQuestion——一次一条 finding（或一批同类项）。不可用（headless / 脚本化）时退化为纯文本，仍然一次一条，任何写入前先获明确批准。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。计划模式下报告跟随计划 frontmatter 的 `language`（否则跟随对话语言）；中文报告里技术名词保留英文。

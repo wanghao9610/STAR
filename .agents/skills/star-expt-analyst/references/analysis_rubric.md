@@ -23,7 +23,7 @@ One entry per scored expectation — this is what fills the scorecard:
 
 ```yaml
 - criterion: <the plan's own words, quoted>
-  origin: sub-plan §5 | parent §4 | parent §5 kill-criterion | stated baseline
+  origin: sub-plan §5 | root §4 | root §5 kill-criterion | stated baseline
   metric: <name as the source prints it>
   value: <as the source prints it — do not round into a different verdict>
   split: train | val | test | unknown
@@ -92,7 +92,7 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 ## D. Metrics vs expectations
 
 - Extract each metric from the most authoritative source available, in this order: a results JSON/CSV the run wrote > the eval log's final summary block > a TB event file (only if tensorboard is already installed) > the last matching line in a training log. Record which one it came from; a criterion that only survives at the weakest tier is a minor observation about the run's reporting.
-- Score every yardstick as a metric row: §5 done-criteria first, then parent §4 metrics, then any baseline the plan states.
+- Score every yardstick as a metric row: §5 done-criteria first, then root §4 metrics, then any baseline the plan states.
 - **Split discipline**: name the split every number came from. If the plan states a threshold without one ("mAP ≥ 30"), report the number from the split the plan's §5 context implies, name the ambiguity, and never pick the flattering split.
 - **No stated expectation** is a legitimate row: report the number, leave `threshold: none stated`, and do not grade it. An ungraded number is honest; a retrofitted threshold is not.
 - **Unmeasurable** means the number is not on disk anywhere. Say what would produce it and hand that command back — never run it (§ the STOP line).
@@ -100,8 +100,8 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 
 ## E. Interpretation
 
-- **Against the claim**: the sub-plan's `traces_to` names the parent claim or section this run serves. State plainly whether the result supports it, refutes it, or leaves it open — and for "open", what is still missing.
-- **Kill-criteria**: check the result against the parent's §5 kill-criteria and against any MVP done-criterion the plan called a cheap early test. A hit is a **strategy signal**: report it prominently, route it (F), and never soften it. A plan that kills a bad idea early is working.
+- **Against the claim**: the sub-plan's `traces_to` names the root claim or section this run serves. State plainly whether the result supports it, refutes it, or leaves it open — and for "open", what is still missing.
+- **Kill-criteria**: check the result against the root's §5 kill-criteria and against any MVP done-criterion the plan called a cheap early test. A hit is a **strategy signal**: report it prominently, route it (F), and never soften it. A plan that kills a bad idea early is working.
 - **Leakage and too-good checks** — run these before accepting a strong number: is the val/test split named in the training config's data paths? Is val ≈ train to an implausible degree? Does the number beat the published state of the art on a first run? Is the metric at or near its ceiling (1.000, 100%)? Was the checkpoint selected on the same split it is reported on? Any hit → the verdict is `invalid` until the user rules it out.
 - **Limits, stated as limits**: one seed is not significance; a subset is not the benchmark; a metric with no baseline is not an improvement; a single run's gap smaller than the framework's known variance is not a result. Write what the run does *not* show.
 
@@ -114,7 +114,7 @@ Map each unresolved item to exactly one owner; the analyst itself writes nothing
 | Steps unfinished, a step `blocked`, or a STOP-line command still pending | `star-plan-executor` (resume the run) |
 | §5 criteria met — the run needs its final verification and `exec_status` | `star-plan-executor` (it owns finalization; the analyst never flips status) |
 | The plan text no longer describes what was actually done or produced | `star-plan-reviser` (evidence-based revision, per-item approved) |
-| A parent kill-criterion hit, or the `traces_to` claim refuted | `star-plan-reviser` (revise from evidence) → `star-plan-coach` (revisit method and risks) → `star-plan-decomposer` (re-scope the sub-plans) |
+| A root kill-criterion hit, or the `traces_to` claim refuted | `star-plan-reviser` (revise from evidence) → `star-plan-coach` (revisit method and risks) → `star-plan-decomposer` (re-scope the sub-plans) |
 | The logs point at a code defect (a bug, a wrong path, a mis-wired metric) | `star-code-reviewer` (scoped to this plan) |
 | Import errors, missing CUDA, a package the run needed | `star-env-builder` |
 | A metric that only a new run can produce | The user — a prepared command, never executed here |

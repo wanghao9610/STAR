@@ -6,10 +6,10 @@ How star-plan-reviser gathers evidence and what each report section must contain
 
 | Source | What it yields |
 |---|---|
-| the plan file itself | intent: §1 objective, §3 tasks, §4 deliverable paths, §5 done-criterion, §6 risks; frontmatter `status` / `exec_status` / `exec_run` / `depends_on` / `children` / `updated` |
-| `wkdrs/<exec_run>/EXEC_PLAN.md` | the actions the executor committed to, and where the STOP line fell |
-| `wkdrs/<exec_run>/EXEC_LOG.md` | step statuses, bound-check results, artifact paths, "Awaiting user" commands, Notes/decisions incl. **Strategy signal** entries |
-| `wkdrs/<exec_run>/EXPT_ANALYSIS_<date>.md` (when present) | star-expt-analyst's results audit: the run verdict, the done-criteria scorecard with each metric's source, log health, and the interpretation incl. kill-criteria hits — a pre-verified evidence base, still cross-checked against disk like any other claim |
+| the plan file itself | intent: §1 objective, §3 tasks, §4 deliverable paths, §5 done-criterion, §6 risks; frontmatter `status` / `exec_status` / `exec_runs` / `depends_on` / `children` / `updated` |
+| `wkdrs/<run>/EXEC_PLAN.md` | the actions the executor committed to, and where the STOP line fell |
+| `wkdrs/<run>/EXEC_LOG.md` | step statuses, bound-check results, artifact paths, "Awaiting user" commands, Notes/decisions incl. **Strategy signal** entries |
+| `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` (when present) | star-expt-analyst's results audit: the run verdict, the done-criteria scorecard with each metric's source, log health, and the interpretation incl. kill-criteria hits — a pre-verified evidence base, still cross-checked against disk like any other claim |
 | §4 deliverable paths | artifacts on disk: existence, size, mtime, cheap sanity |
 | `${CODE_NAME}/` modules named in §2/§3 | whether promised code exists and plausibly matches the log's claims |
 | children frontmatter (root/internal targets) | per-child section status, `exec_status`, `updated`, `depends_on` |

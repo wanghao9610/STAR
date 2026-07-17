@@ -4,7 +4,7 @@ Every plan file is named `<prefix>_<slug>_plan.md`. The **prefix** is a string o
 
 ## The rule
 
-- **Depth = prefix length.** A root plan (from `star-plan-coach`) has a 1-digit prefix (`0_`). Its children have 2-digit prefixes, grandchildren 3-digit, and so on.
+- **Depth = prefix length.** A root plan (from `star-plan-coach`) has a 1-digit prefix — the smallest digit no existing root already uses (`0_` in a fresh project, `1_` for a second root, …). Its children have 2-digit prefixes, grandchildren 3-digit, and so on.
 - **To decompose a plan with prefix `P`**, each sub-plan gets prefix `P` **with one more digit appended**, and that digit is the sub-plan's 0-based index among its siblings.
   - `0_` → `00_`, `01_`, `02_`, …
   - `00_` → `000_`, `001_`, …
@@ -34,7 +34,7 @@ Files sort naturally in a directory listing (`0`, `00`, `01`, `010`, `011`, `012
 
 2. **Why not two digits per level.** Prefix `10_` could mean "child 0 of plan 1" or "top-level plan 10". With a fixed one-digit-per-level scheme and ≤10 nodes at every level, prefixes stay unambiguous and the parent is always recoverable by dropping one digit. Keep the invariant.
 
-3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` currently numbers every root `0_`, so two unrelated root plans can both be `0_` (distinguished only by slug). Their children would both start `00_`, etc. The numeric prefix therefore orders and hints the tree for humans, but the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it (not the prefix) when reconstructing which sub-plan belongs to which parent.
+3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` gives each new root the smallest free digit, but projects created before that rule may hold two unrelated roots both numbered `0_` (distinguished only by slug), whose children then both start `00_`, etc. The numeric prefix therefore orders and hints the tree for humans, but the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it (not the prefix) when reconstructing which sub-plan belongs to which parent.
 
 4. **Slugs are independent of the tree.** The `<slug>` is a short, human-readable English name for the unit's content and has nothing to do with the parent's slug. `0_open-vocab-det-seg` can have child `00_mvp-3way-ablation`.
 

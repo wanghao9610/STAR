@@ -20,13 +20,16 @@ done_criterion: "<the sub-plan §5 check this run must satisfy, with its thresho
 ## Divergences from sub-plan
 
 <!-- Material deltas between this EXEC_PLAN and the sub-plan's §2–§5 (references/plan_sync_rules.md):
-     steps added/dropped/replaced/reordered, §2 deps wrong, §4 paths changed, §5 criterion adjusted.
-     Extra concreteness is NOT a divergence. Confirm these rows with the user before executing, then
-     sync them back into the sub-plan; mark `synced` once written back. Write "None" if faithful. -->
+     steps added/dropped/replaced/reordered, §2 deps wrong, §4 paths changed, §5 criterion adjusted,
+     plus ENRICHED rows — values the sub-plan left unstated that a method document will cite, whose
+     reason names that section. Other extra concreteness is NOT a divergence. Confirm these rows with
+     the user before executing, then sync them back into the sub-plan; mark `synced` once written
+     back. Write "None" if faithful. -->
 
 | # | type | sub-plan says (§) | confirmed change | reason | synced |
 |---|------|-------------------|------------------|--------|--------|
 | D1 | <ADDED/MODIFIED/REMOVED> | §3.<n> <…> | <…> | <…> | ☐ |
+| D2 | ENRICHED | §3.<n> unstated | <the value execution settled> | cited by: training.md §3 | ☐ |
 
 ## Actions
 
@@ -50,5 +53,5 @@ done_criterion: "<the sub-plan §5 check this run must satisfy, with its thresho
 
 ## Done-criterion
 
-<!-- Restate the sub-plan §5 check that ends this run, with its threshold, tied back to the parent's
+<!-- Restate the sub-plan §5 check that ends this run, with its threshold, tied back to the root's
      §4 metrics / §5 kill-criteria where relevant. This is what Step 6 verifies. -->

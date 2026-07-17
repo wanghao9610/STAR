@@ -158,17 +158,17 @@ STAR includes eleven complementary skills that turn a research idea into an audi
 
 | Skill | Purpose | Main output |
 | --- | --- | --- |
-| `$star-plan-coach` | Clarify a research idea through staged questions | `metds/plans/0_<topic>_plan.md` |
+| `$star-plan-coach` | Clarify a research idea through staged questions | `metds/plans/<digit>_<topic>_plan.md` |
 | `$star-refs-reviewer` | Survey the work related to the method: read the closest papers into analysis notes and build a classified bibliography whose every entry is transcribed from a fetched record | `metds/refs/<ABBREV>.md`, `metds/refs/reference.bib`, and `metds/refs/refs_index.md` |
-| `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
 | `$star-code-architect` | Bootstrap `${CODE_NAME}/` from a scored reference implementation, or organize existing code, and record the architecture | `${CODE_NAME}/` with `UPSTREAM.md`, plus `metds/codearc.md` |
-| `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies through a uv > pip > conda ladder, and smoke-verify the result | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
+| `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies through a uv > pip > conda ladder, and smoke-verify the result; `add` installs new packages into the existing env and records them | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
+| `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
 | `$star-plan-executor` | Implement and lightly validate one executable leaf plan | Intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
-| `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures |
+| `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `metds/results.md` in `aggregate` mode |
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |
-| `$star-metd-summarize` | Compile the plan tree into paper-ready method documents, marking what is not yet verified and turning what no plan covers into TODOs | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` |
 | `$star-plan-status` | Report plan-tree progress and the next runnable task | Read-only status summary |
+| `$star-metd-summarize` | Compile the plan tree into paper-ready method documents, marking what is not yet verified and turning what no plan covers into TODOs | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` |
 
 ### Model selection
 
@@ -178,11 +178,10 @@ A typical flow is:
 
 ```text
 research idea
-    → research plan
-    → related-work base with a verified bibliography
-    → executable sub-plans
+    → research plan, written against a related-work base and its verified bibliography
     → codebase with a recorded architecture
     → verified runtime environment
+    → executable sub-plans
     → implementation and validation
     → code review against conventions and the plan
     → review and revision against execution evidence

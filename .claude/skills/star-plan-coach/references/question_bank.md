@@ -64,6 +64,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 
 **Follow-ups**
 - How will the ablations be designed? Can they attribute the gains to your core contribution rather than engineering and tuning?
+- How many seeds or repeats back each headline result, and how is variance reported (mean ± std, min/max)? A margin that vanishes across seeds is noise — which claims need multi-seed support, and which single-seed runs are acceptable as early smoke tests?
 - Is your compute and time budget enough to run all the experiments? Which experiment is the most expensive? Is it worth it?
 - What experimental result would make you abandon or substantially revise the method? (This answer also belongs to Stage 5.)
 

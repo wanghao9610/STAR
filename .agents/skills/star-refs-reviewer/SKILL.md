@@ -8,7 +8,8 @@ description: >-
   under metds/plans/, then to a topic the user supplies) and runs the full pass, resuming
   incrementally when metds/refs/ already exists; a PLAN_NAME or free-text topic scopes the search;
   `verify` re-fetches every entry and diffs it against the file; `organize` re-classifies the
-  existing bib offline; an arXiv id, DOI, or paper URL appends one paper. Every bib field is
+  existing bib offline; `synthesize` compiles the existing notes into a related-work
+  narrative under metds/refs/; an arXiv id, DOI, or paper URL appends one paper. Every bib field is
   transcribed from a record fetched during the run (DBLP → Crossref → Semantic Scholar → arXiv,
   published version preferred), cached under wkdrs/, and logged with its source URL in
   metds/refs/refs_index.md — nothing is written from memory, and a paper with no fetchable record
@@ -22,11 +23,13 @@ description: >-
 
 Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherwise load the unsuffixed resources.
 
-Invocation: `$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | ARXIV_ID | URL]` — no argument reads the method from `metds/` and runs the full pass; a plan name (slug / numeric prefix / filename) or free-text topic scopes the search; `verify` re-fetches and diffs every existing entry; `organize` re-classifies the existing bib without touching the network; an arXiv id, DOI, or paper URL appends that one paper.
+Invocation: `$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]` — no argument reads the method from `metds/` and runs the full pass; a plan name (slug / numeric prefix / filename) or free-text topic scopes the search; `verify` re-fetches and diffs every existing entry; `organize` re-classifies the existing bib without touching the network; `synthesize` compiles the existing notes and the bib's categories into `metds/refs/related_work.md`; an arXiv id, DOI, or paper URL appends that one paper.
+
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
-Serve as the family's literature analyst. `$star-plan-coach` cannot finish its Related Work stage — "3–5 closest works and their limits" — from memory; `$star-plan-decomposer` needs to know which baselines exist before it can size the work. This skill reads the field and leaves two artifacts the rest of the family can cite: analysis notes that say how each close paper relates to **this** method, and a `reference.bib` whose every field came from a record fetched and logged during the run.
+Serve as the family's literature analyst. `$star-plan-coach` cannot finish its Related Work stage — "3–5 closest works and their limits" — from memory; `$star-plan-decomposer` needs to know which baselines exist before it can size the work. This skill reads the field and leaves two artifacts the rest of the family can cite: analysis notes that say how each close paper relates to **this** method, and a `reference.bib` whose every field came from a record fetched and logged during the run. On demand (`synthesize`), it compiles those notes into a third: the related-work narrative a paper's Related Work section is written from.
 
 Survey and record; do not set strategy, write or revise plans, implement methods, or run experiments. What the survey finds that changes the research direction goes back to the user and routes to `$star-plan-coach` §2 — never edit a plan here.
 
@@ -46,10 +49,11 @@ Survey and record; do not set strategy, write or revise plans, implement methods
 1. Interpret the argument, first match wins:
    - `verify` → **verify mode**: Step 7 only, over every existing entry.
    - `organize` → **organize mode**: Step 6 only, offline.
+   - `synthesize` → **synthesize mode**: Step 9 only, offline — requires existing notes under `metds/refs/`.
    - An arXiv id (`2103.00020`), a DOI, or a paper URL → **append mode**: that one paper through Steps 3, 5, and 6.
    - A plan name (slug / numeric prefix / filename against `metds/plans/*_plan.md`) → that plan is the method source.
    - Any other text → the text itself is the topic.
-   - No argument → find the method: `metds/*.md` method notes first (`metds/codearc.md` excluded — it describes code, not research); else the root plan under `metds/plans/` (§1 Problem, §2 Related Work, §3 Method); else ask the user for a topic. Say which source won.
+   - No argument → find the method: `metds/*.md` method notes first (`metds/codearc.md` and `metds/results.md` excluded — they describe code and scores, not the method); else the root plan under `metds/plans/` (§1 Problem, §2 Related Work, §3 Method); else ask the user for a topic. Say which source won.
 2. Read the source and extract the **search profile**: the task, the method's mechanism, the setting and constraints, named datasets and baselines, and the claim the work wants to make. State the profile in 3–4 lines with its source before searching — a wrong profile wastes the whole run.
 3. If `metds/refs/` exists, read `refs_index.md` and `reference.bib` first: existing citekeys, categories, and notes are the baseline. Say what is already there and that this run is incremental.
 4. Fix the language: notes and index follow the method source's frontmatter `language` when it has one, else the dialogue language.
@@ -86,13 +90,24 @@ Re-fetch 5 entries at random and diff them field by field against the file; any 
 
 ### Step 8: Digest in chat
 
-Under about 400 words: the method source and profile, notes written (citekey → file), the entry count and category table, the self-audit result, the Needs-manual-check list, and the routing — the closest-works finding goes to `$star-plan-coach` §2 (Related Work & Positioning) to sharpen the positioning; one more paper later is `$star-refs-reviewer <arxiv-id>`; `$star-refs-reviewer verify` re-checks the whole bib.
+Under about 400 words: the method source and profile, notes written (citekey → file), the entry count and category table, the self-audit result, the Needs-manual-check list, and the routing — the closest-works finding goes to `$star-plan-coach` §2 (Related Work & Positioning) to sharpen the positioning; one more paper later is `$star-refs-reviewer <arxiv-id>`; `$star-refs-reviewer verify` re-checks the whole bib; `$star-refs-reviewer synthesize` compiles the notes into `metds/refs/related_work.md`.
+
+### Step 9: Synthesize related_work.md (synthesize mode only)
+
+Compile the existing notes into `metds/refs/related_work.md` — the material a paper's Related Work section is written from. Offline: no fetching, no new reading. No notes under `metds/refs/` → say so and stop; the full pass or append mode builds them first.
+
+1. Read the whole base: every note (`metds/refs/<ABBREV>.md`, its §5 Relation to This Project above all), `refs_index.md`, `reference.bib`'s category blocks, and the Step 0 method source (root plan §2/§3) for the positioning frame.
+2. Organize by theme, following the bib's categories — merge or split only where the notes justify it. Per theme, one paragraph: what these works do and what they cannot do for this method, every claim drawn from that paper's own note, citekeys cited inline as `[@citekey]`. Close with the positioning paragraph — what none of them do — grounded in the method source's §2.
+3. The note is the source and its `depth:` is the ceiling: characterize a paper only from its own note, no deeper than the note admits. A bib entry without a note may be named inside a theme from its record's facts (title, venue, year), never characterized. Nothing comes from memory. A theme too thin to write becomes a gap naming the papers to read (`$star-refs-reviewer <arxiv-id>` each) — never padded prose.
+4. Frontmatter: `type: related_work`, `language` (Step 0.4's rule), `generated:` (real date), `sources:` (the notes and index read, each with its date). On re-run, a file carrying this frontmatter gets a section-level change list and one direct question before overwrite; a file without it is hand-authored — say what it holds and ask, never overwrite on a diff alone.
+5. Digest ≤400 words: themes written, citekeys cited vs entries total, thin-note gaps with the read-next list, and the boundary: compiled material under the family's zero-fabrication rule — voice, ordering, and final citation style belong to the writing tool.
 
 ## State Rules
 
-- Writes are confined to `metds/refs/**` (notes, `reference.bib`, `refs_index.md`) and the run cache `wkdrs/refs_<date>/raw/**`. Never touch `metds/plans/*`, the `metds/*.md` method notes, `metds/codearc.md`, `${CODE_NAME}/`, `.env`, `UPSTREAM.md`, or `LICENSE` / `CITATION*`.
+- Writes are confined to `metds/refs/**` (notes, `reference.bib`, `refs_index.md`, `related_work.md`) and the run cache `wkdrs/refs_<date>/raw/**`. Never touch `metds/plans/*`, the `metds/*.md` method notes, `metds/codearc.md`, `${CODE_NAME}/`, `.env`, `UPSTREAM.md`, or `LICENSE` / `CITATION*`.
 - `reference.bib` is append-and-reorganize, never regenerate-from-scratch: a verified entry is preserved byte for byte unless `verify` proves it wrong. An entry the user added by hand is never deleted — reclassify it and mark its provenance `user-supplied` when it has no fetched record.
 - One note per paper. A re-run skips papers that already have a note unless the user asks for a refresh.
-- Real dates only, from the system — never invented. A fetch date is when the fetch happened.
-- This skill sets no plan frontmatter and creates no plan files; its audit trail is `refs_index.md` plus the run cache. Git usage is read-only; it never commits.
-- Keep chat replies under about 400 words (the notes and bib do not count); ask the core-set confirmation as one direct question with recommendations marked, and require an explicit answer before any paper is read — even in headless or scripted runs. Report counts honestly: never round a shortfall up, never present a note as deeper than its `depth:` admits. Match the user's dialogue language; notes and index follow the method source's `language` (else the dialogue language); keep technical terms, venue names, and everything inside `reference.bib` in English regardless.
+- `related_work.md` is compiled, never invented: every characterization traces to that paper's note (a note-less entry may be named, only from its fetched record's facts). A generated file (`type:` + `generated:` frontmatter) is overwritten only after its section-level change list is approved; a hand-authored file is never overwritten on a diff alone.
+- Real dates only (conventions §4): a fetch date is when the fetch happened.
+- This skill sets no plan frontmatter and creates no plan files; its audit trail is `refs_index.md` plus the run cache. Git: read-only; it never commits (conventions §1).
+- Ask the core-set confirmation as one direct question with recommendations marked, and require an explicit answer before any paper is read — even in headless or scripted runs. Never present a note as deeper than its `depth:` admits. Notes and index follow the method source's `language` (else the dialogue language); everything inside `reference.bib` stays English regardless.

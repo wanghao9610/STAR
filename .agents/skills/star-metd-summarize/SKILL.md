@@ -28,11 +28,13 @@ Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherw
 
 Invocation: `$star-metd-summarize [OPT]` — `OPT` is one of `overview` / `dataset` / `framework` / `training` / `evaluation`, each compiling `metds/<OPT>.md`; no argument compiles all five in dependency order (`dataset` → `framework` → `training` → `evaluation` → `overview`).
 
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+
 ## Role
 
 Serve as the family's method compiler. `$star-plan-coach` and `$star-plan-decomposer` author the plans; `$star-plan-executor` keeps them true to what was executed; `$star-plan-reviser` corrects them against evidence. This skill compiles them: the plan tree is organized by decomposition and execution order, and it re-cuts the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. The product is the five documents under `metds/`, the material a paper's method section is written from.
 
-Compile and reorganize; do not decide method, revise plans, read code, or interpret results. Route what compiling surfaces beyond the write boundary: a missing strategy answer to `$star-plan-coach`, missing execution detail to `$star-plan-decomposer`, plan text that no longer matches reality to `$star-plan-reviser`, result numbers and their meaning to `$star-expt-analyst`, citations and related-work detail to `$star-refs-reviewer`.
+Compile and reorganize; do not decide method, revise plans, read code, or interpret results. Route what compiling surfaces beyond the write boundary: a missing strategy answer to `$star-plan-coach`, missing execution detail to `$star-plan-decomposer`, a value an executed run settled but its plan never recorded to `$star-plan-executor` (ENRICHED sync-back), plan text that no longer matches reality to `$star-plan-reviser`, result numbers and their meaning to `$star-expt-analyst`, citations and related-work detail to `$star-refs-reviewer` (its `synthesize` mode compiles the notes into `metds/refs/related_work.md`).
 
 ## Core Principles
 
@@ -40,14 +42,14 @@ Compile and reorganize; do not decide method, revise plans, read code, or interp
 2. **Compile, never invent.** Rewriting, reordering, and merging into one voice is the job; adding facts is not. A plausible default (an unstated learning rate, an obvious preprocessing step, a standard metric definition) is an invention — it does not go in. If it is not in a plan, it is a gap.
 3. **Gaps are output, not embarrassment.** A template section no plan covers becomes a `TODO` naming the plan and section that should carry it, and the gap list is a headline of the report. The document is a mirror: it shows the researcher exactly where the method is still unwritten, and pushes the fix back into the plans, which the coach and decomposer own.
 4. **Organize along the method's axis, not the plan's.** One plan section may feed several documents; one document section may merge a dozen plans. Merge, do not concatenate — a section that reads as a list of plan excerpts, or that says the same thing twice because a parent and a leaf both said it, has failed. Where they disagree: **leaf beats parent, newer `updated` beats older**. When neither dominates, print both values with ⚠ and name both sources — never silently pick a winner.
-5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; `evaluation.md` defines the protocol, not the scores.
+5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, and their cross-run ledger is `metds/results.md`; `evaluation.md` defines the protocol, not the scores.
 6. **Generated docs are overwritten only with the diff on the table; hand-authored docs are not targets at all.** A doc carrying this skill's `type:` / `generated:` frontmatter is a compiled artifact: on re-run, show the section-level change list and get approval before writing. A doc without that frontmatter was written by a human — show what it holds and ask; never overwrite it on the strength of a diff.
 
 ## Workflow
 
 ### Step 0: Resolve the targets
 
-1. Read `.env`; resolve `CODE_NAME` — `framework.md` and `training.md` cite `${CODE_NAME}/` paths. If `.env` is missing, create it from `.env.example` and ask the user to fill machine-specific values first (AGENTS.md §6).
+1. Read `.env` and resolve `CODE_NAME` (conventions §3) — `framework.md` and `training.md` cite `${CODE_NAME}/` paths.
 2. Interpret the argument: one of the five OPTs → that document; no argument → all five in dependency order (`overview` last: it links the other four); anything else → name the five valid OPTs and ask one direct question about which was meant.
 3. **An empty plan tree is a valid answer.** No `metds/plans/*_plan.md` → say so and stop, routing to `$star-plan-coach`. Never compile a method document from nothing.
 
@@ -84,14 +86,14 @@ For each target, in dependency order:
 
 ### Step 6: Report
 
-Lead with what landed, under about 400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `$star-plan-coach`, execution detail to `$star-plan-decomposer`, plan text contradicting reality to `$star-plan-reviser`, results to `$star-expt-analyst`, citations to `$star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not.
+Lead with what landed, under about 400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `$star-plan-coach`, execution detail to `$star-plan-decomposer`, a value an executed run settled to `$star-plan-executor`, plan text contradicting reality to `$star-plan-reviser`, results to `$star-expt-analyst`, citations to `$star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not.
 
 ## State Rules
 
 - The only writes are `metds/overview.md`, `metds/dataset.md`, `metds/framework.md`, `metds/training.md`, `metds/evaluation.md` — the five OPT targets, nothing else, nowhere else.
-- Never touch `metds/plans/*` — plan text belongs to `$star-plan-coach`, `$star-plan-decomposer`, `$star-plan-executor`, `$star-plan-reviser`; a gap or a wrong statement found while compiling is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`$star-code-architect`'s), `metds/refs/*` (`$star-refs-reviewer`'s), `wkdrs/*`, `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
+- Never touch `metds/plans/*` — plan text belongs to `$star-plan-coach`, `$star-plan-decomposer`, `$star-plan-executor`, `$star-plan-reviser`; a gap or a wrong statement found while compiling is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`$star-code-architect`'s), `metds/refs/*` (`$star-refs-reviewer`'s), `metds/results.md` (`$star-expt-analyst`'s), `wkdrs/*`, `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
 - Reads are `metds/plans/*_plan.md`, `.env`, and the five target docs. `wkdrs/` is deliberately not read: execution reality reaches these documents through the executor's sync-back into the plans, so if a run's detail is missing here, the fix is a plan sync, not a wider read.
 - This skill runs nothing: no python, no training, no evaluation, no installs — there is no command whose output it needs.
-- Git usage is read-only (`status` / `diff` / `log`); this skill never commits.
+- Git: read-only; this skill never commits (conventions §1).
 - It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
-- Keep chat replies under about 400 words (the compiled documents do not count). Ask one direct question at a time at the four gates — an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs. Match the user's dialogue language; the documents follow the plans' `language` (Step 1), which may differ. Keep technical terms — metric names, module paths, dataset names — in English inside Chinese documents.
+- Ask one direct question at a time at the four gates — an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.

@@ -23,7 +23,7 @@
 
 ```yaml
 - criterion: <计划的原话，引用>
-  origin: sub-plan §5 | parent §4 | parent §5 kill-criterion | stated baseline
+  origin: sub-plan §5 | root §4 | root §5 kill-criterion | stated baseline
   metric: <来源打印出的名字>
   value: <来源打印出的原值——不要四舍五入成另一个判定>
   split: train | val | test | unknown
@@ -92,7 +92,7 @@
 ## D. 指标 vs 预期
 
 - 每个指标从可得的最权威来源提取，顺序为：run 写出的结果 JSON/CSV > 评测日志的最终汇总段 > TB event 文件（仅当 tensorboard 已安装）> 训练日志里最后一条匹配行。记下用的是哪一档；只能靠最弱一档才拿到的判据，值得记一条关于该 run 报告方式的 minor 观察。
-- 每条准绳打成一个指标行：先 §5 完成判据，再父计划 §4 指标，再计划写明的任何 baseline。
+- 每条准绳打成一个指标行：先 §5 完成判据，再根计划 §4 指标，再计划写明的任何 baseline。
 - **split 纪律**：每个数字都要点名它来自哪个 split。若计划给了阈值却没说 split（"mAP ≥ 30"），报出计划 §5 上下文所暗示的那个 split 的数字，点明这处歧义，并且绝不挑那个好看的 split。
 - **未声明预期**是一个合法的行：报出数字，`threshold` 留 `none stated`，不给它打分。不打分的数字是诚实的；倒推出来的阈值不是。
 - **unmeasurable** 意思是这个数字磁盘上哪里都没有。说明什么能产出它，并把那条命令交还——绝不自己跑（见 STOP 线）。
@@ -100,8 +100,8 @@
 
 ## E. 解读
 
-- **对照主张**：子计划的 `traces_to` 点名了这个 run 服务于父计划的哪条主张或哪一节。如实说明结果是支持它、推翻它，还是让它悬着——"悬着"的话，还缺什么。
-- **kill-criteria**：把结果对照父计划 §5 的 kill-criteria，以及计划称为廉价早期测试的任何 MVP 完成判据。命中就是**策略信号**：在报告里突出、路由出去（F），绝不软化。能早早杀掉一个坏点子的计划，是在起作用。
+- **对照主张**：子计划的 `traces_to` 点名了这个 run 服务于根计划的哪条主张或哪一节。如实说明结果是支持它、推翻它，还是让它悬着——"悬着"的话，还缺什么。
+- **kill-criteria**：把结果对照根计划 §5 的 kill-criteria，以及计划称为廉价早期测试的任何 MVP 完成判据。命中就是**策略信号**：在报告里突出、路由出去（F），绝不软化。能早早杀掉一个坏点子的计划，是在起作用。
 - **泄漏与"过好"检查**——接受一个强结果之前先跑这些：训练 config 的数据路径里点到了 val/test split 吗？val ≈ train 到了不合常理的程度吗？这个数字在第一次跑就超过了已发表的 SOTA 吗？指标是不是贴着天花板（1.000、100%）？checkpoint 是不是在它被报告的同一个 split 上选出来的？任何一条命中 → 在用户排除之前，判定就是 `invalid`。
 - **把局限当局限写**：单 seed 不是显著性；子集不是 benchmark；没有 baseline 的指标不叫提升；单次 run 的差距若小于该框架已知的方差，就不算结果。写出这个 run *没有*显示什么。
 
@@ -114,7 +114,7 @@
 | 步骤未完成、某步 `blocked`，或 STOP 线命令仍待跑 | `star-plan-executor`（恢复该 run） |
 | §5 判据已达标——该 run 需要终验与 `exec_status` | `star-plan-executor`（finalize 归它；分析师绝不翻状态） |
 | 计划文本已不能描述实际做了什么、产出了什么 | `star-plan-reviser`（据证据修订，逐项批准） |
-| 命中父计划 kill-criterion，或 `traces_to` 的主张被推翻 | `star-plan-reviser`（据证据修订）→ `star-plan-coach`（重审方法与风险）→ `star-plan-decomposer`（重新划分子计划） |
+| 命中根计划 kill-criterion，或 `traces_to` 的主张被推翻 | `star-plan-reviser`（据证据修订）→ `star-plan-coach`（重审方法与风险）→ `star-plan-decomposer`（重新划分子计划） |
 | 日志指向代码缺陷（bug、路径写错、指标接错） | `star-code-reviewer`（限定到本计划） |
 | import 报错、CUDA 缺失、run 需要的包没装 | `star-env-builder` |
 | 只有跑一次新 run 才能产出的指标 | 用户——一条备好的命令，绝不在这里执行 |

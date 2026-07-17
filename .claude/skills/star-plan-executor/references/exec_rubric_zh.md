@@ -12,10 +12,12 @@
 
 5. **运行走项目环境**——命令都走 `.env` 的 conda 环境;没有系统 python、没有硬编码本地路径。
 
-6. **状态可续跑**——`wkdrs/<run>/EXEC_LOG.md` 反映真实的逐步状态,子计划 frontmatter 有 `exec_status` + `exec_run`。全新 session 能仅凭日志续跑。
+6. **状态可续跑**——`wkdrs/<run>/EXEC_LOG.md` 反映真实的逐步状态,子计划 frontmatter 有 `exec_status` + `exec_runs`,本轮是追加而非替换上一项。全新 session 能仅凭日志续跑。
 
 7. **改动是 surgical 的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(CLAUDE.md §3)。
 
 8. **交接命令可直接跑**——每条"待用户执行"命令都完整(conda 调用、输入、输出路径),并说明该带回什么以便验证。
 
 9. **子计划与实际执行一致**——每条经用户确认的实质性偏差都已写回子计划 §2–§5 并留有 `## Revision History` 条目(`plan_sync_rules_zh.md`);EXEC_PLAN"与子计划的偏差"和 EXEC_LOG"待同步修正"里,没有未经用户明确决定跳过而遗留的未同步行。
+
+10. **文档会引用的值都已捕获**——本轮敲定、子计划未写明、且某个 `metds/*.md` 章节会引用的值(超参、初始化、复现命令),要么已经在子计划里,要么作为一条 ENRICHED 行等待用户确认(`plan_sync_rules_zh.md`)。只有 EXEC_LOG 知道的值,`star-metd-summarize` 只会把它报成一个永久缺口。

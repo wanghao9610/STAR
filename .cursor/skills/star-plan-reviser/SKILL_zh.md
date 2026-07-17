@@ -15,6 +15,8 @@ description: >-
 
 调用方式：`/star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-3way-ablation_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记 drift 的节点。
 
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+
 ## 角色
 
 你负责闭合其他 skill 留下的环：`star-plan-coach` 写战略、`star-plan-decomposer` 拆解、`star-plan-executor` 执行叶子并留下证据（`wkdrs/<run>/EXEC_LOG.md`、产物）——并且明确把"结果与计划相矛盾"交还给用户。你接住**一个计划节点**，用这些证据审计它的意图，并在**用户对每处改动逐一拍板**的前提下**就地修订计划文件**。`star-plan-status` 是全树的浅层只读仪表盘；你是被授权动笔的单计划深度审计。
@@ -35,12 +37,12 @@ description: >-
 ### Step 0：解析目标计划
 
 1. 用 `PLAN_NAME`（slug / 数字前缀 / 完整文件名）匹配 `metds/plans/*_plan.md`；完整读入解析到的计划。
-2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并直接问一个问题——优先推荐有执行证据（已设 `exec_run`）或已知 drift 的节点。
+2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并直接问一个问题——优先推荐有执行证据（`exec_runs` 非空）或已知 drift 的节点。
 3. 判定节点类型：**叶子**（审它自己的 run）vs **根/内部**（审战略章节 + children 汇总）。这决定 Step 1 的证据集合。
 
 ### Step 1：圈定证据
 
-- **叶子**：它的 `exec_run` 目录（`EXEC_PLAN.md`、`EXEC_LOG.md`）、§4 的每个交付物路径、§2 点名的输入（`datas/`、`inits/`）与代码模块（`${CODE_NAME}/`，从 `.env` 解析）。
+- **叶子**：它当前 run 的目录（`exec_runs` 的最后一项——`EXEC_PLAN.md`、`EXEC_LOG.md`）、§4 的每个交付物路径、§2 点名的输入（`datas/`、`inits/`）与代码模块（`${CODE_NAME}/`，从 `.env` 解析）。
 - **根/内部**：children 的 frontmatter（`status`、`exec_status`、`updated`、`depends_on`）、已执行后代的日志（尤其 **Strategy signal** 记录与 kill-criteria 命中），加上本节点自己 §1–§6 的假设。
 - 明说存在哪些证据。若处处都未执行，声明本次为**纯文档审查**：完成度无从打分；报告的意图 / 偏差 / 候选各节仍然适用，依据是用户知道而计划不知道的信息。
 
@@ -54,7 +56,7 @@ description: >-
 
 按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`；报告语言跟随计划的 `language`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 done-criterion：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 涟漪图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
 
-写入 `wkdrs/<exec_run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤400 字摘要：结论、最重要的偏差、候选清单的一行版。
+写入 `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤400 字摘要：结论、最重要的偏差、候选清单的一行版。
 
 ### Step 4：修订问答（一次一条）
 
@@ -69,7 +71,7 @@ description: >-
 1. 依据证据和用户的答复起草新的章节文本；给出简洁的改前 → 改后摘要；写入文件。遵循计划的 `language`；中文计划里技术名词保留英文。
 2. 让章节 `status` 映射保持诚实：引入 `[TBD]` / `【待定】` 的修改把该节翻回 `in_progress`；经确认的重写保持 `done`。
 
-最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且其 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_run` 保留，指向历史 run）；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
+最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且其 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法或里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 会读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
 
 ### Step 6：一致性检查
 
@@ -79,17 +81,17 @@ description: >-
 
 ### Step 7：汇报与交接
 
-≤400 字：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`/star-plan-decomposer <slug>`（结构变了 / children 过期）、`/star-plan-coach <slug>`（战略转向）、`/star-plan-executor <叶子>`（重跑修订后的叶子）、`/star-code-reviewer <叶子>`（审计实现代码）、`/star-plan-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。
+≤400 字：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`/star-plan-decomposer <slug>`（结构变了 / children 过期）、`/star-plan-coach <slug>`（战略转向）、`/star-plan-executor <叶子>`（重跑修订后的叶子）、`/star-code-reviewer <叶子>`（审计实现代码）、`/star-plan-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提供一次提交的机会（见状态与文件规则）。
 
 ## 状态与文件规则
 
 - 审查报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`。
 - 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及目标一行目标变化时父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
+- Git：有落笔修订时，在 Step 7 提供一次提交目标计划（及一行目标变化时的父计划）的机会——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
 - 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped`——与家族一致。
 
 ## 对话纪律
 
-- 聊天回复控制在约 400 字内；报告文件与计划编辑不计入。
 - 以纯文本提问，一次一条候选；任何写入前必须先获得明确答复——headless / 脚本化运行也不例外。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。计划正文与审查报告跟随计划 frontmatter 的 `language`；中文计划里技术名词保留英文。

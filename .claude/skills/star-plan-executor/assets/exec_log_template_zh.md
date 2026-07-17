@@ -35,10 +35,11 @@ status: in_progress   # in_progress / blocked / done
      确认的行写回子计划 §2–§5 及其 `## Revision History`,然后在此勾掉。 -->
 
 - [ ] <ADDED/MODIFIED/REMOVED> §3.<n>:"<原文>" → "<新做法>" —— 原因:<…>
+- [ ] ENRICHED §3.<n>:<计划留白处> → <执行敲定的值> —— 被引用:<文档 §>
 
 ## 备注 / 决策
 
 <!-- 续跑的 session 需要知道的一切:做过的假设、遇到的 blocker 及其解决方式(子计划层面的实质性
      偏差记到上面"待同步修正",不记这里)。
-     若某结果撞上父计划 §5 的 kill-criterion,在此记为 **战略信号**,并注明推荐的反馈路径
+     若某结果撞上根计划 §5 的 kill-criterion,在此记为 **战略信号**,并注明推荐的反馈路径
      (/star-plan-coach 或 /star-plan-decomposer)——执行器本身绝不改父计划。 -->

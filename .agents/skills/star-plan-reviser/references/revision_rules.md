@@ -33,17 +33,17 @@ Appended at the end of the plan file (after `## Sub-plans` if present); the sect
 
 ### 2026-07-16 — star-plan-reviser (report: wkdrs/00_mvp-3way-ablation/REVIEW_2026-07-16.md)
 - §3 step 4: batch eval → streaming eval — the run OOMs at step 4 (evidence: EXEC_LOG.md step 4, blocked)
-- §5: mIoU threshold 85 → 80 — the MVP run reached 82.3 and the parent's §4 margin analysis accepts 80 (evidence: wkdrs/00_mvp-3way-ablation/eval.json)
+- §5: mIoU threshold 85 → 80 — the MVP run reached 82.3 and the root's §4 margin analysis accepts 80 (evidence: wkdrs/00_mvp-3way-ablation/eval.json)
 - exec_status: done → pending (done-criterion changed)
 ```
 
-One `###` block per session, real date (never invented); one bullet per change: section, what changed, why, evidence. Record `exec_status` resets here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss").
+One `###` block per session, real date (never invented); one bullet per change: section, what changed, why, evidence. Record `exec_status` resets and a cleared `finalized:` here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss").
 
 ## exec_status reset rule
 
 | Situation after edits | Action |
 |---|---|
-| §5 done-criterion materially changed and the leaf was `done` / `blocked` | offer a reset to `pending` (keep `exec_run` pointing at the historical run) |
+| §5 done-criterion materially changed and the leaf was `done` / `blocked` | offer a reset to `pending` (`exec_runs` keeps the history either way) |
 | §3 gained or materially changed steps and the leaf was `done` | offer a reset to `pending` |
 | leaf was `in_progress` | leave it — the executor re-orients from `EXEC_LOG.md` on its next run |
 | edits touch only §1/§2/§4 prose or §6 risks | no reset — bump `updated` only |

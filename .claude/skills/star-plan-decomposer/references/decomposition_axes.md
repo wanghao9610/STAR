@@ -1,20 +1,20 @@
 # Decomposition Axes
 
-An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes via AskUserQuestion with the recommendation first. Read the parent's §3 (method), §4 (experiments), and §6 (milestones) before proposing.
+An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes via AskUserQuestion with the recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
 
 ## The three axes
 
 ### 1. Milestone / phase  — default recommendation
 
-Split along the parent's §6 timeline stages. Each milestone becomes one sub-plan.
+Split along the root's §6 timeline stages. Each milestone becomes one sub-plan.
 
-- **Use when** the parent's milestones are already well-formed (they usually are — the coach makes the first milestone a cheap MVP and backs the rest out from the deadline).
+- **Use when** the root's milestones are already well-formed (they usually are — the coach makes the first milestone a cheap MVP and backs the rest out from the deadline).
 - **Gives** a temporally ordered chain of sub-plans; dependencies are mostly linear (each phase hands off to the next).
 - **Example** (`0_open-vocab-det-seg`): `00_mvp-3way-ablation` → `01_core-method-pipeline` → `02_full-experiments` → `03_writing-submission`.
 
 ### 2. Component / module
 
-Split along the separable parts of the method in §3. Each system module becomes one sub-plan.
+Split along the separable parts of the method in the root's §3. Each system module becomes one sub-plan.
 
 - **Use when** the method decomposes into modules that can be built and tested somewhat independently.
 - **Gives** sub-plans that can run in parallel; dependencies form a small graph (shared interfaces), not a line.
@@ -22,7 +22,7 @@ Split along the separable parts of the method in §3. Each system module becomes
 
 ### 3. Claim → experiment
 
-Split along §4: each claim and its matching experiment/ablation becomes one sub-plan.
+Split along the root's §4: each claim and its matching experiment/ablation becomes one sub-plan.
 
 - **Use when** the contribution is mostly empirical, with several claims and ablations that each need their own harness.
 - **Gives** sub-plans in one-to-one correspondence with the paper's claims — easy to audit "every claim has an experiment".
@@ -30,7 +30,7 @@ Split along §4: each claim and its matching experiment/ablation becomes one sub
 
 ## How to choose
 
-- **Default to milestone** unless the parent's milestones are weak or the user asks otherwise — it matches how the plan is already structured and gives the clearest execution order.
+- **Default to milestone** unless the root's milestones are weak or the user asks otherwise — it matches how the plan is already structured and gives the clearest execution order.
 - Prefer **component** when the user's next real work is *building the system* and modules can progress in parallel.
 - Prefer **claim → experiment** when the user's next real work is *running experiments* and the risk is empirical (does each claim hold?).
 - **Depth over breadth:** it is fine — often better — to decompose by milestone at level 2, then recurse into the heavy milestone (usually "core method") by component at level 3. Don't try to capture everything in a single flat level.

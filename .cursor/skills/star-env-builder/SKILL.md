@@ -22,7 +22,9 @@ description: >-
 
 Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
-Invocation: `/star-env-builder [ENV_NAME]` — the conda environment name to create; omit it to use `CODE_NAME` from `.env`.
+Invocation: `/star-env-builder [ENV_NAME | add <package>…]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout.
+
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
@@ -32,7 +34,7 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ## Core Principles
 
-1. **`.env` is the only path source; never activate.** `CODE_NAME` / `CONDA_HOME` / `PYTHON_HOME` come from `.env` — if it is missing, create it from `.env.example` and ask the user to fill machine-specific values first; do not guess paths (AGENTS.md §6). The shell is stateless: `source activate` does not survive to the next command. Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path.
+1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: it is the only one that may create, rename, or install into one.
 2. **One gate; situational asks.** The single gate is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, as plain-text questions, one at a time, each with a recommendation; wait for an explicit answer before acting.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the ladder is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
@@ -43,8 +45,8 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ### Step 0: Preflight
 
-1. Read `.env`; resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME`. Missing `.env` → create it from `.env.example`, ask the user to fill it, and stop until they do.
-2. `ENV_NAME` := the argument, else `CODE_NAME`.
+1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
+2. `ENV_NAME` := the argument, else `CODE_NAME`. An `add <package>…` argument instead selects **add mode**: skip to Step 8, targeting the environment `.env` already names — nothing is created, renamed, or rebuilt.
 3. Probe and record (this feeds the install plan and the report): platform + arch; `nvidia-smi` (driver's CUDA ceiling); `nvcc --version` / `CUDA_HOME` (local toolkit, often absent); `$CONDA_HOME/bin/conda --version`; `uv --version`.
 4. `${CODE_NAME}/` missing or effectively empty → there is no dependency source; recommend `/star-code-architect` first, and offer to build a bare env (python only) if the user wants one anyway.
 
@@ -100,21 +102,32 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 1. Write `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md` from `assets/env_report_template.md`: identity + `ENV_PY`, machine probe, backup renames, per-category install results, the smoke matrix with evidence, failures/blocked items, awaiting-user commands.
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added during smoke diagnosis) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
-4. `ENV_NAME ≠ CODE_NAME` → downstream skills look for the `.env` environment: offer to append `ENV_NAME=<name>` to `.env` (and mirror the field into `.env.example` as documentation) — only with explicit confirmation.
+4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at the environment just built (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
 5. Chat report ≤400 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `/star-plan-executor <leaf>` now has a runtime; `/star-plan-status` shows what to run next.
+
+
+### Step 8: Add packages (add mode only)
+
+The environment already exists; this mode installs into it and records what it installed. It creates, renames, and rebuilds nothing — a broken environment is a full run's job (Step 2's *verify & repair in place*).
+
+1. Resolve `ENV_PY` from `.env` (Principle 1). No usable interpreter → say so and recommend a full `/star-env-builder` run; install nothing.
+2. Categorise each package per `references/installer_policy.md` — framework / runtime / optional / conda-only — and say which requirements file each will land in.
+3. **Gate** (Principle 2 — nothing installs before it): present the packages, their categories, the versions and index that will be used, the download size when it is large, and any CUDA coupling; ask *approve and install* / *adjust* / *abort*.
+4. Install through the ladder (uv > pip > conda; conda only under a conda backend and only for the whitelist). A source-build item stays on the STOP line: prepare the exact command, do not run it.
+5. Smoke the new packages only (`references/smoke_test_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
+6. Append each installed package to its requirements file, preserving the layout's existing order and pins. Append an `## Added <date>` block to the newest `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` (none exists → write a fresh report). Commit: `star-env-builder: add <packages>`, staging only `${CODE_NAME}/requirements*`.
+7. Report ≤400 words: what installed, what each requirements file gained, the smoke evidence, anything blocked or awaiting the user.
 
 ## State & File Rules
 
-- Writes are limited to: the environment itself (under `$CONDA_HOME/envs/` or `<project>/.venv`), `${CODE_NAME}/requirements*` (only when generating a missing layout or filling a verified gap), `wkdrs/env_<ENV_NAME>_<date>/`, and — only with explicit user confirmation — an `ENV_NAME=` line in `.env` / `.env.example`. Never touch source code, `metds/plans/*`, or other skills' outputs.
+- Writes are limited to: the environment itself (under `$CONDA_HOME/envs/` or `<project>/.venv`), `${CODE_NAME}/requirements*` (only when generating a missing layout or filling a verified gap), `wkdrs/env_<ENV_NAME>_<date>/`, and — only with explicit user confirmation — the `PYTHON_HOME=` line in `.env`. Never touch source code, `metds/plans/*`, or other skills' outputs.
 - Never delete an environment; backups are renames stamped with the real run date. Never invent timestamps.
-- Git: at most one commit, only when requirements files were generated — message prefix `star-env-builder:`, staging only `${CODE_NAME}/requirements*` (never `git add -A` / `git add .`). No pushes, no history rewrites, no branch switches.
+- Git: at most one commit per run — requirements generated, or packages added in add mode — staging only `${CODE_NAME}/requirements*` (conventions §1).
 - Gate-approved installs run autonomously, including framework-scale downloads. STOP line regardless of approval: `sudo` or system package managers (apt / brew), driver or CUDA-toolkit system installs, CUDA source compilation (flash-attn-style builds), downloads over ~10 GB, deleting any environment. Prepare those as exact commands in the report instead.
 - Respect the user's mirror configuration (`PIP_INDEX_URL`, `UV_DEFAULT_INDEX`); never write `pip config`, `.condarc`, or `uv.toml`.
 - Re-invoke semantics: if a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present, prefer **verify & repair in place** (Step 2) — resume from its failures instead of rebuilding.
 
 ## Dialogue Discipline
 
-- Keep chat replies under ~400 words; files written to disk do not count.
 - Ask one plain-text question at a time, each with a recommendation, and wait for the answer (Cursor has no structured question tool); the install plan needs an explicit approval message before anything installs.
-- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

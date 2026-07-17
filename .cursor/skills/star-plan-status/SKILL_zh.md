@@ -14,6 +14,8 @@ description: >-
 
 调用方式：`/star-plan-status [PLAN_NAME]`——不带参数则总览整个 `metds/plans/` 森林；带 slug / 数字前缀 / 文件名则把报告收敛到该计划的子树。
 
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+
 ## 角色
 
 你给研究者一张诚实的全景图：每个计划和子计划各自到哪了，以及一条清晰的"下一个该跑谁"的建议。你是地图，不是司机：coach 定战略、decomposer 拆解、executor 干活——你只**读与报告**。
@@ -37,7 +39,7 @@ description: >-
 
 ### Step 3：读各节点状态
 - **战略节点**（根/内部）：coach 的 `status:` 映射——六节里有几节 `done` / `in_progress` / `pending` / `skipped`；是否设了 `finalized:`；是否已被拆解（有 `children:`）。
-- **叶子**：`exec_status`（缺失默认 `pending`）与 `exec_run`。若 `exec_run` 指向某 `wkdrs/<run>/EXEC_LOG.md`，读它取步级进度（步 done / 总数、有无 `blocked`、有无"待用户执行"STOP 命令、有无记录的**战略信号**）。
+- **叶子**：`exec_status`（缺失默认 `pending`）与 `exec_runs`（最后一项是当前 run；更早的是重跑，有的话值得点名）。若当前 run 指向某 `wkdrs/<run>/EXEC_LOG.md`，读它取步级进度（步 done / 总数、有无 `blocked`、有无"待用户执行"STOP 命令、有无记录的**战略信号**）。
 
 ### Step 4：渲染树
 每节点一行，按层级缩进，各带一个状态字形和简短状态（字形图例见 spec）。在叶子上显示 `depends_on`，并标出 blocked / 待用户 的叶子。

@@ -12,7 +12,7 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 1. 范围与证据基础
 
-<!-- run 目录及其解析方式（计划名 → exec_run，或路径 → 其计划）。载入的预期：子计划 §4/§5、父计划
+<!-- run 目录及其解析方式（计划名 → exec_runs 最后一项，或路径 → 其计划）。载入的预期：子计划 §4/§5、根计划
      §4 指标与 §5 kill-criteria、EXEC_PLAN/EXEC_LOG——以及哪些缺失。读了多少文件（给数量，不要罗列）。
      检测到的兄弟 run。降级情况："无 matplotlib——纯文字"、"tensorboard 缺失——TB 指标未读"、
      "环境不可用——仅阅读"。 -->
@@ -25,13 +25,13 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 3. 完成判据记分卡
 
-<!-- 头条。一条准绳一行：先子计划 §5，再父计划 §4 指标，再计划写明的任何 baseline。
+<!-- 头条。一条准绳一行：先子计划 §5，再根计划 §4 指标，再计划写明的任何 baseline。
      `threshold: none stated` → 报出数值，判定留空。数值按来源打印的原样——四舍五入到翻转判定
      是错误，不是"整理"。 -->
 
 | 判据（原文） | 来源 | 指标 | 数值 | Split | 阈值 | 判定 | 出处 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <"…"> | §5 / 父计划 §4 / baseline | <名字> | <值> | train/val/test | <阈值或 none stated> | met / not met / unmeasurable | <path:line 或键名> |
+| <"…"> | §5 / 根计划 §4 / baseline | <名字> | <值> | train/val/test | <阈值或 none stated> | met / not met / unmeasurable | <path:line 或键名> |
 
 ## 4. 产物与完成度
 
@@ -72,7 +72,7 @@ verdict: <met | partially met | not met | inconclusive | invalid>
 
 ## 7. 解读
 
-<!-- E：结果支持 / 推翻 / 悬置 `traces_to` 里的主张？是否命中父计划 §5 的 kill-criterion（突出写——
+<!-- E：结果支持 / 推翻 / 悬置 `traces_to` 里的主张？是否命中根计划 §5 的 kill-criterion（突出写——
      策略信号是计划在起作用）。跑了哪些泄漏与"过好"检查、结果如何。然后把局限当局限写：seed 数、
      split 规模、方差，以及这个 run 没有显示什么。 -->
 

@@ -5,7 +5,7 @@ language: en
 prefix: "<prefix>"           # e.g. "00" — parent prefix + this unit's 0-based index
 parent: <parent-filename>    # e.g. 0_open-vocab-det-seg_plan.md (authoritative link)
 level: <n>                   # = length of prefix (root = 1)
-traces_to: "<parent section/claim this executes, e.g. §6 milestone 1 (MVP); §4 claim 1>"
+traces_to: "<root section/claim this executes, e.g. §6 milestone 1 (MVP); §4 claim 1>"
 depends_on: []               # sibling prefixes that must finish first, e.g. ["00", "01"]; [] = independent
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
@@ -22,7 +22,7 @@ status:
 
 ## 1. Objective & Scope
 
-<!-- What this sub-plan delivers, in one or two sentences, traced to the parent claim/section
+<!-- What this sub-plan delivers, in one or two sentences, traced to the root claim/section
      it serves. State explicit non-goals: what is deliberately left to sibling sub-plans or
      later depth. This sub-plan should own exactly one coherent chunk of the parent's execution. -->
 
@@ -50,11 +50,11 @@ status:
 ## 5. Verification / Done-Criteria
 
 <!-- The single check that proves this sub-plan is done: a test that passes, a metric that clears
-     a threshold, a specific output that exists and looks right. Tie thresholds back to the parent's
+     a threshold, a specific output that exists and looks right. Tie thresholds back to the root's
      §4 metrics / §5 kill-criteria where relevant. If it can't be checked, it isn't a done-criterion. -->
 
 ## 6. Local Risks & Fallback
 
 <!-- Risks specific to executing THIS sub-task (not the research-level risks — those live in the
-     parent §5). What could make this step fail or stall, an early signal to watch, and the local
-     fallback. Note any tie to the parent's kill-criteria. -->
+     root §5). What could make this step fail or stall, an early signal to watch, and the local
+     fallback. Note any tie to the root's kill-criteria. -->

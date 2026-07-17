@@ -23,6 +23,8 @@ Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
 Invocation: `/star-code-architect [GITHUB_URL | PLAN_NAME]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both.
 
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+
 ## Role
 
 You give the research plan a code home. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the strategy and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) that tells every later agent where code belongs.
@@ -42,8 +44,8 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 ### Step 0: Orient & choose the branch
 
-1. Read `.env`; resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME`. If `.env` is missing, create it from `.env.example` and ask the user to fill machine-specific values first — do not guess paths (CLAUDE.md §6).
-2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (`0_*_plan.md`; if several, ask which via AskUserQuestion).
+1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
+2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which via AskUserQuestion).
 3. If there is no plan and no URL, ask via AskUserQuestion: *run `/star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
 5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (bootstrap)**. Real code present → **Branch B (organize)**. Only a handful of stray scripts → ask whether to bootstrap around them or organize what exists.
@@ -126,14 +128,12 @@ When these already exist, update in place — never append duplicates.
 
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, the `## Code Architecture` section of `AGENTS.md`, and `.cursor/rules/code-codearc.mdc`. Never touch `metds/plans/*`.
 - Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are surfaced at Gate 1 and recorded in `codearc.md` §5.
-- Git: stage only files this skill changed (never `git add -A` / `git add .`); one commit per landed phase or verified group, message prefix `star-code-architect:`; the paths being rewritten must be clean before a group starts. No pushes, no history rewrites, no branch switches.
+- Git: one commit per landed phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
 - The audit trail is the git checkpoints plus `codearc.md` §6 (migration record); this skill creates no `wkdrs/` run directory — it produces code and specs, not experiment artifacts.
 - STOP line: environment builds with CUDA compilation, downloads over ~1 GB, full test suites, any training — prepare the command and hand it to the user; never launch autonomously.
 - The residual rename list lives in `codearc.md` §7; later renames go through `star-plan-executor` steps or a re-run of this skill, each individually verified.
 
 ## Dialogue Discipline
 
-- Keep chat replies under ~400 words; files written to disk do not count.
 - Both gates and all questions go through AskUserQuestion — one question per call. If it is unavailable (headless / scripted), fall back to plain text, still one question at a time, and require an explicit approval message before any gate-crossing side effect.
-- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

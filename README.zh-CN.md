@@ -158,17 +158,17 @@ STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/0_<主题>_plan.md` |
+| `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
 | `$star-refs-reviewer` | 调研与方法相关的工作：精读最近邻论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md` |
-| `$star-plan-decomposer` | 将战略研究计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-code-architect` | 从打分参考实现奠基 `${CODE_NAME}/` 或整理已有代码，并沉淀架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
-| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 阶梯解析并安装依赖，并做冒烟验证 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 阶梯解析并安装依赖，并做冒烟验证；`add` 把新包装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+| `$star-plan-decomposer` | 将战略研究计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下的中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
 | `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落笔经批准的机械修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
-| `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对那条主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图 |
+| `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对那条主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `metds/results.md` |
 | `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
-| `$star-metd-summarize` | 把计划树编译成可直接用于论文的方法文档，标注哪些尚未验证，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
 | `$star-plan-status` | 汇总计划树进度并指出下一个可执行任务 | 只读状态摘要 |
+| `$star-metd-summarize` | 把计划树编译成可直接用于论文的方法文档，标注哪些尚未验证，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
 
 ### 模型选择建议
 
@@ -178,11 +178,10 @@ STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、
 
 ```text
 研究想法
-    → 研究计划
-    → 相关工作基座与可核验文献库
-    → 可执行子计划
+    → 研究计划（依托相关工作基座与可核验文献库写成）
     → 有架构记录的代码库
     → 经过验证的运行环境
+    → 可执行子计划
     → 实现与验证
     → 对照规范与计划的代码审查
     → 基于执行证据的审查与修订
@@ -192,7 +191,7 @@ STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
-具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
+具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)；所有 skill 共享的规则——git、STOP 线、`.env` 运行时、日期、委派与对话纪律——见[研究工作流 Skill 通用规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)。
 
 ## 更新 STAR 的 skill 与工作流指南
 

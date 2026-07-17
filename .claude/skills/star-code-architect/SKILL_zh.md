@@ -19,6 +19,8 @@ description: >-
 
 调用方式：`/star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+
 ## 角色
 
 你负责给研究计划一个"代码的家"。上游的 `star-plan-coach` 与 `star-plan-decomposer` 产出战略与可执行子计划；下游的 `star-plan-executor` 在 `${CODE_NAME}/` 里实现计划步骤——但它假设代码库已经存在。本 skill 就负责产出它：一个可运行、已重命名、出处可追溯的 `${CODE_NAME}/` 代码库，外加一份权威架构规范（`metds/codearc.md`），让之后的每个智能体都知道代码该放哪。
@@ -38,8 +40,8 @@ description: >-
 
 ### Step 0：定向并选择分支
 
-1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`。若 `.env` 缺失，从 `.env.example` 创建并请用户先填好机器相关值——不要猜路径（CLAUDE.md §6）。
-2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（`0_*_plan.md`；有多份则用 AskUserQuestion 问选哪份）。
+1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
+2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用 AskUserQuestion 问选哪份）。
 3. 既无计划也无 URL 时，用 AskUserQuestion 问：*先跑 `/star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划* 两个选项。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（奠基）**；已有真实代码 → **分支 B（整理）**；只有零散几个脚本 → 询问是围绕它们奠基还是整理现状。
@@ -122,14 +124,13 @@ description: >-
 
 - 只写这些位置：`${CODE_NAME}/`、`metds/codearc.md`、`AGENTS.md` 的 `## Code Architecture` 一节、`.cursor/rules/code-codearc.mdc`。绝不碰 `metds/plans/*`。
 - 溯源不可省略：import 提交前 `${CODE_NAME}/UPSTREAM.md` 必须存在；上游 `LICENSE` / `CITATION*` 文件绝不删除或改写；许可证问题在门 1 就摆到台面，并记入 `codearc.md` §5。
-- Git：只暂存本 skill 改动的文件（绝不 `git add -A` / `git add .`）；每落地一个阶段或验证完一组提交一次，消息前缀 `star-code-architect:`；开工前待改路径必须是干净的。不 push、不改历史、不切分支。
+- Git：每落地一个阶段或验证完一个迁移组提交一次，只 stage `${CODE_NAME}/` 与本 skill 拥有的规约文件；开工前该组待改路径必须干净（规约 §1）。
 - 审计线索 = git 检查点 + `codearc.md` §6 迁移记录；本 skill 不建 `wkdrs/` 运行目录——它产出代码与规范，不产出实验产物。
 - STOP 线：涉及 CUDA 编译的环境构建、超过约 1 GB 的下载、完整测试套件、任何训练——准备好命令交给用户，绝不擅自启动。
 - 改名残留清单在 `codearc.md` §7；后续改名走 `star-plan-executor` 的步骤或再次运行本 skill，逐项验证。
 
 ## 对话纪律
 
-- 单轮回复控制在约 400 字以内（写入磁盘的文件不计入）。
 - 两道门与所有提问都走 AskUserQuestion——每次调用只问一题。不可用时（无头/脚本化）回退为普通文本，仍一次一题，且跨门的副作用必须先收到明确的批准文字。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `metds/codearc.md` 正文语言跟随根计划的 `language`（无计划则用对话语言）；`UPSTREAM.md` 一律英文（事实元数据）；中文文档中专业术语保留英文。

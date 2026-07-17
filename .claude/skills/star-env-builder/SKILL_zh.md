@@ -19,7 +19,9 @@ description: >-
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
 
-调用方式：`/star-env-builder [ENV_NAME]`——要创建的 conda 环境名；不传则用 `.env` 中的 `CODE_NAME`。
+调用方式：`/star-env-builder [ENV_NAME | add <包名>…]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。
+
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 
@@ -29,7 +31,7 @@ description: >-
 
 ## 核心原则
 
-1. **`.env` 是唯一路径来源；从不 activate。**`CODE_NAME` / `CONDA_HOME` / `PYTHON_HOME` 一律来自 `.env`——缺失则从 `.env.example` 创建并请用户先填好机器相关值，不要猜路径（CLAUDE.md §6）。shell 无状态：`source activate` 到下一条命令就失效。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。
+1. **`.env` 是唯一路径来源；从不 activate**（规约 §3）。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。环境归本 skill 所有：只有它可以创建、重命名环境或往里安装。
 2. **一道门，场景化追问。**唯一的门是安装计划批准（Step 4）：门前不装任何东西；门覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 AskUserQuestion 问，每次只问一题，都带推荐项。
 3. **只改名，绝不删除。**已有环境通过重命名为 `<名称>_<YYYYMMDD>` 备份——日期用运行时的 `date +%Y%m%d` 获取，绝不编造。本 skill 永不删除任何环境；过期备份由用户自行清理。
 4. **类别即策略；阶梯是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装路由与失败处理：优先 uv，逐包降级 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
@@ -40,8 +42,8 @@ description: >-
 
 ### Step 0：预检
 
-1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`。`.env` 缺失 → 从 `.env.example` 创建，请用户填好，填完前不继续。
-2. `ENV_NAME` := 参数，否则 `CODE_NAME`。
+1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
+2. `ENV_NAME` := 参数，否则 `CODE_NAME`。若参数是 `add <包名>…`，则选中 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的那个环境——不创建、不改名、不重建。
 3. 探测并记录（供安装计划与报告使用）：平台 + 架构；`nvidia-smi`（驱动支持的 CUDA 上限）；`nvcc --version` / `CUDA_HOME`（本机 toolkit，常缺失）；`$CONDA_HOME/bin/conda --version`；`uv --version`。
 4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/star-code-architect`，用户坚持则可只建裸环境（仅 python）。
 
@@ -97,21 +99,33 @@ description: >-
 1. 按 `assets/env_report_template_zh.md` 写 `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md`：身份信息 + `ENV_PY`、机器探测、备份改名、各类别安装结果、带证据的冒烟矩阵、失败/blocked 项、待用户命令。
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
 3. 本次生成的 requirements 文件（含冒烟诊断中补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
-4. `ENV_NAME ≠ CODE_NAME` → 下游 skill 默认找 `.env` 的环境：主动提出把 `ENV_NAME=<名称>` 追加进 `.env`（并同步到 `.env.example` 作为字段说明）——必须经明确确认才写。
+4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向刚建好的环境（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
 5. 聊天汇报 ≤400 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-plan-status` 查看下一步。
+
+
+### Step 8：新增依赖（仅 add 模式）
+
+环境已经存在；本模式只往里装，并记录装了什么。它不创建、不改名、不重建——环境坏了是一次完整 run 的事（Step 2 的*就地校验与修复*）。
+
+1. 按原则 1 从 `.env` 解析 `ENV_PY`。没有可用解释器 → 如实说明并建议跑一次完整的 `/star-env-builder`；什么都不装。
+2. 按 `references/installer_policy_zh.md` 给每个包归类——framework / runtime / optional / conda 专属——并说明各自会落进哪个 requirements 文件。
+3. **门**（原则 2——门前不装任何东西）：呈现这些包、它们的类别、将要使用的版本与索引源、下载量大时给出量级、以及任何 CUDA 耦合；询问*批准并安装* / *调整* / *中止*。
+4. 走阶梯安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在 STOP 线上：把确切命令备好，不要跑。
+5. 只对新增的包做冒烟（`references/smoke_test_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，有限重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
+6. 把每个装好的包追加进它所属的 requirements 文件，保留该布局既有的顺序与锁定。在最新的 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` 追加一个 `## Added <日期>` 块（没有报告就新写一份）。提交：`star-env-builder: add <包名>`，只暂存 `${CODE_NAME}/requirements*`。
+7. 汇报 ≤400 字：装了什么、各 requirements 文件增加了什么、冒烟证据、blocked 或待用户处理的项。
 
 ## 状态与文件规则
 
-- 只写这些位置：环境本身（`$CONDA_HOME/envs/` 之下或 `<项目根>/.venv`）、`${CODE_NAME}/requirements*`（仅在生成缺失布局或补验证过的缺口时）、`wkdrs/env_<ENV_NAME>_<日期>/`，以及——仅经用户明确确认——`.env` / `.env.example` 里的 `ENV_NAME=` 一行。绝不碰源代码、`metds/plans/*` 或其他 skill 的产物。
+- 只写这些位置：环境本身（`$CONDA_HOME/envs/` 之下或 `<项目根>/.venv`）、`${CODE_NAME}/requirements*`（仅在生成缺失布局或补验证过的缺口时）、`wkdrs/env_<ENV_NAME>_<日期>/`，以及——仅经用户明确确认——`.env` 里的 `PYTHON_HOME=` 一行。绝不碰源代码、`metds/plans/*` 或其他 skill 的产物。
 - 绝不删除环境；备份一律用运行时真实日期改名。绝不编造时间戳。
-- Git：至多一次提交，且仅当生成了 requirements 文件——消息前缀 `star-env-builder:`，只暂存 `${CODE_NAME}/requirements*`（绝不 `git add -A` / `git add .`）。不 push、不改历史、不切分支。
+- Git：每次运行至多一次提交——生成了 requirements 文件时，或 add 模式下装了包时——只 stage `${CODE_NAME}/requirements*`（规约 §1）。
 - 门批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在 STOP 线外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
 - 尊重用户镜像配置（`PIP_INDEX_URL`、`UV_DEFAULT_INDEX`）；绝不写 `pip config`、`.condarc` 或 `uv.toml`。
 - 重复调用语义：若已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在，优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。
 
 ## 对话纪律
 
-- 单轮回复控制在约 400 字以内（写入磁盘的文件不计入）。
 - 门与所有场景化问题都走 AskUserQuestion——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）回退为普通文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。

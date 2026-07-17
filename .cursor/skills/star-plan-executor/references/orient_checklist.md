@@ -2,7 +2,7 @@
 
 Run before drafting EXEC_PLAN (Step 2). Goal: know what exists in `${CODE_NAME}/` before you plan to change it. Never assume a module, entrypoint, or config exists — read it.
 
-1. **Resolve the runtime.** Read `.env`; get `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME`. If `.env` is absent, create it from `.env.example` and ask the user to fill machine-specific values before running anything — do not guess paths (AGENTS.md §6).
+1. **Resolve the runtime.** Read `.env`; get `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (`docs/mds/star-workflow/research-workflow-conventions.md` §3).
 
 2. **Map the code root.** List `${CODE_NAME}/`. If it holds only `.gitkeep` (empty), declare **greenfield**: the plan scaffolds structure from scratch and the gap list is "everything".
 

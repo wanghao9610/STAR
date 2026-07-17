@@ -8,9 +8,9 @@ Each `metds/plans/<prefix>_<slug>_plan.md` frontmatter may carry:
 
 - Strategy plans (from the coach): `status:` map over the six sections, optional `finalized:`, `updated:`, and (once decomposed) `children:` + a `## Sub-plans` body index.
 - Sub-plans (from the decomposer): `parent:`, `prefix:`, `level:`, `traces_to:`, `depends_on:`, a `status:` map over the six execution sections, `updated:`.
-- Executed leaves (from the executor): `exec_status:` (`pending`/`in_progress`/`done`/`blocked`) and `exec_run:` (a `wkdrs/<run>/` dir).
+- Executed leaves (from the executor): `exec_status:` (`pending`/`in_progress`/`done`/`blocked`) and `exec_runs:` — an append-only list of `wkdrs/<run>/` dirs, newest last, whose **last entry is the current run**; earlier entries are re-runs (a second seed, a fixed bug) and stay for the record. A plan written before this field carries a single `exec_run:`; read it as a one-item list — the executor migrates it on its next write.
 
-For a leaf with `exec_run`, also read `wkdrs/<run>/EXEC_LOG.md`: the step-status table (count `done` / total, note any `blocked`), the "Awaiting user (STOP line)" list, and any "Strategy signal" in Notes.
+For a leaf with `exec_runs`, also read the current run's `wkdrs/<run>/EXEC_LOG.md`: the step-status table (count `done` / total, note any `blocked`), the "Awaiting user (STOP line)" list, and any "Strategy signal" in Notes.
 
 ## Node classification
 
@@ -22,8 +22,8 @@ Rebuild parent→child links from `parent:` (authoritative), not prefixes. Withi
 
 ## Glyph legend (one per node)
 
-- `✔` done — strategy node `finalized:` set, or all six sections `done`; leaf `exec_status: done`.
-- `◐` in progress — some sections `done`/`in_progress`, or leaf `exec_status: in_progress` (show `k/n` steps if a log exists).
+- `✔` done — strategy node `finalized:` set; leaf `exec_status: done`.
+- `◐` in progress — some sections `done`/`in_progress`, or all six `done` with `finalized:` unset (the rubric has not been run), or leaf `exec_status: in_progress` (show `k/n` steps if a log exists).
 - `○` pending — nothing started (`exec_status` absent/`pending`, or all sections `pending`).
 - `⊘` blocked — leaf `exec_status: blocked`, or a leaf whose `depends_on` is unmet.
 - `⏸` awaiting user — leaf whose EXEC_LOG has un-checked "Awaiting user" STOP-line commands.
@@ -63,6 +63,6 @@ Pick the **earliest leaf in execution order** satisfying all of:
 - **Possible stale sub-plan** — a child whose `updated` is older than its parent's `updated` (parent changed after decomposition). Suggest `/star-plan-decomposer <parent>` to reconcile.
 - **Dangling link** — a `children:` entry with no matching file, or a plan file whose `parent:` names a file that isn't there, or that its parent's `## Sub-plans` index omits.
 - **Bad dependency** — a `depends_on` prefix that doesn't resolve to an existing sibling, or a cycle in the dependency graph.
-- **Orphaned run** — an `exec_run` pointing at a `wkdrs/<run>/` dir that doesn't exist, or an EXEC_LOG whose `source_plan` doesn't match the leaf.
+- **Orphaned run** — an `exec_runs` entry pointing at a `wkdrs/<run>/` dir that doesn't exist, or an EXEC_LOG whose `source_plan` doesn't match the leaf.
 
 Keep this section short and omit it entirely when nothing is flagged.
