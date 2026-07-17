@@ -21,7 +21,7 @@ STAR 提供十一个相互衔接的研究工作流 skill，用于把一个研究
 
 上面的列表读起来是一条直线，但实际流程并非线性：`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-plan-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
 
-![STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow)
+![STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 

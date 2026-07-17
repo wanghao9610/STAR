@@ -157,7 +157,7 @@ Run names and output directories should distinguish tasks, experiments, or repet
 STAR includes eleven complementary skills that turn a research idea into an auditable execution process:
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow" alt="STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes" width="100%">
 </div>
 
 | Skill | Purpose | Main output |

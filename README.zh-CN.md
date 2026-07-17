@@ -157,7 +157,7 @@ bash execs/run.sh 00_exp --config config.yaml
 STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、可审计的执行流程：
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow" alt="STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环" width="100%">
 </div>
 
 | 技能 | 用途 | 主要输出 |

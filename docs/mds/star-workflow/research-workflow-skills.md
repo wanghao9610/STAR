@@ -21,7 +21,7 @@ research idea
 
 The list reads as one pass, but the workflow is not linear: `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-plan-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
-![STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow)
+![STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
