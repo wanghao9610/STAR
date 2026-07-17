@@ -156,6 +156,10 @@ bash execs/run.sh 00_exp --config config.yaml
 
 STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、可审计的执行流程：
 
+<div align="center">
+  <img src="docs/srcs/star-research-workflow" alt="STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环" width="100%">
+</div>
+
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
 | `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
@@ -173,21 +177,6 @@ STAR 提供十一个相互配合的技能，将研究想法转化为可追踪、
 ### 模型选择建议
 
 不同阶段对模型能力的侧重有所不同。编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-plan-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十一个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
-
-典型流程如下：
-
-```text
-研究想法
-    → 研究计划（依托相关工作基座与可核验文献库写成）
-    → 有架构记录的代码库
-    → 经过验证的运行环境
-    → 可执行子计划
-    → 实现与验证
-    → 对照规范与计划的代码审查
-    → 基于执行证据的审查与修订
-    → 状态汇总与下一步行动
-    → 为论文编译的方法文档
-```
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1330 900" width="1330" height="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>STAR research workflow — eleven skills, the order they run in, and what each one writes</title>
+
+  <!-- Arrowheads are explicit triangles, not <marker> elements: several SVG
+       rasterisers (macOS sips among them) silently drop markers, which would
+       strip every arrow direction out of an exported PNG. -->
+  <defs>
+    <style>
+      .nt { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14.5px; font-weight: 600; fill: #1e293b; }
+      .np { font-size: 11.5px; fill: #475569; }
+      .no { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10.5px; fill: #64748b; }
+      .bn { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .tag { font-size: 9px; fill: #64748b; text-anchor: middle; }
+      .el { font-size: 10px; fill: #64748b; }
+      .elc { font-size: 9.5px; fill: #64748b; text-anchor: middle; }
+      .lv { font-size: 9.5px; fill: #7048e8; }
+      .lvc { font-size: 9.5px; fill: #7048e8; text-anchor: middle; }
+      .spine { fill: none; stroke: #64748b; stroke-width: 1.8; stroke-linejoin: round; }
+      .loop { fill: none; stroke: #7048e8; stroke-width: 1.6; stroke-dasharray: 6 4; stroke-linejoin: round; }
+      .stub { fill: none; stroke: #7048e8; stroke-width: 1.6; stroke-dasharray: 6 4; }
+      .ah { fill: #64748b; }
+      .ahv { fill: #7048e8; }
+      .jn { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; font-weight: 700; fill: #7048e8; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1330" height="900" fill="#ffffff"/>
+
+  <!-- title -->
+  <text x="60" y="52" font-size="21" font-weight="700" fill="#0f172a">STAR research workflow</text>
+  <text x="60" y="76" font-size="12" fill="#64748b">Eleven skills · the order they run in · what each one writes · how the loop closes</text>
+
+  <!-- ============ NODES ============ -->
+
+  <!-- 1 plan-coach (PLAN) -->
+  <rect x="60" y="110" width="340" height="92" rx="10" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <circle cx="88" cy="136" r="13" fill="#4c6ef5"/>
+  <text class="bn" x="88" y="140.5">1</text>
+  <text class="nt" x="110" y="141">$star-plan-coach</text>
+  <text class="np" x="78" y="166">An idea → a plan, one question at a time</text>
+  <text class="no" x="78" y="188">metds/plans/&lt;n&gt;_&lt;topic&gt;_plan.md</text>
+
+  <!-- 2 refs-reviewer (PLAN) -->
+  <rect x="60" y="240" width="340" height="92" rx="10" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <circle cx="88" cy="266" r="13" fill="#4c6ef5"/>
+  <text class="bn" x="88" y="270.5">2</text>
+  <text class="nt" x="110" y="271">$star-refs-reviewer</text>
+  <text class="np" x="78" y="296">The closest work, transcribed from fetched records</text>
+  <text class="no" x="78" y="318">metds/refs/*.md · reference.bib · refs_index.md</text>
+
+  <!-- 3 code-architect (CODE) -->
+  <rect x="60" y="370" width="340" height="92" rx="10" fill="#fff4e6" stroke="#fed7aa" stroke-width="1.5"/>
+  <circle cx="88" cy="396" r="13" fill="#f76707"/>
+  <text class="bn" x="88" y="400.5">3</text>
+  <text class="nt" x="110" y="401">$star-code-architect</text>
+  <rect x="304" y="382" width="84" height="18" rx="9" fill="#ffffff" stroke="#fed7aa"/>
+  <text class="tag" x="346" y="394.5">first run only</text>
+  <text class="np" x="78" y="426">A code home for the plan, architecture recorded</text>
+  <text class="no" x="78" y="448">${CODE_NAME}/ · UPSTREAM.md · metds/codearc.md</text>
+
+  <!-- 4 env-builder (CODE) -->
+  <rect x="60" y="500" width="340" height="92" rx="10" fill="#fff4e6" stroke="#fed7aa" stroke-width="1.5"/>
+  <circle cx="88" cy="526" r="13" fill="#f76707"/>
+  <text class="bn" x="88" y="530.5">4</text>
+  <text class="nt" x="110" y="531">$star-env-builder</text>
+  <rect x="304" y="512" width="84" height="18" rx="9" fill="#ffffff" stroke="#fed7aa"/>
+  <text class="tag" x="346" y="524.5">first run only</text>
+  <text class="np" x="78" y="556">The runtime built from .env and smoke-verified</text>
+  <text class="no" x="78" y="578">wkdrs/env_*/ENV_REPORT.md · freeze.txt</text>
+
+  <!-- 5 plan-decomposer (PLAN) -->
+  <rect x="60" y="630" width="340" height="92" rx="10" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <circle cx="88" cy="656" r="13" fill="#4c6ef5"/>
+  <text class="bn" x="88" y="660.5">5</text>
+  <text class="nt" x="110" y="661">$star-plan-decomposer</text>
+  <text class="np" x="78" y="686">The plan split into verifiable leaf sub-plans</text>
+  <text class="no" x="78" y="708">metds/plans/&lt;prefix&gt;_&lt;task&gt;_plan.md</text>
+
+  <!-- 6 plan-status (AUDIT) -->
+  <rect x="500" y="110" width="340" height="92" rx="10" fill="#e6fcf5" stroke="#a7f3d0" stroke-width="1.5"/>
+  <circle cx="528" cy="136" r="13" fill="#0ca678"/>
+  <text class="bn" x="528" y="140.5">6</text>
+  <text class="nt" x="550" y="141">$star-plan-status</text>
+  <text class="np" x="518" y="166">The tree read; the one next runnable leaf named</text>
+  <text class="no" x="518" y="188">read-only — writes nothing</text>
+
+  <!-- 7 plan-executor (CODE) -->
+  <rect x="950" y="110" width="340" height="92" rx="10" fill="#fff4e6" stroke="#fed7aa" stroke-width="1.5"/>
+  <circle cx="978" cy="136" r="13" fill="#f76707"/>
+  <text class="bn" x="978" y="140.5">7</text>
+  <text class="nt" x="1000" y="141">$star-plan-executor</text>
+  <text class="np" x="968" y="166">One leaf implemented and verified</text>
+  <text class="no" x="968" y="188">wkdrs/&lt;run&gt;/EXEC_PLAN.md · EXEC_LOG.md</text>
+
+  <!-- 8 code-reviewer (AUDIT) -->
+  <rect x="950" y="370" width="340" height="92" rx="10" fill="#e6fcf5" stroke="#a7f3d0" stroke-width="1.5"/>
+  <circle cx="978" cy="396" r="13" fill="#0ca678"/>
+  <text class="bn" x="978" y="400.5">8</text>
+  <text class="nt" x="1000" y="401">$star-code-reviewer</text>
+  <text class="np" x="968" y="426">Code audited against conventions and the plan</text>
+  <text class="no" x="968" y="448">wkdrs/&lt;run&gt;/CODE_REVIEW_&lt;date&gt;.md</text>
+
+  <!-- 9 expt-analyst (AUDIT) -->
+  <rect x="950" y="630" width="340" height="92" rx="10" fill="#e6fcf5" stroke="#a7f3d0" stroke-width="1.5"/>
+  <circle cx="978" cy="656" r="13" fill="#0ca678"/>
+  <text class="bn" x="978" y="660.5">9</text>
+  <text class="nt" x="1000" y="661">$star-expt-analyst</text>
+  <text class="np" x="968" y="686">The run scored against the plan’s done-criteria</text>
+  <text class="no" x="968" y="708">wkdrs/&lt;run&gt;/EXPT_ANALYSIS_&lt;date&gt;.md · analysis/</text>
+
+  <!-- 10 plan-reviser (PLAN) -->
+  <rect x="500" y="630" width="340" height="92" rx="10" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <circle cx="528" cy="656" r="13" fill="#4c6ef5"/>
+  <text class="bn" x="528" y="660.5">10</text>
+  <text class="nt" x="550" y="661">$star-plan-reviser</text>
+  <text class="np" x="518" y="686">Execution evidence folded back into the plan</text>
+  <text class="no" x="518" y="708">wkdrs/&lt;run&gt;/REVIEW_&lt;date&gt;.md · plan revised</text>
+
+  <!-- 11 metd-summarize (PLAN) -->
+  <rect x="60" y="790" width="400" height="92" rx="10" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <circle cx="88" cy="816" r="13" fill="#4c6ef5"/>
+  <text class="bn" x="88" y="820.5">11</text>
+  <text class="nt" x="110" y="821">$star-metd-summarize</text>
+  <rect x="376" y="802" width="72" height="18" rx="9" fill="#ffffff" stroke="#c7d2fe"/>
+  <text class="tag" x="412" y="814.5">plans only</text>
+  <text class="np" x="78" y="846">The matured plan tree compiled into method docs</text>
+  <text class="no" x="78" y="868">metds/{overview,dataset,framework,training,evaluation}.md</text>
+
+  <!-- ============ SPINE EDGES ============ -->
+
+  <!-- 1 <-> 2 interleave -->
+  <path class="spine" d="M190,202 L190,236"/>
+  <path class="ah" d="M190,236 L185.5,227 L194.5,227 Z"/>
+  <path class="spine" d="M270,240 L270,206"/>
+  <path class="ah" d="M270,206 L265.5,215 L274.5,215 Z"/>
+  <text class="el" x="288" y="226">read, don’t recall</text>
+
+  <!-- 2 -> 3 -> 4 -> 5 -->
+  <path class="spine" d="M230,332 L230,366"/>
+  <path class="ah" d="M230,366 L225.5,357 L234.5,357 Z"/>
+  <path class="spine" d="M230,462 L230,496"/>
+  <path class="ah" d="M230,496 L225.5,487 L234.5,487 Z"/>
+  <path class="spine" d="M230,592 L230,626"/>
+  <path class="ah" d="M230,626 L225.5,617 L234.5,617 Z"/>
+
+  <!-- 5 -> 6 : the sub-plan tree -->
+  <path class="spine" d="M400,650 L478,650 L478,152 L496,152"/>
+  <path class="ah" d="M496,152 L487,147.5 L487,156.5 Z"/>
+  <text class="elc" x="470" y="400" transform="rotate(-90 470 400)">the sub-plan tree</text>
+
+  <!-- 6 -> 7 -->
+  <path class="spine" d="M840,156 L946,156"/>
+  <path class="ah" d="M946,156 L937,151.5 L937,160.5 Z"/>
+  <text class="elc" x="895" y="148">the next runnable leaf</text>
+
+  <!-- 7 -> 8 -->
+  <path class="spine" d="M1140,202 L1140,366"/>
+  <path class="ah" d="M1140,366 L1135.5,357 L1144.5,357 Z"/>
+  <text class="el" x="1152" y="288">new code · EXEC_LOG</text>
+
+  <!-- 8 -> 9 -->
+  <path class="spine" d="M1140,462 L1140,626"/>
+  <path class="ah" d="M1140,626 L1135.5,617 L1144.5,617 Z"/>
+  <text class="el" x="1152" y="548">the run’s artifacts</text>
+
+  <!-- 9 -> 10 -->
+  <path class="spine" d="M950,690 L844,690"/>
+  <path class="ah" d="M844,690 L853,685.5 L853,694.5 Z"/>
+  <text class="elc" x="895" y="682">the verdict</text>
+
+  <!-- 10 -> 6 : close the leaf, ask for the next -->
+  <path class="spine" d="M670,630 L670,206"/>
+  <path class="ah" d="M670,206 L665.5,215 L674.5,215 Z"/>
+  <text class="el" x="684" y="410">leaf closed —</text>
+  <text class="el" x="684" y="426">ask for the next</text>
+
+  <!-- 5 -> 11 -->
+  <path class="spine" d="M230,722 L230,786"/>
+  <path class="ah" d="M230,786 L225.5,777 L234.5,777 Z"/>
+  <text class="el" x="244" y="758">the matured plan tree</text>
+
+  <!-- ============ LOOP-BACK EDGES ============ -->
+
+  <!-- 10 -> 5 re-decompose -->
+  <path class="loop" d="M500,694 L404,694"/>
+  <path class="ahv" d="M404,694 L413,689.5 L413,698.5 Z"/>
+  <text class="lvc" x="452" y="686">re-decompose</text>
+
+  <!-- 9 -> 7 finalize -->
+  <path class="loop" d="M950,660 L880,660 L880,178 L946,178"/>
+  <path class="ahv" d="M946,178 L937,173.5 L937,182.5 Z"/>
+  <text class="lvc" x="872" y="430" transform="rotate(-90 872 430)">done-criterion met → finalize</text>
+
+  <!-- 8 -> 7 feature gaps -->
+  <path class="loop" d="M1290,440 L1312,440 L1312,134 L1294,134"/>
+  <path class="ahv" d="M1294,134 L1303,129.5 L1303,138.5 Z"/>
+  <text class="lvc" x="1305" y="300" transform="rotate(-90 1305 300)">feature gaps</text>
+
+  <!-- 7 self-loop: the STOP line -->
+  <path class="loop" d="M1060,110 C1060,68 1180,68 1180,106"/>
+  <path class="ahv" d="M1180,106 L1175.5,97 L1184.5,97 Z"/>
+  <text class="lvc" x="1120" y="62">STOP line — you run the command, then re-invoke</text>
+
+  <!-- ============ JUMP STUBS ============ -->
+
+  <!-- 10 -> 1 method pivot -->
+  <path class="stub" d="M560,722 L560,748"/>
+  <circle cx="560" cy="762" r="11" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="560" y="766">1</text>
+  <text class="lv" x="578" y="766">method pivot</text>
+
+  <!-- 10 -> 7 re-execute -->
+  <path class="stub" d="M660,722 L660,748"/>
+  <circle cx="660" cy="762" r="11" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="660" y="766">7</text>
+  <text class="lv" x="678" y="766">re-execute</text>
+
+  <!-- 8 -> 3 structural reorganization -->
+  <path class="stub" d="M1040,462 L1040,488"/>
+  <circle cx="1040" cy="502" r="11" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="1040" y="506">3</text>
+  <text class="lv" x="1058" y="506">structural reorg</text>
+
+  <!-- 7 -> 4 environment unusable -->
+  <path class="stub" d="M1010,202 L1010,228"/>
+  <circle cx="1010" cy="242" r="11" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="1010" y="246">4</text>
+  <text class="lv" x="1028" y="246">env missing → rebuild</text>
+
+  <!-- 11 -> 7 plan sync -->
+  <path class="stub" d="M460,836 L486,836"/>
+  <circle cx="499" cy="836" r="11" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="499" y="840">7</text>
+  <text class="lv" x="517" y="840">missing detail → plan sync</text>
+
+  <!-- ============ LEGEND ============ -->
+  <rect x="860" y="752" width="430" height="130" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+
+  <path class="spine" d="M876,772 L904,772"/>
+  <path class="ah" d="M904,772 L895,767.5 L895,776.5 Z"/>
+  <text class="el" x="914" y="776">the usual order</text>
+
+  <path class="loop" d="M876,796 L904,796"/>
+  <path class="ahv" d="M904,796 L895,791.5 L895,800.5 Z"/>
+  <text class="el" x="914" y="800">routes back / re-entry</text>
+
+  <circle cx="886" cy="820" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="886" y="824" font-size="9.5">7</text>
+  <text class="el" x="914" y="824">continues at skill 7</text>
+
+  <rect x="876" y="842" width="12" height="12" rx="3" fill="#4c6ef5"/>
+  <text class="el" x="894" y="852">plans</text>
+  <rect x="944" y="842" width="12" height="12" rx="3" fill="#f76707"/>
+  <text class="el" x="962" y="852">code &amp; env</text>
+  <rect x="1044" y="842" width="12" height="12" rx="3" fill="#0ca678"/>
+  <text class="el" x="1062" y="852">reads &amp; reports</text>
+
+  <text class="elc" x="876" y="872" font-size="9.5" text-anchor="start">Light path per leaf: 6 → 7 → 9. The full path adds 8 and 10.</text>
+</svg>

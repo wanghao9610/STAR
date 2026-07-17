@@ -8,9 +8,9 @@ STAR 提供十一个相互衔接的研究工作流 skill，用于把一个研究
 研究想法
   → star-plan-coach：形成战略研究计划
   → star-refs-reviewer：精读最接近的工作并建立可核验的文献库
-  → star-plan-decomposer：拆成有依赖关系的执行子计划
   → star-code-architect：为计划奠基代码库并沉淀架构规范
   → star-env-builder：构建并验证运行环境
+  → star-plan-decomposer：拆成有依赖关系的执行子计划
   → star-plan-executor：实现并验证一个叶子子计划
   → star-code-reviewer：对照规范与计划审计实现代码
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
@@ -18,6 +18,10 @@ STAR 提供十一个相互衔接的研究工作流 skill，用于把一个研究
   → star-plan-status：随时查看全局进度和下一步
   → star-metd-summarize：把成熟的计划编译成方法文档
 ```
+
+上面的列表读起来是一条直线，但实际流程并非线性：`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-plan-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
+
+![STAR 研究工作流：十一个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow)
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
@@ -28,9 +32,9 @@ STAR 提供十一个相互衔接的研究工作流 skill，用于把一个研究
 ```text
 $star-plan-coach 开放词汇检测与分割
 $star-refs-reviewer open-vocab-det-seg
-$star-plan-decomposer 0_open-vocab-det-seg_plan.md
 $star-code-architect
 $star-env-builder
+$star-plan-decomposer 0_open-vocab-det-seg_plan.md
 $star-plan-executor 00
 $star-code-reviewer 00
 $star-expt-analyst 00

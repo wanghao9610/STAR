@@ -8,9 +8,9 @@ STAR provides eleven connected research workflow skills that turn a research ide
 research idea
   → star-plan-coach: create a strategic research plan
   → star-refs-reviewer: read the closest work and build a verified bibliography
-  → star-plan-decomposer: split it into execution sub-plans with dependencies
   → star-code-architect: give the plan a code home and record the architecture
   → star-env-builder: build and verify the runtime environment
+  → star-plan-decomposer: split it into execution sub-plans with dependencies
   → star-plan-executor: implement and verify one leaf sub-plan
   → star-code-reviewer: audit the implementation against conventions and the plan
   → star-expt-analyst: audit the run's results against what the plan expected
@@ -18,6 +18,10 @@ research idea
   → star-plan-status: inspect overall progress and the next action at any time
   → star-metd-summarize: compile the matured plans into method documents
 ```
+
+The list reads as one pass, but the workflow is not linear: `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-plan-status` names the next leaf each time round, and the audits route what they find back into the plans:
+
+![STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -28,9 +32,9 @@ This guide uses Codex syntax, where a skill is invoked with `$skill-name`:
 ```text
 $star-plan-coach open-vocabulary detection and segmentation
 $star-refs-reviewer open-vocab-det-seg
-$star-plan-decomposer 0_open-vocab-det-seg_plan.md
 $star-code-architect
 $star-env-builder
+$star-plan-decomposer 0_open-vocab-det-seg_plan.md
 $star-plan-executor 00
 $star-code-reviewer 00
 $star-expt-analyst 00
