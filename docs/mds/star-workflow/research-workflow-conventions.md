@@ -64,11 +64,12 @@ Download-size thresholds are **skill-specific** — `star-env-builder` runs fram
 
 The operational form of `AGENTS.md` §6.
 
-1. **`.env` at the project root is the only source** of `CODE_NAME`, `CONDA_HOME`, and `PYTHON_HOME`. Never guess a local path, never hardcode one, never read them from memory of another project.
-2. **Missing `.env`** → create it from `.env.example`, ask the user to fill the machine-specific values, and stop until they do. Never invent a value to keep going.
-3. **The shell is stateless.** `source activate` does not survive to the next command. Resolve the interpreter once to an absolute path — `$CONDA_HOME/envs/<name>/bin/python`, or `<project>/.venv/bin/python` — and run every command through it. Never system python.
-4. **Only `star-env-builder` creates, repairs, or modifies an environment.** No other skill installs or upgrades anything, ever. A tool that is absent (ruff, matplotlib, bibtexparser, pandas) is a **degraded check**: run without it, say so in the report, and route to `star-env-builder`. Installing it to finish your own check is out of bounds.
-5. An environment that cannot run python is a **blocker to report**, not a problem to work around.
+1. **`.env` at the project root is the only source** of `CODE_NAME`, `ENV_NAME`, `CONDA_HOME`, and `PYTHON_HOME`. Never guess a local path, never hardcode one, never read them from memory of another project.
+2. **`PYTHON_HOME` is authoritative.** Set → use it as given; `CONDA_HOME` and `ENV_NAME` may be empty, and the interpreter then runs directly rather than through conda. Empty → derive it as `$CONDA_HOME/envs/$ENV_NAME`, which requires both to be set. Neither → a blocker to report, not a value to invent.
+3. **Missing `.env`** → create it from `.env.example`, ask the user to fill the machine-specific values, and stop until they do. Never invent a value to keep going.
+4. **The shell is stateless.** `source activate` does not survive to the next command. Resolve the interpreter once to an absolute path — `$PYTHON_HOME/bin/python`, from §3.2 — and run every command through it. Never system python.
+5. **Only `star-env-builder` creates, repairs, or modifies an environment.** No other skill installs or upgrades anything, ever. A tool that is absent (ruff, matplotlib, bibtexparser, pandas) is a **degraded check**: run without it, say so in the report, and route to `star-env-builder`. Installing it to finish your own check is out of bounds.
+6. An environment that cannot run python is a **blocker to report**, not a problem to work around.
 
 ## 4. Real dates
 

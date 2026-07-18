@@ -105,13 +105,21 @@ cp .env.example .env
 
 ```dotenv
 CODE_NAME=YOUR_CODE_NAME
+ENV_NAME=your-env
 CONDA_HOME=/path/to/conda
 PYTHON_HOME=/path/to/conda/envs/your-env
 ```
 
 - `CODE_NAME`：项目根目录下存放核心代码的目录名。
-- `CONDA_HOME`：本机 Conda 的安装根目录。
-- `PYTHON_HOME`：Conda 环境目录，或该环境的 Python 可执行文件路径。
+- `PYTHON_HOME`：运行环境的选择依据，可以是环境目录，也可以是该环境的 Python 可执行文件路径。
+- `CONDA_HOME`：本机 Conda 的安装根目录；`ENV_NAME`：其中的环境名。
+
+以 `PYTHON_HOME` 为准，因此有两种配置方式：
+
+- **设置 `PYTHON_HOME`。** 直接按其取值使用，`CONDA_HOME` / `ENV_NAME` 可以留空。未设 `CONDA_HOME` 时不走 `conda activate`，直接调用该解释器——使用普通 `.venv` 时也是这种方式。
+- **留空 `PYTHON_HOME`，同时设置 `CONDA_HOME` 与 `ENV_NAME`。** 此时 `PYTHON_HOME` 由 `$CONDA_HOME/envs/$ENV_NAME` 推导得出。
+
+两者都不设置则报错。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 

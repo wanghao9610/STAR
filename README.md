@@ -105,13 +105,21 @@ Then edit `.env`:
 
 ```dotenv
 CODE_NAME=YOUR_CODE_NAME
+ENV_NAME=your-env
 CONDA_HOME=/path/to/conda
 PYTHON_HOME=/path/to/conda/envs/your-env
 ```
 
 - `CODE_NAME` is the source directory relative to the project root.
-- `CONDA_HOME` is the root of the local Conda installation.
-- `PYTHON_HOME` may be either the environment directory or its Python executable.
+- `PYTHON_HOME` selects the runtime. It may be either the environment directory or its Python executable.
+- `CONDA_HOME` is the root of the local Conda installation, `ENV_NAME` the environment name inside it.
+
+`PYTHON_HOME` is authoritative, so there are two ways to configure the runtime:
+
+- **Set `PYTHON_HOME`.** It is used as given, and `CONDA_HOME` / `ENV_NAME` may be left empty. Without `CONDA_HOME`, the interpreter runs directly instead of through `conda activate` — this is also how a plain `.venv` is used.
+- **Leave `PYTHON_HOME` empty and set both `CONDA_HOME` and `ENV_NAME`.** `PYTHON_HOME` is then derived as `$CONDA_HOME/envs/$ENV_NAME`.
+
+Setting neither is an error.
 
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 

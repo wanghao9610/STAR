@@ -31,22 +31,35 @@ source "${ENV_FILE}"
 set +a
 
 : "${CODE_NAME:?CODE_NAME must be set in ${ENV_FILE}}"
-: "${CONDA_HOME:?CONDA_HOME must be set in ${ENV_FILE}}"
-: "${PYTHON_HOME:?PYTHON_HOME must be set in ${ENV_FILE}}"
 
-CONDA_BIN="${CONDA_HOME}/bin/conda"
-[[ -x "${CONDA_BIN}" ]] || fail "Conda executable not found at CONDA_HOME/bin/conda."
+# PYTHON_HOME selects the runtime. An explicit value wins; when it is empty,
+# CONDA_HOME and ENV_NAME together derive it.
+if [[ -z "${PYTHON_HOME:-}" ]]; then
+    [[ -n "${CONDA_HOME:-}" && -n "${ENV_NAME:-}" ]] ||
+        fail "Set PYTHON_HOME, or set both CONDA_HOME and ENV_NAME, in ${ENV_FILE}."
+    PYTHON_HOME="${CONDA_HOME}/envs/${ENV_NAME}"
+fi
 
 if [[ -x "${PYTHON_HOME}" && ! -d "${PYTHON_HOME}" ]]; then
     PYTHON_BIN="${PYTHON_HOME}"
 else
     PYTHON_BIN="${PYTHON_HOME}/bin/python"
 fi
-[[ -x "${PYTHON_BIN}" ]] || fail "Python executable not found under PYTHON_HOME."
+[[ -x "${PYTHON_BIN}" ]] || fail "Python executable not found under PYTHON_HOME (${PYTHON_HOME})."
 
 PYTHON_ENV="$(cd -- "$(dirname -- "${PYTHON_BIN}")/.." && pwd -P)"
-eval "$("${CONDA_BIN}" shell.bash hook 2>/dev/null)"
-conda activate "${PYTHON_ENV}"
+
+# Activate through Conda when CONDA_HOME is configured; otherwise run the
+# interpreter PYTHON_HOME names directly.
+if [[ -n "${CONDA_HOME:-}" ]]; then
+    CONDA_BIN="${CONDA_HOME}/bin/conda"
+    [[ -x "${CONDA_BIN}" ]] || fail "Conda executable not found at CONDA_HOME/bin/conda."
+    eval "$("${CONDA_BIN}" shell.bash hook 2>/dev/null)"
+    conda activate "${PYTHON_ENV}"
+else
+    PATH="$(dirname -- "${PYTHON_BIN}"):${PATH}"
+    export PATH
+fi
 
 #######################################################################
 #                          PART 2  Project                            #
