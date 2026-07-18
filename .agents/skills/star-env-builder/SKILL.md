@@ -103,7 +103,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added during smoke diagnosis) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
 4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at the environment just built (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
-5. Chat report ≤400 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `$star-plan-executor <leaf>` now has a runtime; `$star-plan-status` shows what to run next.
+5. Chat report ≤400 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `$star-plan-executor <leaf>` now has a runtime; `$star-flow-status` shows what to run next.
 
 
 ### Step 8: Add packages (add mode only)

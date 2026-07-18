@@ -1,128 +1,128 @@
 ---
 name: star-plan-decomposer
-disable-model-invocation: true
 description: >-
-  把现有研究计划（由 star-plan-coach 编写，位于 metds/plans/）分解为具体、可执行的
-  子计划。读取父计划，选择分解轴（里程碑 / 组件 / 声明→实验），然后为每个单元自动
-  起草一份执行子计划——目标、依赖、任务拆解、交付物和完成标准——以分层数字前缀写入
-  metds/plans/，并链接回父计划。支持任意分解深度。当用户调用
-  $star-plan-decomposer，或想拆解/充实计划的具体执行细节，把计划的方法或里程碑变成
-  可行动任务，或把一个计划分成多个子计划时使用。支持中英文双语。
+  把 star-plan-coach 写好、存放在 metds/plans/ 下的研究计划拆解为可执行的子计划。读取父计划，
+  选定拆分轴（里程碑 / 组件模块 / claim→实验），再为每个执行单元自动起草一份执行子计划——目标、依赖、
+  任务分解、产出物、完成判据——按分层数字前缀写入 metds/plans/ 并双向链接回父计划。支持任意深度的拆解。
+  只要用户调用 $star-plan-decomposer，或想拆解 / 细化某个计划的具体执行细节、把计划的方法或里程碑落成
+  可执行任务、把一个计划拆成子计划时，都应使用本 skill。Bilingual（中/英）——用户用英文描述"decompose /
+  break down a plan into executable sub-plans"时同样触发。
 ---
 
-# 研究计划分析——计划分解器
+# Research Plan Analyse — 计划拆解器
 
-匹配用户使用的语言；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
 
-调用方式：`$star-plan-decomposer PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`0`）或文件名（`0_open-vocab-det-seg_plan.md`）。
+调用方式：`$star-plan-decomposer PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 
-你把一份**战略性**研究计划转化为**可执行**子计划。同级 skill `star-plan-coach` 产出策略（一份根计划：问题 → 相关工作 → 方法 → 实验 → 风险 → 里程碑）。本 skill 产出执行方案：把计划的具体实现拆成更小的子计划，每份都包含研究者能够实际运行和验证的步骤。
+你把一份**战略性**研究计划落成若干**可执行的**子计划。姊妹 skill `star-plan-coach` 负责战略（一份根计划：问题定义 → 相关工作 → 核心方法 → 实验设计 → 风险备选 → 里程碑）；本 skill 负责执行：把计划中的具体实现拆分成更小的子计划，每个都带有研究者能真正上手运行并验证的步骤。
 
-你负责**分解，不重新制定策略**。父计划已经承载思考——从中抽取执行细节；不要从头重新推导研究问题、novelty 或方法。
+你**只做拆解，不重做战略**。父计划里已经有想清楚的思考——把执行细节从中抽出来，不要从头重新推导研究问题、novelty 或方法。
 
 ## 核心原则
 
-1. **只分解，不重新制定策略。** 父计划是 *why* 和 *what* 的事实来源。你的职责是 *how*：子目标、有序步骤、依赖、交付物，以及证明各项完成的检查。若发现自己在质疑研究问题或方法，停下——那属于 `star-plan-coach`，不属于这里。
-2. **先确认形状，再自动起草内容。** 依次确认两个决定，每次只确认一个并标出推荐项：**分解轴**，然后是**子计划列表**。有结构化用户输入时使用；否则问简洁纯文本问题。确认后，依据父计划自主起草每份子计划。真正的缺口标为 `[TBD]`；只有步骤缺少用户信息就无法决定时，才问一个针对性问题。不要重新询问父计划已经记录的细节。
-3. **增量写入。** 每份子计划起草完立即写文件。宁可多写几次文件，也不要把结果只留在聊天中——聊天会结束，文件不会。
-4. **每份子计划都可验证。** 子计划必须有具体、以动词表述的步骤、一个**完成标准**（能证明完成的测试 / metric / output），并按项目布局放置交付物（`datas/`、`inits/`、`code/`、`wkdrs/<run>`），否则不能算完成。这与项目的目标驱动执行和验证规则一致。
-5. **双向可追溯。** 每份子计划点名其追溯的根计划章节或声明（`traces_to`）。父计划获得一个 `## Sub-plans` 索引和 `children:` frontmatter 列表。数字前缀供人类排序；frontmatter 的 `parent:` 字段是权威链接。
-6. **依赖是一等信息，不能只写在正文。** 每份子计划都有 `depends_on:` frontmatter 列表——开始前必须完成的同级前缀。这是 executor 与 `star-plan-status` 用来回答“下一项可运行工作是什么”的机器可读顺序。保持为 **DAG**（无环），并与 `## Sub-plans` 索引顺序一致。
+1. **拆解，而非重做战略**。父计划是"为什么"和"做什么"的真源；你负责"怎么做"：子目标、有序步骤、依赖、产出物，以及证明每一步做完了的检查。若你开始质疑研究问题或方法本身，请停下——那属于 `star-plan-coach`，不属于这里。
+2. **先确认形状，再自动起草内容**。两个决策依次确认，每次一项，各带推荐项：**拆分轴**，然后是**子计划清单**。有结构化用户输入时使用；否则问简洁纯文本问题。确认后，依据父计划自主起草每份子计划。真正缺失处标 `【待定】`；只有当某个步骤离开用户就无法写下时，才追问一个针对性问题。不要重新问父计划里已经记录的细节。
+3. **增量落盘**。每起草完一份子计划立即写文件。宁可多写几次文件，也不要把成果只留在对话里——对话会结束，文件不会。
+4. **每份子计划都可验证**。一份子计划不算完成，除非它有具体、动词明确的步骤、一条**完成判据**（证明完成的测试 / 指标 / 产出），以及按项目布局摆放的产出物（`datas/`、`inits/`、`code/`、`wkdrs/<run>`）。这与项目的 Goal-Driven Execution 和 Verification 规则一致。
+5. **双向可追溯**。每份子计划标明它对应根计划的哪一节 / 哪条 claim（`traces_to`）。父计划则获得一个 `## Sub-plans` 索引和 `children:` frontmatter 列表。数字前缀供人类排序树结构；frontmatter 的 `parent:` 字段才是权威链接。
+6. **依赖是一等公民，不只是散文**。每份子计划带一个 `depends_on:` frontmatter 列表——必须先完成的兄弟前缀。这是 executor 与 `star-flow-status` 用来回答"下一个能跑谁"的机器可读顺序。务必保持为 **DAG**（无环），并与 `## Sub-plans` 索引顺序一致。
 
-## 命名约定（摘要）
+## 命名规则（摘要）
 
-文件名为 `<prefix>_<slug>_plan.md`。**prefix 是十进制数字字符串；长度等于计划在树中的深度。**
+文件名为 `<prefix>_<slug>_plan.md`。**前缀是一串十进制数字，其长度等于该计划在树中的深度。**
 
-- 分解前缀为 `P` 的计划时，子计划前缀是在 `P` 后**再追加一个数字**，即子节点的 0-based index：`0_` → `00_ 01_ 02_ …`；`00_` → `000_ 001_ …`；`3_` → `30_ 31_ …`。
-- **Parent** = 去掉最后一位数字。**Level** = prefix 长度。每个节点最多 **10 个同级子节点**（index 0–9）。
+- 要拆解前缀为 `P` 的计划，其子计划前缀 = `P` **再追加一位数字** = 子计划的 0 起始序号：`0_` → `00_ 01_ 02_ …`；`00_` → `000_ 001_ …`；`3_` → `30_ 31_ …`。
+- **父级** = 去掉最后一位数字。**层级** = 前缀长度。**每个节点最多 10 个子计划**（序号 0–9）。
 
-完整规则、示例树和边界情况见 `references/naming_convention.md`。
+完整规则、示例树与边界情形见 `references/naming_convention_zh.md`。
 
 ## 工作流
 
-### 步骤 0：解析目标计划
+### Step 0：定位目标计划
 
-1. 解释 `PLAN_NAME`：按 slug、数字前缀或完整文件名与 `metds/plans/*_plan.md` 匹配。
-2. 未提供参数或匹配有歧义时，列出可用计划（prefix + slug + 单行标题）并询问选择哪一份。
-3. 完整读取解析出的计划。
+1. 解析 `PLAN_NAME`：按 slug、数字前缀或完整文件名与 `metds/plans/*_plan.md` 匹配。
+2. 若未给参数，或匹配有歧义，列出可选计划（前缀 + slug + 一句话标题），询问选择哪一个。
+3. 完整读取选定的计划。
 
-### 步骤 1：评估就绪程度
+### Step 1：评估就绪度
 
-检查根计划的 `finalized:`——这是策略计划可供消费的唯一信号（`star-plan-coach` 仅在六节均为 `done`/`skipped` 且通过评分规则后设置它，并在任何章节重新打开时清除）。未 finalized → 阅读其 `status` map 和正文，点名 `pending`/`in_progress` 或充满 `[TBD]` 的章节（尤其是 **method** 和 **milestones**），告诉用户分解会比较浅，并提供选择：*仍然分解（缺口在子计划中成为 `[TBD]`）* / *返回 `$star-plan-coach` 先完成父计划*。尊重选择。
+检查根计划的 `finalized:`——它是"这份战略计划已可被消费"的唯一信号（`star-plan-coach` 只在六节全 `done`/`skipped` 且 rubric 过关时设上它，任一节重开即清除）。未 finalized → 读它的 `status` 映射与正文，点名哪些章节仍为 `pending`/`in_progress` 或布满 `[TBD]`（尤其是**方法**与**里程碑**），并告知用户拆解会比较浅，并提供选项：*仍然拆解（缺口在子计划里记为 `【待定】`）* / *先回到 `$star-plan-coach` 把父计划补完*。尊重用户选择。
 
-若目标本身已有执行证据（`exec_runs` 非空或 `exec_status` 超出 `pending`），拆分前暂停：分解会把已执行 leaf 变成 internal node——其 `exec_status` / `exec_runs` 冻结为历史，`star-plan-status` 不再把它计作可执行 leaf，其 `wkdrs/` run 仍附着在 executor 不会再次访问的节点上。提供选择：*先用 `$star-plan-reviser <slug>` 把执行证据折叠进计划文本（推荐）* / *仍然分解*——若仍分解，起草 children 时应把已执行工作反映在其 §2 输入和 §3 步骤中，而不是重新规划。
+若目标自身带有执行证据（`exec_runs` 非空，或 `exec_status` 超出 `pending`），先暂停再拆：分解会把一个已执行的叶子变成内部节点——它的 `exec_status` / `exec_runs` 就地冻结为历史，`star-flow-status` 不再把它算作可执行叶子，它的 `wkdrs/` run 也会留在一个 executor 不会再回访的节点上。提供选项：*先用 `$star-plan-reviser <slug>` 把执行证据固化进计划文本（推荐）* / *仍然拆解*——若选择仍然拆解，起草 children 时要把已完成的工作反映进它们的 §2 输入与 §3 步骤，而不是重新规划一遍。
 
-### 步骤 2：选择分解轴
+### Step 2：选择拆分轴
 
-在一个问题中提出 2–3 个轴，并推荐第一个。详情和选择方法见 `references/decomposition_axes.md`。
+用一个问题提出 2–3 个轴，并推荐第一项。详情与如何选择见 `references/decomposition_axes_zh.md`。
 
-| 轴 | 如何拆分计划 | 最适合 |
-|----|--------------|--------|
-| **Milestone / phase**（默认） | 根计划 §6 的时间线阶段 | 里程碑已清晰成形（通常如此） |
-| **Component / module** | 方法的系统组成（根计划 §3） | 方法具有可清晰分离的模块 |
-| **Claim → experiment** | 根计划 §4 中的每个声明/实验 | 贡献以实证为主、消融较多 |
+| 拆分轴 | 按什么拆 | 何时最合适 |
+|--------|----------|-----------|
+| **里程碑 / 阶段**（默认） | 根计划 §6 的时间线阶段 | 里程碑已经写得比较成形（通常如此） |
+| **组件 / 模块** | 根计划 §3 方法的系统组成部分 | 方法有清晰可分离的模块 |
+| **claim → 实验** | 根计划 §4 中每条 claim / 实验 | 贡献偏实证、消融很多 |
 
-允许混合分解，但必须明确确认。
+允许混合拆解，但要明确向用户确认。
 
-### 步骤 3：提出子计划列表
+### Step 3：提出子计划清单
 
-依据所选轴起草 N 个单元。每个单元包含：简短标题、英文 `slug`、单行目标、追溯的根计划章节/声明，以及**依赖哪些同级计划**。以普通文本展示列表——包括依赖边和最终执行顺序——询问用户确认、编辑列表或调整粒度。
+按选定的轴起草 N 个单元。每个含：简短标题、英文 `slug`、一句话目标、对应根计划的哪一节 / claim、**以及它依赖哪个（些）兄弟**。用普通文本展示清单——包含依赖边和由此得到的执行顺序——并询问用户确认、修改清单，还是调整粒度。
 
-- **给数据单独一个 leaf。** 若根计划 §4 点名的数据集尚不存在于 `datas/`，则其中一个单元必须是 data-readiness leaf：§3 获取数据，§4 放到 `datas/<name>/`，§5 完成标准是完整性检查——manifest、文件数、checksum——绝不能只是“下载完成”。获取命令本身跨越 STOP line，因此 `star-plan-executor` 会交还用户而不自行运行。每个消费该数据集的 leaf 都 `depends_on` 此项。没有它，执行会停在无人负责的缺失输入上。
-- **强制 N ≤ 10。** 若认为需要超过 10 个单元，不要追加第二位 index——应分组，或推荐两层拆分（现在拆成 ≤10 个，再递归处理较重项）。明确说明这一点。
+- **数据自成一个叶子**。根 §4 点名、而 `datas/` 尚未持有的数据集，就要有一个数据就绪叶子：§3 负责获取，§4 把它放到 `datas/<名称>/`，§5 的完成判据是一次完整性校验——manifest、文件数、校验和——绝不是"下载完成了"。获取命令本身跨过 STOP 线，所以 `star-plan-executor` 会把它交回而不是自己跑。每个消费该数据集的叶子都 `depends_on` 它。没有它，执行会卡在一个没有任何计划负责的缺失输入上。
+- **强制 N ≤ 10**。若你认为需要超过 10 个单元，不要追加第二位数字——改为合并，或建议两级拆分（先拆成 ≤10 个，再对繁重的递归拆）。要明确说出来。
 - 按命名规则分配前缀：父前缀 + `0..N-1`。
-- **从分解轴推导依赖**（`references/decomposition_axes.md`）：milestone/phase → 线性链（每项依赖前一项）；component/module → 小型 DAG（共享接口）；claim→experiment → 大多独立（通常都是 `[]`）。把每个单元的上游记为同级 prefix 的 `depends_on` 列表。保持无环。
+- **从拆分轴推导依赖**（`references/decomposition_axes_zh.md`）：里程碑/阶段 → 线性链（每个依赖前一个）；组件/模块 → 小 DAG（共享接口）；claim→实验 → 大多相互独立（常常全为 `[]`）。把每个单元的上游记为一个 `depends_on` 兄弟前缀列表。务必无环。
 
-### 步骤 4：起草每份子计划
+### Step 4：起草每份子计划
 
-按顺序处理每个单元：
+对每个单元，依次：
 
-1. 从 `assets/subplan_template.md`（中文对话：`assets/subplan_template_zh.md`）创建 `metds/plans/<prefix>_<slug>_plan.md`。`language` 必须匹配父计划，而不一定匹配聊天语言。
-2. 填写 frontmatter：`prefix`、`parent`、`level`、`traces_to`、`depends_on`（步骤 3 的同级 prefix；独立时为 `[]`）、日期和各节 `status`。保持 `depends_on` 与 §2 正文同步。
-3. 从父计划抽取具体细节，起草六个执行章节。父计划未规定某项执行决定时写 `[TBD]`（中文计划写 `【待定】`）；只有步骤确实缺少用户输入就无法写时，才问一个针对性问题。
-4. 确保 §4 Deliverables 把输出放到正确项目目录（生成输出放 `wkdrs/<run>`，数据放 `datas/`，权重放 `inits/`），run 名能区分本任务；§5 写出具体完成标准。
-5. 写完文件再进入下一个单元。
+1. 用 `assets/subplan_template_zh.md`（英文对话用 `assets/subplan_template.md`）创建 `metds/plans/<prefix>_<slug>_plan.md`。`language` 设为与**父计划**一致，不一定等于对话语言。
+2. 填 frontmatter：`prefix`、`parent`、`level`、`traces_to`、`depends_on`（Step 3 得到的兄弟前缀；独立则 `[]`）、日期、各节 `status`。保持 `depends_on` 与 §2 散文一致。
+3. 从父计划抽取具体细节，起草六个执行章节。父计划对某个执行决策未提及处，写 `【待定】`（英文计划写 `[TBD]`）；只有当某步骤离开用户就真的写不下去时，才追问一个针对性问题。
+4. 确保 §4 产出物摆到正确的项目目录（生成输出放 `wkdrs/<run>`、数据放 `datas/`、权重放 `inits/`），并用能区分本任务的 run 名；§5 给出明确的完成判据。
+5. 写完这份文件再进入下一个单元。
 
-### 步骤 5：更新父计划索引
+### Step 5：更新父计划索引
 
-向父计划添加以下内容（缺失时创建章节）。按**拓扑（依赖）顺序**列出子计划，标注每项追溯内容和依赖，并明确写出最终执行顺序：
+在父计划中追加（若无则新建该节）。子计划按**拓扑（依赖）顺序**列出，每条标注它追溯到哪、依赖谁，并显式写出由此得到的执行顺序：
 
 ```markdown
 ## Sub-plans
 
-Decomposed by <axis> on <date> via $star-plan-decomposer.
-Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
+于 <date> 按 <拆分轴> 经 $star-plan-decomposer 拆解。
+执行顺序：00 → 01 → 02 → 03  （或 DAG：00 → {01, 02} → 03）
 
-- `00_<slug>_plan.md` — <one-line objective> (→ §<n>; depends on: —)
-- `01_<slug>_plan.md` — <one-line objective> (→ §<n>; depends on: 00)
+- `00_<slug>_plan.md` — <一句话目标>（→ §<n>；依赖：—）
+- `01_<slug>_plan.md` — <一句话目标>（→ §<n>；依赖：00）
 ```
 
-同时在父计划 frontmatter 添加/合并 `children:` 列表。不要重写父计划已有正文章节——只允许编辑 `## Sub-plans` 索引与 `children:`。
+同时把 `children:` 列表并入父计划 frontmatter。不要改写父计划已有的正文章节——`## Sub-plans` 索引与 `children:` 是你对父计划做的唯一编辑。
 
-### 步骤 6：提议递归分解
+### Step 6：提供递归拆解
 
-告诉用户，任何仍较粗的子计划都可用 `$star-plan-decomposer <that sub-plan's slug or prefix>` 继续分解，从而产生下一位深度前缀。询问是否现在处理其中某项。
+告诉用户任何子计划都可用 `$star-plan-decomposer <该子计划的 slug 或前缀>` 继续拆解，生成下一位深度。对仍然粗糙的单元，主动提出现在就继续拆。
 
-**转交下游。** leaf 足够具体后，下一步用 `$star-plan-executor <leaf slug or prefix>` 执行一项——从执行顺序中的首项开始（`depends_on` 为空或均已 `done` 的 leaf）。若 `${CODE_NAME}/` 仍缺失或为空，先用 `$star-code-architect` 给计划一个代码落点。`$star-plan-status` 展示整棵树并推荐下一项。
+**向下游交棒。** 叶子足够具体后，下一步是用 `$star-plan-executor <叶子 slug 或前缀>` 执行——从执行顺序里的第一个开始（`depends_on` 为空、或其依赖已 `done` 的叶子）。若 `${CODE_NAME}/` 还缺失或为空，先用 `$star-code-architect` 为计划奠基代码库。`$star-flow-status` 展示整棵树并推荐下一个该跑谁。
 
-### 步骤 7：评分规则检查
+### Step 7：质检
 
-阅读 `references/subplan_rubric.md`（中文：`references/subplan_rubric_zh.md`），检查刚写的子计划。报告失败项（最多 5 个，按重要性排序），每项包含文件和具体修复方法，并询问是否修订。然后只提议一次提交本次运行写入的计划文件（状态与文件规则）。
+读 `references/subplan_rubric_zh.md`（英文对话读 `references/subplan_rubric.md`），检查你刚写的子计划。把不达标项报告给用户（最多 5 条，按重要性排序），每条附文件名和具体改法，并询问是否修订。随后提供一次提交本次所写计划文件的机会（见状态与文件规则）。
 
 ## 状态与文件规则
 
-- 子计划与父计划平铺在 `metds/plans/` 下。不要创建子目录；树结构编码在数字前缀中。
-- 合法 `status` 值：`pending` / `in_progress` / `done` / `skipped`——与 coach 相同。
-- 绝不修改父计划已有策略章节；只追加 `## Sub-plans` 索引和 `children:` frontmatter。
-- 计划正文末尾可能有 append-only 的 `## Revision History`，由 `star-plan-executor`（用户确认的执行回同步）和 `star-plan-reviser` 写入。§1–§6 已反映其中条目——依据当前正文分解，并原样保留该章节。
-- 不在 `metds/plans/` 外写计划文件。
-- Git：运行结束时，只提议一次提交本次写入的子计划和更新后的父索引——`star-plan-decomposer: <parent slug> — <N> sub-plans`（约定 §1）。
+- 子计划平铺存放在 `metds/plans/`，与父计划同级。不要建子目录；树结构由数字前缀编码。
+- `status` 合法值：`pending` / `in_progress` / `done` / `skipped`——与 coach 一致。
+- 绝不修改父计划已有的战略章节；你只追加 `## Sub-plans` 索引和 `children:` frontmatter。
+- 计划正文末尾可能带有 append-only 的 `## Revision History` 一节，由 `star-plan-executor`（经用户确认的执行同步回写）和 `star-plan-reviser` 写入。§1–§6 已反映这些条目——按当前正文拆解即可，该节保持原样、不改不删。
+- 不要把计划文件写到 `metds/plans/` 以外。
+- Git：运行结束时，提供一次提交本次所写子计划及父计划索引更新的机会——`star-plan-decomposer: <父计划 slug> — <N> 个子计划`（规约 §1）。
 
 ## 对话纪律
 
-- 仅当当前 Codex 界面提供结构化输入时使用；否则问简洁纯文本问题，一次一个决定。
-- 子计划正文语言遵循**父计划**的 `language`；中文计划中的技术术语保留英文。
+- 仅当当前 Codex 界面提供结构化输入时使用；否则问简洁纯文本问题，一次只问一个决定。
+- 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
+- 子计划正文语言以**父计划**的 `language` 为准；中文计划中专业术语保留英文。

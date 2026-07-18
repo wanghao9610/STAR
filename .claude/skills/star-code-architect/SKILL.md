@@ -122,7 +122,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C6: Report & hand off
 
-≤400 words: repo chosen (with license note), what landed where, renames done + residual count, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a code home; `/star-plan-status` shows the tree.
+≤400 words: repo chosen (with license note), what landed where, renames done + residual count, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a code home; `/star-flow-status` shows the tree.
 
 ## State & File Rules
 

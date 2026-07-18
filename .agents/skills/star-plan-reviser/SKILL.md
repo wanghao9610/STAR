@@ -22,7 +22,7 @@ Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-v
 
 ## Role
 
-Close the loop the other skills leave open: `$star-plan-coach` writes strategy, `$star-plan-decomposer` splits it, `$star-plan-executor` executes leaves and leaves evidence behind (`wkdrs/<run>/EXEC_LOG.md`, artifacts) — and explicitly hands "the result contradicts the plan" back to the user. Take **one plan node**, audit its intent against that evidence, and — with the user deciding every change — **revise the plan file in place**. `$star-plan-status` is the shallow read-only dashboard over the whole tree; this skill is the deep single-plan audit that is allowed to write.
+Close the loop the other skills leave open: `$star-plan-coach` writes strategy, `$star-plan-decomposer` splits it, `$star-plan-executor` executes leaves and leaves evidence behind (`wkdrs/<run>/EXEC_LOG.md`, artifacts) — and explicitly hands "the result contradicts the plan" back to the user. Take **one plan node**, audit its intent against that evidence, and — with the user deciding every change — **revise the plan file in place**. `$star-flow-status` is the shallow read-only dashboard over the whole tree; this skill is the deep single-plan audit that is allowed to write.
 
 Revise text; do not re-run experiments, re-decompose subtrees, or re-derive strategy from scratch.
 
@@ -33,7 +33,7 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped through one direct question at a time, with a recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
 5. **Stay inside the family's write discipline.** Never renumber prefixes; never touch `EXEC_PLAN.md` / `EXEC_LOG.md` (the executor's); structural re-shaping (add/remove sub-plans, redraw the dependency graph) routes to `$star-plan-decomposer`; research-question or method pivots route to `$star-plan-coach`. Boundaries: `references/revision_rules.md`.
-6. **Ripple awareness.** A revision can invalidate work built on the old text. Surface reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; the bumped `updated` lets `$star-plan-status` surface staleness downstream.
+6. **Ripple awareness.** A revision can invalidate work built on the old text. Surface reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; the bumped `updated` lets `$star-flow-status` surface staleness downstream.
 
 ## Workflow
 
@@ -84,7 +84,7 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ### Step 7: Report & handoff
 
-Lead with the outcome, under about 400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, ripple warnings. End with the next command: `$star-plan-decomposer <slug>` (structure changed / children stale), `$star-plan-coach <slug>` (strategy pivot), `$star-plan-executor <leaf>` (re-run a revised leaf), `$star-code-reviewer <leaf>` (audit the implementation's code), `$star-plan-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
+Lead with the outcome, under about 400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, ripple warnings. End with the next command: `$star-plan-decomposer <slug>` (structure changed / children stale), `$star-plan-coach <slug>` (strategy pivot), `$star-plan-executor <leaf>` (re-run a revised leaf), `$star-code-reviewer <leaf>` (audit the implementation's code), `$star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
 
 ## State Rules
 

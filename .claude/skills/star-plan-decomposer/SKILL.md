@@ -34,7 +34,7 @@ You **decompose, you do not re-strategize.** The parent plan already holds the t
 3. **Incremental writes.** Write each sub-plan file the moment it is drafted. Prefer more file writes over leaving results in chat — chats end, files do not.
 4. **Every sub-plan is verifiable.** A sub-plan is not done until it has concrete, verb-specific steps, a **done-criterion** (a test / metric / output that proves completion), and deliverables placed per the project layout (`datas/`, `inits/`, `code/`, `wkdrs/<run>`). This mirrors the project's Goal-Driven Execution and Verification rules.
 5. **Traceability both ways.** Every sub-plan names the root section or claim it traces to (`traces_to`). The parent gets a `## Sub-plans` index and a `children:` frontmatter list. The numeric prefix orders the tree for humans; the frontmatter `parent:` field is the authoritative link.
-6. **Dependencies are first-class, not prose-only.** Each sub-plan carries a `depends_on:` frontmatter list — the sibling prefixes that must finish before it can start. This is the machine-readable order the executor and `star-plan-status` consume to answer "what's runnable next". Keep it a **DAG** (no cycles) and consistent with the `## Sub-plans` index order.
+6. **Dependencies are first-class, not prose-only.** Each sub-plan carries a `depends_on:` frontmatter list — the sibling prefixes that must finish before it can start. This is the machine-readable order the executor and `star-flow-status` consume to answer "what's runnable next". Keep it a **DAG** (no cycles) and consistent with the `## Sub-plans` index order.
 
 ## Naming Convention (summary)
 
@@ -57,7 +57,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 Check the root's `finalized:` — the one signal that a strategy plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), and tell the user that decomposition will be shallow, and offer via AskUserQuestion: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `star-plan-coach` to finish the parent first*. Respect the choice.
 
-If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — its `exec_status` / `exec_runs` freeze as history, `star-plan-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `/star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — and when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
+If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — its `exec_status` / `exec_runs` freeze as history, `star-flow-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `/star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — and when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
 
 ### Step 2: Choose the decomposition axis
 
@@ -110,7 +110,7 @@ Also add/merge a `children:` list into the parent frontmatter. Do not rewrite th
 
 Tell the user any sub-plan can be decomposed further with `/star-plan-decomposer <that sub-plan's slug or prefix>`, producing the next digit of depth. Offer to do it now for any unit that is still coarse.
 
-**Hand off downstream.** Once the leaves are concrete enough, the next step is to execute one with `/star-plan-executor <leaf slug or prefix>` — start with the first in the execution order (a leaf whose `depends_on` is empty or already `done`). If `${CODE_NAME}/` is still missing or empty, give the plan a code home first with `/star-code-architect`. `/star-plan-status` shows the whole tree and recommends what to run next.
+**Hand off downstream.** Once the leaves are concrete enough, the next step is to execute one with `/star-plan-executor <leaf slug or prefix>` — start with the first in the execution order (a leaf whose `depends_on` is empty or already `done`). If `${CODE_NAME}/` is still missing or empty, give the plan a code home first with `/star-code-architect`. `/star-flow-status` shows the whole tree and recommends what to run next.
 
 ### Step 7: Rubric pass
 

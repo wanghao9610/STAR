@@ -2,7 +2,7 @@
 
 在起草 EXEC_PLAN(Step 2)前执行。目标:在计划改动 `${CODE_NAME}/` 之前,先弄清它现在有什么。绝不假设某个模块、入口或配置存在——去读它。
 
-1. **解析运行环境**。读 `.env`；取 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` §3）。
+1. **解析运行环境**。读 `.env`;取 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`(`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` §3)。
 
 2. **摸清代码根**。列出 `${CODE_NAME}/`。若只有 `.gitkeep`(空),声明 **greenfield**:计划要从零搭骨架,差距清单就是"全部"。
 

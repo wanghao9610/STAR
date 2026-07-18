@@ -166,7 +166,7 @@ bash execs/run.sh 00_exp --config config.yaml
 STAR 提供十二个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程：
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十二个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十一个 skill 的调用顺序与一个通读全局的 skill、各自的主要产物，以及每个叶子计划上的回环" width="100%">
 </div>
 
 | 技能 | 用途 | 主要输出 |
@@ -181,12 +181,12 @@ STAR 提供十二个相互配合的技能，将模糊的研究兴趣转化为可
 | `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落笔经批准的机械修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
 | `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对那条主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `metds/results.md` |
 | `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
-| `$star-plan-status` | 汇总计划树进度并指出下一个可执行任务 | 只读状态摘要 |
+| `$star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
 | `$star-metd-summarize` | 把计划树编译成可直接用于论文的方法文档，标注哪些尚未验证，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
 
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-plan-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十二个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-flow-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十二个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 

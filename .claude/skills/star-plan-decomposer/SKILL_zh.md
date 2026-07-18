@@ -30,7 +30,7 @@ description: >-
 3. **增量落盘**。每起草完一份子计划立即写文件。宁可多写几次文件，也不要把成果只留在对话里——对话会结束，文件不会。
 4. **每份子计划都可验证**。一份子计划不算完成，除非它有具体、动词明确的步骤、一条**完成判据**（证明完成的测试 / 指标 / 产出），以及按项目布局摆放的产出物（`datas/`、`inits/`、`code/`、`wkdrs/<run>`）。这与项目的 Goal-Driven Execution 和 Verification 规则一致。
 5. **双向可追溯**。每份子计划标明它对应根计划的哪一节 / 哪条 claim（`traces_to`）。父计划则获得一个 `## Sub-plans` 索引和 `children:` frontmatter 列表。数字前缀供人类排序树结构；frontmatter 的 `parent:` 字段才是权威链接。
-6. **依赖是一等公民，不只是散文**。每份子计划带一个 `depends_on:` frontmatter 列表——必须先完成的兄弟前缀。这是 executor 与 `star-plan-status` 用来回答"下一个能跑谁"的机器可读顺序。务必保持为 **DAG**（无环），并与 `## Sub-plans` 索引顺序一致。
+6. **依赖是一等公民，不只是散文**。每份子计划带一个 `depends_on:` frontmatter 列表——必须先完成的兄弟前缀。这是 executor 与 `star-flow-status` 用来回答"下一个能跑谁"的机器可读顺序。务必保持为 **DAG**（无环），并与 `## Sub-plans` 索引顺序一致。
 
 ## 命名规则（摘要）
 
@@ -53,7 +53,7 @@ description: >-
 
 检查根计划的 `finalized:`——它是"这份战略计划已可被消费"的唯一信号（`star-plan-coach` 只在六节全 `done`/`skipped` 且 rubric 过关时设上它，任一节重开即清除）。未 finalized → 读它的 `status` 映射与正文，点名哪些章节仍为 `pending`/`in_progress` 或布满 `[TBD]`（尤其是**方法**与**里程碑**），并告知用户拆解会比较浅，并用 AskUserQuestion 提供选项：*仍然拆解（缺口在子计划里记为 `【待定】`）* / *先回到 `star-plan-coach` 把父计划补完*。尊重用户选择。
 
-若目标自身带有执行证据（`exec_runs` 非空，或 `exec_status` 超出 `pending`），先暂停再拆：分解会把一个已执行的叶子变成内部节点——它的 `exec_status` / `exec_runs` 就地冻结为历史，`star-plan-status` 不再把它算作可执行叶子，它的 `wkdrs/` run 也会留在一个 executor 不会再回访的节点上。用 AskUserQuestion 提供选项：*先用 `/star-plan-reviser <slug>` 把执行证据固化进计划文本（推荐）* / *仍然拆解*——若选择仍然拆解，起草 children 时要把已完成的工作反映进它们的 §2 输入与 §3 步骤，而不是重新规划一遍。
+若目标自身带有执行证据（`exec_runs` 非空，或 `exec_status` 超出 `pending`），先暂停再拆：分解会把一个已执行的叶子变成内部节点——它的 `exec_status` / `exec_runs` 就地冻结为历史，`star-flow-status` 不再把它算作可执行叶子，它的 `wkdrs/` run 也会留在一个 executor 不会再回访的节点上。用 AskUserQuestion 提供选项：*先用 `/star-plan-reviser <slug>` 把执行证据固化进计划文本（推荐）* / *仍然拆解*——若选择仍然拆解，起草 children 时要把已完成的工作反映进它们的 §2 输入与 §3 步骤，而不是重新规划一遍。
 
 ### Step 2：选择拆分轴
 
@@ -106,7 +106,7 @@ description: >-
 
 告诉用户任何子计划都可用 `/star-plan-decomposer <该子计划的 slug 或前缀>` 继续拆解，生成下一位深度。对仍然粗糙的单元，主动提出现在就继续拆。
 
-**向下游交棒。** 叶子足够具体后，下一步是用 `/star-plan-executor <叶子 slug 或前缀>` 执行——从执行顺序里的第一个开始（`depends_on` 为空、或其依赖已 `done` 的叶子）。若 `${CODE_NAME}/` 还缺失或为空，先用 `/star-code-architect` 为计划奠基代码库。`/star-plan-status` 展示整棵树并推荐下一个该跑谁。
+**向下游交棒。** 叶子足够具体后，下一步是用 `/star-plan-executor <叶子 slug 或前缀>` 执行——从执行顺序里的第一个开始（`depends_on` 为空、或其依赖已 `done` 的叶子）。若 `${CODE_NAME}/` 还缺失或为空，先用 `/star-code-architect` 为计划奠基代码库。`/star-flow-status` 展示整棵树并推荐下一个该跑谁。
 
 ### Step 7：质检
 

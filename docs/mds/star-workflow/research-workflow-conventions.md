@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The twelve skills — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-plan-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The twelve skills — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
 
 **Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
@@ -10,7 +10,7 @@ This file is a contract for the skills and a description for the reader: it is w
 
 ## 1. Git
 
-**Skills that never commit** — git usage is read-only (`status` / `diff` / `log`): `star-plan-status`, `star-refs-reviewer`, `star-expt-analyst`, `star-metd-summarize`.
+**Skills that never commit** — git usage is read-only (`status` / `diff` / `log`): `star-flow-status`, `star-refs-reviewer`, `star-expt-analyst`, `star-metd-summarize`.
 
 **Skills that may commit**, and what each may stage:
 
@@ -83,7 +83,7 @@ The operational form of `AGENTS.md` §6.
 2. **Absent or ambiguous → list the nearest candidates** (prefix + slug + one-line state) and ask one direct question. Never guess which plan was meant.
 3. **`parent:` is authoritative; the prefix only hints.** Rebuild the tree from each file's `parent:` frontmatter. The numeric prefix orders and hints the tree for humans — and in projects created before roots took the smallest free digit, two unrelated roots can share a digit.
 4. **A leaf is a plan with empty or absent `children:`.** Only leaves are executable.
-5. **`depends_on` holds sibling prefixes** and is the machine-readable execution order the executor and `star-plan-status` consume. It stays acyclic and consistent with the parent's `## Sub-plans` index.
+5. **`depends_on` holds sibling prefixes** and is the machine-readable execution order the executor and `star-flow-status` consume. It stays acyclic and consistent with the parent's `## Sub-plans` index.
 6. **Never renumber a prefix.** Every deeper prefix and every `parent:` / `traces_to` reference is built on it.
 
 ## 6. Delegation
@@ -104,3 +104,25 @@ The tool-neutral half. **How** to ask — AskUserQuestion, Codex's structured us
 4. **Report honestly.** Never round a shortfall up. Never present a check as run when it was skipped or degraded. Never state or imply that a file, a status, or a plan was changed when it was not.
 5. **Lead with the outcome**, then the evidence, then the routing to the next skill.
 6. **Reply in the user's dialogue language.** A document's body language follows its own frontmatter `language` (or its source's), **not** the chat's — a Chinese conversation about an English plan still writes English into that plan. Inside Chinese documents keep technical terms, metric names, venue names, file paths, and everything inside `reference.bib` in English.
+
+## 8. The artifact registry
+
+Every skill's durable output, in one table. `star-flow-status` reads this as the contract for its coverage checks: a stage is "covered" when the artifact below exists and its state field is current. Keep the table honest — a skill that changes what it writes updates this row in the same commit, or the status skill silently stops checking that stage.
+
+| Stage | Producer | Path | State field |
+|---|---|---|---|
+| Idea | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | `finalized:` |
+| Refs | `star-refs-reviewer` | `metds/refs/refs_index.md`, `<ABBREV>.md`, `reference.bib`, `related_work.md` | index presence |
+| Codebase | `star-code-architect` | `metds/codearc.md` | presence |
+| Env | `star-env-builder` | `wkdrs/env_<name>_<date>/ENV_REPORT.md`, `freeze.txt` | date in dir name |
+| Plan | `star-plan-coach`, `star-plan-decomposer`, `star-plan-reviser` | `metds/plans/<prefix>_<slug>_plan.md` | `status:`, `finalized:`, `updated:` |
+| Run | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md` | plan `exec_status:`, `exec_runs:` |
+| Code review | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md`, else `wkdrs/reviews/code_<scope>_<date>.md` | date in filename |
+| Analysis | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, `wkdrs/<run>/analysis/` | date in filename |
+| Ledger | `star-expt-analyst aggregate` | `metds/results.md` | `generated:` |
+| Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
+
+Two properties of this table matter more than its contents:
+
+1. **`sources:` on a compiled document records each source plan's `updated` as it was when read.** That is what makes staleness detectable by exact comparison rather than by file mtime, which moves for unrelated reasons.
+2. **Nothing enforces this table.** `star-flow-status` ends its report with a count of report-shaped files matching no row here, which turns a drifted convention into a visible line rather than a silent under-report.

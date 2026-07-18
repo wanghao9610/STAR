@@ -16,13 +16,13 @@ vague research interest
   → star-code-reviewer: audit the implementation against conventions and the plan
   → star-expt-analyst: audit the run's results against what the plan expected
   → star-plan-reviser: review a plan against execution evidence and revise it
-  → star-plan-status: inspect overall progress and the next action at any time
+  → star-flow-status: inspect overall progress and the next action at any time
   → star-metd-summarize: compile the matured plans into method documents
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-plan-status` names the next leaf each time round, and the audits route what they find back into the plans:
+The list reads as one pass, but the workflow is not linear: `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
-![STAR research workflow: the twelve skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
+![STAR research workflow: eleven skills in the order they run in plus one that reads them all, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -41,7 +41,7 @@ $star-plan-executor 00
 $star-code-reviewer 00
 $star-expt-analyst 00
 $star-plan-reviser 00
-$star-plan-status
+$star-flow-status
 $star-metd-summarize framework
 ```
 
@@ -672,33 +672,34 @@ metds/plans/<prefix>_<slug>_plan.md   # revised in place, with a Revision Histor
 ### Practical guidance
 
 - Run it after a leaf completes or blocks, before starting the next leaf — revision is cheapest while the evidence is fresh.
-- Revising a parent bumps its `updated`, so `$star-plan-status` will flag its children as stale; that is the intended signal to re-decompose the affected children.
-- For a quick progress overview use `$star-plan-status`; the reviser is for depth on one plan, with write access.
+- Revising a parent bumps its `updated`, so `$star-flow-status` will flag its children as stale; that is the intended signal to re-decompose the affected children.
+- For a quick progress overview use `$star-flow-status`; the reviser is for depth on one plan, with write access.
 
 See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.agents/skills/star-plan-reviser/SKILL.md).
 
-## 13. `$star-plan-status`: inspect the plan tree
+## 13. `$star-flow-status`: inspect the whole flow
 
 ### When to use it
 
-- You want to know how far the overall research plan has progressed.
+- You want to know how far the overall research has progressed.
 - You are unsure which sub-plan should be decomposed or executed next.
+- You want to know what is still owed on work you already finished — a run never reviewed, results never analyzed, method documents older than the plans they were compiled from.
 - You want to inspect dependencies, blockers, commands awaiting the user, or stale plans.
 - You need a quick context refresh at the beginning of a new session.
 
 ### How to invoke it
 
-Inspect all plans:
+Inspect the whole flow:
 
 ```text
-$star-plan-status
+$star-flow-status
 ```
 
 Inspect one plan subtree:
 
 ```text
-$star-plan-status open-vocab-det-seg
-$star-plan-status 01
+$star-flow-status open-vocab-det-seg
+$star-flow-status 01
 ```
 
 ### What it reports
@@ -706,12 +707,14 @@ $star-plan-status 01
 - A plan tree annotated with status;
 - Strategy-section completeness, decomposition coverage, and leaf execution progress;
 - Each leaf's dependencies, logged step progress, blockers, or commands awaiting the user;
-- Exactly one recommended next runnable leaf, with a reason;
-- Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs.
+- A coverage band: finished work whose follow-up is missing or out of date — a done leaf with no code review or no experiment analysis, a reviewed run whose log has since moved on, a results ledger or method document older than what it was compiled from, a finalized idea that never became a plan. Only the triggered checks are printed; work still in progress owes nothing and stays silent;
+- Exactly one recommended next action, chosen by a fixed ladder — an awaiting-user command first, then debt on finished work, then the next runnable leaf, then a finalized idea with no plan — with its reason;
+- Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs;
+- A self-audit line counting report-shaped files that match no known artifact pattern, so that a producer skill's renamed output is noticed rather than silently dropping out of the coverage band.
 
-This skill is **strictly read-only**. It scans `metds/plans/` and `wkdrs/<run>/EXEC_LOG.md` without creating or modifying any file.
+This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/<run>/` — without creating or modifying any file.
 
-See the complete definition in [`star-plan-status/SKILL.md`](../../../.agents/skills/star-plan-status/SKILL.md).
+See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
 
 ## 14. `$star-metd-summarize`: compile the plans into method documents
 
@@ -838,7 +841,7 @@ Decomposing **after** Steps 2–3 is what lets each leaf's §2 name real modules
 ### Step 5: identify the next task
 
 ```text
-$star-plan-status open-vocab-det-seg
+$star-flow-status open-vocab-det-seg
 ```
 
 If the report recommends `00_mvp-3way-ablation`, run:
@@ -859,7 +862,7 @@ If the log contains a training command that the user must run:
 
 ### Step 7: repeat — the light path or the full path
 
-After each leaf, `$star-plan-status` gives the single next recommendation. How much of the loop you run per leaf depends on what the leaf is for; see [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
+After each leaf, `$star-flow-status` gives the single next recommendation. How much of the loop you run per leaf depends on what the leaf is for; see [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
 
 ### Step 8: compile the method for the paper
 
@@ -887,16 +890,16 @@ This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, 
 | The implementation landed and you want the code audited against conventions and the plan | `$star-code-reviewer` |
 | A run produced results and you want to know what they mean and whether they met the plan | `$star-expt-analyst` |
 | A plan was (partly) executed and its text should absorb the results | `$star-plan-reviser` |
-| You do not know the current status or next action | `$star-plan-status` |
+| You do not know the current status or next action | `$star-flow-status` |
 | The plans have matured and you want the method written out for a reader or a paper | `$star-metd-summarize` |
 
 ### How much of the loop does each leaf need?
 
 Two paths. Choose per leaf, not per project.
 
-**The light path — `$star-plan-status` → `$star-plan-executor` → `$star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to tell you whether the direction is worth pursuing. The executor's own bound checks plus the analyst's done-criteria scorecard are enough. Skip the code review and the plan revision — the code is scaffolding you may well throw away, and the plan text has not been contradicted, only tested.
+**The light path — `$star-flow-status` → `$star-plan-executor` → `$star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to tell you whether the direction is worth pursuing. The executor's own bound checks plus the analyst's done-criteria scorecard are enough. Skip the code review and the plan revision — the code is scaffolding you may well throw away, and the plan text has not been contradicted, only tested.
 
-**The full path — `$star-plan-status` → `$star-plan-executor` → `$star-code-reviewer` → (STOP line: you run the command, `$star-expt-analyst watch <leaf>` while it runs) → `$star-expt-analyst` → `$star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result moves the strategy. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table, and the reviser folds what the run taught back into the plan the method documents compile from.
+**The full path — `$star-flow-status` → `$star-plan-executor` → `$star-code-reviewer` → (STOP line: you run the command, `$star-expt-analyst watch <leaf>` while it runs) → `$star-expt-analyst` → `$star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result moves the strategy. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table, and the reviser folds what the run taught back into the plan the method documents compile from.
 
 Two rules cut across both:
 
@@ -907,7 +910,7 @@ When in doubt, ask what happens if the leaf's result turns out to be wrong. If t
 
 ### Why will the executor not run the plan I selected?
 
-The usual causes are that the target is not a leaf, an entry in `depends_on` is unfinished, the task breakdown/done-criterion still contains too many `[TBD]` items, or the `.env` environment itself is unusable — `$star-env-builder` rebuilds it. Running `$star-plan-status` first usually reveals the exact reason.
+The usual causes are that the target is not a leaf, an entry in `depends_on` is unfinished, the task breakdown/done-criterion still contains too many `[TBD]` items, or the `.env` environment itself is unusable — `$star-env-builder` rebuilds it. Running `$star-flow-status` first usually reveals the exact reason.
 
 ### Why was a training command recorded instead of executed?
 
@@ -932,7 +935,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 
 The approval gates do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
-- **Safe on a timer**: `$star-plan-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
+- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
 - **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists.
 - **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser` — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
@@ -950,7 +953,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 ### Can I edit plan files manually?
 
-Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-plan-status` to check for drift before deciding whether to decompose it again.
+Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
 
 ## 17. Skill locations
 
@@ -977,6 +980,6 @@ star-plan-executor
 star-code-reviewer
 star-expt-analyst
 star-plan-reviser
-star-plan-status
+star-flow-status
 star-metd-summarize
 ```

@@ -57,7 +57,7 @@ description: >-
 
 全部章节 `done`（或 `skipped`）后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。把不达标项列给用户（最多 5 条，按重要性排序），询问是否回到对应章节补强。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个，没有更宽松的解释：六节全部 `done` 或 `skipped`，且 rubric 跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
 
-**向下游交棒。** 定稿后，告诉用户推荐顺序：若 `${CODE_NAME}/` 还是空的，先给方法一个代码家（`/star-code-architect`，它读的正是这份根计划）和运行环境（`/star-env-builder`），再用 `/star-plan-decomposer <slug>` 把战略落成可执行子计划——代码库已存在时写出的叶子能点到真实模块，而不是猜路径。子计划树建立后，`/star-plan-status` 给出整棵树的总览。并提供一次提交计划文件的机会（见状态与文件规则）。
+**向下游交棒。** 定稿后，告诉用户推荐顺序：若 `${CODE_NAME}/` 还是空的，先给方法一个代码家（`/star-code-architect`，它读的正是这份根计划）和运行环境（`/star-env-builder`），再用 `/star-plan-decomposer <slug>` 把战略落成可执行子计划——代码库已存在时写出的叶子能点到真实模块，而不是猜路径。子计划树建立后，`/star-flow-status` 给出整棵树的总览。并提供一次提交计划文件的机会（见状态与文件规则）。
 
 ## 状态与文件规则
 

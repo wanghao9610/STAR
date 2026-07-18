@@ -30,7 +30,7 @@ done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
 
 ## 动作清单
 
-<!-- 有序。每个动作绑一个 check。`执行方` = `codex`、`delegate` 或 `stop → 用户`（Codex 备好命令、用户来跑
+<!-- 有序。每个动作绑一个 check。`执行方` = `codex`、`delegate` 或 `stop → 用户`(Codex 备好命令、用户来跑
      ——见 STOP 线)。命令走 .env 的 conda 环境;产物落 wkdrs/<run>/ 下。 -->
 
 | # | 动作 | 文件 / 模块(${CODE_NAME}/…) | 命令(走 conda) | 产物(wkdrs/<run>/…) | 检查 | 执行方 |

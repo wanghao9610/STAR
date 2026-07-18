@@ -49,7 +49,7 @@ description: >-
 
 ### Step 1：扫描计划树
 
-列出 `metds/plans/*_plan.md`；读每个的 frontmatter 与正文。按 `parent:` 重建树——`parent:` 权威，数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-plan-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
+列出 `metds/plans/*_plan.md`；读每个的 frontmatter 与正文。按 `parent:` 重建树——`parent:` 权威，数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
 
 - **输出语言跟随计划**：取根计划的 `language:`；多根时取多数；打平时用对话语言。
 - **一套文档描述一个方法。** 树里有多个互不相关的根时，如实说明，并直接问一个问题：这套文档描述的是哪个根的子树；答案决定整轮的范围。

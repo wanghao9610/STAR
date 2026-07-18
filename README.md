@@ -166,7 +166,7 @@ Run names and output directories should distinguish tasks, experiments, or repet
 STAR includes twelve complementary skills that turn a vague research interest into an auditable execution process:
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: the twelve skills, the order they run in, what each one writes, and how the per-leaf loop closes" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: eleven skills in the order they run in plus one that reads them all, what each one writes, and how the per-leaf loop closes" width="100%">
 </div>
 
 | Skill | Purpose | Main output |
@@ -181,12 +181,12 @@ STAR includes twelve complementary skills that turn a vague research interest in
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
 | `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `metds/results.md` in `aggregate` mode |
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |
-| `$star-plan-status` | Report plan-tree progress and the next runnable task | Read-only status summary |
+| `$star-flow-status` | Report progress across the whole flow — the plan tree, plus finished work whose review, analysis, or write-up is missing or stale — and the single next action | Read-only status summary |
 | `$star-metd-summarize` | Compile the plan tree into paper-ready method documents, marking what is not yet verified and turning what no plan covers into TODOs | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` |
 
 ### Model selection
 
-Different stages benefit from different model strengths. For brainstorming and judging research directions, for drafting, decomposing, and revising research plans, for judging how related work positions the method, for interpreting what experiment results mean, and for compiling the plans into method write-ups, we recommend using Claude Fable5 Extra or ChatGPT5.6 Sol High with `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, and `$star-metd-summarize`. For codebase bootstrapping, environment builds, plan execution, code review, and progress summaries, we recommend using Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), or Cursor Grok4.5 High with `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, and `$star-plan-status`. When resources permit, using the strongest available model across all twelve workflows generally delivers the best overall results.
+Different stages benefit from different model strengths. For brainstorming and judging research directions, for drafting, decomposing, and revising research plans, for judging how related work positions the method, for interpreting what experiment results mean, and for compiling the plans into method write-ups, we recommend using Claude Fable5 Extra or ChatGPT5.6 Sol High with `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, and `$star-metd-summarize`. For codebase bootstrapping, environment builds, plan execution, code review, and progress summaries, we recommend using Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), or Cursor Grok4.5 High with `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, and `$star-flow-status`. When resources permit, using the strongest available model across all twelve workflows generally delivers the best overall results.
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 

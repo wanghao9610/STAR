@@ -55,7 +55,7 @@ Compile and reorganize; do not decide method, revise plans, read code, or interp
 
 ### Step 1: Scan the plan tree
 
-List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the tree from `parent:` — authoritative; the numeric prefix only hints, since two unrelated roots can both be `0_` (`$star-plan-status`'s rule). Record per node: root / internal / leaf, `updated`, `language`, the `status:` map, and on leaves `exec_status` and `traces_to`.
+List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the tree from `parent:` — authoritative; the numeric prefix only hints, since two unrelated roots can both be `0_` (`$star-flow-status`'s rule). Record per node: root / internal / leaf, `updated`, `language`, the `status:` map, and on leaves `exec_status` and `traces_to`.
 
 - **Output language** follows the plans: the root's `language:`; with several roots, the majority; a tie takes the dialogue language.
 - **One document set describes one method.** If the tree has several unrelated roots, say so and ask one direct question about which root's subtree these documents describe; the answer scopes the whole run.

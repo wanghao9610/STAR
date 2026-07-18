@@ -56,7 +56,7 @@ description: >-
 
 ### Stage 4：收敛（`converge`）
 
-读 `references/idea_rubric.md`（中文对话读 `references/idea_rubric_zh.md`）。给每个扫描过的方向打分：六行判断——novelty、impact、feasibility、crowdedness/scoop-risk、personal fit、evaluability——每行注明证据（§1 的某条约束或 §3 的论文）；然后每方向一个裁决：**Pursue / Refine / Park**，附一行理由。呈现对比表与你的推荐，再一次一问地讨论（问题库 Stage 4）。用户可以选定胜者；打磨某方向（按点名的缺陷修补，重打一次分）；合并两个方向（合并后必须回答同一个问题——否则是两个选题钉在一起）；或补一个新方向，让它回 Stage 3 走一遍——这样的回环最多一轮，需要第二轮说明种子本身动了：如实说出来，重开 Stage 1。决定权在用户（原则 6）。写入 §4——表、理由、决定——并为所有未选中的方向填 §6 Parked 方向（名称、裁决理由、何时复活）。
+读 `references/idea_rubric.md`（中文对话读 `references/idea_rubric_zh.md`）。给每个扫描过的方向打分：六行判断——novelty、impact、feasibility、crowdedness/scoop-risk、personal fit、evaluability——每行注明证据（§1 的某条约束或 §3 的论文）；然后每方向一个裁决：**Pursue / Refine / Park**，附一行理由。呈现对比表与你的推荐，再一次一问地讨论（问题库 Stage 4）。用户可以选定胜者；打磨某方向（按点名的缺陷修补，重打一次分）；合并两个方向（合并后必须回答同一个问题——否则是两个选题钉在一起）；或补一个新方向，让它回 Stage 3 走一遍——这样的回环最多一轮，需要第二轮说明种子本身动了：如实说出来，重开 Stage 1。决定权在用户（原则 6）。写入 §4——表、理由、决定——并为所有未选中的方向填 §6 Parked Directions（名称、裁决理由、何时复活）。
 
 ### Stage 5：定稿选题（`frame`）
 

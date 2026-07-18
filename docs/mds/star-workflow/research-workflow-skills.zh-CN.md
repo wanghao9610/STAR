@@ -16,13 +16,13 @@ STAR 提供十二个相互衔接的研究工作流 skill，用于把一个模糊
   → star-code-reviewer：对照规范与计划审计实现代码
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
   → star-plan-reviser：以执行证据审查计划并修订
-  → star-plan-status：随时查看全局进度和下一步
+  → star-flow-status：随时查看全局进度和下一步
   → star-metd-summarize：把成熟的计划编译成方法文档
 ```
 
-上面的列表读起来是一条直线，但实际流程并非线性：`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-plan-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
+上面的列表读起来是一条直线，但实际流程并非线性：`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
 
-![STAR 研究工作流：十二个 skill 的调用顺序、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
+![STAR 研究工作流：十一个 skill 的调用顺序与一个通读全局的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
@@ -41,7 +41,7 @@ $star-plan-executor 00
 $star-code-reviewer 00
 $star-expt-analyst 00
 $star-plan-reviser 00
-$star-plan-status
+$star-flow-status
 $star-metd-summarize framework
 ```
 
@@ -672,33 +672,34 @@ metds/plans/<prefix>_<slug>_plan.md   # 就地修订，并带一条 Revision His
 ### 使用建议
 
 - 在一个叶子完成或阻塞之后、开始下一个叶子之前运行——证据新鲜时修订成本最低。
-- 修订父计划会更新其 `updated`，`$star-plan-status` 随即把 children 标为过期；这正是提示你对受影响 children 重新拆解的信号。
-- 只想看进度总览用 `$star-plan-status`；reviser 是对单个计划的深度审计，并且有写权限。
+- 修订父计划会更新其 `updated`，`$star-flow-status` 随即把 children 标为过期；这正是提示你对受影响 children 重新拆解的信号。
+- 只想看进度总览用 `$star-flow-status`；reviser 是对单个计划的深度审计，并且有写权限。
 
 完整定义见 [`star-plan-reviser/SKILL_zh.md`](../../../.agents/skills/star-plan-reviser/SKILL_zh.md)。
 
-## 13. `$star-plan-status`：查看计划树状态
+## 13. `$star-flow-status`：查看整条流程的状态
 
 ### 什么时候用
 
-- 想知道整个研究计划进行到哪一步。
+- 想知道整个研究进行到哪一步。
 - 不确定接下来该拆解还是该执行哪个子计划。
+- 想知道已经做完的事情还欠着什么——某个 run 一直没审代码、结果一直没分析、方法文档比它编译自的计划还旧。
 - 想检查依赖、阻塞、待用户命令或计划是否过期。
 - 开始新 session 前需要快速恢复上下文。
 
 ### 怎么调用
 
-查看全部计划：
+查看整条流程：
 
 ```text
-$star-plan-status
+$star-flow-status
 ```
 
 只查看某个计划子树：
 
 ```text
-$star-plan-status open-vocab-det-seg
-$star-plan-status 01
+$star-flow-status open-vocab-det-seg
+$star-flow-status 01
 ```
 
 ### 它会报告什么
@@ -706,12 +707,14 @@ $star-plan-status 01
 - 带状态的计划树；
 - 战略章节完整度、拆解覆盖度和叶子执行进度；
 - 每个叶子的依赖、日志步骤进度、阻塞或待用户命令；
-- 唯一一个推荐的“下一步可执行叶子”及理由；
-- 父计划更新晚于子计划、悬挂链接、坏依赖、孤儿 run 等 drift。
+- 一条覆盖带：已完成工作里缺失或过期的后续环节——已 done 的叶子却没有代码审查或实验分析、审查过的 run 其日志之后又往前走了、结果台账或方法文档比其来源还旧、已定稿的想法一直没变成计划。只打印触发的检查项；仍在进行中的工作什么都不欠，保持沉默；
+- 唯一一条推荐的下一步动作，由固定阶梯选出——待用户命令优先，其次是已完成工作的欠账，再次是下一个可执行叶子，最后是已定稿但未立项的想法——并附理由；
+- 父计划更新晚于子计划、悬挂链接、坏依赖、孤儿 run 等 drift；
+- 一行自审线，统计不匹配任何已知产物模式的报告形文件，好让某个生产者 skill 改了输出命名这件事被看见，而不是让对应的覆盖检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描 `metds/plans/` 和 `wkdrs/<run>/EXEC_LOG.md`，不会创建或修改任何文件。
+这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/<run>/` 下的日志与报告——不会创建或修改任何文件。
 
-完整定义见 [`star-plan-status/SKILL_zh.md`](../../../.agents/skills/star-plan-status/SKILL_zh.md)。
+完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 
 ## 14. `$star-metd-summarize`：把计划编译成方法文档
 
@@ -838,7 +841,7 @@ $star-plan-decomposer open-vocab-det-seg
 ### 第五步：确认下一项工作
 
 ```text
-$star-plan-status open-vocab-det-seg
+$star-flow-status open-vocab-det-seg
 ```
 
 如果报告推荐 `00_mvp-3way-ablation`，执行：
@@ -859,7 +862,7 @@ $star-plan-executor 00_mvp-3way-ablation_plan.md
 
 ### 第七步：循环推进——轻路径还是全路径
 
-每完成一个叶子，`$star-plan-status` 给出唯一的下一步建议。每个叶子要跑多少环节，取决于这个叶子是干什么用的；见[每个叶子都要跑完整个循环吗？](#每个叶子都要跑完整个循环吗)。
+每完成一个叶子，`$star-flow-status` 给出唯一的下一步建议。每个叶子要跑多少环节，取决于这个叶子是干什么用的；见[每个叶子都要跑完整个循环吗？](#每个叶子都要跑完整个循环吗)。
 
 ### 第八步：为论文编译方法文档
 
@@ -887,16 +890,16 @@ $star-metd-summarize
 | 实现已落地，想对照规范与计划审一遍代码 | `$star-code-reviewer` |
 | run 产出了结果，想知道它们意味着什么、有没有达到计划的预期 | `$star-expt-analyst` |
 | 计划已（部分）执行，文本应该吸收执行结果 | `$star-plan-reviser` |
-| 不知道当前进度或下一步 | `$star-plan-status` |
+| 不知道当前进度或下一步 | `$star-flow-status` |
 | 计划已经成熟，想把方法写成给读者或论文用的表述 | `$star-metd-summarize` |
 
 ### 每个叶子都要跑完整个循环吗？
 
 两条路径。按叶子选，不是按项目选。
 
-**轻路径——`$star-plan-status` → `$star-plan-executor` → `$star-expt-analyst`。** 适合探索性叶子：一次试探、一次可行性检查、一个只负责告诉你"这个方向值不值得继续"的 MVP。executor 自己的绑定检查加上 analyst 的完成判据记分卡就够了。跳过代码审查和计划修订——这些代码很可能是要扔掉的脚手架，而计划文本并没有被推翻，只是被测试了一下。
+**轻路径——`$star-flow-status` → `$star-plan-executor` → `$star-expt-analyst`。** 适合探索性叶子：一次试探、一次可行性检查、一个只负责告诉你"这个方向值不值得继续"的 MVP。executor 自己的绑定检查加上 analyst 的完成判据记分卡就够了。跳过代码审查和计划修订——这些代码很可能是要扔掉的脚手架，而计划文本并没有被推翻，只是被测试了一下。
 
-**全路径——`$star-plan-status` → `$star-plan-executor` → `$star-code-reviewer` →（STOP 线：你来跑命令，期间用 `$star-expt-analyst watch <叶子>` 看着）→ `$star-expt-analyst` → `$star-plan-reviser`。** 适合数字会被写进论文、代码会被后续叶子依赖、或结果会牵动战略的叶子。这时代码审查值回票价：它让 bug 死在 GPU 工时之前，也死在错误数字进入表格之前；而 reviser 把这次运行教到的东西回灌进计划——方法文档正是从计划编译出来的。
+**全路径——`$star-flow-status` → `$star-plan-executor` → `$star-code-reviewer` →（STOP 线：你来跑命令，期间用 `$star-expt-analyst watch <叶子>` 看着）→ `$star-expt-analyst` → `$star-plan-reviser`。** 适合数字会被写进论文、代码会被后续叶子依赖、或结果会牵动战略的叶子。这时代码审查值回票价：它让 bug 死在 GPU 工时之前，也死在错误数字进入表格之前；而 reviser 把这次运行教到的东西回灌进计划——方法文档正是从计划编译出来的。
 
 两条通用规则：
 
@@ -907,7 +910,7 @@ $star-metd-summarize
 
 ### 为什么 executor 不执行我指定的计划？
 
-常见原因有四类：目标不是叶子、`depends_on` 尚未完成、任务分解/完成判据仍有大量 `【待定】`，或 `.env` 环境本身不可用——可用 `$star-env-builder` 重建。先运行 `$star-plan-status` 通常能看到具体原因。
+常见原因有四类：目标不是叶子、`depends_on` 尚未完成、任务分解/完成判据仍有大量 `【待定】`，或 `.env` 环境本身不可用——可用 `$star-env-builder` 重建。先运行 `$star-flow-status` 通常能看到具体原因。
 
 ### 为什么训练命令只写进日志，没有自动运行？
 
@@ -932,7 +935,7 @@ $star-metd-summarize
 
 审批门在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
-- **可以挂定时任务**：`$star-plan-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
+- **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
 - **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`metds/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问。
 - **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
 
@@ -950,7 +953,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 ### 可以手工修改计划文件吗？
 
-可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status` 和 `exec_runs`。修改父计划后，先运行 `$star-plan-status` 检查 drift，再决定是否重新拆解。
+可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status` 和 `exec_runs`。修改父计划后，先运行 `$star-flow-status` 检查 drift，再决定是否重新拆解。
 
 ## 17. Skill 文件位置
 
@@ -977,6 +980,6 @@ star-plan-executor
 star-code-reviewer
 star-expt-analyst
 star-plan-reviser
-star-plan-status
+star-flow-status
 star-metd-summarize
 ```

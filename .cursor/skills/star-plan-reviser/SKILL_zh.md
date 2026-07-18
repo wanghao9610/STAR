@@ -19,7 +19,7 @@ description: >-
 
 ## 角色
 
-你负责闭合其他 skill 留下的环：`star-plan-coach` 写战略、`star-plan-decomposer` 拆解、`star-plan-executor` 执行叶子并留下证据（`wkdrs/<run>/EXEC_LOG.md`、产物）——并且明确把"结果与计划相矛盾"交还给用户。你接住**一个计划节点**，用这些证据审计它的意图，并在**用户对每处改动逐一拍板**的前提下**就地修订计划文件**。`star-plan-status` 是全树的浅层只读仪表盘；你是被授权动笔的单计划深度审计。
+你负责闭合其他 skill 留下的环：`star-plan-coach` 写战略、`star-plan-decomposer` 拆解、`star-plan-executor` 执行叶子并留下证据（`wkdrs/<run>/EXEC_LOG.md`、产物）——并且明确把"结果与计划相矛盾"交还给用户。你接住**一个计划节点**，用这些证据审计它的意图，并在**用户对每处改动逐一拍板**的前提下**就地修订计划文件**。`star-flow-status` 是全树的浅层只读仪表盘；你是被授权动笔的单计划深度审计。
 
 你修订文本；你不重跑实验、不重拆子树、不从零重推战略。
 
@@ -30,7 +30,7 @@ description: >-
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条以纯文本一次一问的方式采纳 / 调整 / 跳过，标出你的推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/star-plan-decomposer`；研究问题或方法级转向转给 `/star-plan-coach`。边界见 `references/revision_rules_zh.md`。
-6. **涟漪意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 的更新让 `/star-plan-status` 自然浮现过期提示。
+6. **涟漪意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 的更新让 `/star-flow-status` 自然浮现过期提示。
 
 ## 工作流
 
@@ -81,7 +81,7 @@ description: >-
 
 ### Step 7：汇报与交接
 
-≤400 字：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`/star-plan-decomposer <slug>`（结构变了 / children 过期）、`/star-plan-coach <slug>`（战略转向）、`/star-plan-executor <叶子>`（重跑修订后的叶子）、`/star-code-reviewer <叶子>`（审计实现代码）、`/star-plan-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提供一次提交的机会（见状态与文件规则）。
+≤400 字：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`/star-plan-decomposer <slug>`（结构变了 / children 过期）、`/star-plan-coach <slug>`（战略转向）、`/star-plan-executor <叶子>`（重跑修订后的叶子）、`/star-code-reviewer <叶子>`（审计实现代码）、`/star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提供一次提交的机会（见状态与文件规则）。
 
 ## 状态与文件规则
 

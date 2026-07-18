@@ -13,7 +13,7 @@ status: in_progress   # in_progress / blocked / done
 
 ## 步骤状态
 
-<!-- 每个 EXEC_PLAN 动作一行。`检查结果` 由**主循环**重跑或独立检查绑定 check 后填写，不是 delegate 自报。
+<!-- 每个 EXEC_PLAN 动作一行。`检查结果` 由**主循环**重跑或独立检查绑定 check 后填写,不是 delegate 自报。
      合法 status:pending / in_progress / done / blocked / skipped。 -->
 
 | # | 步骤 | status | 产物(wkdrs/<run>/…) | 检查结果 | 备注 |

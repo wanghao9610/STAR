@@ -48,7 +48,7 @@ One `###` block per session, real date (never invented); one bullet per change: 
 | leaf was `in_progress` | leave it — the executor re-orients from `EXEC_LOG.md` on its next run |
 | edits touch only §1/§2/§4 prose or §6 risks | no reset — bump `updated` only |
 
-Never reset silently; the offer names the consequence (the leaf rejoins the runnable queue in star-plan-status / star-plan-executor).
+Never reset silently; the offer names the consequence (the leaf rejoins the runnable queue in star-flow-status / star-plan-executor).
 
 ## Section status flips
 
@@ -58,7 +58,7 @@ Never reset silently; the offer names the consequence (the leaf rejoins the runn
 
 ## Ripple duties
 
-- Bump `updated` on every edited file. Downstream, star-plan-status flags children older than a revised parent — that staleness is the intended signal, not a bug to suppress.
+- Bump `updated` on every edited file. Downstream, star-flow-status flags children older than a revised parent — that staleness is the intended signal, not a bug to suppress.
 - If the revised content is something children were derived from, name the affected children in the final report and recommend re-decomposition for them.
 - After edits, verify `children:` entries and `depends_on` prefixes still resolve; report dangling references — do not silently repair them.
 
