@@ -19,7 +19,9 @@
       .spine { fill: none; stroke: #64748b; stroke-width: 1.8; stroke-linejoin: round; }
       .loop { fill: none; stroke: #7048e8; stroke-width: 1.6; stroke-dasharray: 6 4; stroke-linejoin: round; }
       .stub { fill: none; stroke: #7048e8; stroke-width: 1.6; stroke-dasharray: 6 4; }
+      .read { fill: none; stroke: #94a3b8; stroke-width: 1.2; stroke-dasharray: 2 3; stroke-linejoin: round; }
       .ah { fill: #64748b; }
+      .ahr { fill: #94a3b8; }
       .ahv { fill: #7048e8; }
       .jn { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; font-weight: 700; fill: #7048e8; text-anchor: middle; }
     </style>
@@ -163,10 +165,12 @@
   <path class="spine" d="M230,688 L230,716"/>
   <path class="ah" d="M230,716 L225.5,707 L234.5,707 Z"/>
 
-  <!-- 6 -> flow-status : the sub-plan tree -->
-  <path class="spine" d="M400,740 L458,740 L458,142 L516,142"/>
-  <path class="ah" d="M516,142 L507,137.5 L507,146.5 Z"/>
-  <text class="elc" x="450" y="450" transform="rotate(-90 450 450)">the sub-plan tree</text>
+  <!-- 6 -> flow-status : a read, not a handoff. Drawn in the .read style
+       because nothing is passed here — flow-status goes and reads the tree
+       (and every other registered artifact) whenever it is invoked. -->
+  <path class="read" d="M400,740 L458,740 L458,142 L516,142"/>
+  <path class="ahr" d="M516,142 L507,137.5 L507,146.5 Z"/>
+  <text class="elc" x="450" y="450" transform="rotate(-90 450 450)">reads the plan tree — and every other artifact</text>
 
   <!-- flow-status -> 7 -->
   <path class="spine" d="M860,146 L956,146"/>
@@ -256,32 +260,36 @@
   <!-- ============ LEGEND ============ -->
   <rect x="880" y="824" width="420" height="156" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
 
-  <circle cx="906" cy="844" r="9" fill="#0ca678"/>
-  <circle cx="906" cy="844" r="5" fill="#f8fafc"/>
-  <circle cx="906" cy="844" r="2.4" fill="#0ca678"/>
-  <text class="el" x="934" y="848">reads every stage · run it at any time</text>
+  <circle cx="906" cy="840" r="9" fill="#0ca678"/>
+  <circle cx="906" cy="840" r="5" fill="#f8fafc"/>
+  <circle cx="906" cy="840" r="2.4" fill="#0ca678"/>
+  <text class="el" x="934" y="844">reads every stage · run it at any time</text>
 
-  <path class="spine" d="M896,868 L924,868"/>
-  <path class="ah" d="M924,868 L915,863.5 L915,872.5 Z"/>
-  <text class="el" x="934" y="872">the usual order</text>
+  <path class="spine" d="M896,862 L924,862"/>
+  <path class="ah" d="M924,862 L915,857.5 L915,866.5 Z"/>
+  <text class="el" x="934" y="866">the usual order</text>
 
-  <path class="loop" d="M896,892 L924,892"/>
-  <path class="ahv" d="M924,892 L915,887.5 L915,896.5 Z"/>
-  <text class="el" x="934" y="896">routes back / re-entry</text>
+  <path class="read" d="M896,884 L924,884"/>
+  <path class="ahr" d="M924,884 L915,879.5 L915,888.5 Z"/>
+  <text class="el" x="934" y="888">reads, does not consume</text>
 
-  <circle cx="906" cy="916" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
-  <text class="jn" x="906" y="920" font-size="9.5">N</text>
-  <text class="el" x="934" y="920">continues at skill N</text>
+  <path class="loop" d="M896,906 L924,906"/>
+  <path class="ahv" d="M924,906 L915,901.5 L915,910.5 Z"/>
+  <text class="el" x="934" y="910">routes back / re-entry</text>
 
-  <rect x="896" y="938" width="12" height="12" rx="3" fill="#4c6ef5"/>
-  <text class="el" x="914" y="948">plans</text>
-  <rect x="966" y="938" width="12" height="12" rx="3" fill="#f76707"/>
-  <text class="el" x="984" y="948">code &amp; env</text>
-  <rect x="1066" y="938" width="12" height="12" rx="3" fill="#0ca678"/>
-  <text class="el" x="1084" y="948">reads &amp; reports</text>
+  <circle cx="906" cy="928" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="906" y="932" font-size="9.5">N</text>
+  <text class="el" x="934" y="932">continues at skill N</text>
 
-  <circle cx="901" cy="969" r="6" fill="#0ca678"/>
-  <circle cx="901" cy="969" r="3.4" fill="#f8fafc"/>
-  <circle cx="901" cy="969" r="1.6" fill="#0ca678"/>
-  <text class="elc" x="912" y="972" font-size="9.5" text-anchor="start">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
+  <rect x="896" y="946" width="12" height="12" rx="3" fill="#4c6ef5"/>
+  <text class="el" x="914" y="956">plans</text>
+  <rect x="966" y="946" width="12" height="12" rx="3" fill="#f76707"/>
+  <text class="el" x="984" y="956">code &amp; env</text>
+  <rect x="1066" y="946" width="12" height="12" rx="3" fill="#0ca678"/>
+  <text class="el" x="1084" y="956">reads &amp; reports</text>
+
+  <circle cx="901" cy="971" r="6" fill="#0ca678"/>
+  <circle cx="901" cy="971" r="3.4" fill="#f8fafc"/>
+  <circle cx="901" cy="971" r="1.6" fill="#0ca678"/>
+  <text class="elc" x="912" y="974" font-size="9.5" text-anchor="start">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
 </svg>

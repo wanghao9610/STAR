@@ -16,8 +16,10 @@ STAR 提供十二个相互衔接的研究工作流 skill，用于把一个模糊
   → star-code-reviewer：对照规范与计划审计实现代码
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
   → star-plan-reviser：以执行证据审查计划并修订
-  → star-flow-status：随时查看全局进度和下一步
   → star-metd-summarize：把成熟的计划编译成方法文档
+
+  ⌾ star-flow-status：随时通读上述全部产物——
+    进度到哪里、还欠什么、下一步该做哪一件
 ```
 
 上面的列表读起来是一条直线，但实际流程并非线性：`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：

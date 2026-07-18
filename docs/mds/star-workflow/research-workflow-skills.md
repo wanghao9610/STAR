@@ -16,8 +16,10 @@ vague research interest
   → star-code-reviewer: audit the implementation against conventions and the plan
   → star-expt-analyst: audit the run's results against what the plan expected
   → star-plan-reviser: review a plan against execution evidence and revise it
-  → star-flow-status: inspect overall progress and the next action at any time
   → star-metd-summarize: compile the matured plans into method documents
+
+  ⌾ star-flow-status: reads all of the above at any point —
+    where things stand, what is owed, and the one next action
 ```
 
 The list reads as one pass, but the workflow is not linear: `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
