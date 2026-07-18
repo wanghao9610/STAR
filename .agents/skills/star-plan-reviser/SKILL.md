@@ -14,7 +14,7 @@ description: >-
 
 # Research Plan Reviser
 
-Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherwise load the unsuffixed resources.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`00`), or a filename (`00_mvp-3way-ablation_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
 

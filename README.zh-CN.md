@@ -205,7 +205,27 @@ bash execs/update.sh
 bash execs/update.sh TAG_OR_BRANCH
 ```
 
-上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；这些目录中仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
+如需只更新一个 skill，通过 `--skill` 传入其目录名：
+
+```bash
+bash execs/update.sh --skill star-plan-coach
+```
+
+该命令会更新三个工具目录中对应的 skill：
+
+- `.agents/skills/star-plan-coach/`
+- `.claude/skills/star-plan-coach/`
+- `.cursor/skills/star-plan-coach/`
+
+单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
+
+```bash
+bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
+```
+
+命令的通用形式为 `bash execs/update.sh [ref] [--skill NAME]`。如果 skill 名称无效，或上游三个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
+
+上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；本次更新范围中仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 
 ## 项目约定
 

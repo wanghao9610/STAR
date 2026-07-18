@@ -13,7 +13,7 @@ description: >-
 
 # Research Plan Coach
 
-Match the user's language; load `*_zh.md` resources for Chinese dialogue.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]` — pass a topic or idea to seed a new plan; an idea name (slug or filename against `metds/ideas/*_idea.md`) seeds the plan from that finalized idea file; a plan name with a section key (`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`) reopens just that section of a finished plan; no argument resumes an existing plan under `metds/plans/`.
 

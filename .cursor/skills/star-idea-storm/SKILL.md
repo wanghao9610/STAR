@@ -17,7 +17,7 @@ description: >-
 
 # Research Idea Storm — from vague interest to a defensible topic
 
-Match the user's language; load `*_zh.md` resources for Chinese dialogue.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none.
 

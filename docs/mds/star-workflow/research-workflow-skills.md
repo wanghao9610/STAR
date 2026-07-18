@@ -956,6 +956,8 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
+Every skill directory has the same shape in all three roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. In Chinese dialogue the entry point reads `SKILL_zh.md` in full before acting, then loads other `*_zh.md` resources as they are referenced; where the two conflict, `SKILL.md` is authoritative. This guide follows the Codex example from §1, so its "complete definition" links point into `.agents/`.
+
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |
 | Codex | `.agents/skills/` | `$star-*` |

@@ -23,7 +23,7 @@ description: >-
 
 # Research Experiment Analyst — results audit
 
-Match the user's language; load `*_zh.md` resources for Chinese dialogue.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]` — a plan name (slug / numeric prefix / filename) resolves through that plan's `exec_runs` to its current run directory; a `wkdrs/<run>/` path back-resolves to its plan; `aggregate` compiles every run's verified numbers into the cross-run ledger `metds/results.md`, optionally scoped to one subtree; no argument lists the runs on disk and asks which to analyze; `watch` gives a chat-only health read of a run that may still be executing.
 

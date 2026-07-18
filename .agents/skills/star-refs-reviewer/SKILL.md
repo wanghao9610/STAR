@@ -21,7 +21,7 @@ description: >-
 
 # Research Refs Reviewer
 
-Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherwise load the unsuffixed resources.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]` — no argument reads the method from `metds/` and runs the full pass; a plan name (slug / numeric prefix / filename) or free-text topic scopes the search; `verify` re-fetches and diffs every existing entry; `organize` re-classifies the existing bib without touching the network; `synthesize` compiles the existing notes and the bib's categories into `metds/refs/related_work.md`; an arXiv id, DOI, or paper URL appends that one paper.
 

@@ -205,7 +205,27 @@ To pin the update to a tag or branch, pass it as an argument:
 bash execs/update.sh TAG_OR_BRANCH
 ```
 
-Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in these directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
+To update one skill only, pass its directory name with `--skill`:
+
+```bash
+bash execs/update.sh --skill star-plan-coach
+```
+
+This updates the matching skill in all three tool-specific directories:
+
+- `.agents/skills/star-plan-coach/`
+- `.claude/skills/star-plan-coach/`
+- `.cursor/skills/star-plan-coach/`
+
+The workflow documentation under `docs/mds/star-workflow/` is not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
+
+```bash
+bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
+```
+
+The general command form is `bash execs/update.sh [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the three upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
+
+Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in the updated directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 
 ## Project conventions
 

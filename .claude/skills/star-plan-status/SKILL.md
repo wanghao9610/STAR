@@ -13,7 +13,7 @@ description: >-
 
 # Research Plan Status — read-only overview
 
-Match the user's language; load `*_zh.md` resources for Chinese dialogue.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-plan-status [PLAN_NAME]` — with no argument, report the whole `metds/plans/` forest; with a slug / numeric prefix / filename, scope the report to that plan's subtree.
 

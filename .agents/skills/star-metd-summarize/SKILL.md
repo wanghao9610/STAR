@@ -24,7 +24,7 @@ description: >-
 
 # Research Method Summarizer
 
-Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherwise load the unsuffixed resources.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-metd-summarize [OPT]` — `OPT` is one of `overview` / `dataset` / `framework` / `training` / `evaluation`, each compiling `metds/<OPT>.md`; no argument compiles all five in dependency order (`dataset` → `framework` → `training` → `evaluation` → `overview`).
 

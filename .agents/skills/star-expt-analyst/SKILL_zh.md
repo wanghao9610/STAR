@@ -23,7 +23,7 @@ description: >-
 
 调用方式：`$star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]` —— 计划名（slug、数字前缀或文件名）通过该计划的 `exec_runs` 解析到当前 run 目录；`wkdrs/<run>/` 路径反向解析到计划；`aggregate` 把每次运行中验证过的数值汇编到跨运行总账 `metds/results.md`，还可限定在某棵子树；不带参数时列出磁盘上的 run 并询问分析哪一个；`watch` 仅在聊天中健康检查一个可能尚在执行的 run。
 
-**共享约定。** 行动前阅读 `docs/mds/star-workflow/research-workflow-conventions.md`（中文：`research-workflow-conventions.zh-CN.md`）：§1 git、§2 STOP line、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话。这是所有 STAR skill 的共同基线；本文件规定此 skill 的专属规则，凡要求更严格之处以本文件为准。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 

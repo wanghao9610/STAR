@@ -16,7 +16,7 @@ description: >-
 
 # Research Code Architect
 
-Match the user's language. Load `*_zh.md` resources for Chinese dialogue; otherwise load the unsuffixed resources.
+Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-code-architect [GITHUB_URL | PLAN_NAME]` — a GitHub URL skips the search and uses that repo; a plan name (slug / numeric prefix / filename) chooses which plan drives the run; no argument auto-resolves both.
 
