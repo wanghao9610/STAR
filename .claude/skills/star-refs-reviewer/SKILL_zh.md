@@ -3,7 +3,7 @@ name: star-refs-reviewer
 description: >-
   为项目的方法建立可审计的相关工作基座：精读 5–10 篇最相关工作写成逐篇分析笔记，外加一份分好类、
   条条经过核验的 reference.bib（≥50 条），全部落在 metds/refs/ 下。不带参数时从 metds/*.md 方法
-  笔记读取方法（缺失则回退 metds/plans/ 的根计划，再缺则请用户给 topic）并跑完整流程，metds/refs/
+  笔记读取方法（缺失则回退 metds/plans/ 的根计划，再回退 metds/ideas/ 下定稿的 idea 文件，再缺则请用户给 topic）并跑完整流程，metds/refs/
   已存在时增量续跑；传 PLAN_NAME 或自由文本 topic 限定检索范围；`verify` 逐条重抓并与文件做 diff；
   `organize` 离线重新分类现有 bib；`synthesize` 把已有笔记合成为相关工作叙述（metds/refs/related_work.md）；
   传 arXiv id、DOI 或论文 URL 追加单篇。bib 的每个字段都从本次
@@ -47,7 +47,7 @@ description: >-
    - arXiv id（`2103.00020`）、DOI 或论文 URL → **append 模式**：单篇走 Step 3、5、6。
    - 计划名（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划即方法来源。
    - 其他文本 → 该文本本身就是 topic。
-   - 无参数 → 找方法：先 `metds/*.md` 方法笔记（排除 `metds/codearc.md` 与 `metds/results.md`——它们描述的是代码与分数，不是方法）；否则 `metds/plans/` 下的根计划（§1 问题、§2 相关工作、§3 方法）；再否则请用户给 topic。说明命中的是哪个来源。
+   - 无参数 → 找方法：先 `metds/*.md` 方法笔记（排除 `metds/codearc.md` 与 `metds/results.md`——它们描述的是代码与分数，不是方法）；否则 `metds/plans/` 下的根计划（§1 问题、§2 相关工作、§3 方法）；再否则 `metds/ideas/` 下 `finalized` 的 idea 文件（其 §5 选题陈述）；再否则请用户给 topic。说明命中的是哪个来源。
 2. 读来源，提取**检索画像**：任务、方法的机制、设定与约束、点名的数据集与 baseline、这项工作想立的 claim。检索前先用 3–4 行报出画像及其来源——画像错了，整轮就白跑。
 3. `metds/refs/` 已存在 → 先读 `refs_index.md` 与 `reference.bib`：已有的 citekey、类别和笔记就是基线。说明已有什么，以及本轮是增量。
 4. 定语言：笔记与 index 跟随方法来源 frontmatter 的 `language`（没有就跟随对话语言）。

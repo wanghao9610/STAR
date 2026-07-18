@@ -2,7 +2,7 @@
 
 **语言：** [English](research-workflow-conventions.md) | 简体中文
 
-STAR 研究工作流中每个 skill 都遵守的规则。十一个 skill——`star-plan-coach`、`star-refs-reviewer`、`star-code-architect`、`star-env-builder`、`star-plan-decomposer`、`star-plan-executor`、`star-code-reviewer`、`star-expt-analyst`、`star-plan-reviser`、`star-plan-status`、`star-metd-summarize`——各有自己的工作流、写入边界和质检表。它们共用的部分只在这里存一份。
+STAR 研究工作流中每个 skill 都遵守的规则。十二个 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`、`star-code-architect`、`star-env-builder`、`star-plan-decomposer`、`star-plan-executor`、`star-code-reviewer`、`star-expt-analyst`、`star-plan-reviser`、`star-plan-status`、`star-metd-summarize`——各有自己的工作流、写入边界和质检表。它们共用的部分只在这里存一份。
 
 **优先级。** 本文件是**基线**。某个 skill 的 `SKILL.md` 可以更**严**——更窄的写入边界、更低的阈值、额外的门、乃至"本 skill 永不提交"——更严者生效。skill 绝不放松本文件设下的规则。当 `SKILL.md` 里带有下述某条规则的一行摘要时，那一行是有约束力的提醒，本文件是完整规则。
 
@@ -16,6 +16,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十一个 skill——`s
 
 | Skill | 提交时机 | stage 范围 |
 | --- | --- | --- |
+| `star-idea-storm` | 会话结束时提供一次 | 本次会话创建或编辑过的 idea 文件 |
 | `star-plan-coach` | 会话结束时提供一次 | 本次会话创建或编辑过的计划文件 |
 | `star-plan-decomposer` | 运行结束时提供一次 | 本次所写子计划及父计划的索引更新 |
 | `star-plan-reviser` | Step 7 有落笔修订时提供一次 | 目标计划，及一行目标变化时的父计划 |

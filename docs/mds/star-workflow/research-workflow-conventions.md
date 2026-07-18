@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The eleven skills — `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-plan-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The twelve skills — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-plan-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
 
 **Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
@@ -16,6 +16,7 @@ This file is a contract for the skills and a description for the reader: it is w
 
 | Skill | Commits | Stages |
 | --- | --- | --- |
+| `star-idea-storm` | offered once when the session ends | the idea file this session created or edited |
 | `star-plan-coach` | offered once when the session ends | the plan files this session created or edited |
 | `star-plan-decomposer` | offered once at the end of the run | the sub-plans written plus the parent's updated index |
 | `star-plan-reviser` | offered once at Step 7, when edits were applied | the target plan, plus the parent when its `## Sub-plans` line changed |

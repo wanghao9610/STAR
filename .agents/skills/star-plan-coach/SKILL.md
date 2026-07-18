@@ -6,15 +6,16 @@ description: >-
   (problem → related work → method → experiments → risks → milestones), writing each
   finished section to metds/plans/ and supporting cross-session resume. Use whenever
   the user wants to write or refine a research plan, proposal, or 开题报告; flesh out
-  a research idea; mentions plan files under metds/plans; or has an idea but is unsure
-  how to proceed — even if they never say the word "plan". Bilingual (en/zh).
+  a research idea; grow a finalized idea file under metds/ideas into a plan; mentions
+  plan files under metds/plans; or has an idea but is unsure how to proceed — even if
+  they never say the word "plan". Bilingual (en/zh).
 ---
 
 # Research Plan Coach
 
 Match the user's language; load `*_zh.md` resources for Chinese dialogue.
 
-Invocation: `$star-plan-coach [TOPIC | PLAN_NAME [SECTION]]` — pass a topic or idea to seed a new plan; a plan name with a section key (`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`) reopens just that section of a finished plan; no argument resumes an existing plan under `metds/plans/`.
+Invocation: `$star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]` — pass a topic or idea to seed a new plan; an idea name (slug or filename against `metds/ideas/*_idea.md`) seeds the plan from that finalized idea file; a plan name with a section key (`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`) reopens just that section of a finished plan; no argument resumes an existing plan under `metds/plans/`.
 
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
@@ -35,8 +36,9 @@ You are a senior CS research mentor. Your job is not to write the plan for the u
 
 1. List existing `*_plan.md` files under `metds/plans/` and read each file's frontmatter.
 2. **A `PLAN_NAME` with a `SECTION` key** → reopen that one section: set its `status` back to `in_progress`, **clear `finalized:`** — the plan is not consumable while a section is open, and `$star-plan-decomposer` and `$star-code-architect` both read that field — restore context in 2–3 sentences from the sections it builds on, coach it alone, then re-run Step 7 over the whole plan, which sets it again. This is the way back into a `finalized` plan — a closer paper `$star-refs-reviewer` surfaced, a result that moved the positioning, a reviewer's objection.
-3. If a plan has any section whose `status` is not `done`, ask whether to continue it (continue that plan / start a new one); if yes, resume from the first non-`done` section (before resuming, summarize completed sections in 2–3 sentences to restore context).
-4. If creating new: first clarify the topic (one or two sentences), derive a short English slug, take the smallest digit 0–9 that no existing root plan's prefix uses (`0` in a fresh project; all ten taken → ask which root to retire rather than inventing a longer prefix), and create `metds/plans/<digit>_<slug>_plan.md` from the template and fill frontmatter — English dialogue uses `assets/plan_template.md`, Chinese dialogue uses `assets/plan_template_zh.md`; set `language` to `en` or `zh` accordingly.
+3. If a plan has any section whose `status` is not `done`, ask whether to continue it (continue that plan / start a new one); if yes, resume from the first non-`done` section (before resuming, summarize completed sections in 2–3 sentences to restore context). If there are no plans yet but a `finalized` idea file exists under `metds/ideas/`, offer it as the seed (use that idea / start from a fresh topic) before asking for a topic.
+4. **An `IDEA_NAME`** — an argument matching `metds/ideas/*_idea.md` by slug or filename (a plan-name match wins when both match) → seed a new plan from that idea file. If the file lacks `finalized:`, say so and offer to finish it with `$star-idea-storm <slug>` first, or continue with what it has and mark what is unconfirmed. Reuse the idea's slug as the plan slug; create the plan per item 5; then pre-fill: draft Stage 1 from the idea's Topic Statement (§5 — question, gap, why-now) and open Stage 1 by presenting that draft to confirm and sharpen rather than asking from scratch, noting the seed in §1's prose ("Seeded from `metds/ideas/<slug>_idea.md`"). The idea's first validation experiment and risks feed Stages 4–5 when they arrive.
+5. If creating new: first clarify the topic (one or two sentences), derive a short English slug, take the smallest digit 0–9 that no existing root plan's prefix uses (`0` in a fresh project; all ten taken → ask which root to retire rather than inventing a longer prefix), and create `metds/plans/<digit>_<slug>_plan.md` from the template and fill frontmatter — English dialogue uses `assets/plan_template.md`, Chinese dialogue uses `assets/plan_template_zh.md`; set `language` to `en` or `zh` accordingly.
 
 ### Steps 1–6: Stage-by-stage coaching
 
@@ -56,7 +58,7 @@ Pace per stage:
 - At least 2 dialogue turns, about 5 max. If still not converged by turn 5, draft the section from what you have, mark open items as `[TBD]` / `【待定】`, and move on.
 - At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it, then confirm (options like "Write it to the file" / "Needs edits"); after confirmation, write it to the plan file, set that section's `status` to `done` and the next to `in_progress`, and update `updated`.
 
-Stage 2 handoff: the closest works and their limits are read, not recalled. If `metds/refs/` already holds analysis notes and a `reference.bib`, ground the section in them and cite their citekeys. If it does not, recommend breaking out to `$star-refs-reviewer` **before** writing this section and resuming with `$star-plan-coach <slug> related_work` — positioning written from memory is the failure this stage exists to prevent. If the user would rather not, continue with what they know and mark what the survey should later confirm.
+Stage 2 handoff: the closest works and their limits are read, not recalled. If `metds/refs/` already holds analysis notes and a `reference.bib`, ground the section in them and cite their citekeys. If it does not, recommend breaking out to `$star-refs-reviewer` **before** writing this section and resuming with `$star-plan-coach <slug> related_work` — positioning written from memory is the failure this stage exists to prevent. If the user would rather not, continue with what they know and mark what the survey should later confirm. When the plan was seeded from an idea file, its §3 scan tables name first candidates for this stage — but they were read at abstract depth: they point the survey, they do not replace it.
 
 ### Step 7: Final quality check
 

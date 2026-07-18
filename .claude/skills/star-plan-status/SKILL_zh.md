@@ -22,7 +22,7 @@ description: >-
 
 ## 核心原则
 
-1. **严格只读**。绝不创建、编辑或删除任何文件——不动计划、不动日志、不动 frontmatter。不用 AskUserQuestion、不进 plan 模式、不派 subagent。用户想据此行动，就把他们指向对应 skill（`/star-plan-coach`、`/star-refs-reviewer`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-code-reviewer`、`/star-expt-analyst`、`/star-plan-reviser`、`/star-metd-summarize`）。
+1. **严格只读**。绝不创建、编辑或删除任何文件——不动计划、不动日志、不动 frontmatter。不用 AskUserQuestion、不进 plan 模式、不派 subagent。用户想据此行动，就把他们指向对应 skill（`/star-idea-storm`、`/star-plan-coach`、`/star-refs-reviewer`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-code-reviewer`、`/star-expt-analyst`、`/star-plan-reviser`、`/star-metd-summarize`）。
 2. **文件是唯一真源**。你报告的一切都来自 `metds/plans/` 下的 frontmatter 与正文、以及 `wkdrs/<run>/` 下的 `EXEC_LOG.md`。绝不凭对话记忆推断进度。字段缺失就写"未知",不要猜。
 3. **`parent:` 权威，前缀只是提示**。按每个文件的 `parent:` frontmatter 重建树，而非只看数字（两个不相关的根都可能是 `0_`）。层内顺序用 `depends_on`。
 4. **一条建议，附理由**。以唯一的下一个可执行叶子收尾，并给出原因（依赖已满足、顺序最靠前）——不是给菜单。若无可执行者，说清是什么在挡路。

@@ -25,7 +25,7 @@ You give the researcher a single, honest picture of where every plan and sub-pla
 
 ## Core Principles
 
-1. **Strictly read-only.** Never create, edit, or delete any file — not plans, not logs, not frontmatter. No AskUserQuestion, no plan mode, no subagents. If the user wants to act on what you show, point them at the right skill (`/star-plan-coach`, `/star-refs-reviewer`, `/star-plan-decomposer`, `/star-plan-executor`, `/star-code-reviewer`, `/star-expt-analyst`, `/star-plan-reviser`, `/star-metd-summarize`).
+1. **Strictly read-only.** Never create, edit, or delete any file — not plans, not logs, not frontmatter. No AskUserQuestion, no plan mode, no subagents. If the user wants to act on what you show, point them at the right skill (`/star-idea-storm`, `/star-plan-coach`, `/star-refs-reviewer`, `/star-plan-decomposer`, `/star-plan-executor`, `/star-code-reviewer`, `/star-expt-analyst`, `/star-plan-reviser`, `/star-metd-summarize`).
 2. **Files are the only source of truth.** Everything you report comes from the frontmatter and bodies under `metds/plans/` and the `EXEC_LOG.md` files under `wkdrs/<run>/`. Never infer progress from chat memory. If a field is missing, say "unknown" rather than guessing.
 3. **`parent:` is authoritative; prefix only hints.** Rebuild the tree from each file's `parent:` frontmatter, not from digits alone (two unrelated roots can both be `0_`). Use `depends_on` for ordering within a level.
 4. **One recommendation, with its reason.** End with the single next runnable leaf and why (deps satisfied, earliest in order) — not a menu. If nothing is runnable, say what's blocking.

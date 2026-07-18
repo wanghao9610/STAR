@@ -1,14 +1,14 @@
 ---
 name: star-plan-coach
 description: >-
-  分阶段引导计算机学科研究人员编写研究计划。以教练式提问为主，逐节打磨（问题定义 → 相关工作 → 核心方法 → 实验设计 → 风险备选 → 里程碑），每完成一节即写入 metds/plans/ 并支持跨会话续写。只要用户想写或完善研究计划、开题报告、research plan、proposal，想展开一个研究 idea，提到 metds/plans 下的计划文件，或者有想法但不知道如何推进研究时，都应使用本 skill——即使用户没有明确说出"计划"二字。Bilingual (中/英)— also trigger in English whenever the user wants to write or refine a research plan or proposal, flesh out a research idea, mentions plan files under metds/plans, or has an idea but is unsure how to proceed, even if they never say the word "plan".
+  分阶段引导计算机学科研究人员编写研究计划。以教练式提问为主，逐节打磨（问题定义 → 相关工作 → 核心方法 → 实验设计 → 风险备选 → 里程碑），每完成一节即写入 metds/plans/ 并支持跨会话续写。只要用户想写或完善研究计划、开题报告、research plan、proposal，想展开一个研究 idea，想把 metds/ideas 下定稿的 idea 文件长成计划，提到 metds/plans 下的计划文件，或者有想法但不知道如何推进研究时，都应使用本 skill——即使用户没有明确说出"计划"二字。Bilingual (中/英)— also trigger in English whenever the user wants to write or refine a research plan or proposal, flesh out a research idea, grow a finalized idea file under metds/ideas into a plan, mentions plan files under metds/plans, or has an idea but is unsure how to proceed, even if they never say the word "plan".
 ---
 
 # Research Plan Coach — 研究计划引导
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
 
-调用方式：`/star-plan-coach [TOPIC | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。
+调用方式：`/star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则从那份定稿的 idea 文件播种新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
@@ -29,8 +29,9 @@ description: >-
 
 1. 列出 `metds/plans/` 下现有的 `*_plan.md`，读取各文件的 frontmatter。
 2. **带 `SECTION` 键的 `PLAN_NAME`** → 只重开那一节：把它的 `status` 退回 `in_progress`，**清除 `finalized:`**——有章节开着时这份计划就不可被下游消费，而 `/star-plan-decomposer` 与 `/star-code-architect` 都读这个字段——用 2–3 句从它所依赖的章节恢复上下文，单独辅导这一节，完成后对整份计划重跑 Step 7，由它重新设上。这是回到一份 `finalized` 计划的入口——`/star-refs-reviewer` 翻出了更近的工作、某个结果改变了定位、审稿人提了异议。
-3. 若存在 `status` 中有非 `done` 章节的计划，用 AskUserQuestion 确认是否继续（选项如：继续该计划 / 新建计划）；继续则从第一个非 `done` 章节恢复提问（恢复前先用 2–3 句话总结已完成章节的要点，帮用户找回上下文）。
-4. 若新建：先问清研究主题（一两句即可），据此生成简短英文 slug，取现有根计划前缀都未占用的最小数字 0–9（新项目为 `0`；十个数字全被占用时询问要淘汰哪个根计划，而不是发明更长的前缀），按模板创建 `metds/plans/<数字>_<slug>_plan.md` 并填好 frontmatter——英文对话用 `assets/plan_template.md`，中文对话用 `assets/plan_template_zh.md`，`language` 相应填 `en` 或 `zh`。
+3. 若存在 `status` 中有非 `done` 章节的计划，用 AskUserQuestion 确认是否继续（选项如：继续该计划 / 新建计划）；继续则从第一个非 `done` 章节恢复提问（恢复前先用 2–3 句话总结已完成章节的要点，帮用户找回上下文）。若还没有任何计划、但 `metds/ideas/` 下存在 `finalized` 的 idea 文件，先用 AskUserQuestion 提议以它为种子（选项如：用这份 idea / 从新主题开始），再落到问主题。
+4. **带 `IDEA_NAME`**——参数按 slug 或文件名命中 `metds/ideas/*_idea.md`（计划名与 idea 名同时命中时计划名优先）→ 从那份 idea 文件播种新计划。若文件没有 `finalized:`，如实说明，并建议先用 `/star-idea-storm <slug>` 把它定稿——或者带着现状继续，标注未确认的部分。计划 slug 沿用 idea 的 slug；按第 5 条创建计划文件；然后预填：用 idea 的选题陈述（§5——问题、gap、why-now）起草 Stage 1，开场即展示这份草稿供确认与打磨，而不是从零提问，并在 §1 正文注明种子来源（"Seeded from `metds/ideas/<slug>_idea.md`"）。idea 的首个验证实验与风险，等 Stage 4–5 到来时喂给它们。
+5. 若新建：先问清研究主题（一两句即可），据此生成简短英文 slug，取现有根计划前缀都未占用的最小数字 0–9（新项目为 `0`；十个数字全被占用时询问要淘汰哪个根计划，而不是发明更长的前缀），按模板创建 `metds/plans/<数字>_<slug>_plan.md` 并填好 frontmatter——英文对话用 `assets/plan_template.md`，中文对话用 `assets/plan_template_zh.md`，`language` 相应填 `en` 或 `zh`。
 
 ### Step 1–6：逐阶段引导
 
@@ -50,7 +51,7 @@ description: >-
 - 至少 2 轮对话，约 5 轮封顶。到 5 轮仍未收敛，就基于已有信息起草该节，把未定事项以 `[TBD]` / `【待定】` 标注在文中，不要拖住整体进度。
 - 阶段结束时：把该章节整理成 150–400 字的成文（是结构化的正文，不是问答记录），展示给用户，再用 AskUserQuestion 确认（选项如："写入文件" / "需要修改"）；确认后写入计划文件对应章节，把 frontmatter `status` 中该节改为 `done`、下一节改为 `in_progress`，更新 `updated` 日期。
 
-阶段 2 的衔接：最接近的工作及其局限应当是读出来的，不是回忆出来的。若 `metds/refs/` 已有分析笔记与 `reference.bib`，就以它们为依据来写这一节并引用其 citekey。若没有，建议**先**抽身去跑 `/star-refs-reviewer`，再用 `/star-plan-coach <slug> related_work` 回来续写——凭记忆写定位，正是这一阶段要防的失败。用户若不愿意，就基于他已知的内容继续，并标出日后需要调研确认的部分。
+阶段 2 的衔接：最接近的工作及其局限应当是读出来的，不是回忆出来的。若 `metds/refs/` 已有分析笔记与 `reference.bib`，就以它们为依据来写这一节并引用其 citekey。若没有，建议**先**抽身去跑 `/star-refs-reviewer`，再用 `/star-plan-coach <slug> related_work` 回来续写——凭记忆写定位，正是这一阶段要防的失败。用户若不愿意，就基于他已知的内容继续，并标出日后需要调研确认的部分。计划由 idea 文件播种时，其 §3 的扫描表为这一阶段点出首批候选——但那些只读到摘要深度：它们为调研指路，不能替代调研。
 
 ### Step 7：收尾质检
 

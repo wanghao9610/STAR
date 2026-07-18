@@ -2,10 +2,11 @@
 
 **Language:** English | [简体中文](research-workflow-skills.zh-CN.md)
 
-STAR provides eleven connected research workflow skills that turn a research idea into a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, plans that absorb execution results, and method documents compiled back out of those plans:
+STAR provides twelve connected research workflow skills that turn a vague research interest into a defensible topic backed by a landscape scan, a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, plans that absorb execution results, and method documents compiled back out of those plans:
 
 ```text
-research idea
+vague research interest
+  → star-idea-storm: diverge, scan the landscape, and converge on a topic
   → star-plan-coach: create a strategic research plan
   → star-refs-reviewer: read the closest work and build a verified bibliography
   → star-code-architect: give the plan a code home and record the architecture
@@ -19,9 +20,9 @@ research idea
   → star-metd-summarize: compile the matured plans into method documents
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-plan-status` names the next leaf each time round, and the audits route what they find back into the plans:
+The list reads as one pass, but the workflow is not linear: `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-plan-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
-![STAR research workflow: the eleven skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
+![STAR research workflow: the twelve skills, the order they run in, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -30,6 +31,7 @@ The skills persist plan state in project files, so work can continue across conv
 This guide uses Codex syntax, where a skill is invoked with `$skill-name`:
 
 ```text
+$star-idea-storm open-vocabulary perception
 $star-plan-coach open-vocabulary detection and segmentation
 $star-refs-reviewer open-vocab-det-seg
 $star-code-architect
@@ -73,7 +75,68 @@ Multiple root plans may currently start with `0_`. If a match is ambiguous, use 
 
 You do not need prepared data, weights, or runnable code merely to draft or decompose a plan. Those inputs are checked during execution.
 
-## 3. `$star-plan-coach`: write a research plan
+## 3. `$star-idea-storm`: converge on a research topic
+
+### When to use it
+
+- You have an interest area, a hunch, or a frustration — but no committed research topic yet.
+- You are torn between several possible directions and want them compared on evidence rather than mood.
+- You want to know how crowded a direction is, and who is closest, before investing in it.
+- A parked direction may have revived — new evidence arrived and the decision deserves a re-run.
+
+### How to invoke it
+
+Start a new storm from a seed:
+
+```text
+$star-idea-storm open-vocabulary perception
+```
+
+Resume (or reopen) an existing exploration:
+
+```text
+$star-idea-storm open-vocab-perception
+$star-idea-storm
+```
+
+An idea name (slug or filename under `metds/ideas/`) resumes that exploration; no argument resumes the unfinished one or asks for a seed.
+
+### What it does
+
+The skill discusses one question at a time and moves through five stages — diverge before converge:
+
+1. Seed and constraints: what is driving the interest, and the compute / data / time / venue box the topic must fit;
+2. Diverge: 3–5 genuinely distinct candidate directions (different problem, bet, or setting), of which you keep 2–4;
+3. Landscape scan: per kept direction, an abstract-level literature scan — 8–15 papers with venue, year, citations, and record URL, a crowdedness note, the 3 closest works, and the apparent gap. Every named paper is transcribed from a record fetched during the run, cached under `wkdrs/ideas_<date>/raw/` — nothing is written from memory, and Google Scholar is never scraped;
+4. Converge: each scanned direction is scored on six dimensions (novelty, impact, feasibility, crowdedness/scoop-risk, personal fit, evaluability) with a Pursue / Refine / Park verdict — advice, not a ruling: you decide, and overruled verdicts are recorded with their reason;
+5. Frame: the winner becomes a topic statement — a one-sentence research question, the gap naming the closest scanned works, why now, and a first validation experiment with an explicit kill-condition. After your confirmation the file is `finalized`.
+
+The scan reads abstracts by default and says so honestly; naming a direction deepens its top-3 to intro level, and the depth is recorded. Parked directions keep their scan evidence and a revive-when line.
+
+### Main output
+
+```text
+metds/ideas/<slug>_idea.md
+```
+
+For example:
+
+```text
+metds/ideas/open-vocab-perception_idea.md
+```
+
+The idea file holds the seed and constraints, all candidate directions, the per-direction scan tables, the scored comparison and decision, the topic statement, and the parked directions. Once `finalized`, it seeds the plan: `$star-plan-coach <slug>` pre-drafts its Problem stage from the topic statement, and `$star-refs-reviewer` falls back to it when no plan or method notes exist yet.
+
+### Practical guidance
+
+- One vague sentence is enough to start; the skill asks before it widens.
+- Keep directions that differ in kind, not in wording — the scan is most useful when the candidates would be scooped by different papers.
+- The scan prices a direction; it does not veto it. A crowded field with a real angle can still be the right call, and the file records that choice with its reason.
+- This is topic selection, not the survey: expect abstracts and a map, not per-paper analyses. The deep read on the winner belongs to `$star-refs-reviewer`.
+
+See the complete definition in [`star-idea-storm/SKILL.md`](../../../.agents/skills/star-idea-storm/SKILL.md).
+
+## 4. `$star-plan-coach`: write a research plan
 
 ### When to use it
 
@@ -89,6 +152,14 @@ Start a new plan:
 ```text
 $star-plan-coach open-vocabulary detection and segmentation
 ```
+
+Seed a new plan from a finalized idea file:
+
+```text
+$star-plan-coach open-vocab-perception
+```
+
+An argument matching `metds/ideas/*_idea.md` by slug or filename seeds the plan from that idea file: the plan reuses the idea's slug, and the Problem stage opens with a draft built from its topic statement — confirmed and sharpened rather than asked from scratch.
 
 Resume an existing plan:
 
@@ -141,7 +212,7 @@ The plan contains six research sections and their statuses. When all sections ar
 
 See the complete definition in [`star-plan-coach/SKILL.md`](../../../.agents/skills/star-plan-coach/SKILL.md).
 
-## 4. `$star-refs-reviewer`: survey the related work
+## 5. `$star-refs-reviewer`: survey the related work
 
 ### When to use it
 
@@ -199,7 +270,7 @@ Google Scholar is deliberately not a source: it has no API, gates automated quer
 
 See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.agents/skills/star-refs-reviewer/SKILL.md).
 
-## 5. `$star-code-architect`: bootstrap or organize the codebase
+## 6. `$star-code-architect`: bootstrap or organize the codebase
 
 ### When to use it
 
@@ -255,7 +326,7 @@ Environment builds involving CUDA compilation, downloads over ~1 GB, full test s
 
 See the complete definition in [`star-code-architect/SKILL.md`](../../../.agents/skills/star-code-architect/SKILL.md).
 
-## 6. `$star-env-builder`: build the runtime environment
+## 7. `$star-env-builder`: build the runtime environment
 
 ### When to use it
 
@@ -306,7 +377,7 @@ Gate-approved installs run autonomously, including large framework wheels. The s
 
 See the complete definition in [`star-env-builder/SKILL.md`](../../../.agents/skills/star-env-builder/SKILL.md).
 
-## 7. `$star-plan-decomposer`: create execution sub-plans
+## 8. `$star-plan-decomposer`: create execution sub-plans
 
 ### When to use it
 
@@ -373,7 +444,7 @@ $star-plan-decomposer 01
 
 See the complete definition in [`star-plan-decomposer/SKILL.md`](../../../.agents/skills/star-plan-decomposer/SKILL.md).
 
-## 8. `$star-plan-executor`: execute one leaf plan
+## 9. `$star-plan-executor`: execute one leaf plan
 
 ### When to use it
 
@@ -448,7 +519,7 @@ Execution rarely matches the written plan exactly. When the difference is materi
 
 See the complete definition in [`star-plan-executor/SKILL.md`](../../../.agents/skills/star-plan-executor/SKILL.md).
 
-## 9. `$star-code-reviewer`: review code against conventions and the plan
+## 10. `$star-code-reviewer`: review code against conventions and the plan
 
 ### When to use it
 
@@ -499,7 +570,7 @@ The fix pass never changes behavior: no feature completion, no signature changes
 
 See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.agents/skills/star-code-reviewer/SKILL.md).
 
-## 10. `$star-expt-analyst`: analyze a run's results
+## 11. `$star-expt-analyst`: analyze a run's results
 
 ### When to use it
 
@@ -557,7 +628,7 @@ This skill is **read-only apart from its own report**. It never edits plan files
 
 See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.agents/skills/star-expt-analyst/SKILL.md).
 
-## 11. `$star-plan-reviser`: review and revise one plan
+## 12. `$star-plan-reviser`: review and revise one plan
 
 ### When to use it
 
@@ -606,7 +677,7 @@ metds/plans/<prefix>_<slug>_plan.md   # revised in place, with a Revision Histor
 
 See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.agents/skills/star-plan-reviser/SKILL.md).
 
-## 12. `$star-plan-status`: inspect the plan tree
+## 13. `$star-plan-status`: inspect the plan tree
 
 ### When to use it
 
@@ -642,7 +713,7 @@ This skill is **strictly read-only**. It scans `metds/plans/` and `wkdrs/<run>/E
 
 See the complete definition in [`star-plan-status/SKILL.md`](../../../.agents/skills/star-plan-status/SKILL.md).
 
-## 13. `$star-metd-summarize`: compile the plans into method documents
+## 14. `$star-metd-summarize`: compile the plans into method documents
 
 ### When to use it
 
@@ -699,9 +770,17 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 
 See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.agents/skills/star-metd-summarize/SKILL.md).
 
-## 14. End-to-end example
+## 15. End-to-end example
 
 The following sequence illustrates a typical workflow.
+
+### Step 0: converge on a topic (only when none is chosen yet)
+
+```text
+$star-idea-storm reliable open-vocabulary perception, but I have not settled on a question
+```
+
+The storm clarifies the seed and constraints, diverges into 3–5 candidate directions, scans the landscape for the kept ones (abstract-level, every paper from a fetched record), scores them on six dimensions, and frames the winner into `metds/ideas/open-vocab-perception_idea.md` with a topic statement and a first validation experiment. Already have a topic? Skip straight to Step 1 — or pass the finalized idea to the coach: `$star-plan-coach open-vocab-perception`.
 
 ### Step 1: turn an idea into a plan — with the literature interleaved
 
@@ -792,13 +871,14 @@ $star-metd-summarize
 
 This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. Anything sourced from a leaf that has not been executed is marked not yet verified, and every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile whenever the plans move; a document whose sources have not changed is left untouched.
 
-## 15. Frequently asked questions
+## 16. Frequently asked questions
 
 ### Which skill should I use first?
 
 | Current situation | Use |
 | --- | --- |
-| You only have an idea and the research question is still unclear | `$star-plan-coach` |
+| You have only a vague interest and no committed topic yet | `$star-idea-storm` |
+| You have an idea (or a finalized idea file) and the plan is still unwritten | `$star-plan-coach` |
 | The method is clear but you do not yet know the closest work, the baselines, or how to cite them | `$star-refs-reviewer` |
 | The plan is ready but `${CODE_NAME}/` is empty, or the codebase needs organizing | `$star-code-architect` |
 | The codebase exists but there is no usable runtime environment | `$star-env-builder` |
@@ -835,6 +915,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 
 ### How do I continue across sessions?
 
+- The idea storm resumes from stage statuses in the idea-file frontmatter, and a `finalized` idea reopens through its converge stage;
 - The coach resumes from section statuses in the plan frontmatter;
 - The refs reviewer resumes from `metds/refs/`: existing notes and verified `reference.bib` entries are the baseline, and a re-run only fills the gaps;
 - The decomposer resumes from parent-child links and existing sub-plans;
@@ -853,7 +934,7 @@ The approval gates do not relax in headless or scripted runs — a skill that re
 
 - **Safe on a timer**: `$star-plan-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
 - **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists.
-- **Needs you at the wheel**: `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser` — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
+- **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser` — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
 A practical unattended pattern: run the STOP-line training command, keep `$star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
 
@@ -862,7 +943,7 @@ A practical unattended pattern: run the STOP-line training command, keep `$star-
 STAR defines the process, the file locations, and the verification records; it does not bring a model stack, a tracker, or a writing tool. Three boundaries are deliberate:
 
 - **Hyperparameter sweeps and experiment tracking.** A sweep is a plan decision (`$star-plan-decomposer` scopes it, the STOP line hands the command back); which sweeper and which tracker you run it through is yours. Point them at `wkdrs/<run>/` and the workflow keeps working.
-- **Idea generation.** `$star-plan-coach` starts from an idea you already have — it sharpens, it does not invent. Finding one is upstream of STAR.
+- **Choosing what to care about.** `$star-idea-storm` starts from a seed interest you bring — it diverges, scans, and converges, but it does not pick a field for you, and `$star-plan-coach` sharpens the topic that comes out. Which problems deserve your years is upstream of STAR.
 - **Paper writing.** STAR stops at the material. The handoff is `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md` (the method), `metds/refs/reference.bib` (the citations), `metds/refs/related_work.md` (the related-work narrative, once synthesized), and `metds/results.md` (the numbers, with the run behind each one). Any writing tool takes it from there.
 
 Each of these could have been a skill. They are not, because the answer would have had to guess your stack, your field, or your voice — and the workflow is more useful when it does not.
@@ -871,7 +952,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-plan-status` to check for drift before deciding whether to decompose it again.
 
-## 16. Skill locations
+## 17. Skill locations
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
@@ -881,9 +962,10 @@ Each tool has an adapted, authoritative copy of the skills. Do not mix tool-spec
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 
-The eleven skill directory names are:
+The twelve skill directory names are:
 
 ```text
+star-idea-storm
 star-plan-coach
 star-refs-reviewer
 star-plan-decomposer
