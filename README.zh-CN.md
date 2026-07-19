@@ -16,12 +16,12 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的项目结构**：清晰组织代码、数据、权重、输出和研究记录。
 - **可迁移的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
-- **完整的研究生命周期**：通过十二个相互配合的 skill，引导从模糊兴趣收敛出研究选题、计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现奠基代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、以执行证据修订计划、全局状态汇总，以及把成熟计划编译成方法文档。
+- **完整的研究生命周期**：通过十三个相互配合的 skill，引导把已经开工的项目无损接入、从模糊兴趣收敛出研究选题、计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现奠基代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、以执行证据修订计划、全局状态汇总，以及把成熟计划编译成方法文档。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
 - **面向 AI 协作的规范**：为 Codex、Claude 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
-十二个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
+十三个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
 
 ## 项目结构
 
@@ -93,6 +93,17 @@ git commit -m "First commit."
 
 如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，并且需要将其文件直接纳入当前项目，请在执行 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 
+### 1b. 或者：接入一个已经存在的项目
+
+如果项目已经开工——有真实代码、有能跑的环境、有几个月的提交、手里已经攥着结果——那就把骨架装进它，而不是把它搬进 STAR。在那个仓库的根目录下执行：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
+bash /tmp/star-update.sh --adopt
+```
+
+已经存在的东西一律不覆盖：每个已有文件都被原样保留并列出。随后在该仓库里运行 `/star-proj-adopt`——它会勘察布局、写好 `.env`、用软链接触达你已有的数据 / 权重 / 输出目录而不搬动它们、包装你已有的启动命令，并记录下已经建成和已经跑过的东西。之后下面的第 2–4 步原样适用。
+
 ### 2. 配置本地运行环境
 
 复制环境配置示例文件：
@@ -163,14 +174,15 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ## 研究工作流
 
-STAR 提供十二个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程：
+STAR 提供十三个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程：
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十一个 skill 的调用顺序与一个通读全局的 skill、各自的主要产物，以及每个叶子计划上的回环" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十二个 skill 的调用顺序与一个通读全局的 skill、各自的主要产物，以及每个叶子计划上的回环" width="100%">
 </div>
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
+| `$star-proj-adopt` | 把已经开工的项目无损接入：勘察已有仓库，配好 `.env` 并用软链接触达已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西；待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
 | `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域（每篇论文都转录自抓取的记录）、六维打分，最后连同首个验证实验定稿选题 | `metds/ideas/<slug>_idea.md` |
 | `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
 | `$star-refs-reviewer` | 调研与方法相关的工作：精读最近邻论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md` |
@@ -186,7 +198,7 @@ STAR 提供十二个相互配合的技能，将模糊的研究兴趣转化为可
 
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-flow-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十二个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码和汇总进度时，建议为 `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer` 和 `$star-flow-status` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）或 Cursor Grok4.5 High。在条件允许的情况下，十三个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 

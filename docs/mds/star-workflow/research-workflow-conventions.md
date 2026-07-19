@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The twelve skills — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The thirteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
 
 **Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
@@ -16,6 +16,7 @@ This file is a contract for the skills and a description for the reader: it is w
 
 | Skill | Commits | Stages |
 | --- | --- | --- |
+| `star-proj-adopt` | offered once at the end of each phase | only the paths that phase wrote; in an adopted repository, pre-existing uncommitted work is named, never bundled |
 | `star-idea-storm` | offered once when the session ends | the idea file this session created or edited |
 | `star-plan-coach` | offered once when the session ends | the plan files this session created or edited |
 | `star-plan-decomposer` | offered once at the end of the run | the sub-plans written plus the parent's updated index |
@@ -111,6 +112,7 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 
 | Stage | Producer | Path | State field |
 |---|---|---|---|
+| Adoption | `star-proj-adopt` | `metds/adopt.md` | `adopted:`, `backfilled:` |
 | Idea | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | `finalized:` |
 | Refs | `star-refs-reviewer` | `metds/refs/refs_index.md`, `<ABBREV>.md`, `reference.bib`, `related_work.md` | index presence |
 | Codebase | `star-code-architect` | `metds/codearc.md` | presence |
@@ -121,6 +123,8 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Analysis | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, `wkdrs/<run>/analysis/` | date in filename |
 | Ledger | `star-expt-analyst aggregate` | `metds/results.md` | `generated:` |
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
+
+**One carve-out.** In its `backfill` phase, `star-proj-adopt` may write `exec_status:` and `exec_runs:` — and nothing else — onto leaves in `metds/plans/`, each leaf individually confirmed by the user. Those two fields are the Run row's state, and adoption is the one case where the work they describe happened before any plan existed to record it. Every other part of a plan file, in both of adoption's phases, stays with the producers named in the Plan row.
 
 Two properties of this table matter more than its contents:
 
