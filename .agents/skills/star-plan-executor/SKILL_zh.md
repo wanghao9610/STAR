@@ -78,7 +78,7 @@ description: >-
 ### Step 5：完成
 
 1. 运行子计划 §5 完成判据，并把证据记录到 `EXEC_LOG.md`。
-2. 满足时，把 run 与子计划 `exec_status` 设为 `done`，然后只提议一次删除该计划的 `tasks/<plan-name>/` scratch——先把仍值得保留的内容提升到 `wkdrs/<run>/`，并在 `EXEC_LOG.md` 记录选择；保留也完全可以。未满足时，按 §6 本地 fallback 处理，或报告已验证缺口。
+2. 满足时，把 run 与子计划 `exec_status` 设为 `done`，然后只提议一次删除该计划的 `tasks/<plan-name>/` **scratch**——先把仍值得保留的内容提升到 `wkdrs/<run>/`，并在 `EXEC_LOG.md` 记录选择；保留也完全可以。**该提议绝不覆盖该计划自有的工具脚本**（规约 §9）：把它们按名字列为保留项，只有用户自己点名才删。未满足时，按 §6 本地 fallback 处理，或报告已验证缺口。
 3. 若 EXEC_LOG 的 `Pending amendments` 非空，一次展示整批（全部同步 / 选择部分 / 跳过），按 `references/plan_sync_rules_zh.md` 把确认行写回（原地更新 §2–§5 + 添加 `## Revision History` + 更新 `updated`，然后勾掉各行）。仅限战术层：任何触碰 §1/§6、父计划或 kill-criterion 的内容都通过第 5 点的 strategy signal 转交，绝不回同步。
 4. 检查 `references/exec_rubric_zh.md`，报告前修复范围内的失败；最多列出五个剩余失败及具体补救方法。
 5. 若结果命中根计划 kill-criterion 或使廉价 MVP 假设失效，在日志中记录 **Strategy signal**，并推荐 `$star-plan-reviser <slug>`（审计证据并修订计划）、`$star-plan-coach <slug>` 或 `$star-plan-decomposer <slug>`。不要编辑父计划的策略章节。
@@ -90,7 +90,7 @@ description: >-
 ## 状态规则
 
 - 把 `wkdrs/<run>/EXEC_LOG.md` 视为执行事实来源。再次调用时跳过 `done` action，从第一个未完成项恢复。回同步必须幂等：标为 `synced` 或已勾选的行绝不重复应用；未同步 pending 行在 finalize 时重新提出。
-- `tasks/<plan-name>/` 是该计划的可丢弃 scratch，本 skill 拥有其生命周期：Step 3 创建，§5 满足后在 finalize 时只提议一次删除。持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。
+- `tasks/<plan-name>/` 存放该计划自有的工具脚本（持久）与可丢弃 scratch，本 skill 拥有 scratch 的生命周期：Step 3 创建，§5 满足后在 finalize 时只提议删除 scratch，绝不删脚本（规约 §9）。生成工件与持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。
 - 可以自由编辑子计划 frontmatter 的 `exec_status`、`exec_runs`、`updated`；只有通过用户确认的回同步协议（`references/plan_sync_rules_zh.md`）才能编辑其 §2–§5，且始终原地更新并配对一个 `## Revision History` 条目。绝不重写 §1 或 §6，绝不触碰父计划——objective 或 strategy 级偏差转交 `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`。
 - Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件，且仅在 checkpoint 获批时（约定 §1）。
 - 合法 action status：`pending` / `in_progress` / `done` / `blocked` / `skipped`。

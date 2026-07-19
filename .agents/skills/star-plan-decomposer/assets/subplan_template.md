@@ -45,7 +45,9 @@ status:
 
 <!-- The concrete artifacts this sub-plan produces and exactly where they live:
      generated outputs under wkdrs/<run-name>/… with a run name that distinguishes this task/
-     experiment; datasets under datas/; weights under inits/. Name the files/dirs, not just "results". -->
+     experiment; datasets under datas/; weights under inits/; any script this plan must write itself
+     under tasks/<plan-name>/ (never execs/ — its root is closed). Name the files/dirs, not just
+     "results". -->
 
 ## 5. Verification / Done-Criteria
 

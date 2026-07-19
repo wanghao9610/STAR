@@ -8,7 +8,7 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 
 3. **Nothing heavy ran autonomously** — every long/multi-GPU training, full-dataset eval, or costly API call is in "Awaiting user", not silently executed (`stop_line_rules.md`).
 
-4. **Files are where they belong** — intermediate working files under `tasks/<plan-name>/`; `EXEC_PLAN.md`, `EXEC_LOG.md`, and generated outputs under `wkdrs/<run>/`; data under `datas/`; weights under `inits/`; run scripts under `execs/scpts/`; code changes only under `${CODE_NAME}/`. Nothing generated is left in `metds/plans/`.
+4. **Files are where they belong** — the plan's own tool scripts and intermediate working files under `tasks/<plan-name>/`, and no script loose in `execs/`; `EXEC_PLAN.md`, `EXEC_LOG.md`, and generated outputs under `wkdrs/<run>/`; data under `datas/`; weights under `inits/`; run scripts under `execs/scpts/`; code changes only under `${CODE_NAME}/`. Nothing generated is left in `metds/plans/`.
 
 5. **Runtime is the project env** — commands went through `.env`'s conda env; no system python, no hardcoded local paths.
 

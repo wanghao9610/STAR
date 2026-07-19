@@ -67,10 +67,10 @@ The abbreviated directory names are deliberate:
 | `metds/` | Methodologies | Research plans, design notes, and methodology records |
 | `execs/` | Executions | Launchers and experiment scripts |
 | `scpts/` | Scripts | Individual runnable experiment definitions |
-| `tasks/` | Tasks | Intermediate files produced while executing plans, grouped by plan name |
+| `tasks/` | Tasks | Each plan's own tool scripts plus the intermediate files produced while executing it, grouped by plan name |
 | `wkdrs/` | Work directories | Run logs, metrics, predictions, and other generated outputs |
 
-For example, executing `metds/plans/00_demo_plan.md` creates `tasks/00_demo/` for that plan's intermediate execution files; any generated experiment artifacts still go to the applicable `wkdrs/<run-name>/` directory.
+For example, executing `metds/plans/00_demo_plan.md` creates `tasks/00_demo/` for that plan's own tool scripts — a verification or indexing script its done-criterion runs — and its intermediate execution files; any generated experiment artifacts still go to the applicable `wkdrs/<run-name>/` directory.
 
 ## Quick start
 
@@ -194,7 +194,7 @@ STAR includes thirteen complementary skills that turn a vague research interest 
 | `$star-code-architect` | Bootstrap `${CODE_NAME}/` from a scored reference implementation, or organize existing code, and record the architecture | `${CODE_NAME}/` with `UPSTREAM.md`, plus `metds/codearc.md` |
 | `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies through a uv > pip > conda ladder, and smoke-verify the result; `add` installs new packages into the existing env and records them | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
 | `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
-| `$star-plan-executor` | Implement and lightly validate one executable leaf plan | Intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
+| `$star-plan-executor` | Implement and lightly validate one executable leaf plan | The plan's own tool scripts and intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
 | `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `metds/results.md` in `aggregate` mode |
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |

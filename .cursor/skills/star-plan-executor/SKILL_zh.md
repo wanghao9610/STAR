@@ -82,7 +82,7 @@ description: >-
 
 ### Step 6：收尾 / 完成判据验证
 
-所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` 草稿区的机会——还值得留的先提升到 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
+所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——还值得留的先提升到 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户自己点名才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
 
 **修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,一次性呈现整批(*全部同步 / 逐条挑 / 不同步*),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是战略信号——走下面的反馈回流,绝不同步。
 
@@ -101,7 +101,7 @@ description: >-
 
 ## 状态与文件规则
 
-- 中间工作文件放在 `tasks/<plan-name>/`,执行态及生成产物放在 `wkdrs/<run>/`。绝不把执行日志写进 `metds/plans/`——子计划只拿 `exec_status` + `exec_runs` + `updated`。`tasks/<plan-name>/` 是本计划的可弃置草稿区,生命周期归本 skill:收尾且 §5 达标时提供一次删除的机会。持久证据绝不放在那里;绝不擅自删除,也绝不碰其他计划的 `tasks/` 目录。
+- 中间工作文件放在 `tasks/<plan-name>/`,执行态及生成产物放在 `wkdrs/<run>/`。绝不把执行日志写进 `metds/plans/`——子计划只拿 `exec_status` + `exec_runs` + `updated`。`tasks/<plan-name>/` 存放本计划自有的工具脚本(持久)与可弃置草稿,草稿的生命周期归本 skill:收尾且 §5 达标时提供一次删除草稿的机会,绝不删脚本(规约 §9)。生成产物与持久证据绝不放在那里;绝不擅自删除,也绝不碰其他计划的 `tasks/` 目录。
 - 代码改动进 `${CODE_NAME}/`;数据进 `datas/`;权重进 `inits/`;运行脚本进 `execs/scpts/`、以 `execs/run.sh` 为入口(AGENTS.md §5)。
 - 绝不自主启动重型或不可逆任务(长时/多卡训练、全量评测、大开销 API);这些越过 STOP 线交给用户。
 - 所有运行命令走 `.env` 的 conda 环境;绝不用系统 python、绝不硬编码本地路径。

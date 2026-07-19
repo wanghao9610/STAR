@@ -142,11 +142,11 @@ Where a skill puts what it writes. Each destination is exclusive — a file belo
 | Model weights | `inits/` |
 | Generated artifacts, execution records, reports | `wkdrs/<run>/` |
 | Plans, notes, method docs | `metds/` |
-| Plan-execution scratch (disposable) | `tasks/<plan-name>/` |
+| Plan-owned tool scripts, plan-execution scratch | `tasks/<plan-name>/` |
 | Run entrypoint | `execs/run.sh` |
 | Reusable launch scripts | `execs/scpts/<run>.sh` |
 
 Two rules the table alone does not carry:
 
 - **`execs/` root is closed.** It holds `run.sh` and `update.sh` and nothing else. A new `.sh` goes to `execs/scpts/`; anything that is not a launch script does not go to `execs/` at all.
-- **`tasks/<plan-name>/` is disposable, so it is not a catch-all.** A file belongs there only if losing it at finalize costs nothing. Anything that must survive the run — a config that reproduces it, an output worth citing — goes to `wkdrs/<run>/`.
+- **`tasks/<plan-name>/` holds two kinds of file, and only one is disposable.** A **plan-owned tool script** — the leaf's own verification, indexing, or data-prep tooling, the kind a §5 done-criterion actually runs — is durable: it is neither project code nor a launcher, it lives here for the life of the plan, and finalize never deletes it. Everything else is **scratch**, and belongs here only if losing it at finalize costs nothing. Generated artifacts are neither: an output worth citing, or a config that reproduces a run, goes to `wkdrs/<run>/`.

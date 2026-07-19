@@ -10,7 +10,7 @@ Run this over each sub-plan you wrote. Rank failing items by importance and repo
 
 4. **Every step is verb-concrete and checkable** — §3 has no "explore / combine / look into" verbs whose completion can't be verified; each numbered step is small enough that "done or not" is unambiguous.
 
-5. **Deliverables have a name and a home** — §4 places outputs under the correct project directory (`wkdrs/<run>` for generated output, `datas/`, `inits/`) with a run name that distinguishes this task/experiment; it names the artifacts, not just "results".
+5. **Deliverables have a name and a home** — §4 places outputs under the correct project directory (`wkdrs/<run>` for generated output, `datas/`, `inits/`, and `tasks/<plan-name>/` for the plan's own tool scripts — never `execs/`) with a run name that distinguishes this task/experiment; it names the artifacts, not just "results".
 
 6. **There is a real done-criterion** — §5 states a single check that proves completion (a test that passes, a metric over a threshold, a specific output that exists), with the threshold tied back to the root's §4 metrics or §5 kill-criteria where relevant. If it can't be checked, it isn't done-criterion. A metric-based done-criterion also states the seed/repeat policy it is measured under (or explicitly accepts single-seed as an MVP smoke test) — `star-expt-analyst` scores exactly what is written.
 

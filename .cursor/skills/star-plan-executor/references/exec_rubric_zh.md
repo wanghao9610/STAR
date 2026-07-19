@@ -8,7 +8,7 @@
 
 3. **没有重型任务被自主执行**——每个长时/多卡训练、全量评测、大开销 API 都在"待用户执行",而非被悄悄跑掉(`stop_line_rules_zh.md`)。
 
-4. **文件各归其位**——执行过程的中间工作文件在 `tasks/<plan-name>/`;`EXEC_PLAN.md`、`EXEC_LOG.md` 及生成输出在 `wkdrs/<run>/`;数据在 `datas/`;权重在 `inits/`;运行脚本在 `execs/scpts/`;代码改动只在 `${CODE_NAME}/`。`metds/plans/` 里没有留下任何生成物。
+4. **文件各归其位**——本计划自有的工具脚本与执行过程的中间工作文件在 `tasks/<plan-name>/`,`execs/` 下没有散落的脚本;`EXEC_PLAN.md`、`EXEC_LOG.md` 及生成输出在 `wkdrs/<run>/`;数据在 `datas/`;权重在 `inits/`;运行脚本在 `execs/scpts/`;代码改动只在 `${CODE_NAME}/`。`metds/plans/` 里没有留下任何生成物。
 
 5. **运行走项目环境**——命令都走 `.env` 的 conda 环境;没有系统 python、没有硬编码本地路径。
 

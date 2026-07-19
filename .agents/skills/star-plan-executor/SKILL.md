@@ -80,7 +80,7 @@ For each unfinished action:
 ### Step 5: Finalize
 
 1. Run the sub-plan's §5 done-criterion and record the evidence in `EXEC_LOG.md`.
-2. If met, set the run and sub-plan `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` scratch — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. If unmet, follow the local fallback in §6 or report the verified gap.
+2. If met, set the run and sub-plan `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` **scratch** — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. **The offer never covers the plan's own tool scripts** (conventions §9): list them by name as retained, and delete one only if the user names it themselves. If unmet, follow the local fallback in §6 or report the verified gap.
 3. If EXEC_LOG's `Pending amendments` is non-empty, present the batch once (sync all / select which / skip) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion routes through the strategy signal in point 5, never through sync-back.
 4. Check `references/exec_rubric.md` and fix in-scope failures before reporting; list at most five remaining failures with concrete remedies.
 5. If a result hits a root kill-criterion or invalidates the cheap MVP assumption, record a **Strategy signal** in the log and recommend `$star-plan-reviser <slug>` (audit the evidence and revise the plan), `$star-plan-coach <slug>`, or `$star-plan-decomposer <slug>`. Do not edit the parent's strategy sections.
@@ -92,7 +92,7 @@ Lead with the outcome. State what was verified and its evidence, where the `task
 ## State Rules
 
 - Treat `wkdrs/<run>/EXEC_LOG.md` as the execution source of truth. On reinvocation, skip `done` actions and resume from the first unfinished one. Sync-back is idempotent: rows marked `synced` or checked off are never re-applied; unsynced pending rows are re-offered at finalize.
-- `tasks/<plan-name>/` is this plan's disposable scratch and this skill owns its lifecycle: created at Step 3, offered for deletion once at finalize when §5 is met. Durable evidence never lives there; never delete it unasked, and never touch another plan's `tasks/` directory.
+- `tasks/<plan-name>/` holds this plan's own tool scripts (durable) plus its disposable scratch, and this skill owns the scratch's lifecycle: created at Step 3, the scratch offered for deletion once at finalize when §5 is met — never the scripts (conventions §9). Generated artifacts and durable evidence never live there; never delete it unasked, and never touch another plan's `tasks/` directory.
 - Edit `exec_status`, `exec_runs`, and `updated` in the sub-plan frontmatter freely; edit its §2–§5 **only** through the user-confirmed sync-back protocol (`references/plan_sync_rules.md`), always in place and always paired with a `## Revision History` entry. Never rewrite §1 or §6 and never touch a parent plan — objective- or strategy-level divergence routes to `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`.
 - Git: one commit per verified action, staging only the files that action touched, and only when checkpointing was approved (conventions §1).
 - Legal action status: `pending` / `in_progress` / `done` / `blocked` / `skipped`.

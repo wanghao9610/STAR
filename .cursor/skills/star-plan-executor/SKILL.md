@@ -88,7 +88,7 @@ Keep the main-loop reply concise; details live in the log.
 
 ### Step 6: Finalize / done-criterion verification
 
-After all agent steps are `done`, verify the sub-plan's §5 done-criterion (reuse `/verify`, `/run` where useful). Met → set the sub-plan's `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` scratch — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. Not met → follow the sub-plan's §6 local fallback, or report the gap. Then run `references/exec_rubric.md` and report failing items (≤5, ranked, each with a concrete fix).
+After all agent steps are `done`, verify the sub-plan's §5 done-criterion (reuse `/verify`, `/run` where useful). Met → set the sub-plan's `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` **scratch** — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. **The offer never covers the plan's own tool scripts** (conventions §9): list them by name as retained, and delete one only if the user names it themselves. Not met → follow the sub-plan's §6 local fallback, or report the gap. Then run `references/exec_rubric.md` and report failing items (≤5, ranked, each with a concrete fix).
 
 **Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, present the batch once (*sync all / select which / skip*) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a strategy signal — route it through feedback reflux below, never sync it.
 
@@ -107,7 +107,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 
 ## State & File Rules
 
-- Intermediate working files live under `tasks/<plan-name>/`; execution state and generated artifacts live under `wkdrs/<run>/`. Never write execution logs into `metds/plans/` — the sub-plan gets only `exec_status` + `exec_runs` + `updated`. `tasks/<plan-name>/` is this plan's disposable scratch and this skill owns its lifecycle: offer its deletion once at finalize when §5 is met. Durable evidence never lives there; never delete it unasked, and never touch another plan's `tasks/` directory.
+- Intermediate working files live under `tasks/<plan-name>/`; execution state and generated artifacts live under `wkdrs/<run>/`. Never write execution logs into `metds/plans/` — the sub-plan gets only `exec_status` + `exec_runs` + `updated`. `tasks/<plan-name>/` holds this plan's own tool scripts (durable) plus its disposable scratch, and this skill owns the scratch's lifecycle: offer the scratch's deletion once at finalize when §5 is met, never the scripts (conventions §9). Generated artifacts and durable evidence never live there; never delete it unasked, and never touch another plan's `tasks/` directory.
 - Code changes go under `${CODE_NAME}/`; data under `datas/`; weights under `inits/`; run scripts under `execs/scpts/` with `execs/run.sh` as the entrypoint (AGENTS.md §5).
 - Never launch heavy or irreversible jobs (long/multi-GPU training, full-dataset eval, costly API) autonomously; those cross the STOP line to the user.
 - All run commands go through `.env`'s conda env; never system python, never hardcoded local paths.
