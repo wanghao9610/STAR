@@ -1,6 +1,5 @@
 ---
 name: star-metd-summarize
-disable-model-invocation: true
 description: >-
   Compile the research-plan tree under metds/plans/ into paper-ready method documents under metds/.
   Invoked as $star-metd-summarize [OPT] where OPT is overview, dataset, framework, training, or

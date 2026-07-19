@@ -2,3 +2,5 @@ interface:
   display_name: "Research Refs Reviewer"
   short_description: "Survey related work into notes and a verified reference.bib"
   default_prompt: "Use $star-refs-reviewer to survey the work related to this project's method: read the closest papers into analysis notes and build a classified, source-verified reference.bib under metds/refs/."
+policy:
+  allow_implicit_invocation: false

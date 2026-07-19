@@ -1,6 +1,5 @@
 ---
 name: star-code-reviewer
-disable-model-invocation: true
 description: >-
   Review code against the project's written conventions and, when scoped to a plan, against what
   that plan promised. With no argument it reviews all of ${CODE_NAME}/ (read from .env); a

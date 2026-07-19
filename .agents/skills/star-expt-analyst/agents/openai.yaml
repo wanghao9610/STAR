@@ -2,3 +2,5 @@ interface:
   display_name: "Research Experiment Analyst"
   short_description: "Audit a run's results against what the plan expected"
   default_prompt: "Use $star-expt-analyst to analyze what a plan's run produced and score it against the plan's done-criteria."
+policy:
+  allow_implicit_invocation: false

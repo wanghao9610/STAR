@@ -1,6 +1,5 @@
 ---
 name: star-plan-decomposer
-disable-model-invocation: true
 description: >-
   Decompose an existing research plan (written by star-plan-coach and living under
   metds/plans/) into concrete, executable sub-plans. Reads the parent plan, picks a
@@ -30,7 +29,7 @@ You **decompose, you do not re-strategize.** The parent plan already holds the t
 ## Core Principles
 
 1. **Decompose, don't re-strategize.** The parent is the source of truth for *why* and *what*. Your job is *how*: sub-goals, ordered steps, dependencies, deliverables, and a check that proves each is done. If you find yourself questioning the research question or method, stop — that belongs in `star-plan-coach`, not here.
-2. **Confirm the shape, then auto-draft the content.** Confirm two decisions, one at a time and with a recommendation: the **decomposition axis**, then the **sub-plan list**. Use structured user input when available; otherwise ask concise plain-text questions. After confirmation, draft each sub-plan autonomously from the parent. Mark genuine gaps `[TBD]`; ask a targeted follow-up only when a step is undecidable without the user. Do not re-elicit detail the parent already records.
+2. **Confirm the shape, then auto-draft the content.** Confirm two decisions, one at a time and with a recommendation: the **decomposition axis**, then the **sub-plan list**. Ask through the `ask_user_question` tool; fall back to concise plain-text questions only in non-interactive `codex exec`. After confirmation, draft each sub-plan autonomously from the parent. Mark genuine gaps `[TBD]`; ask a targeted follow-up only when a step is undecidable without the user. Do not re-elicit detail the parent already records.
 3. **Incremental writes.** Write each sub-plan file the moment it is drafted. Prefer more file writes over leaving results in chat — chats end, files do not.
 4. **Every sub-plan is verifiable.** A sub-plan is not done until it has concrete, verb-specific steps, a **done-criterion** (a test / metric / output that proves completion), and deliverables placed per the project layout (`datas/`, `inits/`, `code/`, `wkdrs/<run>`). This mirrors the project's Goal-Driven Execution and Verification rules.
 5. **Traceability both ways.** Every sub-plan names the root section or claim it traces to (`traces_to`). The parent gets a `## Sub-plans` index and a `children:` frontmatter list. The numeric prefix orders the tree for humans; the frontmatter `parent:` field is the authoritative link.
@@ -135,5 +134,5 @@ Read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`)
 
 ## Dialogue Discipline
 
-- Use structured input only when the current Codex surface exposes it; otherwise ask concise plain-text questions, one decision at a time.
+- Ask through the `ask_user_question` tool; fall back to concise plain-text questions only in non-interactive `codex exec` — one decision at a time.
 - A sub-plan's body language follows the **parent** plan's `language`; keep technical terms in English inside Chinese plans.

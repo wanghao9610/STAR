@@ -1,6 +1,5 @@
 ---
 name: star-code-architect
-disable-model-invocation: true
 description: >-
   Give research plans under metds/plans/ a code home. If ${CODE_NAME}/ (from .env) is missing
   or empty, mine the plan for a search profile, find and score candidate reference
@@ -31,7 +30,7 @@ Architect; do not implement research features. Feature work belongs to `$star-pl
 ## Core Principles
 
 1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `$star-plan-coach` first — or take a topic / URL directly and proceed without one.
-2. **Two gates; autonomous between them.** Gate 1: the user picks the reference repo from a scored shortlist. Gate 2: the user approves the target architecture and migration table. Ask each gate as one question — use Codex's structured user-input tool when available, otherwise one concise plain-text question — and wait for an explicit answer before crossing. Everything between and after runs autonomously with bounded retries. Never do work a gate did not cover.
+2. **Two gates; autonomous between them.** Gate 1: the user picks the reference repo from a scored shortlist. Gate 2: the user approves the target architecture and migration table. Ask each gate as one question — ask through the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec` — and wait for an explicit answer before crossing. Everything between and after runs autonomously with bounded retries. Never do work a gate did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
 4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), verifying after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into a residual list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
 5. **Verify per group; delegate selectively.** Execute surveys and migrations locally by default. Delegate only bounded, independent lanes or migration groups when collaboration tools are available and delegation materially helps, giving each delegate the narrow contract in `references/orchestration_spec.md`. Either way: disjoint file ownership per group, re-run every check yourself (never trust a self-reported pass), commit a git checkpoint per verified group, retry ≤2, roll back what still fails.
@@ -132,5 +131,5 @@ When these already exist, update in place — never append duplicates.
 
 ## Dialogue Discipline
 
-- Ask one question at a time — Codex's structured user-input tool when available, otherwise concise plain text — and wait for the answer. Any gate-crossing side effect requires an explicit approval first.
+- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. Any gate-crossing side effect requires an explicit approval first.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

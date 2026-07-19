@@ -2,3 +2,5 @@ interface:
   display_name: "Research Method Summarizer"
   short_description: "Compile research plans into paper-ready method documents"
   default_prompt: "Use $star-metd-summarize to compile the plans under metds/plans/ into a method document — overview, dataset, framework, training, or evaluation."
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,5 @@
 ---
 name: star-expt-analyst
-disable-model-invocation: true
 description: >-
   Analyze what a plan's execution run actually produced and judge it against what the plan
   expected. A PLAN_NAME (slug / numeric prefix / filename) resolves through the plan's exec_runs

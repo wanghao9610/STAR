@@ -1,6 +1,5 @@
 ---
 name: star-env-builder
-disable-model-invocation: true
 description: >-
   Build and verify the project's Python runtime environment so plan execution has a working
   interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default
@@ -35,7 +34,7 @@ Build the environment; do not implement or refactor research code. The only writ
 ## Core Principles
 
 1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: it is the only one that may create, rename, or install into one.
-2. **One gate; situational asks.** The single gate is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, one at a time through Codex's structured user-input tool when available, otherwise as one concise plain-text question, each with a recommendation; wait for an explicit answer before acting.
+2. **One gate; situational asks.** The single gate is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, one at a time through the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec`, each with a recommendation; wait for an explicit answer before acting.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the ladder is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), land in the two-tier layout, and are committed as a code asset once the build is verified.
@@ -75,7 +74,7 @@ Generated layout: `requirements.txt` holds only `-r requirements/framework.txt` 
 
 ### Step 4: Gate — the user approves the install plan
 
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask as one question — Codex's structured user-input tool when available, otherwise plain text: *approve and build* / *adjust (say what)* / *abort* — and wait for an explicit answer. Uncertainties are settled here — never silently.
+Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask as one question — the `ask_user_question` tool, with plain text only in non-interactive `codex exec`: *approve and build* / *adjust (say what)* / *abort* — and wait for an explicit answer. Uncertainties are settled here — never silently.
 
 ### Step 5: Install (tiered ladder)
 
@@ -129,5 +128,5 @@ The environment already exists; this mode installs into it and records what it i
 
 ## Dialogue Discipline
 
-- Ask one question at a time — Codex's structured user-input tool when available, otherwise concise plain text — each with a recommendation, and wait for an explicit answer; the install plan needs explicit approval before anything installs.
+- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — each with a recommendation, and wait for an explicit answer; the install plan needs explicit approval before anything installs.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

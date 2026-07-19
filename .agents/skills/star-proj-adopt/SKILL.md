@@ -1,6 +1,5 @@
 ---
 name: star-proj-adopt
-disable-model-invocation: true
 description: >-
   Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the
   existing repository read-only (source layout, runtime, data / weights / output locations,
@@ -52,7 +51,7 @@ Detect, without writing anything: candidate source directories (top-level import
 
 #### Step S2: Gate 1 — confirm the mapping
 
-Ask one question at a time — Codex's structured user-input tool when available, otherwise one concise plain-text question — only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until this gate closes.
+Ask one question at a time — the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec` — only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until this gate closes.
 
 #### Step S3: Land the mechanical setup
 
@@ -99,7 +98,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was ledgered in S5
 
 ## Dialogue Discipline
 
-- Ask one question at a time — Codex's structured user-input tool when available, otherwise concise plain text — and wait for the answer. All three gates require an explicit answer before any gate-crossing write.
+- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. All three gates require an explicit answer before any gate-crossing write.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.
 - `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

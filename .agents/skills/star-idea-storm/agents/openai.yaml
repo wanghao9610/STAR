@@ -2,3 +2,5 @@ interface:
   display_name: "Research Idea Storm"
   short_description: "Brainstorm and converge on a defensible research topic"
   default_prompt: "Use $star-idea-storm to turn my vague research interest into a scanned, defensible topic."
+policy:
+  allow_implicit_invocation: false

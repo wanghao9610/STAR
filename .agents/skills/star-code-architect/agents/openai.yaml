@@ -2,3 +2,5 @@ interface:
   display_name: "Research Code Architect"
   short_description: "Bootstrap or organize the codebase and record its architecture"
   default_prompt: "Use $star-code-architect to give my research plan a code home and record the architecture."
+policy:
+  allow_implicit_invocation: false

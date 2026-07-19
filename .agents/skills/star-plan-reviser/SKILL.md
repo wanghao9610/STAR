@@ -1,6 +1,5 @@
 ---
 name: star-plan-reviser
-disable-model-invocation: true
 description: >-
   Review one research plan from metds/plans/ against its execution evidence, then revise it in
   place with per-item user approval. Read the wkdrs/<run>/ execution logs and artifacts (children

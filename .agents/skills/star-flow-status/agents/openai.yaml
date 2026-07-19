@@ -2,3 +2,5 @@ interface:
   display_name: "Research Flow Status"
   short_description: "Summarize the whole research flow and recommend what is next"
   default_prompt: "Use $star-flow-status to show my research progress, what is still owed, and the next action."
+policy:
+  allow_implicit_invocation: false
