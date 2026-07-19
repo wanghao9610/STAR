@@ -55,6 +55,12 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 ### Step 1: Assess readiness
 
+**First, check whether this plan has already been decomposed.** Scan `metds/plans/` for files whose `parent:` is the target — equivalently, whose prefix is the target's prefix plus one digit. If any exist, decomposition is already partial or complete, and Steps 2–4 would overwrite files that may carry hand edits, a `## Revision History`, or execution state. Report what was found (prefix, slug, `exec_status`, and whether the parent's `## Sub-plans` / `children:` already list them) and offer via AskUserQuestion:
+
+- *Repair the parent index only* (recommended when the existing children look complete) — skip Steps 2–4 and go straight to Step 5, deriving the index from the child files themselves. Nothing is written to the children.
+- *Add new units alongside them* — leave the existing files untouched, number new units from the next free index, and run Steps 2–4 for those only; Step 5 then merges old and new.
+- *Re-decompose from scratch* — Steps 2–4 as normal, but confirm each overwrite file-by-file, and never overwrite a child carrying `## Revision History` or a non-empty `exec_runs` without naming exactly what would be lost.
+
 Check the root's `finalized:` — the one signal that a strategy plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), and tell the user that decomposition will be shallow, and offer via AskUserQuestion: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `star-plan-coach` to finish the parent first*. Respect the choice.
 
 If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — its `exec_status` / `exec_runs` freeze as history, `star-flow-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `/star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — and when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
@@ -103,6 +109,8 @@ Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
 - `00_<slug>_plan.md` — <one-line objective> (→ §<n>; depends on: —)
 - `01_<slug>_plan.md` — <one-line objective> (→ §<n>; depends on: 00)
 ```
+
+**Reached via the Step 1 repair branch?** Derive every field from the existing child files rather than from a Step 3 list: topological order and the `depends on:` annotations from their `depends_on`, the `→ §<n>` reference from their `traces_to`, the decomposition date from their own frontmatter (never invented). Each one-liner is *condensed* from that child's §1 objective, not copied — so show the drafted section for review before writing it.
 
 Also add/merge a `children:` list into the parent frontmatter. Do not rewrite the parent's existing body sections — the `## Sub-plans` index and `children:` are the only edits you make to the parent.
 

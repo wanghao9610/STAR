@@ -70,6 +70,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Generated output files belong in `wkdrs/`.
 - Put methodology notes in `metds/` and research plans in `metds/plans/`.
 - Plan-execution intermediate files belong in `tasks/<plan-name>/`.
+- Launcher scripts belong in `execs/`: keep only `run.sh` and `update.sh` at its root, and put per-run scripts in `execs/scpts/<run>.sh`.
 - Output names must distinguish tasks, experiments, or runs.
 
 ## 6. Project Runtime

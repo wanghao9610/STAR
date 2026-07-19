@@ -126,3 +126,23 @@ Two properties of this table matter more than its contents:
 
 1. **`sources:` on a compiled document records each source plan's `updated` as it was when read.** That is what makes staleness detectable by exact comparison rather than by file mtime, which moves for unrelated reasons.
 2. **Nothing enforces this table.** `star-flow-status` ends its report with a count of report-shaped files matching no row here, which turns a drifted convention into a visible line rather than a silent under-report.
+
+## 9. Project layout
+
+Where a skill puts what it writes. Each destination is exclusive — a file belongs to exactly one, chosen by what the file *is*, not by which step produced it.
+
+| What | Where |
+|---|---|
+| Project code | `${CODE_NAME}/` (from `.env`) |
+| Data | `datas/` |
+| Model weights | `inits/` |
+| Generated artifacts, execution records, reports | `wkdrs/<run>/` |
+| Plans, notes, method docs | `metds/` |
+| Plan-execution scratch (disposable) | `tasks/<plan-name>/` |
+| Run entrypoint | `execs/run.sh` |
+| Reusable launch scripts | `execs/scpts/<run>.sh` |
+
+Two rules the table alone does not carry:
+
+- **`execs/` root is closed.** It holds `run.sh` and `update.sh` and nothing else. A new `.sh` goes to `execs/scpts/`; anything that is not a launch script does not go to `execs/` at all.
+- **`tasks/<plan-name>/` is disposable, so it is not a catch-all.** A file belongs there only if losing it at finalize costs nothing. Anything that must survive the run — a config that reproduces it, an output worth citing — goes to `wkdrs/<run>/`.
