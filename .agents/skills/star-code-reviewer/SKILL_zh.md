@@ -18,7 +18,7 @@ description: >-
 
 调用方式：`$star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 

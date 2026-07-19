@@ -19,7 +19,7 @@ description: >-
 
 调用方式：`$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；arXiv id、DOI 或论文 URL 追加单篇。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 
