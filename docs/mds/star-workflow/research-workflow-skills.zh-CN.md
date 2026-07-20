@@ -784,7 +784,7 @@ $star-flow-status 01
 - 父计划更新晚于子计划、悬挂链接、坏依赖、孤儿 run 等 drift；
 - 一行自审线，统计不匹配任何已知产物模式的报告形文件，好让某个生产者 skill 改了输出命名这件事被看见，而不是让对应的覆盖检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/<run>/` 下的日志与报告——不会创建或修改任何文件。
+这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/` 与 `wkdrs/env_<name>_<date>/`）——不会创建或修改任何文件。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 

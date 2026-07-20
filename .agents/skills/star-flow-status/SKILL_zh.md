@@ -24,7 +24,7 @@ description: >-
 ## 核心原则
 
 1. **严格只读**。绝不创建、编辑或删除任何文件——不动计划、不动日志、不动 frontmatter。不建进度计划、不委派工作、不做交互式追问。用户想据此行动，就把他们指向对应 skill（`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-decomposer`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-analyst`、`$star-plan-reviser`、`$star-metd-summarize`）。
-2. **文件是唯一真源**。你报告的一切都来自规约 §8 注册的产物：`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/<run>/` 下的日志与报告。绝不凭对话记忆推断进度。字段缺失就写"未知"，不要猜。
+2. **文件是唯一真源**。你报告的一切都来自规约 §8 注册的产物：`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/` 与 `wkdrs/env_<name>_<date>/`）。绝不凭对话记忆推断进度。字段缺失就写"未知"，不要猜。
 3. **`parent:` 权威，前缀只是提示**。按每个文件的 `parent:` frontmatter 重建树，而非只看数字（两个不相关的根都可能是 `0_`）。层内顺序用 `depends_on`。
 4. **树是引擎，覆盖带很薄**。只有计划树带顺序语义（`parent`、`depends_on`、`exec_status`），所以只有它值得走一遍图。其它阶段一律按注册表做"存在性 + 新鲜度"检查——绝不给本来没有顺序的产物硬造一套顺序。
 5. **覆盖检查默认沉默**。只有 `references/status_spec_zh.md` 里的触发条件全部满足，某条信号才出现。进行中的工作永远不算欠账：还在跑的 run 什么都不欠。一条会给健康状态报警的覆盖带，只会教会读者跳过它——那比没有更糟。

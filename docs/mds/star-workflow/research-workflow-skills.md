@@ -784,7 +784,7 @@ $star-flow-status 01
 - Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs;
 - A self-audit line counting report-shaped files that match no known artifact pattern, so that a producer skill's renamed output is noticed rather than silently dropping out of the coverage band.
 
-This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/<run>/` — without creating or modifying any file.
+This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/` and `wkdrs/env_<name>_<date>/`) — without creating or modifying any file.
 
 See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
 

@@ -104,7 +104,8 @@
 
 上面的覆盖带是按文件名匹配产物的。如果某个生产者 skill 改了它写出来的东西，覆盖带会悄悄不再触发那一行——这是一次没人会察觉的漏报。这一行把那种失败翻转成看得见的。只数**报告形**文件，让 run 产物（权重、图、原始日志）绝不进来：
 
-- 直接位于某个 `wkdrs/<run>/` 目录下的 `*.md`，且文件名不是 `EXEC_PLAN.md`、`EXEC_LOG.md`、`CODE_REVIEW_<date>.md`、`EXPT_ANALYSIS_<date>.md`；
+- 直接位于某个 `wkdrs/<run>/` 目录下的 `*.md`，且文件名不是 `EXEC_PLAN.md`、`EXEC_LOG.md`、`CODE_REVIEW_<date>.md`、`EXPT_ANALYSIS_<date>.md`、`REVIEW_<date>.md`；
+- 直接位于 `wkdrs/` 下两个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（无 run 时的共用兜底目录）登记的名字是 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记的名字是 `ENV_REPORT.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
 - `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`results`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，意味着某个生产者既改了输出名又丢掉了 `type:` 时仍然会被抓到；而 `metds/` 下手写的笔记三者皆无，保持沉默。
 
 不要下钻子目录（`analysis/`、`raw/`、`refs/`）——那是各生产者自己的工作空间，本就不在注册表内。报一行：`⚠ N 个未识别的报告文件` + 至多三个路径。N 为 0 时整行省略。这是命名不一致，不是对文件本身的判断：它意味着规约 §8 的注册表和磁盘上的实际情况已经分叉，两者之一需要更新。
