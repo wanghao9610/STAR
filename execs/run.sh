@@ -99,7 +99,7 @@ list_experiments() {
 
     for script in "${SCPT_DIR}"/*.sh; do
         [[ -e "${script}" ]] || continue
-        printf '%s\n' "$(basename -- "${script}")"
+        printf '%s\n' "$(basename -- "${script}" .sh)"
         found=1
     done
 

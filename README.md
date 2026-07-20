@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/srcs/star-project-icon.png" alt="STAR project icon" width="128">
   <h1>STAR</h1>
-  <p><strong>Structured Toolkit for AI Research</strong></p>
+  <p><strong>Systematic Toolchain for AI Research</strong></p>
   <p><em>A reusable foundation for reproducible and well-structured AI research.</em></p>
 </div>
 

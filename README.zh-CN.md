@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/srcs/star-project-icon.png" alt="STAR 项目图标" width="128">
   <h1>STAR</h1>
-  <p><strong>结构化 AI 研究工具包</strong></p>
+  <p><strong>系统化 AI 研究工具链</strong></p>
   <p><em>一个面向可复现、结构化 AI 研究的可复用项目基础。</em></p>
 </div>
 
