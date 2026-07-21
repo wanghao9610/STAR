@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research Experiment Digest"
+  short_description: "Summarize experiment progress over a period, on the time axis"
+  default_prompt: "Use $star-expt-digest to summarize what the experiment programme has done since the previous digest, and what was learned."
+policy:
+  allow_implicit_invocation: false

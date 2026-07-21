@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-skills.zh-CN.md)
 
-STAR provides thirteen connected research workflow skills that turn a vague research interest into a defensible topic backed by a landscape scan, a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, plans that absorb execution results, and method documents compiled back out of those plans:
+STAR provides fourteen connected research workflow skills that turn a vague research interest into a defensible topic backed by a landscape scan, a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, progress digested over time, plans that absorb execution results, and method documents compiled back out of those plans:
 
 ```text
 an already-started project
@@ -18,6 +18,7 @@ vague research interest
   → star-plan-executor: implement and verify one leaf sub-plan
   → star-code-reviewer: audit the implementation against conventions and the plan
   → star-expt-analyst: audit the run's results against what the plan expected
+  → star-expt-digest: summarize what the programme did this period, and what moved
   → star-plan-reviser: review a plan against execution evidence and revise it
   → star-metd-summarize: compile the matured plans into method documents
 
@@ -25,9 +26,9 @@ vague research interest
     where things stand, what is owed, and the one next action
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
+The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan, with `star-expt-digest` run on a cadence across the loop rather than inside it — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
-![STAR research workflow: twelve skills in the order they run in plus one that reads them all, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
+![STAR research workflow: twelve skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -680,11 +681,12 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 wkdrs/<run>/EXPT_ANALYSIS_<date>.md   # the analysis report
 wkdrs/<run>/analysis/*.png            # curves, when matplotlib is available (with the script that made them)
 metds/results.md                      # aggregate mode only: the cross-run results ledger
+                                      # (metds/results_<slug>.md when scoped to a subtree)
 ```
 
 ### The results ledger (`aggregate`)
 
-`$star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `metds/results.md`: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The ledger reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
+`$star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `metds/results.md` — or `metds/results_<slug>.md` when you scope it to a subtree, so a scoped run never clobbers the project ledger: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The ledger reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
 
 The report records the scope and evidence base, a run verdict, the done-criteria scorecard, the artifact inventory and completion, log health, metrics with their sources and any cross-run comparison, the interpretation, and the routing.
 
@@ -700,7 +702,76 @@ This skill is **read-only apart from its own report**. It never edits plan files
 
 See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.agents/skills/star-expt-analyst/SKILL.md).
 
-## 13. `$star-plan-reviser`: review and revise one plan
+## 13. `$star-expt-digest`: summarize progress over a period
+
+### When to use it
+
+- It is Friday, or the end of a sprint, and you want one page saying what the experiments did this week.
+- You are back after two weeks and need to know what happened while you were away.
+- You are writing a progress report or preparing for a supervisor meeting.
+- You want everything a plan family has produced so far — the parent's question and every descendant's answers — in one place.
+- You want to know what *changed* since the last time you looked, not just where things stand now.
+
+### How to invoke it
+
+```text
+$star-expt-digest                          # since the previous digest — the default cadence
+$star-expt-digest 7d                       # the last seven days
+$star-expt-digest 2026-07-01               # since that date
+$star-expt-digest 01                       # a plan family: the node, its ancestors, all its leaves
+$star-expt-digest core-method-pipeline
+$star-expt-digest all                      # the whole history; re-seeds the series
+```
+
+With no argument the skill reads the newest digest's `covers.through` as a watermark and covers everything after it, so running it on a regular cadence produces a series with no gaps and no double-counting. A plan argument takes the usual slug / numeric prefix / filename forms.
+
+### What it does
+
+1. Resolves the period and states it before reading anything, so a wrong window is caught early — and reports an empty period as an empty period rather than widening it;
+2. Collects the in-scope runs and dates each one by its analysis report, else by its `EXEC_LOG`'s last dated entry — never by file mtime, which moves for a checkout or a backup;
+3. Reads each **report-backed** run's newest `EXPT_ANALYSIS_<date>.md` for its verdict, scorecard, and headline metrics, carrying over the source and split the report recorded;
+4. Reads each **provisional** run's `EXEC_LOG.md` only — status, steps, strategy signals, and a number only if the log itself names one with its file;
+5. Derives what moved by diffing against the previous digest's `sources:`: new runs, changed verdicts, runs that were provisional last time and are analyzed now;
+6. Notes which plans were created, revised, decomposed, or finalized in the window, and lists the gaps — unanalyzed runs, unexecuted leaves, awaiting STOP-line commands, a stale ledger;
+7. Writes the dated digest and gives a short chat summary with the routing.
+
+### Main output
+
+```text
+wkdrs/digests/EXPT_DIGEST_<date>.md   # the period's digest
+```
+
+### Two tiers, and why they never mix
+
+A run that has an analysis report is **report-backed**: its numbers are quoted from that report with their provenance. A run that does not is **provisional**: its log is read raw for a rough line, tagged `provisional (unverified)`, and kept in its own table. The wall between them is strict — a provisional number is never scored against a done-criterion, never used to compute a movement, never quoted as a result, and never allowed into `metds/results.md`. That is what lets the provisional tier exist at all: it makes a week's work visible without letting an unverified number contradict the ledger.
+
+### How it differs from the neighbouring skills
+
+Three skills read across runs, and they answer different questions:
+
+| Question | Skill | Axis |
+|---|---|---|
+| Did *this run* meet its plan? | `$star-expt-analyst <plan>` | one run, verified |
+| What are the final numbers, by claim? | `$star-expt-analyst aggregate` | claim, re-verified from source |
+| Where does everything stand right now? | `$star-flow-status` | current state, no memory |
+| What happened lately, and what did we learn? | `$star-expt-digest` | time, report-level |
+
+The digest is **report-level, not re-verified**: unlike `aggregate`, it copies a number with its provenance rather than re-opening the source to confirm it. That is the whole cost difference, and it is why a digest can run weekly while an aggregate cannot. It also means a digest is never the file you quote a number into a paper from — `metds/results.md` is, and every digest says so on its face.
+
+### The write boundary
+
+This skill is **read-only apart from its own digest**. It never edits plans, `exec_status`, `EXEC_LOG.md`, an analysis report, or the results ledger, and it never runs anything to fill a gap — every gap is a listed line with the command that closes it. It also never says *why* a variant won: like the ledger, it reports the direction of a change and routes the interpretation.
+
+### Practical guidance
+
+- Run it on a cadence — weekly is the natural one. The value compounds: each digest's "what moved" section is only as good as the previous digest it diffs against.
+- A digest full of provisional rows is a signal, not a failure: it means runs are finishing faster than they are being analyzed. Clear it with `$star-expt-analyst` on the named runs.
+- Use plan mode before a milestone review, when you want a family's whole story rather than a date range.
+- `wkdrs/` is git-ignored by default, so the digest series lives on your disk and not in the repository history. Digests are regenerable from the analysis reports, so this is recoverable — but do not treat a digest as the archival record.
+
+See the complete definition in [`star-expt-digest/SKILL.md`](../../../.agents/skills/star-expt-digest/SKILL.md).
+
+## 14. `$star-plan-reviser`: review and revise one plan
 
 ### When to use it
 
@@ -749,7 +820,7 @@ metds/plans/<prefix>_<slug>_plan.md   # revised in place, with a Revision Histor
 
 See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.agents/skills/star-plan-reviser/SKILL.md).
 
-## 14. `$star-flow-status`: inspect the whole flow
+## 15. `$star-flow-status`: inspect the whole flow
 
 ### When to use it
 
@@ -779,16 +850,16 @@ $star-flow-status 01
 - A plan tree annotated with status;
 - Strategy-section completeness, decomposition coverage, and leaf execution progress;
 - Each leaf's dependencies, logged step progress, blockers, or commands awaiting the user;
-- A coverage band: finished work whose follow-up is missing or out of date — a done leaf with no code review or no experiment analysis, a reviewed run whose log has since moved on, a results ledger or method document older than what it was compiled from, a finalized idea that never became a plan. Only the triggered checks are printed; work still in progress owes nothing and stays silent;
+- A coverage band: finished work whose follow-up is missing or out of date — a done leaf with no code review or no experiment analysis, a reviewed run whose log has since moved on, a results ledger or method document older than what it was compiled from, a digest series that has fallen behind the analysis reports, a finalized idea that never became a plan. Only the triggered checks are printed; work still in progress owes nothing and stays silent;
 - Exactly one recommended next action, chosen by a fixed ladder — an awaiting-user command first, then debt on finished work, then the next runnable leaf, then a finalized idea with no plan — with its reason;
 - Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs;
 - A self-audit line counting report-shaped files that match no known artifact pattern, so that a producer skill's renamed output is noticed rather than silently dropping out of the coverage band.
 
-This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/` and `wkdrs/env_<name>_<date>/`) — without creating or modifying any file.
+This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, and `wkdrs/digests/`) — without creating or modifying any file.
 
 See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
 
-## 15. `$star-metd-summarize`: compile the plans into method documents
+## 16. `$star-metd-summarize`: compile the plans into method documents
 
 ### When to use it
 
@@ -845,7 +916,7 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 
 See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.agents/skills/star-metd-summarize/SKILL.md).
 
-## 16. End-to-end example
+## 17. End-to-end example
 
 The following sequence illustrates a typical workflow.
 
@@ -948,7 +1019,7 @@ $star-metd-summarize
 
 This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. Anything sourced from a leaf that has not been executed is marked not yet verified, and every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile whenever the plans move; a document whose sources have not changed is left untouched.
 
-## 17. Frequently asked questions
+## 18. Frequently asked questions
 
 ### Which skill should I use first?
 
@@ -1030,7 +1101,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
 
-## 18. Skill locations
+## 19. Skill locations
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
@@ -1042,7 +1113,7 @@ Every skill directory has the same shape in all three roots: `SKILL.md` is the e
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 
-The thirteen skill directory names are:
+The fourteen skill directory names are:
 
 ```text
 star-proj-adopt
@@ -1055,6 +1126,7 @@ star-plan-decomposer
 star-plan-executor
 star-code-reviewer
 star-expt-analyst
+star-expt-digest
 star-plan-reviser
 star-flow-status
 star-metd-summarize

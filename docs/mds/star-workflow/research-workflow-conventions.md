@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The thirteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The fourteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
 
 **Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
@@ -10,7 +10,7 @@ This file is a contract for the skills and a description for the reader: it is w
 
 ## 1. Git
 
-**Skills that never commit** — git usage is read-only (`status` / `diff` / `log`): `star-flow-status`, `star-refs-reviewer`, `star-expt-analyst`, `star-metd-summarize`.
+**Skills that never commit** — git usage is read-only (`status` / `diff` / `log`): `star-flow-status`, `star-refs-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-metd-summarize`.
 
 **Skills that may commit**, and what each may stage:
 
@@ -122,7 +122,8 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Code review | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md`, else `wkdrs/reviews/code_<scope>_<date>.md` | date in filename |
 | Plan review | `star-plan-reviser` | `wkdrs/<run>/REVIEW_<date>.md`, else `wkdrs/reviews/<prefix>_<slug>_<date>.md` | date in filename |
 | Analysis | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, `wkdrs/<run>/analysis/` | date in filename |
-| Ledger | `star-expt-analyst aggregate` | `metds/results.md` | `generated:` |
+| Ledger | `star-expt-analyst aggregate` | `metds/results.md`, else `metds/results_<slug>.md` when scoped | `generated:` |
+| Digest | `star-expt-digest` | `wkdrs/digests/EXPT_DIGEST_<date>.md` | `covers:`, `sources:` |
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
 
 **One carve-out.** In its `backfill` phase, `star-proj-adopt` may write `exec_status:` and `exec_runs:` — and nothing else — onto leaves in `metds/plans/`, each leaf individually confirmed by the user. Those two fields are the Run row's state, and adoption is the one case where the work they describe happened before any plan existed to record it. Every other part of a plan file, in both of adoption's phases, stays with the producers named in the Plan row.

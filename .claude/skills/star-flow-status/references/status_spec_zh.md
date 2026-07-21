@@ -67,15 +67,17 @@
 | 3 | 缺代码审查 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `CODE_REVIEW_<date>.md` | `/star-code-reviewer <叶子>` |
 | 4 | 代码审查过期 | 该 run 最新的 `CODE_REVIEW_<date>.md` 存在 **且** 其日期早于该 run `EXEC_LOG.md` 里最后一条带日期的记录 | `/star-code-reviewer <叶子>` |
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `/star-expt-analyst <叶子>` |
-| 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**（`metds/results.md` 不存在 **或** 其 `generated:` 早于这些报告里最新的日期） | `/star-expt-analyst aggregate` |
+| 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `metds/results.md` 与（限定到 `PLAN_NAME` 时的）`metds/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `/star-metd-summarize` |
 | 8 | 方法文档缺失 | ≥1 个叶子 `exec_status: done` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `/star-proj-adopt backfill` |
+| 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `/star-expt-digest` |
 
-有三行特别容易做错：
+有四行特别容易做错：
 
 - **第 4 行需要日志里有日期，没有就沉默。** EXEC_LOG 的步骤表并不强制带日期列。日志里没有可比对的带日期条目时，第 4 行无法判定——那就什么都不报，绝不退回去拿文件 mtime 猜。真正要紧的那种情况（压根没有审查）已经由第 3 行覆盖。
 - **第 7 行是精确对账，不是拿 mtime 猜。** `/star-metd-summarize` 会逐个源计划记下"读取时该计划带的 `updated` 值"。拿那个记录值和计划当前的 `updated` 比——绝不用文件 mtime，它会因为无关的事情变动（一次 checkout、一次格式化）。
+- **第 10 行只对已经在记 digest 的项目触发。** 与第 2、7、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，一个从没跑过 `/star-expt-digest` 的项目并不因此欠账。所以这一行问的是“已有的序列有没有落在分析报告后面”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不可被当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对水位线的定义一致。
 - **第 1 行是这里最弱的信号。** `/star-plan-coach` 把种子记在计划 §1 的散文里（"Seeded from `metds/ideas/<slug>_idea.md`"），不是 frontmatter 字段，所以检测靠 slug 匹配加上对想法文件名的正文 grep。一份由想法长出来、之后又被改名的计划，会被读成"未立项"。当只有第 1 行触发时，说明这条检查是启发式的。
 
 ## 下一步动作（唯一的建议）
@@ -83,7 +85,7 @@
 自上而下走阶梯，取**第一个**能给出候选的层。其余欠账留在覆盖带里，此处不重复。
 
 1. **待用户** —— 某个 `⏸` 叶子有未勾选的 STOP 命令。点名该命令；只有用户能清掉它，在那之前下面几层都不重要。
-2. **已完成工作的欠账** —— 落在已完成之事上的覆盖带触发项，按"欠账滚得多快"取：回填（第 9 行）→ 审查（第 3、4 行）→ 分析（第 5 行）→ 汇总台账（第 6 行）→ 凝练方法（第 7、8 行）→ 文献（第 2 行）。第 9 行排在最前，因为它是那种会把其余欠账一起藏起来的欠账：在被接入项目里已完成的叶子拿到 `exec_status: done` 之前，第 3、5 行根本无法在它们身上触发，而第 3 层还会兴高采烈地建议你去执行一个成果早已躺在磁盘上的叶子。除第 1 行外的每一条覆盖行都能在这一层被取到；第 1 行归第 4 层，因为"开一个新题目"不是欠账。文献虽然在流程里靠前，却排在最后：缺综述的代价是写作时的定位，而未审代码的代价是压在它上面的每一个叶子——所以"去读文献"绝不该盖过"你刚跑完的那个 run 从没审过代码"。欠账优先于进度，因为它会滚：每多执行一个建立在未审代码之上的叶子、每多引用一次过期台账的数字，将来要返工的面就更宽。而下一个叶子不会过期。
+2. **已完成工作的欠账** —— 落在已完成之事上的覆盖带触发项，按"欠账滚得多快"取：回填（第 9 行）→ 审查（第 3、4 行）→ 分析（第 5 行）→ 汇总台账（第 6 行）→ 凝练方法（第 7、8 行）→ 文献（第 2 行）→ digest（第 10 行）。第 9 行排在最前，因为它是那种会把其余欠账一起藏起来的欠账：在被接入项目里已完成的叶子拿到 `exec_status: done` 之前，第 3、5 行根本无法在它们身上触发，而第 3 层还会兴高采烈地建议你去执行一个成果早已躺在磁盘上的叶子。除第 1 行外的每一条覆盖行都能在这一层被取到；第 1 行归第 4 层，因为"开一个新题目"不是欠账。digest 排在最末，也是这份清单上唯一一条推迟不付出代价的欠账：每份 digest 都由留在磁盘上的分析报告重新编译，而且无论隔多久，序列都不会出现缺口——所以迟写的 digest 不丢任何信息，而这份清单上其余每一行都会越拖越贵。文献虽然在流程里靠前，却排在倒数第二：缺综述的代价是写作时的定位，而未审代码的代价是压在它上面的每一个叶子——所以"去读文献"绝不该盖过"你刚跑完的那个 run 从没审过代码"。欠账优先于进度，因为它会滚：每多执行一个建立在未审代码之上的叶子、每多引用一次过期台账的数字，将来要返工的面就更宽。而下一个叶子不会过期。
 3. **下一个可执行叶子** —— **执行顺序里最靠前**、且同时满足以下全部的叶子：`exec_status` 既非 `done` 也非 `blocked`；其 `depends_on` 里每个前缀都能解析到一个 `exec_status` 为 `done` 的兄弟；它不是 `⚠` 粗糙叶子（若是，改为建议先拆解它）。"执行顺序" = 由 `depends_on` 得到的拓扑序，以前缀升序破平局，深度优先遍历（使某个已拆解节点自己的叶子排在它后面的兄弟之前）。输出 `→ 下一个: /star-plan-executor <前缀或 slug>`。
 4. **已定稿但未立项的想法** —— 即覆盖带第 1 行。只有当树全部完成且不欠任何东西时才会走到这一层；而那时正是开下一个题目的时候。
 
@@ -105,7 +107,7 @@
 上面的覆盖带是按文件名匹配产物的。如果某个生产者 skill 改了它写出来的东西，覆盖带会悄悄不再触发那一行——这是一次没人会察觉的漏报。这一行把那种失败翻转成看得见的。只数**报告形**文件，让 run 产物（权重、图、原始日志）绝不进来：
 
 - 直接位于某个 `wkdrs/<run>/` 目录下的 `*.md`，且文件名不是 `EXEC_PLAN.md`、`EXEC_LOG.md`、`CODE_REVIEW_<date>.md`、`EXPT_ANALYSIS_<date>.md`、`REVIEW_<date>.md`；
-- 直接位于 `wkdrs/` 下两个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（无 run 时的共用兜底目录）登记的名字是 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记的名字是 `ENV_REPORT.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
-- `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`results`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，意味着某个生产者既改了输出名又丢掉了 `type:` 时仍然会被抓到；而 `metds/` 下手写的笔记三者皆无，保持沉默。
+- 直接位于 `wkdrs/` 下三个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（无 run 时的共用兜底目录）登记的名字是 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记的名字是 `ENV_REPORT.md`；`wkdrs/digests/` 登记的名字是 `EXPT_DIGEST_<date>.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
+- `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`results`、`results_<slug>`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，意味着某个生产者既改了输出名又丢掉了 `type:` 时仍然会被抓到；而 `metds/` 下手写的笔记三者皆无，保持沉默。
 
 不要下钻子目录（`analysis/`、`raw/`、`refs/`）——那是各生产者自己的工作空间，本就不在注册表内。报一行：`⚠ N 个未识别的报告文件` + 至多三个路径。N 为 0 时整行省略。这是命名不一致，不是对文件本身的判断：它意味着规约 §8 的注册表和磁盘上的实际情况已经分叉，两者之一需要更新。

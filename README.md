@@ -16,12 +16,12 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - **A consistent project layout** for code, data, weights, outputs, and research notes.
 - **A portable runtime boundary**: machine-specific paths live in a local `.env` file rather than in scripts.
 - **A single experiment entrypoint** through `execs/run.sh`.
-- **A complete research lifecycle** through thirteen complementary skills for adopting an already-started project without disturbing it, converging a vague interest into a defensible research topic, drafting plans, surveying the related work into analysis notes and a verified bibliography, recursively decomposing them, bootstrapping the codebase from a reference implementation, building the runtime environment, executing leaf plans, reviewing code against conventions and plan promises, analyzing run results against what the plan expected, revising plans against execution evidence, summarizing global status, and compiling the matured plans into method documents.
+- **A complete research lifecycle** through fourteen complementary skills for adopting an already-started project without disturbing it, converging a vague interest into a defensible research topic, drafting plans, surveying the related work into analysis notes and a verified bibliography, recursively decomposing them, bootstrapping the codebase from a reference implementation, building the runtime environment, executing leaf plans, reviewing code against conventions and plan promises, analyzing run results against what the plan expected, digesting progress over a period, revising plans against execution evidence, summarizing global status, and compiling the matured plans into method documents.
 - **A traceable, resumable research process** that stores plans under `metds/plans/`, plan-execution intermediates under `tasks/`, and generated run artifacts under `wkdrs/` instead of relying on chat history for context.
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
-See [Research workflow](#research-workflow) for the responsibilities, invocation patterns, and complete examples for all thirteen skills.
+See [Research workflow](#research-workflow) for the responsibilities, invocation patterns, and complete examples for all fourteen skills.
 
 ## Project structure
 
@@ -179,10 +179,10 @@ Run names and output directories should distinguish tasks, experiments, or repet
 
 ## Research workflow
 
-STAR includes thirteen complementary skills that turn a vague research interest into an auditable execution process:
+STAR includes fourteen complementary skills that turn a vague research interest into an auditable execution process:
 
 <div align="center">
-  <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: twelve skills in the order they run in plus one that reads them all, what each one writes, and how the per-leaf loop closes" width="100%">
+  <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: twelve skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes" width="100%">
 </div>
 
 | Skill | Purpose | Main output |
@@ -196,14 +196,15 @@ STAR includes thirteen complementary skills that turn a vague research interest 
 | `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
 | `$star-plan-executor` | Implement and lightly validate one executable leaf plan | The plan's own tool scripts and intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
-| `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `metds/results.md` in `aggregate` mode |
+| `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `metds/results.md` (or `metds/results_<slug>.md` when scoped) in `aggregate` mode |
+| `$star-expt-digest` | Summarize what the programme has done lately, on the time axis: resume from the previous digest, or cover an explicit window or a whole plan family; tabulate each run's verdict and headline metrics from its analysis report, derive what moved since last time, and list the gaps | `wkdrs/digests/EXPT_DIGEST_<date>.md` |
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |
 | `$star-flow-status` | Report progress across the whole flow — the plan tree, plus finished work whose review, analysis, or write-up is missing or stale — and the single next action | Read-only status summary |
 | `$star-metd-summarize` | Compile the plan tree into paper-ready method documents, marking what is not yet verified and turning what no plan covers into TODOs | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` |
 
 ### Model selection
 
-Different stages benefit from different model strengths. For brainstorming and judging research directions, for drafting, decomposing, and revising research plans, for judging how related work positions the method, for interpreting what experiment results mean, and for compiling the plans into method write-ups, we recommend using Claude Fable5 Extra or ChatGPT5.6 Sol High with `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, and `$star-metd-summarize`. For codebase bootstrapping, environment builds, plan execution, code review, and progress summaries, we recommend using Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), or Cursor Grok4.5 High with `$star-proj-adopt`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, and `$star-flow-status`. When resources permit, using the strongest available model across all thirteen workflows generally delivers the best overall results.
+Different stages benefit from different model strengths. For brainstorming and judging research directions, for drafting, decomposing, and revising research plans, for judging how related work positions the method, for interpreting what experiment results mean, and for compiling the plans into method write-ups, we recommend using Claude Fable5 Extra or ChatGPT5.6 Sol High with `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, and `$star-metd-summarize`. For codebase bootstrapping, environment builds, plan execution, code review, periodic progress digests, and progress summaries, we recommend using Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), or Cursor Grok4.5 High with `$star-proj-adopt`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-expt-digest`, and `$star-flow-status`. When resources permit, using the strongest available model across all fourteen workflows generally delivers the best overall results.
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 

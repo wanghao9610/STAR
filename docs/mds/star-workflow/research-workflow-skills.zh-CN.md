@@ -2,7 +2,7 @@
 
 **语言：** [English](research-workflow-skills.md) | 简体中文
 
-STAR 提供十三个相互衔接的研究工作流 skill，用于把一个模糊的研究兴趣逐步变成有文献扫描背书的研究选题、可追踪的计划、有可核验文献库的相关工作基座、有架构记录的代码库、经过验证的运行环境、可执行的任务、有验证记录的实现、对照规范审计过的代码、对照预期审计过的实验结果、能吸收执行结果的计划，以及从这些计划反向编译出的方法文档：
+STAR 提供十四个相互衔接的研究工作流 skill，用于把一个模糊的研究兴趣逐步变成有文献扫描背书的研究选题、可追踪的计划、有可核验文献库的相关工作基座、有架构记录的代码库、经过验证的运行环境、可执行的任务、有验证记录的实现、对照规范审计过的代码、对照预期审计过的实验结果、按时间轴沉淀的阶段进展、能吸收执行结果的计划，以及从这些计划反向编译出的方法文档：
 
 ```text
 已经开工的项目
@@ -18,6 +18,7 @@ STAR 提供十三个相互衔接的研究工作流 skill，用于把一个模糊
   → star-plan-executor：实现并验证一个叶子子计划
   → star-code-reviewer：对照规范与计划审计实现代码
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
+  → star-expt-digest：汇总本阶段实验做了什么、什么发生了变化
   → star-plan-reviser：以执行证据审查计划并修订
   → star-metd-summarize：把成熟的计划编译成方法文档
 
@@ -25,9 +26,9 @@ STAR 提供十三个相互衔接的研究工作流 skill，用于把一个模糊
     进度到哪里、还欠什么、下一步该做哪一件
 ```
 
-上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
+上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
 
-![STAR 研究工作流：十二个 skill 的调用顺序与一个通读全局的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
+![STAR 研究工作流：十二个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
@@ -680,11 +681,12 @@ $star-expt-analyst watch 00                       # 对可能仍在运行的 run
 wkdrs/<run>/EXPT_ANALYSIS_<日期>.md   # 分析报告
 wkdrs/<run>/analysis/*.png            # 曲线，matplotlib 可用时（连同生成它们的脚本）
 metds/results.md                      # 仅 aggregate 模式：跨 run 的结果总账
+                                      # （限定到子树时为 metds/results_<slug>.md）
 ```
 
 ### 结果总账（`aggregate`）
 
-`$star-expt-analyst aggregate [PLAN_NAME]` 回答单个 run 回答不了的问题：*整个实验计划显示了什么？* 它收集每个叶子最新的分析报告，在放行每个数字之前**回到该报告引用的来源处重开确认**——报告是已验证的，但不是照抄它的许可——然后编译出 `metds/results.md`：每条 claim 一张表、每个消融一张表，取自根计划 §4 的 claim→实验映射而非计划树，每个数字都带着它的 run、来源与判定。判定为 `invalid` 或 `inconclusive` 的 run，以及复核未通过的数字，会被排除到一个点名并说明原因的小节，好让读者数得出被拿掉了什么；`not met` 的 run 留在它的表里，因为负结果也是结果。总账只报数字、不解释数字——说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。它与只定义协议、绝不携带分数的 `metds/evaluation.md` 配成一对，正是论文结果节据以撰写的素材。
+`$star-expt-analyst aggregate [PLAN_NAME]` 回答单个 run 回答不了的问题：*整个实验计划显示了什么？* 它收集每个叶子最新的分析报告，在放行每个数字之前**回到该报告引用的来源处重开确认**——报告是已验证的，但不是照抄它的许可——然后编译出 `metds/results.md`——限定到某棵子树时则是 `metds/results_<slug>.md`，这样限定范围的一次运行绝不会冲掉项目总账：每条 claim 一张表、每个消融一张表，取自根计划 §4 的 claim→实验映射而非计划树，每个数字都带着它的 run、来源与判定。判定为 `invalid` 或 `inconclusive` 的 run，以及复核未通过的数字，会被排除到一个点名并说明原因的小节，好让读者数得出被拿掉了什么；`not met` 的 run 留在它的表里，因为负结果也是结果。总账只报数字、不解释数字——说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。它与只定义协议、绝不携带分数的 `metds/evaluation.md` 配成一对，正是论文结果节据以撰写的素材。
 
 报告记录范围与证据基础、run 判定、完成判据记分卡、产物清点与完成度、日志健康、带来源的指标与跨 run 对比、解读，以及路由。
 
@@ -700,7 +702,76 @@ metds/results.md                      # 仅 aggregate 模式：跨 run 的结果
 
 完整定义见 [`star-expt-analyst/SKILL_zh.md`](../../../.agents/skills/star-expt-analyst/SKILL_zh.md)。
 
-## 13. `$star-plan-reviser`：审查并修订一个计划
+## 13. `$star-expt-digest`：按时间轴汇总阶段进展
+
+### 何时使用
+
+- 周五了，或一个冲刺结束了，你想要一页纸说清这周的实验做了什么。
+- 你离开两周后回来，需要知道这期间发生了什么。
+- 你要写进度汇报，或准备见导师。
+- 你想把一个计划家族到目前为止的全部产出——父计划的问题加上每个后代的答案——放在一处看。
+- 你想知道相对上次*变了什么*，而不只是现在停在哪。
+
+### 调用方式
+
+```text
+$star-expt-digest                          # 自上一份 digest 以来——默认节奏
+$star-expt-digest 7d                       # 最近七天
+$star-expt-digest 2026-07-01               # 自该日期起
+$star-expt-digest 01                       # 计划家族：该节点、其祖先、其全部叶子
+$star-expt-digest core-method-pipeline
+$star-expt-digest all                      # 全部历史；重建整个序列
+```
+
+不带参数时，skill 会把最新一份 digest 的 `covers.through` 读作水位线，覆盖其后的全部内容，因此按固定节奏运行就能得到一个不漏、不重的序列。计划参数接受常规的 slug / 数字前缀 / 文件名形式。
+
+### 它做什么
+
+1. 先确定周期并在读任何东西之前说出来，好让错误的窗口尽早被发现——空周期就如实报成空周期，绝不为此放宽窗口；
+2. 收集范围内的 run，并按其分析报告日期、其次按 `EXEC_LOG` 最后一条带日期的条目给每个 run 定日期——绝不用文件 mtime，它会因为一次 checkout 或备份而改变；
+3. 对每个**报告支撑**的 run，只读它最新的 `EXPT_ANALYSIS_<日期>.md`，取其判定、记分卡与头条指标，并原样带上报告记录的来源与 split；
+4. 对每个**临时**的 run，只读它的 `EXEC_LOG.md`——状态、步数、战略信号，以及仅当日志自己点名了数字及其文件时才取的那个数字；
+5. 与上一份 digest 的 `sources:` 求差，推导出变化：新增的 run、判定变了的 run、上次还是临时层而这次已被分析的 run；
+6. 记录窗内新建、修订、拆解或定稿的计划，并列出缺口——未分析的 run、未执行的叶子、待用户执行的 STOP 命令、过期的台账；
+7. 写下带日期的 digest，并在对话里给出简短摘要与路由。
+
+### 主要产物
+
+```text
+wkdrs/digests/EXPT_DIGEST_<日期>.md   # 该周期的 digest
+```
+
+### 两层证据，以及它们为何绝不混合
+
+有分析报告的 run 属**报告支撑**层：数字连同出处引自那份报告。没有的属**临时**层：原始读取其日志得到粗略一行，标注 `provisional (unverified)`，单独成表。两者之间的墙是刚性的——临时数字绝不对照完成判据评分、绝不参与变化计算、绝不作为结果引用、也绝不允许进入 `metds/results.md`。正是这堵墙让临时层可以存在：它让一周的工作变得可见，同时不让一个未核实的数字去与台账矛盾。
+
+### 与相邻 skill 的分工
+
+三个 skill 都跨 run 阅读，但回答的问题不同：
+
+| 问题 | Skill | 轴 |
+|---|---|---|
+| *这个 run* 达到它的计划了吗？ | `$star-expt-analyst <plan>` | 单个 run，已核实 |
+| 按 claim 组织的最终数字是什么？ | `$star-expt-analyst aggregate` | claim 轴，从源头重新核实 |
+| 现在整体走到哪了？ | `$star-flow-status` | 当前状态，无记忆 |
+| 最近发生了什么，学到了什么？ | `$star-expt-digest` | 时间轴，报告级 |
+
+digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它连同出处抄录数字，而不回到源头去确认。这就是两者全部的成本差别，也是 digest 能按周跑而 aggregate 不能的原因。这同时意味着 digest 永远不是你把数字抄进论文时该引用的那个文件——那是 `metds/results.md`，而每份 digest 都在正面写明了这一点。
+
+### 写入边界
+
+本 skill **除自己的 digest 外严格只读**。它绝不改计划、`exec_status`、`EXEC_LOG.md`、分析报告或结果台账，也绝不为填缺口去跑任何东西——每个缺口都是一行带着关闭命令的条目。它同样绝不说某个变体*为什么*赢：和台账一样，它报告变化的方向，并把解读路由出去。
+
+### 实践建议
+
+- 按节奏跑——每周是最自然的节奏。价值是累积的：每份 digest 的"变化"段，取决于它拿来比对的上一份 digest 有多好。
+- 一份满是临时行的 digest 是信号，不是失败：它说明 run 跑完的速度快过被分析的速度。用 `$star-expt-analyst` 对点名的那些 run 清掉它。
+- 里程碑评审前用 plan 模式，这时你要的是一个家族的完整故事，而不是一个日期区间。
+- `wkdrs/` 默认被 git 忽略，因此 digest 序列存在你的磁盘上，不在仓库历史里。digest 可以从分析报告重新生成，所以这是可恢复的——但别把 digest 当成存档记录。
+
+完整定义见 [`star-expt-digest/SKILL.md`](../../../.agents/skills/star-expt-digest/SKILL.md)。
+
+## 14. `$star-plan-reviser`：审查并修订一个计划
 
 ### 什么时候用
 
@@ -749,7 +820,7 @@ metds/plans/<prefix>_<slug>_plan.md   # 就地修订，并带一条 Revision His
 
 完整定义见 [`star-plan-reviser/SKILL_zh.md`](../../../.agents/skills/star-plan-reviser/SKILL_zh.md)。
 
-## 14. `$star-flow-status`：查看整条流程的状态
+## 15. `$star-flow-status`：查看整条流程的状态
 
 ### 什么时候用
 
@@ -779,16 +850,16 @@ $star-flow-status 01
 - 带状态的计划树；
 - 战略章节完整度、拆解覆盖度和叶子执行进度；
 - 每个叶子的依赖、日志步骤进度、阻塞或待用户命令；
-- 一条覆盖带：已完成工作里缺失或过期的后续环节——已 done 的叶子却没有代码审查或实验分析、审查过的 run 其日志之后又往前走了、结果台账或方法文档比其来源还旧、已定稿的想法一直没变成计划。只打印触发的检查项；仍在进行中的工作什么都不欠，保持沉默；
+- 一条覆盖带：已完成工作里缺失或过期的后续环节——已 done 的叶子却没有代码审查或实验分析、审查过的 run 其日志之后又往前走了、结果台账或方法文档比其来源还旧、digest 序列落在了分析报告后面、已定稿的想法一直没变成计划。只打印触发的检查项；仍在进行中的工作什么都不欠，保持沉默；
 - 唯一一条推荐的下一步动作，由固定阶梯选出——待用户命令优先，其次是已完成工作的欠账，再次是下一个可执行叶子，最后是已定稿但未立项的想法——并附理由；
 - 父计划更新晚于子计划、悬挂链接、坏依赖、孤儿 run 等 drift；
 - 一行自审线，统计不匹配任何已知产物模式的报告形文件，好让某个生产者 skill 改了输出命名这件事被看见，而不是让对应的覆盖检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/` 与 `wkdrs/env_<name>_<date>/`）——不会创建或修改任何文件。
+这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/` 与 `wkdrs/digests/`）——不会创建或修改任何文件。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 
-## 15. `$star-metd-summarize`：把计划编译成方法文档
+## 16. `$star-metd-summarize`：把计划编译成方法文档
 
 ### 什么时候用
 
@@ -845,7 +916,7 @@ $star-metd-summarize
 
 完整定义见 [`star-metd-summarize/SKILL_zh.md`](../../../.agents/skills/star-metd-summarize/SKILL_zh.md)。
 
-## 16. 一套完整的使用示例
+## 17. 一套完整的使用示例
 
 下面是一条典型路径。
 
@@ -948,7 +1019,7 @@ $star-metd-summarize
 
 它会从计划树编译出 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md` 和 `evaluation.md`。凡是来自尚未执行的叶子的内容都会标注"尚未验证"，没有覆盖的小节则转成点名了该补进哪个计划哪一节的 `TODO`——于是这份缺口清单同时也是计划的待办清单。计划一动就重新编译；来源没变的文档会原样不动。
 
-## 17. 常见问题
+## 18. 常见问题
 
 ### 应该先用哪个 skill？
 
@@ -1030,7 +1101,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status` 和 `exec_runs`。修改父计划后，先运行 `$star-flow-status` 检查 drift，再决定是否重新拆解。
 
-## 18. Skill 文件位置
+## 19. Skill 文件位置
 
 不同工具使用各自适配的 skill 副本，不要混用其中的工具调用说明：
 
@@ -1042,7 +1113,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 
-十三个目录名分别是：
+十四个目录名分别是：
 
 ```text
 star-proj-adopt
@@ -1055,6 +1126,7 @@ star-plan-decomposer
 star-plan-executor
 star-code-reviewer
 star-expt-analyst
+star-expt-digest
 star-plan-reviser
 star-flow-status
 star-metd-summarize

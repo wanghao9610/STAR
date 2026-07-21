@@ -2,7 +2,7 @@
 
 Per-run analysis answers *did this run meet its plan*. Aggregate answers *what does the whole experiment programme show, and where did each number come from* — compiling every run's verified numbers into one ledger, `metds/results.md`: the material a paper's results section is written from, and the counterpart to `metds/evaluation.md`, which defines the protocol these numbers were measured under.
 
-This file defines scope, the trust model, the axis, what the ledger never does, exclusion, and the write gate.
+This file defines scope, the destination, the trust model, the axis, what the ledger never does, exclusion, and the write gate.
 
 ## Scope
 
@@ -13,6 +13,17 @@ This file defines scope, the trust model, the axis, what the ledger never does, 
 - a leaf with no `exec_runs` at all → never executed; list it as a gap and route to `star-plan-executor <slug>`.
 
 A scope where no leaf has a report is a valid answer: say so and stop. Never compile a ledger from nothing.
+
+## The destination follows the scope
+
+**The scope decides the filename, because a ledger that silently replaces a wider one is how a results section loses rows.**
+
+- **Whole forest** (`aggregate`, no plan name) → `metds/results.md`. The project ledger.
+- **Scoped** (`aggregate PLAN_NAME`) → `metds/results_<slug>.md`, where `<slug>` is the scoped node's slug — `metds/results_core-method-pipeline.md`. One file per subtree anyone aggregates.
+
+The two never write to each other's path, in either direction. A scoped run must never overwrite `metds/results.md`: it holds fewer runs by construction, so replacing the project ledger with it deletes every row outside the subtree while leaving a file that still looks complete. The `scope:` frontmatter records what the file covers; the filename is what keeps it from being clobbered.
+
+A scoped ledger is a **view, not a fork**. It is regenerated from the same reports under the same trust model, and it never carries a number the project ledger would not. When both exist and disagree, the project ledger is authoritative and the scoped one is stale — recompile it rather than reconciling by hand.
 
 ## Trust model: re-verify from source, never transitively
 
@@ -69,6 +80,8 @@ sources:                          # every run that fed this ledger
 
 ## Write gate
 
+Applied to the destination the scope selected above — never to the other one.
+
 - **Missing** → write it.
-- **Exists with `type: results`** → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → write nothing; leave the file and its `generated` date alone.
+- **Exists with `type: results`** → confirm its `scope:` matches the scope being compiled. It does → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → write nothing; leave the file and its `generated` date alone. It does **not** match — a wider scope than the one being compiled — → stop and say so rather than narrowing it; that is the clobber the filename rule exists to prevent.
 - **Exists without that frontmatter** → hand-authored. Say what it holds and what compiling would replace it with, and ask. Leaving it alone is a valid outcome; so is compiling to a path the user names.
