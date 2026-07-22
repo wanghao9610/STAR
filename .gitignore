@@ -2,8 +2,13 @@
 
 inits/
 datas/
-wkdrs/
-.cache/
-__pycache__/
+
+wkdrs/**
+!wkdrs/**/
+!wkdrs/**/*.md
+!wkdrs/.gitkeep
+
 .ruff_cache/
 .pytest_cache/
+**/__pycache__/
+**/.cache/
