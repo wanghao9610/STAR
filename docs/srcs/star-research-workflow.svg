@@ -24,6 +24,8 @@
       .ahr { fill: #94a3b8; }
       .ahv { fill: #7048e8; }
       .jn { font-family: Menlo, ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; font-weight: 700; fill: #7048e8; text-anchor: middle; }
+      .lh { font-size: 8.5px; font-weight: 700; fill: #94a3b8; letter-spacing: 0.09em; }
+      .ef { font-size: 9px; fill: #94a3b8; }
     </style>
   </defs>
 
@@ -323,42 +325,53 @@
   <text class="lv" x="248" y="1024">missing detail → plan sync</text>
 
   <!-- ============ LEGEND ============ -->
-  <!-- A full-width footer strip rather than a floating box: once the bottom row
-       held three nodes, a 420-wide box left a white void on either side of it.
-       Row 1 is how to read an edge, row 2 is what a colour means. -->
-  <rect x="60" y="1056" width="1240" height="82" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <!-- Three cards on the diagram's own column grid, each sharing the x and width
+       of the node above it (11 / 12 / digest), so the legend reads as a fourth
+       row of the same table rather than a bar bolted to the bottom. The content
+       is only ~630px wide, so stretching it across the full 1240 left every item
+       marooned from its neighbour; grouping it into three labelled cards keeps
+       each icon next to its label and the white space outside the groups. -->
 
-  <circle cx="90" cy="1082" r="9" fill="#0ca678"/>
-  <circle cx="90" cy="1082" r="5" fill="#f8fafc"/>
-  <circle cx="90" cy="1082" r="2.4" fill="#0ca678"/>
-  <text class="el" x="108" y="1086">reads every stage · run it at any time</text>
+  <!-- EDGES — aligned with 11 metd-summarize -->
+  <rect x="60" y="1050" width="400" height="102" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text class="lh" x="78" y="1072">EDGES</text>
 
-  <path class="spine" d="M402,1082 L430,1082"/>
-  <path class="ah" d="M430,1082 L421,1077.5 L421,1086.5 Z"/>
-  <text class="el" x="440" y="1086">the usual order</text>
+  <path class="spine" d="M78,1092.5 L106,1092.5"/>
+  <path class="ah" d="M106,1092.5 L97,1088 L97,1097 Z"/>
+  <text class="el" x="116" y="1096">the usual order</text>
 
-  <path class="read" d="M627,1082 L655,1082"/>
-  <path class="ahr" d="M655,1082 L646,1077.5 L646,1086.5 Z"/>
-  <text class="el" x="665" y="1086">reads, does not consume</text>
+  <path class="read" d="M78,1112.5 L106,1112.5"/>
+  <path class="ahr" d="M106,1112.5 L97,1108 L97,1117 Z"/>
+  <text class="el" x="116" y="1116">reads, does not consume</text>
 
-  <path class="loop" d="M893,1082 L921,1082"/>
-  <path class="ahv" d="M921,1082 L912,1077.5 L912,1086.5 Z"/>
-  <text class="el" x="931" y="1086">routes back / re-entry</text>
+  <path class="loop" d="M78,1132.5 L106,1132.5"/>
+  <path class="ahv" d="M106,1132.5 L97,1128 L97,1137 Z"/>
+  <text class="el" x="116" y="1136">routes back / re-entry</text>
 
-  <circle cx="1163" cy="1082" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
-  <text class="jn" x="1163" y="1086" style="font-size:9.5px">N</text>
-  <text class="el" x="1181" y="1086">continues at skill N</text>
+  <!-- NODE KINDS — aligned with 12 code-release -->
+  <rect x="520" y="1050" width="340" height="102" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text class="lh" x="538" y="1072">NODE KINDS</text>
 
-  <rect x="90" y="1108" width="12" height="12" rx="3" fill="#4c6ef5"/>
-  <text class="el" x="108" y="1118">plans</text>
-  <rect x="356" y="1108" width="12" height="12" rx="3" fill="#f76707"/>
-  <text class="el" x="374" y="1118">code &amp; env</text>
-  <rect x="648" y="1108" width="12" height="12" rx="3" fill="#0ca678"/>
-  <text class="el" x="666" y="1118">reads &amp; reports</text>
+  <rect x="538" y="1086" width="12" height="12" rx="3" fill="#4c6ef5"/>
+  <text class="el" x="556" y="1096">plans</text>
+  <rect x="538" y="1106" width="12" height="12" rx="3" fill="#f76707"/>
+  <text class="el" x="556" y="1116">code &amp; env</text>
+  <rect x="538" y="1126" width="12" height="12" rx="3" fill="#0ca678"/>
+  <text class="el" x="556" y="1136">reads &amp; reports</text>
 
-  <circle cx="968" cy="1114" r="6" fill="#0ca678"/>
-  <circle cx="968" cy="1114" r="3.4" fill="#f8fafc"/>
-  <circle cx="968" cy="1114" r="1.6" fill="#0ca678"/>
-  <text class="el" x="982" y="1118" font-size="9.5">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
+  <!-- READING THE FLOW — aligned with expt-digest -->
+  <rect x="960" y="1050" width="340" height="102" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text class="lh" x="978" y="1072">READING THE FLOW</text>
+
+  <circle cx="987" cy="1092.5" r="8" fill="#0ca678"/>
+  <circle cx="987" cy="1092.5" r="4.5" fill="#f8fafc"/>
+  <circle cx="987" cy="1092.5" r="2.2" fill="#0ca678"/>
+  <text class="el" x="1004" y="1096">reads every stage · run it any time</text>
+
+  <circle cx="987" cy="1112.5" r="8" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="987" y="1116" style="font-size:8.5px">N</text>
+  <text class="el" x="1004" y="1116">continues at skill N</text>
+
+  <text class="ef" x="978" y="1136">→ 7 → 9 is the light path per leaf; the full path adds 8 and 10</text>
   </g>
 </svg>
