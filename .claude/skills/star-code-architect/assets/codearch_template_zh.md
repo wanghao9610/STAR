@@ -5,6 +5,7 @@ upstream_commit: <sha，或 —>
 language: zh
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # 代码架构 — <CODE_NAME>

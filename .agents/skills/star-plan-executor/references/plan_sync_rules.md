@@ -57,7 +57,7 @@ For each confirmed row:
    ```markdown
    ## Revision History
 
-   ### <YYYY-MM-DD> — star-plan-executor (run: <prefix>_<slug>, approval gate | finalize)
+   ### <YYYY-MM-DD> — star-plan-executor · <model_id> (run: <prefix>_<slug>, approval gate | finalize)
    - MODIFIED §3.2: "<old>" → "<new>" — <reason>
    - ADDED §3.5: "<new step>" — <reason>
    - ENRICHED §3.3: lr unstated → 1e-4 — cited by: training.md §3

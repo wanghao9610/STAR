@@ -4,6 +4,7 @@ language: zh
 adopted: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 backfilled: <YYYY-MM-DD，或 — >
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # Project Adoption Record — 项目接入记录

@@ -1,6 +1,6 @@
 # Review — <prefix>_<slug> (<YYYY-MM-DD>)
 
-<!-- Written by /star-plan-reviser. Target: metds/plans/<file>; node type: leaf | internal | root;
+<!-- Written by /star-plan-reviser (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>). Target: metds/plans/<file>; node type: leaf | internal | root;
      exec_runs: <run dirs, newest last, or none>. Every claim cites evidence (path[:line], command output, or a
      frontmatter field). Sections with nothing to say collapse to one line — never pad. -->
 

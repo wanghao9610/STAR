@@ -4,6 +4,7 @@ slug: <slug>
 language: zh
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 status:
   problem: in_progress
   related_work: pending

@@ -1,6 +1,6 @@
 # Reference Index — <topic> (<YYYY-MM-DD>)
 
-<!-- Written by /star-refs-reviewer. This file is the audit trail for reference.bib: every entry's
+<!-- Written by /star-refs-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>). This file is the audit trail for reference.bib: every entry's
      origin is recorded here, so any field in the bib can be re-checked against the record it came
      from. An entry with no row here is not allowed to exist. -->
 

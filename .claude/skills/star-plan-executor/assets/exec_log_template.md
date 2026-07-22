@@ -4,6 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Execution Log — <prefix>_<slug>

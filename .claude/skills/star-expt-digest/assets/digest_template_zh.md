@@ -8,6 +8,7 @@ covers:
   from: <YYYY-MM-DD 或 "—">
   through: <YYYY-MM-DD>
 previous: <EXPT_DIGEST_<YYYY-MM-DD>.md 或 "—">
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 sources:
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md 或 "none">

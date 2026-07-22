@@ -3,6 +3,7 @@ run: <prefix>_<slug>
 source_plan: <prefix>_<slug>_plan.md
 analyzed: <YYYY-MM-DD>
 verdict: <met | partially met | not met | inconclusive | invalid>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Experiment Analysis — <run> (<YYYY-MM-DD>)

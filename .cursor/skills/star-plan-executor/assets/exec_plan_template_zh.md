@@ -7,6 +7,7 @@ code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # 用户在 plan 模式审批门后批准的日期
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # <子主题> 可执行计划

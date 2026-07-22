@@ -4,6 +4,7 @@ slug: <slug>
 language: en
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 status:
   seed: in_progress
   diverge: pending

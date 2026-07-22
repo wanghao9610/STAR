@@ -10,6 +10,7 @@ links:
   code: <URL，或 "none found">
   project: <URL，或 "none found">
 read_on: <YYYY-MM-DD>
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # <方法缩写> —— <一句话：它是什么>

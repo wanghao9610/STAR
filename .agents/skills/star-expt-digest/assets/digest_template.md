@@ -8,6 +8,7 @@ covers:
   from: <YYYY-MM-DD or "—">
   through: <YYYY-MM-DD>
 previous: <EXPT_DIGEST_<YYYY-MM-DD>.md or "—">
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 sources:
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md or "none">

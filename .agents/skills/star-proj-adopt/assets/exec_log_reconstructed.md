@@ -5,6 +5,7 @@ reconstructed: <YYYY-MM-DD>
 reconstructed_by: star-proj-adopt
 updated: <YYYY-MM-DD>
 status: done
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Execution Log — <run> (reconstructed)

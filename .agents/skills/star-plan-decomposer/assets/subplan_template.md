@@ -9,6 +9,7 @@ traces_to: "<root section/claim this executes, e.g. §6 milestone 1 (MVP); §4 c
 depends_on: []               # sibling prefixes that must finish first, e.g. ["00", "01"]; [] = independent
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 status:
   objective: in_progress
   deps: pending

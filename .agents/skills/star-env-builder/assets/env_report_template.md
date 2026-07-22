@@ -3,6 +3,7 @@ env_name: <ENV_NAME>
 backend: conda            # conda / venv
 created: <YYYY-MM-DD>     # real run date (date +%Y%m%d), never invented
 status: verified          # verified / partial / blocked
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Environment Report — <ENV_NAME>

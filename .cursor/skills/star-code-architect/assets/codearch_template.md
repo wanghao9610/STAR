@@ -5,6 +5,7 @@ upstream_commit: <sha, or —>
 language: en
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Code Architecture — <CODE_NAME>

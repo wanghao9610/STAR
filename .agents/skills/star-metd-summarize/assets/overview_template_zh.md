@@ -2,6 +2,7 @@
 type: overview
 language: zh
 generated: <YYYY-MM-DD>
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 sources:
   - plan: <prefix>_<slug>_plan.md
     updated: <YYYY-MM-DD>

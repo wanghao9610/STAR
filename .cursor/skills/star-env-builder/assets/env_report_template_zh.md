@@ -3,6 +3,7 @@ env_name: <ENV_NAME>
 backend: conda            # conda / venv
 created: <YYYY-MM-DD>     # 运行时真实日期（date +%Y%m%d），绝不编造
 status: verified          # verified / partial / blocked
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # 环境报告——<ENV_NAME>

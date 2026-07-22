@@ -4,6 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # 执行日志 — <prefix>_<slug>

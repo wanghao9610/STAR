@@ -3,6 +3,7 @@
 <!-- Always written in English. Factual metadata only — the architectural summary lives in metds/codearc.md §5. -->
 
 - **Source**: <repository URL>
+- **model_id**: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 - **Commit**: `<full sha>` (<commit date, YYYY-MM-DD>)
 - **Sub-path**: <monorepo sub-path, or —>
 - **Cloned**: <YYYY-MM-DD>

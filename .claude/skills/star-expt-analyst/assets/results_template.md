@@ -3,6 +3,7 @@ type: results
 language: en
 generated: <YYYY-MM-DD>
 scope: <the subtree these numbers come from, or "whole forest">
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 sources:
   - run: <prefix>_<slug>
     report: EXPT_ANALYSIS_<YYYY-MM-DD>.md

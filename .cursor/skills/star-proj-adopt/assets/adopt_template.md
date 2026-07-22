@@ -4,6 +4,7 @@ language: en
 adopted: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 backfilled: <YYYY-MM-DD, or — >
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # Project Adoption Record

@@ -2,6 +2,7 @@
 type: overview
 language: en
 generated: <YYYY-MM-DD>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 sources:
   - plan: <prefix>_<slug>_plan.md
     updated: <YYYY-MM-DD>

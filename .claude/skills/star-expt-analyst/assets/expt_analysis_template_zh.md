@@ -3,6 +3,7 @@ run: <prefix>_<slug>
 source_plan: <prefix>_<slug>_plan.md
 analyzed: <YYYY-MM-DD>
 verdict: <met | partially met | not met | inconclusive | invalid>
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # 实验分析 — <run>（<YYYY-MM-DD>）

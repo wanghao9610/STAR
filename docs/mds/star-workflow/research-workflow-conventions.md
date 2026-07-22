@@ -126,6 +126,13 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Digest | `star-expt-digest` | `wkdrs/digests/EXPT_DIGEST_<date>.md` | `covers:`, `sources:` |
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
 
+**Every artifact records the model that wrote it.** Each producer writes `model_id` into what it creates — a frontmatter key where the artifact has frontmatter, and the header line where it does not (`CODE_REVIEW`, `REVIEW`, `refs_index.md`, `UPSTREAM.md`). The value is the model id the runtime reports for the writing session, copied verbatim; where the runtime reports none, write `unrecorded`. Never infer it, never reason about which model this is "probably", and never copy one artifact's value into another.
+
+Two limits matter, because this field will be used to compare work across models:
+
+1. **It is self-reported, not verified.** It records what the runtime claimed at write time. A model switched mid-session may still be described by the pre-switch string, so a value can lag reality. Treat it as evidence about provenance, not proof of it.
+2. **It describes one write, not a file's whole history.** For a write-once artifact — every dated report, and every compiled document, since those are regenerated wholesale — those are the same thing. For a plan, which several skills and several models edit over months, the frontmatter names only the most recent writer; the per-edit record is the `## Revision History` entry, which carries its own model id.
+
 **One carve-out.** In its `backfill` phase, `star-proj-adopt` may write `exec_status:` and `exec_runs:` — and nothing else — onto leaves in `metds/plans/`, each leaf individually confirmed by the user. Those two fields are the Run row's state, and adoption is the one case where the work they describe happened before any plan existed to record it. Every other part of a plan file, in both of adoption's phases, stays with the producers named in the Plan row.
 
 Two properties of this table matter more than its contents:

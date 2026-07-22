@@ -1,6 +1,6 @@
 # 代码审查 — <scope>（<YYYY-MM-DD>）
 
-<!-- 由 /star-code-reviewer 写出。模式：full | plan | path | diff；目标：<原样的参数>；
+<!-- 由 /star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">）。模式：full | plan | path | diff；目标：<原样的参数>；
      审查文件数：<n>。finding 编号 F1、F2、…，均引用 file:line、违反的规则和具体修法。
      无话可说的节收缩为一行——绝不注水。 -->
 

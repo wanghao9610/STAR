@@ -31,13 +31,13 @@ Appended at the end of the plan file (after `## Sub-plans` if present); the sect
 ```markdown
 ## Revision History
 
-### 2026-07-16 — star-plan-reviser (report: wkdrs/00_mvp-3way-ablation/REVIEW_2026-07-16.md)
+### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/00_mvp-3way-ablation/REVIEW_2026-07-16.md)
 - §3 step 4: batch eval → streaming eval — the run OOMs at step 4 (evidence: EXEC_LOG.md step 4, blocked)
 - §5: mIoU threshold 85 → 80 — the MVP run reached 82.3 and the root's §4 margin analysis accepts 80 (evidence: wkdrs/00_mvp-3way-ablation/eval.json)
 - exec_status: done → pending (done-criterion changed)
 ```
 
-One `###` block per session, real date (never invented); one bullet per change: section, what changed, why, evidence. Record `exec_status` resets and a cleared `finalized:` here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss").
+One `###` block per session, real date (never invented), and after the skill name the `model_id` of the session making the edit — the runtime's reported id copied verbatim, or `unrecorded` (conventions §8). That per-entry id is what gives a plan its model attribution: the frontmatter `model_id` names only the latest writer, while this section preserves who wrote each earlier revision. One bullet per change: section, what changed, why, evidence. Record `exec_status` resets and a cleared `finalized:` here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss").
 
 ## exec_status reset rule
 

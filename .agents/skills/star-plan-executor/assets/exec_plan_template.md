@@ -7,6 +7,7 @@ code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
 started: <YYYY-MM-DD>                # date Codex started this authorized execution run
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # <Sub-topic> Executable Plan

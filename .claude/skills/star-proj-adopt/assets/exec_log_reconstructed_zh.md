@@ -5,6 +5,7 @@ reconstructed: <YYYY-MM-DD>
 reconstructed_by: star-proj-adopt
 updated: <YYYY-MM-DD>
 status: done
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
 ---
 
 # Execution Log — <run>（重建）

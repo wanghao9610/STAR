@@ -10,6 +10,7 @@ links:
   code: <URL, or "none found">
   project: <URL, or "none found">
 read_on: <YYYY-MM-DD>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
 ---
 
 # <Method> — <one line: what it is>
