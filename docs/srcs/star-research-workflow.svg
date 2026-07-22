@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1330 1340" width="1330" height="1340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1330 1300" width="1330" height="1300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
   <title>STAR research workflow — thirteen skills in order, two that read across them, and what each one writes</title>
 
   <!-- Arrowheads are explicit triangles, not <marker> elements: several SVG
@@ -27,7 +27,7 @@
     </style>
   </defs>
 
-  <rect x="0" y="0" width="1330" height="1340" fill="#ffffff"/>
+  <rect x="0" y="0" width="1330" height="1300" fill="#ffffff"/>
 
   <!-- title -->
   <text x="60" y="52" font-size="21" font-weight="700" fill="#0f172a">STAR research workflow</text>
@@ -323,41 +323,42 @@
   <text class="lv" x="248" y="1024">missing detail → plan sync</text>
 
   <!-- ============ LEGEND ============ -->
-  <g transform="translate(-360,208)">
-  <rect x="880" y="824" width="420" height="156" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <!-- A full-width footer strip rather than a floating box: once the bottom row
+       held three nodes, a 420-wide box left a white void on either side of it.
+       Row 1 is how to read an edge, row 2 is what a colour means. -->
+  <rect x="60" y="1056" width="1240" height="82" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
 
-  <circle cx="906" cy="840" r="9" fill="#0ca678"/>
-  <circle cx="906" cy="840" r="5" fill="#f8fafc"/>
-  <circle cx="906" cy="840" r="2.4" fill="#0ca678"/>
-  <text class="el" x="934" y="844">reads every stage · run it at any time</text>
+  <circle cx="90" cy="1082" r="9" fill="#0ca678"/>
+  <circle cx="90" cy="1082" r="5" fill="#f8fafc"/>
+  <circle cx="90" cy="1082" r="2.4" fill="#0ca678"/>
+  <text class="el" x="108" y="1086">reads every stage · run it at any time</text>
 
-  <path class="spine" d="M896,862 L924,862"/>
-  <path class="ah" d="M924,862 L915,857.5 L915,866.5 Z"/>
-  <text class="el" x="934" y="866">the usual order</text>
+  <path class="spine" d="M402,1082 L430,1082"/>
+  <path class="ah" d="M430,1082 L421,1077.5 L421,1086.5 Z"/>
+  <text class="el" x="440" y="1086">the usual order</text>
 
-  <path class="read" d="M896,884 L924,884"/>
-  <path class="ahr" d="M924,884 L915,879.5 L915,888.5 Z"/>
-  <text class="el" x="934" y="888">reads, does not consume</text>
+  <path class="read" d="M627,1082 L655,1082"/>
+  <path class="ahr" d="M655,1082 L646,1077.5 L646,1086.5 Z"/>
+  <text class="el" x="665" y="1086">reads, does not consume</text>
 
-  <path class="loop" d="M896,906 L924,906"/>
-  <path class="ahv" d="M924,906 L915,901.5 L915,910.5 Z"/>
-  <text class="el" x="934" y="910">routes back / re-entry</text>
+  <path class="loop" d="M893,1082 L921,1082"/>
+  <path class="ahv" d="M921,1082 L912,1077.5 L912,1086.5 Z"/>
+  <text class="el" x="931" y="1086">routes back / re-entry</text>
 
-  <circle cx="906" cy="928" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
-  <text class="jn" x="906" y="932" style="font-size:9.5px">N</text>
-  <text class="el" x="934" y="932">continues at skill N</text>
+  <circle cx="1163" cy="1082" r="9" fill="#ffffff" stroke="#7048e8" stroke-width="1.5"/>
+  <text class="jn" x="1163" y="1086" style="font-size:9.5px">N</text>
+  <text class="el" x="1181" y="1086">continues at skill N</text>
 
-  <rect x="896" y="946" width="12" height="12" rx="3" fill="#4c6ef5"/>
-  <text class="el" x="914" y="956">plans</text>
-  <rect x="966" y="946" width="12" height="12" rx="3" fill="#f76707"/>
-  <text class="el" x="984" y="956">code &amp; env</text>
-  <rect x="1066" y="946" width="12" height="12" rx="3" fill="#0ca678"/>
-  <text class="el" x="1084" y="956">reads &amp; reports</text>
+  <rect x="84" y="1108" width="12" height="12" rx="3" fill="#4c6ef5"/>
+  <text class="el" x="102" y="1118">plans</text>
+  <rect x="230" y="1108" width="12" height="12" rx="3" fill="#f76707"/>
+  <text class="el" x="248" y="1118">code &amp; env</text>
+  <rect x="400" y="1108" width="12" height="12" rx="3" fill="#0ca678"/>
+  <text class="el" x="418" y="1118">reads &amp; reports</text>
 
-  <circle cx="901" cy="971" r="6" fill="#0ca678"/>
-  <circle cx="901" cy="971" r="3.4" fill="#f8fafc"/>
-  <circle cx="901" cy="971" r="1.6" fill="#0ca678"/>
-  <text class="el" x="912" y="974" font-size="9.5">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
-  </g>
+  <circle cx="940" cy="1114" r="6" fill="#0ca678"/>
+  <circle cx="940" cy="1114" r="3.4" fill="#f8fafc"/>
+  <circle cx="940" cy="1114" r="1.6" fill="#0ca678"/>
+  <text class="el" x="954" y="1118" font-size="9.5">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
   </g>
 </svg>
