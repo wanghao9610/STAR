@@ -4,6 +4,8 @@ backend: conda            # conda / venv
 created: <YYYY-MM-DD>     # real run date (date +%Y%m%d), never invented
 status: verified          # verified / partial / blocked
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 
 # Environment Report — <ENV_NAME>

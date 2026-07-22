@@ -6,6 +6,8 @@ reconstructed_by: star-proj-adopt
 updated: <YYYY-MM-DD>
 status: done
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 
 # Execution Log — <run> (reconstructed)

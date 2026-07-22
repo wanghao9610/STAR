@@ -5,6 +5,8 @@ language: en
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 status:
   seed: in_progress
   diverge: pending

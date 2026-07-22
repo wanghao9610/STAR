@@ -82,7 +82,7 @@ Multiple root plans may currently start with `0_`. If a match is ambiguous, use 
 
 You do not need prepared data, weights, or runnable code merely to draft or decompose a plan. Those inputs are checked during execution.
 
-Every artifact a skill writes carries a `model_id` recording which model produced it, so a later comparison across models has something to key on. It is the id the runtime reports at write time, copied verbatim, or `unrecorded` when the runtime reports none — self-reported rather than verified, so a model switched mid-session can leave a stale value. On plans, which several models edit over months, the frontmatter names only the latest writer and each `## Revision History` entry carries its own. See conventions §8.
+Every artifact a skill writes carries a `model_id` recording which model produced it, so a later comparison across models has something to key on. It is the id the runtime reports at write time, copied verbatim, or `unrecorded` when the runtime reports none — self-reported rather than verified, so a model switched mid-session can leave a stale value. On plans, which several models edit over months, the frontmatter names only the latest writer and each `## Revision History` entry carries its own. Artifacts written across several sessions also carry an append-only `model_trail` — one entry per write session — and `star-expt-digest ledger` rolls every trail into `wkdrs/digests/MODEL_LEDGER.md` so the whole flow is visible in one table. See conventions §8.
 
 ## 3. `$star-proj-adopt`: adopt an in-progress project
 

@@ -17,7 +17,7 @@ description: >-
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
-调用方式：`$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列。
+调用方式：`$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。
 
 **通用规约。** 动手前先读 `docs/mds$star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
@@ -81,9 +81,19 @@ description: >-
 
 ≤400 字，先说周期：窗口与范围、报告支撑 / 临时各多少个 run、学到了什么的头条、相对上一份 digest 有什么变化、以及最主要的缺口。然后是路由：未分析的 run → `$star-expt-analyst <run dir>`；过期台账 → `$star-expt-analyst aggregate`；未执行或待用户的叶子 → `$star-plan-executor <slug>`；被证伪的 claim 或 kill-criterion 命中 → `$star-plan-reviser <slug>`；当前树态 → `$star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
 
+### Step 8：台账（仅 ledger 模式）
+
+把每份产物的 `model_trail` 汇总成一张表——**谁写了什么**的跨产物视图，这是任何单份产物都给不出的。它是机械汇总，不是解读：读、分组、计数、写出。
+
+1. 遍历规约 §8 注册且磁盘上存在的产物。**只读 frontmatter**——`model_id`、`model_trail`，以及该文件自己的日期字段。绝不为推断作者身份去读正文。
+2. 每一行都抄自某条 trail 条目。没有 `model_trail` 的产物是**缺口**，连同"为什么没有"（写于该字段存在之前，或某个 skill 漏写）列进 §5——绝不假定它是单模型，也绝不靠猜来回填。
+3. 某份产物若带有比 trail 更细的逐事件归属——计划的 `## Revision History`、`EXEC_LOG` 步骤表的 `model` 列、`refs_index` 的 `Model` 列——优先用它：它说的是某个模型写了哪一**步**或哪一**条**，而不只是哪一次会话。
+4. 填 `assets/model_ledger_template_zh.md`（英文：`assets/model_ledger_template.md`）写入 `wkdrs/digests/MODEL_LEDGER.md`。日期规则与 digest 相同：同一天覆盖，跨天各写各的。
+
+**计数不是判决。** 报出各模型的写入事件数，到此为止。写入事件多的模型只是写得多，不等于"做得好"——本台账里没有任何质量信号，用这些数字去说质量，与把指标 delta 归因到某个原因是同一种错误。trail 是自报的（规约 §8），台账因此继承同一限制，并在正面写明。
 ## 状态规则
 
-- 唯一的写入是 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`。别处一律不写——不出图、不留脚本、不建子目录。
+- 写入只有 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`，以及——仅在 `ledger` 模式下——`wkdrs/digests/MODEL_LEDGER.md`。别处一律不写——不出图、不留脚本、不建子目录。
 - 绝不碰：`metds/plans/*`（含 `exec_status`、`exec_runs`、`updated`）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`；任何 `EXPT_ANALYSIS_<date>.md`（它们是你的输入，永远不是你的输出）；`metds/results.md` 与 `metds/results_<slug>.md`（台账属于 `$star-expt-analyst aggregate`，digest 里的数字绝不能流进去）；`${CODE_NAME}/`；`.env`。
 - 绝不移动、重命名或删除任何 run 目录、日志、产物，或更早的 digest。更早的 digest 是序列的历史，也是下一次运行的基线。
 - 更早的 digest 只读它的 frontmatter——`covers`、`sources`、`previous`。绝不为了让它符合你现在知道的情况而回头改写它。

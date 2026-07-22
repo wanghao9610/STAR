@@ -9,6 +9,8 @@ covers:
   through: <YYYY-MM-DD>
 previous: <EXPT_DIGEST_<YYYY-MM-DD>.md or "—">
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 sources:
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md or "none">

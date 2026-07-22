@@ -5,6 +5,8 @@ task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 
 # Execution Log — <prefix>_<slug>
@@ -19,10 +21,10 @@ able to resume from this file alone: skip `done` steps, continue from the first 
      check, not by the agent's self-report. Legal status: pending / in_progress / done / blocked /
      skipped. -->
 
-| # | Step | status | artifact (wkdrs/<run>/…) | check result | note |
-|---|------|--------|---------------------------|--------------|------|
-| 1 | <…> | pending | | | |
-| 2 | <…> | pending | | | |
+| # | Step | status | model | artifact (wkdrs/<run>/…) | check result | note |
+|---|------|--------|-------|---------------------------|--------------|------|
+| 1 | <…> | pending | | | | |
+| 2 | <…> | pending | | | | |
 
 ## Awaiting user (STOP line)
 

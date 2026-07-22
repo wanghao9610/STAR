@@ -10,6 +10,8 @@ depends_on: []               # 必须先完成的兄弟前缀，例如 ["00", "0
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
+  - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 status:
   objective: in_progress
   deps: pending

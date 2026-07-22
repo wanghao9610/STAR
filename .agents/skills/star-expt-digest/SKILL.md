@@ -21,7 +21,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all]` — no argument resumes from the newest digest's `covers.through` and covers everything after it; a plan name (slug / numeric prefix / filename) covers that node's family with no time bound; `7d` or `2026-07-01` sets an explicit window; `all` covers the whole history and re-seeds the series.
+Invocation: `$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]` — no argument resumes from the newest digest's `covers.through` and covers everything after it; a plan name (slug / numeric prefix / filename) covers that node's family with no time bound; `7d` or `2026-07-01` sets an explicit window; `all` covers the whole history and re-seeds the series; `ledger` writes a different artifact entirely — the cross-artifact model-provenance rollup at `wkdrs/digests/MODEL_LEDGER.md` (Step 8).
 
 **Shared conventions.** Read `docs/mds$star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
@@ -85,9 +85,19 @@ Fill `assets/digest_template.md` (Chinese: `assets/digest_template_zh.md`; the d
 
 ≤400 words, period first: the window and scope, how many runs were report-backed / provisional, the headline of what was learned, what moved since the previous digest, and the top gaps. Then the routing: an unanalyzed run → `$star-expt-analyst <run dir>`; a stale ledger → `$star-expt-analyst aggregate`; an unexecuted or awaiting leaf → `$star-plan-executor <slug>`; a refuted claim or a kill-criterion hit → `$star-plan-reviser <slug>`; the current state of the tree → `$star-flow-status`. End with the digest path, and one line saying it is a progress record whose numbers are quoted from reports, not verified here.
 
+### Step 8: Ledger (ledger mode only)
+
+Roll every artifact's `model_trail` into one table — the cross-artifact view of **who wrote what**, which no single artifact can show. Mechanical, not interpretive: read, group, count, write.
+
+1. Walk the artifacts registered in conventions §8 that exist on disk. Read **frontmatter only** — `model_id`, `model_trail`, and the file's own date field. Never read a body to infer authorship.
+2. Every row is copied from a trail entry. An artifact with no `model_trail` is a **gap**, listed in §5 with why it has none (written before the field existed, or a skill that skipped it) — never assumed single-model, and never back-filled by guessing.
+3. Where an artifact carries finer per-event attribution than its trail — a plan's `## Revision History`, an `EXEC_LOG` step table's `model` column, `refs_index`'s `Model` column — prefer it: it says which *step* or *entry* a model wrote, not just which session.
+4. Fill `assets/model_ledger_template.md` (Chinese: `assets/model_ledger_template_zh.md`) into `wkdrs/digests/MODEL_LEDGER.md`. Same date rule as the digest: same day overwrites, a later day writes its own.
+
+**Counts are not a verdict.** Report write events per model and stop there. A model with more events did more writes, which is not "did better" — the ledger has no quality signal in it, and saying otherwise from these numbers is the same error as attributing a metric delta to a cause. Trails are self-reported (conventions §8), so the ledger inherits that limit and says so on its face.
 ## State Rules
 
-- The only write is `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`. Nothing else, anywhere — no figures, no scripts, no subdirectories.
+- The only writes are `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md` and — in `ledger` mode only — `wkdrs/digests/MODEL_LEDGER.md`. Nothing else, anywhere — no figures, no scripts, no subdirectories.
 - Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (they are this skill's input, never its output); `metds/results.md` and `metds/results_<slug>.md` (the ledger is `$star-expt-analyst aggregate`'s, and a digest number must never reach it); `${CODE_NAME}/`; `.env`.
 - Never move, rename, or delete a run directory, log, artifact, or an older digest. An older digest is the series' history and the next run's baseline.
 - Older digests are read for their frontmatter only — `covers`, `sources`, `previous`. Never rewrite one to reconcile it with what is now known.

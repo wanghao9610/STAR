@@ -8,6 +8,8 @@ created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # date the user approved this via ExitPlanMode
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_trail:                    # append-only: one entry per write session, never rewritten
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 
 # <Sub-topic> Executable Plan

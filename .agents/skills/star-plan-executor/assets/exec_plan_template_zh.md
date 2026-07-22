@@ -8,6 +8,8 @@ created: <YYYY-MM-DD>
 started: <YYYY-MM-DD>                # Codex 开始本次已授权执行的日期
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
 model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
+  - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---
 
 # <子主题> 可执行计划

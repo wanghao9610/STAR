@@ -5,6 +5,8 @@ task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
+  - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---
 
 # 执行日志 — <prefix>_<slug>
@@ -17,10 +19,10 @@ model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "u
 <!-- 每个 EXEC_PLAN 动作一行。`检查结果` 由**主循环**重跑或独立检查绑定 check 后填写,不是 delegate 自报。
      合法 status:pending / in_progress / done / blocked / skipped。 -->
 
-| # | 步骤 | status | 产物(wkdrs/<run>/…) | 检查结果 | 备注 |
-|---|------|--------|----------------------|----------|------|
-| 1 | <…> | pending | | | |
-| 2 | <…> | pending | | | |
+| # | 步骤 | status | model | 产物(wkdrs/<run>/…) | 检查结果 | 备注 |
+|---|------|--------|-------|----------------------|----------|------|
+| 1 | <…> | pending | | | | |
+| 2 | <…> | pending | | | | |
 
 ## 待用户执行（STOP 线）
 

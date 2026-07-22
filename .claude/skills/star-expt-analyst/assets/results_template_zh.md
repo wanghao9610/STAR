@@ -4,6 +4,8 @@ language: zh
 generated: <YYYY-MM-DD>
 scope: <这些数字来自哪个子树，或 "whole forest">
 model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
+  - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 sources:
   - run: <prefix>_<slug>
     report: EXPT_ANALYSIS_<YYYY-MM-DD>.md
