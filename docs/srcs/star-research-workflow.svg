@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1330 1200" width="1330" height="1200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
-  <title>STAR research workflow — twelve skills in order, two that read across them, and what each one writes</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1330 1340" width="1330" height="1340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>STAR research workflow — thirteen skills in order, two that read across them, and what each one writes</title>
 
   <!-- Arrowheads are explicit triangles, not <marker> elements: several SVG
        rasterisers (macOS sips among them) silently drop markers, which would
@@ -27,11 +27,11 @@
     </style>
   </defs>
 
-  <rect x="0" y="0" width="1330" height="1200" fill="#ffffff"/>
+  <rect x="0" y="0" width="1330" height="1340" fill="#ffffff"/>
 
   <!-- title -->
   <text x="60" y="52" font-size="21" font-weight="700" fill="#0f172a">STAR research workflow</text>
-  <text x="60" y="76" font-size="12" fill="#64748b">Fourteen skills · twelve in order and two that read across them · what each one writes · how the loop closes</text>
+  <text x="60" y="76" font-size="12" fill="#64748b">Fifteen skills · thirteen in order and two that read across them · what each one writes · how the loop closes</text>
 
   <!-- ============ ENTRY NODE (outside the shifted group) ============ -->
 
@@ -183,6 +183,18 @@
   <text class="np" x="78" y="944">The matured plan tree compiled into method docs</text>
   <text class="no" x="78" y="966">metds/{overview,dataset,framework,training,evaluation}.md</text>
 
+  <!-- 12 code-release (CODE) — the terminal node: it consumes the compiled method
+       docs and the results ledger and writes the repository a stranger clones. It
+       prepares a release and never publishes one, so nothing leaves this box. -->
+  <rect x="520" y="888" width="340" height="92" rx="10" fill="#fff4e6" stroke="#fed7aa" stroke-width="1.5"/>
+  <circle cx="548" cy="914" r="13" fill="#f76707"/>
+  <text class="bn" x="548" y="918.5">12</text>
+  <text class="nt" x="570" y="919">$star-code-release</text>
+  <rect x="756" y="900" width="92" height="18" rx="9" fill="#ffffff" stroke="#fed7aa"/>
+  <text class="tag" x="802" y="912.5">before publishing</text>
+  <text class="np" x="538" y="944">Code gathered, polished, README compiled</text>
+  <text class="no" x="538" y="966">README.md · wkdrs/release/RELEASE_&lt;date&gt;.md</text>
+
   <!-- ============ SPINE EDGES ============ -->
 
   <!-- 1 -> 2 : the framed topic -->
@@ -243,6 +255,19 @@
   <path class="ah" d="M230,884 L225.5,875 L234.5,875 Z"/>
   <text class="el" x="244" y="852">the matured plan tree</text>
 
+  <!-- 11 -> 12 : the compiled method documents -->
+  <path class="spine" d="M460,934 L516,934"/>
+  <path class="ah" d="M516,934 L507,929.5 L507,938.5 Z"/>
+  <text class="elc" x="490" y="934" transform="rotate(-90 490 934)">method docs</text>
+
+  <!-- 9 -> 12 : a read, not a handoff — the release compiles its numbers from the
+       ledger `$star-expt-analyst aggregate` writes, never from a run directly.
+       Routed at x=910 to stay off the x=900 finalize loop it would otherwise
+       appear collinear with. -->
+  <path class="read" d="M980,812 L980,850 L910,850 L910,934 L864,934"/>
+  <path class="ahr" d="M864,934 L873,929.5 L873,938.5 Z"/>
+  <text class="elc" x="896" y="892" transform="rotate(-90 896 892)">the results ledger</text>
+
   <!-- ============ LOOP-BACK EDGES ============ -->
 
   <!-- 10 -> 6 re-decompose -->
@@ -298,7 +323,7 @@
   <text class="lv" x="248" y="1024">missing detail → plan sync</text>
 
   <!-- ============ LEGEND ============ -->
-  <g transform="translate(-360,64)">
+  <g transform="translate(-360,208)">
   <rect x="880" y="824" width="420" height="156" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
 
   <circle cx="906" cy="840" r="9" fill="#0ca678"/>

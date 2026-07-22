@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research Code Release"
+  short_description: "Consolidate the code, polish the release surface, compile the README"
+  default_prompt: "Use $star-code-release to gather scattered code into the codebase, polish the release surface, and compile the project's README before publishing."
+policy:
+  allow_implicit_invocation: false

@@ -2,7 +2,7 @@
 
 **语言：** [English](research-workflow-skills.md) | 简体中文
 
-STAR 提供十四个相互衔接的研究工作流 skill，用于把一个模糊的研究兴趣逐步变成有文献扫描背书的研究选题、可追踪的计划、有可核验文献库的相关工作基座、有架构记录的代码库、经过验证的运行环境、可执行的任务、有验证记录的实现、对照规范审计过的代码、对照预期审计过的实验结果、按时间轴沉淀的阶段进展、能吸收执行结果的计划，以及从这些计划反向编译出的方法文档：
+STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊的研究兴趣逐步变成有文献扫描背书的研究选题、可追踪的计划、有可核验文献库的相关工作基座、有架构记录的代码库、经过验证的运行环境、可执行的任务、有验证记录的实现、对照规范审计过的代码、对照预期审计过的实验结果、按时间轴沉淀的阶段进展、能吸收执行结果的计划、从这些计划反向编译出的方法文档，以及最后一份陌生人可以直接 clone 的仓库：
 
 ```text
 已经开工的项目
@@ -21,14 +21,15 @@ STAR 提供十四个相互衔接的研究工作流 skill，用于把一个模糊
   → star-expt-digest：汇总本阶段实验做了什么、什么发生了变化
   → star-plan-reviser：以执行证据审查计划并修订
   → star-metd-summarize：把成熟的计划编译成方法文档
+  → star-code-release：归拢代码并编译出项目自己的 README
 
   ⌾ star-flow-status：随时通读上述全部产物——
     进度到哪里、还欠什么、下一步该做哪一件
 ```
 
-上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
+上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中，`star-code-release` 跑在最后、在工作已经可以给别人读的时候——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
 
-![STAR 研究工作流：十二个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
+![STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
@@ -50,6 +51,7 @@ $star-expt-analyst 00
 $star-plan-reviser 00
 $star-flow-status
 $star-metd-summarize framework
+$star-code-release
 ```
 
 在 Claude 和 Cursor 中，对应写法是 `/skill-name`：
@@ -918,7 +920,62 @@ $star-metd-summarize
 
 完整定义见 [`star-metd-summarize/SKILL_zh.md`](../../../.agents/skills/star-metd-summarize/SKILL_zh.md)。
 
-## 17. 一套完整的使用示例
+## 17. `$star-code-release`：把仓库准备到可发布
+
+### 什么时候用
+
+- 工作做完了，仓库需要被你以外的人读懂——审稿人、合作者，或公众。
+- 有用的代码散在 `tasks/` 和 `wkdrs/` 里，应该在别人 clone 之前先归位到代码库中。
+- 根目录的 `README.md` 描述的还是 STAR 模板，而不是你的项目。
+- 准备开源，想先知道会泄漏什么：误提交的 `.env`、某个 token、烧进配置里的 `/home/<你>/` 路径。
+
+### 怎么调用
+
+```text
+$star-code-release              # 完整流程：gather → polish → readme → check
+$star-code-release gather       # 只归拢散落的代码
+$star-code-release polish       # 只跑发布面打磨
+$star-code-release readme       # 只编译 README.md
+$star-code-release check        # 只跑发布体检——除报告外只读
+```
+
+### 它做什么
+
+1. 动手之前先打印一张**就绪表**：编译所需的输入哪些在、哪些过期，每行标出产出它的 skill。带缺口编译是允许的——缺口会变成 README 的 TODO——但你先看到这张表；
+2. 扫描 `tasks/`、`wkdrs/` 里的脚本与配置、以及根目录散落文件，只提升通过三选一证据检验的文件——README 会引用它、某个已执行叶子的 §4 交付物或 §5 完成判据需要它、或它能复现 `metds/results.md` 里的某个数字。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选报成架构缺口，而不是自造一个目录。**Gate 1：** 你逐行批准提升表，每行都带风险，以及它会让哪行计划文本过期；
+3. 只打磨发布面——本次提升的文件、README 会打印的入口 / 配置 / 脚本、以及它展示的公共 API。每处改动逐项批准且不改行为；
+4. 按一张成文映射表逐节编译 `README.md`：头部与摘要来自 `metds/overview.md`，方法来自 `metds/framework.md`，安装来自 `requirements*` 与最新的 `ENV_REPORT.md`，数据准备来自 `metds/dataset.md`，训练与评测来自 `metds/training.md` 和 `metds/evaluation.md`，结果与模型库来自 `metds/results.md`，仓库结构来自 `metds/codearc.md`，引用来自 `reference.bib`，致谢来自 `UPSTREAM.md`；
+5. 最后跑一遍阻断式体检：secret 与机器本地路径、许可证与署名、它打印的每条命令是否真的能解析、它写下的每个链接与图片是否指向存在的文件。
+
+### 主要产物
+
+```text
+README.md                              # 编译出的项目 README（被提议并接受时还有 README.zh-CN.md）
+wkdrs/release/RELEASE_<日期>.md        # 就绪表、提升记录、打磨记录、小节映射、体检结果
+```
+
+README 的第一行是一条 HTML 注释形式的溯源标记——不是 frontmatter，那会被 GitHub 渲染成页首的一张表——记录日期、模型，以及每个来源被读取时所带的日期。下一次运行正是靠这条标记同时识别出"README 过期了"和"这一节你手改过"，并保留你的手改。
+
+### 编译边界
+
+每一节都能追到产物。**数字只来自 `metds/results.md`**——不来自执行日志、不来自 digest、不来自记忆——被账本判为 invalid 或 inconclusive 而排除的数字根本不出现。**每条命令打印前先解析**：脚本存在、配置路径存在、入口可导入；解析不了的就删掉或标为未验证。最高级形容是一种主张，所以 "state-of-the-art" 只在账本自己的结论支撑时才出现。没有产物覆盖的小节转成点名了由哪个 skill 来填的 `TODO`——这份缺口清单同时就是待办清单，和 `$star-metd-summarize` 一样。
+
+本 skill 也完全不写 `metds/`。它的输入各有生产者，一次去改自己输入的发布运行已经不叫编译了。
+
+### 发布边界
+
+它做发布准备，绝不代为发布。不 `git push`、不改 remote 或分支、不打 tag、不 `gh repo create`、不 `gh release`、不把权重或数据上传到任何地方。发布命令准备在报告的*等待用户*一节，每条都注明它让什么变得不可逆。发布是这套工作流里少数真正不可逆的动作之一，它始终属于你。
+
+### 实用建议
+
+- 早跑、常跑 `check`，别等到真要发布那天。第二个月发现的 `/home/<你>/` 路径只值一条 `sed`；投稿前一天发现的那条，代价是一场手忙脚乱。
+- 就绪表大面积飘红时，先去跑生产者。用四份缺失的方法文档编出来的 README 是一串 TODO——诚实，但没用。
+- `tasks/` 里多数文件应该回到 `keep in place`。那是提升检验在起作用，不是它失灵——scratch 本来就该是可丢弃的。
+- 账本或方法文档一动就重跑 `readme`。手改过的小节能挺过重新生成，靠的正是那条标记。
+
+完整定义见 [`star-code-release/SKILL_zh.md`](../../../.agents/skills/star-code-release/SKILL_zh.md)。
+
+## 18. 一套完整的使用示例
 
 下面是一条典型路径。
 
@@ -1021,7 +1078,17 @@ $star-metd-summarize
 
 它会从计划树编译出 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md` 和 `evaluation.md`。凡是来自尚未执行的叶子的内容都会标注"尚未验证"，没有覆盖的小节则转成点名了该补进哪个计划哪一节的 `TODO`——于是这份缺口清单同时也是计划的待办清单。计划一动就重新编译；来源没变的文档会原样不动。
 
-## 18. 常见问题
+### 第九步：把仓库准备到可发布
+
+当方法文档与 `metds/results.md` 都是最新的之后：
+
+```text
+$star-code-release
+```
+
+散落的代码会落到 `metds/codearc.md` 指定的 `${CODE_NAME}/` 位置，发布面被打磨过，`README.md` 由第八步产出的文档加上结果账本编译而成——每个数字都能追到 run，每条打印出来的命令都已解析。体检会报出哪些东西会泄漏，发布命令则交回给你。
+
+## 19. 常见问题
 
 ### 应该先用哪个 skill？
 
@@ -1040,6 +1107,7 @@ $star-metd-summarize
 | 计划已（部分）执行，文本应该吸收执行结果 | `$star-plan-reviser` |
 | 不知道当前进度或下一步 | `$star-flow-status` |
 | 计划已经成熟，想把方法写成给读者或论文用的表述 | `$star-metd-summarize` |
+| 工作已经做完，仓库需要能被别人读懂、也能对外发布 | `$star-code-release` |
 
 ### 每个叶子都要跑完整个循环吗？
 
@@ -1084,8 +1152,8 @@ $star-metd-summarize
 审批门在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
-- **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`metds/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问。
-- **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
+- **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`metds/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的门口。
+- **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
 
 一个实用的无人值守组合：启动 STOP 线交回的训练命令，训练期间定时跑 `$star-expt-analyst watch <叶子>`，打分与修订留到你回来再做。
 
@@ -1103,7 +1171,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status` 和 `exec_runs`。修改父计划后，先运行 `$star-flow-status` 检查 drift，再决定是否重新拆解。
 
-## 19. Skill 文件位置
+## 20. Skill 文件位置
 
 不同工具使用各自适配的 skill 副本，不要混用其中的工具调用说明：
 
@@ -1115,7 +1183,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 
-十四个目录名分别是：
+十五个目录名分别是：
 
 ```text
 star-proj-adopt
@@ -1132,4 +1200,5 @@ star-expt-digest
 star-plan-reviser
 star-flow-status
 star-metd-summarize
+star-code-release
 ```

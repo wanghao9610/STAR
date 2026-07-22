@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-skills.zh-CN.md)
 
-STAR provides fourteen connected research workflow skills that turn a vague research interest into a defensible topic backed by a landscape scan, a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, progress digested over time, plans that absorb execution results, and method documents compiled back out of those plans:
+STAR provides fifteen connected research workflow skills that turn a vague research interest into a defensible topic backed by a landscape scan, a traceable plan, a related-work base with a verified bibliography, a codebase with a recorded architecture, a verified runtime environment, executable tasks, an implementation backed by verification records, code audited against the project's conventions, results audited against what the plan expected, progress digested over time, plans that absorb execution results, method documents compiled back out of those plans, and finally a repository a stranger can clone:
 
 ```text
 an already-started project
@@ -21,14 +21,15 @@ vague research interest
   → star-expt-digest: summarize what the programme did this period, and what moved
   → star-plan-reviser: review a plan against execution evidence and revise it
   → star-metd-summarize: compile the matured plans into method documents
+  → star-code-release: consolidate the code and compile the project's README
 
   ⌾ star-flow-status: reads all of the above at any point —
     where things stand, what is owed, and the one next action
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan, with `star-expt-digest` run on a cadence across the loop rather than inside it — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
+The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan, with `star-expt-digest` run on a cadence across the loop rather than inside it, and `star-code-release` runs last, once the work is ready to be read by someone else — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
-![STAR research workflow: twelve skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
+![STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -50,6 +51,7 @@ $star-expt-analyst 00
 $star-plan-reviser 00
 $star-flow-status
 $star-metd-summarize framework
+$star-code-release
 ```
 
 In Claude and Cursor, use `/skill-name` instead:
@@ -918,7 +920,62 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 
 See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.agents/skills/star-metd-summarize/SKILL.md).
 
-## 17. End-to-end example
+## 17. `$star-code-release`: prepare the repository for release
+
+### When to use it
+
+- The work is done and the repository has to be readable by someone who is not you — a reviewer, a collaborator, the public.
+- Useful code is scattered across `tasks/` and `wkdrs/` and should live in the codebase before anyone clones it.
+- The root `README.md` still describes the STAR template rather than your project.
+- You are about to open-source and want to know what would leak: a committed `.env`, a token, a `/home/<you>/` path baked into a config.
+
+### How to invoke it
+
+```text
+$star-code-release              # the full pass: gather → polish → readme → check
+$star-code-release gather       # only consolidate the scattered code
+$star-code-release polish       # only the release-surface pass
+$star-code-release readme       # only compile README.md
+$star-code-release check        # only the hygiene sweep — read-only apart from its report
+```
+
+### What it does
+
+1. Prints a **readiness table** before anything else: which of the compile's inputs exist and which are stale, each with the skill that produces it. Compiling with gaps is allowed — they become README TODOs — but you see the table first;
+2. Sweeps `tasks/`, `wkdrs/` scripts and configs, and root strays, promoting only what passes a three-part evidence test — the README will cite it, an executed leaf's §4 deliverable or §5 done-criterion needs it, or it reproduces a number in `metds/results.md`. Destinations come from `metds/codearc.md` §2; a candidate no placement rule covers is reported as an architecture gap rather than given an invented directory. **Gate 1:** you approve the promotion table row by row, with each row's risk and any plan line it would make stale shown;
+3. Polishes the release surface only — the promoted files, the entrypoints and configs and scripts the README prints, the public API it shows. Each edit is individually approved and behavior-preserving;
+4. Compiles `README.md` section by section through a written map: the header and abstract from `metds/overview.md`, the method from `metds/framework.md`, installation from `requirements*` and the newest `ENV_REPORT.md`, data preparation from `metds/dataset.md`, training and evaluation from `metds/training.md` and `metds/evaluation.md`, the results and model zoo from `metds/results.md`, the repository structure from `metds/codearc.md`, the citation from `reference.bib`, and the acknowledgement from `UPSTREAM.md`;
+5. Ends with a hygiene sweep whose findings block: secrets and machine-local paths, license and attribution, whether every command it printed actually resolves, and whether every link and image it wrote points at a file that exists.
+
+### Main outputs
+
+```text
+README.md                              # the compiled project README (README.zh-CN.md when offered)
+wkdrs/release/RELEASE_<date>.md        # readiness, promotions, polish record, section map, checklist
+```
+
+The README opens with an HTML-comment provenance marker — not frontmatter, which GitHub would render as a table — recording the date, the model, and each source with the date it carried when read. That marker is how the next run detects both a stale README and a section you edited by hand, which it then keeps.
+
+### The compile boundary
+
+Every section traces to an artifact. **Numbers come only from `metds/results.md`** — never from an execution log, never from a digest, never from memory — and a number the ledger excluded as invalid or inconclusive does not appear at all. **Every command is resolved before it is printed**: the script exists, the config path exists, the entry point imports; what does not resolve is dropped or marked unverified. Superlatives are claims, so "state-of-the-art" appears only where the ledger's own verdict carries it. A section no artifact covers becomes a `TODO` naming the skill that fills it — the gap list doubles as the to-do list, exactly as it does for `$star-metd-summarize`.
+
+The skill also never writes `metds/` at all. Its inputs belong to their producers, and a release run that edited its own sources would no longer be compiling.
+
+### The publish boundary
+
+It prepares a release; it never publishes one. No `git push`, no remote or branch change, no tag, no `gh repo create`, no `gh release`, and no upload of weights or data anywhere. The publish commands are prepared in the report under *Awaiting user*, each with a note saying what it makes irreversible. Publishing is one of the few genuinely irreversible acts in the workflow, and it stays yours.
+
+### Practical guidance
+
+- Run `check` early and often — long before you intend to release. A `/home/<you>/` path found in month two costs a `sed`; found the day before submission it costs a scramble.
+- Run the producers first when the readiness table is mostly red. A README compiled from four missing method documents is a list of TODOs, which is honest but not useful.
+- Most of `tasks/` should come back `keep in place`. That is the promotion test working, not failing — scratch is meant to be disposable.
+- Re-run `readme` whenever the ledger or the method documents move. Hand edits to a section survive the regeneration; the marker is what makes that possible.
+
+See the complete definition in [`star-code-release/SKILL.md`](../../../.agents/skills/star-code-release/SKILL.md).
+
+## 18. End-to-end example
 
 The following sequence illustrates a typical workflow.
 
@@ -1021,7 +1078,17 @@ $star-metd-summarize
 
 This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. Anything sourced from a leaf that has not been executed is marked not yet verified, and every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile whenever the plans move; a document whose sources have not changed is left untouched.
 
-## 18. Frequently asked questions
+### Step 9: prepare the repository for release
+
+Once the method documents and `metds/results.md` are current:
+
+```text
+$star-code-release
+```
+
+The scattered code lands in `${CODE_NAME}/` where `metds/codearc.md` says it belongs, the release surface is polished, and `README.md` is compiled from the documents Step 8 produced plus the results ledger — every number traced to a run, every printed command resolved. The hygiene sweep reports what would leak, and the publish commands come back to you.
+
+## 19. Frequently asked questions
 
 ### Which skill should I use first?
 
@@ -1040,6 +1107,7 @@ This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, 
 | A plan was (partly) executed and its text should absorb the results | `$star-plan-reviser` |
 | You do not know the current status or next action | `$star-flow-status` |
 | The plans have matured and you want the method written out for a reader or a paper | `$star-metd-summarize` |
+| The work is done and the repository has to be readable — and publishable — by someone else | `$star-code-release` |
 
 ### How much of the loop does each leaf need?
 
@@ -1084,8 +1152,8 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 The approval gates do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
 - **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
-- **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists.
-- **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser` — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
+- **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their gates.
+- **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
 A practical unattended pattern: run the STOP-line training command, keep `$star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
 
@@ -1103,7 +1171,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
 
-## 19. Skill locations
+## 20. Skill locations
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
@@ -1115,7 +1183,7 @@ Every skill directory has the same shape in all three roots: `SKILL.md` is the e
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 
-The fourteen skill directory names are:
+The fifteen skill directory names are:
 
 ```text
 star-proj-adopt
@@ -1132,4 +1200,5 @@ star-expt-digest
 star-plan-reviser
 star-flow-status
 star-metd-summarize
+star-code-release
 ```

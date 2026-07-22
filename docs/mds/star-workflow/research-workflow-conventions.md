@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The fourteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The fifteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize`, `star-code-release` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
 
 **Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
@@ -25,6 +25,7 @@ This file is a contract for the skills and a description for the reader: it is w
 | `star-env-builder` | at most one per run | `${CODE_NAME}/requirements*` only |
 | `star-plan-executor` | one per verified action, only when the gate approved checkpointing | the files that action touched |
 | `star-code-reviewer` | one optional commit after the fix pass | only the files the fix pass touched |
+| `star-code-release` | one per landed phase (gather / polish / readme) | only that phase's paths: the promoted files plus the call sites their move broke, the polish-pass files, `README.md` |
 
 **Universal rules:**
 
@@ -126,8 +127,9 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Digest | `star-expt-digest` | `wkdrs/digests/EXPT_DIGEST_<date>.md` | `covers:`, `sources:` |
 | Model ledger | `star-expt-digest ledger` | `wkdrs/digests/MODEL_LEDGER.md` | `generated:` |
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
+| Release | `star-code-release` | `README.md`, `wkdrs/release/RELEASE_<date>.md` | the README's provenance marker (date + `sources:`) |
 
-**Every artifact records the model that wrote it.** Each producer writes `model_id` into what it creates — a frontmatter key where the artifact has frontmatter, and the header line where it does not (`CODE_REVIEW`, `REVIEW`, `refs_index.md`, `UPSTREAM.md`). The value is the model id the runtime reports for the writing session, copied verbatim; where the runtime reports none, write `unrecorded`. Never infer it, never reason about which model this is "probably", and never copy one artifact's value into another.
+**Every artifact records the model that wrote it.** Each producer writes `model_id` into what it creates — a frontmatter key where the artifact has frontmatter, and the header line where it does not (`CODE_REVIEW`, `REVIEW`, `refs_index.md`, `UPSTREAM.md`, and `README.md`, whose header line is an HTML comment because GitHub would render frontmatter as a table at the top of the page). The value is the model id the runtime reports for the writing session, copied verbatim; where the runtime reports none, write `unrecorded`. Never infer it, never reason about which model this is "probably", and never copy one artifact's value into another.
 
 Two limits matter, because this field will be used to compare work across models:
 
