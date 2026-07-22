@@ -349,16 +349,16 @@
   <text class="jn" x="1163" y="1086" style="font-size:9.5px">N</text>
   <text class="el" x="1181" y="1086">continues at skill N</text>
 
-  <rect x="84" y="1108" width="12" height="12" rx="3" fill="#4c6ef5"/>
-  <text class="el" x="102" y="1118">plans</text>
-  <rect x="230" y="1108" width="12" height="12" rx="3" fill="#f76707"/>
-  <text class="el" x="248" y="1118">code &amp; env</text>
-  <rect x="400" y="1108" width="12" height="12" rx="3" fill="#0ca678"/>
-  <text class="el" x="418" y="1118">reads &amp; reports</text>
+  <rect x="90" y="1108" width="12" height="12" rx="3" fill="#4c6ef5"/>
+  <text class="el" x="108" y="1118">plans</text>
+  <rect x="356" y="1108" width="12" height="12" rx="3" fill="#f76707"/>
+  <text class="el" x="374" y="1118">code &amp; env</text>
+  <rect x="648" y="1108" width="12" height="12" rx="3" fill="#0ca678"/>
+  <text class="el" x="666" y="1118">reads &amp; reports</text>
 
-  <circle cx="940" cy="1114" r="6" fill="#0ca678"/>
-  <circle cx="940" cy="1114" r="3.4" fill="#f8fafc"/>
-  <circle cx="940" cy="1114" r="1.6" fill="#0ca678"/>
-  <text class="el" x="954" y="1118" font-size="9.5">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
+  <circle cx="968" cy="1114" r="6" fill="#0ca678"/>
+  <circle cx="968" cy="1114" r="3.4" fill="#f8fafc"/>
+  <circle cx="968" cy="1114" r="1.6" fill="#0ca678"/>
+  <text class="el" x="982" y="1118" font-size="9.5">→ 7 → 9 is the light path per leaf. The full path adds 8 and 10.</text>
   </g>
 </svg>
