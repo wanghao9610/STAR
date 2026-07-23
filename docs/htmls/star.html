@@ -67,6 +67,20 @@
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(148, 163, 216, 0.08);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  nav.scrolled {
+    background: rgba(4, 6, 15, 0.85);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4);
+  }
+  .nav-progress {
+    position: absolute;
+    left: 0; bottom: -1px;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--violet), var(--blue));
+    transform: scaleX(0);
+    transform-origin: left;
+    pointer-events: none;
   }
   .nav-brand {
     display: flex;
@@ -83,8 +97,20 @@
     font-size: 0.88rem;
     color: var(--text-dim);
   }
-  .nav-links a { transition: color 0.2s; }
+  .nav-links a { position: relative; transition: color 0.2s; }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -5px;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
   .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--gold); }
   .nav-gh {
     display: inline-flex;
     align-items: center;
@@ -109,6 +135,8 @@
     text-align: center;
     padding: 7rem 1.5rem 4rem;
     position: relative;
+    isolation: isolate;
+    overflow: hidden;
   }
   .hero::after {
     content: "";
@@ -202,9 +230,9 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(1.4rem, 5vw, 3.5rem);
   }
-  .stat { text-align: center; }
+  .stat { text-align: center; padding: 0 clamp(1.2rem, 3.5vw, 2.4rem); }
+  .stat:not(:first-child) { border-left: 1px solid rgba(148, 163, 216, 0.14); }
   .stat b {
     display: block;
     font-size: clamp(1.5rem, 3.5vw, 2.1rem);
@@ -221,15 +249,51 @@
     text-transform: uppercase;
     color: var(--text-faint);
   }
+  @media (max-width: 600px) {
+    .stat { padding: 0.4rem 0.9rem; }
+    .stat:not(:first-child) { border-left: none; }
+  }
+
+  /* aurora glows behind the title */
+  .aurora {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+  }
+  .aurora-a {
+    width: 480px; height: 480px;
+    top: 10%; left: 50%;
+    margin-left: -440px;
+    background: radial-gradient(circle, rgba(255, 216, 107, 0.13), transparent 65%);
+    animation: drift-a 14s ease-in-out infinite;
+  }
+  .aurora-b {
+    width: 560px; height: 560px;
+    top: 24%; left: 50%;
+    margin-left: -40px;
+    background: radial-gradient(circle, rgba(139, 147, 255, 0.12), transparent 65%);
+    animation: drift-b 18s ease-in-out infinite;
+  }
+  @keyframes drift-a {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(42px, -28px); }
+  }
+  @keyframes drift-b {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-48px, 22px); }
+  }
+
   .scroll-hint {
     position: absolute;
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
     color: var(--text-faint);
-    font-size: 1.4rem;
     animation: bob 2.2s ease-in-out infinite;
   }
+  .scroll-hint svg { display: block; width: 20px; height: 20px; }
   @keyframes bob {
     0%, 100% { transform: translate(-50%, 0); opacity: 0.5; }
     50% { transform: translate(-50%, 8px); opacity: 1; }
@@ -296,6 +360,18 @@
     opacity: 0.7;
   }
   .card:hover::before { opacity: 1; }
+  /* cursor spotlight, driven by --mx/--my from JS */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--card-glow, rgba(255,216,107,0.12)), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .card:hover::after { opacity: 1; }
   .card.wide { grid-column: span 3; }
   .card-icon {
     width: 42px; height: 42px;
@@ -303,11 +379,12 @@
     align-items: center;
     justify-content: center;
     border-radius: 11px;
-    font-size: 1.25rem;
     margin-bottom: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--line);
+    color: var(--card-c, var(--gold));
+    background: color-mix(in srgb, var(--card-c, var(--gold)) 9%, transparent);
+    border: 1px solid color-mix(in srgb, var(--card-c, var(--gold)) 28%, transparent);
   }
+  .card-icon svg { width: 20px; height: 20px; }
   .card h3 { font-size: 1.08rem; font-weight: 650; margin-bottom: 0.5rem; }
   .card p { font-size: 0.9rem; color: var(--text-dim); }
   .card code {
@@ -528,6 +605,50 @@
   footer .f-links { display: flex; gap: 1.4rem; }
   footer a:hover { color: var(--gold); }
 
+  /* ---------- polish: dividers, grain, sheen, hover, focus ---------- */
+  section { position: relative; }
+  section + section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: min(1120px, 86%);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 216, 0.16), transparent);
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+  .tree-window, .term { position: relative; }
+  .tree-window::before, .term::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(230, 234, 246, 0.14), transparent);
+  }
+  .phase-star { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .phase:hover .phase-star {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px var(--phase-glow, rgba(255, 216, 107, 0.45));
+  }
+  footer .f-links { gap: 0; }
+  footer .f-links a + a::before {
+    content: "✦";
+    margin: 0 1.1rem;
+    opacity: 0.35;
+  }
+  a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .reveal { opacity: 1; transform: none; }
@@ -556,10 +677,13 @@
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
     GitHub
   </a>
+  <span class="nav-progress" aria-hidden="true"></span>
 </nav>
 
 <!-- ==================== HERO ==================== -->
 <header class="hero" id="top">
+  <div class="aurora aurora-a" aria-hidden="true"></div>
+  <div class="aurora aurora-b" aria-hidden="true"></div>
   <span class="hero-badge">Systematic Toolchain for AI Research</span>
   <h1>STAR</h1>
   <p class="hero-sub">Research, by design</p>
@@ -578,7 +702,7 @@
     <div class="stat"><b>2</b><span>Languages · EN 中文</span></div>
     <div class="stat"><b>MIT</b><span>Open Source</span></div>
   </div>
-  <a class="scroll-hint" href="#pillars" aria-label="Scroll down">▾</a>
+  <a class="scroll-hint" href="#pillars" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a>
 </header>
 
 <!-- ==================== PILLARS ==================== -->
@@ -591,38 +715,38 @@
       STAR moves both into the repository itself.
     </p>
     <div class="bento">
-      <div class="card reveal" style="--card-glow: rgba(255,216,107,0.14)">
-        <div class="card-icon">🗂️</div>
+      <div class="card reveal" style="--card-glow: rgba(255,216,107,0.14); --card-c: #ffd86b">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="13" height="13" rx="2"/><path d="M8 20h11a2 2 0 0 0 2-2V8"/></svg></div>
         <h3>A consistent layout</h3>
         <p>Code, data, weights, outputs, and methodology notes each have one predictable home — <code>code/</code>, <code>datas/</code>, <code>inits/</code>, <code>wkdrs/</code>, <code>metds/</code>.</p>
       </div>
-      <div class="card reveal" style="--card-glow: rgba(139,147,255,0.16)">
-        <div class="card-icon">🔌</div>
+      <div class="card reveal" style="--card-glow: rgba(139,147,255,0.16); --card-c: #8b93ff">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3"/><path d="M15 7V3"/><path d="M7 7h10v4a5 5 0 0 1-10 0V7z"/><path d="M12 16v5"/></svg></div>
         <h3>A portable runtime boundary</h3>
         <p>Machine-specific paths live in a local <code>.env</code>, never in scripts. Clone the repo anywhere, point it at your conda or venv, and run.</p>
       </div>
-      <div class="card reveal" style="--card-glow: rgba(76,195,255,0.16)">
-        <div class="card-icon">🚀</div>
+      <div class="card reveal" style="--card-glow: rgba(76,195,255,0.16); --card-c: #4cc3ff">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
         <h3>One experiment entrypoint</h3>
         <p><code>bash execs/run.sh &lt;exp&gt;</code> activates the environment, exports the path variables, and launches any experiment script the same way, every time.</p>
       </div>
-      <div class="card wide reveal" style="--card-glow: rgba(62,230,192,0.14)">
-        <div class="card-icon">🧭</div>
+      <div class="card wide reveal" style="--card-glow: rgba(62,230,192,0.14); --card-c: #3ee6c0">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></div>
         <h3>A traceable, resumable research process</h3>
         <p>Plans live in <code>metds/plans/</code>, execution intermediates in <code>tasks/</code>, run artifacts in <code>wkdrs/</code>. Key decisions, task dependencies, and validation records persist in project files — not in chat history — so any session, human or agent, can pick up exactly where the last one stopped.</p>
       </div>
-      <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14)">
-        <div class="card-icon">🤖</div>
+      <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14); --card-c: #ff7eb6">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="11" rx="2"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.2"/><path d="M2.5 14v2"/><path d="M21.5 14v2"/><path d="M9.5 13.5v2"/><path d="M14.5 13.5v2"/></svg></div>
         <h3>AI-agent native</h3>
         <p>Shared instructions and identical skill sets ship for <strong>Codex</strong>, <strong>Claude</strong>, <strong>Kimi</strong>, and <strong>Cursor</strong> — in English and Chinese. Your agents follow the same conventions you do, and STAR stays framework-agnostic: bring your own model stack, dependency manager, and experiment tracker.</p>
       </div>
-      <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14)">
-        <div class="card-icon">🛡️</div>
+      <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14); --card-c: #f5a623">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 11.5l2 2 4-4"/></svg></div>
         <h3>Safe defaults for large artifacts</h3>
         <p>Local data, model weights, generated outputs, and environment settings are excluded from version control out of the box. Adopt an existing project with symlinks — nothing gets moved, nothing gets overwritten.</p>
       </div>
-      <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14)">
-        <div class="card-icon">🔄</div>
+      <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14); --card-c: #8b93ff">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
         <h3>Upgradeable without disruption</h3>
         <p><code>bash execs/update.sh</code> syncs newer STAR skills and workflow guides into an existing project without touching your code, experiments, or Git remotes.</p>
       </div>
@@ -807,6 +931,7 @@
     <a href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">GitHub</a>
     <a href="https://github.com/wanghao9610/STAR#research-workflow" target="_blank" rel="noopener">Workflow Guide</a>
     <a href="https://github.com/wanghao9610/STAR/blob/main/README.zh-CN.md" target="_blank" rel="noopener">简体中文</a>
+    <a href="#top">Back to top ↑</a>
   </div>
 </footer>
 
@@ -817,20 +942,85 @@
   "use strict";
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- scroll reveal ---------- */
+  /* ---------- scroll reveal (with stagger for grouped items) ---------- */
   var revealEls = document.querySelectorAll(".reveal");
+  var bento = document.querySelector(".bento");
+  if (bento) {
+    Array.prototype.forEach.call(bento.children, function (card, i) {
+      card.setAttribute("data-stagger", i * 70);
+    });
+  }
   if ("IntersectionObserver" in window && !reduced) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
-          e.target.classList.add("visible");
-          io.unobserve(e.target);
+          var el = e.target;
+          var d = parseInt(el.getAttribute("data-stagger") || "0", 10);
+          if (d > 0) {
+            el.style.transitionDelay = d + "ms";
+            setTimeout(function () { el.style.transitionDelay = ""; }, d + 800);
+          }
+          el.classList.add("visible");
+          io.unobserve(el);
         }
       });
     }, { threshold: 0.12 });
     revealEls.forEach(function (el) { io.observe(el); });
   } else {
     revealEls.forEach(function (el) { el.classList.add("visible"); });
+  }
+
+  /* ---------- nav: scroll progress, condensed state, active section ---------- */
+  var nav = document.querySelector("nav");
+  var progress = document.querySelector(".nav-progress");
+  function onScroll() {
+    var st = window.scrollY || document.documentElement.scrollTop;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    if (progress) progress.style.transform = "scaleX(" + (max > 0 ? Math.min(st / max, 1) : 0) + ")";
+    if (nav) nav.classList.toggle("scrolled", st > 24);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  var navLinks = document.querySelectorAll(".nav-links a");
+  if ("IntersectionObserver" in window && navLinks.length) {
+    var secObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          navLinks.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id);
+          });
+        }
+      });
+    }, { rootMargin: "-40% 0px -55% 0px" });
+    document.querySelectorAll("section[id]").forEach(function (s) { secObs.observe(s); });
+  }
+
+  /* ---------- hero stats count-up ---------- */
+  if (!reduced) {
+    document.querySelectorAll(".hero-stats .stat b").forEach(function (el) {
+      var end = parseInt(el.textContent, 10);
+      if (isNaN(end)) return;
+      var t0 = null, dur = 1100;
+      el.textContent = "0";
+      requestAnimationFrame(function tick(t) {
+        if (t0 === null) t0 = t;
+        var p = Math.min((t - t0) / dur, 1);
+        el.textContent = String(Math.round(end * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(tick);
+      });
+    });
+  }
+
+  /* ---------- card spotlight ---------- */
+  if (!reduced && window.matchMedia("(pointer: fine)").matches) {
+    document.querySelectorAll(".card").forEach(function (card) {
+      card.addEventListener("mousemove", function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        card.style.setProperty("--my", (e.clientY - r.top) + "px");
+      });
+    });
   }
 
   /* ---------- starfield + constellation ---------- */
