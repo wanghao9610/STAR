@@ -11,6 +11,26 @@ STAR provides a lightweight starting point for artificial intelligence research 
 
 STAR is intentionally framework-agnostic: the research workflow defines only the process, file locations, and validation records, so you can still bring your own model stack, dependency manager, and experiment tracker.
 
+## Contents
+
+- [Contents](#contents)
+- [What STAR provides](#what-star-provides)
+- [Project structure](#project-structure)
+- [Quick start](#quick-start)
+  - [1. Start a project with STAR](#1-start-a-project-with-star)
+  - [1b. Or adopt a project that already exists](#1b-or-adopt-a-project-that-already-exists)
+  - [2. Configure the local runtime](#2-configure-the-local-runtime)
+  - [2b. Optional: enable Kimi model-id provenance](#2b-optional-enable-kimi-model-id-provenance)
+  - [3. Add an experiment](#3-add-an-experiment)
+  - [4. Run it](#4-run-it)
+- [Research workflow](#research-workflow)
+  - [Model selection](#model-selection)
+- [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides)
+- [Project conventions](#project-conventions)
+- [Adapting STAR to a new project](#adapting-star-to-a-new-project)
+- [Change log](#change-log)
+- [License](#license)
+
 ## What STAR provides
 
 - **A consistent project layout** for code, data, weights, outputs, and research notes.
@@ -292,6 +312,13 @@ When starting a new research repository from STAR:
 - Update the copyright holder and year in `LICENCE`.
 
 Keep only the structure that remains useful—STAR should support the research, not constrain it.
+
+## Change log
+
+Not yet versioned — highlights by date, newest first.
+
+- **2026-07-23** — Added Kimi Code support.
+- **2026-07-15** — Initial STAR release.
 
 ## License
 
