@@ -5,7 +5,7 @@ upstream_commit: <sha, or —>
 language: en
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
-model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+model_id: <model id, copied verbatim from what your runtime states this session — Claude Code injects it at session start; "unrecorded" only if the session names none>
 model_trail:                    # append-only: one entry per write session, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---

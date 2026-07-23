@@ -3,7 +3,7 @@
 <!-- Always written in English. Factual metadata only — the architectural summary lives in metds/codearc.md §5. -->
 
 - **Source**: <repository URL>
-- **model_id**: <model id, self-reported at write time; "unrecorded" if the runtime states none>
+- **model_id**: <model id, copied verbatim from what your runtime states this session — Claude Code injects it at session start; "unrecorded" only if the session names none>
 - **Commit**: `<full sha>` (<commit date, YYYY-MM-DD>)
 - **Sub-path**: <monorepo sub-path, or —>
 - **Cloned**: <YYYY-MM-DD>

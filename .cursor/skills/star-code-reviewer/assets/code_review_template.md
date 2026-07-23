@@ -1,6 +1,6 @@
 # Code Review — <scope> (<YYYY-MM-DD>)
 
-<!-- Written by /star-code-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>). Mode: full | plan | path | diff; target: <argument as given>;
+<!-- Written by /star-code-reviewer (model_id: <model id, copied verbatim from what your runtime states this session — Claude Code injects it at session start; "unrecorded" only if the session names none>). Mode: full | plan | path | diff; target: <argument as given>;
      files reviewed: <n>. Findings are numbered F1, F2, … and cite file:line, the violated rule,
      and a concrete fix. Sections with nothing to say collapse to one line — never pad. -->
 

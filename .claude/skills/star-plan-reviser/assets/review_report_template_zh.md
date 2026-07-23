@@ -1,6 +1,6 @@
 # 审查报告 — <prefix>_<slug>（<YYYY-MM-DD>）
 
-<!-- 由 /star-plan-reviser 生成（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">）。目标：metds/plans/<file>；节点类型：leaf | internal | root；
+<!-- 由 /star-plan-reviser 生成（model_id: <模型 id，照抄运行时本会话为你声明的那串——Claude Code 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">）。目标：metds/plans/<file>；节点类型：leaf | internal | root；
      exec_runs：<run 目录列表，最新的在最后，或 none>。每条结论都要引证据（路径[:行号]、命令输出、或 frontmatter 字段）。
      无话可说的节收敛成一行——绝不注水。 -->
 

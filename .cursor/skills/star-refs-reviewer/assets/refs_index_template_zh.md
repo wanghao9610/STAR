@@ -1,6 +1,6 @@
 # Reference Index —— <主题>（<YYYY-MM-DD>）
 
-<!-- 由 /star-refs-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">）。本文件是 reference.bib 的审计痕迹：每条条目的出处都记在这里，
+<!-- 由 /star-refs-reviewer 写出（model_id: <模型 id，照抄运行时本会话为你声明的那串——Claude Code 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">）。本文件是 reference.bib 的审计痕迹：每条条目的出处都记在这里，
      因此 bib 里的任何字段都能回溯到它来自的那条记录复查。没有这里的行，条目就不允许存在。 -->
 
 ## 1. 范围

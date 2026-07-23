@@ -7,7 +7,7 @@ code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # 用户在 plan 模式审批门后批准的日期
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
-model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_id: <模型 id，照抄运行时本会话为你声明的那串——Claude Code 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---
