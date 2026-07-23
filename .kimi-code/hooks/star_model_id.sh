@@ -19,8 +19,9 @@
 # Registration: Kimi does not auto-load project config, so this hook cannot be
 # committed live the way the other harnesses' are. Add the [[hooks]] block from
 # .kimi-code/hooks.example.toml to your global config at
-# $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml), with the
-# absolute path to this script, to enable it.
+# $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml) to enable it.
+# It registers a relative command path, which resolves per-project because Kimi
+# runs hooks with the working directory set to the project root.
 
 input=$(cat)
 

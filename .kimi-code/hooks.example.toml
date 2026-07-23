@@ -3,9 +3,14 @@
 # Kimi does not auto-load project-level config, so this cannot live in the repo
 # the way .claude/settings.json, .codex/hooks.json, and .cursor/hooks.json do.
 # To enable the hook, copy the [[hooks]] block below into your GLOBAL Kimi
-# config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml), and
-# set `command` to the ABSOLUTE path of this repo's
-# .kimi-code/hooks/star_model_id.sh.
+# config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
+# The relative command path works because Kimi runs hook commands with the
+# working directory set to the session's project root, so it resolves to each
+# STAR project's own copy — one global entry then serves every STAR project with
+# no per-project editing, and in a non-STAR session the path is simply absent
+# and the hook no-ops (fail-open). If your Kimi build does not resolve relative
+# hook paths, replace `command` with the ABSOLUTE path to this repo's
+# .kimi-code/hooks/star_model_id.sh (which must then be edited per project).
 #
 # Why UserPromptSubmit rather than SessionStart: in Kimi, SessionStart is
 # fire-and-forget and cannot inject context, and its payload carries no model
@@ -17,5 +22,5 @@
 
 [[hooks]]
 event = "UserPromptSubmit"
-command = "/absolute/path/to/STAR/.kimi-code/hooks/star_model_id.sh"
+command = ".kimi-code/hooks/star_model_id.sh"
 timeout = 10
