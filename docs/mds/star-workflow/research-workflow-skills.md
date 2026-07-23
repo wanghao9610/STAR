@@ -60,6 +60,12 @@ In Claude and Cursor, use `/skill-name` instead:
 /star-plan-coach open-vocabulary detection and segmentation
 ```
 
+In Kimi, use `/skill:skill-name`:
+
+```text
+/skill:star-plan-coach open-vocabulary detection and segmentation
+```
+
 You can also describe the task in natural language, such as “Break this research plan into executable sub-plans.” Naming the skill explicitly usually makes the intended workflow unambiguous.
 
 When a skill needs a target plan, `PLAN_NAME` accepts three forms:
@@ -1175,7 +1181,7 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all three roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. In Chinese dialogue the entry point reads `SKILL_zh.md` in full before acting, then loads other `*_zh.md` resources as they are referenced; where the two conflict, `SKILL.md` is authoritative. This guide follows the Codex example from §1, so its "complete definition" links point into `.agents/`.
+Every skill directory has the same shape in all four roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. In Chinese dialogue the entry point reads `SKILL_zh.md` in full before acting, then loads other `*_zh.md` resources as they are referenced; where the two conflict, `SKILL.md` is authoritative. This guide follows the Codex example from §1, so its "complete definition" links point into `.agents/`.
 
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |

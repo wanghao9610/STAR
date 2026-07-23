@@ -14,6 +14,7 @@ SKILL_ROOTS=(
     ".agents/skills"
     ".claude/skills"
     ".cursor/skills"
+    ".kimi/skills"
 )
 
 log() {
@@ -33,7 +34,7 @@ Usage: bash execs/update.sh [ref] [--skill NAME]
 Overwrite STAR-managed skills and research workflow documentation with files from upstream.
 The default ref is main; a branch or tag may be supplied instead.
 By default, all skills and workflow documentation are updated. Use --skill to update only
-the named skill across the Codex, Claude, and Cursor skill directories.
+the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
 
 --adopt installs the STAR skeleton into an already-started project instead of updating one.
 It runs against the current working directory, which must be a git repository root, and

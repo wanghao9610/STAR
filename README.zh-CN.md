@@ -18,7 +18,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
 - **完整的研究生命周期**：通过十五个相互配合的 skill，引导把已经开工的项目无损接入、从模糊兴趣收敛出研究选题、计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现奠基代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、按时间轴汇总阶段进展、以执行证据修订计划、全局状态汇总、把成熟计划编译成方法文档，以及把仓库准备到可发布。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
-- **面向 AI 协作的规范**：为 Codex、Claude 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
+- **面向 AI 协作的规范**：为 Codex、Claude、Kimi 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
 十五个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
@@ -49,6 +49,7 @@ star-ai-research/
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
+├── .kimi/skills/           # Kimi 使用的研究工作流技能
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .env.example            # 本地运行环境配置示例
@@ -219,6 +220,7 @@ bash execs/update.sh
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
+- `.kimi/skills/`
 - `docs/mds/star-workflow/`
 
 如需固定到某个 tag 或分支，可以将其作为参数传入：
@@ -233,11 +235,12 @@ bash execs/update.sh TAG_OR_BRANCH
 bash execs/update.sh --skill star-plan-coach
 ```
 
-该命令会更新三个工具目录中对应的 skill：
+该命令会更新四个工具目录中对应的 skill：
 
 - `.agents/skills/star-plan-coach/`
 - `.claude/skills/star-plan-coach/`
 - `.cursor/skills/star-plan-coach/`
+- `.kimi/skills/star-plan-coach/`
 
 单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
 
@@ -245,7 +248,7 @@ bash execs/update.sh --skill star-plan-coach
 bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 ```
 
-命令的通用形式为 `bash execs/update.sh [ref] [--skill NAME]`。如果 skill 名称无效，或上游三个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
+命令的通用形式为 `bash execs/update.sh [ref] [--skill NAME]`。如果 skill 名称无效，或上游四个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
 
 上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；本次更新范围中仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 

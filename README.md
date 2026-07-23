@@ -18,7 +18,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - **A single experiment entrypoint** through `execs/run.sh`.
 - **A complete research lifecycle** through fifteen complementary skills for adopting an already-started project without disturbing it, converging a vague interest into a defensible research topic, drafting plans, surveying the related work into analysis notes and a verified bibliography, recursively decomposing them, bootstrapping the codebase from a reference implementation, building the runtime environment, executing leaf plans, reviewing code against conventions and plan promises, analyzing run results against what the plan expected, digesting progress over a period, revising plans against execution evidence, summarizing global status, compiling the matured plans into method documents, and preparing the repository for release.
 - **A traceable, resumable research process** that stores plans under `metds/plans/`, plan-execution intermediates under `tasks/`, and generated run artifacts under `wkdrs/` instead of relying on chat history for context.
-- **AI-friendly project guidance and research workflows** shared across Codex, Claude, and Cursor, with support for both English and Chinese.
+- **AI-friendly project guidance and research workflows** shared across Codex, Claude, Kimi, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
 See [Research workflow](#research-workflow) for the responsibilities, invocation patterns, and complete examples for all fifteen skills.
@@ -49,6 +49,7 @@ STAR/
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
+├── .kimi/skills/           # Research workflow skills for Kimi
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .env.example            # Portable environment configuration example
@@ -224,6 +225,7 @@ By default, the command updates these directories from STAR's `main` branch:
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
+- `.kimi/skills/`
 - `docs/mds/star-workflow/`
 
 To pin the update to a tag or branch, pass it as an argument:
@@ -238,11 +240,12 @@ To update one skill only, pass its directory name with `--skill`:
 bash execs/update.sh --skill star-plan-coach
 ```
 
-This updates the matching skill in all three tool-specific directories:
+This updates the matching skill in all four tool-specific directories:
 
 - `.agents/skills/star-plan-coach/`
 - `.claude/skills/star-plan-coach/`
 - `.cursor/skills/star-plan-coach/`
+- `.kimi/skills/star-plan-coach/`
 
 The workflow documentation under `docs/mds/star-workflow/` is not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
 
@@ -250,7 +253,7 @@ The workflow documentation under `docs/mds/star-workflow/` is not updated in sin
 bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 ```
 
-The general command form is `bash execs/update.sh [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the three upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
+The general command form is `bash execs/update.sh [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the four upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
 
 Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in the updated directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 
