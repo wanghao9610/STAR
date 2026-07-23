@@ -90,7 +90,7 @@ $star-code-release
 
 如果只是编写或拆解计划，不需要提前准备数据、权重或可运行代码；这些输入会在执行阶段检查。
 
-每个 skill 写出的产物都带一个 `model_id`，记录它由哪个模型产出，好让日后横向比较不同模型时有据可依。取值是运行时在写入当时报出的 id，原样抄录——每个受支持的运行时都通过 STAR 的 SessionStart 钩子在会话开始注入它（`.claude/`、`.codex/`、`.cursor/hooks/star_model_id.sh`；Kimi 的 SessionStart 无法注入上下文，故改用尽力而为的 `.kimi/hooks/star_model_id.sh` 挂在 `UserPromptSubmit` 上），Claude Code 还在系统提示里点名，照抄那串即可——只有会话里没点名模型时才写 `unrecorded`；它是自报而非核实的，所以会话中途换过模型时可能留下过期的值。计划由多个模型在数月间反复编辑，其 frontmatter 只点名最近一次写入者，而每条 `## Revision History` 条目各自带着自己的 model id。跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——而 `star-expt-digest ledger` 把全部 trail 汇总进 `wkdrs/digests/MODEL_LEDGER.md`，让整条流水在一张表里可见。详见规约 §8。
+每个 skill 写出的产物都带一个 `model_id`，记录它由哪个模型产出，好让日后横向比较不同模型时有据可依。取值是运行时在写入当时报出的 id，原样抄录——每个受支持的运行时都通过 STAR 的 SessionStart 钩子在会话开始注入它（`.claude/`、`.codex/`、`.cursor/hooks/star_model_id.sh`；Kimi 的 SessionStart 无法注入上下文，故改用尽力而为的 `.kimi-code/hooks/star_model_id.sh` 挂在 `UserPromptSubmit` 上），Claude Code 还在系统提示里点名，照抄那串即可——只有会话里没点名模型时才写 `unrecorded`；它是自报而非核实的，所以会话中途换过模型时可能留下过期的值。计划由多个模型在数月间反复编辑，其 frontmatter 只点名最近一次写入者，而每条 `## Revision History` 条目各自带着自己的 model id。跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——而 `star-expt-digest ledger` 把全部 trail 汇总进 `wkdrs/digests/MODEL_LEDGER.md`，让整条流水在一张表里可见。详见规约 §8。
 
 ## 3. `$star-proj-adopt`：接入一个做了一半的项目
 

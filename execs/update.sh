@@ -14,7 +14,7 @@ SKILL_ROOTS=(
     ".agents/skills"
     ".claude/skills"
     ".cursor/skills"
-    ".kimi/skills"
+    ".kimi-code/skills"
 )
 
 log() {

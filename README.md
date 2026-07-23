@@ -49,7 +49,7 @@ STAR/
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
-├── .kimi/skills/           # Research workflow skills for Kimi
+├── .kimi-code/skills/      # Research workflow skills for Kimi
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .env.example            # Portable environment configuration example
@@ -225,7 +225,7 @@ By default, the command updates these directories from STAR's `main` branch:
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
-- `.kimi/skills/`
+- `.kimi-code/skills/`
 - `docs/mds/star-workflow/`
 
 To pin the update to a tag or branch, pass it as an argument:
@@ -245,7 +245,7 @@ This updates the matching skill in all four tool-specific directories:
 - `.agents/skills/star-plan-coach/`
 - `.claude/skills/star-plan-coach/`
 - `.cursor/skills/star-plan-coach/`
-- `.kimi/skills/star-plan-coach/`
+- `.kimi-code/skills/star-plan-coach/`
 
 The workflow documentation under `docs/mds/star-workflow/` is not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
 

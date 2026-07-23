@@ -18,8 +18,9 @@
 #
 # Registration: Kimi does not auto-load project config, so this hook cannot be
 # committed live the way the other harnesses' are. Add the [[hooks]] block from
-# .kimi/hooks.example.toml to your global ~/.kimi/config.toml (with the absolute
-# path to this script) to enable it.
+# .kimi-code/hooks.example.toml to your global config at
+# $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml), with the
+# absolute path to this script, to enable it.
 
 input=$(cat)
 
@@ -43,12 +44,11 @@ marker="${TMPDIR:-/tmp}/star_kimi_model_id_${sid:-nosession}"
 
 # --- configured default model from config.toml (global; Kimi has no per-project config) ---
 model=""
-for cfg in "$HOME/.kimi/config.toml" "$HOME/.kimi-code/config.toml"; do
-  [ -f "$cfg" ] || continue
+cfg="${KIMI_CODE_HOME:-$HOME/.kimi-code}/config.toml"
+if [ -f "$cfg" ]; then
   model=$(grep -E '^[[:space:]]*default_model[[:space:]]*=' "$cfg" | head -1 \
             | sed -E 's/^[^=]*=[[:space:]]*"?([^"#]*)"?.*/\1/' | sed -E 's/[[:space:]]+$//')
-  [ -n "$model" ] && break
-done
+fi
 
 if [ -n "${model:-}" ]; then
   ctx="STAR provenance: this Kimi session has configured default model ${model} (from config.toml; the active model may differ if it was overridden with kimi -m or /model). When a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), record the model actually answering — normally ${model} — verbatim; do not write 'unrecorded'."

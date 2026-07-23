@@ -49,7 +49,7 @@ star-ai-research/
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
-├── .kimi/skills/           # Kimi 使用的研究工作流技能
+├── .kimi-code/skills/      # Kimi 使用的研究工作流技能
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .env.example            # 本地运行环境配置示例
@@ -220,7 +220,7 @@ bash execs/update.sh
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
-- `.kimi/skills/`
+- `.kimi-code/skills/`
 - `docs/mds/star-workflow/`
 
 如需固定到某个 tag 或分支，可以将其作为参数传入：
@@ -240,7 +240,7 @@ bash execs/update.sh --skill star-plan-coach
 - `.agents/skills/star-plan-coach/`
 - `.claude/skills/star-plan-coach/`
 - `.cursor/skills/star-plan-coach/`
-- `.kimi/skills/star-plan-coach/`
+- `.kimi-code/skills/star-plan-coach/`
 
 单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
 
