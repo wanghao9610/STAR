@@ -1,9 +1,13 @@
 # STAR model_id provenance hook for Kimi Code — registration snippet.
 #
+# EASIEST: run `bash .kimi-code/hooks/install.sh` once — it writes the block
+# below into your global config for you (idempotent, backs up first). The manual
+# route below is the same thing by hand.
+#
 # Kimi does not auto-load project-level config, so this cannot live in the repo
 # the way .claude/settings.json, .codex/hooks.json, and .cursor/hooks.json do.
-# To enable the hook, copy the [[hooks]] block below into your GLOBAL Kimi
-# config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
+# To enable the hook manually, copy the [[hooks]] block below into your GLOBAL
+# Kimi config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
 # The relative command path works because Kimi runs hook commands with the
 # working directory set to the session's project root, so it resolves to each
 # STAR project's own copy — one global entry then serves every STAR project with
