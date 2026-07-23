@@ -140,6 +140,16 @@ Setting neither is an error.
 
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
+### 2b. Optional: enable Kimi model-id provenance
+
+If you drive STAR with **Kimi Code**, run this once per machine so skills record the real `model_id` instead of `unrecorded`:
+
+```bash
+bash .kimi-code/hooks/install.sh
+```
+
+It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor register their hooks automatically. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
+
 ### 3. Add an experiment
 
 Put reusable project code under the directory named by `CODE_NAME`, then add an experiment script under `execs/scpts/`. For example:

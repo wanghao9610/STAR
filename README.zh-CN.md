@@ -135,6 +135,16 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
+### 2b. 可选：启用 Kimi 的 model-id 溯源
+
+如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，让各 skill 记录真实的 `model_id` 而不是 `unrecorded`：
+
+```bash
+bash .kimi-code/hooks/install.sh
+```
+
+它会把溯源钩子注册进你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 会自动注册各自的钩子。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+
 ### 3. 添加实验
 
 将可复用的项目代码放在 `CODE_NAME` 指定的目录中，再在 `execs/scpts/` 下添加实验脚本。例如：
