@@ -1,0 +1,20 @@
+# STAR model_id provenance hook for Kimi Code — registration snippet.
+#
+# Kimi does not auto-load project-level config, so this cannot live in the repo
+# the way .claude/settings.json, .codex/hooks.json, and .cursor/hooks.json do.
+# To enable the hook, copy the [[hooks]] block below into your GLOBAL Kimi
+# config at ~/.kimi/config.toml (or ~/.kimi-code/config.toml), and set `command`
+# to the ABSOLUTE path of this repo's .kimi/hooks/star_model_id.sh.
+#
+# Why UserPromptSubmit rather than SessionStart: in Kimi, SessionStart is
+# fire-and-forget and cannot inject context, and its payload carries no model
+# id. UserPromptSubmit is the only context-appending event. The hook injects
+# once per session (keyed on session_id), so it does not repeat every turn.
+#
+# Note: [[hooks]] accepts only event / matcher / command / timeout — any extra
+# field makes the whole config fail to load.
+
+[[hooks]]
+event = "UserPromptSubmit"
+command = "/absolute/path/to/STAR/.kimi/hooks/star_model_id.sh"
+timeout = 10
