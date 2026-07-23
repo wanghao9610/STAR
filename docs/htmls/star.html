@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="STAR — Systematic Toolchain for AI Research. A reusable foundation for reproducible and well-structured AI research.">
+<title>STAR — Systematic Toolchain for AI Research</title>
+<link rel="icon" href="../srcs/star-project-icon.png">
+<style>
+  /* ============================================================
+     STAR landing page — dark, cinematic, constellation-themed.
+     Self-contained: no external fonts, scripts, or stylesheets.
+     ============================================================ */
+  :root {
+    --bg-0: #04060f;
+    --bg-1: #0a0f1e;
+    --bg-2: #101731;
+    --panel: rgba(255, 255, 255, 0.03);
+    --panel-hi: rgba(255, 255, 255, 0.06);
+    --line: rgba(148, 163, 216, 0.16);
+    --line-hi: rgba(148, 163, 216, 0.35);
+    --text: #e6eaf6;
+    --text-dim: #9aa5c4;
+    --text-faint: #626e92;
+    --gold: #ffd86b;
+    --gold-deep: #f5a623;
+    --violet: #8b93ff;
+    --blue: #4cc3ff;
+    --teal: #3ee6c0;
+    --rose: #ff7eb6;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg-0);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(255, 216, 107, 0.25); }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; }
+
+  /* ---------- starfield canvas ---------- */
+  #sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .content { position: relative; z-index: 1; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem clamp(1.2rem, 4vw, 3rem);
+    background: rgba(4, 6, 15, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(148, 163, 216, 0.08);
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    font-size: 1.05rem;
+  }
+  .nav-brand img { width: 26px; height: 26px; }
+  .nav-links {
+    display: flex;
+    gap: clamp(0.8rem, 2.5vw, 2rem);
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .nav-links a { transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-gh {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.95rem;
+    border: 1px solid var(--line-hi);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .nav-gh:hover { border-color: var(--gold); background: rgba(255, 216, 107, 0.08); }
+  .nav-gh svg { width: 16px; height: 16px; fill: currentColor; }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 7rem 1.5rem 4rem;
+    position: relative;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 240px;
+    background: linear-gradient(to bottom, transparent, var(--bg-0));
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1.1rem;
+    border: 1px solid rgba(255, 216, 107, 0.35);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(255, 216, 107, 0.06);
+    animation: badge-glow 4s ease-in-out infinite;
+  }
+  @keyframes badge-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(255, 216, 107, 0); }
+    50% { box-shadow: 0 0 24px rgba(255, 216, 107, 0.18); }
+  }
+  .hero h1 {
+    margin-top: 1.6rem;
+    font-size: clamp(4.5rem, 16vw, 11rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    background: linear-gradient(100deg, #fff 10%, var(--gold) 38%, var(--violet) 68%, var(--blue) 92%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: shimmer 7s linear infinite;
+  }
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+  .hero-sub {
+    margin-top: 0.8rem;
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .hero-desc {
+    margin-top: 1.6rem;
+    max-width: 620px;
+    font-size: clamp(0.98rem, 2vw, 1.12rem);
+    color: var(--text-dim);
+  }
+  .hero-desc strong { color: var(--text); font-weight: 600; }
+  .hero-ctas {
+    margin-top: 2.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.78rem 1.7rem;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--gold-deep), var(--gold));
+    color: #1a1204;
+    box-shadow: 0 6px 28px rgba(245, 166, 35, 0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245, 166, 35, 0.5); }
+  .btn-ghost {
+    border: 1px solid var(--line-hi);
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .btn-ghost:hover { transform: translateY(-2px); border-color: var(--violet); background: rgba(139, 147, 255, 0.08); }
+  .hero-stats {
+    margin-top: 3.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(1.4rem, 5vw, 3.5rem);
+  }
+  .stat { text-align: center; }
+  .stat b {
+    display: block;
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 750;
+    background: linear-gradient(120deg, var(--gold), var(--violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .stat span {
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-faint);
+    font-size: 1.4rem;
+    animation: bob 2.2s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); opacity: 0.5; }
+    50% { transform: translate(-50%, 8px); opacity: 1; }
+  }
+
+  /* ---------- shared section chrome ---------- */
+  section { padding: clamp(4rem, 9vw, 7rem) clamp(1.2rem, 5vw, 3rem); }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  .kicker {
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+  }
+  .kicker::before { content: "✦ "; }
+  h2 {
+    font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .section-lead {
+    margin-top: 1rem;
+    max-width: 640px;
+    color: var(--text-dim);
+    font-size: 1.02rem;
+  }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ---------- pillars: bento grid ---------- */
+  .bento {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+  }
+  .card {
+    grid-column: span 2;
+    padding: 1.6rem;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: linear-gradient(160deg, var(--panel-hi), var(--panel));
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-hi);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--card-glow, rgba(255,216,107,0.12)), transparent 70%);
+    transition: opacity 0.25s;
+    opacity: 0.7;
+  }
+  .card:hover::before { opacity: 1; }
+  .card.wide { grid-column: span 3; }
+  .card-icon {
+    width: 42px; height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+  }
+  .card h3 { font-size: 1.08rem; font-weight: 650; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.9rem; color: var(--text-dim); }
+  .card code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    color: var(--gold);
+    background: rgba(255, 216, 107, 0.08);
+    padding: 0.08em 0.4em;
+    border-radius: 5px;
+  }
+  @media (max-width: 900px) { .card, .card.wide { grid-column: span 3; } }
+  @media (max-width: 600px) { .card, .card.wide { grid-column: span 6; } }
+
+  /* ---------- structure: tree + legend ---------- */
+  .structure-grid {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .structure-grid { grid-template-columns: 1fr; } }
+  .tree-window {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(6, 9, 20, 0.85);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .window-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  .window-title {
+    margin-left: 0.6rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+  .tree-body {
+    padding: 1.2rem 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .tree-body .dir { color: var(--blue); font-weight: 600; }
+  .tree-body .file { color: var(--text-dim); }
+  .tree-body .cm { color: var(--text-faint); }
+  .tree-body .hl { color: var(--gold); font-weight: 600; }
+  .legend { display: flex; flex-direction: column; gap: 0.7rem; }
+  .legend-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 0.9rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    align-items: baseline;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .legend-row:hover { border-color: var(--line-hi); background: var(--panel-hi); }
+  .legend-row code {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--gold);
+  }
+  .legend-row span { font-size: 0.86rem; color: var(--text-dim); }
+
+  /* ---------- workflow constellation ---------- */
+  .phases { margin-top: 3.2rem; display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 1.6rem;
+    padding: 1.8rem 0;
+    position: relative;
+  }
+  .phase:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 58px;
+    bottom: -14px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--phase-c, var(--gold)), transparent);
+    opacity: 0.35;
+  }
+  .phase-head { display: flex; align-items: flex-start; gap: 0.9rem; }
+  .phase-star {
+    flex: none;
+    width: 30px; height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.35), transparent 60%), var(--phase-c, var(--gold));
+    color: #0a0d18;
+    box-shadow: 0 0 18px var(--phase-glow, rgba(255, 216, 107, 0.45));
+  }
+  .phase-head h3 { font-size: 1.12rem; font-weight: 700; line-height: 30px; }
+  .phase-head small {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--text-faint);
+    line-height: 1.45;
+    margin-top: 0.25rem;
+  }
+  .skills { display: flex; flex-wrap: wrap; gap: 0.7rem; align-content: flex-start; }
+  .skill {
+    flex: 1 1 240px;
+    max-width: 340px;
+    padding: 0.85rem 1.05rem;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--panel);
+    transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .skill:hover {
+    transform: translateY(-3px);
+    border-color: var(--phase-c, var(--gold));
+    background: var(--panel-hi);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+  }
+  .skill code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--phase-c, var(--gold));
+  }
+  .skill p { margin-top: 0.3rem; font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+  @media (max-width: 760px) {
+    .phase { grid-template-columns: 1fr; gap: 1rem; }
+    .phase:not(:last-child)::after { display: none; }
+  }
+  .workflow-map {
+    margin-top: 3.5rem;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .workflow-map img { display: block; width: 100%; }
+  .workflow-map figcaption {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+
+  /* ---------- quick start terminal ---------- */
+  .term {
+    margin-top: 3rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(5, 8, 18, 0.92);
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  }
+  .term-body {
+    padding: 1.4rem 1.6rem;
+    font-family: var(--mono);
+    font-size: 0.87rem;
+    line-height: 1.9;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .term-body .p { color: var(--teal); user-select: none; }
+  .term-body .c { color: var(--text-faint); }
+  .term-body .cmd { color: var(--text); }
+  .term-body .flag { color: var(--violet); }
+  .term-body .str { color: var(--gold); }
+  .cursor-blink {
+    display: inline-block;
+    width: 8px; height: 1.05em;
+    background: var(--teal);
+    vertical-align: text-bottom;
+    animation: blink 1.1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- final CTA + footer ---------- */
+  .cta-final {
+    text-align: center;
+    padding-bottom: clamp(4rem, 8vw, 6rem);
+  }
+  .cta-final h2 span {
+    background: linear-gradient(110deg, var(--gold), var(--violet), var(--blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .cta-final .section-lead { margin-left: auto; margin-right: auto; }
+  footer {
+    border-top: 1px solid rgba(148, 163, 216, 0.08);
+    padding: 2rem clamp(1.2rem, 5vw, 3rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.84rem;
+    color: var(--text-faint);
+  }
+  footer .f-links { display: flex; gap: 1.4rem; }
+  footer a:hover { color: var(--gold); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div class="content">
+
+<nav>
+  <a class="nav-brand" href="#top">
+    <img src="../srcs/star-project-icon.png" alt="">
+    STAR
+  </a>
+  <div class="nav-links">
+    <a href="#pillars">Why STAR</a>
+    <a href="#structure">Structure</a>
+    <a href="#workflow">Workflow</a>
+    <a href="#quickstart">Quick Start</a>
+  </div>
+  <a class="nav-gh" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero" id="top">
+  <span class="hero-badge">Systematic Toolchain for AI Research</span>
+  <h1>STAR</h1>
+  <p class="hero-sub">Research, by design</p>
+  <p class="hero-desc">
+    A reusable foundation for <strong>reproducible, well-structured AI research</strong> —
+    one predictable layout, one experiment entrypoint, and a fifteen-skill workflow that
+    carries a vague idea all the way to a released repository, with every decision on file.
+  </p>
+  <div class="hero-ctas">
+    <a class="btn btn-primary" href="#quickstart">✦ Get Started</a>
+    <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">View on GitHub</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><b>15</b><span>Workflow Skills</span></div>
+    <div class="stat"><b>3</b><span>AI Agents Supported</span></div>
+    <div class="stat"><b>2</b><span>Languages · EN 中文</span></div>
+    <div class="stat"><b>MIT</b><span>Open Source</span></div>
+  </div>
+  <a class="scroll-hint" href="#pillars" aria-label="Scroll down">▾</a>
+</header>
+
+<!-- ==================== PILLARS ==================== -->
+<section id="pillars">
+  <div class="wrap">
+    <p class="kicker reveal">Why STAR</p>
+    <h2 class="reveal">Everything in its place.<br>Every decision on file.</h2>
+    <p class="section-lead reveal">
+      Research code rots when structure lives in someone's head and context lives in a chat window.
+      STAR moves both into the repository itself.
+    </p>
+    <div class="bento">
+      <div class="card reveal" style="--card-glow: rgba(255,216,107,0.14)">
+        <div class="card-icon">🗂️</div>
+        <h3>A consistent layout</h3>
+        <p>Code, data, weights, outputs, and methodology notes each have one predictable home — <code>code/</code>, <code>datas/</code>, <code>inits/</code>, <code>wkdrs/</code>, <code>metds/</code>.</p>
+      </div>
+      <div class="card reveal" style="--card-glow: rgba(139,147,255,0.16)">
+        <div class="card-icon">🔌</div>
+        <h3>A portable runtime boundary</h3>
+        <p>Machine-specific paths live in a local <code>.env</code>, never in scripts. Clone the repo anywhere, point it at your conda or venv, and run.</p>
+      </div>
+      <div class="card reveal" style="--card-glow: rgba(76,195,255,0.16)">
+        <div class="card-icon">🚀</div>
+        <h3>One experiment entrypoint</h3>
+        <p><code>bash execs/run.sh &lt;exp&gt;</code> activates the environment, exports the path variables, and launches any experiment script the same way, every time.</p>
+      </div>
+      <div class="card wide reveal" style="--card-glow: rgba(62,230,192,0.14)">
+        <div class="card-icon">🧭</div>
+        <h3>A traceable, resumable research process</h3>
+        <p>Plans live in <code>metds/plans/</code>, execution intermediates in <code>tasks/</code>, run artifacts in <code>wkdrs/</code>. Key decisions, task dependencies, and validation records persist in project files — not in chat history — so any session, human or agent, can pick up exactly where the last one stopped.</p>
+      </div>
+      <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14)">
+        <div class="card-icon">🤖</div>
+        <h3>AI-agent native</h3>
+        <p>Shared instructions and identical skill sets ship for <strong>Codex</strong>, <strong>Claude</strong>, and <strong>Cursor</strong> — in English and Chinese. Your agents follow the same conventions you do, and STAR stays framework-agnostic: bring your own model stack, dependency manager, and experiment tracker.</p>
+      </div>
+      <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14)">
+        <div class="card-icon">🛡️</div>
+        <h3>Safe defaults for large artifacts</h3>
+        <p>Local data, model weights, generated outputs, and environment settings are excluded from version control out of the box. Adopt an existing project with symlinks — nothing gets moved, nothing gets overwritten.</p>
+      </div>
+      <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14)">
+        <div class="card-icon">🔄</div>
+        <h3>Upgradeable without disruption</h3>
+        <p><code>bash execs/update.sh</code> syncs newer STAR skills and workflow guides into an existing project without touching your code, experiments, or Git remotes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STRUCTURE ==================== -->
+<section id="structure">
+  <div class="wrap">
+    <p class="kicker reveal">Project structure</p>
+    <h2 class="reveal">Seven directories.<br>Zero guessing.</h2>
+    <p class="section-lead reveal">
+      The abbreviated names are deliberate: short to type, unambiguous to search,
+      and identical across every STAR project you will ever open.
+    </p>
+    <div class="structure-grid">
+      <div class="tree-window reveal">
+        <div class="window-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="window-title">tree ~/my-research</span>
+        </div>
+        <div class="tree-body"><span class="hl">STAR/</span>
+├── <span class="dir">code/</span>        <span class="cm"># core source (named by CODE_NAME)</span>
+├── <span class="dir">datas/</span>       <span class="cm"># datasets &amp; data files</span>
+├── <span class="dir">inits/</span>       <span class="cm"># weights &amp; checkpoints</span>
+├── <span class="dir">metds/</span>       <span class="cm"># methodologies</span>
+│   ├── <span class="dir">ideas/</span>   <span class="cm"># topic explorations</span>
+│   ├── <span class="dir">plans/</span>   <span class="cm"># research plans &amp; sub-plans</span>
+│   └── <span class="dir">refs/</span>    <span class="cm"># related-work notes + reference.bib</span>
+├── <span class="dir">execs/</span>       <span class="cm"># executions</span>
+│   ├── <span class="file">run.sh</span>   <span class="cm"># ← the single entrypoint</span>
+│   ├── <span class="file">update.sh</span>
+│   └── <span class="dir">scpts/</span>   <span class="cm"># experiment scripts</span>
+├── <span class="dir">tasks/</span>       <span class="cm"># per-plan execution intermediates</span>
+├── <span class="dir">wkdrs/</span>       <span class="cm"># run outputs: logs, metrics, figures</span>
+├── <span class="dir">docs/</span>        <span class="cm"># documentation site</span>
+├── <span class="file">.env</span>         <span class="cm"># machine-local paths (never committed)</span>
+└── <span class="file">AGENTS.md</span>    <span class="cm"># shared human + agent instructions</span></div>
+      </div>
+      <div class="legend reveal">
+        <div class="legend-row"><code>datas/</code><span><strong>Data</strong> — raw, processed, or generated datasets</span></div>
+        <div class="legend-row"><code>inits/</code><span><strong>Initializations</strong> — pretrained weights and checkpoints</span></div>
+        <div class="legend-row"><code>metds/</code><span><strong>Methodologies</strong> — plans, design notes, research records</span></div>
+        <div class="legend-row"><code>execs/</code><span><strong>Executions</strong> — launchers and experiment scripts</span></div>
+        <div class="legend-row"><code>scpts/</code><span><strong>Scripts</strong> — individual runnable experiment definitions</span></div>
+        <div class="legend-row"><code>tasks/</code><span><strong>Tasks</strong> — each plan's tool scripts and working files</span></div>
+        <div class="legend-row"><code>wkdrs/</code><span><strong>Work directories</strong> — logs, metrics, predictions, artifacts</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== WORKFLOW ==================== -->
+<section id="workflow">
+  <div class="wrap">
+    <p class="kicker reveal">Research workflow</p>
+    <h2 class="reveal">Fifteen skills.<br>One constellation.</h2>
+    <p class="section-lead reveal">
+      From a vague interest to a released repository — each skill writes its evidence into
+      project files, so the whole research programme is auditable and resumable at any point.
+    </p>
+
+    <div class="phases">
+      <div class="phase reveal" style="--phase-c: var(--gold); --phase-glow: rgba(255,216,107,0.45)">
+        <div class="phase-head">
+          <div class="phase-star">✦</div>
+          <h3>Shape<small>Converge on a topic and turn it into verifiable plans.</small></h3>
+        </div>
+        <div class="skills">
+          <div class="skill"><code>$star-idea-storm</code><p>Converge a vague interest into a defensible research topic, scored on six dimensions.</p></div>
+          <div class="skill"><code>$star-plan-coach</code><p>Clarify the idea through staged questions into a strategic research plan.</p></div>
+          <div class="skill"><code>$star-refs-reviewer</code><p>Survey related work into analysis notes and a verified, classified bibliography.</p></div>
+          <div class="skill"><code>$star-plan-decomposer</code><p>Split strategic plans recursively into verifiable, executable sub-plans.</p></div>
+        </div>
+      </div>
+
+      <div class="phase reveal" style="--phase-c: var(--violet); --phase-glow: rgba(139,147,255,0.45)">
+        <div class="phase-head">
+          <div class="phase-star">✦</div>
+          <h3>Build<small>Stand up the codebase and the runtime it needs.</small></h3>
+        </div>
+        <div class="skills">
+          <div class="skill"><code>$star-proj-adopt</code><p>Adopt an already-started project without disturbing it — probe, symlink, record.</p></div>
+          <div class="skill"><code>$star-code-architect</code><p>Bootstrap the codebase from a scored reference implementation and record the architecture.</p></div>
+          <div class="skill"><code>$star-env-builder</code><p>Build the conda env or venv from <em>.env</em>, resolve dependencies, smoke-verify.</p></div>
+        </div>
+      </div>
+
+      <div class="phase reveal" style="--phase-c: var(--blue); --phase-glow: rgba(76,195,255,0.45)">
+        <div class="phase-head">
+          <div class="phase-star">✦</div>
+          <h3>Execute<small>Implement each leaf plan and audit what it produced.</small></h3>
+        </div>
+        <div class="skills">
+          <div class="skill"><code>$star-plan-executor</code><p>Implement and lightly validate one executable leaf plan, logging every run.</p></div>
+          <div class="skill"><code>$star-code-reviewer</code><p>Review code against project conventions and the plan's promised implementation.</p></div>
+          <div class="skill"><code>$star-expt-analyst</code><p>Audit a run against what the plan expected: artifacts, logs, metrics, meaning.</p></div>
+        </div>
+      </div>
+
+      <div class="phase reveal" style="--phase-c: var(--teal); --phase-glow: rgba(62,230,192,0.45)">
+        <div class="phase-head">
+          <div class="phase-star">✦</div>
+          <h3>Steer<small>Keep the plan tree honest against execution evidence.</small></h3>
+        </div>
+        <div class="skills">
+          <div class="skill"><code>$star-plan-reviser</code><p>Revise a plan in place against its execution evidence, with a revision history.</p></div>
+          <div class="skill"><code>$star-expt-digest</code><p>Summarize what the programme has done lately — verdicts, movement, gaps.</p></div>
+          <div class="skill"><code>$star-flow-status</code><p>Report progress across the whole flow and the single next action to take.</p></div>
+        </div>
+      </div>
+
+      <div class="phase reveal" style="--phase-c: var(--rose); --phase-glow: rgba(255,126,182,0.45)">
+        <div class="phase-head">
+          <div class="phase-star">✦</div>
+          <h3>Deliver<small>Turn matured plans into papers and releases.</small></h3>
+        </div>
+        <div class="skills">
+          <div class="skill"><code>$star-metd-summarize</code><p>Compile the plan tree into paper-ready method documents, flagging the unverified.</p></div>
+          <div class="skill"><code>$star-code-release</code><p>Prepare the repository for release: promote code, polish, compile the README, sweep for secrets.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="workflow-map reveal">
+      <img src="../srcs/star-research-workflow.svg" alt="STAR research workflow: thirteen skills in running order plus two that read across them, what each writes, and how the per-leaf loop closes" loading="lazy">
+      <figcaption>The full workflow map — running order, outputs, and how the per-leaf loop closes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ==================== QUICK START ==================== -->
+<section id="quickstart">
+  <div class="wrap">
+    <p class="kicker reveal">Quick start</p>
+    <h2 class="reveal">Four commands to liftoff.</h2>
+    <p class="section-lead reveal">
+      Start fresh from the template — or run <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>
+      inside an existing repository and STAR installs itself around your work without moving a single file.
+    </p>
+    <div class="term reveal">
+      <div class="window-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="window-title">zsh — my-research</span>
+      </div>
+      <div class="term-body"><span class="c"># 1 · Start a project from the STAR template</span>
+<span class="p">❯</span> <span class="cmd">git clone https://github.com/wanghao9610/STAR my-research <span class="flag">&amp;&amp;</span> cd my-research</span>
+
+<span class="c"># 2 · Configure the local runtime (machine paths stay out of Git)</span>
+<span class="p">❯</span> <span class="cmd">cp .env.example .env</span>   <span class="c"># set CODE_NAME, CONDA_HOME / PYTHON_HOME…</span>
+
+<span class="c"># 3 · See what's runnable</span>
+<span class="p">❯</span> <span class="cmd">bash execs/run.sh <span class="flag">--list</span></span>
+
+<span class="c"># 4 · Launch an experiment through the single entrypoint</span>
+<span class="p">❯</span> <span class="cmd">bash execs/run.sh 00_exp <span class="flag">--config</span> <span class="str">config.yaml</span></span>
+<span class="p">❯</span> <span class="cursor-blink"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FINAL CTA ==================== -->
+<section class="cta-final">
+  <div class="wrap">
+    <p class="kicker reveal">Ready when you are</p>
+    <h2 class="reveal">Give your research a<br><span>structure worth returning to.</span></h2>
+    <p class="section-lead reveal">
+      STAR is free, MIT-licensed, and framework-agnostic.
+      Use it as a GitHub template, or adopt it into the project you already have.
+    </p>
+    <div class="hero-ctas reveal">
+      <a class="btn btn-primary" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">✦ Use the Template</a>
+      <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR#quick-start" target="_blank" rel="noopener">Read the Docs</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 STAR · Released under the MIT License</span>
+  <div class="f-links">
+    <a href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/wanghao9610/STAR#research-workflow" target="_blank" rel="noopener">Workflow Guide</a>
+    <a href="https://github.com/wanghao9610/STAR/blob/main/README.zh-CN.md" target="_blank" rel="noopener">简体中文</a>
+  </div>
+</footer>
+
+</div><!-- /.content -->
+
+<script>
+(function () {
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- scroll reveal ---------- */
+  var revealEls = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window && !reduced) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add("visible");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add("visible"); });
+  }
+
+  /* ---------- starfield + constellation ---------- */
+  var canvas = document.getElementById("sky");
+  var ctx = canvas.getContext("2d");
+  var stars = [], meteors = [], W = 0, H = 0;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var running = true;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+  }
+
+  function seed() {
+    stars = [];
+    var n = Math.min(260, Math.floor((W * H) / 6500));
+    for (var i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.3 + 0.25,
+        base: Math.random() * 0.5 + 0.25,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.9 + 0.35,
+        hue: Math.random() < 0.16 ? "255,216,107" : (Math.random() < 0.5 ? "165,180,252" : "226,232,255")
+      });
+    }
+  }
+
+  function spawnMeteor() {
+    if (meteors.length > 2) return;
+    meteors.push({
+      x: Math.random() * W * 0.8 + W * 0.1,
+      y: Math.random() * H * 0.35,
+      vx: -(4 + Math.random() * 4),
+      vy: 2 + Math.random() * 2,
+      life: 1
+    });
+  }
+
+  /* constellation: connect nearby stars with faint lines */
+  function drawLinks() {
+    var linkDist = 110;
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i < stars.length; i++) {
+      var a = stars[i];
+      if (a.y > H * 0.85) continue;
+      for (var j = i + 1; j < i + 6 && j < stars.length; j++) {
+        var b = stars[j];
+        var dx = a.x - b.x, dy = a.y - b.y;
+        var d2 = dx * dx + dy * dy;
+        if (d2 < linkDist * linkDist) {
+          var alpha = (1 - Math.sqrt(d2) / linkDist) * 0.14;
+          ctx.strokeStyle = "rgba(148,163,216," + alpha.toFixed(3) + ")";
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  var last = 0;
+  function frame(t) {
+    if (running) requestAnimationFrame(frame);
+    if (t - last < 1000 / 45) return; /* cap ~45fps */
+    last = t;
+    var time = t / 1000;
+
+    /* deep-space gradient backdrop */
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#04060f");
+    g.addColorStop(0.5, "#070b1a");
+    g.addColorStop(1, "#04060f");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    /* soft violet nebula glow */
+    var neb = ctx.createRadialGradient(W * 0.5, H * 0.32, 0, W * 0.5, H * 0.32, Math.max(W, H) * 0.5);
+    neb.addColorStop(0, "rgba(99,102,241,0.075)");
+    neb.addColorStop(0.5, "rgba(76,195,255,0.03)");
+    neb.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = neb;
+    ctx.fillRect(0, 0, W, H);
+
+    drawLinks();
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var tw = reduced ? 1 : (0.55 + 0.45 * Math.sin(time * s.speed + s.phase));
+      var alpha = s.base * tw;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(" + s.hue + "," + alpha.toFixed(3) + ")";
+      ctx.fill();
+      if (s.r > 1.15) { /* bright stars get a cross flare */
+        ctx.strokeStyle = "rgba(" + s.hue + "," + (alpha * 0.35).toFixed(3) + ")";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(s.x - s.r * 3.2, s.y); ctx.lineTo(s.x + s.r * 3.2, s.y);
+        ctx.moveTo(s.x, s.y - s.r * 3.2); ctx.lineTo(s.x, s.y + s.r * 3.2);
+        ctx.stroke();
+      }
+    }
+
+    /* meteors */
+    if (!reduced && Math.random() < 0.0035) spawnMeteor();
+    for (var m = meteors.length - 1; m >= 0; m--) {
+      var mt = meteors[m];
+      mt.x += mt.vx; mt.y += mt.vy; mt.life -= 0.012;
+      if (mt.life <= 0) { meteors.splice(m, 1); continue; }
+      var grad = ctx.createLinearGradient(mt.x, mt.y, mt.x - mt.vx * 14, mt.y - mt.vy * 14);
+      grad.addColorStop(0, "rgba(255,240,200," + (0.85 * mt.life).toFixed(3) + ")");
+      grad.addColorStop(1, "rgba(255,240,200,0)");
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(mt.x, mt.y);
+      ctx.lineTo(mt.x - mt.vx * 14, mt.y - mt.vy * 14);
+      ctx.stroke();
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    var wasRunning = running;
+    running = !document.hidden && !reduced;
+    if (running && !wasRunning) requestAnimationFrame(frame);
+  });
+
+  window.addEventListener("resize", resize);
+  resize();
+  if (reduced) {
+    /* static render: a single frame, no animation loop */
+    running = false;
+    requestAnimationFrame(function (t) { frame(t + 1000); });
+  } else {
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+
+</body>
+</html>
