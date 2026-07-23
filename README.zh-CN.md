@@ -201,7 +201,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码、周期性进展汇总、全局状态汇总和发布准备时，建议为 `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status` 和 `$star-code-release` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K2.7 Code。在条件允许的情况下，十五个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+不同阶段对模型能力的侧重有所不同。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra 或 ChatGPT5.6 Sol High；奠基代码库、构建环境、执行计划、审查代码、周期性进展汇总、全局状态汇总和发布准备时，建议为 `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status` 和 `$star-code-release` 选用 Claude Opus4.8 Medium (Sonnet5 High)、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3。在条件允许的情况下，十五个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
