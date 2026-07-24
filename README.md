@@ -29,6 +29,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - [Project conventions](#project-conventions)
 - [Adapting STAR to a new project](#adapting-star-to-a-new-project)
 - [Change log](#change-log)
+- [Citation](#citation)
 - [License](#license)
 
 ## What STAR provides
@@ -336,6 +337,19 @@ Not yet versioned — highlights by date, newest first.
 
 - **2026-07-23** — First official release.
 - **2026-07-15** — Initial STAR release.
+
+## Citation
+
+If you find STAR useful in your research, please cite:
+
+```bibtex
+@misc{star2026,
+  title = {{STAR}: Systematic Toolchain for AI Research},
+  author = {Hao Wang},
+  howpublished = {\url{https://github.com/wanghao9610/STAR}},
+  year = {2026}
+}
+```
 
 ## License
 

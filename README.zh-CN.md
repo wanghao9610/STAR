@@ -29,6 +29,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - [项目约定](#项目约定)
 - [将 STAR 用于新项目](#将-star-用于新项目)
 - [更新日志](#更新日志)
+- [引用](#引用)
 - [许可证](#许可证)
 
 ## 主要特性
@@ -331,6 +332,19 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
 - **2026-07-23** — 第一个正式版本发布。
 - **2026-07-15** — STAR 首个发布。
+
+## 引用
+
+如果 STAR 对你的研究有帮助，请按如下方式引用：
+
+```bibtex
+@misc{star2026,
+  title = {{STAR}: Systematic Toolchain for AI Research},
+  author = {Hao Wang},
+  howpublished = {\url{https://github.com/wanghao9610/STAR}},
+  year = {2026}
+}
+```
 
 ## 许可证
 
