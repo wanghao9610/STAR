@@ -3,7 +3,7 @@ name: star-code-release
 description: >-
   为项目公开发布做准备：把散落的代码归拢进 ${CODE_NAME}/（从 .env 读取）、打磨发布面、编译出项目
   自己的 README.md。扫描 tasks/、wkdrs/ 和项目根下值得随版本发出去的代码，只提升通过三选一证据
-  检验的文件（README 会引用它、某个已执行叶子的交付物或完成判据需要它、或它能复现 metds/results.md
+  检验的文件（README 会引用它、某个已执行叶子的交付物或完成判据需要它、或它能复现 wkdrs/results/results.md
   中的某个数字），并严格按 metds/codearc.md 的放置规则落位——绝不自造目录。打磨只覆盖发布面（本次
   提升的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文映射表逐节
   编译自 metds/overview.md、framework.md、dataset.md、training.md、evaluation.md、results.md、
@@ -30,9 +30,9 @@ description: >-
 
 ## 核心原则
 
-1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`metds/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，它同时规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造——而公开 README 里的编造是代价最高的那种。
-2. **数字只来自账本；命令只来自磁盘。** README 里每个数字都从 `metds/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 在自己脸上就写着它不是拿去引用数字的文件），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级形容是一种主张："state-of-the-art"、"outperforms X"、"best" 只在账本自己的结论支撑时才出现。
-3. **提升要有证据；落位要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `metds/results.md` 里的某个数字。其余原地不动——`tasks/` 里的 scratch 本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/skill:star-code-architect` 的架构缺口，绝不在这里自造目录。Rubric 见 `references/gather_rubric_zh.md`。
+1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，它同时规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造——而公开 README 里的编造是代价最高的那种。
+2. **数字只来自账本；命令只来自磁盘。** README 里每个数字都从 `wkdrs/results/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 在自己脸上就写着它不是拿去引用数字的文件），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级形容是一种主张："state-of-the-art"、"outperforms X"、"best" 只在账本自己的结论支撑时才出现。
+3. **提升要有证据；落位要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的 scratch 本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/skill:star-code-architect` 的架构缺口，绝不在这里自造目录。Rubric 见 `references/gather_rubric_zh.md`。
 4. **只打磨发布面。** 范围内：本次提升的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、读者会去查的东西的 docstring、`codearc.md` 符合度、移动留下的残渣、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/skill:star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
 5. **体检项是阻断性的，且在宣布"就绪"之前就查。** 误提交的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。带着未清的阻断项收尾的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **你做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，且是用户的决定——你把仓库准备好，把命令交回去。STOP 线原样适用：不训练、不做全量评测、不做高成本 API 调用——账本里没有的数字就留成 TODO。
@@ -86,7 +86,7 @@ description: >-
 ## 状态与文件规则
 
 - 写入仅限：`README.md`（以及被提议并接受时的 `README.zh-CN.md`）、提升进 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、发布面内逐项批准的打磨改动、`wkdrs/release/RELEASE_<date>.md`。
-- 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`、不写 `metds/results.md`。它们各有生产者，而一次去改自己输入的发布运行已经不叫编译了。绝不写 `EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
+- 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有生产者，而一次去改自己输入的发布运行已经不叫编译了。绝不写结果总账 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
 - 什么都不删。被提升的文件是移走的；没被提升的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
 - 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未点名的目录——那是 `/skill:star-code-architect` 的。

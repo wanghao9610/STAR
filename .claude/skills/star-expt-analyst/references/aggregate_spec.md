@@ -1,6 +1,6 @@
 # Aggregate mode — the cross-run results ledger
 
-Per-run analysis answers *did this run meet its plan*. Aggregate answers *what does the whole experiment programme show, and where did each number come from* — compiling every run's verified numbers into one ledger, `metds/results.md`: the material a paper's results section is written from, and the counterpart to `metds/evaluation.md`, which defines the protocol these numbers were measured under.
+Per-run analysis answers *did this run meet its plan*. Aggregate answers *what does the whole experiment programme show, and where did each number come from* — compiling every run's verified numbers into one ledger, `wkdrs/results/results.md`: the material a paper's results section is written from, and the counterpart to `metds/evaluation.md`, which defines the protocol these numbers were measured under.
 
 This file defines scope, the destination, the trust model, the axis, what the ledger never does, exclusion, and the write gate.
 
@@ -18,10 +18,10 @@ A scope where no leaf has a report is a valid answer: say so and stop. Never com
 
 **The scope decides the filename, because a ledger that silently replaces a wider one is how a results section loses rows.**
 
-- **Whole forest** (`aggregate`, no plan name) → `metds/results.md`. The project ledger.
-- **Scoped** (`aggregate PLAN_NAME`) → `metds/results_<slug>.md`, where `<slug>` is the scoped node's slug — `metds/results_core-method-pipeline.md`. One file per subtree anyone aggregates.
+- **Whole forest** (`aggregate`, no plan name) → `wkdrs/results/results.md`. The project ledger.
+- **Scoped** (`aggregate PLAN_NAME`) → `wkdrs/results/results_<slug>.md`, where `<slug>` is the scoped node's slug — `wkdrs/results/results_core-method-pipeline.md`. One file per subtree anyone aggregates.
 
-The two never write to each other's path, in either direction. A scoped run must never overwrite `metds/results.md`: it holds fewer runs by construction, so replacing the project ledger with it deletes every row outside the subtree while leaving a file that still looks complete. The `scope:` frontmatter records what the file covers; the filename is what keeps it from being clobbered.
+The two never write to each other's path, in either direction. A scoped run must never overwrite `wkdrs/results/results.md`: it holds fewer runs by construction, so replacing the project ledger with it deletes every row outside the subtree while leaving a file that still looks complete. The `scope:` frontmatter records what the file covers; the filename is what keeps it from being clobbered.
 
 A scoped ledger is a **view, not a fork**. It is regenerated from the same reports under the same trust model, and it never carries a number the project ledger would not. When both exist and disagree, the project ledger is authoritative and the scoped one is stale — recompile it rather than reconciling by hand.
 

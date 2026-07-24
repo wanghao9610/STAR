@@ -50,7 +50,7 @@
 ## ✨ 亮点
 
 <!-- (O §4) 取自 metds/overview.md 中写成可证伪主张的 contributions。三到五条，每条讲一件
-     baseline 做不到的事。这里出现的数字，要么连同背后的 run 从 metds/results.md 抄来，
+     baseline 做不到的事。这里出现的数字，要么连同背后的 run 从 wkdrs/results/results.md 抄来，
      要么就不该是数字。 -->
 
 - **<主张>** —— <一行实质内容，不要形容词堆砌>
@@ -88,7 +88,7 @@ pip install -r <CODE_NAME>/requirements.txt
 
 ## 📦 模型库
 
-<!-- (O §8) 每个已发布 checkpoint 一行，取自 metds/results.md；只有文件在 inits/ 下的盘上或
+<!-- (O §8) 每个已发布 checkpoint 一行，取自 wkdrs/results/results.md；只有文件在 inits/ 下的盘上或
      已公开发布时才给链接。列按账本实际携带的字段来；下面是社区通行形态。 -->
 
 | 模型 | Backbone | 训练数据 | <指标> | 权重 |
@@ -140,7 +140,7 @@ bash execs/scpts/<eval>.sh
 
 ## 📈 结果
 
-<!-- (O §12) 取自 metds/results.md，别无他处。复现它的表格，并为每个数字带上背后的 run。
+<!-- (O §12) 取自 wkdrs/results/results.md，别无他处。复现它的表格，并为每个数字带上背后的 run。
      被账本判为 invalid 或 inconclusive 而排除的数字，在这里完全不出现。
      与 baseline 的比较，需要该 baseline 的数字出现在同一张表里。 -->
 

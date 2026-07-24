@@ -49,7 +49,7 @@ You survey and record; you do not set strategy, write or revise plans, implement
    - An arXiv id (`2103.00020`), a DOI, or a paper URL → **append mode**: that one paper through Steps 3, 5, and 6.
    - A plan name (slug / numeric prefix / filename against `metds/plans/*_plan.md`) → that plan is the method source.
    - Any other text → the text itself is the topic.
-   - No argument → find the method: `metds/*.md` method notes first (`metds/codearc.md` and `metds/results.md` excluded — they describe code and scores, not the method); else the root plan under `metds/plans/` (§1 Problem, §2 Related Work, §3 Method); else a `finalized` idea file under `metds/ideas/` (its §5 Topic Statement); else ask the user for a topic. Say which source won.
+   - No argument → find the method: `metds/*.md` method notes first (`metds/codearc.md` excluded — it describes code, not the method); else the root plan under `metds/plans/` (§1 Problem, §2 Related Work, §3 Method); else a `finalized` idea file under `metds/ideas/` (its §5 Topic Statement); else ask the user for a topic. Say which source won.
 2. Read the source and extract the **search profile**: the task, the method's mechanism, the setting and constraints, named datasets and baselines, and the claim the work wants to make. State the profile in 3–4 lines with its source before searching — a wrong profile wastes the whole run.
 3. If `metds/refs/` exists, read `refs_index.md` and `reference.bib` first: existing citekeys, categories, and notes are the baseline. Say what is already there and that this run is incremental.
 4. Fix the language: notes and index follow the method source's frontmatter `language` when it has one, else the dialogue language.

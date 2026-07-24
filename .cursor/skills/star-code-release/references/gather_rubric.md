@@ -19,7 +19,7 @@ A candidate is promoted only if it passes **at least one** part, and the passing
 
 - **A. The README will cite it.** A section from `references/readme_map.md` prints its path or the command that runs it — a data-prep script §7 names, an eval entry point §11 prints, a demo §9 shows.
 - **B. An executed leaf needs it.** The file is named by a leaf's §4 deliverables or is the machinery its §5 done-criterion runs, and that leaf's `exec_status` is `done`. Evidence is the plan file and line.
-- **C. It reproduces a ledger number.** Running it is how a row in `metds/results.md` was produced — the config of a run the ledger cites, the script that computed a reported metric. Evidence is the ledger row.
+- **C. It reproduces a ledger number.** Running it is how a row in `wkdrs/results/results.md` was produced — the config of a run the ledger cites, the script that computed a reported metric. Evidence is the ledger row.
 
 Passing none → **keep in place**. Say so on the row and move on; that is the expected outcome for most of `tasks/`, and it is not a finding.
 

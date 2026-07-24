@@ -690,13 +690,13 @@ $star-expt-analyst watch 00                       # 对可能仍在运行的 run
 ```text
 wkdrs/<run>/EXPT_ANALYSIS_<日期>.md   # 分析报告
 wkdrs/<run>/analysis/*.png            # 曲线，matplotlib 可用时（连同生成它们的脚本）
-metds/results.md                      # 仅 aggregate 模式：跨 run 的结果总账
-                                      # （限定到子树时为 metds/results_<slug>.md）
+wkdrs/results/results.md              # 仅 aggregate 模式：跨 run 的结果总账
+                                      # （限定到子树时为 wkdrs/results/results_<slug>.md）
 ```
 
 ### 结果总账（`aggregate`）
 
-`$star-expt-analyst aggregate [PLAN_NAME]` 回答单个 run 回答不了的问题：*整个实验计划显示了什么？* 它收集每个叶子最新的分析报告，在放行每个数字之前**回到该报告引用的来源处重开确认**——报告是已验证的，但不是照抄它的许可——然后编译出 `metds/results.md`——限定到某棵子树时则是 `metds/results_<slug>.md`，这样限定范围的一次运行绝不会冲掉项目总账：每条 claim 一张表、每个消融一张表，取自根计划 §4 的 claim→实验映射而非计划树，每个数字都带着它的 run、来源与判定。判定为 `invalid` 或 `inconclusive` 的 run，以及复核未通过的数字，会被排除到一个点名并说明原因的小节，好让读者数得出被拿掉了什么；`not met` 的 run 留在它的表里，因为负结果也是结果。总账只报数字、不解释数字——说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。它与只定义协议、绝不携带分数的 `metds/evaluation.md` 配成一对，正是论文结果节据以撰写的素材。
+`$star-expt-analyst aggregate [PLAN_NAME]` 回答单个 run 回答不了的问题：*整个实验计划显示了什么？* 它收集每个叶子最新的分析报告，在放行每个数字之前**回到该报告引用的来源处重开确认**——报告是已验证的，但不是照抄它的许可——然后编译出 `wkdrs/results/results.md`——限定到某棵子树时则是 `wkdrs/results/results_<slug>.md`，这样限定范围的一次运行绝不会冲掉项目总账：每条 claim 一张表、每个消融一张表，取自根计划 §4 的 claim→实验映射而非计划树，每个数字都带着它的 run、来源与判定。判定为 `invalid` 或 `inconclusive` 的 run，以及复核未通过的数字，会被排除到一个点名并说明原因的小节，好让读者数得出被拿掉了什么；`not met` 的 run 留在它的表里，因为负结果也是结果。总账只报数字、不解释数字——说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。它与只定义协议、绝不携带分数的 `metds/evaluation.md` 配成一对，正是论文结果节据以撰写的素材。
 
 报告记录范围与证据基础、run 判定、完成判据记分卡、产物清点与完成度、日志健康、带来源的指标与跨 run 对比、解读，以及路由。
 
@@ -753,7 +753,7 @@ wkdrs/digests/EXPT_DIGEST_<日期>.md   # 该周期的 digest
 
 ### 两层证据，以及它们为何绝不混合
 
-有分析报告的 run 属**报告支撑**层：数字连同出处引自那份报告。没有的属**临时**层：原始读取其日志得到粗略一行，标注 `provisional (unverified)`，单独成表。两者之间的墙是刚性的——临时数字绝不对照完成判据评分、绝不参与变化计算、绝不作为结果引用、也绝不允许进入 `metds/results.md`。正是这堵墙让临时层可以存在：它让一周的工作变得可见，同时不让一个未核实的数字去与台账矛盾。
+有分析报告的 run 属**报告支撑**层：数字连同出处引自那份报告。没有的属**临时**层：原始读取其日志得到粗略一行，标注 `provisional (unverified)`，单独成表。两者之间的墙是刚性的——临时数字绝不对照完成判据评分、绝不参与变化计算、绝不作为结果引用、也绝不允许进入 `wkdrs/results/results.md`。正是这堵墙让临时层可以存在：它让一周的工作变得可见，同时不让一个未核实的数字去与台账矛盾。
 
 ### 与相邻 skill 的分工
 
@@ -766,7 +766,7 @@ wkdrs/digests/EXPT_DIGEST_<日期>.md   # 该周期的 digest
 | 现在整体走到哪了？ | `$star-flow-status` | 当前状态，无记忆 |
 | 最近发生了什么，学到了什么？ | `$star-expt-digest` | 时间轴，报告级 |
 
-digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它连同出处抄录数字，而不回到源头去确认。这就是两者全部的成本差别，也是 digest 能按周跑而 aggregate 不能的原因。这同时意味着 digest 永远不是你把数字抄进论文时该引用的那个文件——那是 `metds/results.md`，而每份 digest 都在正面写明了这一点。
+digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它连同出处抄录数字，而不回到源头去确认。这就是两者全部的成本差别，也是 digest 能按周跑而 aggregate 不能的原因。这同时意味着 digest 永远不是你把数字抄进论文时该引用的那个文件——那是 `wkdrs/results/results.md`，而每份 digest 都在正面写明了这一点。
 
 ### 写入边界
 
@@ -865,7 +865,7 @@ $star-flow-status 01
 - 父计划更新晚于子计划、悬挂链接、坏依赖、孤儿 run 等 drift；
 - 一行自审线，统计不匹配任何已知产物模式的报告形文件，好让某个生产者 skill 改了输出命名这件事被看见，而不是让对应的覆盖检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/` 与 `wkdrs/digests/`）——不会创建或修改任何文件。
+这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/` 与 `wkdrs/results/`）——不会创建或修改任何文件。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 
@@ -949,9 +949,9 @@ $star-code-release check        # 只跑发布体检——除报告外只读
 ### 它做什么
 
 1. 动手之前先打印一张**就绪表**：编译所需的输入哪些在、哪些过期，每行标出产出它的 skill。带缺口编译是允许的——缺口会变成 README 的 TODO——但你先看到这张表；
-2. 扫描 `tasks/`、`wkdrs/` 里的脚本与配置、以及根目录散落文件，只提升通过三选一证据检验的文件——README 会引用它、某个已执行叶子的 §4 交付物或 §5 完成判据需要它、或它能复现 `metds/results.md` 里的某个数字。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选报成架构缺口，而不是自造一个目录。**Gate 1：** 你逐行批准提升表，每行都带风险，以及它会让哪行计划文本过期；
+2. 扫描 `tasks/`、`wkdrs/` 里的脚本与配置、以及根目录散落文件，只提升通过三选一证据检验的文件——README 会引用它、某个已执行叶子的 §4 交付物或 §5 完成判据需要它、或它能复现 `wkdrs/results/results.md` 里的某个数字。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选报成架构缺口，而不是自造一个目录。**Gate 1：** 你逐行批准提升表，每行都带风险，以及它会让哪行计划文本过期；
 3. 只打磨发布面——本次提升的文件、README 会打印的入口 / 配置 / 脚本、以及它展示的公共 API。每处改动逐项批准且不改行为；
-4. 按一张成文映射表逐节编译 `README.md`：头部与摘要来自 `metds/overview.md`，方法来自 `metds/framework.md`，安装来自 `requirements*` 与最新的 `ENV_REPORT.md`，数据准备来自 `metds/dataset.md`，训练与评测来自 `metds/training.md` 和 `metds/evaluation.md`，结果与模型库来自 `metds/results.md`，仓库结构来自 `metds/codearc.md`，引用来自 `reference.bib`，致谢来自 `UPSTREAM.md`；
+4. 按一张成文映射表逐节编译 `README.md`：头部与摘要来自 `metds/overview.md`，方法来自 `metds/framework.md`，安装来自 `requirements*` 与最新的 `ENV_REPORT.md`，数据准备来自 `metds/dataset.md`，训练与评测来自 `metds/training.md` 和 `metds/evaluation.md`，结果与模型库来自 `wkdrs/results/results.md`，仓库结构来自 `metds/codearc.md`，引用来自 `reference.bib`，致谢来自 `UPSTREAM.md`；
 5. 最后跑一遍阻断式体检：secret 与机器本地路径、许可证与署名、它打印的每条命令是否真的能解析、它写下的每个链接与图片是否指向存在的文件。
 
 ### 主要产物
@@ -965,7 +965,7 @@ README 的第一行是一条 HTML 注释形式的溯源标记——不是 frontm
 
 ### 编译边界
 
-每一节都能追到产物。**数字只来自 `metds/results.md`**——不来自执行日志、不来自 digest、不来自记忆——被账本判为 invalid 或 inconclusive 而排除的数字根本不出现。**每条命令打印前先解析**：脚本存在、配置路径存在、入口可导入；解析不了的就删掉或标为未验证。最高级形容是一种主张，所以 "state-of-the-art" 只在账本自己的结论支撑时才出现。没有产物覆盖的小节转成点名了由哪个 skill 来填的 `TODO`——这份缺口清单同时就是待办清单，和 `$star-metd-summarize` 一样。
+每一节都能追到产物。**数字只来自 `wkdrs/results/results.md`**——不来自执行日志、不来自 digest、不来自记忆——被账本判为 invalid 或 inconclusive 而排除的数字根本不出现。**每条命令打印前先解析**：脚本存在、配置路径存在、入口可导入；解析不了的就删掉或标为未验证。最高级形容是一种主张，所以 "state-of-the-art" 只在账本自己的结论支撑时才出现。没有产物覆盖的小节转成点名了由哪个 skill 来填的 `TODO`——这份缺口清单同时就是待办清单，和 `$star-metd-summarize` 一样。
 
 本 skill 也完全不写 `metds/`。它的输入各有生产者，一次去改自己输入的发布运行已经不叫编译了。
 
@@ -1087,7 +1087,7 @@ $star-metd-summarize
 
 ### 第九步：把仓库准备到可发布
 
-当方法文档与 `metds/results.md` 都是最新的之后：
+当方法文档与 `wkdrs/results/results.md` 都是最新的之后：
 
 ```text
 $star-code-release
@@ -1159,7 +1159,7 @@ $star-code-release
 审批门在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——没就绪的树会停在就绪门槛上，来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
-- **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`metds/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的门口。
+- **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的门口。
 - **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
 
 一个实用的无人值守组合：启动 STOP 线交回的训练命令，训练期间定时跑 `$star-expt-analyst watch <叶子>`，打分与修订留到你回来再做。
@@ -1170,7 +1170,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 - **超参 sweep 与实验追踪。** sweep 是一个计划决策（`$star-plan-decomposer` 划定它，STOP 线把命令交回给你）；用哪个 sweeper、哪个 tracker 跑它是你的事。把它们指向 `wkdrs/<run>/`，工作流照常运转。
 - **决定在乎什么。** `$star-idea-storm` 从你带来的种子兴趣出发——它负责发散、扫描、收敛，但不替你挑选领域；`$star-plan-coach` 再把收敛出的选题磨锋利。哪些问题值得你投入几年，这件事在 STAR 的上游。
-- **论文写作。** STAR 止步于素材。交接物是 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md`（方法）、`metds/refs/reference.bib`（引文）、`metds/refs/related_work.md`（合成后的相关工作叙述），以及 `metds/results.md`（数字，且每个数字背后都有它的 run）。之后交给任何写作工具。
+- **论文写作。** STAR 止步于素材。交接物是 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md`（方法）、`metds/refs/reference.bib`（引文）、`metds/refs/related_work.md`（合成后的相关工作叙述），以及 `wkdrs/results/results.md`（数字，且每个数字背后都有它的 run）。之后交给任何写作工具。
 
 这三样本可以各做成一个 skill。之所以没有，是因为那样的答案不得不去猜你的技术栈、你的领域或你的文风——而工作流不猜的时候更有用。
 

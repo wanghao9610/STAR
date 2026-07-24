@@ -17,7 +17,7 @@
 | Source | State | Producer | Effect on this run |
 |---|---|---|---|
 | `metds/overview.md` | present / absent / stale | `/skill:star-metd-summarize overview` | <which README section it fed, or which TODO it left> |
-| `metds/results.md` | | `/skill:star-expt-analyst aggregate` | |
+| `wkdrs/results/results.md` | | `/skill:star-expt-analyst aggregate` | |
 | `metds/codearc.md` | | `/skill:star-code-architect` | |
 | `${CODE_NAME}/requirements*` | | `/skill:star-env-builder` | |
 
@@ -53,7 +53,7 @@
 |---|---|---|
 | Abstract | `metds/overview.md`@<date> | written / TODO (`/skill:star-metd-summarize overview`) / omitted (no source) |
 | Installation | `requirements.txt`, `ENV_REPORT.md`@<date> | |
-| Results | `metds/results.md`@<date> | |
+| Results | `wkdrs/results/results.md`@<date> | |
 
 **Unverified content marked:** <sections carrying a "not yet verified" line, with the leaf behind each, or "none">
 

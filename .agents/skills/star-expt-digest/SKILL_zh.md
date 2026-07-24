@@ -23,7 +23,7 @@ description: >-
 
 ## 角色
 
-担任这一家 skill 的记时者。`star-expt-analyst` 回答*这次 run 达没达到它的计划*；它的 `aggregate` 模式回答*按 claim 组织的最终数字是什么*，并拥有经核实的台账 `metds/results.md`；`star-flow-status` 回答*现在整体走到哪了*，是一张没有记忆的快照。本 skill 回答它们都答不了的那个问题：**上次之后发生了什么，我们学到了什么。**
+担任这一家 skill 的记时者。`star-expt-analyst` 回答*这次 run 达没达到它的计划*；它的 `aggregate` 模式回答*按 claim 组织的最终数字是什么*，并拥有经核实的台账 `wkdrs/results/results.md`；`star-flow-status` 回答*现在整体走到哪了*，是一张没有记忆的快照。本 skill 回答它们都答不了的那个问题：**上次之后发生了什么，我们学到了什么。**
 
 产物是一份带日期的 digest——研究者在见导师前、写周报前、或搁置两周后重新上手时会翻回去读的那一条记录。它承载台账被明令禁止承载的叙事：什么在动、什么被证伪、方向在哪拐了弯。它不是结果表，也永远不该成为别人引用数字的来源。
 
@@ -33,10 +33,10 @@ description: >-
 
 1. **周期在读任何东西之前就定下来，并且写进文件**。每份 digest 都写明自己的 mode、scope 和确切覆盖区间，并点名它续接的那份 digest。水位线从那个文件的 `covers.through` 读取，绝不用文件 mtime，绝不靠上一轮会话的记忆。规则见 `references/scope_spec_zh.md`。
 2. **两层证据，永不混表**。有 `EXPT_ANALYSIS_<date>.md` 的 run 属**报告支撑层**：数字与判定连同报告日期一起引自该报告。没有的属**临时层**：只原始读取其 EXEC_LOG 得到粗略一行，标注 `provisional (unverified)`，单独成表。两层绝不共用一张表；临时数字绝不评分、绝不参与 delta、绝不作为结果引用。规则见 `references/digest_rubric_zh.md`。
-3. **报告级，而非重新核实——并且 digest 自己要说出这一点**。与 `aggregate` 不同，你不会逐个重开引用源去确认数字。你连同出处一起抄录（`{值, 来源, 报告日期}`），让读者能自己去查。每份 digest 都用自己的话写明：这是一份进展记录，经核实的数字在 `metds/results.md`。从 digest 里把数字抄进论文，是这个文件本身就在警告的误用。
+3. **报告级，而非重新核实——并且 digest 自己要说出这一点**。与 `aggregate` 不同，你不会逐个重开引用源去确认数字。你连同出处一起抄录（`{值, 来源, 报告日期}`），让读者能自己去查。每份 digest 都用自己的话写明：这是一份进展记录，经核实的数字在 `wkdrs/results/results.md`。从 digest 里把数字抄进论文，是这个文件本身就在警告的误用。
 4. **"变化"才是重点**。一份只罗列 run 的 digest，只是更差版的 `star-flow-status`。价值在于与上一份 digest 的 `sources:` 做对比——哪些 run 是新的、哪些判定变了、哪些上次还是临时层而这次已被分析、哪些 claim 被证伪。没有上一份 digest 时，就说序列从此开始，并整段省略，而不是编造变化。
 5. **允许叙事，不许归因**。你可以写学到了什么、一个负面结果暗示了什么、工作在哪里转了向。你**不可以**说*为什么*某个变体赢了——那需要这一家 skill 都不做的受控对比（`aggregate_spec.md` 的规矩，在这里同样生效）。报告方向，并说清该问谁：解读找 `$star-expt-analyst <run>`，对计划意味着什么找 `$star-plan-reviser`。
-6. **除本 skill 自己的文件外严格只读；STOP 线同样适用**。唯一写的是 `wkdrs/digests/EXPT_DIGEST_<date>.md`。绝不碰计划、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`、任何 `EXPT_ANALYSIS` 报告，或 `metds/results*.md`。绝不为填一个缺口去重跑训练、评测或高成本调用——没测的东西是一条带路由命令的缺口，不是你要接下的活。
+6. **除本 skill 自己的文件外严格只读；STOP 线同样适用**。唯一写的是 `wkdrs/digests/EXPT_DIGEST_<date>.md`。绝不碰计划、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`、任何 `EXPT_ANALYSIS` 报告，或结果总账 `wkdrs/results/*`。绝不为填一个缺口去重跑训练、评测或高成本调用——没测的东西是一条带路由命令的缺口，不是你要接下的活。
 
 ## 工作流
 
@@ -69,7 +69,7 @@ description: >-
 ### Step 5：收集周边语境
 
 - **期内计划树变化**：`updated`（或 `finalized:`）落在窗内的计划——新建、修订、拆解、定稿。只读 frontmatter，不 diff 正文。
-- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选 STOP 命令的叶子；以及 `metds/results.md`（或按范围的 `metds/results_<slug>.md`）是否比范围内最新的分析报告更旧。
+- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选 STOP 命令的叶子；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
 
 ### Step 6：写 digest
 
@@ -94,7 +94,7 @@ description: >-
 ## 状态规则
 
 - 写入只有 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`，以及——仅在 `ledger` 模式下——`wkdrs/digests/MODEL_LEDGER.md`。别处一律不写——不出图、不留脚本、不建子目录。
-- 绝不碰：`metds/plans/*`（含 `exec_status`、`exec_runs`、`updated`）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`；任何 `EXPT_ANALYSIS_<date>.md`（它们是你的输入，永远不是你的输出）；`metds/results.md` 与 `metds/results_<slug>.md`（台账属于 `$star-expt-analyst aggregate`，digest 里的数字绝不能流进去）；`${CODE_NAME}/`；`.env`。
+- 绝不碰：`metds/plans/*`（含 `exec_status`、`exec_runs`、`updated`）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`；任何 `EXPT_ANALYSIS_<date>.md`（它们是你的输入，永远不是你的输出）；`wkdrs/results/results.md` 与 `wkdrs/results/results_<slug>.md`（台账属于 `$star-expt-analyst aggregate`，digest 里的数字绝不能流进去）；`${CODE_NAME}/`；`.env`。
 - 绝不移动、重命名或删除任何 run 目录、日志、产物，或更早的 digest。更早的 digest 是序列的历史，也是下一次运行的基线。
 - 更早的 digest 只读它的 frontmatter——`covers`、`sources`、`previous`。绝不为了让它符合你现在知道的情况而回头改写它。
 - 所有命令走 `.env` 的 conda 环境；不用系统 python；绝不安装或升级任何东西（规约 §3.5）。本 skill 除读文件外不需要任何包。

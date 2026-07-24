@@ -72,7 +72,7 @@
 | 4. 消融设计 | 根 §4 消融设计 + 根 §5 kill-criteria（"什么结果推翻它"那一列） |
 | 5. 评测执行 | 评测类叶子 §3/§4 的入口、命令与输出位置 |
 
-**分数绝不进 evaluation.md。** 它定义协议；某个 run 测出了什么在该 run 的分析报告里（`wkdrs/<run>/` 下），而这些数字的跨 run 总账是 `metds/results.md`（`star-expt-analyst aggregate`）。
+**分数绝不进 evaluation.md。** 它定义协议；某个 run 测出了什么在该 run 的分析报告里（`wkdrs/<run>/` 下），而这些数字的跨 run 总账是 `wkdrs/results/results.md`（`star-expt-analyst aggregate`）。
 
 ## 合并与冲突规则
 

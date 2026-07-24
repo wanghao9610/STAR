@@ -690,13 +690,13 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 ```text
 wkdrs/<run>/EXPT_ANALYSIS_<date>.md   # the analysis report
 wkdrs/<run>/analysis/*.png            # curves, when matplotlib is available (with the script that made them)
-metds/results.md                      # aggregate mode only: the cross-run results ledger
-                                      # (metds/results_<slug>.md when scoped to a subtree)
+wkdrs/results/results.md              # aggregate mode only: the cross-run results ledger
+                                      # (wkdrs/results/results_<slug>.md when scoped to a subtree)
 ```
 
 ### The results ledger (`aggregate`)
 
-`$star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `metds/results.md` — or `metds/results_<slug>.md` when you scope it to a subtree, so a scoped run never clobbers the project ledger: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The ledger reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
+`$star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `wkdrs/results/results.md` — or `wkdrs/results/results_<slug>.md` when you scope it to a subtree, so a scoped run never clobbers the project ledger: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The ledger reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
 
 The report records the scope and evidence base, a run verdict, the done-criteria scorecard, the artifact inventory and completion, log health, metrics with their sources and any cross-run comparison, the interpretation, and the routing.
 
@@ -753,7 +753,7 @@ wkdrs/digests/EXPT_DIGEST_<date>.md   # the period's digest
 
 ### Two tiers, and why they never mix
 
-A run that has an analysis report is **report-backed**: its numbers are quoted from that report with their provenance. A run that does not is **provisional**: its log is read raw for a rough line, tagged `provisional (unverified)`, and kept in its own table. The wall between them is strict — a provisional number is never scored against a done-criterion, never used to compute a movement, never quoted as a result, and never allowed into `metds/results.md`. That is what lets the provisional tier exist at all: it makes a week's work visible without letting an unverified number contradict the ledger.
+A run that has an analysis report is **report-backed**: its numbers are quoted from that report with their provenance. A run that does not is **provisional**: its log is read raw for a rough line, tagged `provisional (unverified)`, and kept in its own table. The wall between them is strict — a provisional number is never scored against a done-criterion, never used to compute a movement, never quoted as a result, and never allowed into `wkdrs/results/results.md`. That is what lets the provisional tier exist at all: it makes a week's work visible without letting an unverified number contradict the ledger.
 
 ### How it differs from the neighbouring skills
 
@@ -766,7 +766,7 @@ Three skills read across runs, and they answer different questions:
 | Where does everything stand right now? | `$star-flow-status` | current state, no memory |
 | What happened lately, and what did we learn? | `$star-expt-digest` | time, report-level |
 
-The digest is **report-level, not re-verified**: unlike `aggregate`, it copies a number with its provenance rather than re-opening the source to confirm it. That is the whole cost difference, and it is why a digest can run weekly while an aggregate cannot. It also means a digest is never the file you quote a number into a paper from — `metds/results.md` is, and every digest says so on its face.
+The digest is **report-level, not re-verified**: unlike `aggregate`, it copies a number with its provenance rather than re-opening the source to confirm it. That is the whole cost difference, and it is why a digest can run weekly while an aggregate cannot. It also means a digest is never the file you quote a number into a paper from — `wkdrs/results/results.md` is, and every digest says so on its face.
 
 ### The write boundary
 
@@ -865,7 +865,7 @@ $star-flow-status 01
 - Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs;
 - A self-audit line counting report-shaped files that match no known artifact pattern, so that a producer skill's renamed output is noticed rather than silently dropping out of the coverage band.
 
-This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, and `wkdrs/digests/`) — without creating or modifying any file.
+This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, `wkdrs/digests/`, and `wkdrs/results/`) — without creating or modifying any file.
 
 See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
 
@@ -949,9 +949,9 @@ $star-code-release check        # only the hygiene sweep — read-only apart fro
 ### What it does
 
 1. Prints a **readiness table** before anything else: which of the compile's inputs exist and which are stale, each with the skill that produces it. Compiling with gaps is allowed — they become README TODOs — but you see the table first;
-2. Sweeps `tasks/`, `wkdrs/` scripts and configs, and root strays, promoting only what passes a three-part evidence test — the README will cite it, an executed leaf's §4 deliverable or §5 done-criterion needs it, or it reproduces a number in `metds/results.md`. Destinations come from `metds/codearc.md` §2; a candidate no placement rule covers is reported as an architecture gap rather than given an invented directory. **Gate 1:** you approve the promotion table row by row, with each row's risk and any plan line it would make stale shown;
+2. Sweeps `tasks/`, `wkdrs/` scripts and configs, and root strays, promoting only what passes a three-part evidence test — the README will cite it, an executed leaf's §4 deliverable or §5 done-criterion needs it, or it reproduces a number in `wkdrs/results/results.md`. Destinations come from `metds/codearc.md` §2; a candidate no placement rule covers is reported as an architecture gap rather than given an invented directory. **Gate 1:** you approve the promotion table row by row, with each row's risk and any plan line it would make stale shown;
 3. Polishes the release surface only — the promoted files, the entrypoints and configs and scripts the README prints, the public API it shows. Each edit is individually approved and behavior-preserving;
-4. Compiles `README.md` section by section through a written map: the header and abstract from `metds/overview.md`, the method from `metds/framework.md`, installation from `requirements*` and the newest `ENV_REPORT.md`, data preparation from `metds/dataset.md`, training and evaluation from `metds/training.md` and `metds/evaluation.md`, the results and model zoo from `metds/results.md`, the repository structure from `metds/codearc.md`, the citation from `reference.bib`, and the acknowledgement from `UPSTREAM.md`;
+4. Compiles `README.md` section by section through a written map: the header and abstract from `metds/overview.md`, the method from `metds/framework.md`, installation from `requirements*` and the newest `ENV_REPORT.md`, data preparation from `metds/dataset.md`, training and evaluation from `metds/training.md` and `metds/evaluation.md`, the results and model zoo from `wkdrs/results/results.md`, the repository structure from `metds/codearc.md`, the citation from `reference.bib`, and the acknowledgement from `UPSTREAM.md`;
 5. Ends with a hygiene sweep whose findings block: secrets and machine-local paths, license and attribution, whether every command it printed actually resolves, and whether every link and image it wrote points at a file that exists.
 
 ### Main outputs
@@ -965,7 +965,7 @@ The README opens with an HTML-comment provenance marker — not frontmatter, whi
 
 ### The compile boundary
 
-Every section traces to an artifact. **Numbers come only from `metds/results.md`** — never from an execution log, never from a digest, never from memory — and a number the ledger excluded as invalid or inconclusive does not appear at all. **Every command is resolved before it is printed**: the script exists, the config path exists, the entry point imports; what does not resolve is dropped or marked unverified. Superlatives are claims, so "state-of-the-art" appears only where the ledger's own verdict carries it. A section no artifact covers becomes a `TODO` naming the skill that fills it — the gap list doubles as the to-do list, exactly as it does for `$star-metd-summarize`.
+Every section traces to an artifact. **Numbers come only from `wkdrs/results/results.md`** — never from an execution log, never from a digest, never from memory — and a number the ledger excluded as invalid or inconclusive does not appear at all. **Every command is resolved before it is printed**: the script exists, the config path exists, the entry point imports; what does not resolve is dropped or marked unverified. Superlatives are claims, so "state-of-the-art" appears only where the ledger's own verdict carries it. A section no artifact covers becomes a `TODO` naming the skill that fills it — the gap list doubles as the to-do list, exactly as it does for `$star-metd-summarize`.
 
 The skill also never writes `metds/` at all. Its inputs belong to their producers, and a release run that edited its own sources would no longer be compiling.
 
@@ -1087,7 +1087,7 @@ This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, 
 
 ### Step 9: prepare the repository for release
 
-Once the method documents and `metds/results.md` are current:
+Once the method documents and `wkdrs/results/results.md` are current:
 
 ```text
 $star-code-release
@@ -1159,7 +1159,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 The approval gates do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
 - **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness gate, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
-- **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their gates.
+- **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their gates.
 - **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
 A practical unattended pattern: run the STOP-line training command, keep `$star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
@@ -1170,7 +1170,7 @@ STAR defines the process, the file locations, and the verification records; it d
 
 - **Hyperparameter sweeps and experiment tracking.** A sweep is a plan decision (`$star-plan-decomposer` scopes it, the STOP line hands the command back); which sweeper and which tracker you run it through is yours. Point them at `wkdrs/<run>/` and the workflow keeps working.
 - **Choosing what to care about.** `$star-idea-storm` starts from a seed interest you bring — it diverges, scans, and converges, but it does not pick a field for you, and `$star-plan-coach` sharpens the topic that comes out. Which problems deserve your years is upstream of STAR.
-- **Paper writing.** STAR stops at the material. The handoff is `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md` (the method), `metds/refs/reference.bib` (the citations), `metds/refs/related_work.md` (the related-work narrative, once synthesized), and `metds/results.md` (the numbers, with the run behind each one). Any writing tool takes it from there.
+- **Paper writing.** STAR stops at the material. The handoff is `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md` (the method), `metds/refs/reference.bib` (the citations), `metds/refs/related_work.md` (the related-work narrative, once synthesized), and `wkdrs/results/results.md` (the numbers, with the run behind each one). Any writing tool takes it from there.
 
 Each of these could have been a skill. They are not, because the answer would have had to guess your stack, your field, or your voice — and the workflow is more useful when it does not.
 

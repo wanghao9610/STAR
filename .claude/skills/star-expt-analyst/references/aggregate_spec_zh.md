@@ -1,6 +1,6 @@
 # aggregate 模式——跨 run 的结果总账
 
-单 run 分析回答*这个 run 是否达到了它的计划*。aggregate 回答*整个实验计划显示了什么、每个数字从哪来*——把每个 run 已验证的数字编译成一份总账 `metds/results.md`：论文结果节据以撰写的素材，也是 `metds/evaluation.md` 的对应物——后者定义这些数字是在什么协议下测出来的。
+单 run 分析回答*这个 run 是否达到了它的计划*。aggregate 回答*整个实验计划显示了什么、每个数字从哪来*——把每个 run 已验证的数字编译成一份总账 `wkdrs/results/results.md`：论文结果节据以撰写的素材，也是 `metds/evaluation.md` 的对应物——后者定义这些数字是在什么协议下测出来的。
 
 本文件定义范围、写入目标、信任模型、编排轴、总账绝不做的事、排除，以及写入门。
 
@@ -18,10 +18,10 @@
 
 **范围决定文件名，因为一份悄悄替换掉更宽总账的窄总账，正是结果节丢行的原因。**
 
-- **整片森林**（`aggregate`，不带计划名）→ `metds/results.md`。项目总账。
-- **限定范围**（`aggregate PLAN_NAME`）→ `metds/results_<slug>.md`，其中 `<slug>` 是被限定节点的 slug——`metds/results_core-method-pipeline.md`。谁聚合哪棵子树，就有一份对应的文件。
+- **整片森林**（`aggregate`，不带计划名）→ `wkdrs/results/results.md`。项目总账。
+- **限定范围**（`aggregate PLAN_NAME`）→ `wkdrs/results/results_<slug>.md`，其中 `<slug>` 是被限定节点的 slug——`wkdrs/results/results_core-method-pipeline.md`。谁聚合哪棵子树，就有一份对应的文件。
 
-两者绝不互相写入对方的路径，任何方向都不行。限定范围的运行绝不能覆盖 `metds/results.md`：按构造它包含的 run 更少，用它替换项目总账会删掉子树以外的每一行，却留下一个看上去仍然完整的文件。`scope:` frontmatter 记录这份文件覆盖了什么；文件名才是防止它被冲掉的东西。
+两者绝不互相写入对方的路径，任何方向都不行。限定范围的运行绝不能覆盖 `wkdrs/results/results.md`：按构造它包含的 run 更少，用它替换项目总账会删掉子树以外的每一行，却留下一个看上去仍然完整的文件。`scope:` frontmatter 记录这份文件覆盖了什么；文件名才是防止它被冲掉的东西。
 
 限定范围的总账是**视图，不是分叉**。它由同一批报告、在同一信任模型下重新生成，绝不携带项目总账不会有的数字。两者都存在且不一致时，以项目总账为准，视为限定总账已陈旧——重新编译它，而不是手工对账。
 

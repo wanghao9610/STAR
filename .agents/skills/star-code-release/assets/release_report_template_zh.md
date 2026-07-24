@@ -17,7 +17,7 @@
 | 来源 | 状态 | 生产者 | 对本次运行的影响 |
 |---|---|---|---|
 | `metds/overview.md` | present / absent / stale | `$star-metd-summarize overview` | <它喂了 README 的哪一节，或留下了哪条 TODO> |
-| `metds/results.md` | | `$star-expt-analyst aggregate` | |
+| `wkdrs/results/results.md` | | `$star-expt-analyst aggregate` | |
 | `metds/codearc.md` | | `$star-code-architect` | |
 | `${CODE_NAME}/requirements*` | | `$star-env-builder` | |
 
@@ -52,7 +52,7 @@
 |---|---|---|
 | 摘要 | `metds/overview.md`@<日期> | written / TODO（`$star-metd-summarize overview`）/ omitted（无来源） |
 | 安装 | `requirements.txt`、`ENV_REPORT.md`@<日期> | |
-| 结果 | `metds/results.md`@<日期> | |
+| 结果 | `wkdrs/results/results.md`@<日期> | |
 
 **标为未验证的内容：** <带"尚未验证"行的小节及各自背后的叶子，或"无">
 

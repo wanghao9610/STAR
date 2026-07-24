@@ -22,7 +22,7 @@ sources:
 
 <!-- Written by $star-expt-digest. This is a PROGRESS RECORD, not a results table. Numbers in §3 are
      copied from EXPT_ANALYSIS reports with their provenance and were NOT re-verified here; numbers in
-     §4 are provisional and unverified. The verified ledger a paper is written from is metds/results.md
+     §4 are provisional and unverified. The verified ledger a paper is written from is wkdrs/results/results.md
      ($star-expt-analyst aggregate); the protocol those numbers were measured under is
      metds/evaluation.md. Never quote a number from this file into a paper. -->
 

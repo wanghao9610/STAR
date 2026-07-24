@@ -53,7 +53,7 @@
 
 <!-- (O §4) From metds/overview.md's contributions, which are written as falsifiable claims. Three
      to five bullets, each one thing the project does that its baselines do not. A number here is
-     copied from metds/results.md with the run behind it, or it is not a number here. -->
+     copied from wkdrs/results/results.md with the run behind it, or it is not a number here. -->
 
 - **<claim>** — <one line of substance, not adjectives>
 
@@ -91,7 +91,7 @@ pip install -r <CODE_NAME>/requirements.txt
 
 ## 📦 Model Zoo
 
-<!-- (O §8) One row per released checkpoint, from metds/results.md, linked only when the file is
+<!-- (O §8) One row per released checkpoint, from wkdrs/results/results.md, linked only when the file is
      on disk under inits/ or already published. Columns follow what the ledger actually carries;
      the shape below is the community default. -->
 
@@ -146,7 +146,7 @@ bash execs/scpts/<eval>.sh
 
 ## 📈 Results
 
-<!-- (O §12) From metds/results.md and nowhere else. Reproduce its tables with the run behind each
+<!-- (O §12) From wkdrs/results/results.md and nowhere else. Reproduce its tables with the run behind each
      number. Numbers the ledger excluded as invalid or inconclusive do not appear here at all.
      A comparison against a baseline needs that baseline's number in the same table. -->
 

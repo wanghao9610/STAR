@@ -22,7 +22,7 @@ sources:
 
 <!-- 由 $star-expt-digest 写入。这是一份**进展记录**，不是结果表。§3 的数字连同出处抄自 EXPT_ANALYSIS
      报告，并未在此重新核实；§4 的数字是临时的、未核实的。论文据以撰写的、经核实的台账是
-     metds/results.md（$star-expt-analyst aggregate）；这些数字所依据的评测协议是 metds/evaluation.md。
+     wkdrs/results/results.md（$star-expt-analyst aggregate）；这些数字所依据的评测协议是 metds/evaluation.md。
      绝不要把本文件里的数字抄进论文。 -->
 
 ## 1. 周期与范围

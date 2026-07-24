@@ -38,7 +38,7 @@ description: >-
 2. **只编译，绝不发明。** 改写、重排、并成一个声音，这是本职；添加事实不是。一个看起来合理的默认值（没写明的学习率、"显然要做"的预处理、标准指标的定义）就是发明——不许进文档。计划里没有的，就是缺口。
 3. **缺口是产出，不是难堪。** 模板里没有计划覆盖的小节转成 `TODO`，并点名该由哪个计划的哪一节补上；缺口清单是汇报的重点之一。文档是一面镜子：它精确告诉研究者方法还有哪里没写，并把修补推回计划——那是 coach 与 decomposer 的地盘。
 4. **沿方法的轴线组织，而不是计划的轴线。** 一个计划小节可以喂多份文档；一个文档小节可以合并十几个计划。要合并，不要拼接——读起来像计划摘录清单、或因为父计划和叶子都说过而重复两遍的小节，就是失败。二者冲突时：**叶子压父计划，`updated` 新的压旧的**。谁都不占优时，两个值并列写出、前缀 ⚠、点名两处来源——绝不悄悄挑一个赢家。
-5. **绝不让计划读起来像结果。** 来自 `exec_status` 非 `done` 叶子的内容——只会出现在显式选择的草稿编译里（Step 1 的就绪门槛）——是设计意图：在该小节末尾加一行斜体标注"尚未验证"，并点名来源计划。已验证的内容不加任何标记。结果数字则完全不进这些文档——某个 run 测出的指标属于 `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`，它们的跨 run 总账是 `metds/results.md`；`evaluation.md` 定义的是协议，不是分数。
+5. **绝不让计划读起来像结果。** 来自 `exec_status` 非 `done` 叶子的内容——只会出现在显式选择的草稿编译里（Step 1 的就绪门槛）——是设计意图：在该小节末尾加一行斜体标注"尚未验证"，并点名来源计划。已验证的内容不加任何标记。结果数字则完全不进这些文档——某个 run 测出的指标属于 `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`，它们的跨 run 总账是 `wkdrs/results/results.md`；`evaluation.md` 定义的是协议，不是分数。
 6. **已生成的文档要摆出 diff 才能覆盖；手写的文档根本不是目标。** 带本 skill 的 `type:` / `generated:` frontmatter 的文档是编译产物：重跑时给出分节变更清单、获批准后再写。没有这套 frontmatter 的文档是人写的——说清里面有什么并询问；绝不凭一个 diff 就覆盖它。
 
 ## 工作流
@@ -88,7 +88,7 @@ description: >-
 ## 状态与文件规则
 
 - 唯一的写入是 `metds/overview.md`、`metds/dataset.md`、`metds/framework.md`、`metds/training.md`、`metds/evaluation.md`——五个 OPT 目标，除此之外不写任何东西、任何地方。
-- 绝不碰 `metds/plans/*`——计划文本属于 `/star-plan-coach`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-plan-reviser`；你发现的缺口或错误表述只汇报与路由，绝不就地修改。绝不碰 `metds/codearc.md`（`/star-code-architect` 的）、`metds/refs/*`（`/star-refs-reviewer` 的）、`metds/results.md`（`/star-expt-analyst` 的）、`wkdrs/*`、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
+- 绝不碰 `metds/plans/*`——计划文本属于 `/star-plan-coach`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-plan-reviser`；你发现的缺口或错误表述只汇报与路由，绝不就地修改。绝不碰 `metds/codearc.md`（`/star-code-architect` 的）、`metds/refs/*`（`/star-refs-reviewer` 的）、`wkdrs/*`（含 `/star-expt-analyst` 的结果总账 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
 - 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：执行现实经由 executor 的同步回写进入计划，所以如果某个 run 的细节在这里缺失，该修的是 plan sync，而不是把读取面扩大。
 - 本 skill 不跑任何东西：不跑 python、不训练、不评测、不安装——没有哪条命令的输出是它需要的。
 - Git：只读；本 skill 绝不提交（规约 §1）。

@@ -67,7 +67,7 @@
 | 3 | 缺代码审查 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `CODE_REVIEW_<date>.md` | `/skill:star-code-reviewer <叶子>` |
 | 4 | 代码审查过期 | 该 run 最新的 `CODE_REVIEW_<date>.md` 存在 **且** 其日期早于该 run `EXEC_LOG.md` 里最后一条带日期的记录 | `/skill:star-code-reviewer <叶子>` |
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `/skill:star-expt-analyst <叶子>` |
-| 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `metds/results.md` 与（限定到 `PLAN_NAME` 时的）`metds/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/skill:star-expt-analyst aggregate` |
+| 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `wkdrs/results/results.md` 与（限定到 `PLAN_NAME` 时的）`wkdrs/results/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/skill:star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `/skill:star-metd-summarize` |
 | 8 | 方法文档缺失 | 每个叶子都 `exec_status: done` **且** 每个策略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `/skill:star-proj-adopt backfill` |
@@ -108,7 +108,7 @@
 上面的覆盖带是按文件名匹配产物的。如果某个生产者 skill 改了它写出来的东西，覆盖带会悄悄不再触发那一行——这是一次没人会察觉的漏报。这一行把那种失败翻转成看得见的。只数**报告形**文件，让 run 产物（权重、图、原始日志）绝不进来：
 
 - 直接位于某个 `wkdrs/<run>/` 目录下的 `*.md`，且文件名不是 `EXEC_PLAN.md`、`EXEC_LOG.md`、`CODE_REVIEW_<date>.md`、`EXPT_ANALYSIS_<date>.md`、`REVIEW_<date>.md`；
-- 直接位于 `wkdrs/` 下三个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（无 run 时的共用兜底目录）登记的名字是 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记的名字是 `ENV_REPORT.md`；`wkdrs/digests/` 登记的名字是 `EXPT_DIGEST_<date>.md` 与 `MODEL_LEDGER.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
-- `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`results`、`results_<slug>`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，意味着某个生产者既改了输出名又丢掉了 `type:` 时仍然会被抓到；而 `metds/` 下手写的笔记三者皆无，保持沉默。
+- 直接位于 `wkdrs/` 下四个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（无 run 时的共用兜底目录）登记的名字是 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记的名字是 `ENV_REPORT.md`；`wkdrs/digests/` 登记的名字是 `EXPT_DIGEST_<date>.md` 与 `MODEL_LEDGER.md`；`wkdrs/results/` 登记的名字是 `results.md` 与 `results_<slug>.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
+- `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，意味着某个生产者既改了输出名又丢掉了 `type:` 时仍然会被抓到；而 `metds/` 下手写的笔记三者皆无，保持沉默。
 
 不要下钻子目录（`analysis/`、`raw/`、`refs/`）——那是各生产者自己的工作空间，本就不在注册表内。报一行：`⚠ N 个未识别的报告文件` + 至多三个路径。N 为 0 时整行省略。这是命名不一致，不是对文件本身的判断：它意味着规约 §8 的注册表和磁盘上的实际情况已经分叉，两者之一需要更新。

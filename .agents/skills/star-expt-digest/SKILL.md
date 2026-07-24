@@ -27,7 +27,7 @@ Invocation: `$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`
 
 ## Role
 
-Serve as the family's timekeeper. `star-expt-analyst` answers *did this run meet its plan*; its `aggregate` mode answers *what are the final numbers, organised by claim* and owns the verified ledger `metds/results.md`; `star-flow-status` answers *where does everything stand right now*, as a snapshot with no memory. This skill answers the question none of them can: **what has happened since last time, and what did we learn.**
+Serve as the family's timekeeper. `star-expt-analyst` answers *did this run meet its plan*; its `aggregate` mode answers *what are the final numbers, organised by claim* and owns the verified ledger `wkdrs/results/results.md`; `star-flow-status` answers *where does everything stand right now*, as a snapshot with no memory. This skill answers the question none of them can: **what has happened since last time, and what did we learn.**
 
 The product is a dated digest — the entry a researcher reads back before a supervisor meeting, a weekly report, or picking work up after two weeks away. It carries narrative the ledger is forbidden to carry: what moved, what got refuted, which direction changed. It is not a results table, and it never becomes the source anyone quotes a number from.
 
@@ -37,10 +37,10 @@ Read and narrate; do not execute, analyze runs, score criteria, revise plans, or
 
 1. **The period is defined before anything is read, and it is written down.** Every digest states its mode, its scope, and the exact window it covers, and names the digest it continues from. The watermark is read from that file's `covers.through`, never from file mtimes and never from memory of a previous session. Rules: `references/scope_spec.md`.
 2. **Two tiers of evidence, never merged.** A run with an `EXPT_ANALYSIS_<date>.md` is **report-backed**: its numbers and verdict are quoted from that report with its date. A run without one is **provisional**: its EXEC_LOG is read raw for a rough line, tagged `provisional (unverified)`, and kept in its own table. The tiers never share a table, and a provisional number is never scored, never used in a delta, and never quoted as a result. Rules: `references/digest_rubric.md`.
-3. **Report-level, not re-verified — and the digest says so.** Unlike `aggregate`, do not re-open each cited source to confirm a number. Copy it with its provenance (`{value, source, report date}`) so a reader can. Every digest states in its own words that it is a progress record, and that `metds/results.md` is where verified numbers live. A number quoted into a paper from a digest is a misuse the file itself warns against.
+3. **Report-level, not re-verified — and the digest says so.** Unlike `aggregate`, do not re-open each cited source to confirm a number. Copy it with its provenance (`{value, source, report date}`) so a reader can. Every digest states in its own words that it is a progress record, and that `wkdrs/results/results.md` is where verified numbers live. A number quoted into a paper from a digest is a misuse the file itself warns against.
 4. **What moved is the point.** A digest that only lists runs is a worse `star-flow-status`. The value is the comparison against the previous digest's `sources:` — runs that are new, verdicts that changed, runs that were provisional last time and are analyzed now, claims that got refuted. When there is no previous digest, say the series starts here and skip the section rather than inventing movement.
 5. **Narrative is allowed; causal attribution is not.** Write what was learned, what a negative result suggests, and where the work turned. Never say *why* one variant beat another — that needs a controlled comparison no skill in this family runs (`aggregate_spec.md`'s rule, and it binds here too). Report the direction and who to ask: `$star-expt-analyst <run>` for the interpretation, `$star-plan-reviser` for what it means for the plan.
-6. **Strictly read-only outside this skill's own file; the STOP line applies.** The only thing written is `wkdrs/digests/EXPT_DIGEST_<date>.md`. Never touch plans, `exec_status`, `EXEC_PLAN.md`, `EXEC_LOG.md`, any `EXPT_ANALYSIS` report, or `metds/results*.md`. Never re-run training, evaluation, or a costly call to fill a gap — an unmeasured thing is a listed gap with a routing command, not a task to take on.
+6. **Strictly read-only outside this skill's own file; the STOP line applies.** The only thing written is `wkdrs/digests/EXPT_DIGEST_<date>.md`. Never touch plans, `exec_status`, `EXEC_PLAN.md`, `EXEC_LOG.md`, any `EXPT_ANALYSIS` report, or the results ledger `wkdrs/results/*`. Never re-run training, evaluation, or a costly call to fill a gap — an unmeasured thing is a listed gap with a routing command, not a task to take on.
 
 ## Workflow
 
@@ -73,7 +73,7 @@ Compare this run set against the previous digest's `sources:` list: runs appeari
 ### Step 5: Gather the surrounding context
 
 - **Plan-tree changes in the period**: plans whose `updated` (or `finalized:`) falls in the window — created, revised, decomposed, finalized. Frontmatter only; do not diff bodies.
-- **Gaps and debts**: in-scope runs with no analysis report; leaves with no `exec_runs`; leaves whose EXEC_LOG has an unchecked STOP-line command; and whether `metds/results.md` (or the scoped `metds/results_<slug>.md`) is older than the newest analysis report in scope.
+- **Gaps and debts**: in-scope runs with no analysis report; leaves with no `exec_runs`; leaves whose EXEC_LOG has an unchecked STOP-line command; and whether `wkdrs/results/results.md` (or the scoped `wkdrs/results/results_<slug>.md`) is older than the newest analysis report in scope.
 
 ### Step 6: Write the digest
 
@@ -98,7 +98,7 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 ## State Rules
 
 - The only writes are `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md` and — in `ledger` mode only — `wkdrs/digests/MODEL_LEDGER.md`. Nothing else, anywhere — no figures, no scripts, no subdirectories.
-- Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (they are this skill's input, never its output); `metds/results.md` and `metds/results_<slug>.md` (the ledger is `$star-expt-analyst aggregate`'s, and a digest number must never reach it); `${CODE_NAME}/`; `.env`.
+- Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (they are this skill's input, never its output); `wkdrs/results/results.md` and `wkdrs/results/results_<slug>.md` (the ledger is `$star-expt-analyst aggregate`'s, and a digest number must never reach it); `${CODE_NAME}/`; `.env`.
 - Never move, rename, or delete a run directory, log, artifact, or an older digest. An older digest is the series' history and the next run's baseline.
 - Older digests are read for their frontmatter only — `covers`, `sources`, `previous`. Never rewrite one to reconcile it with what is now known.
 - All commands run through `.env`'s conda env; no system python; never install or upgrade anything (conventions §3.5). This skill needs no packages beyond file reads.

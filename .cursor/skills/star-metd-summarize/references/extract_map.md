@@ -72,7 +72,7 @@ Read every row as *source → the document section it fills*. A source that does
 | 4. Ablations | root §4 ablation design + root §5 kill-criteria (the "refutes it if" column) |
 | 5. Running the Evaluation | eval leaves' §3/§4 entry points, commands, and output locations |
 
-**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`, and the cross-run ledger of those numbers is `metds/results.md` (`star-expt-analyst aggregate`).
+**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`, and the cross-run ledger of those numbers is `wkdrs/results/results.md` (`star-expt-analyst aggregate`).
 
 ## Merge & conflict rules
 
