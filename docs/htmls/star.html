@@ -530,6 +530,7 @@
   @media (max-width: 760px) {
     .phase { grid-template-columns: 1fr; gap: 1rem; }
     .phase:not(:last-child)::after { display: none; }
+    .skill { max-width: none; }
   }
   .workflow-map {
     margin-top: 3.5rem;
@@ -638,7 +639,8 @@
     transform: scale(1.1);
     box-shadow: 0 0 30px var(--phase-glow, rgba(255, 216, 107, 0.45));
   }
-  footer .f-links { gap: 0; }
+  footer .f-links { gap: 0; flex-wrap: wrap; row-gap: 0.6rem; }
+  footer .f-links a { white-space: nowrap; }
   footer .f-links a + a::before {
     content: "✦";
     margin: 0 1.1rem;
