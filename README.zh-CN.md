@@ -158,6 +158,8 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
+可选地，加上 `INVOLVE=low|medium|high` 设定 STAR skills 决策前问多少——`low` 在裁量题上取推荐项（并记录），`medium`（默认）按文档提问，`high` 逐步确认；STOP 线、提交、删除等安全门在任何档位都会询问。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §7.7。
+
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
 ### 2b. 可选：启用 Kimi 的 model-id 溯源
