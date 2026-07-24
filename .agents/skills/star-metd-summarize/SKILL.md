@@ -14,11 +14,15 @@ description: >-
   newer-over-older, marks content from unexecuted leaves as not yet verified, and turns uncovered
   template sections into TODOs naming the plan section to fill. Plans are the only source — never
   code, logs, wkdrs/ or chat; result numbers stay with star-expt-analyst. Writes only metds/<OPT>.md,
-  and overwrites an existing generated doc only after a section-level change list is approved. Use
-  when the user invokes $star-metd-summarize or asks Codex to summarize / consolidate research plans
-  into a method write-up, produce overview, dataset, framework, training or evaluation
-  documentation, or draft paper method material from the plans. Supports bilingual English/Chinese
-  work.
+  and overwrites an existing generated doc only after a section-level change list is approved. An
+  end-of-flow skill: the readiness gate compiles only a finished tree — every strategy plan
+  finalized and every leaf exec_status done, i.e. all experiments finished and the method
+  determined — and otherwise stops, naming and routing the unfinished work; a draft compile is an
+  explicit user choice, never the default. Use when all experiments are finished and the plans are
+  finalized and the user invokes $star-metd-summarize or asks Codex to summarize / consolidate the
+  finished research plans into a method write-up, produce overview, dataset, framework, training or
+  evaluation documentation, or draft paper method material from the plans. Supports bilingual
+  English/Chinese work.
 ---
 
 # Research Method Summarizer
@@ -31,7 +35,7 @@ Invocation: `$star-metd-summarize [OPT]` — `OPT` is one of `overview` / `datas
 
 ## Role
 
-Serve as the family's method compiler. `$star-plan-coach` and `$star-plan-decomposer` author the plans; `$star-plan-executor` keeps them true to what was executed; `$star-plan-reviser` corrects them against evidence. This skill compiles them: the plan tree is organized by decomposition and execution order, and it re-cuts the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. The product is the five documents under `metds/`, the material a paper's method section is written from.
+Serve as the family's method compiler. `$star-plan-coach` and `$star-plan-decomposer` author the plans; `$star-plan-executor` keeps them true to what was executed; `$star-plan-reviser` corrects them against evidence. This skill compiles them: the plan tree is organized by decomposition and execution order, and it re-cuts the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. The product is the five documents under `metds/`, the material a paper's method section is written from. This skill runs once the loop has closed — every leaf executed, every strategy plan finalized, the method determined — not alongside it: while the method is still moving, the plans are the deliverable, not these documents.
 
 Compile and reorganize; do not decide method, revise plans, read code, or interpret results. Route what compiling surfaces beyond the write boundary: a missing strategy answer to `$star-plan-coach`, missing execution detail to `$star-plan-decomposer`, a value an executed run settled but its plan never recorded to `$star-plan-executor` (ENRICHED sync-back), plan text that no longer matches reality to `$star-plan-reviser`, result numbers and their meaning to `$star-expt-analyst`, citations and related-work detail to `$star-refs-reviewer` (its `synthesize` mode compiles the notes into `metds/refs/related_work.md`).
 
@@ -41,7 +45,7 @@ Compile and reorganize; do not decide method, revise plans, read code, or interp
 2. **Compile, never invent.** Rewriting, reordering, and merging into one voice is the job; adding facts is not. A plausible default (an unstated learning rate, an obvious preprocessing step, a standard metric definition) is an invention — it does not go in. If it is not in a plan, it is a gap.
 3. **Gaps are output, not embarrassment.** A template section no plan covers becomes a `TODO` naming the plan and section that should carry it, and the gap list is a headline of the report. The document is a mirror: it shows the researcher exactly where the method is still unwritten, and pushes the fix back into the plans, which the coach and decomposer own.
 4. **Organize along the method's axis, not the plan's.** One plan section may feed several documents; one document section may merge a dozen plans. Merge, do not concatenate — a section that reads as a list of plan excerpts, or that says the same thing twice because a parent and a leaf both said it, has failed. Where they disagree: **leaf beats parent, newer `updated` beats older**. When neither dominates, print both values with ⚠ and name both sources — never silently pick a winner.
-5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, and their cross-run ledger is `metds/results.md`; `evaluation.md` defines the protocol, not the scores.
+5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` — present only in an explicitly chosen draft compile (Step 1's readiness gate) — is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, and their cross-run ledger is `metds/results.md`; `evaluation.md` defines the protocol, not the scores.
 6. **Generated docs are overwritten only with the diff on the table; hand-authored docs are not targets at all.** A doc carrying this skill's `type:` / `generated:` frontmatter is a compiled artifact: on re-run, show the section-level change list and get approval before writing. A doc without that frontmatter was written by a human — show what it holds and ask; never overwrite it on the strength of a diff.
 
 ## Workflow
@@ -58,6 +62,7 @@ List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the 
 
 - **Output language** follows the plans: the root's `language:`; with several roots, the majority; a tie takes the dialogue language.
 - **One document set describes one method.** If the tree has several unrelated roots, say so and ask one direct question about which root's subtree these documents describe; the answer scopes the whole run.
+- **Readiness gate — compile only a determined method.** The tree in scope is ready only when every strategy plan carries `finalized:` and every leaf is `exec_status: done` — all experiments finished, the plans final. Anything less: compile nothing, list what is open (each leaf not `done` with its `exec_status`, each strategy plan missing `finalized:`), and route it — unexecuted or blocked leaves to `$star-plan-executor`, an unfinalized strategy plan to `$star-plan-coach`, the whole picture to `$star-flow-status` — then stop. Past the gate there is one path: the user, shown exactly what is unfinished, explicitly chooses, asked one direct question, to compile a draft anyway — then every passage from an unfinished leaf carries the not-yet-verified mark (Step 3).
 - **A plan whose relevant sections are still `pending`** contributes nothing but a gap — note it now, so the report can name it instead of silently thinning the document.
 
 ### Step 2: Extract
@@ -85,7 +90,7 @@ For each target, in dependency order:
 
 ### Step 6: Report
 
-Lead with what landed, under about 400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `$star-plan-coach`, execution detail to `$star-plan-decomposer`, a value an executed run settled to `$star-plan-executor`, plan text contradicting reality to `$star-plan-reviser`, results to `$star-expt-analyst`, citations to `$star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not.
+Lead with what landed, under about 400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `$star-plan-coach`, execution detail to `$star-plan-decomposer`, a value an executed run settled to `$star-plan-executor`, plan text contradicting reality to `$star-plan-reviser`, results to `$star-expt-analyst`, citations to `$star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-gate override) says so in the report's first line.
 
 ## State Rules
 
@@ -95,4 +100,4 @@ Lead with what landed, under about 400 words: per document — written / skipped
 - This skill runs nothing: no python, no training, no evaluation, no installs — there is no command whose output it needs.
 - Git: read-only; this skill never commits (conventions §1).
 - It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
-- Ask one direct question at a time at the four gates — an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.
+- Ask one direct question at a time at the five gates — the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs; never compile past the readiness gate without one. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.

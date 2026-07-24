@@ -20,14 +20,14 @@ STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
   → star-expt-digest：汇总本阶段实验做了什么、什么发生了变化
   → star-plan-reviser：以执行证据审查计划并修订
-  → star-metd-summarize：把成熟的计划编译成方法文档
+  → star-metd-summarize：所有叶子执行完、计划定稿后，把计划编译成方法文档
   → star-code-release：归拢代码并编译出项目自己的 README
 
   ⌾ star-flow-status：随时通读上述全部产物——
     进度到哪里、还欠什么、下一步该做哪一件
 ```
 
-上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中，`star-code-release` 跑在最后、在工作已经可以给别人读的时候——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
+上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中，`star-metd-summarize` 要等循环收口——所有叶子执行完、计划定稿——之后才跑，`star-code-release` 跑在最后、在工作已经可以给别人读的时候——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论路由回计划本身：
 
 ![STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的回环](../../srcs/star-research-workflow.png)
 
@@ -873,7 +873,7 @@ $star-flow-status 01
 
 ### 什么时候用
 
-- 计划已经成熟，你想把方法写成读者能顺着读下去的表述。
+- 所有实验已经做完、计划已经定稿——方法已确定——你想把它写成读者能顺着读下去的表述。
 - 要动手写论文方法部分，想先把计划里已经写明的内容汇总成素材。
 - 想一眼看清方法还有哪里没写——每个缺口都点名了该由哪个计划的哪一节补上。
 - 合作者需要理解方法，但不想通读整棵计划树。
@@ -896,11 +896,12 @@ $star-metd-summarize
 
 ### 它会做什么
 
-1. 和 status skill 一样，按各计划的 `parent:` 重建计划树；
-2. 依成文的映射抽取每份文档所需的内容——overview 取根计划的 §1–§3 与 §6，dataset 取 §4 的数据选择加每个叶子的 `datas/` 输入，framework 取 §3 技术路线加建模类叶子及其 `${CODE_NAME}/` 路径，training 取 §3 策略加 `inits/` 与超参数，evaluation 取 §4 的 benchmark、baseline、指标与消融设计加 §5 kill-criteria；
-3. 按方法本身的轴线而非计划的轴线合并，冲突时叶子压父计划、新压旧，谁都不占优时用 ⚠ 并列写出两处来源；
-4. 凡是来自尚未执行的叶子的内容，都标注"尚未验证"；
-5. 模板里没有计划覆盖的小节，一律转成点名了该补进哪个计划哪一节的 `TODO`。
+1. 先过就绪门槛：除非每个策略计划都带 `finalized:`、每个叶子都是 `exec_status: done`，否则在编译任何内容之前就停下，点名未完成项并路由——明知未完成仍编译草稿，必须由用户显式选择，绝非默认；
+2. 和 status skill 一样，按各计划的 `parent:` 重建计划树；
+3. 依成文的映射抽取每份文档所需的内容——overview 取根计划的 §1–§3 与 §6，dataset 取 §4 的数据选择加每个叶子的 `datas/` 输入，framework 取 §3 技术路线加建模类叶子及其 `${CODE_NAME}/` 路径，training 取 §3 策略加 `inits/` 与超参数，evaluation 取 §4 的 benchmark、baseline、指标与消融设计加 §5 kill-criteria；
+4. 按方法本身的轴线而非计划的轴线合并，冲突时叶子压父计划、新压旧，谁都不占优时用 ⚠ 并列写出两处来源；
+5. 凡是来自尚未执行的叶子的内容——只可能出现在草稿编译里——都标注"尚未验证"；
+6. 模板里没有计划覆盖的小节，一律转成点名了该补进哪个计划哪一节的 `TODO`。
 
 ### 主要产物
 
@@ -920,7 +921,7 @@ $star-metd-summarize
 
 ### 使用建议
 
-- 早编译、常编译。缺口清单最有用的时候是*截稿前*——那时还来得及回答它提的问题。
+- 循环收口后再编译——所有叶子执行完、计划定稿。过早运行会停在就绪门槛上，把未完成项交还给你：方法还在变动时，该走的是 `$star-plan-executor` 和 `$star-plan-coach`，不是编一份草稿文档。不过门槛一开就尽快跑——缺口清单最有用的时候是*截稿前*，那时还来得及回答它提的问题。
 - 把这些文档当作生成物。要改某份文档，就去改它的来源计划再重新编译——手工编辑会在下次运行时被覆盖；不过不是它生成的文件，不问过你绝不会被覆盖。
 - 全部小节都没变化的一次重新生成什么都不写，所以重跑的成本只有你读它的时间。
 
@@ -1076,13 +1077,13 @@ $star-plan-executor 00_mvp-3way-ablation_plan.md
 
 ### 第八步：为论文编译方法文档
 
-当计划已经吸收了执行教给它的东西之后：
+当循环已经收口——所有叶子执行完、所有策略计划定稿——且计划已经吸收了执行教给它的东西之后：
 
 ```text
 $star-metd-summarize
 ```
 
-它会从计划树编译出 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md` 和 `evaluation.md`。凡是来自尚未执行的叶子的内容都会标注"尚未验证"，没有覆盖的小节则转成点名了该补进哪个计划哪一节的 `TODO`——于是这份缺口清单同时也是计划的待办清单。计划一动就重新编译；来源没变的文档会原样不动。
+它会从计划树编译出 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md` 和 `evaluation.md`。就绪门槛把住时机：只要还有叶子未执行、或策略计划未定稿，它就停下并路由未完成项而不编译——执意继续是显式的草稿选择，草稿里来自未执行叶子的内容都会标注"尚未验证"，没有覆盖的小节则转成点名了该补进哪个计划哪一节的 `TODO`——于是这份缺口清单同时也是计划的待办清单。之后计划再动就重新编译；来源没变的文档会原样不动。
 
 ### 第九步：把仓库准备到可发布
 
@@ -1112,7 +1113,7 @@ $star-code-release
 | run 产出了结果，想知道它们意味着什么、有没有达到计划的预期 | `$star-expt-analyst` |
 | 计划已（部分）执行，文本应该吸收执行结果 | `$star-plan-reviser` |
 | 不知道当前进度或下一步 | `$star-flow-status` |
-| 计划已经成熟，想把方法写成给读者或论文用的表述 | `$star-metd-summarize` |
+| 所有实验做完、计划定稿，想把方法写成给读者或论文用的表述 | `$star-metd-summarize` |
 | 工作已经做完，仓库需要能被别人读懂、也能对外发布 | `$star-code-release` |
 
 ### 每个叶子都要跑完整个循环吗？
@@ -1157,7 +1158,7 @@ $star-code-release
 
 审批门在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
-- **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
+- **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——没就绪的树会停在就绪门槛上，来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
 - **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致会停到 diff 被确认为止；`metds/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的门口。
 - **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
 

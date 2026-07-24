@@ -20,14 +20,14 @@ vague research interest
   → star-expt-analyst: audit the run's results against what the plan expected
   → star-expt-digest: summarize what the programme did this period, and what moved
   → star-plan-reviser: review a plan against execution evidence and revise it
-  → star-metd-summarize: compile the matured plans into method documents
+  → star-metd-summarize: once every leaf is executed and the plans finalized, compile them into method documents
   → star-code-release: consolidate the code and compile the project's README
 
   ⌾ star-flow-status: reads all of the above at any point —
     where things stand, what is owed, and the one next action
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan, with `star-expt-digest` run on a cadence across the loop rather than inside it, and `star-code-release` runs last, once the work is ready to be read by someone else — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
+The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is being adopted (a project that started from the template never needs it), `star-idea-storm` runs only while the topic is still open (skip it when one is already chosen), `star-code-architect` and `star-env-builder` only run on the first pass, while `star-plan-executor` through `star-plan-reviser` is a loop you re-enter for each leaf sub-plan, with `star-expt-digest` run on a cadence across the loop rather than inside it, `star-metd-summarize` run only once the loop has closed — every leaf executed, the plans finalized — and `star-code-release` runs last, once the work is ready to be read by someone else — `star-flow-status` names the next leaf each time round, and the audits route what they find back into the plans:
 
 ![STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
@@ -873,7 +873,7 @@ See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/sk
 
 ### When to use it
 
-- The plans have matured and you want the method written out as prose a reader can follow.
+- Every experiment is finished and the plans are finalized — the method is determined — and you want it written out as prose a reader can follow.
 - You are starting a paper's method section and want the material assembled from what the plans already say.
 - You want to see, in one place, where the method is still unwritten — every gap named with the plan section that should fill it.
 - A collaborator needs to understand the method without reading the whole plan tree.
@@ -896,11 +896,12 @@ $star-metd-summarize
 
 ### What it does
 
-1. Rebuilds the plan tree from each plan's `parent:`, exactly as the status skill does;
-2. Extracts what each document needs through a written map — the root's §1–§3 and §6 for the overview, §4 data choices plus every leaf's `datas/` inputs for the dataset document, the §3 technical route plus modeling leaves and their `${CODE_NAME}/` paths for the framework, §3 strategy plus `inits/` and hyperparameters for training, §4 benchmarks, baselines, metrics and ablation design plus §5 kill-criteria for evaluation;
-3. Merges the passages along the method's axis rather than the plan's, resolving conflicts leaf-over-parent and newer-over-older, and printing ⚠ with both sources when neither dominates;
-4. Marks anything sourced from a leaf that has not been executed as not yet verified;
-5. Turns every template section no plan covers into a `TODO` naming the plan and section that should carry it.
+1. Gates on readiness: unless every strategy plan carries `finalized:` and every leaf is `exec_status: done`, it stops before compiling anything, names what is still open, and routes it — compiling a draft anyway is an explicit choice it asks for, never a default;
+2. Rebuilds the plan tree from each plan's `parent:`, exactly as the status skill does;
+3. Extracts what each document needs through a written map — the root's §1–§3 and §6 for the overview, §4 data choices plus every leaf's `datas/` inputs for the dataset document, the §3 technical route plus modeling leaves and their `${CODE_NAME}/` paths for the framework, §3 strategy plus `inits/` and hyperparameters for training, §4 benchmarks, baselines, metrics and ablation design plus §5 kill-criteria for evaluation;
+4. Merges the passages along the method's axis rather than the plan's, resolving conflicts leaf-over-parent and newer-over-older, and printing ⚠ with both sources when neither dominates;
+5. Marks anything sourced from a leaf that has not been executed — possible only in a draft compile — as not yet verified;
+6. Turns every template section no plan covers into a `TODO` naming the plan and section that should carry it.
 
 ### Main outputs
 
@@ -920,7 +921,7 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 
 ### Practical guidance
 
-- Compile early and often. The gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
+- Compile once the loop has closed — every leaf executed, the plans finalized. A premature run stops at the readiness gate and hands back what is still open: while the method is moving, the route is `$star-plan-executor` and `$star-plan-coach`, not a draft document. Run it as soon as the gate opens, though — the gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
 - Treat these documents as generated. To change one, change the plan it came from and recompile — hand edits are overwritten on the next run, though a file the skill did not generate is never overwritten without asking first.
 - A regeneration whose sections are all unchanged writes nothing, so re-running it costs you only the reading.
 
@@ -1076,13 +1077,13 @@ After each leaf, `$star-flow-status` gives the single next recommendation. How m
 
 ### Step 8: compile the method for the paper
 
-Once the plans have absorbed what execution taught them:
+Once the loop has closed — every leaf executed, every strategy plan finalized, and the plans have absorbed what execution taught them:
 
 ```text
 $star-metd-summarize
 ```
 
-This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. Anything sourced from a leaf that has not been executed is marked not yet verified, and every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile whenever the plans move; a document whose sources have not changed is left untouched.
+This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness gate enforces the timing: while any leaf is unexecuted or any strategy plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
 
 ### Step 9: prepare the repository for release
 
@@ -1112,7 +1113,7 @@ The scattered code lands in `${CODE_NAME}/` where `metds/codearc.md` says it bel
 | A run produced results and you want to know what they mean and whether they met the plan | `$star-expt-analyst` |
 | A plan was (partly) executed and its text should absorb the results | `$star-plan-reviser` |
 | You do not know the current status or next action | `$star-flow-status` |
-| The plans have matured and you want the method written out for a reader or a paper | `$star-metd-summarize` |
+| Every experiment is finished, the plans are finalized, and you want the method written out for a reader or a paper | `$star-metd-summarize` |
 | The work is done and the repository has to be readable — and publishable — by someone else | `$star-code-release` |
 
 ### How much of the loop does each leaf need?
@@ -1157,7 +1158,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 
 The approval gates do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
-- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
+- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness gate, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of clobbering.
 - **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `metds/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their gates.
 - **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 

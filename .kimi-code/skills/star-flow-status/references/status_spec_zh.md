@@ -69,14 +69,15 @@
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `/skill:star-expt-analyst <叶子>` |
 | 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `metds/results.md` 与（限定到 `PLAN_NAME` 时的）`metds/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/skill:star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `/skill:star-metd-summarize` |
-| 8 | 方法文档缺失 | ≥1 个叶子 `exec_status: done` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
+| 8 | 方法文档缺失 | 每个叶子都 `exec_status: done` **且** 每个策略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `/skill:star-proj-adopt backfill` |
 | 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `/skill:star-expt-digest` |
 
-有四行特别容易做错：
+有五行特别容易做错：
 
 - **第 4 行需要日志里有日期，没有就沉默。** EXEC_LOG 的步骤表并不强制带日期列。日志里没有可比对的带日期条目时，第 4 行无法判定——那就什么都不报，绝不退回去拿文件 mtime 猜。真正要紧的那种情况（压根没有审查）已经由第 3 行覆盖。
 - **第 7 行是精确对账，不是拿 mtime 猜。** `/skill:star-metd-summarize` 会逐个源计划记下"读取时该计划带的 `updated` 值"。拿那个记录值和计划当前的 `updated` 比——绝不用文件 mtime，它会因为无关的事情变动（一次 checkout、一次格式化）。
+- **第 8 行要等整棵树。** summarizer 编译的是已确定的方法——只要还有叶子未执行、或策略计划未定稿，它自身的就绪门槛就会停下——所以覆盖带只在每个叶子都 `done`、每个策略计划都带 `finalized:` 之后才推荐它，无论更早已经完成了多少叶子。
 - **第 10 行只对已经在记 digest 的项目触发。** 与第 2、7、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，一个从没跑过 `/skill:star-expt-digest` 的项目并不因此欠账。所以这一行问的是“已有的序列有没有落在分析报告后面”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不可被当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对水位线的定义一致。
 - **第 1 行是这里最弱的信号。** `/skill:star-plan-coach` 把种子记在计划 §1 的散文里（"Seeded from `metds/ideas/<slug>_idea.md`"），不是 frontmatter 字段，所以检测靠 slug 匹配加上对想法文件名的正文 grep。一份由想法长出来、之后又被改名的计划，会被读成"未立项"。当只有第 1 行触发时，说明这条检查是启发式的。
 
