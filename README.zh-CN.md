@@ -249,13 +249,26 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 bash execs/update.sh
 ```
 
-该命令默认从 STAR 的 `main` 分支更新以下目录：
+该命令默认从 STAR 的 `main` 分支更新以下路径：
 
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
 - `.kimi-code/skills/`
+- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/`
+
+钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，绝不覆盖；若保留下来的配置没有注册 STAR 钩子，命令会打印提示。在钩子纳入更新范围之前基于 STAR 创建的项目，请先手动刷新一次更新脚本本身（`execs/update.sh` 不会覆盖自己）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
+```
+
+如需在不改动任何文件的情况下预览更新，可加 `--diff`（可选地搭配 ref 或 `--skill NAME`）。它会列出上游新增或与本地不同的文件，并标注仅存在于本项目、更新时会保留的文件；有可更新内容时以 `1` 退出，完全一致时以 `0` 退出：
+
+```bash
+bash execs/update.sh --diff
+```
 
 如需固定到某个 tag 或分支，可以将其作为参数传入：
 
@@ -276,13 +289,13 @@ bash execs/update.sh --skill star-plan-coach
 - `.cursor/skills/star-plan-coach/`
 - `.kimi-code/skills/star-plan-coach/`
 
-单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
+单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档，也不会更新溯源钩子。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
 
 ```bash
 bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 ```
 
-命令的通用形式为 `bash execs/update.sh [ref] [--skill NAME]`。如果 skill 名称无效，或上游四个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
+命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--skill NAME]`。如果 skill 名称无效，或上游四个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
 
 上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；本次更新范围中仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 
@@ -316,6 +329,7 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
 尚未版本化——按日期列出要点，最新在前。
 
+- **2026-07-23** — `execs/update.sh` 现在会同步并接入 model-id 溯源钩子，并新增 `--diff` 预览上游变更。
 - **2026-07-23** — 新增 Kimi Code 支持。
 - **2026-07-15** — STAR 首个发布。
 

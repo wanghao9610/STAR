@@ -254,13 +254,26 @@ After creating a project from STAR, you can sync later STAR skill and research w
 bash execs/update.sh
 ```
 
-By default, the command updates these directories from STAR's `main` branch:
+By default, the command updates these paths from STAR's `main` branch:
 
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`
 - `.kimi-code/skills/`
+- `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.kimi-code/hooks/`, and `.kimi-code/hooks.example.toml` — the model-id provenance hooks
 - `docs/mds/star-workflow/`
+
+Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing and never overwritten; when a kept config does not register the STAR hook, the command prints a note. Projects created before hooks joined the update set should refresh the updater itself once, since `execs/update.sh` never overwrites itself:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
+```
+
+To preview an update without changing any file, pass `--diff` (optionally with a ref or `--skill NAME`). It lists upstream files that are new or differ from your local copies, marks project-local files an update would keep, and exits `1` when an update would change anything — `0` when everything already matches:
+
+```bash
+bash execs/update.sh --diff
+```
 
 To pin the update to a tag or branch, pass it as an argument:
 
@@ -281,13 +294,13 @@ This updates the matching skill in all four tool-specific directories:
 - `.cursor/skills/star-plan-coach/`
 - `.kimi-code/skills/star-plan-coach/`
 
-The workflow documentation under `docs/mds/star-workflow/` is not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
+The workflow documentation under `docs/mds/star-workflow/` and the provenance hooks are not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
 
 ```bash
 bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 ```
 
-The general command form is `bash execs/update.sh [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the four upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
+The general command form is `bash execs/update.sh [--diff] [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the four upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
 
 Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in the updated directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 
@@ -321,6 +334,7 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Not yet versioned — highlights by date, newest first.
 
+- **2026-07-23** — `execs/update.sh` now syncs and adopts the model-id provenance hooks, and gained `--diff` to preview upstream changes.
 - **2026-07-23** — Added Kimi Code support.
 - **2026-07-15** — Initial STAR release.
 
