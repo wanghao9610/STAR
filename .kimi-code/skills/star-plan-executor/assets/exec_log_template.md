@@ -4,6 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
+involvement: <level (source)>   # effective involvement level, conventions §7.7 — e.g. low (invocation); medium when never set
 model_id: <model id, copied verbatim from what your runtime states this session — your Kimi session reports it where available; "unrecorded" only if the session names none>
 model_trail:                    # append-only: one entry per write session, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }

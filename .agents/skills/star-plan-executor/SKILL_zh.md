@@ -95,3 +95,4 @@ description: >-
 - Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件，且仅在 checkpoint 获批时（约定 §1）。
 - 合法 action status：`pending` / `in_progress` / `done` / `blocked` / `skipped`。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
+- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交确认与 divergence 行确认（它回写计划 §2–§5）、Step 5 的 Pending amendments 整批同步、以及删 scratch 的提议（它把关一次删除）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
