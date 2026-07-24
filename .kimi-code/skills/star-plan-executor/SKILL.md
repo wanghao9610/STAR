@@ -43,13 +43,13 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 ### Step 0: Resolve the target plan
 
 1. Interpret `PLAN_NAME` (slug / numeric prefix / full filename) against `metds/plans/*_plan.md`.
-2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it — list its leaves (prefix + slug + one-line objective) and ask in the conversation which leaf to execute, or offer to execute the leaves in dependency order, one at a time.
+2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it — list its leaves (prefix + slug + one-line objective) and ask in the conversation which leaf to execute (recommend the first ready one in dependency order), or offer to execute the leaves in dependency order, one at a time.
 3. If no argument was given or the match is ambiguous, list available plans and ask.
 4. Read the resolved sub-plan in full.
 
 ### Step 1: Readiness check
 
-1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, tell the user decomposition is unfinished and offer in the conversation: *go back to `/skill:star-plan-decomposer` to flesh it out* / *execute anyway (shallow, gaps stay `[TBD]`)*.
+1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, tell the user decomposition is unfinished and offer in the conversation: *go back to `/skill:star-plan-decomposer` to flesh it out* (recommended) / *execute anyway (shallow, gaps stay `[TBD]`)*.
 2. **Dependencies.** Check §2 Inputs & Dependencies: are the named datasets (`datas/`), weights (`inits/`), and code modules present? Are the upstream sibling leaves in the leaf's `depends_on` frontmatter list all marked `exec_status: done`? If a hard dependency is missing, **stop and report** — do not fabricate inputs. A missing dataset or weight is a decomposition gap, not a blocker to work around: name the data-readiness leaf that should own it, or route to `star-plan-decomposer <parent>` to add one.
 
 ### Step 2: Orient in the codebase
@@ -88,7 +88,7 @@ Keep the main-loop reply concise; details live in the log.
 
 After all agent steps are `done`, verify the sub-plan's §5 done-criterion (reuse `/verify`, `/run` where useful). Met → set the sub-plan's `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` **scratch** — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. **The offer never covers the plan's own tool scripts** (conventions §9): list them by name as retained, and delete one only if the user names it themselves. Not met → follow the sub-plan's §6 local fallback, or report the gap. Then run `references/exec_rubric.md` and report failing items (≤5, ranked, each with a concrete fix).
 
-**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, present the batch via **one** question (*sync all / select which / skip*) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a strategy signal — route it through feedback reflux below, never sync it.
+**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, present the batch via **one** question (*sync all / select which / skip*, recommendation marked) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a strategy signal — route it through feedback reflux below, never sync it.
 
 **Feedback reflux (strategy signal).** If the result contradicts an assumption the parent plan depends on — i.e. it matches a root §5 **kill-criterion**, or an MVP done-criterion the plan called the "cheap early test" came back negative — this is a strategy-level finding, not just a failed step. You do not edit the parent's §1–§6 (that stays with the coach/decomposer). Instead: record it in the run's `EXEC_LOG.md` "Notes / decisions" (which this skill owns), and in the Step 8 report **surface it explicitly** and recommend feeding it back via `/skill:star-plan-reviser <slug>` (audit the evidence and revise the plan under per-item approval), `/skill:star-plan-coach <slug>` (revisit risks/method), or `/skill:star-plan-decomposer <slug>` (re-scope the sub-plans). This closes the loop from execution back to strategy without violating write discipline.
 

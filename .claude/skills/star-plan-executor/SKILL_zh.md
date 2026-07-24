@@ -39,13 +39,13 @@ description: >-
 ### Step 0：定位目标计划
 
 1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与 `metds/plans/*_plan.md` 匹配。
-2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它——列出它的叶子(前缀 + slug + 一句话目标),用 AskUserQuestion 让用户选执行哪个叶子,或提议按依赖顺序一次一个地执行这些叶子。
+2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它——列出它的叶子(前缀 + slug + 一句话目标),用 AskUserQuestion 让用户选执行哪个叶子(推荐依赖顺序中第一个就绪的叶子),或提议按依赖顺序一次一个地执行这些叶子。
 3. 若未给参数或匹配有歧义,列出可选计划并询问。
 4. 完整读取选定的子计划。
 
 ### Step 1：就绪检查
 
-1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,告知用户拆解尚未完成,用 AskUserQuestion 提供:*先回 `/star-plan-decomposer` 补完* / *仍然执行(较浅,缺口保留 `【待定】`)*。
+1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,告知用户拆解尚未完成,用 AskUserQuestion 提供:*先回 `/star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
 2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的阻塞:点名本该负责它的数据就绪叶子,或路由到 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
 
 ### Step 2：勘察代码库
@@ -84,7 +84,7 @@ description: >-
 
 所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——还值得留的先提升到 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户自己点名才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
 
-**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,用**一次** AskUserQuestion 呈现整批(*全部同步 / 逐条挑 / 不同步*),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是战略信号——走下面的反馈回流,绝不同步。
+**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,用**一次** AskUserQuestion 呈现整批(*全部同步 / 逐条挑 / 不同步*,标出你推荐的一项),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是战略信号——走下面的反馈回流,绝不同步。
 
 **反馈回流(战略信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——这是战略层面的发现,而不只是某步失败。你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `/star-plan-reviser <slug>`(以证据审计并在逐条批准下修订计划)、`/star-plan-coach <slug>`(重审风险/方法)或 `/star-plan-decomposer <slug>`(重新拆分子计划)。这样在不破坏写入纪律的前提下,把执行→战略的回路闭合。
 

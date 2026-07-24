@@ -40,13 +40,13 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 ### Step 0: Resolve the target
 
 1. Match `PLAN_NAME` against `metds/plans/*_plan.md` by slug, numeric prefix, or full filename.
-2. Only leaves are executable. If the target has non-empty `children:`, list its leaves and ask which one to execute, or offer to process them one at a time in dependency order.
+2. Only leaves are executable. If the target has non-empty `children:`, list its leaves and ask which one to execute (recommend the first ready one), or offer to process them one at a time in dependency order.
 3. If the target is absent or ambiguous, list concise candidates and ask one direct question.
 4. Read the selected sub-plan in full.
 
 ### Step 1: Check readiness
 
-1. Require concrete §3 Task Breakdown and §5 Done-Criteria. If they are mostly `[TBD]` / `【待定】`, report the missing decisions and ask whether to return to `$star-plan-decomposer` or continue with the remaining uncertainty explicitly recorded.
+1. Require concrete §3 Task Breakdown and §5 Done-Criteria. If they are mostly `[TBD]` / `【待定】`, report the missing decisions and ask whether to return to `$star-plan-decomposer` (recommended) or continue with the remaining uncertainty explicitly recorded.
 2. Verify named datasets, weights, code modules, and every `depends_on` sibling. If a hard dependency is missing or an upstream sibling is not `exec_status: done`, stop and report the exact blocker. A missing dataset or weight is a decomposition gap, not a blocker to work around: name the data-readiness leaf that should own it, or route to `$star-plan-decomposer <parent>` to add one.
 3. Derive the intermediate workspace as `tasks/<plan-name>/`, where `<plan-name>` is the selected filename without `_plan.md`. If the selected leaf already has `exec_runs`, read its current run's `wkdrs/<run>/EXEC_LOG.md` and resume it. Otherwise use run name `<prefix>_<slug>`. If that run directory already exists but is not a resumable run for this leaf, ask for a distinguishing suffix; never invent one.
 
@@ -81,7 +81,7 @@ For each unfinished action:
 
 1. Run the sub-plan's §5 done-criterion and record the evidence in `EXEC_LOG.md`.
 2. If met, set the run and sub-plan `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` **scratch** — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. **The offer never covers the plan's own tool scripts** (conventions §9): list them by name as retained, and delete one only if the user names it themselves. If unmet, follow the local fallback in §6 or report the verified gap.
-3. If EXEC_LOG's `Pending amendments` is non-empty, present the batch once (sync all / select which / skip) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion routes through the strategy signal in point 5, never through sync-back.
+3. If EXEC_LOG's `Pending amendments` is non-empty, present the batch once (sync all / select which / skip, recommendation marked) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion routes through the strategy signal in point 5, never through sync-back.
 4. Check `references/exec_rubric.md` and fix in-scope failures before reporting; list at most five remaining failures with concrete remedies.
 5. If a result hits a root kill-criterion or invalidates the cheap MVP assumption, record a **Strategy signal** in the log and recommend `$star-plan-reviser <slug>` (audit the evidence and revise the plan), `$star-plan-coach <slug>`, or `$star-plan-decomposer <slug>`. Do not edit the parent's strategy sections.
 

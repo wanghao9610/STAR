@@ -38,13 +38,13 @@ description: >-
 ### Step 0：解析目标
 
 1. 按 slug、数字前缀或完整文件名，把 `PLAN_NAME` 与 `metds/plans/*_plan.md` 匹配。
-2. 只有 leaf 可执行。若目标的 `children:` 非空，列出其 leaf 并询问执行哪一个，或提议按依赖顺序逐个处理。
+2. 只有 leaf 可执行。若目标的 `children:` 非空，列出其 leaf 并询问执行哪一个（推荐第一个就绪的 leaf），或提议按依赖顺序逐个处理。
 3. 目标不存在或有歧义时，列出简洁候选，只问一个直接问题。
 4. 完整读取所选子计划。
 
 ### Step 1：检查就绪状态
 
-1. 要求具体的 §3 任务分解与 §5 完成判据。若大部分是 `[TBD]` / `【待定】`，报告缺失决定，询问是返回 `$star-plan-decomposer`，还是在明确记录剩余不确定性的前提下继续。
+1. 要求具体的 §3 任务分解与 §5 完成判据。若大部分是 `[TBD]` / `【待定】`，报告缺失决定，询问是返回 `$star-plan-decomposer`（推荐），还是在明确记录剩余不确定性的前提下继续。
 2. 验证点名的数据集、权重、代码模块和每个 `depends_on` sibling。若硬依赖缺失或上游 sibling 未达到 `exec_status: done`，停止并报告准确 blocker。缺失数据集或权重是分解缺口，不能绕过：点名应拥有它的 data-readiness leaf，或转回 `$star-plan-decomposer <parent>` 添加一个。
 3. 中间工作区为 `tasks/<plan-name>/`，其中 `<plan-name>` 是所选文件名去掉 `_plan.md`。若所选 leaf 已有 `exec_runs`，读取当前 run 的 `wkdrs/<run>/EXEC_LOG.md` 并恢复。否则 run 名使用 `<prefix>_<slug>`。若该 run 目录已存在但不是此 leaf 可恢复的 run，询问一个区分后缀；绝不自行编造。
 
@@ -79,7 +79,7 @@ description: >-
 
 1. 运行子计划 §5 完成判据，并把证据记录到 `EXEC_LOG.md`。
 2. 满足时，把 run 与子计划 `exec_status` 设为 `done`，然后只提议一次删除该计划的 `tasks/<plan-name>/` **scratch**——先把仍值得保留的内容提升到 `wkdrs/<run>/`，并在 `EXEC_LOG.md` 记录选择；保留也完全可以。**该提议绝不覆盖该计划自有的工具脚本**（规约 §9）：把它们按名字列为保留项，只有用户自己点名才删。未满足时，按 §6 本地 fallback 处理，或报告已验证缺口。
-3. 若 EXEC_LOG 的 `Pending amendments` 非空，一次展示整批（全部同步 / 选择部分 / 跳过），按 `references/plan_sync_rules_zh.md` 把确认行写回（原地更新 §2–§5 + 添加 `## Revision History` + 更新 `updated`，然后勾掉各行）。仅限战术层：任何触碰 §1/§6、父计划或 kill-criterion 的内容都通过第 5 点的 strategy signal 转交，绝不回同步。
+3. 若 EXEC_LOG 的 `Pending amendments` 非空，一次展示整批（全部同步 / 选择部分 / 跳过，标出你推荐的一项），按 `references/plan_sync_rules_zh.md` 把确认行写回（原地更新 §2–§5 + 添加 `## Revision History` + 更新 `updated`，然后勾掉各行）。仅限战术层：任何触碰 §1/§6、父计划或 kill-criterion 的内容都通过第 5 点的 strategy signal 转交，绝不回同步。
 4. 检查 `references/exec_rubric_zh.md`，报告前修复范围内的失败；最多列出五个剩余失败及具体补救方法。
 5. 若结果命中根计划 kill-criterion 或使廉价 MVP 假设失效，在日志中记录 **Strategy signal**，并推荐 `$star-plan-reviser <slug>`（审计证据并修订计划）、`$star-plan-coach <slug>` 或 `$star-plan-decomposer <slug>`。不要编辑父计划的策略章节。
 

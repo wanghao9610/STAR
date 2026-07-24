@@ -50,7 +50,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 ### Step 0: Resolve the target plan
 
 1. Interpret `PLAN_NAME`: match it against `metds/plans/*_plan.md` by slug, by numeric prefix, or by full filename.
-2. If no argument was given, or the match is ambiguous, list the available plans (prefix + slug + one-line title) and ask which one via AskUserQuestion.
+2. If no argument was given, or the match is ambiguous, list the available plans (prefix + slug + one-line title) and ask which one via AskUserQuestion, with your recommendation marked.
 3. Read the resolved plan in full.
 
 ### Step 1: Assess readiness
@@ -61,7 +61,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 - *Add new units alongside them* — leave the existing files untouched, number new units from the next free index, and run Steps 2–4 for those only; Step 5 then merges old and new.
 - *Re-decompose from scratch* — Steps 2–4 as normal, but confirm each overwrite file-by-file, and never overwrite a child carrying `## Revision History` or a non-empty `exec_runs` without naming exactly what would be lost.
 
-Check the root's `finalized:` — the one signal that a strategy plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), and tell the user that decomposition will be shallow, and offer via AskUserQuestion: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `star-plan-coach` to finish the parent first*. Respect the choice.
+Check the root's `finalized:` — the one signal that a strategy plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), and tell the user that decomposition will be shallow, and offer via AskUserQuestion: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `star-plan-coach` to finish the parent first* (recommended). Respect the choice.
 
 If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — its `exec_status` / `exec_runs` freeze as history, `star-flow-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `/star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — and when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
 
@@ -79,7 +79,7 @@ Mixed decomposition is allowed but confirm it explicitly.
 
 ### Step 3: Propose the sub-plan list
 
-From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and confirm via AskUserQuestion (*looks good* / *edit the list* / *change granularity*).
+From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and confirm via AskUserQuestion (*looks good* / *edit the list* / *change granularity*, with your recommendation marked).
 
 - **Give data its own leaf.** Where the root §4 names a dataset `datas/` does not yet hold, one unit is a data-readiness leaf: §3 acquires it, §4 places it under `datas/<name>/` **and names the verification script under `tasks/<plan-name>/`**, and §5's done-criterion is an integrity check — a manifest, a file count, a checksum — never "the download finished". The check's verdict and evidence land in the run's `EXEC_LOG.md` like any other step check; bulky raw output — the manifest itself, a checksum list — goes in a run subdirectory or a non-`.md` file, never a free-named report `.md` at the top of `wkdrs/<run>/` — a name conventions §8 does not register. The acquisition command itself crosses the STOP line, so `star-plan-executor` hands it back rather than running it. Every leaf that consumes the dataset `depends_on` this one. Without it, execution stops at a missing input no plan owns.
 - **Enforce N ≤ 10.** If you believe more than 10 units are needed, do not append a second digit — instead group them, or recommend a two-level split (decompose into ≤10 now, then recurse into the heavy ones). Say so explicitly.
