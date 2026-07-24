@@ -12,3 +12,5 @@ wkdrs/**
 .pytest_cache/
 **/__pycache__/
 **/.cache/
+
+.DS_Store
