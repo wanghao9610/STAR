@@ -4,7 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
-involvement: <档位 (来源)>   # 生效参与度档位，规约 §7.7——如 low (invocation)；从未设置时为 medium
+involve: <档位 (来源)>   # 生效参与度档位，规约 §7.7——如 low (invocation)；从未设置时为 medium
 model_id: <模型 id，照抄运行时本会话为你声明的那串——Kimi 会话有报告就照记；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
