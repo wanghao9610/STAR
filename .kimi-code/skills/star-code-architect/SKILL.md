@@ -1,5 +1,6 @@
 ---
 name: star-code-architect
+disable-model-invocation: true
 description: >-
   Bootstrap or reorganize the project codebase (${CODE_NAME}/, read from .env) so research plans under
   metds/plans/ have a code home. When ${CODE_NAME}/ is missing or empty: mine the plan for a search

@@ -1,5 +1,6 @@
 ---
 name: star-env-builder
+disable-model-invocation: true
 description: >-
   Build and verify the project's Python runtime environment so plan execution has a working interpreter.
   Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a

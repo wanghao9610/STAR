@@ -70,6 +70,10 @@ star-ai-research/
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .kimi-code/skills/      # Kimi 使用的研究工作流技能
+├── .claude/hooks/          # Claude 的 model-id 溯源钩子
+├── .codex/hooks/           # Codex 的 model-id 溯源钩子
+├── .cursor/hooks/          # Cursor 的 model-id 溯源钩子
+├── .kimi-code/hooks/       # Kimi 的 model-id 溯源钩子（见快速开始 2b）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .env.example            # 本地运行环境配置示例

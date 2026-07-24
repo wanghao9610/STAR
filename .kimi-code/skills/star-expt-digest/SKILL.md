@@ -1,5 +1,6 @@
 ---
 name: star-expt-digest
+disable-model-invocation: true
 description: >-
   Summarize what the experiment programme has done lately, on the time axis. No argument resumes from the
   previous digest's watermark and covers everything since; a PLAN_NAME covers that node's whole family —

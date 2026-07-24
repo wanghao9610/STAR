@@ -1,5 +1,6 @@
 ---
 name: star-code-release
+disable-model-invocation: true
 description: >-
   Prepare the research project for public release: consolidate scattered code into ${CODE_NAME}/ (read
   from .env), polish the release surface, and compile the project's README.md. Sweeps tasks/, wkdrs/ and

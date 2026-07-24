@@ -1,5 +1,6 @@
 ---
 name: star-refs-reviewer
+disable-model-invocation: true
 description: >-
   Build an auditable related-work base for the project's method: 5–10 close papers read into per-paper
   analysis notes, plus a classified reference.bib of ≥50 verified entries, all under metds/refs/. With no

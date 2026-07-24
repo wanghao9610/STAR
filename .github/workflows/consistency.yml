@@ -1,0 +1,14 @@
+name: STAR consistency
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run consistency checks
+        run: bash .github/scripts/check_consistency.sh

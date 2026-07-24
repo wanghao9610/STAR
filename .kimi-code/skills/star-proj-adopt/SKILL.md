@@ -1,5 +1,6 @@
 ---
 name: star-proj-adopt
+disable-model-invocation: true
 description: >-
   Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the existing
   repository read-only (source layout, runtime, data / weights / output locations, launch entrypoints,

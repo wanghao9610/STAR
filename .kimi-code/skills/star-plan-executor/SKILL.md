@@ -1,5 +1,6 @@
 ---
 name: star-plan-executor
+disable-model-invocation: true
 description: >-
   Execute a leaf execution sub-plan (produced by star-plan-decomposer, under metds/plans/) against the
   project code. Orients in the codebase (${CODE_NAME}/, read from .env) to build a "current state vs

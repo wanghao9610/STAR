@@ -70,6 +70,10 @@ STAR/
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
 ├── .kimi-code/skills/      # Research workflow skills for Kimi
+├── .claude/hooks/          # Model-id provenance hook for Claude
+├── .codex/hooks/           # Model-id provenance hook for Codex
+├── .cursor/hooks/          # Model-id provenance hook for Cursor
+├── .kimi-code/hooks/       # Model-id provenance hook for Kimi (see Quick start 2b)
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .env.example            # Portable environment configuration example
@@ -206,7 +210,7 @@ bash execs/run.sh
 bash execs/run.sh 00_exp --config config.yaml
 ```
 
-Run names and output directories should distinguish tasks, experiments, or repetitions. Generated artifacts belong under `wkdrs/<run-name>/`.
+The stock `00_exp.sh` is a blank placeholder — replace it with your first real experiment when starting a project from STAR. Run names and output directories should distinguish tasks, experiments, or repetitions. Generated artifacts belong under `wkdrs/<run-name>/`.
 
 ## Research workflow
 
@@ -240,7 +244,7 @@ Different stages benefit from different model strengths. For brainstorming and j
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 
-See the [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance.
+See the [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance; the rules every skill shares — git, the STOP line, the `.env` runtime, dates, delegation, and dialogue discipline — are in the [Research Workflow Skill Conventions](docs/mds/star-workflow/research-workflow-conventions.md).
 
 ## Updating STAR skills and workflow guides
 

@@ -1,5 +1,6 @@
 ---
 name: star-idea-storm
+disable-model-invocation: true
 description: >-
   Coach a researcher from a vague interest to a defensible research topic through
   diverge–scan–converge: clarify the seed and its constraints, generate 3–5 genuinely
