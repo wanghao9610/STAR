@@ -334,8 +334,7 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Not yet versioned — highlights by date, newest first.
 
-- **2026-07-23** — `execs/update.sh` now syncs and adopts the model-id provenance hooks, and gained `--diff` to preview upstream changes.
-- **2026-07-23** — Added Kimi Code support.
+- **2026-07-23** — First official release.
 - **2026-07-15** — Initial STAR release.
 
 ## License

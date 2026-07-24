@@ -329,8 +329,7 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
 尚未版本化——按日期列出要点，最新在前。
 
-- **2026-07-23** — `execs/update.sh` 现在会同步并接入 model-id 溯源钩子，并新增 `--diff` 预览上游变更。
-- **2026-07-23** — 新增 Kimi Code 支持。
+- **2026-07-23** — 第一个正式版本发布。
 - **2026-07-15** — STAR 首个发布。
 
 ## 许可证
