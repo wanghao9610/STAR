@@ -78,6 +78,8 @@ $star-code-release
 
 多个根计划目前都可能以 `0_` 开头，因此出现歧义时应使用 slug 或完整文件名。
 
+任意 skill 调用还可附带一个可选的 `involve=low|medium|high` 记号，设定本次运行决策前问多少——如 `$star-plan-executor 00 involve=low`。`low` 在裁量题上取推荐项（并逐条记录），`high` 逐步确认；它覆盖 `.env` 里的 `INVOLVE`（仅限这一次运行），运行中也可对 skill 说“少问点”临时调整。STOP 线、提交、删除等安全门在任何档位都会询问。完整规则见[规约 §7.7](research-workflow-conventions.zh-CN.md)。
+
 ## 2. 开始前的准备
 
 - 在 STAR 项目根目录中使用这些 skill。

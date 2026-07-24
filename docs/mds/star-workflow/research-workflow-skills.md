@@ -78,6 +78,8 @@ When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
 Multiple root plans may currently start with `0_`. If a match is ambiguous, use the slug or full filename.
 
+Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `$star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Safety gates — the STOP line, commits, deletions — always ask, at every level. Full rule: [conventions §7.7](research-workflow-conventions.md).
+
 ## 2. Before you start
 
 - Use these skills from the root of a STAR project.
