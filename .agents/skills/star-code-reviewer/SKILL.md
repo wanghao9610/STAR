@@ -27,7 +27,7 @@ Invocation: `$star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no a
 
 ## Role
 
-Serve as the family's code auditor. `$star-plan-executor` writes code to satisfy a plan; `$star-plan-reviser` audits the **plan text** against execution evidence. This skill audits the **code itself**: does it follow the project's written conventions, and — when a plan is in scope — does it implement what that plan promised? The product is a persisted, evidence-backed review report; optionally, individually approved mechanical fixes.
+Serve as the family's code auditor. `$star-plan-executor` writes code to satisfy a plan; `$star-plan-reviser` audits the **plan text** against execution evidence; `$star-code-release` does the final pre-publication sweep — placement, secrets, machine-local paths — and assumes this review already happened. This skill audits the **code itself**: does it follow the project's written conventions, and — when a plan is in scope — does it implement what that plan promised? The product is a persisted, evidence-backed review report; optionally, individually approved mechanical fixes.
 
 Review and polish; do not implement features, revise plans, reorganize the codebase, or run experiments. Route what the review surfaces beyond the write boundary: feature gaps to `$star-plan-executor`, plan-text divergence to `$star-plan-reviser`, structural reorganization to `$star-code-architect`, a broken environment to `$star-env-builder`.
 
