@@ -153,6 +153,20 @@ while IFS= read -r skill; do
     # Bare /star-* is foreign in the Kimi tree; /skill:star-* does not contain it.
     check_absent .kimi-code/skills "/${skill}"
 done < <(printf '%s\n' "${SKILLS}")
+
+# The rewrite that retokenizes a ported skill targets "/star-*", and the one
+# repo path carrying that substring is docs/mds/star-workflow/. A hand-run
+# rewrite once turned its separator into "docs/mds$star-workflow/" in .agents,
+# and the checks above passed it: the token is not foreign to that tree, and
+# check 6 matches the filename, not the directory. Every "docs/mds" in the
+# skill trees must still be followed by "/star-workflow/".
+mangled_paths="$(grep -rn 'docs/mds[^/]' "${SKILL_ROOTS[@]}" || true)"
+if [[ -n "${mangled_paths}" ]]; then
+    fail "docs/mds/ path separator damaged (token rewrite hit a directory name):"
+    printf '%s\n' "${mangled_paths}" | sed 's/^/      /'
+    token_errors=1
+fi
+
 (( token_errors == 0 )) && note "invocation tokens are consistent per tree"
 
 # 8. Workflow docs ship as en/zh pairs.
