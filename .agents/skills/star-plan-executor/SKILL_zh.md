@@ -87,12 +87,16 @@ description: >-
 
 以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。run 完成后，推荐 `$star-code-reviewer <leaf>` 在修订或进入下一项前，依据约定和子计划审计实现。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 400 词以内。
 
-## 状态规则
+## 状态与文件规则
 
 - 把 `wkdrs/<run>/EXEC_LOG.md` 视为执行事实来源。再次调用时跳过 `done` action，从第一个未完成项恢复。回同步必须幂等：标为 `synced` 或已勾选的行绝不重复应用；未同步 pending 行在 finalize 时重新提出。
 - `tasks/<plan-name>/` 存放该计划自有的工具脚本（持久）与可丢弃 scratch，本 skill 拥有 scratch 的生命周期：Step 3 创建，§5 满足后在 finalize 时只提议删除 scratch，绝不删脚本（规约 §9）。生成工件与持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。
 - 可以自由编辑子计划 frontmatter 的 `exec_status`、`exec_runs`、`updated`；只有通过用户确认的回同步协议（`references/plan_sync_rules_zh.md`）才能编辑其 §2–§5，且始终原地更新并配对一个 `## Revision History` 条目。绝不重写 §1 或 §6，绝不触碰父计划——objective 或 strategy 级偏差转交 `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`。
 - Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件，且仅在 checkpoint 获批时（约定 §1）。
 - 合法 action status：`pending` / `in_progress` / `done` / `blocked` / `skipped`。
+
+## 对话纪律
+
+- 在非交互的 `codex exec` 中（`ask_user_question` 不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行，仍然重实验前停，任何同步回写子计划前仍需纯文本确认。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
 - 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交确认与 divergence 行确认（它回写计划 §2–§5）、Step 5 的 Pending amendments 整批同步、以及删 scratch 的提议（它把关一次删除）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

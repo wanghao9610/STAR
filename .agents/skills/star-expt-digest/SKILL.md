@@ -95,7 +95,7 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 4. Fill `assets/model_ledger_template.md` (Chinese: `assets/model_ledger_template_zh.md`) into `wkdrs/digests/MODEL_LEDGER.md`. Same date rule as the digest: same day overwrites, a later day writes its own.
 
 **Counts are not a verdict.** Report write events per model and stop there. A model with more events did more writes, which is not "did better" — the ledger has no quality signal in it, and saying otherwise from these numbers is the same error as attributing a metric delta to a cause. Trails are self-reported (conventions §8), so the ledger inherits that limit and says so on its face.
-## State Rules
+## State & File Rules
 
 - The only writes are `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md` and — in `ledger` mode only — `wkdrs/digests/MODEL_LEDGER.md`. Nothing else, anywhere — no figures, no scripts, no subdirectories.
 - Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (they are this skill's input, never its output); `wkdrs/results/results.md` and `wkdrs/results/results_<slug>.md` (the ledger is `$star-expt-analyst aggregate`'s, and a digest number must never reach it); `${CODE_NAME}/`; `.env`.
@@ -104,5 +104,8 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 - All commands run through `.env`'s conda env; no system python; never install or upgrade anything (conventions §3.5). This skill needs no packages beyond file reads.
 - Nothing heavy: no training, no evaluation, no full-dataset passes, no costly API calls (conventions §2).
 - Git: read-only; never commit (conventions §1). `wkdrs/` is git-ignored, so the digest series lives on disk only — say so once if the user asks about sharing it.
+
+## Dialogue Discipline
+
 - Ask one direct question at a time where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan) and require an explicit answer. Since the skill writes nothing outside its own digest, there is no approval gate — but for the same reason, never state or imply that a plan, a status, a report, or the ledger was changed.
 - Never present a provisional number as a result in chat either. If the digest tagged it unverified, the reply says so too. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.

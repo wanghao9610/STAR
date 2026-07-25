@@ -85,7 +85,7 @@ description: >-
 
 先说落盘结果，控制在约 400 字以内：逐文档——已写 / 跳过 / 未变、路径、缺口数与"尚未验证"数。然后是研究者真正要据以行动的三样：**缺口**（各自要哪个计划小节，最要紧的在前）、**⚠ 冲突**（两处来源都点名）、以及路由——策略缺口交 `$star-plan-coach`，执行细节交 `$star-plan-decomposer`，某个已执行 run 敲定的值交 `$star-plan-executor`，与现实矛盾的计划文本交 `$star-plan-reviser`，结果交 `$star-expt-analyst`，引文交 `$star-refs-reviewer`。绝不把文档称为"可直接投稿"；它是编译出的素材，而它的缺口正是它还不是成品的原因。草稿编译（就绪门槛豁免）要在汇报第一行注明。
 
-## 状态规则
+## 状态与文件规则
 
 - 唯一的写入是 `metds/overview.md`、`metds/dataset.md`、`metds/framework.md`、`metds/training.md`、`metds/evaluation.md`——五个 OPT 目标，除此之外不写任何东西、任何地方。
 - 绝不碰 `metds/plans/*`——计划文本属于 `$star-plan-coach`、`$star-plan-decomposer`、`$star-plan-executor`、`$star-plan-reviser`；编译时发现的缺口或错误表述只汇报与路由，绝不就地修改。绝不碰 `metds/codearc.md`（`$star-code-architect` 的）、`metds/refs/*`（`$star-refs-reviewer` 的）、`wkdrs/*`（含 `$star-expt-analyst` 的结果总账 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
@@ -93,5 +93,8 @@ description: >-
 - 本 skill 不跑任何东西：不跑 python、不训练、不评测、不安装——没有哪条命令的输出是它需要的。
 - Git：只读；本 skill 绝不提交（规约 §1）。
 - 它不设置任何计划 frontmatter，也不创建 run 目录；每份文档的 `sources:` 块就是全部审计轨迹。
+
+## 对话纪律
+
 - 对话回复控制在 ~400 字以内；编译出的文档不计入。
 - 在五道门上一次只问一个直接问题——就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档——覆盖任何已存在文件前都要求明确批准，即使在 headless 或 scripted 运行中也是如此；没有明确批准也绝不越过就绪门槛。文档跟随计划的 `language`（Step 1），可能与对话语言不同。

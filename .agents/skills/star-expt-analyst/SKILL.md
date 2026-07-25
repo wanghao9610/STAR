@@ -119,7 +119,7 @@ A quick health read of a run that may still be executing — dimension C plus li
 3. Liveness and progress: the newest log/artifact mtime ("last write N minutes ago"), and the latest progress line — step / epoch / eval with its values, quoted as the log states them.
 4. Report ≤200 words, liveness first: alive or stalled since when, the latest progress line, any fatal or anomalous signal with its `file:line`, and one next action — keep waiting; a fatal signal → stop the job, fix and relaunch via `$star-plan-executor <slug>`; import or environment errors → `$star-env-builder`. Say plainly the run has not been scored: when it finishes, the full pass (`$star-expt-analyst <slug>`) does that.
 
-## State Rules
+## State & File Rules
 
 - The only writes are `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`, `wkdrs/<run>/analysis/` when figures were rendered (the `.png` files plus the script that made them), and — in aggregate mode only — `wkdrs/results/results.md` (whole forest) or `wkdrs/results/results_<slug>.md` (scoped). Nothing else, anywhere. Watch mode writes nothing at all — its whole product is the chat digest.
 - Never touch: `metds/plans/*` — including `exec_status`, `exec_runs`, and `updated` (a met criterion is *recommended* to `$star-plan-executor`, which owns finalization); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md` (the executor's log is evidence, not a scratchpad — a Strategy signal found here is reported and routed, not written into the log); `${CODE_NAME}/`; `metds/codearc.md`; `UPSTREAM.md`; `.env`.
@@ -128,4 +128,7 @@ A quick health read of a run that may still be executing — dimension C plus li
 - Nothing heavy: no training, no evaluation runs, no full-dataset passes, no costly API calls — the executor's STOP line applies here too. A metric that would need a run to obtain is `unmeasurable`; hand the prepared command back to the user instead.
 - Git: read-only; this skill never commits (conventions §1).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file.
+
+## Dialogue Discipline
+
 - Ask one direct question at a time where the workflow calls for it (which run to analyze, an ambiguous match) and require an explicit answer. Since the skill writes nothing outside its own report, there is no approval gate — but for the same reason, never state or imply that a plan, a status, or a log was changed. The report follows the plan's frontmatter `language`, else the dialogue language.

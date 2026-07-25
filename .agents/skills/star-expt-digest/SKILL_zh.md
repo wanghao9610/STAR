@@ -91,7 +91,7 @@ description: >-
 4. 填 `assets/model_ledger_template_zh.md`（英文：`assets/model_ledger_template.md`）写入 `wkdrs/digests/MODEL_LEDGER.md`。日期规则与 digest 相同：同一天覆盖，跨天各写各的。
 
 **计数不是判决。** 报出各模型的写入事件数，到此为止。写入事件多的模型只是写得多，不等于"做得好"——本台账里没有任何质量信号，用这些数字去说质量，与把指标 delta 归因到某个原因是同一种错误。trail 是自报的（规约 §8），台账因此继承同一限制，并在正面写明。
-## 状态规则
+## 状态与文件规则
 
 - 写入只有 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`，以及——仅在 `ledger` 模式下——`wkdrs/digests/MODEL_LEDGER.md`。别处一律不写——不出图、不留脚本、不建子目录。
 - 绝不碰：`metds/plans/*`（含 `exec_status`、`exec_runs`、`updated`）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`；任何 `EXPT_ANALYSIS_<date>.md`（它们是你的输入，永远不是你的输出）；`wkdrs/results/results.md` 与 `wkdrs/results/results_<slug>.md`（台账属于 `$star-expt-analyst aggregate`，digest 里的数字绝不能流进去）；`${CODE_NAME}/`；`.env`。
@@ -100,5 +100,8 @@ description: >-
 - 所有命令走 `.env` 的 conda 环境；不用系统 python；绝不安装或升级任何东西（规约 §3.5）。本 skill 除读文件外不需要任何包。
 - 不做重活：不训练、不评测、不全量数据集遍历、不高成本 API 调用（规约 §2）。
 - Git：只读；本 skill 从不提交（规约 §1）。`wkdrs/` 被 git 忽略，所以 digest 序列只存在于本地磁盘——用户问到分享时说明一次即可。
+
+## 对话纪律
+
 - 仅在工作流要求处提问（计划名有歧义、参数既解析不成窗口也解析不成计划），一次一问并要求明确答复。因为本 skill 不在自己的 digest 之外写任何东西，所以没有审批门——也正因如此，绝不声称或暗示计划、状态、报告或台账被改动过。
 - 在对话里同样绝不把临时数字当作结果陈述。digest 里标了未核实，回复里也要标。中文 digest 里保持技术术语、指标名、日志键、文件路径、run 名为英文。

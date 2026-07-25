@@ -96,7 +96,7 @@ description: >-
 4. Frontmatter：`type: related_work`、`language`（按 Step 0.4 的规则）、`generated:`（真实日期）、`sources:`（读过的笔记与 index 及各自日期）。重跑时：带这份 frontmatter 的文件，先给出节级变更清单、经一次直接提问确认后才覆写；没有它的文件是人写的——说明其内容并询问，绝不凭 diff 直接覆写。
 5. 摘要 ≤400 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是家族零编造规则背书的素材——语气、次序与最终引用格式属于写作工具。
 
-## 状态规则
+## 状态与文件规则
 
 - 写入范围限定在 `metds/refs/**`（笔记、`reference.bib`、`refs_index.md`、`related_work.md`）与运行缓存 `wkdrs/refs_<date>/raw/**`。绝不碰 `metds/plans/*`、`metds/*.md` 方法笔记、`metds/codearc.md`、`${CODE_NAME}/`、`.env`、`UPSTREAM.md`、`LICENSE` / `CITATION*`。
 - `reference.bib` 只追加与重组，绝不整体重新生成：已核验的条目逐字节保留，除非 `verify` 证明它错了。用户手工加的条目绝不删——重新归类，没有抓取记录时把 provenance 标为 `user-supplied`。
@@ -104,4 +104,8 @@ description: >-
 - `related_work.md` 只编译、不发明：每条刻画都能追溯到对应论文的笔记（没有笔记的条目只能以其抓取记录的事实被点名）。带 `type:` + `generated:` frontmatter 的生成文件，须先批准节级变更清单才能覆写；人写的文件绝不凭 diff 覆写。
 - 日期必须真实（规约 §4）：抓取日期就是实际抓取的那天。
 - 本 skill 不设任何计划 frontmatter、不创建计划文件；审计痕迹就是 `refs_index.md` 加运行缓存。Git：只读；绝不提交（规约 §1）。
+
+## 对话纪律
+
 - 核心集确认用一个直接问题，标出推荐，并要求任何论文被阅读前都得到明确答复——即使在 headless 或脚本化运行中也一样。笔记绝不说得比 `depth:` 承认的更深。笔记与 index 跟随方法来源的 `language`（否则跟随对话语言）；`reference.bib` 里的全部内容一律保留英文。
+- 如实报数：抓到多少条、失败多少条、多少条要人工核。缺口绝不往上凑。

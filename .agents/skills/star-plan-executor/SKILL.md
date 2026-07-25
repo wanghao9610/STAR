@@ -89,12 +89,16 @@ For each unfinished action:
 
 Lead with the outcome. State what was verified and its evidence, where the `tasks/<plan-name>/` intermediate workspace and `wkdrs/<run>/` records/artifacts live, which commands await the user, which amendments were synced into the sub-plan, and any remaining risk. After a completed run, recommend `$star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands await the user at the STOP line, add that once their outputs exist, `$star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep the report under about 400 words.
 
-## State Rules
+## State & File Rules
 
 - Treat `wkdrs/<run>/EXEC_LOG.md` as the execution source of truth. On reinvocation, skip `done` actions and resume from the first unfinished one. Sync-back is idempotent: rows marked `synced` or checked off are never re-applied; unsynced pending rows are re-offered at finalize.
 - `tasks/<plan-name>/` holds this plan's own tool scripts (durable) plus its disposable scratch, and this skill owns the scratch's lifecycle: created at Step 3, the scratch offered for deletion once at finalize when §5 is met — never the scripts (conventions §9). Generated artifacts and durable evidence never live there; never delete it unasked, and never touch another plan's `tasks/` directory.
 - Edit `exec_status`, `exec_runs`, and `updated` in the sub-plan frontmatter freely; edit its §2–§5 **only** through the user-confirmed sync-back protocol (`references/plan_sync_rules.md`), always in place and always paired with a `## Revision History` entry. Never rewrite §1 or §6 and never touch a parent plan — objective- or strategy-level divergence routes to `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`.
 - Git: one commit per verified action, staging only the files that action touched, and only when checkpointing was approved (conventions §1).
 - Legal action status: `pending` / `in_progress` / `done` / `blocked` / `skipped`.
+
+## Dialogue Discipline
+
+- In non-interactive `codex exec`, where `ask_user_question` is unavailable, fall back: present EXEC_PLAN as plain text and require an explicit plain-text approval before any side effect — still gate before executing, still stop before heavy experiments, still confirm in plain text before any sync-back write to the sub-plan.
 - Match the user's dialogue language while preserving the plan body's frontmatter `language`; keep technical terms in English inside Chinese plans.
 - Involve (conventions §7.7). Dial-immune here: the STOP line (Step 4), Step 3's checkpoint-commit question and divergence-row confirmation (it writes plan §2–§5), Step 5's pending-amendments batch, and the scratch offer (it gates a deletion). Dialed at `low`: Step 0's which-leaf choice (take the first ready leaf in dependency order; an absent or ambiguous target still asks, conventions §5.2) and Step 1's readiness fallback (take the recommendation: route back to the decomposer and stop). At `high`, confirm each action (Step 4) before executing it. Record the effective level and its source once in `EXEC_LOG.md`.

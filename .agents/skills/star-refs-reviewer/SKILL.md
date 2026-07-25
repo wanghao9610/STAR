@@ -101,7 +101,7 @@ Compile the existing notes into `metds/refs/related_work.md` — the material a 
 4. Frontmatter: `type: related_work`, `language` (Step 0.4's rule), `generated:` (real date), `sources:` (the notes and index read, each with its date). On re-run, a file carrying this frontmatter gets a section-level change list and one direct question before overwrite; a file without it is hand-authored — say what it holds and ask, never overwrite on a diff alone.
 5. Digest ≤400 words: themes written, citekeys cited vs entries total, thin-note gaps with the read-next list, and the boundary: compiled material under the family's zero-fabrication rule — voice, ordering, and final citation style belong to the writing tool.
 
-## State Rules
+## State & File Rules
 
 - Writes are confined to `metds/refs/**` (notes, `reference.bib`, `refs_index.md`, `related_work.md`) and the run cache `wkdrs/refs_<date>/raw/**`. Never touch `metds/plans/*`, the `metds/*.md` method notes, `metds/codearc.md`, `${CODE_NAME}/`, `.env`, `UPSTREAM.md`, or `LICENSE` / `CITATION*`.
 - `reference.bib` is append-and-reorganize, never regenerate-from-scratch: a verified entry is preserved byte for byte unless `verify` proves it wrong. An entry the user added by hand is never deleted — reclassify it and mark its provenance `user-supplied` when it has no fetched record.
@@ -109,4 +109,8 @@ Compile the existing notes into `metds/refs/related_work.md` — the material a 
 - `related_work.md` is compiled, never invented: every characterization traces to that paper's note (a note-less entry may be named, only from its fetched record's facts). A generated file (`type:` + `generated:` frontmatter) is overwritten only after its section-level change list is approved; a hand-authored file is never overwritten on a diff alone.
 - Real dates only (conventions §4): a fetch date is when the fetch happened.
 - This skill sets no plan frontmatter and creates no plan files; its audit trail is `refs_index.md` plus the run cache. Git: read-only; it never commits (conventions §1).
+
+## Dialogue Discipline
+
 - Ask the core-set confirmation as one direct question with recommendations marked, and require an explicit answer before any paper is read — even in headless or scripted runs. Never present a note as deeper than its `depth:` admits. Notes and index follow the method source's `language` (else the dialogue language); everything inside `reference.bib` stays English regardless.
+- Report counts honestly: how many entries were fetched, how many failed, how many need manual checking. Never round a shortfall up.

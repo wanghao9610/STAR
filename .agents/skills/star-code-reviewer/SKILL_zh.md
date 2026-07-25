@@ -83,7 +83,7 @@ description: >-
 4. 把修复记录追加进报告（`F<n> — applied / skipped / reverted`）。若 Step 0 时 working tree 干净，最后问一次：提交修复（只 stage 本 pass 碰过的文件；信息 `star-code-reviewer: apply review fixes — <scope>`）还是留着不提交。tree 本来就脏 → 不提交并说明。
 5. 收尾报出修了什么、跳过什么、路由了什么，以及报告路径。
 
-## 状态规则
+## 状态与文件规则
 
 - 报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`，绝不放进 `${CODE_NAME}/`。
 - 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类 finding 路由给 `$star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
@@ -91,4 +91,7 @@ description: >-
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的 STOP 线同样适用）。
 - Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计痕迹就是报告文件，外加（若有）那次修复提交。
+
+## 对话纪律
+
 - 修复 pass 的批准一次只问一条，任何写入前都要求明确答复。计划模式下报告跟随计划 frontmatter 的 `language`，否则跟随对话语言。

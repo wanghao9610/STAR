@@ -112,7 +112,7 @@ STOP 线命令从未执行过的 run 是**未完成**的，其 §5 判据通常�
 3. 活性与进度：最新日志/产物的 mtime（"距上次写入 N 分钟"），以及最近一条进度行——step / epoch / 评测行及其数值，按日志原样引用。
 4. 汇报 ≤200 字，活性先行：还活着还是从何时起停滞、最近的进度行、任何致命或异常信号及其 `file:line`，以及一个下一步——继续等；致命信号 → 停掉任务、修复后经 `$star-plan-executor <slug>` 重启；import 或环境错误 → `$star-env-builder`。明说这个 run 尚未被打分：跑完后由完整流程（`$star-expt-analyst <slug>`）来打。
 
-## 状态规则
+## 状态与文件规则
 
 - 唯一的写入是 `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`、渲染了图时的 `wkdrs/<run>/analysis/`（`.png` 加上生成它们的脚本），以及——仅在 aggregate 模式下——`wkdrs/results/results.md`（整片森林）或 `wkdrs/results/results_<slug>.md`（限定范围）。除此以外，任何地方都不写。watch 模式什么都不写——它的全部产出就是聊天摘要。
 - 绝不碰：`metds/plans/*`——包括 `exec_status`、`exec_runs`、`updated`（判据达标是*建议*交给 `$star-plan-executor`，终验归它）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`（executor 的日志是证据，不是草稿纸——发现的 Strategy signal 是报告并路由，不是写进日志）；`${CODE_NAME}/`；`metds/codearc.md`；`UPSTREAM.md`；`.env`。
@@ -121,4 +121,7 @@ STOP 线命令从未执行过的 run 是**未完成**的，其 §5 判据通常�
 - 不跑重活：不训练、不跑评测、不做全量数据 pass、不做高成本 API 调用——executor 的 STOP 线在这里同样适用。需要跑一次才能拿到的指标就是 `unmeasurable`；把备好的命令交还给用户，而不是自己跑。
 - Git：只读；本 skill 绝不提交（规约 §1）。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计痕迹就是报告文件。
+
+## 对话纪律
+
 - 仅在工作流要求处（分析哪个 run、匹配有歧义时）一次只问一条，并要求明确答复。由于本 skill 除自己的报告外什么都不写，没有批准闸门——但同样地，绝不声称或暗示改动了计划、状态或日志。报告跟随计划 frontmatter 的 `language`，否则跟随对话语言。

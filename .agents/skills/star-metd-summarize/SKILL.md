@@ -92,12 +92,15 @@ For each target, in dependency order:
 
 Lead with what landed, under about 400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `$star-plan-coach`, execution detail to `$star-plan-decomposer`, a value an executed run settled to `$star-plan-executor`, plan text contradicting reality to `$star-plan-reviser`, results to `$star-expt-analyst`, citations to `$star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-gate override) says so in the report's first line.
 
-## State Rules
+## State & File Rules
 
 - The only writes are `metds/overview.md`, `metds/dataset.md`, `metds/framework.md`, `metds/training.md`, `metds/evaluation.md` — the five OPT targets, nothing else, nowhere else.
 - Never touch `metds/plans/*` — plan text belongs to `$star-plan-coach`, `$star-plan-decomposer`, `$star-plan-executor`, `$star-plan-reviser`; a gap or a wrong statement found while compiling is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`$star-code-architect`'s), `metds/refs/*` (`$star-refs-reviewer`'s), `wkdrs/*` (including `$star-expt-analyst`'s results ledger `wkdrs/results/`), `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
 - Reads are `metds/plans/*_plan.md`, `.env`, and the five target docs. `wkdrs/` is deliberately not read: execution reality reaches these documents through the executor's sync-back into the plans, so if a run's detail is missing here, the fix is a plan sync, not a wider read.
 - This skill runs nothing: no python, no training, no evaluation, no installs — there is no command whose output it needs.
 - Git: read-only; this skill never commits (conventions §1).
+
+## Dialogue Discipline
+
 - It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
 - Ask one direct question at a time at the five gates — the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs; never compile past the readiness gate without one. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.

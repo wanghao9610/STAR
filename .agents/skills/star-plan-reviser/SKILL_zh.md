@@ -83,11 +83,14 @@ description: >-
 
 以结果开头，约 400 字以内：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`$star-plan-decomposer <slug>`（结构变了 / children 过期）、`$star-plan-coach <slug>`（战略转向）、`$star-plan-executor <叶子>`（重跑修订后的叶子）、`$star-code-reviewer <叶子>`（审计实现代码）、`$star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提供一次提交的机会（见状态与文件规则）。
 
-## 状态规则
+## 状态与文件规则
 
 - 审查报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`。
 - 只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及目标一行目标变化时父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
 - Git：有落笔修订时，在 Step 7 提供一次提交目标计划（及一行目标变化时的父计划）的机会——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
 - 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped`——与家族一致。
+
+## 对话纪律
+
 - 一次只问一个问题，任何写入前都要求明确答复。计划正文与审查报告保持计划 frontmatter 的 `language`。

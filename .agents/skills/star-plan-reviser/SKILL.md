@@ -85,11 +85,14 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 Lead with the outcome, under about 400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, ripple warnings. End with the next command: `$star-plan-decomposer <slug>` (structure changed / children stale), `$star-plan-coach <slug>` (strategy pivot), `$star-plan-executor <leaf>` (re-run a revised leaf), `$star-code-reviewer <leaf>` (audit the implementation's code), `$star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
 
-## State Rules
+## State & File Rules
 
 - Review reports live under `wkdrs/` (the plan's run dir, else `wkdrs/reviews/`); never under `metds/plans/`.
 - Edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status` — the latter two only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed. Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
 - Every write must trace to an individually approved candidate; `## Revision History` is append-only.
 - Git: when edits were applied, offer once at Step 7 to commit the target plan (plus the parent when its `## Sub-plans` line changed) — `star-plan-reviser: <slug> — <n> changes` (conventions §1). Core Principle 4's "older versions live in git" depends on these commits.
 - Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `skipped` — same as the family.
+
+## Dialogue Discipline
+
 - Ask questions one at a time and require an explicit answer before any write. The plan body and the review report keep the plan's frontmatter `language`.

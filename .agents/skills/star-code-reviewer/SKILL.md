@@ -88,7 +88,7 @@ Lead with the verdict, under about 400 words: files reviewed, counts per severit
 4. Append the fix record to the report (`F<n> — applied / skipped / reverted`). If the working tree was clean at Step 0, ask one final question: commit the fixes (stage only the files this pass touched; message `star-code-reviewer: apply review fixes — <scope>`) or leave them uncommitted. With a dirty tree, leave them uncommitted and say so.
 5. Close with what was applied, skipped, and routed, plus the report path.
 
-## State Rules
+## State & File Rules
 
 - Reports live under `wkdrs/` (the plan's run dir, else `wkdrs/reviews/`); never under `metds/plans/`, never inside `${CODE_NAME}/`.
 - The only code writes are individually approved fix-pass items inside the reviewed scope. Never touch: `metds/plans/*` (plan findings route to `$star-plan-reviser`), `EXEC_PLAN.md` / `EXEC_LOG.md`, `UPSTREAM.md`, `LICENSE` / `CITATION*`, `metds/codearc.md`, `.env`.
@@ -96,4 +96,7 @@ Lead with the verdict, under about 400 words: files reviewed, counts per severit
 - All commands run through `.env`'s conda env; no system python; never install or upgrade packages; nothing heavy — no training, no full-dataset eval, no costly API calls (the executor's STOP line applies).
 - Git: read-only, plus the single optional fix commit staging only fix-pass files (conventions §1).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file plus the fix commit when one was made.
+
+## Dialogue Discipline
+
 - Ask fix-pass approvals one at a time and require an explicit answer before any write. The report follows the plan's frontmatter `language` in plan mode, else the dialogue language.
