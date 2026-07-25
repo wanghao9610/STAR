@@ -364,7 +364,7 @@ When starting a new research repository from STAR:
 - Document how datasets and pretrained weights are obtained; do not commit large artifacts directly.
 - Define the expected outputs, metrics, and reproduction commands for the project.
 - Update the copyright holder and year in `LICENSE`.
-- Replace `docs/htmls/star.html` and `docs/srcs/` — they are STAR's own landing page and images, not your project's. Leave `docs/mds/star-workflow/` alone; `execs/update.sh` keeps it current.
+- Replace `docs/htmls/star.html`, `docs/htmls/star_zh.html` and `docs/srcs/` — they are STAR's own landing pages and images, not your project's. `docs/index.html` and `docs/index_zh.html` are symlinks that serve those pages at the site root, and the two pages link to each other absolutely (`/STAR/index_zh.html`), so rewrite that `/STAR` prefix to your own repository name or the language switch will break. Leave `docs/mds/star-workflow/` alone; `execs/update.sh` keeps it current.
 - Delete the harness trees you will not use. Each of `.agents/` (Codex), `.claude/`, `.cursor/` and `.kimi-code/` is a self-contained copy of the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest.
 
 Keep only the structure that remains useful—STAR should support the research, not constrain it. The skeleton stands alone: the directory layout, `.env` and `execs/run.sh` work with no skills installed at all, so removing every harness tree is a supported way to use STAR.
