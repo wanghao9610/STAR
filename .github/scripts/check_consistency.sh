@@ -304,6 +304,24 @@ while IFS= read -r rel; do
         fi
     done
 done < <(cd "${SKILL_ROOTS[0]}" && find . -type f -name '*.sh' | sed 's|^\./||' | sort)
+
+# Same-named scripts are one shared file, not per-skill forks. A skill cannot
+# reference another skill's copy — the path would carry a foreign invocation
+# token and `update.sh --skill` would not guarantee the other skill is even
+# installed — so a shared collector is duplicated into each consumer instead,
+# and this is what keeps the duplicates honest.
+while IFS= read -r base; do
+    first=""
+    while IFS= read -r path; do
+        if [[ -z "${first}" ]]; then
+            first="${path}"
+        elif ! cmp -s "${first}" "${path}"; then
+            fail "${path} differs from ${first}; same-named skill scripts must be one shared file"
+            script_errors=1
+        fi
+    done < <(find "${SKILL_ROOTS[@]}" -type f -name "${base}" | sort)
+done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | sort -u)
+
 (( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all four trees"
 
 printf '\n'

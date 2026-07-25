@@ -1,47 +1,73 @@
 #!/usr/bin/env bash
 #
-# star-flow-status data collector — one digest instead of one read per file.
+# STAR flow data collector — one digest instead of one read per file.
+#
+# Shared by the skills that open the same plans, run logs, and registered
+# artifacts before doing anything else. Every copy is byte-identical and CI
+# enforces that; it names no harness and no skill, so there is nothing to adapt
+# per tree.
 #
 # Deliberately dumb: it globs, greps, and prints. It decides nothing. No glyphs,
 # no coverage verdicts, no ordering, no scoping, no knowledge of which filenames
 # the registry expects — it prints what is on disk and the skill applies the
-# rules. That split is the point: conventions §8 and references/status_spec.md
-# stay the single home of every rule, so a producer skill that renames its output
+# rules. That split is the point: conventions §8 and each skill's own spec stay
+# the single home of every rule, so a producer skill that renames its output
 # never has to be mirrored here.
 #
-# Usage: bash <skill-dir>/scripts/scan.sh    # run from the project root
+# Usage: bash <skill-dir>/scripts/scan.sh [--trails]   # run from the project root
+#
+#   --trails   provenance mode: print every model_trail entry in full rather
+#              than counting it, add each plan's ## Revision History and the
+#              model_id header line of files that carry no frontmatter, and
+#              widen the sweep to metds/refs/. This is what a cross-artifact
+#              provenance ledger reads; the default mode drops all of it because
+#              an unbounded trail would crowd out the fields everything else needs.
 #
 # Reads only. Writes nothing, anywhere.
 
 set -u
 
+TRAILS=0
+case "${1:-}" in
+    "") ;;
+    --trails) TRAILS=1 ;;
+    *) printf 'usage: scan.sh [--trails]\n' >&2; exit 2 ;;
+esac
+
 FM_CAP=120   # frontmatter lines printed per file before truncation
+[ "$TRAILS" = 0 ] || FM_CAP=500
 
 say() { printf '%s\n' "$*"; }
 
 # Leading --- block, capped. Prints nothing for a file that has no frontmatter
 # (CODE_REVIEW, REVIEW, refs_index.md carry a header line instead).
 #
-# model_trail entries are counted, not printed: the list grows without bound over
-# a plan's life and sits above `status:` in the frontmatter, so printing it would
-# eventually push the fields this skill actually reads past the cap. No other list
-# is dropped — `sources:` in particular is what the stale-method-docs row compares.
+# Without --trails, model_trail entries are counted rather than printed: the list
+# grows without bound over a plan's life and sits above `status:`, so printing it
+# would eventually push the fields the readers actually need past the cap. No
+# other list is dropped — `sources:` in particular is what a stale-document check
+# compares against.
 frontmatter() {
-    awk -v cap="$FM_CAP" '
+    awk -v cap="$FM_CAP" -v trails="$TRAILS" '
         function flush_trail() {
             if (trail_open && trailn > 0) print "  … (" trailn " model_trail entries omitted)"
             trail_open = 0; trailn = 0
         }
         NR == 1 { if ($0 !~ /^---[ \t]*$/) exit; next }
         /^---[ \t]*$/ { flush_trail(); exit }
-        /^model_trail:/ { flush_trail(); trail_open = 1; n++; print; next }
-        trail_open && /^[ \t]/ { trailn++; next }
-        trail_open { flush_trail() }
+        trails == 0 && /^model_trail:/ { flush_trail(); trail_open = 1; n++; print; next }
+        trails == 0 && trail_open && /^[ \t]/ { trailn++; next }
+        trails == 0 && trail_open { flush_trail() }
         { n++
           if (n > cap) { print "  … (frontmatter truncated at " cap " lines)"; exit }
           print }
         END { flush_trail() }
     ' "$1"
+}
+
+# Provenance carried on a header line instead of in frontmatter.
+header_model() {
+    awk 'NR > 10 { exit } /model_id/ { print }' "$1"
 }
 
 # A "## <heading>" section body, up to the next "## ".
@@ -97,8 +123,9 @@ fi
 
 say "# STAR flow scan — $(pwd -P)"
 say "# today: $(date +%Y-%m-%d)"
-say "# Raw excerpts only: no status, no glyphs, no coverage verdicts, no ordering,"
-say "# no scoping. Apply SKILL.md and references/status_spec.md to what follows."
+[ "$TRAILS" = 0 ] || say "# mode: --trails (provenance)"
+say "# Raw excerpts only: no status, no glyphs, no verdicts, no ordering, no scoping."
+say "# Apply your skill's own rules to what follows."
 
 # ---------------------------------------------------------------- plans
 say ""
@@ -121,6 +148,13 @@ for f in metds/plans/*_plan.md; do
     seeds=$(grep -o '[A-Za-z0-9._-]*_idea\.md' "$f" | sort -u | tr '\n' ' ')
     [ -z "$seeds" ] || say "[idea refs] $seeds"
     tbd_counts "$f"
+    if [ "$TRAILS" = 1 ]; then
+        history=$(section_body "$f" '^##[ \t]*Revision History')
+        if [ -n "$history" ]; then
+            say "[revision history]"
+            printf '%s\n' "$history" | grep -v '^[ \t]*$'
+        fi
+    fi
 done
 [ "$plans" -gt 0 ] || say "(none)"
 
@@ -145,18 +179,26 @@ done
 # Every other registered-area .md, one depth level down as the self-audit rule
 # defines it: metds/, its ideas dir, and each wkdrs/<dir>/. Frontmatter only —
 # the state field each row of the registry needs lives there. metds/refs/ is
-# listed but not dumped: it is checked for the index's presence, and a project
-# with fifty paper notes would otherwise drown the digest.
+# listed but not dumped by default: it is checked for the index's presence, and a
+# project with fifty paper notes would otherwise drown the digest — --trails
+# widens to it, because a provenance ledger does want every note's writer.
 say ""
 say "## ARTIFACT FRONTMATTER — everything else, depth 1"
+set -- metds/*.md metds/ideas/*.md wkdrs/*/*.md
+[ "$TRAILS" = 0 ] || set -- "$@" metds/refs/*.md
 others=0
-for f in metds/*.md metds/ideas/*.md wkdrs/*/*.md; do
+for f in "$@"; do
     [ -f "$f" ] || continue
     case "$f" in
         metds/plans/*|*/EXEC_LOG.md) continue ;;
     esac
     fm=$(frontmatter "$f")
-    [ -n "$fm" ] || continue
+    if [ -z "$fm" ]; then
+        # No frontmatter. In provenance mode its header line may still name a writer.
+        [ "$TRAILS" = 1 ] || continue
+        fm=$(header_model "$f")
+        [ -n "$fm" ] || continue
+    fi
     others=$(( others + 1 ))
     say ""
     say "=== $f"

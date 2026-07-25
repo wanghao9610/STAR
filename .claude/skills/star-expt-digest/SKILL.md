@@ -44,17 +44,21 @@ You read and narrate; you do not execute, analyze runs, score criteria, revise p
 
 ## Workflow
 
+**One scan first.** Before Step 0, run the collector once: `bash <this skill's directory>/scripts/scan.sh`, with the project root as the working directory. In one call it prints what Steps 0, 1, 3 and 5 would otherwise open file by file — every plan's and every registered artifact's frontmatter, every run log's frontmatter plus its step table, awaiting-user checkboxes, strategy signals and the dates it carries, and a depth-1 listing of `metds/` and `wkdrs/` with the dates in the filenames. In `ledger` mode run `scripts/scan.sh --trails` instead: Step 8 needs every `model_trail` entry, each plan's `## Revision History`, and the header-line `model_id` of files that carry no frontmatter, none of which the default mode prints.
+
+The script gathers, it never judges — it knows nothing about windows, watermarks, tiers, or which filenames the registry expects, so every rule stays in this file and in `references/scope_spec.md`. Read what it prints as raw file content, and do not re-open a file it already covered. Step 2 is the deliberate exception: an `EXPT_ANALYSIS` body is content rather than metadata, so those are still read one per run. If the script is missing or fails, fall back to reading the files directly and say in your report that the scan fell back.
+
 ### Step 0: Resolve the period and the scope
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
-2. List `wkdrs/digests/EXPT_DIGEST_*.md` and read the newest one's frontmatter — its `covers.through` is the watermark, its `sources:` is the baseline for Step 4.
+2. Take the newest `wkdrs/digests/EXPT_DIGEST_*.md` from the scan's artifact frontmatter — its `covers.through` is the watermark, its `sources:` is the baseline for Step 4.
 3. Interpret the argument per `references/scope_spec.md`, first match wins: `all` → whole history; `<N>d` / `<YYYY-MM-DD>` → that window; a plan name → that node's family, time-unbounded; nothing → the incremental window `(watermark, today]`, or the whole history when no digest exists yet.
 4. State the resolved period and scope in one line before reading further, so a wrong window is caught before the work.
 5. **An empty period is a valid answer.** No run falls in it → say so, name the watermark and the newest run date, and stop. Never widen a window to find something to report.
 
 ### Step 1: Collect the in-scope runs
 
-Resolve the scope's leaves and, for each, every entry in its `exec_runs` — a leaf re-run for a second seed has several, and all of them are dated independently. Date each run by the rules in `references/scope_spec.md` (analysis report date, else the EXEC_LOG's last dated entry; never file mtime) and keep those falling in the window. In plan-family mode keep them all.
+Resolve the scope's leaves from the scan's plan frontmatter and, for each, every entry in its `exec_runs` — a leaf re-run for a second seed has several, and all of them are dated independently. Date each run by the rules in `references/scope_spec.md` (analysis report date, else the EXEC_LOG's last dated entry; never file mtime) and keep those falling in the window: the scan's listing carries the report dates in the filenames and each log's `[dates seen]` line carries the log's. In plan-family mode keep them all.
 
 Classify each kept run **report-backed** (its dir holds an `EXPT_ANALYSIS_<date>.md`; take the newest) or **provisional** (it does not).
 
@@ -64,7 +68,7 @@ Per run, from its newest `EXPT_ANALYSIS_<date>.md` only: the run verdict, the §
 
 ### Step 3: Read the provisional tier (bounded)
 
-For a run with no analysis report, read **only** its `EXEC_LOG.md`: log `status`, steps done / total, any `blocked` step, any "Awaiting user" STOP-line command, any recorded Strategy signal. If the log itself names a headline number and the file it came from, quote it with `path:line` and the `provisional` tag; if it does not, write `not measured` — never go hunting through raw logs for a number to fill the cell, and never render a figure. The bounds are in `references/digest_rubric.md`, and they are tight on purpose: this tier exists so a week's work is visible, not so the digest can grade it.
+For a run with no analysis report, use **only** its `EXEC_LOG.md` block in the scan: log `status`, steps done / total, any `blocked` step, any "Awaiting user" STOP-line command, any recorded Strategy signal. If the log itself names a headline number and the file it came from, quote it with `path:line` and the `provisional` tag; if it does not, write `not measured` — never go hunting through raw logs for a number to fill the cell, and never render a figure. The bounds are in `references/digest_rubric.md`, and they are tight on purpose: this tier exists so a week's work is visible, not so the digest can grade it.
 
 ### Step 4: Derive what moved
 
@@ -72,7 +76,7 @@ Compare this run set against the previous digest's `sources:` list: runs appeari
 
 ### Step 5: Gather the surrounding context
 
-- **Plan-tree changes in the period**: plans whose `updated` (or `finalized:`) falls in the window — created, revised, decomposed, finalized. Frontmatter only; do not diff bodies.
+- **Plan-tree changes in the period**: plans whose `updated` (or `finalized:`) falls in the window — created, revised, decomposed, finalized. The scan's plan frontmatter is the whole input; do not diff bodies.
 - **Gaps and debts**: in-scope runs with no analysis report; leaves with no `exec_runs`; leaves whose EXEC_LOG has an unchecked STOP-line command; and whether `wkdrs/results/results.md` (or the scoped `wkdrs/results/results_<slug>.md`) is older than the newest analysis report in scope.
 
 ### Step 6: Write the digest
@@ -89,7 +93,7 @@ Fill `assets/digest_template.md` (Chinese: `assets/digest_template_zh.md`; the d
 
 Roll every artifact's `model_trail` into one table — the cross-artifact view of **who wrote what**, which no single artifact can show. Mechanical, not interpretive: read, group, count, write.
 
-1. Walk the artifacts registered in conventions §8 that exist on disk. Read **frontmatter only** — `model_id`, `model_trail`, and the file's own date field. Never read a body to infer authorship.
+1. Walk the artifacts registered in conventions §8 that exist on disk, as the `--trails` scan lists them. Use **frontmatter only** — `model_id`, `model_trail`, and the file's own date field — plus the header-line `model_id` the scan prints for artifacts that carry no frontmatter. Never read a body to infer authorship.
 2. Every row is copied from a trail entry. An artifact with no `model_trail` is a **gap**, listed in §5 with why it has none (written before the field existed, or a skill that skipped it) — never assumed single-model, and never back-filled by guessing.
 3. Where an artifact carries finer per-event attribution than its trail — a plan's `## Revision History`, an `EXEC_LOG` step table's `model` column, `refs_index`'s `Model` column — prefer it: it says which *step* or *entry* a model wrote, not just which session.
 4. Fill `assets/model_ledger_template.md` (Chinese: `assets/model_ledger_template_zh.md`) into `wkdrs/digests/MODEL_LEDGER.md`. Same date rule as the digest: same day overwrites, a later day writes its own.

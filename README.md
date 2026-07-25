@@ -192,12 +192,17 @@ It registers the provenance hook in your global `~/.kimi-code/config.toml` (idem
 
 ### 2c. Optional: pre-approve the status collector
 
-`star-flow-status` is the most-run skill, so it gathers the plans and logs with one read-only script — `skills/star-flow-status/scripts/scan.sh` inside your harness's tree — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
+`star-flow-status` and `star-expt-digest` open the same plans, run logs, and reports before doing anything else, so each gathers them with one read-only script — `scripts/scan.sh` in its own directory inside your harness's tree — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
 
-Claude Code needs nothing on a fresh install — `.claude/settings.json` ships an allow rule for exactly that script and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rule there yourself:
+Claude Code needs nothing on a fresh install — `.claude/settings.json` ships allow rules for exactly those two scripts and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rules there yourself:
 
 ```json
-"permissions": { "allow": ["Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)"] }
+"permissions": {
+  "allow": [
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
+  ]
+}
 ```
 
 Elsewhere, approve it once when asked, or pre-approve it in the harness:

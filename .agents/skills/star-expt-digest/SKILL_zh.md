@@ -40,17 +40,21 @@ description: >-
 
 ## 工作流
 
+**先扫一次。** 在 Step 0 之前，以项目根目录为工作目录，运行一次收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh`。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、战略信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。
+
+脚本只收集，从不判断——它不认识时间窗、水位线、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md` 里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。Step 2 是刻意的例外：`EXPT_ANALYSIS` 正文是内容而非元数据，因此仍然逐 run 读取。若脚本缺失或执行失败，退回逐文件读取，并在报告里说明这次走了退路。
+
 ### Step 0：确定周期与范围
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. 列出 `wkdrs/digests/EXPT_DIGEST_*.md`，读最新一份的 frontmatter——其 `covers.through` 是水位线，其 `sources:` 是 Step 4 的基线。
+2. 从扫描结果的产物 frontmatter 里取最新一份 `wkdrs/digests/EXPT_DIGEST_*.md`——其 `covers.through` 是水位线，其 `sources:` 是 Step 4 的基线。
 3. 按 `references/scope_spec_zh.md` 解释参数，先匹配先生效：`all` → 全部历史；`<N>d` / `<YYYY-MM-DD>` → 该时间窗；计划名 → 该节点家族，不设时间界；无参数 → 增量窗 `(水位线, 今天]`，尚无 digest 时则为全部历史。
 4. 在继续读之前先用一行说明解析出的周期与范围，好让错误的窗口在开工前就被发现。
 5. **空周期是一个合法答案**。窗内没有任何 run → 说明这一点，点名水位线和最新的 run 日期，然后停下。绝不为了报出点什么而放宽窗口。
 
 ### Step 1：收集范围内的 run
 
-解析范围内的叶子，并对每个叶子取其 `exec_runs` 的每一项——为第二个种子重跑的叶子会有好几个 run，它们各自独立计日期。按 `references/scope_spec_zh.md` 的规则给每个 run 定日期（分析报告日期，其次 EXEC_LOG 最后一条带日期的条目；绝不用文件 mtime），保留落在窗内的。plan 模式下全部保留。
+从扫描结果的计划 frontmatter 解析范围内的叶子，并对每个叶子取其 `exec_runs` 的每一项——为第二个种子重跑的叶子会有好几个 run，它们各自独立计日期。按 `references/scope_spec_zh.md` 的规则给每个 run 定日期（分析报告日期，其次 EXEC_LOG 最后一条带日期的条目；绝不用文件 mtime），保留落在窗内的：报告日期在扫描清单的文件名里，日志日期在每份日志的 `[dates seen]` 行里。plan 模式下全部保留。
 
 把每个保留下来的 run 分类为**报告支撑**（目录里有 `EXPT_ANALYSIS_<date>.md`，取最新的一份）或**临时**（没有）。
 
@@ -60,7 +64,7 @@ description: >-
 
 ### Step 3：读临时层（有界）
 
-对没有分析报告的 run，**只**读它的 `EXEC_LOG.md`：日志 `status`、步 done / 总数、任何 `blocked` 步、任何未勾选的"待用户执行"STOP 命令、任何记录的战略信号。如果日志本身点名了一个头条数字**并且**给出了它来自哪个文件，就连 `path:line` 一起引用并打上 `provisional` 标签；如果没有，就写 `not measured`——绝不为了填上那一格去原始日志里翻找数字，也绝不出图。边界写在 `references/digest_rubric_zh.md`，而且是刻意收紧的：这一层存在是为了让一周的工作**可见**，不是为了让 digest 去给它打分。
+对没有分析报告的 run，**只**用扫描结果里它那段 `EXEC_LOG.md`：日志 `status`、步 done / 总数、任何 `blocked` 步、任何未勾选的"待用户执行"STOP 命令、任何记录的战略信号。如果日志本身点名了一个头条数字**并且**给出了它来自哪个文件，就连 `path:line` 一起引用并打上 `provisional` 标签；如果没有，就写 `not measured`——绝不为了填上那一格去原始日志里翻找数字，也绝不出图。边界写在 `references/digest_rubric_zh.md`，而且是刻意收紧的：这一层存在是为了让一周的工作**可见**，不是为了让 digest 去给它打分。
 
 ### Step 4：推导"发生了什么变化"
 
@@ -68,7 +72,7 @@ description: >-
 
 ### Step 5：收集周边语境
 
-- **期内计划树变化**：`updated`（或 `finalized:`）落在窗内的计划——新建、修订、拆解、定稿。只读 frontmatter，不 diff 正文。
+- **期内计划树变化**：`updated`（或 `finalized:`）落在窗内的计划——新建、修订、拆解、定稿。扫描结果里的计划 frontmatter 就是全部输入，不 diff 正文。
 - **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选 STOP 命令的叶子；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
 
 ### Step 6：写 digest
@@ -85,7 +89,7 @@ description: >-
 
 把每份产物的 `model_trail` 汇总成一张表——**谁写了什么**的跨产物视图，这是任何单份产物都给不出的。它是机械汇总，不是解读：读、分组、计数、写出。
 
-1. 遍历规约 §8 注册且磁盘上存在的产物。**只读 frontmatter**——`model_id`、`model_trail`，以及该文件自己的日期字段。绝不为推断作者身份去读正文。
+1. 按 `--trails` 扫描列出的清单，遍历规约 §8 注册且磁盘上存在的产物。**只用 frontmatter**——`model_id`、`model_trail`，以及该文件自己的日期字段——外加扫描为没有 frontmatter 的产物打印的头部行 `model_id`。绝不为推断作者身份去读正文。
 2. 每一行都抄自某条 trail 条目。没有 `model_trail` 的产物是**缺口**，连同"为什么没有"（写于该字段存在之前，或某个 skill 漏写）列进 §5——绝不假定它是单模型，也绝不靠猜来回填。
 3. 某份产物若带有比 trail 更细的逐事件归属——计划的 `## Revision History`、`EXEC_LOG` 步骤表的 `model` 列、`refs_index` 的 `Model` 列——优先用它：它说的是某个模型写了哪一**步**或哪一**条**，而不只是哪一次会话。
 4. 填 `assets/model_ledger_template_zh.md`（英文：`assets/model_ledger_template.md`）写入 `wkdrs/digests/MODEL_LEDGER.md`。日期规则与 digest 相同：同一天覆盖，跨天各写各的。

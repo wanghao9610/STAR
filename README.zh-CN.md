@@ -187,12 +187,17 @@ bash .kimi-code/hooks/install.sh
 
 ### 2c. 可选：为状态收集脚本预先授权
 
-`star-flow-status` 是调用最频繁的 skill，因此它用一个只读脚本一次收齐计划与日志——即所用 harness 目录下的 `skills/star-flow-status/scripts/scan.sh`——而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
+`star-flow-status` 与 `star-expt-digest` 在动手之前都要打开同一批计划、run 日志与报告，因此各自用一个只读脚本一次收齐——即所用 harness 目录下各自的 `scripts/scan.sh`——而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
 
-全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带一条只针对该脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这条规则：
+全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带只针对这两个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这些规则：
 
 ```json
-"permissions": { "allow": ["Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)"] }
+"permissions": {
+  "allow": [
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
+  ]
+}
 ```
 
 其他 harness 可在被询问时授权一次，或预先加入白名单：
