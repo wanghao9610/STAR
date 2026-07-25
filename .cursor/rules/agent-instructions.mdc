@@ -97,6 +97,15 @@ Before finishing:
 - If a check cannot be run, say why and name the remaining risk.
 - Report what was verified, not just that it "works."
 
+## 8. Research Workflow
+
+**This project uses the STAR research workflow. Its records are files, not chat history.**
+
+- Plans live in `metds/plans/`; each leaf's execution record is under `wkdrs/<run>/` (`EXEC_PLAN.md`, `EXEC_LOG.md`).
+- Run the status skill first when you do not know where things stand — it reads the plan tree and the reports on disk and names the single next action.
+- The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
+- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/` — `execs/update.sh` overwrites it.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to over complication, and clarifying questions come before implementation rather than after mistakes.

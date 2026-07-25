@@ -8,6 +8,28 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 
 本文件既是给 skill 的契约，也是给读者的说明：它写明了这套工作流会对你的仓库做什么、不会做什么。
 
+## 0. 词汇表
+
+本文件与各 `SKILL.md` 直接使用、不再解释的术语。完整定义见"定义处"一列。
+
+| 术语 | 一句话 | 定义处 |
+|---|---|---|
+| STOP 线 | skill 绝不自行越过的边界——重的、贵的、不可逆的活儿以命令形式交回用户 | §2 |
+| 叶子 | `children:` 为空或缺失的计划；只有叶子可执行 | §5.4 |
+| 策略计划 | 来自 `star-plan-coach` 的非叶子计划，带六节 `status:` 映射 | §5、§8 |
+| 完成判据 | 叶子的 §5：判定该 run 是否成功的二值测试 | 指南、各计划 §3 |
+| kill-criterion | 根计划的 §5：出现即意味着该方向不再值得追下去的结果 | `star-plan-coach` |
+| `finalized:` | 六节全 `done` 时由 coach 设置；三个 skill 以它为门 | §8 |
+| `exec_status:` | 叶子的执行状态；`done` / `skipped` / `abandoned` 为终态 | `status_spec_zh.md` |
+| `traces_to` | 子计划字段，点名它服务的父层主张 | `star-plan-decomposer` |
+| `depends_on` | 兄弟前缀，机器可读的执行顺序 | §5.5 |
+| 粗（coarse） | 大到无法执行——§3/§5 基本还是 `[TBD]`，或已定稿却从未拆解 | `status_spec_zh.md` |
+| 产物登记表 | §8 的表，列出每个 skill 的持久产物及其状态字段 | §8 |
+| `model_trail` | 每个产物上按写入会话追加的溯源列表 | §8 |
+| 参与度档位 | 一次运行决策前问多少——`low` / `medium` / `high` | §7.7 |
+| backfill | `star-proj-adopt` 的第二阶段，记录在任何计划存在之前就完成的工作 | §8 |
+| 收集型 delegate | 只读子代理，返回填好的契约、不写任何文件 | §6.4 |
+
 ## 1. Git
 
 **永不提交的 skill**——git 只读使用（`status` / `diff` / `log`）：`star-flow-status`、`star-refs-reviewer`、`star-expt-analyst`、`star-expt-digest`、`star-metd-summarize`。

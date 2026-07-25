@@ -34,6 +34,29 @@ The list reads as one pass, but the workflow is not linear: `star-proj-adopt` ru
 
 The skills persist plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
+## Contents
+
+- [1. Invoking the skills](#1-invoking-the-skills)
+- [2. Before you start](#2-before-you-start)
+- [3. `$star-proj-adopt`: adopt an in-progress project](#3-star-proj-adopt-adopt-an-in-progress-project)
+- [4. `$star-idea-storm`: converge on a research topic](#4-star-idea-storm-converge-on-a-research-topic)
+- [5. `$star-plan-coach`: write a research plan](#5-star-plan-coach-write-a-research-plan)
+- [6. `$star-refs-reviewer`: survey the related work](#6-star-refs-reviewer-survey-the-related-work)
+- [7. `$star-code-architect`: bootstrap or organize the codebase](#7-star-code-architect-bootstrap-or-organize-the-codebase)
+- [8. `$star-env-builder`: build the runtime environment](#8-star-env-builder-build-the-runtime-environment)
+- [9. `$star-plan-decomposer`: create execution sub-plans](#9-star-plan-decomposer-create-execution-sub-plans)
+- [10. `$star-plan-executor`: execute one leaf plan](#10-star-plan-executor-execute-one-leaf-plan)
+- [11. `$star-code-reviewer`: review code against conventions and the plan](#11-star-code-reviewer-review-code-against-conventions-and-the-plan)
+- [12. `$star-expt-analyst`: analyze a run's results](#12-star-expt-analyst-analyze-a-runs-results)
+- [13. `$star-expt-digest`: summarize progress over a period](#13-star-expt-digest-summarize-progress-over-a-period)
+- [14. `$star-plan-reviser`: review and revise one plan](#14-star-plan-reviser-review-and-revise-one-plan)
+- [15. `$star-flow-status`: inspect the whole flow](#15-star-flow-status-inspect-the-whole-flow)
+- [16. `$star-metd-summarize`: compile the plans into method documents](#16-star-metd-summarize-compile-the-plans-into-method-documents)
+- [17. `$star-code-release`: prepare the repository for release](#17-star-code-release-prepare-the-repository-for-release)
+- [18. End-to-end example](#18-end-to-end-example)
+- [19. Frequently asked questions](#19-frequently-asked-questions)
+- [20. Skill locations](#20-skill-locations)
+
 ## 1. Invoking the skills
 
 This guide uses Codex syntax, where a skill is invoked with `$skill-name`:

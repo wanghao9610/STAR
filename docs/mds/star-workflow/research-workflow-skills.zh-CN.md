@@ -34,6 +34,29 @@ STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
+## 目录
+
+- [1. 调用方式](#1-调用方式)
+- [2. 开始前的准备](#2-开始前的准备)
+- [3. `$star-proj-adopt`：接入一个做了一半的项目](#3-star-proj-adopt接入一个做了一半的项目)
+- [4. `$star-idea-storm`：收敛出研究选题](#4-star-idea-storm收敛出研究选题)
+- [5. `$star-plan-coach`：编写研究计划](#5-star-plan-coach编写研究计划)
+- [6. `$star-refs-reviewer`：调研相关工作](#6-star-refs-reviewer调研相关工作)
+- [7. `$star-code-architect`：奠基或整理代码库](#7-star-code-architect奠基或整理代码库)
+- [8. `$star-env-builder`：构建运行环境](#8-star-env-builder构建运行环境)
+- [9. `$star-plan-decomposer`：拆解执行子计划](#9-star-plan-decomposer拆解执行子计划)
+- [10. `$star-plan-executor`：执行一个叶子计划](#10-star-plan-executor执行一个叶子计划)
+- [11. `$star-code-reviewer`：对照规范与计划审查代码](#11-star-code-reviewer对照规范与计划审查代码)
+- [12. `$star-expt-analyst`：分析一个 run 的结果](#12-star-expt-analyst分析一个-run-的结果)
+- [13. `$star-expt-digest`：按时间轴汇总阶段进展](#13-star-expt-digest按时间轴汇总阶段进展)
+- [14. `$star-plan-reviser`：审查并修订一个计划](#14-star-plan-reviser审查并修订一个计划)
+- [15. `$star-flow-status`：查看整条流程的状态](#15-star-flow-status查看整条流程的状态)
+- [16. `$star-metd-summarize`：把计划编译成方法文档](#16-star-metd-summarize把计划编译成方法文档)
+- [17. `$star-code-release`：把仓库准备到可发布](#17-star-code-release把仓库准备到可发布)
+- [18. 一套完整的使用示例](#18-一套完整的使用示例)
+- [19. 常见问题](#19-常见问题)
+- [20. Skill 文件位置](#20-skill-文件位置)
+
 ## 1. 调用方式
 
 本文以 Codex 为例，使用 `$skill-name` 调用：

@@ -8,6 +8,28 @@ The rules every STAR research workflow skill follows. The fifteen skills — `st
 
 This file is a contract for the skills and a description for the reader: it is what the workflow will and will not do to your repository.
 
+## 0. Vocabulary
+
+Terms this file and every `SKILL.md` use without re-explaining. Each is defined in full where the "Defined in" column points.
+
+| Term | In one clause | Defined in |
+|---|---|---|
+| STOP line | the boundary a skill never crosses on its own — heavy, costly, or irreversible work is handed back as a command | §2 |
+| leaf | a plan with empty or absent `children:`; only leaves are executable | §5.4 |
+| strategy plan | a non-leaf plan from `star-plan-coach`, carrying the six-section `status:` map | §5, §8 |
+| done-criterion | a leaf's §5: the binary test that decides whether its run succeeded | the guide, §3 of each plan |
+| kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
+| `finalized:` | set by the coach when all six sections are `done`; three skills gate on it | §8 |
+| `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are terminal | `status_spec.md` |
+| `traces_to` | the sub-plan field naming the parent claim it serves | `star-plan-decomposer` |
+| `depends_on` | sibling prefixes, the machine-readable execution order | §5.5 |
+| coarse | too big to execute — §3/§5 largely `[TBD]`, or finalized but never decomposed | `status_spec.md` |
+| artifact registry | the §8 table naming every skill's durable output and its state field | §8 |
+| `model_trail` | the append-only per-write-session provenance list on every artifact | §8 |
+| involve dial | how much a run asks before deciding — `low` / `medium` / `high` | §7.7 |
+| backfill | `star-proj-adopt`'s second phase, recording work finished before any plan existed | §8 |
+| collector delegate | a read-only subagent that returns a filled contract and writes nothing | §6.4 |
+
 ## 1. Git
 
 **Skills that never commit** — git usage is read-only (`status` / `diff` / `log`): `star-flow-status`, `star-refs-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-metd-summarize`.
