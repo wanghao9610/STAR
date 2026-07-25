@@ -90,7 +90,7 @@ description: >-
 - 持久产物是 `metds/adopt.md`（规约 §8）。除此之外，写入范围仅限：`.env`、`datas/` / `inits/` / `wkdrs/` 三处软链、`execs/run.sh`、`execs/update.sh`、`execs/scpts/*.sh`、入账的 `wkdrs/<run>/` 链接及其重建版 `EXEC_LOG.md`，以及**仅在** `backfill` 阶段、获确认 leaf 上的那两个 frontmatter 字段。
 - 两个阶段都绝不触碰：`${CODE_NAME}/` 及其下一切、项目自己的启动器 / 配置 / CI、`metds/ideas/**`、`metds/refs/**`、`metds/codearc.md`、编译出的 `metds/*.md`，以及计划文件中那两个字段之外的任何部分。
 - 只用真实日期，取自系统时钟（规约 §4）——接入日期、每个入账 run 的日期、回填日期。
-- STOP 线（规约 §2）：这里没有任何训练、评测、安装或删除。勘察是只读的，验证只有 `--list` 加一次解释器版本检查。环境修复归 `/skill:star-env-builder`；运行时跑不了 python 是要上报的阻塞，不是要绕过的问题。
+- STOP 线（规约 §2）：这里没有任何训练、评测、安装或删除。勘察是只读的，验证只有 `--list` 加一次解释器版本检查。环境修复归 `/skill:star-env-builder`；运行时跑不了 python 是要上报的阻塞，不是要在这里修的问题。
 - Git：每个阶段结束时提议一次，只暂存本 skill 写过的路径——`star-proj-adopt: <phase> — <summary>`（规约 §1）。`.env` 和被忽略的目录树不入历史。运行开始时就带着未提交改动的路径绝不暂存；在一个被接入的仓库里这种情况很常见：把那些路径点名说出来，而不是绕开它们。
 
 ## 对话纪律

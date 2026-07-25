@@ -23,7 +23,7 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]` — no argument resumes from the newest digest's `covers.through` and covers everything after it; a plan name (slug / numeric prefix / filename) covers that node's family with no time bound; `7d` or `2026-07-01` sets an explicit window; `all` covers the whole history and re-seeds the series; `ledger` writes a different artifact entirely — the cross-artifact model-provenance rollup at `wkdrs/digests/MODEL_LEDGER.md` (Step 8).
 
-**Shared conventions.** Read `docs/mds$star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 

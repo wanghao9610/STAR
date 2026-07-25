@@ -19,7 +19,7 @@ description: >-
 
 调用方式：`$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。
 
-**通用规约。** 动手前先读 `docs/mds$star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 

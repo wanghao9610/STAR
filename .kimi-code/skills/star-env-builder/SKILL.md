@@ -125,4 +125,5 @@ The environment already exists; this mode installs into it and records what it i
 ## Dialogue Discipline
 
 - The gate and all situational questions are asked in the conversation — one at a time, each with a recommendation. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

@@ -130,4 +130,5 @@ The environment already exists; this mode installs into it and records what it i
 ## Dialogue Discipline
 
 - Ask one plain-text question at a time, each with a recommendation, and wait for the answer (Cursor has no structured question tool); the install plan needs an explicit approval message before anything installs.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

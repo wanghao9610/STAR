@@ -129,4 +129,5 @@ The environment already exists; this mode installs into it and records what it i
 ## Dialogue Discipline
 
 - Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — each with a recommendation, and wait for an explicit answer; the install plan needs explicit approval before anything installs.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.
