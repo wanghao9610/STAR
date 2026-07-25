@@ -191,6 +191,60 @@ for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .kimi-code/h
 done
 (( hook_errors == 0 )) && note "hooks present, executable, and registered"
 
+# 11. Heading structure matches across the three trees that share it.
+#     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
+#     section could be dropped from one tree, or reordered, and every check passed.
+#     This compares the heading sequence of each file.
+#
+#     Normalization: a heading is truncated at its first "(" or "（" and stripped of
+#     backticks, so harness vocabulary inside a heading is free to differ —
+#     "Step 4: Approval gate (`ExitPlanMode`)" and "Step 4：审批门（退出 Plan 模式）"
+#     compare equal to their siblings. What remains must match exactly.
+#
+#     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
+#     executor against the others' 9), and its headings differ in 23 files. That is a
+#     known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
+section "Heading structure (.claude / .cursor / .kimi-code)"
+STRUCT_ROOTS=(.claude/skills .cursor/skills .kimi-code/skills)
+
+norm_headings() { # $1 = file; prints one normalized heading per line
+    awk '
+        /^#/ {
+            n = 0
+            while (substr($0, n + 1, 1) == "#") n++
+            if (n < 2 || n > 4) next
+            if (substr($0, n + 1, 1) != " ") next
+            line = $0
+            p = index(line, "(")
+            q = index(line, "（")
+            if (q > 0 && (p == 0 || q < p)) p = q
+            if (p > 0) line = substr(line, 1, p - 1)
+            gsub(/`/, "", line)
+            gsub(/[ \t]+/, " ", line)
+            sub(/^ +/, "", line)
+            sub(/ +$/, "", line)
+            print tolower(line)
+        }
+    ' "$1"
+}
+
+struct_errors=0
+struct_files=0
+while IFS= read -r rel; do
+    baseline_file="${STRUCT_ROOTS[0]}/${rel}"
+    struct_files=$(( struct_files + 1 ))
+    for root in "${STRUCT_ROOTS[@]:1}"; do
+        other="${root}/${rel}"
+        [[ -f "${other}" ]] || continue   # inventory parity is check 3's job
+        if ! diff -q <(norm_headings "${baseline_file}") <(norm_headings "${other}") > /dev/null; then
+            fail "${other}: heading structure differs from ${baseline_file}:"
+            diff <(norm_headings "${baseline_file}") <(norm_headings "${other}") | sed 's/^/      /'
+            struct_errors=1
+        fi
+    done
+done < <(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | sed 's|^\./||' | sort)
+(( struct_errors == 0 )) && note "heading structure matches across the three trees (${struct_files} files)"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
