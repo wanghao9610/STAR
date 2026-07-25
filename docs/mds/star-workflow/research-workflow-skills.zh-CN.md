@@ -84,7 +84,7 @@ skill 必须显式点名。四套工具都禁用了隐式调用——三套 mark
 
 - 在 STAR 项目根目录中使用这些 skill。
 - 研究计划统一放在 `metds/plans/`。
-- 奠基代码库或执行代码前应存在本地 `.env`，并正确设置 `CODE_NAME`、`CONDA_HOME` 和 `PYTHON_HOME`。
+- 奠基代码库或执行代码前应存在本地 `.env`，并设置 `CODE_NAME`，以及 `PYTHON_HOME` 单独设置、或 `CONDA_HOME` 与 `ENV_NAME` 成对设置。
 - 可复用代码放在 `${CODE_NAME}/`，数据放在 `datas/`，模型权重放在 `inits/`，生成结果放在 `wkdrs/`。
 - 中文和英文都受支持。skill 会跟随对话语言；已有计划继续使用其 frontmatter 中 `language` 指定的正文语言。
 

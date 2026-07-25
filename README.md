@@ -198,7 +198,7 @@ python "${CODE_DIR}/train.py" \
     "$@"
 ```
 
-The launcher activates the configured Conda environment and exports these paths for experiment scripts:
+The launcher resolves the interpreter from `.env` — activating Conda when `CONDA_HOME` is set, otherwise using `PYTHON_HOME` directly — and exports these paths for experiment scripts:
 
 ```text
 ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR WORK_DIR  SCPT_DIR

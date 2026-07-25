@@ -84,7 +84,7 @@ Any skill invocation also accepts an optional `involve=low|medium|high` token th
 
 - Use these skills from the root of a STAR project.
 - Keep all research plans under `metds/plans/`.
-- Before bootstrapping the codebase or executing code, create a local `.env` and set `CODE_NAME`, `CONDA_HOME`, and `PYTHON_HOME` correctly.
+- Before bootstrapping the codebase or executing code, create a local `.env` and set `CODE_NAME`, plus either `PYTHON_HOME` alone or `CONDA_HOME` and `ENV_NAME` together.
 - Put reusable code under `${CODE_NAME}/`, data under `datas/`, model weights under `inits/`, and generated results under `wkdrs/`.
 - Both English and Chinese are supported. A skill follows the conversation language, while an existing plan continues to use the body language declared by its frontmatter `language` field.
 

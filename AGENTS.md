@@ -78,9 +78,9 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **Use the project environment. Do not guess local paths.**
 
 Before running Python, tests, or dependency checks:
-- Read the project root `.env` and use its `CONDA_HOME` and `PYTHON_HOME`.
+- Read the project root `.env` and use its `PYTHON_HOME`, or derive it from `CONDA_HOME` and `ENV_NAME` when `PYTHON_HOME` is empty.
 - If `.env` is missing, create it from `.env.example` and fill in machine-specific values first.
-- Run through that Conda environment, not system Python.
+- Run through that interpreter, not system Python. Conda is optional: when `CONDA_HOME` is empty, `PYTHON_HOME` is used directly, which is also how a plain venv is used.
 - Do not hardcode local paths.
 
 ## 7. Verification

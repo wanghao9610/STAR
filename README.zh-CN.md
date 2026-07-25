@@ -193,7 +193,7 @@ python "${CODE_DIR}/train.py" \
     "$@"
 ```
 
-启动器会激活配置好的 Conda 环境，并向实验脚本导出以下路径变量：
+启动器会依据 `.env` 解析解释器——设置了 `CONDA_HOME` 时激活 Conda，否则直接使用 `PYTHON_HOME`——并向实验脚本导出以下路径变量：
 
 ```text
 ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR WORK_DIR  SCPT_DIR
