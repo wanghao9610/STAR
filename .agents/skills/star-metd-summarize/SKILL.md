@@ -99,8 +99,8 @@ Lead with what landed, under about 400 words: per document — written / skipped
 - Reads are `metds/plans/*_plan.md`, `.env`, and the five target docs. `wkdrs/` is deliberately not read: execution reality reaches these documents through the executor's sync-back into the plans, so if a run's detail is missing here, the fix is a plan sync, not a wider read.
 - This skill runs nothing: no python, no training, no evaluation, no installs — there is no command whose output it needs.
 - Git: read-only; this skill never commits (conventions §1).
+- It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
 
 ## Dialogue Discipline
 
-- It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
 - Ask one direct question at a time at the five gates — the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs; never compile past the readiness gate without one. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.
