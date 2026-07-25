@@ -9,7 +9,7 @@ traces_to: "<本子计划执行根计划的哪一节/哪条 claim，例如 §6 �
 depends_on: []               # 必须先完成的兄弟前缀，例如 ["00", "01"]；[] = 无依赖，可独立开工
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
-model_id: <模型 id，照抄运行时本会话为你声明的那串——Claude Code 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
+model_id: <模型 id，照抄运行时本会话为你声明的那串——Cursor 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 status:
