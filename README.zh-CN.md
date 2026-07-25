@@ -109,6 +109,7 @@ HTML 页面放在 `docs/htmls/`，按主题组织的 Markdown 文档放在 `docs
 git clone https://github.com/wanghao9610/STAR
 cd STAR
 rm -rf .git
+rm -rf .github        # STAR 上游维护用的 CI，只用于校验 STAR 自身的 skill 镜像。
 cd ..
 mv STAR YOUR_PROJ_NAME
 cd YOUR_PROJ_NAME
@@ -117,6 +118,8 @@ git init
 git add .
 git commit -m "First commit."
 ```
+
+`.github/` 里是 STAR 用来保持四套 skill 镜像同步的一致性检查，服务于 STAR 自身的维护，而非你的项目：若保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套 harness 目录时失败。步骤 1b 的接入方式从不安装它。
 
 如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，并且需要将其文件直接纳入当前项目，请在执行 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 

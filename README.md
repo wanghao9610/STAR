@@ -109,6 +109,7 @@ Use this repository as a GitHub template, or clone/copy it into a new project:
 git clone https://github.com/wanghao9610/STAR
 cd STAR
 rm -rf .git
+rm -rf .github        # Upstream maintainer CI; it checks STAR's own skill mirrors.
 cd ..
 mv STAR YOUR_PROJ_NAME
 cd YOUR_PROJ_NAME
@@ -117,6 +118,8 @@ git init
 git add .
 git commit -m "First commit."
 ```
+
+`.github/` holds the consistency check STAR uses to keep its four skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a harness tree you do not use. The adopt path in step 1b never installs it.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should be included directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before running `git add .`.
 
