@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)",
+      "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

@@ -22,6 +22,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
   - [1b. 或者：接入一个已经存在的项目](#1b-或者接入一个已经存在的项目)
   - [2. 配置本地运行环境](#2-配置本地运行环境)
   - [2b. 可选：启用 Kimi 的 model-id 溯源](#2b-可选启用-kimi-的-model-id-溯源)
+  - [2c. 可选：为状态收集脚本预先授权](#2c-可选为状态收集脚本预先授权)
   - [3. 添加实验](#3-添加实验)
   - [4. 运行实验](#4-运行实验)
   - [5. 启动研究工作流](#5-启动研究工作流)
@@ -183,6 +184,26 @@ bash .kimi-code/hooks/install.sh
 ```
 
 它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 会自动注册各自的钩子。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+
+### 2c. 可选：为状态收集脚本预先授权
+
+`star-flow-status` 是调用最频繁的 skill，因此它用一个只读脚本一次收齐计划与日志——即所用 harness 目录下的 `skills/star-flow-status/scripts/scan.sh`——而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
+
+全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带一条只针对该脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这条规则：
+
+```json
+"permissions": { "allow": ["Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)"] }
+```
+
+其他 harness 可在被询问时授权一次，或预先加入白名单：
+
+| Harness | 在哪里预先授权 |
+|---|---|
+| Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
+| Cursor | 应用设置里的命令白名单 |
+| Kimi | 全局 `~/.kimi-code/config.toml`——Kimi 不读取项目级配置 |
+
+该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。
 
 ### 3. 添加实验
 

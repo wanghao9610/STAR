@@ -22,6 +22,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
   - [1b. Or adopt a project that already exists](#1b-or-adopt-a-project-that-already-exists)
   - [2. Configure the local runtime](#2-configure-the-local-runtime)
   - [2b. Optional: enable Kimi model-id provenance](#2b-optional-enable-kimi-model-id-provenance)
+  - [2c. Optional: pre-approve the status collector](#2c-optional-pre-approve-the-status-collector)
   - [3. Add an experiment](#3-add-an-experiment)
   - [4. Run it](#4-run-it)
   - [5. Start the research workflow](#5-start-the-research-workflow)
@@ -188,6 +189,26 @@ bash .kimi-code/hooks/install.sh
 ```
 
 It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor register their hooks automatically. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
+
+### 2c. Optional: pre-approve the status collector
+
+`star-flow-status` is the most-run skill, so it gathers the plans and logs with one read-only script — `skills/star-flow-status/scripts/scan.sh` inside your harness's tree — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
+
+Claude Code needs nothing on a fresh install — `.claude/settings.json` ships an allow rule for exactly that script and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rule there yourself:
+
+```json
+"permissions": { "allow": ["Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)"] }
+```
+
+Elsewhere, approve it once when asked, or pre-approve it in the harness:
+
+| Harness | Where to pre-approve |
+|---|---|
+| Codex | its approval-policy / sandbox setting (global config, not per project) |
+| Cursor | its command allowlist, in the app's settings |
+| Kimi | your global `~/.kimi-code/config.toml` — Kimi does not read project-level config |
+
+The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
 
 ### 3. Add an experiment
 
