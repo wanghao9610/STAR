@@ -116,6 +116,21 @@ dates_seen() {
     grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' "$1" | sort -u | tr '\n' ' '
 }
 
+# File selection never goes through a shell glob. An unmatched pattern is a fatal
+# error in zsh and expands to itself in POSIX sh, and either one would quietly
+# corrupt the digest — a missing wkdrs/*.md took the whole listing with it. find
+# behaves the same under every shell, and sorting its output makes the digest
+# byte-identical whatever the caller ran it with.
+find_md() {   # $1 = dir, $2 = exact depth below it, $3 = name pattern
+    [ -d "$1" ] || return 0
+    find "$1" -mindepth "$2" -maxdepth "$2" -type f -name "$3" 2>/dev/null | sort
+}
+
+find_dirs() { # $1 = dir; immediate subdirectories, trailing slash kept
+    [ -d "$1" ] || return 0
+    find "$1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|$|/|' | sort
+}
+
 if [ ! -d metds ] && [ ! -d wkdrs ]; then
     say "(no metds/ or wkdrs/ in $(pwd -P) — run this from the project root)"
     exit 0
@@ -131,8 +146,8 @@ say "# Apply your skill's own rules to what follows."
 say ""
 say "## PLANS — metds/plans/*_plan.md"
 plans=0
-for f in metds/plans/*_plan.md; do
-    [ -f "$f" ] || continue
+while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$f" ] || continue
     plans=$(( plans + 1 ))
     say ""
     say "=== $f"
@@ -149,21 +164,25 @@ for f in metds/plans/*_plan.md; do
     [ -z "$seeds" ] || say "[idea refs] $seeds"
     tbd_counts "$f"
     if [ "$TRAILS" = 1 ]; then
-        history=$(section_body "$f" '^##[ \t]*Revision History')
-        if [ -n "$history" ]; then
+        # Not named `history`: that is a special array in zsh, and assigning to it
+        # aborts the loop there while working fine everywhere else.
+        revisions=$(section_body "$f" '^##[ \t]*Revision History')
+        if [ -n "$revisions" ]; then
             say "[revision history]"
-            printf '%s\n' "$history" | grep -v '^[ \t]*$'
+            printf '%s\n' "$revisions" | grep -v '^[ \t]*$'
         fi
     fi
-done
+done <<PLANS
+$(find_md metds/plans 1 '*_plan.md')
+PLANS
 [ "$plans" -gt 0 ] || say "(none)"
 
 # ---------------------------------------------------------------- runs
 say ""
 say "## RUNS — wkdrs/*/EXEC_LOG.md"
 runs=0
-for f in wkdrs/*/EXEC_LOG.md; do
-    [ -f "$f" ] || continue
+while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$f" ] || continue
     runs=$(( runs + 1 ))
     say ""
     say "=== $f"
@@ -172,7 +191,9 @@ for f in wkdrs/*/EXEC_LOG.md; do
     say "[body: headings with their table rows, checkboxes, and signals]"
     body_index "$f"
     say "[dates seen] $(dates_seen "$f")"
-done
+done <<RUNS
+$(find_md wkdrs 2 'EXEC_LOG.md')
+RUNS
 [ "$runs" -gt 0 ] || say "(none)"
 
 # ---------------------------------------------------------------- other artifacts
@@ -184,13 +205,17 @@ done
 # widens to it, because a provenance ledger does want every note's writer.
 say ""
 say "## ARTIFACT FRONTMATTER — everything else, depth 1"
-set -- metds/*.md metds/ideas/*.md wkdrs/*/*.md
-[ "$TRAILS" = 0 ] || set -- "$@" metds/refs/*.md
+artifact_files() {
+    find_md metds 1 '*.md'
+    find_md metds/ideas 1 '*.md'
+    find_md wkdrs 2 '*.md'
+    [ "$TRAILS" = 0 ] || find_md metds/refs 1 '*.md'
+}
 others=0
-for f in "$@"; do
-    [ -f "$f" ] || continue
+while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$f" ] || continue
     case "$f" in
-        metds/plans/*|*/EXEC_LOG.md) continue ;;
+        */EXEC_LOG.md) continue ;;
     esac
     fm=$(frontmatter "$f")
     if [ -z "$fm" ]; then
@@ -203,7 +228,9 @@ for f in "$@"; do
     say ""
     say "=== $f"
     printf '%s\n' "$fm"
-done
+done <<ARTIFACTS
+$(artifact_files)
+ARTIFACTS
 [ "$others" -gt 0 ] || say "(none with frontmatter)"
 
 # ---------------------------------------------------------------- listing
@@ -211,19 +238,25 @@ done
 # self-audit line. Depth 1 only: producers' working subdirs are not registered.
 say ""
 say "## LISTING — registered areas, depth 1, *.md"
-listing=$(ls -d metds/*.md metds/ideas/*.md metds/refs/*.md metds/plans/*.md \
-                wkdrs/*.md wkdrs/*/*.md 2>/dev/null | sort)
+listing=$(
+    find_md metds 1 '*.md'
+    find_md metds/ideas 1 '*.md'
+    find_md metds/refs 1 '*.md'
+    find_md metds/plans 1 '*.md'
+    find_md wkdrs 1 '*.md'
+    find_md wkdrs 2 '*.md'
+)
 if [ -n "$listing" ]; then
-    printf '%s\n' "$listing"
+    printf '%s\n' "$listing" | sort
 else
     say "(none)"
 fi
 
 say ""
 say "## DIRS — metds/ and wkdrs/ subdirectories"
-dirs=$(ls -d metds/*/ wkdrs/*/ 2>/dev/null | sort)
+dirs=$(find_dirs metds; find_dirs wkdrs)
 if [ -n "$dirs" ]; then
-    printf '%s\n' "$dirs"
+    printf '%s\n' "$dirs" | sort
 else
     say "(none)"
 fi
