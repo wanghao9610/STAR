@@ -34,7 +34,7 @@ You **build the environment; you do not implement or refactor research code.** T
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the ladder is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), land in the two-tier layout, and are committed as a code asset once the build is verified.
-6. **Evidence-based acceptance.** The main loop runs the three smoke layers itself (`references/smoke_test_spec.md`) and reports what was verified with evidence, not that it "works" (CLAUDE.md §7). Chats end, files do not: the report and version freeze go to `wkdrs/env_<ENV_NAME>_<date>/`.
+6. **Evidence-based acceptance.** The main loop runs the three smoke layers itself (`references/smoke_test_spec.md`) and reports what was verified with evidence, not that it "works" (AGENTS.md §7). Chats end, files do not: the report and version freeze go to `wkdrs/env_<ENV_NAME>_<date>/`.
 
 ## Workflow
 

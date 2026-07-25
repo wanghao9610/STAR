@@ -14,7 +14,7 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 
 6. **State is resumable** — `wkdrs/<run>/EXEC_LOG.md` reflects true per-step status and the sub-plan frontmatter has `exec_status` + `exec_runs`, this run appended rather than replacing the last. A fresh session could resume from the log alone.
 
-7. **Changes are surgical** — code diffs trace to EXEC_PLAN steps; no unrelated refactors or "improvements" to adjacent code (CLAUDE.md §3).
+7. **Changes are surgical** — code diffs trace to EXEC_PLAN steps; no unrelated refactors or "improvements" to adjacent code (AGENTS.md §3).
 
 8. **Handoffs are runnable** — each "Awaiting user" command is complete (conda invocation, inputs, output path) and states what to bring back for verification.
 

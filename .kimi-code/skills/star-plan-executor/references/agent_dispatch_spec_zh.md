@@ -5,8 +5,8 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 subagent。主循�
 ## 交给 agent 什么
 
 - **范围**——该步目标,逐字取自 EXEC_PLAN,加上它绑定的 check。明确写:"**只**做这一步;不要推进到后续步骤。"
-- **文件**——`${CODE_NAME}/` 下要新建或修改的确切文件/模块(取自差距清单)。要求它匹配既有代码风格,只碰这一步需要的地方(CLAUDE.md §3,surgical changes)。
-- **运行环境**——走 `.env` 的 conda 环境(`CONDA_HOME` / `PYTHON_HOME`);绝不用系统 python、绝不硬编码本地路径(CLAUDE.md §6)。
+- **文件**——`${CODE_NAME}/` 下要新建或修改的确切文件/模块(取自差距清单)。要求它匹配既有代码风格,只碰这一步需要的地方(AGENTS.md §3,surgical changes)。
+- **运行环境**——走 `.env` 的 conda 环境(`CONDA_HOME` / `PYTHON_HOME`);绝不用系统 python、绝不硬编码本地路径(AGENTS.md §6)。
 - **边界**——它**只能跑轻量验证**。若它的步骤在 STOP 线上,必须**备好命令并返回,不要跑**(`stop_line_rules_zh.md`)。
 - **产出**——产物存哪(`wkdrs/<run>/…`)。
 

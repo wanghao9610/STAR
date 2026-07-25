@@ -95,7 +95,7 @@ Dispatch read-only subagents, one per concern lane — structure & dependencies,
 
 #### Step C1: Design the target architecture
 
-From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, CLAUDE.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. Keep it minimal.
+From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. Keep it minimal.
 
 #### Step C2: Gate 2 — the user approves
 
@@ -115,7 +115,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C5: Final verification
 
-`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (CLAUDE.md §7).
+`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §7).
 
 #### Step C6: Report & hand off
 

@@ -5,8 +5,8 @@ One subagent per step (or coherent step-group) in EXEC_PLAN. The main loop orche
 ## What to give the agent
 
 - **Scope** — the one step's goal, verbatim from EXEC_PLAN, plus its bound check. State: "do **ONLY** this step; do not proceed to later steps."
-- **Files** — the exact files/modules to create or modify under `${CODE_NAME}/` (from the gap list). Tell it to match existing code style and touch only what this step needs (CLAUDE.md §3, surgical changes).
-- **Runtime** — run through the `.env` conda env (`CONDA_HOME` / `PYTHON_HOME`); never system python, never hardcoded local paths (CLAUDE.md §6).
+- **Files** — the exact files/modules to create or modify under `${CODE_NAME}/` (from the gap list). Tell it to match existing code style and touch only what this step needs (AGENTS.md §3, surgical changes).
+- **Runtime** — run through the `.env` conda env (`CONDA_HOME` / `PYTHON_HOME`); never system python, never hardcoded local paths (AGENTS.md §6).
 - **Boundary** — it may run **light validation only**. If its step is on the STOP line, it must **prepare the command and return it, NOT run it** (`stop_line_rules.md`).
 - **Outputs** — where artifacts go (`wkdrs/<run>/…`).
 

@@ -19,7 +19,7 @@ How the main loop coordinates subagents for this skill. Sibling contract: the ex
 
 Give each migrator:
 
-- **Scope** — the group's migration items verbatim, plus: "do **ONLY** these items; no opportunistic edits, no renames beyond the items, no style improvements" (CLAUDE.md §3).
+- **Scope** — the group's migration items verbatim, plus: "do **ONLY** these items; no opportunistic edits, no renames beyond the items, no style improvements" (AGENTS.md §3).
 - **Files** — the explicit file list it owns (moves + import-fix sites).
 - **Mechanics** — moves/renames plus the import/path fixes they force; nothing behavioral.
 - **Runtime** — checks run through the `.env` conda env (`CONDA_HOME`/`PYTHON_HOME`); `python -m compileall -q` is always available (no deps needed).

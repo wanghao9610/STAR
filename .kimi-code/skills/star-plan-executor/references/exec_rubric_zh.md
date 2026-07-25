@@ -14,7 +14,7 @@
 
 6. **状态可续跑**——`wkdrs/<run>/EXEC_LOG.md` 反映真实的逐步状态,子计划 frontmatter 有 `exec_status` + `exec_runs`,本轮是追加而非替换上一项。全新 session 能仅凭日志续跑。
 
-7. **改动是 surgical 的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(CLAUDE.md §3)。
+7. **改动是 surgical 的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(AGENTS.md §3)。
 
 8. **交接命令可直接跑**——每条"待用户执行"命令都完整(conda 调用、输入、输出路径),并说明该带回什么以便验证。
 

@@ -28,11 +28,11 @@ description: >-
 
 ## 核心原则
 
-1. **准绳是成文的；每条 finding 都要引用。** 规则来自 CLAUDE.md（尤其 §2 简洁、§3 外科手术式修改、§5 布局、§6 运行时）、存在时的 `metds/codearc.md`（放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条 finding 携带 {file:line、违反的规则、证据、具体修法}；没有成文准绳支撑的抱怨是风格偏好，不是 finding。Rubric 见 `references/review_rubric_zh.md`。
+1. **准绳是成文的；每条 finding 都要引用。** 规则来自 AGENTS.md（尤其 §2 简洁、§3 外科手术式修改、§5 布局、§6 运行时）、存在时的 `metds/codearc.md`（放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条 finding 携带 {file:line、违反的规则、证据、具体修法}；没有成文准绳支撑的抱怨是风格偏好，不是 finding。Rubric 见 `references/review_rubric_zh.md`。
 2. **广收集，先核实再报告。** 收集可以扇出给只读 subagent，但每条要进报告的 blocker/major finding，主循环都要重读被引用的代码确认；站不住的降级或丢弃。评价一份 review 看的是 finding 的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
 3. **符合度对照磁盘打分，绝不对照日志。** 计划模式下，§3 任务映射为 `implemented` / `partial` / `missing` 并带指针，§4 交付物查磁盘，§5 完成判据查支撑机制——EXEC_LOG 的声明要对照实际代码核实，绝不采信（reviser 的纪律，应用到代码上）。
 4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出喂给 findings，不替代读代码。环境不可用 → 审查降级为纯阅读，报告里写明，并建议 `/skill:star-env-builder`。绝不改动环境。
-5. **修复是机械的、逐项批准的、不改行为的。** 报告之后提供修复 pass，只覆盖 docstring、作用域内改名、unused imports、本项目引入的死代码。每项先在对话里批准再落笔——一次一条 finding（或一批同类项），标出推荐——落笔后复检。绝不打包默批；绝不顺手"改进"相邻代码（CLAUDE.md §3）。
+5. **修复是机械的、逐项批准的、不改行为的。** 报告之后提供修复 pass，只覆盖 docstring、作用域内改名、unused imports、本项目引入的死代码。每项先在对话里批准再落笔——一次一条 finding（或一批同类项），标出推荐——落笔后复检。绝不打包默批；绝不顺手"改进"相邻代码（AGENTS.md §3）。
 6. **修复 pass 之外一律只读；STOP 线适用。** 不改计划文件，不跨代码库移动或重命名模块，绝不为"验证"完成判据而启动训练、全量评测或高成本 API 调用——这里的符合度检查是静态的。codearc.md 改名残留清单上的名称（registry 字符串、config `type:` 键、checkpoint 前缀）只标记，绝不动。
 
 ## 工作流
@@ -51,7 +51,7 @@ description: >-
 
 ### Step 1：载入准绳
 
-读 CLAUDE.md；存在时读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的准绳——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（CLAUDE.md §3）。
+读 AGENTS.md；存在时读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的准绳——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（AGENTS.md §3）。
 
 ### Step 2：廉价静态证据
 
@@ -77,7 +77,7 @@ description: >-
 
 ### Step 7：可选修复 pass（仅机械项）
 
-1. **可修**：缺失或不完整的 docstring；引用全部落在审查范围内的改名；unused imports；本项目引入的死代码（upstream 继承的死代码只报告、绝不删——CLAUDE.md §3）；rubric 标记的注释问题。**不可修**：任何触及行为、范围外被引用的签名、范围外文件或残留清单名称的改动。
+1. **可修**：缺失或不完整的 docstring；引用全部落在审查范围内的改名；unused imports；本项目引入的死代码（upstream 继承的死代码只报告、绝不删——AGENTS.md §3）；rubric 标记的注释问题。**不可修**：任何触及行为、范围外被引用的签名、范围外文件或残留清单名称的改动。
 2. 按报告顺序在对话里走可修 findings——*照建议修* / *调整后修* / *跳过*，标出推荐，一次一条。同类超过 4 条（如 12 处缺 docstring）可合并为一问：*全修* / *选哪些* / *全部跳过*。
 3. 每条批准的修复落笔后：对该文件重跑 `compileall`（有 ruff 时加跑）；改名要在 `${CODE_NAME}/` 全域 grep 旧符号，证明没有残留引用。复检失败 → 回滚该项，记 `reverted`，继续。
 4. 把修复记录追加进报告（`F<n> — applied / skipped / reverted`）。若 Step 0 时 working tree 干净，最后问一次：提交修复（只 stage 本 pass 碰过的文件；信息 `star-code-reviewer: apply review fixes — <scope>`）还是留着不提交。tree 本来就脏 → 不提交并说明。

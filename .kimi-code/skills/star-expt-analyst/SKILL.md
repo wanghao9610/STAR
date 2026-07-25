@@ -62,7 +62,7 @@ A missing §5 done-criterion is not a blocker for the analysis — it means the 
 
 Follow `references/analysis_rubric.md`:
 
-- **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (CLAUDE.md §5).
+- **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (AGENTS.md §5).
 - **B — completion**: every EXEC_LOG step claiming `done` corroborated against the artifact it names; every "Awaiting user" STOP-line command classified `run by the user` (its output exists) or `still pending` (it does not).
 
 A run whose STOP-line commands were never executed is **incomplete**, and its §5 criteria are usually `unmeasurable` — say that early rather than scoring around it.

@@ -30,11 +30,11 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ## Core Principles
 
-1. **Yardsticks are written down; every finding cites one.** The rules come from CLAUDE.md (esp. §2 simplicity, §3 surgical changes, §5 layout, §6 runtime), from `metds/codearc.md` when it exists (placement rules, naming conventions, rename residuals), and — in plan mode — from the plan's §2–§5. Every finding carries {file:line, the violated rule, evidence, a concrete fix}; a complaint no written yardstick backs is a style preference, not a finding. Rubric: `references/review_rubric.md`.
+1. **Yardsticks are written down; every finding cites one.** The rules come from AGENTS.md (esp. §2 simplicity, §3 surgical changes, §5 layout, §6 runtime), from `metds/codearc.md` when it exists (placement rules, naming conventions, rename residuals), and — in plan mode — from the plan's §2–§5. Every finding carries {file:line, the violated rule, evidence, a concrete fix}; a complaint no written yardstick backs is a style preference, not a finding. Rubric: `references/review_rubric.md`.
 2. **Find wide, verify before reporting.** Collection may fan out to read-only subagents, but the main loop re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
 3. **Conformance is scored against disk, never against logs.** In plan mode, §3 tasks map to code as `implemented` / `partial` / `missing` with pointers, §4 deliverables are checked on disk, and the §5 done-criterion is checked for supporting machinery — EXEC_LOG's claims are corroborated against actual code, never trusted (the reviser's discipline, applied to code).
 4. **Static tools are evidence, not judges — and never installed.** `python -m compileall -q` always (zero dependencies); ruff/flake8 only if already present in the `.env` env. Tool output feeds findings; it does not replace reading the code. No usable env → the review degrades to reading-only, says so in the report, and recommends `/skill:star-env-builder`. Never modify the environment.
-5. **Fixes are mechanical, individually approved, behavior-preserving.** After the report, offer a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. Each item is approved in the conversation before it is applied — one finding (or one same-type batch) per question, recommendation marked — and re-verified after application. Never bundle-approve silently; never "improve" adjacent code (CLAUDE.md §3).
+5. **Fixes are mechanical, individually approved, behavior-preserving.** After the report, offer a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. Each item is approved in the conversation before it is applied — one finding (or one same-type batch) per question, recommendation marked — and re-verified after application. Never bundle-approve silently; never "improve" adjacent code (AGENTS.md §3).
 6. **Read-only beyond the fix pass; the STOP line applies.** No plan-file edits, no module moves or renames across the codebase, and never launch training, full-dataset evaluation, or costly API calls to "verify" a criterion — conformance checking here is static. Names on codearc.md's rename-residual list (registry strings, config `type:` keys, checkpoint prefixes) are flagged, never touched.
 
 ## Workflow
@@ -53,7 +53,7 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ### Step 1: Load the yardsticks
 
-Read CLAUDE.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 residual list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which yardsticks are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (CLAUDE.md §3).
+Read AGENTS.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 residual list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which yardsticks are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (AGENTS.md §3).
 
 ### Step 2: Cheap static evidence
 
@@ -79,7 +79,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 
 ### Step 7: Optional fix pass (mechanical only)
 
-1. **Eligible**: missing or incomplete docstrings; renames whose references all live inside the reviewed scope; unused imports; dead code this project introduced (upstream-inherited dead code is reported, never deleted — CLAUDE.md §3); comment fixes the rubric flagged. **Ineligible**: anything touching behavior, signatures used outside the scope, files outside the scope, or residual-list names.
+1. **Eligible**: missing or incomplete docstrings; renames whose references all live inside the reviewed scope; unused imports; dead code this project introduced (upstream-inherited dead code is reported, never deleted — AGENTS.md §3); comment fixes the rubric flagged. **Ineligible**: anything touching behavior, signatures used outside the scope, files outside the scope, or residual-list names.
 2. Walk the eligible findings in report order in the conversation — *apply as proposed* / *apply adjusted* / *skip*, recommendation marked, one finding per question. More than 4 same-type findings (e.g. 12 missing docstrings) may be batched into one question: *apply all* / *select which* / *skip all*.
 3. Apply each approved fix; after each touched file re-run `compileall` on it (plus ruff when available), and for renames grep the old symbol across `${CODE_NAME}/` to prove no stale references remain. A failed re-check → revert that fix, mark it `reverted`, continue.
 4. Append the fix record to the report (`F<n> — applied / skipped / reverted`). If the working tree was clean at Step 0, ask one final question: commit the fixes (stage only the files this pass touched; message `star-code-reviewer: apply review fixes — <scope>`) or leave them uncommitted. With a dirty tree, leave them uncommitted and say so.
