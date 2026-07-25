@@ -69,7 +69,7 @@ List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the 
 
 Follow `references/extract_map.md`: for each target it names the plan sections that feed each document section, and how to tell which leaves are relevant — by what a leaf's §2 inputs, §3 steps, and §4 deliverables actually **name** (a `datas/` input, an `inits/` weight, a `${CODE_NAME}/` module, a benchmark), never by guessing from its title. A leaf may feed several documents. Carry every passage with its provenance `{plan file, §, updated, exec_status}` — Steps 3–5 need it for conflict resolution, the not-yet-verified marks, and the `sources:` frontmatter.
 
-**Scale**: a small tree (≤ ~15 plans) is read by the main loop. For a larger one, partition **by document target** into read-only subagents, at most 3 in parallel, each given the map, its exact file list, and the extraction contract in `extract_map.md`. Collectors extract and return; they never write files, never resolve cross-plan conflicts, and never compile `overview` (it needs the other four documents' compiled content).
+**Scale**: a small tree (≤ ~15 plans) is read by the main loop. For a larger one, partition **by document target** into read-only `Agent` subagents (`subagent_type: Explore`), at most 3 in parallel, each given the map, its exact file list, and the extraction contract in `extract_map.md`. Collectors extract and return; they never write files, never resolve cross-plan conflicts, and never compile `overview` (it needs the other four documents' compiled content).
 
 ### Step 3: Merge & resolve
 

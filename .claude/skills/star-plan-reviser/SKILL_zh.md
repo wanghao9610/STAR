@@ -26,7 +26,7 @@ description: >-
 ## 核心原则
 
 1. **证据先于观点。** 每条审查结论都带证据指针（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑廉价检查；绝不启动重实验（executor 的 STOP 线对你同样生效）。这是把项目的 Verification 规则（CLAUDE.md §7）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **收集靠分散，判断在主循环。** 证据收集委派给并行的**只读 subagent**（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器契约返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主循环。
+2. **收集靠分散，判断在主循环。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: Explore`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器契约返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主循环。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条经 AskUserQuestion 采纳 / 调整 / 跳过，一次一条，标出你的推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/star-plan-decomposer`；研究问题或方法级转向转给 `/star-plan-coach`。边界见 `references/revision_rules_zh.md`。
@@ -48,7 +48,7 @@ description: >-
 
 ### Step 2：收集证据（只读 subagent）
 
-按 `references/review_spec_zh.md` 的收集器契约并行派出只读 subagent——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、strategy signal）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 廉价 sanity 检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否落地、与日志声称的改动是否一致）。
+按 `references/review_spec_zh.md` 的收集器契约并行派出只读 `Agent` subagent（`subagent_type: Explore`）——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、strategy signal）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 廉价 sanity 检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否落地、与日志声称的改动是否一致）。
 
 分歧在主循环交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的廉价检查由你亲自复跑；重的一律不跑。
 

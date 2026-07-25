@@ -69,7 +69,7 @@ Rank candidates by the core-paper criteria in `references/refs_rubric.md` and pr
 
 Per confirmed paper: fetch the paper page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page), read at minimum the abstract, intro, method, and main results table, fill `assets/ref_analysis_template.md` (Chinese: `assets/ref_analysis_template_zh.md`), and **write it immediately** to `metds/refs/<ABBREV>.md`. `ABBREV` is the paper's own abbreviation (`CLIP.md`, `DETR.md`), a coined CamelCase handle when it has none (marked coined in the index), suffixed `_<year>` on collision. Set `depth:` to what you actually read, honestly.
 
-Reading may fan out to read-only subagents, at most 3 in parallel, one paper each, each returning a filled template. The main loop writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
+Reading may fan out to read-only `Agent` subagents (`subagent_type: Explore`), at most 3 in parallel, one paper each, each returning a filled template. The main loop writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
 
 ### Step 4: Expand to ≥50
 

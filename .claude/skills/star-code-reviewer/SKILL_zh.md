@@ -29,7 +29,7 @@ description: >-
 ## 核心原则
 
 1. **准绳是成文的；每条 finding 都要引用。** 规则来自 CLAUDE.md（尤其 §2 简洁、§3 外科手术式修改、§5 布局、§6 运行时）、存在时的 `metds/codearc.md`（放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条 finding 携带 {file:line、违反的规则、证据、具体修法}；没有成文准绳支撑的抱怨是风格偏好，不是 finding。Rubric 见 `references/review_rubric_zh.md`。
-2. **广收集，先核实再报告。** 收集可以扇出给只读 subagent，但每条要进报告的 blocker/major finding，主循环都要重读被引用的代码确认；站不住的降级或丢弃。评价一份 review 看的是 finding 的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
+2. **广收集，先核实再报告。** 收集可以扇出给只读 `Agent` subagent（`subagent_type: Explore`），但每条要进报告的 blocker/major finding，主循环都要重读被引用的代码确认；站不住的降级或丢弃。评价一份 review 看的是 finding 的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
 3. **符合度对照磁盘打分，绝不对照日志。** 计划模式下，§3 任务映射为 `implemented` / `partial` / `missing` 并带指针，§4 交付物查磁盘，§5 完成判据查支撑机制——EXEC_LOG 的声明要对照实际代码核实，绝不采信（reviser 的纪律，应用到代码上）。
 4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出喂给 findings，不替代读代码。环境不可用 → 审查降级为纯阅读，报告里写明，并建议 `/star-env-builder`。绝不改动环境。
 5. **修复是机械的、逐项批准的、不改行为的。** 报告之后提供修复 pass，只覆盖 docstring、作用域内改名、unused imports、本项目引入的死代码。每项先经 AskUserQuestion 批准再落笔——一次一条 finding（或一批同类项），标出推荐——落笔后复检。绝不打包默批；绝不顺手"改进"相邻代码（CLAUDE.md §3）。
@@ -60,7 +60,7 @@ description: >-
 ### Step 3：收集 findings
 
 - **小范围**（≤ 约 20 个文件——diff 模式的审查通常都是）：主循环逐个读文件，直接应用 `references/review_rubric_zh.md`。
-- **较大范围**：按包/目录切分给只读 subagent，至多 3 个并行，每个拿到 rubric、准绳摘要和确切的文件清单，按 `review_rubric_zh.md` 的结构化 finding 契约返回。收集器绝不写文件、绝不越出自己的清单、绝不给整体结论打分。
+- **较大范围**：按包/目录切分给只读 `Agent` subagent（`subagent_type: Explore`），至多 3 个并行，每个拿到 rubric、准绳摘要和确切的文件清单，按 `review_rubric_zh.md` 的结构化 finding 契约返回。收集器绝不写文件、绝不越出自己的清单、绝不给整体结论打分。
 - **计划模式加维度 F**（主循环做，不交收集器——它需要计划上下文）：§3 任务到代码的映射、§4 交付物在盘核对、§5 支撑检查、EXEC_LOG 与代码交叉核对。
 
 ### Step 4：核实

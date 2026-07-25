@@ -5,8 +5,8 @@ How the main loop coordinates subagents for this skill. Sibling contract: the ex
 ## Roles
 
 - **Main loop (the architect)** — plans, runs the gates, partitions work, re-runs checks, commits checkpoints, rolls back failures.
-- **Surveyors** — read-only lanes (`survey_spec.md`).
-- **Migrators** — one per migration group, write access limited to their group's files.
+- **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`), one lane each (`survey_spec.md`).
+- **Migrators** — `Agent` subagents (`subagent_type: general-purpose`), one per migration group, write access limited to their group's files.
 
 ## Partitioning migrations
 

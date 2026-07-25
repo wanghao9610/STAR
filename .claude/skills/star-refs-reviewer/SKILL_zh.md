@@ -64,7 +64,7 @@ description: >-
 
 逐篇：抓论文页（arXiv abs/HTML、ACL Anthology、CVF open access 或项目主页），至少读摘要、intro、方法和主结果表，填 `assets/ref_analysis_template_zh.md`（英文：`assets/ref_analysis_template.md`），**立刻落盘**到 `metds/refs/<缩写>.md`。`<缩写>` 用论文自己的缩写（`CLIP.md`、`DETR.md`），没有就自拟一个紧凑的 CamelCase 名（在 index 里标注为自拟），冲突时加 `_<年份>` 后缀。`depth:` 如实写你真正读到的深度。
 
-精读可以扇出给只读 subagent，至多 3 个并行，一个 subagent 一篇，各自返回填好的模板。主循环负责写文件并亲自写 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。
+精读可以扇出给只读 `Agent` subagent（`subagent_type: Explore`），至多 3 个并行，一个 subagent 一篇，各自返回填好的模板。主循环负责写文件并亲自写 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。
 
 ### Step 4：扩展到 ≥50
 

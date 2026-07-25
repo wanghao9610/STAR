@@ -33,7 +33,7 @@ description: >-
 2. **两道门，门间自主。**门 1：用户从打分候选中选定参考库。门 2：用户批准目标架构与迁移表。两门之间和之后的工作自主推进、有界重试。门没有覆盖的事不做。
 3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项落地——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
-5. **主循环编排与复核，subagent 执行。**勘察与迁移交给职责狭窄的 subagent，文件所有权互不相交，返回结构化结果。主循环亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。契约见 `references/orchestration_spec_zh.md`。
+5. **主循环编排与复核，`Agent` subagent 执行。**勘察与迁移交给职责狭窄的 `Agent` subagent（`subagent_type: general-purpose`；只读勘察用 `Explore`），文件所有权互不相交，返回结构化结果。主循环亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。契约见 `references/orchestration_spec_zh.md`。
 6. **单一规范，薄指针。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划组件落位映射、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行的摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻指针。规范内容绝不复制成多份。
 
 ## 工作流
@@ -88,7 +88,7 @@ description: >-
 
 #### Step B1：勘察
 
-派发只读 subagent，一个关注面一条线——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——最多 3 个并行，各自按 `references/survey_spec_zh.md` 返回结构化报告。主循环汇总成**仓库地图**：模块清单、依赖方向、排序后的坏味道（只收会促成迁移项的坏味道）。
+派发只读 `Agent` subagent（`subagent_type: Explore`），一个关注面一条线——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——最多 3 个并行，各自按 `references/survey_spec_zh.md` 返回结构化报告。主循环汇总成**仓库地图**：模块清单、依赖方向、排序后的坏味道（只收会促成迁移项的坏味道）。
 
 ### 汇合：架构、迁移、规范
 
@@ -102,7 +102,7 @@ description: >-
 
 #### Step C3：执行迁移
 
-把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 subagent，契约为：范围原文照录（"只做这些条目"）、明确文件清单、只做机械移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主循环亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息喂回重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
+把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: general-purpose`），契约为：范围原文照录（"只做这些条目"）、明确文件清单、只做机械移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主循环亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息喂回重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
 #### Step C4：落地规范
 

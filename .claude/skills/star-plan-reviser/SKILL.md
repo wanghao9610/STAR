@@ -30,7 +30,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 ## Core Principles
 
 1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies to you too). This applies the project's Verification rule (CLAUDE.md §7) to the plan itself. Rules: `references/review_spec.md`.
-2. **Collect wide, judge in the main loop.** Evidence gathering is delegated to parallel **read-only subagents** (execution log / artifacts / code state), each returning the structured collector contract in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main loop.
+2. **Collect wide, judge in the main loop.** Evidence gathering is delegated to parallel **read-only `Agent` subagents** (`subagent_type: Explore`) (execution log / artifacts / code state), each returning the structured collector contract in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main loop.
 3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped via AskUserQuestion, one candidate per call, with your recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
 5. **Stay inside the family's write discipline.** Never renumber prefixes; never touch `EXEC_PLAN.md` / `EXEC_LOG.md` (the executor's); structural re-shaping (add/remove sub-plans, redraw the dependency graph) routes to `/star-plan-decomposer`; research-question or method pivots route to `/star-plan-coach`. Boundaries: `references/revision_rules.md`.
@@ -52,7 +52,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ### Step 2: Collect evidence (read-only subagents)
 
-Dispatch parallel read-only subagents per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, strategy signals), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
+Dispatch parallel read-only `Agent` subagents (`subagent_type: Explore`) per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, strategy signals), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
 
 Cross-check disagreements in the main loop — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks yourself; never anything heavy.
 

@@ -5,8 +5,8 @@
 ## 角色
 
 - **主循环（架构师）**——制定方案、执行两道门、划分工作、亲自重跑检查、打提交检查点、回滚失败。
-- **勘察者**——只读分线（`survey_spec_zh.md`）。
-- **迁移者**——每组一个，写权限仅限本组文件。
+- **勘察者**——只读 `Agent` subagent（`subagent_type: Explore`），一线一个（`survey_spec_zh.md`）。
+- **迁移者**——`Agent` subagent（`subagent_type: general-purpose`），每组一个，写权限仅限本组文件。
 
 ## 迁移分组
 

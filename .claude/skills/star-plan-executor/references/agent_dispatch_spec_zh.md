@@ -1,6 +1,6 @@
 # Agent 派发契约
 
-EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 subagent。主循环负责编排与验证;agent 只做这一步的改/跑。让 agent 保持窄,以便失败可定位、上下文短。
+EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `Agent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`）。主循环负责编排与验证;agent 只做这一步的改/跑。让 agent 保持窄,以便失败可定位、上下文短。
 
 ## 交给 agent 什么
 

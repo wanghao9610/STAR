@@ -37,7 +37,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 2. **Two gates; autonomous between them.** Gate 1: the user picks the reference repo from a scored shortlist. Gate 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a gate did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
 4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into a residual list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
-5. **The main loop orchestrates and verifies; subagents execute.** Surveys and migrations are delegated to narrow subagents with disjoint file ownership and structured returns. The main loop re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
+5. **The main loop orchestrates and verifies; subagents execute.** Surveys and migrations are delegated to narrow `Agent` subagents (`subagent_type: general-purpose`) with disjoint file ownership and structured returns. The main loop re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
 6. **One spec, thin pointers.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, rename residuals. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
 
 ## Workflow
@@ -92,7 +92,7 @@ Complete the repo map for Step C1 with a single read-only pass (`references/surv
 
 #### Step B1: Survey
 
-Dispatch read-only subagents, one per concern lane — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — at most 3 in parallel, each returning the structured report in `references/survey_spec.md`. The main loop merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
+Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per concern lane — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — at most 3 in parallel, each returning the structured report in `references/survey_spec.md`. The main loop merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
 
 ### Converged: architecture, migration, specs
 
@@ -106,7 +106,7 @@ Show the architecture summary and the numbered migration table as normal text. T
 
 #### Step C3: Execute migrations
 
-Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run ≤3 in parallel, dependent groups serially. Dispatch one subagent per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main loop re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
+Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run ≤3 in parallel, dependent groups serially. Dispatch one `Agent` subagent (`subagent_type: general-purpose`) per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main loop re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
 
 #### Step C4: Write the specs
 

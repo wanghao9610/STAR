@@ -79,7 +79,7 @@ Follow `references/orient_checklist.md`:
 
 For each step in EXEC_PLAN, in order:
 
-1. Dispatch a subagent with the contract in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, how to run via conda, the bound check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
+1. Dispatch an `Agent` subagent (`subagent_type: general-purpose`, or `Explore` when the step is read-only orientation) with the contract in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, how to run via conda, the bound check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
 2. When it returns, **the main loop re-runs the bound check** to confirm (do not trust a self-reported pass without evidence). Pass → checkpoint to `EXEC_LOG.md`, update the sub-plan's lightweight status, and — when the gate approved checkpointing — commit this step's files. Fail → diagnose, bounded retry (≤2) with the failure fed back; still failing → mark the step `blocked` and stop with the log.
 3. **If the step is on the STOP line** (heavy experiment) → do **not** dispatch it to run; write the prepared command into EXEC_LOG's "Awaiting user" area and stop, handing it to the user.
 4. If a retry or blocker changes the approach at the sub-plan's granularity (a step added/dropped/replaced, a deliverable path or done-criterion shifted), record a delta row under EXEC_LOG's "Pending amendments" and continue — these sync at Step 6, not mid-run.

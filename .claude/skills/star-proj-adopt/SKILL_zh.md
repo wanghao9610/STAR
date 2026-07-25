@@ -61,7 +61,7 @@ description: >-
 
 #### Step S4：建立工作清单
 
-从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `/star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。勘察可以扇出只读的收集子代理（规约 §6），至多 3 个，各自返回填好的清单块；主循环负责合并，并独占全部判断。
+从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `/star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。勘察可以扇出只读的收集`Agent` 子代理（`subagent_type: Explore`）（规约 §6），至多 3 个，各自返回填好的清单块；主循环负责合并，并独占全部判断。
 
 #### Step S5：门 2——把值得留存的历史 run 入账
 

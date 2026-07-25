@@ -1,6 +1,6 @@
 # Agent Dispatch Contract
 
-One subagent per step (or coherent step-group) in EXEC_PLAN. The main loop orchestrates and verifies; the agent does the edit/run for exactly one step. Keep agents narrow so failures localize and contexts stay short.
+One `Agent` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: general-purpose`; use `Explore` only for read-only orientation. The main loop orchestrates and verifies; the agent does the edit/run for exactly one step. Keep agents narrow so failures localize and contexts stay short.
 
 ## What to give the agent
 

@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Lanes
 
-One subagent per lane, at most 3 in parallel (they are read-only, so parallelism is safe):
+One `Agent` subagent (`subagent_type: Explore`) per lane, at most 3 in parallel (they are read-only, so parallelism is safe):
 
 | Lane | Looks at | Key questions |
 |---|---|---|

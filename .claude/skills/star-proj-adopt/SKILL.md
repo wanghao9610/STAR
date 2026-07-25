@@ -65,7 +65,7 @@ In this order, each step reported as done or skipped-because-it-exists:
 
 #### Step S4: Build the work inventory
 
-From git log, the entrypoints, the output directories, and the README, assemble the inventory defined in `references/adopt_spec.md`: one row per identifiable unit of finished or in-flight work — what it is, its state (`built` / `run` / `concluded` / `abandoned`), and its evidence paths. This is the seed `/star-plan-coach` reads; it is a description of the repository, not a plan (Principle 5). Probing may fan out to read-only collector subagents (conventions §6), at most 3, each returning a filled inventory block; the main loop merges and owns every judgment.
+From git log, the entrypoints, the output directories, and the README, assemble the inventory defined in `references/adopt_spec.md`: one row per identifiable unit of finished or in-flight work — what it is, its state (`built` / `run` / `concluded` / `abandoned`), and its evidence paths. This is the seed `/star-plan-coach` reads; it is a description of the repository, not a plan (Principle 5). Probing may fan out to read-only collector `Agent` subagents (`subagent_type: Explore`) (conventions §6), at most 3, each returning a filled inventory block; the main loop merges and owns every judgment.
 
 #### Step S5: Gate 2 — ledger the historical runs worth keeping
 

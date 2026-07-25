@@ -73,7 +73,7 @@ description: >-
 
 对 EXEC_PLAN 的每个步骤,依次:
 
-1. 按 `references/agent_dispatch_spec_zh.md` 的契约派一个 subagent:本步目标、要碰的确切文件、如何走 conda 运行、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
+1. 按 `references/agent_dispatch_spec_zh.md` 的契约派一个 `Agent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`）:本步目标、要碰的确切文件、如何走 conda 运行、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
 2. agent 返回后,**主循环重跑绑定的 check** 确认(没有证据不轻信自报通过)。通过 → checkpoint 到 `EXEC_LOG.md`、更新子计划轻量状态,并在门批准了 checkpoint 时提交本步触碰的文件。失败 → 诊断,有限重试(≤2)并把失败喂回;仍失败 → 该步标 `blocked`,带日志停下。
 3. **若该步在 STOP 线上**(重实验)→ **不**派它执行;把备好的命令写进 EXEC_LOG 的"待用户执行"区,停下交回用户。
 4. 若重试或 blocker 导致做法在子计划粒度上变了(步骤增/删/替换、产出路径或完成判据移位),在 EXEC_LOG 的"待同步修正"区记一行 delta 后继续——这些留到 Step 6 同步,不在执行中途处理。
