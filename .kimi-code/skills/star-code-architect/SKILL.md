@@ -43,7 +43,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which in the conversation).
-3. If there is no plan and no URL, ask in the conversation: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
+3. If there is no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/skill:star-proj-adopt` routes in from. Otherwise ask in the conversation: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
 5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (bootstrap)**. Real code present → **Branch B (organize)**. Only a handful of stray scripts → ask whether to bootstrap around them or organize what exists.
 

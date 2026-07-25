@@ -42,7 +42,7 @@ description: >-
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用对话提问问选哪份）。
-3. 既无计划也无 URL 时，用对话提问问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题据此检索*。
+3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `/skill:star-proj-adopt` 转介进来的状态。否则在对话里问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划* 两个选项。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（奠基）**；已有真实代码 → **分支 B（整理）**；只有零散几个脚本 → 询问是围绕它们奠基还是整理现状。
 

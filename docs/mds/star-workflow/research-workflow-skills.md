@@ -1047,7 +1047,7 @@ After confirming milestone-based decomposition, the skill may produce:
 00_mvp-3way-ablation_plan.md
 01_core-method-pipeline_plan.md
 02_full-experiments_plan.md
-03_writing-submission_plan.md
+03_scaling-and-robustness_plan.md
 ```
 
 Decomposing **after** Steps 2–3 is what lets each leaf's §2 name real modules under `${CODE_NAME}/` and a runtime that exists, instead of paths it guesses. Decomposing first also works — the executor will route you back — but the leaves come out vaguer.
@@ -1086,7 +1086,7 @@ Once the loop has closed — every leaf executed, every strategy plan finalized,
 $star-metd-summarize
 ```
 
-This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness gate enforces the timing: while any leaf is unexecuted or any strategy plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
+This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness gate enforces the timing: while any leaf is unexecuted or any strategy plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. The commonest reason the gate stays shut is a writing or submission leaf: it cannot be executed until the method documents exist, and the documents wait on it. Keep write-up out of the plan tree, or mark that leaf `skipped` before compiling. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
 
 ### Step 9: prepare the repository for release
 

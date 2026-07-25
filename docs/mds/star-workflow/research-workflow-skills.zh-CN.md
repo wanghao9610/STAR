@@ -899,7 +899,7 @@ $star-metd-summarize
 
 ### 它会做什么
 
-1. 先过就绪门槛：除非每个策略计划都带 `finalized:`、每个叶子都是 `exec_status: done`，否则在编译任何内容之前就停下，点名未完成项并路由——明知未完成仍编译草稿，必须由用户显式选择，绝非默认；
+1. 先过就绪门槛：除非每个策略计划都带 `finalized:`、每个叶子都是 `exec_status: done`，否则在编译任何内容之前就停下，点名未完成项并路由——明知未完成仍编译草稿，必须由用户显式选择，绝非默认。门槛卡住最常见的原因是写作或投稿类叶子：方法文档没出来它就没法执行，而文档又在等它。要么别把写作放进计划树，要么在编译前把该叶子标成 `skipped`；
 2. 和 status skill 一样，按各计划的 `parent:` 重建计划树；
 3. 依成文的映射抽取每份文档所需的内容——overview 取根计划的 §1–§3 与 §6，dataset 取 §4 的数据选择加每个叶子的 `datas/` 输入，framework 取 §3 技术路线加建模类叶子及其 `${CODE_NAME}/` 路径，training 取 §3 策略加 `inits/` 与超参数，evaluation 取 §4 的 benchmark、baseline、指标与消融设计加 §5 kill-criteria；
 4. 按方法本身的轴线而非计划的轴线合并，冲突时叶子压父计划、新压旧，谁都不占优时用 ⚠ 并列写出两处来源；
@@ -1047,7 +1047,7 @@ $star-plan-decomposer open-vocab-det-seg
 00_mvp-3way-ablation_plan.md
 01_core-method-pipeline_plan.md
 02_full-experiments_plan.md
-03_writing-submission_plan.md
+03_scaling-and-robustness_plan.md
 ```
 
 放在第二、三步**之后**再拆，才能让每个叶子的 §2 点到 `${CODE_NAME}/` 下真实存在的模块和一个已经跑得起来的运行时，而不是靠猜的路径。先拆也能跑通——executor 会把你路由回来——只是叶子会写得更含糊。

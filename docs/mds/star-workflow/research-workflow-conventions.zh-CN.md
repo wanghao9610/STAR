@@ -68,7 +68,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 
 1. **项目根的 `.env` 是 `CODE_NAME`、`ENV_NAME`、`CONDA_HOME`、`PYTHON_HOME` 的唯一来源。** 绝不猜本地路径、绝不硬编码、绝不凭别的项目的记忆填。
 2. **以 `PYTHON_HOME` 为准。** 已设置 → 按其取值使用，`CONDA_HOME` 与 `ENV_NAME` 可留空，此时不走 conda、直接调用该解释器。留空 → 由 `$CONDA_HOME/envs/$ENV_NAME` 推导，此时两者都必须设置。两者都没有 → 这是要上报的 blocker，不是可以编造的值。
-3. **`.env` 缺失** → 从 `.env.example` 创建，请用户填好机器相关的值，在此之前停下。绝不为了继续跑而编造一个值。
+3. **`.env` 缺失** → 对需要解释器的 skill：从 `.env.example` 创建，请用户填好机器相关的值，在此之前停下。绝不为了继续跑而编造一个值。**这一条只约束即将真正跑东西的 skill。** 不需要运行时的 skill——状态汇报、计划编辑、文献调研——记下缺失、把 `INVOLVE` 当作 `medium`（§7.7）处理，然后继续；只读 skill 绝不创建该文件，因为它自己的写入边界优先于本条。全新克隆本就没有 `.env`，而读一棵计划树并不需要它。
 4. **shell 是无状态的。** `source activate` 活不到下一条命令。把解释器一次性解析成绝对路径——`$PYTHON_HOME/bin/python`，见 §3.2——之后每条命令都走它。绝不用系统 python。
 5. **只有 `star-env-builder` 创建、修复或改动环境。** 其他 skill 永不安装或升级任何东西。缺失的工具（ruff、matplotlib、bibtexparser、pandas）意味着**检查降级**：没有它照跑，在报告里说明，并路由到 `star-env-builder`。为了跑完自己的检查而去装它，超出边界。
 6. 跑不了 python 的环境是**要上报的 blocker**，不是绕过去的问题。
