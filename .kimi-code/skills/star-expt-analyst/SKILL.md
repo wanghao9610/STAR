@@ -7,7 +7,7 @@ description: >-
   directory; a wkdrs/<run>/ path back-resolves to its plan; no argument lists the runs on disk and asks.
   Use when the user runs /skill:star-expt-analyst, or wants to analyze / interpret experiment results,
   outputs or artifacts, check whether a run met its expectations or done-criteria, read training logs or
-  metrics, or find out what a finished run means for the plan. Bilingual (en/zh).
+  metrics, or find out what a finished run means for the plan. Read-only otherwise: never edits plans, exec_status, or EXEC_LOG; `watch` gives a chat-only health read of a still-running run. Bilingual (en/zh).
 ---
 
 # Research Experiment Analyst — results audit

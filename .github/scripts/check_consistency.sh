@@ -245,6 +245,31 @@ while IFS= read -r rel; do
 done < <(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | sed 's|^\./||' | sort)
 (( struct_errors == 0 )) && note "heading structure matches across the three trees (${struct_files} files)"
 
+# 12. Kimi frontmatter descriptions stay inside their length budget.
+#     Every .kimi-code description is at or under 1041 bytes while the other
+#     trees run to 1989, and the short ones end in complete sentences — they were
+#     condensed on purpose, not truncated. The budget was undocumented, so a
+#     later edit could silently exceed it. See .github/CONTRIBUTING.md.
+#     SKILL.md only: it is the registered manifest whose description the platform
+#     surfaces. SKILL_zh.md is loaded as a resource and runs past 1300 chars.
+section "Kimi description budget (<= ${KIMI_DESC_MAX:=1050} bytes)"
+desc_errors=0
+while IFS= read -r manifest; do
+    len="$(awk '
+        NR == 1 && /^---[ \t]*$/ { fm = 1; next }
+        fm && /^---[ \t]*$/ { exit }
+        fm && /^description:/ { grab = 1; sub(/^description:[ \t]*/, ""); }
+        fm && grab && /^[A-Za-z_-]+:/ && !/^description:/ { exit }
+        grab { gsub(/^[ \t]+|[ \t]+$/, ""); if (length($0)) body = body (length(body) ? " " : "") $0 }
+        END { print length(body) }
+    ' "${manifest}")"
+    if (( len > KIMI_DESC_MAX )); then
+        fail "${manifest}: description is ${len} bytes, over the ${KIMI_DESC_MAX}-byte Kimi budget"
+        desc_errors=1
+    fi
+done < <(find .kimi-code/skills -name 'SKILL.md' | sort)
+(( desc_errors == 0 )) && note "all Kimi descriptions within ${KIMI_DESC_MAX} bytes"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

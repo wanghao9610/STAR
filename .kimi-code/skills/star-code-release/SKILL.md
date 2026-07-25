@@ -10,7 +10,7 @@ description: >-
   Polishes only the release surface (promoted files, entrypoints, configs, the public API the README
   shows) with individually approved behavior-preserving edits. Use when the user runs
   /skill:star-code-release, wants to open-source / release / publish the project, wants a README for the
-  repository, or wants the code scattered across tasks/ gathered into the codebase. Bilingual (en/zh).
+  repository, or wants the code scattered across tasks/ gathered into the codebase. It prepares a release and never publishes one: no push, no repo creation, no tag, no weight upload. Bilingual (en/zh).
 ---
 
 # Research Code Release — consolidate, polish, document
