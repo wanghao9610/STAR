@@ -765,7 +765,7 @@
 <section id="structure">
   <div class="wrap">
     <p class="kicker reveal">Project structure</p>
-    <h2 class="reveal">Seven directories.<br>Zero guessing.</h2>
+    <h2 class="reveal">Eight directories.<br>Zero guessing.</h2>
     <p class="section-lead reveal">
       The abbreviated names are deliberate: short to type, unambiguous to search,
       and identical across every STAR project you will ever open.
@@ -890,7 +890,7 @@
 <section id="quickstart">
   <div class="wrap">
     <p class="kicker reveal">Quick start</p>
-    <h2 class="reveal">Four commands to liftoff.</h2>
+    <h2 class="reveal">Six commands to liftoff.</h2>
     <p class="section-lead reveal">
       Start fresh from the template — or run <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>
       inside an existing repository and STAR installs itself around your work without moving a single file.
@@ -902,15 +902,17 @@
       </div>
       <div class="term-body"><span class="c"># 1 · Start a project from the STAR template</span>
 <span class="p">❯</span> <span class="cmd">git clone https://github.com/wanghao9610/STAR my-research <span class="flag">&amp;&amp;</span> cd my-research</span>
+<span class="p">❯</span> <span class="cmd">rm <span class="flag">-rf</span> .git .github <span class="flag">&amp;&amp;</span> git init</span>   <span class="c"># drop STAR's history and its maintainer CI</span>
 
-<span class="c"># 2 · Configure the local runtime (machine paths stay out of Git)</span>
-<span class="p">❯</span> <span class="cmd">cp .env.example .env</span>   <span class="c"># set CODE_NAME, CONDA_HOME / PYTHON_HOME…</span>
+<span class="c"># 2 · Name your source package, then configure the local runtime</span>
+<span class="p">❯</span> <span class="cmd">mv code my_pkg</span>
+<span class="p">❯</span> <span class="cmd">cp .env.example .env <span class="flag">&amp;&amp;</span> <span class="str">$EDITOR</span> .env</span>   <span class="c"># CODE_NAME=my_pkg, then PYTHON_HOME (or CONDA_HOME + ENV_NAME)</span>
 
 <span class="c"># 3 · See what's runnable</span>
 <span class="p">❯</span> <span class="cmd">bash execs/run.sh <span class="flag">--list</span></span>
 
-<span class="c"># 4 · Launch an experiment through the single entrypoint</span>
-<span class="p">❯</span> <span class="cmd">bash execs/run.sh 00_exp <span class="flag">--config</span> <span class="str">config.yaml</span></span>
+<span class="c"># 4 · Launch through the single entrypoint — 00_exp prints the resolved paths</span>
+<span class="p">❯</span> <span class="cmd">bash execs/run.sh 00_exp</span>
 <span class="p">❯</span> <span class="cursor-blink"></span></div>
     </div>
   </div>
