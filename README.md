@@ -24,6 +24,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
   - [2b. Optional: enable Kimi model-id provenance](#2b-optional-enable-kimi-model-id-provenance)
   - [3. Add an experiment](#3-add-an-experiment)
   - [4. Run it](#4-run-it)
+  - [5. Start the research workflow](#5-start-the-research-workflow)
 - [Research workflow](#research-workflow)
   - [Model selection](#model-selection)
 - [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides)
@@ -218,6 +219,19 @@ bash execs/run.sh 00_exp --config config.yaml
 ```
 
 The stock `00_exp.sh` runs no science: it prints the interpreter the launcher resolved and the six exported paths, so a fresh checkout has something that visibly succeeds and you can confirm `.env` is wired correctly. Replace it with your first real experiment when starting a project from STAR. Run names and output directories should distinguish tasks, experiments, or repetitions. Generated artifacts belong under `wkdrs/<run-name>/`.
+
+### 5. Start the research workflow
+
+The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` are useful without any of the skills. To pick up the workflow, start at whichever of these describes you, using your tool's prefix from [Research workflow](#research-workflow):
+
+| Where you are | Start with |
+| --- | --- |
+| An interest, but no defined topic yet | `star-idea-storm <your interest>` |
+| A topic in hand, ready to plan | `star-plan-coach <your topic>` |
+| A project you just adopted with step 1b | `star-proj-adopt` |
+| Returning to a project already under way | `star-flow-status` |
+
+`star-flow-status` is the one to remember: it reads the plan tree and the reports on disk and names the single next action, so you never have to recall where you left off.
 
 ## Research workflow
 
