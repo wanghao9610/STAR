@@ -131,13 +131,16 @@ if [[ "${ADOPT}" == true ]]; then
         "${HOOK_TREES[@]}"
         ".cursor/rules"
         "docs/mds/star-workflow"
+        "docs/srcs"
     )
     ADOPT_FILES=(
         "AGENTS.md"
         ".env.example"
         ".gitignore"
+        ".cursorignore"
         "execs/run.sh"
         "execs/update.sh"
+        "execs/scpts/00_exp.sh"
         "${HOOK_FILES[@]}"
         "${HOOK_CONFIGS[@]}"
     )
@@ -172,7 +175,15 @@ else
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
         "docs/mds/star-workflow"
+        "docs/srcs"
     )
+fi
+
+# Without --adopt this script rewrites the project it lives in, derived from its
+# own location. A copy run from somewhere else would target that other tree.
+if [[ "${ADOPT}" == false ]]; then
+    [[ -f "${ROOT_DIR}/execs/run.sh" ]] || \
+        fail "${ROOT_DIR} is not a STAR project (no execs/run.sh). This script updates the project it lives in: copy it to <project>/execs/update.sh and run it there, or pass --adopt to install STAR into the current directory."
 fi
 
 command -v git >/dev/null 2>&1 || fail "git is required."
@@ -194,7 +205,7 @@ fi
 git clone \
     "${CLONE_ARGS[@]}" \
     "${STAR_REPOSITORY}" \
-    "${SOURCE_DIR}" || fail "Unable to fetch ref '${STAR_REF}'."
+    "${SOURCE_DIR}" || fail "Unable to fetch ref '${STAR_REF}' from ${STAR_REPOSITORY}. Check the ref exists (a branch or tag, not a commit SHA), that the network is reachable, and that git is 2.25 or newer — currently $(git --version 2>/dev/null || echo 'unknown')."
 
 if [[ "${ADOPT}" == false ]]; then
     if [[ -n "${SKILL_NAME}" ]]; then
@@ -203,7 +214,7 @@ if [[ "${ADOPT}" == false ]]; then
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode; the tar below still copies only SYNC_PATHS.
         git -C "${SOURCE_DIR}" sparse-checkout set \
-            .agents .claude .codex .cursor .kimi-code docs/mds/star-workflow
+            .agents .claude .codex .cursor .kimi-code docs/mds/star-workflow docs/srcs
     fi
 
     SYNCED=()
@@ -228,7 +239,7 @@ if [[ "${ADOPT}" == false ]]; then
                 printf '  new      %s\n' "${rel}"
                 added=$(( added + 1 ))
             elif ! cmp -s "${SOURCE_DIR}/${rel}" "${ROOT_DIR}/${rel}"; then
-                printf '  changed  %s\n' "${rel}"
+                printf '  differs  %s\n' "${rel}"
                 changed=$(( changed + 1 ))
             fi
         done < <(cd "${SOURCE_DIR}" && find "${SYNCED[@]}" -type f | sort)
@@ -236,7 +247,7 @@ if [[ "${ADOPT}" == false ]]; then
         # Project-local files under the same paths; an update keeps them.
         while IFS= read -r rel; do
             if [[ ! -e "${SOURCE_DIR}/${rel}" ]]; then
-                printf '  local    %s (only in this project; update keeps it)\n' "${rel}"
+                printf '  extra    %s (not in upstream ref; update keeps it)\n' "${rel}"
                 kept=$(( kept + 1 ))
             fi
         done < <(cd "${ROOT_DIR}" && find "${SYNCED[@]}" -type f 2>/dev/null | sort)
@@ -258,7 +269,8 @@ if [[ "${ADOPT}" == false ]]; then
             hint="bash execs/update.sh"
             [[ "${REF_SET}" == false ]] || hint="${hint} ${STAR_REF}"
             [[ -z "${SKILL_NAME}" ]] || hint="${hint} --skill ${SKILL_NAME}"
-            log "${changed} changed, ${added} new upstream, ${kept} local-only."
+            log "${changed} differ, ${added} new upstream, ${kept} extra local."
+            log "'differs' is direction-blind: it includes files you edited yourself."
             log "Run '${hint}' to apply the upstream versions."
             exit 1
         fi
@@ -351,10 +363,19 @@ if [[ -e "${ROOT_DIR}/AGENTS.md" ]] && \
     log "NOTE: your AGENTS.md was kept, so STAR's project conventions are not in it."
     log "      Compare against ${STAR_REPOSITORY} AGENTS.md and merge what you want."
 fi
-if [[ -e "${ROOT_DIR}/.gitignore" ]] && \
-   ! grep -qE '^/?(datas|inits|wkdrs)/?$' "${ROOT_DIR}/.gitignore" 2>/dev/null; then
-    log "NOTE: your .gitignore was kept and does not ignore datas/ inits/ wkdrs/."
-    log "      Add them before committing, or a dataset or checkpoint tree may enter history."
+if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
+    # Checked per directory, and tolerant of the glob forms (datas/*, wkdrs/**)
+    # that a carve-out rule needs: one combined grep would let a .gitignore
+    # naming only datas/ silence the warning about inits/ and wkdrs/ too.
+    unignored=()
+    for tree in datas inits wkdrs; do
+        grep -qE "^/?${tree}(/|/\*|/\*\*)?$" "${ROOT_DIR}/.gitignore" 2>/dev/null || \
+            unignored+=("${tree}/")
+    done
+    if (( ${#unignored[@]} > 0 )); then
+        log "NOTE: your .gitignore was kept and does not ignore ${unignored[*]}."
+        log "      Add them before committing, or a dataset or checkpoint tree may enter history."
+    fi
 fi
 for cfg in "${HOOK_CONFIGS[@]}"; do
     if [[ -e "${ROOT_DIR}/${cfg}" ]] && \
