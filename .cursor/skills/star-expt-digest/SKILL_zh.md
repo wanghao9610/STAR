@@ -99,7 +99,7 @@ description: >-
 - 更早的 digest 只读它的 frontmatter——`covers`、`sources`、`previous`。绝不为了让它符合你现在知道的情况而回头改写它。
 - 所有命令走 `.env` 的 conda 环境；不用系统 python；绝不安装或升级任何东西（规约 §3.5）。本 skill 除读文件外不需要任何包。
 - 不做重活：不训练、不评测、不全量数据集遍历、不高成本 API 调用（规约 §2）。
-- Git：只读；本 skill 从不提交（规约 §1）。`wkdrs/` 被 git 忽略，所以 digest 序列只存在于本地磁盘——用户问到分享时说明一次即可。
+- Git：只读；本 skill 从不提交（规约 §1）。`wkdrs/` 下只有 `*.md` 不被 git 忽略，因此 digest 序列**是可以进版本库的**——它就是 `wkdrs/digests/` 下的 markdown。本 skill 从不提交，所以这些文件会一直处于未暂存状态，直到用户自己提交；用户问到分享时如实说明。
 
 ## 对话纪律
 

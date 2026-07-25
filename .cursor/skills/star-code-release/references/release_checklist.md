@@ -48,7 +48,7 @@ Nothing is *executed* beyond imports and `--help`. Verifying that a training com
 | Every image the README references exists (`docs/srcs/…`, relative paths) | major |
 | Every relative link resolves to a file in the repository | major |
 | Every anchor link matches a heading in the file | minor |
-| No link points into `wkdrs/`, `datas/`, `inits/`, or another git-ignored path | major — it resolves for the author and 404s for everyone else |
+| No link points into `datas/`, `inits/`, or a non-`.md` path under `wkdrs/` — the `.md` reports there are tracked and safe to link | major — it resolves for the author and 404s for everyone else |
 | `.gitignore` still covers `.env`, `datas/`, `inits/`, `wkdrs/` | blocker if not |
 | No file over ~10 MB is tracked | major — name it and suggest a release asset or a download script |
 

@@ -34,7 +34,7 @@ This file is a contract for the skills and a description for the reader: it is w
 3. **No pushes, no history rewrites** (`rebase`, `amend`, `reset --hard`), **no branch switches, no tag creation.** The user owns the branch and the remote.
 4. **A path that already carried uncommitted changes when the run started is never staged.** Name those paths when asking, so the user can commit or stash them first — a skill's commit must never bundle work it did not do.
 5. **Never commit silently.** Every commit is either covered by a gate the user approved or offered as its own question. Declining is always a valid answer.
-6. **Never force-add an ignored path.** `.env`, `datas/`, `inits/`, and `wkdrs/` are git-ignored by default; they stay out of history. (`tasks/` is currently tracked — see `AGENTS.md` §5.)
+6. **Never force-add an ignored path.** `.env`, `datas/`, and `inits/` are git-ignored by default and stay out of history. `wkdrs/` is **not** wholly ignored: everything under it is ignored *except* `*.md`, so the workflow's own reports — exec logs, analyses, digests, reviews, the results ledger — are versionable on purpose, and a run's record can outlive the machine that made it. `tasks/` is tracked in full: a plan's tool scripts are durable by design, and the scratch beside them is small enough not to warrant a carve-out.
 
 **Why it matters.** `star-plan-reviser` tells users that "older versions live in git"; that is only true if the plan writers actually offer the commits. And a single stray `git add -A` in a project holding `inits/` and `wkdrs/` is the difference between a 40 KB diff and a 40 GB one.
 

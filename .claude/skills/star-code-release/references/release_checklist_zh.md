@@ -48,7 +48,7 @@ README 打印的每条命令，按读者会遇到的顺序检查。这一族决�
 | README 引用的每张图片都存在（`docs/srcs/…`、相对路径） | major |
 | 每个相对链接都解析到仓库内的文件 | major |
 | 每个锚点链接都对应文件里的某个标题 | minor |
-| 没有链接指向 `wkdrs/`、`datas/`、`inits/` 或其他被 git 忽略的路径 | major——它在作者机器上能开，对别人是 404 |
+| 没有链接指向 `datas/`、`inits/`，或 `wkdrs/` 下的非 `.md` 路径——那里的 `.md` 报告是被跟踪的，可以放心链接 | major——它在作者机器上能开，对别人是 404 |
 | `.gitignore` 仍覆盖 `.env`、`datas/`、`inits/`、`wkdrs/` | 不覆盖则阻断 |
 | 没有超过约 10 MB 的文件被跟踪 | major——点名它，并建议改用 release asset 或下载脚本 |
 

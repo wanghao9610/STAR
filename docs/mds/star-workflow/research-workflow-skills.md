@@ -780,7 +780,7 @@ This skill is **read-only apart from its own digest**. It never edits plans, `ex
 - Run it on a cadence — weekly is the natural one. The value compounds: each digest's "what moved" section is only as good as the previous digest it diffs against.
 - A digest full of provisional rows is a signal, not a failure: it means runs are finishing faster than they are being analyzed. Clear it with `$star-expt-analyst` on the named runs.
 - Use plan mode before a milestone review, when you want a family's whole story rather than a date range.
-- `wkdrs/` is git-ignored by default, so the digest series lives on your disk and not in the repository history. Digests are regenerable from the analysis reports, so this is recoverable — but do not treat a digest as the archival record.
+- Under `wkdrs/` everything is git-ignored **except `*.md`**, so the digest series can enter the repository history — but no skill commits it for you, since the digest skill is read-only. Digests are regenerable from the analysis reports, so losing an uncommitted one is recoverable.
 
 See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/skills/star-expt-digest/SKILL.md).
 

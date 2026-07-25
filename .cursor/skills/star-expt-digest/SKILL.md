@@ -103,7 +103,7 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 - Older digests are read for their frontmatter only — `covers`, `sources`, `previous`. Never rewrite one to reconcile it with what you now know.
 - All commands run through `.env`'s conda env; no system python; never install or upgrade anything (conventions §3.5). This skill needs no packages beyond file reads.
 - Nothing heavy: no training, no evaluation, no full-dataset passes, no costly API calls (conventions §2).
-- Git: read-only; this skill never commits (conventions §1). `wkdrs/` is git-ignored, so the digest series lives on disk only — say so once if the user asks about sharing it.
+- Git: read-only; this skill never commits (conventions §1). Under `wkdrs/` only `*.md` escapes the ignore rule, so the digest series **is** versionable — it is markdown under `wkdrs/digests/`. This skill never commits, so those files stay unstaged until the user commits them; say so if they ask about sharing.
 
 ## Dialogue Discipline
 

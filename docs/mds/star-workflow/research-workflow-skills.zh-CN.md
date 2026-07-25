@@ -780,7 +780,7 @@ digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它�
 - 按节奏跑——每周是最自然的节奏。价值是累积的：每份 digest 的"变化"段，取决于它拿来比对的上一份 digest 有多好。
 - 一份满是临时行的 digest 是信号，不是失败：它说明 run 跑完的速度快过被分析的速度。用 `$star-expt-analyst` 对点名的那些 run 清掉它。
 - 里程碑评审前用 plan 模式，这时你要的是一个家族的完整故事，而不是一个日期区间。
-- `wkdrs/` 默认被 git 忽略，因此 digest 序列存在你的磁盘上，不在仓库历史里。digest 可以从分析报告重新生成，所以这是可恢复的——但别把 digest 当成存档记录。
+- `wkdrs/` 下除 `*.md` 外都被 git 忽略，因此 digest 序列**可以**进入仓库历史——但没有任何 skill 会替你提交，digest skill 本身是只读的。digest 可以从分析报告重新生成，所以未提交的那份丢了也能恢复。
 
 完整定义见 [`star-expt-digest/SKILL_zh.md`](../../../.claude/skills/star-expt-digest/SKILL_zh.md)。
 
