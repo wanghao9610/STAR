@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="STAR — Systematic Toolchain for AI Research. A reusable foundation for reproducible and well-structured AI research.">
-<title>STAR — Systematic Toolchain for AI Research</title>
+<meta name="description" content="STAR — 系统化 AI 研究工具链。一个面向可复现、结构化 AI 研究的可复用项目基础。">
+<title>STAR — 系统化 AI 研究工具链</title>
 <link rel="icon" href="./srcs/star-project-icon.png">
 <style>
   /* ============================================================
@@ -687,13 +687,13 @@
     STAR
   </a>
   <div class="nav-links">
-    <a href="#pillars">Why STAR</a>
-    <a href="#structure">Structure</a>
-    <a href="#workflow">Workflow</a>
-    <a href="#quickstart">Quick Start</a>
+    <a href="#pillars">为何 STAR</a>
+    <a href="#structure">项目结构</a>
+    <a href="#workflow">研究工作流</a>
+    <a href="#quickstart">快速开始</a>
   </div>
   <div class="nav-right">
-    <a class="nav-lang" href="./star_zh.html" hreflang="zh-CN">中文</a>
+    <a class="nav-lang" href="./star.html" hreflang="en">EN</a>
     <a class="nav-gh" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       GitHub
@@ -706,71 +706,71 @@
 <header class="hero" id="top">
   <div class="aurora aurora-a" aria-hidden="true"></div>
   <div class="aurora aurora-b" aria-hidden="true"></div>
-  <span class="hero-badge">Systematic Toolchain for AI Research</span>
+  <span class="hero-badge">系统化 AI 研究工具链</span>
   <h1>STAR</h1>
-  <p class="hero-sub">Research, by design</p>
+  <p class="hero-sub">研究，始于设计</p>
   <p class="hero-desc">
-    A reusable foundation for <strong>reproducible, well-structured AI research</strong> —
-    one predictable layout, one experiment entrypoint, and a fifteen-skill workflow that
-    carries a vague idea all the way to a released repository, with every decision on file.
+    一个面向<strong>可复现、结构良好的 AI 研究</strong>的可复用项目基础——
+    一套可预期的目录布局、一个统一的实验入口，以及一条由十五个 skill 组成的工作流，
+    把一个模糊的想法一路带到一个可发布的仓库，每个决策都有档可查。
   </p>
   <div class="hero-ctas">
-    <a class="btn btn-primary" href="#quickstart">✦ Get Started</a>
-    <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">View on GitHub</a>
+    <a class="btn btn-primary" href="#quickstart">✦ 开始使用</a>
+    <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">在 GitHub 上查看</a>
   </div>
   <div class="hero-stats">
-    <div class="stat"><b>15</b><span>Workflow Skills</span></div>
-    <div class="stat"><b>4</b><span>AI Agents Supported</span></div>
-    <div class="stat"><b>2</b><span>Languages · EN 中文</span></div>
-    <div class="stat"><b>MIT</b><span>Open Source</span></div>
+    <div class="stat"><b>15</b><span>工作流技能</span></div>
+    <div class="stat"><b>4</b><span>支持的 AI 智能体</span></div>
+    <div class="stat"><b>2</b><span>语言 · EN 中文</span></div>
+    <div class="stat"><b>MIT</b><span>开源</span></div>
   </div>
-  <a class="scroll-hint" href="#pillars" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a>
+  <a class="scroll-hint" href="#pillars" aria-label="向下滚动"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a>
 </header>
 
 <!-- ==================== PILLARS ==================== -->
 <section id="pillars">
   <div class="wrap">
-    <p class="kicker reveal">Why STAR</p>
-    <h2 class="reveal">Everything in its place.<br>Every decision on file.</h2>
+    <p class="kicker reveal">为何选择 STAR</p>
+    <h2 class="reveal">一切各归其位。<br>每个决策都有档可查。</h2>
     <p class="section-lead reveal">
-      Research code rots when structure lives in someone's head and context lives in a chat window.
-      STAR moves both into the repository itself.
+      当项目结构只存在于某个人的脑海中、上下文只存在于聊天窗口里时，研究代码就会腐坏。
+      STAR 把两者都搬进仓库本身。
     </p>
     <div class="bento">
       <div class="card reveal" style="--card-glow: rgba(255,216,107,0.14); --card-c: #ffd86b">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="13" height="13" rx="2"/><path d="M8 20h11a2 2 0 0 0 2-2V8"/></svg></div>
-        <h3>A consistent layout</h3>
-        <p>Code, data, weights, outputs, and methodology notes each have one predictable home — <code>code/</code>, <code>datas/</code>, <code>inits/</code>, <code>wkdrs/</code>, <code>metds/</code>.</p>
+        <h3>一致的目录布局</h3>
+        <p>代码、数据、权重、输出和方法文档，各有一个可预期的归宿——<code>code/</code>、<code>datas/</code>、<code>inits/</code>、<code>wkdrs/</code>、<code>metds/</code>。</p>
       </div>
       <div class="card reveal" style="--card-glow: rgba(139,147,255,0.16); --card-c: #8b93ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3"/><path d="M15 7V3"/><path d="M7 7h10v4a5 5 0 0 1-10 0V7z"/><path d="M12 16v5"/></svg></div>
-        <h3>A portable runtime boundary</h3>
-        <p>Machine-specific paths live in a local <code>.env</code>, never in scripts. Clone the repo anywhere, point it at your conda or venv, and run.</p>
+        <h3>可迁移的运行环境</h3>
+        <p>与机器相关的路径只保存在本地 <code>.env</code> 中，绝不写进脚本。在任何机器上克隆仓库，指向你的 conda 或 venv，即可运行。</p>
       </div>
       <div class="card reveal" style="--card-glow: rgba(76,195,255,0.16); --card-c: #4cc3ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
-        <h3>One experiment entrypoint</h3>
-        <p><code>bash execs/run.sh &lt;exp&gt;</code> activates the environment, exports the path variables, and launches any experiment script the same way, every time.</p>
+        <h3>统一的实验入口</h3>
+        <p><code>bash execs/run.sh &lt;exp&gt;</code> 会激活环境、导出路径变量，并以同样的方式启动任何实验脚本，每次如此。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(62,230,192,0.14); --card-c: #3ee6c0">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></div>
-        <h3>A traceable, resumable research process</h3>
-        <p>Plans live in <code>metds/plans/</code>, execution intermediates in <code>tasks/</code>, run artifacts in <code>wkdrs/</code>. Key decisions, task dependencies, and validation records persist in project files — not in chat history — so any session, human or agent, can pick up exactly where the last one stopped.</p>
+        <h3>可追踪、可恢复的研究过程</h3>
+        <p>计划保存在 <code>metds/plans/</code>，执行中间文件保存在 <code>tasks/</code>，运行产物保存在 <code>wkdrs/</code>。关键决策、任务依赖和验证记录都沉淀在项目文件中——而不是聊天记录里——因此任何会话，无论来自人还是智能体，都能从上次停下的地方精确接续。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14); --card-c: #ff7eb6">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="11" rx="2"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.2"/><path d="M2.5 14v2"/><path d="M21.5 14v2"/><path d="M9.5 13.5v2"/><path d="M14.5 13.5v2"/></svg></div>
-        <h3>AI-agent native</h3>
-        <p>Shared instructions and identical skill sets ship for <strong>Codex</strong>, <strong>Claude</strong>, <strong>Kimi</strong>, and <strong>Cursor</strong> — in English and Chinese. Your agents follow the same conventions you do, and STAR stays framework-agnostic: bring your own model stack, dependency manager, and experiment tracker.</p>
+        <h3>原生支持 AI 智能体</h3>
+        <p>为 <strong>Codex</strong>、<strong>Claude</strong>、<strong>Kimi</strong> 和 <strong>Cursor</strong> 提供一致的共享指令与相同的 skill 集——中英文皆有。你的智能体遵循与你相同的约定；STAR 也不绑定具体框架：模型技术栈、依赖管理工具和实验跟踪平台都由你自行选择。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14); --card-c: #f5a623">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 11.5l2 2 4-4"/></svg></div>
-        <h3>Safe defaults for large artifacts</h3>
-        <p>Local data, model weights, generated outputs, and environment settings are excluded from version control out of the box. Adopt an existing project with symlinks — nothing gets moved, nothing gets overwritten.</p>
+        <h3>适合大文件的安全默认配置</h3>
+        <p>本地数据、模型权重、生成的输出和环境配置默认不纳入版本控制。通过符号链接接入已有项目——不移动任何文件，不覆盖任何内容。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14); --card-c: #8b93ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
-        <h3>Upgradeable without disruption</h3>
-        <p><code>bash execs/update.sh</code> syncs newer STAR skills and workflow guides into an existing project without touching your code, experiments, or Git remotes.</p>
+        <h3>无扰升级</h3>
+        <p><code>bash execs/update.sh</code> 把新版 STAR 的 skill 和工作流指南同步进已有项目，不触碰你的代码、实验和 Git 远程仓库。</p>
       </div>
     </div>
   </div>
@@ -779,11 +779,11 @@
 <!-- ==================== STRUCTURE ==================== -->
 <section id="structure">
   <div class="wrap">
-    <p class="kicker reveal">Project structure</p>
-    <h2 class="reveal">Eight directories.<br>Zero guessing.</h2>
+    <p class="kicker reveal">项目结构</p>
+    <h2 class="reveal">八个目录。<br>无需猜测。</h2>
     <p class="section-lead reveal">
-      The abbreviated names are deliberate: short to type, unambiguous to search,
-      and identical across every STAR project you will ever open.
+      这些缩写命名是刻意为之：输入简短、搜索无歧义，
+      并且在你打开的每一个 STAR 项目中都完全一致。
     </p>
     <div class="structure-grid">
       <div class="tree-window reveal">
@@ -792,31 +792,31 @@
           <span class="window-title">tree ~/my-research</span>
         </div>
         <div class="tree-body"><span class="hl">STAR/</span>
-├── <span class="dir">code/</span>        <span class="cm"># core source (named by CODE_NAME)</span>
-├── <span class="dir">datas/</span>       <span class="cm"># datasets &amp; data files</span>
-├── <span class="dir">inits/</span>       <span class="cm"># weights &amp; checkpoints</span>
-├── <span class="dir">metds/</span>       <span class="cm"># methodologies</span>
-│   ├── <span class="dir">ideas/</span>   <span class="cm"># topic explorations</span>
-│   ├── <span class="dir">plans/</span>   <span class="cm"># research plans &amp; sub-plans</span>
-│   └── <span class="dir">refs/</span>    <span class="cm"># related-work notes + reference.bib</span>
-├── <span class="dir">execs/</span>       <span class="cm"># executions</span>
-│   ├── <span class="file">run.sh</span>   <span class="cm"># ← the single entrypoint</span>
+├── <span class="dir">code/</span>        <span class="cm"># 核心源码（目录名由 CODE_NAME 配置）</span>
+├── <span class="dir">datas/</span>       <span class="cm"># 数据集及数据文件</span>
+├── <span class="dir">inits/</span>       <span class="cm"># 模型权重与检查点</span>
+├── <span class="dir">metds/</span>       <span class="cm"># 方法文档</span>
+│   ├── <span class="dir">ideas/</span>   <span class="cm"># 选题探索</span>
+│   ├── <span class="dir">plans/</span>   <span class="cm"># 研究计划与子计划</span>
+│   └── <span class="dir">refs/</span>    <span class="cm"># 相关工作笔记 + reference.bib</span>
+├── <span class="dir">execs/</span>       <span class="cm"># 执行</span>
+│   ├── <span class="file">run.sh</span>   <span class="cm"># ← 统一入口</span>
 │   ├── <span class="file">update.sh</span>
-│   └── <span class="dir">scpts/</span>   <span class="cm"># experiment scripts</span>
-├── <span class="dir">tasks/</span>       <span class="cm"># per-plan execution intermediates</span>
-├── <span class="dir">wkdrs/</span>       <span class="cm"># run outputs: logs, metrics, figures</span>
-├── <span class="dir">docs/</span>        <span class="cm"># documentation site</span>
-├── <span class="file">.env</span>         <span class="cm"># machine-local paths (never committed)</span>
-└── <span class="file">AGENTS.md</span>    <span class="cm"># shared human + agent instructions</span></div>
+│   └── <span class="dir">scpts/</span>   <span class="cm"># 实验脚本</span>
+├── <span class="dir">tasks/</span>       <span class="cm"># 按计划归档的执行中间文件</span>
+├── <span class="dir">wkdrs/</span>       <span class="cm"># 运行输出：日志、指标、图表</span>
+├── <span class="dir">docs/</span>        <span class="cm"># 文档站点</span>
+├── <span class="file">.env</span>         <span class="cm"># 本机路径（绝不提交）</span>
+└── <span class="file">AGENTS.md</span>    <span class="cm"># 人与智能体共享的规范</span></div>
       </div>
       <div class="legend reveal">
-        <div class="legend-row"><code>datas/</code><span><strong>Data</strong> — raw, processed, or generated datasets</span></div>
-        <div class="legend-row"><code>inits/</code><span><strong>Initializations</strong> — pretrained weights and checkpoints</span></div>
-        <div class="legend-row"><code>metds/</code><span><strong>Methodologies</strong> — plans, design notes, research records</span></div>
-        <div class="legend-row"><code>execs/</code><span><strong>Executions</strong> — launchers and experiment scripts</span></div>
-        <div class="legend-row"><code>scpts/</code><span><strong>Scripts</strong> — individual runnable experiment definitions</span></div>
-        <div class="legend-row"><code>tasks/</code><span><strong>Tasks</strong> — each plan's tool scripts and working files</span></div>
-        <div class="legend-row"><code>wkdrs/</code><span><strong>Work directories</strong> — logs, metrics, predictions, artifacts</span></div>
+        <div class="legend-row"><code>datas/</code><span><strong>数据</strong>——原始、处理后或生成的数据集</span></div>
+        <div class="legend-row"><code>inits/</code><span><strong>初始化</strong>——预训练权重与检查点</span></div>
+        <div class="legend-row"><code>metds/</code><span><strong>方法文档</strong>——计划、设计笔记、研究记录</span></div>
+        <div class="legend-row"><code>execs/</code><span><strong>执行</strong>——启动器与实验脚本</span></div>
+        <div class="legend-row"><code>scpts/</code><span><strong>脚本</strong>——可直接运行的实验定义</span></div>
+        <div class="legend-row"><code>tasks/</code><span><strong>任务</strong>——各计划自有的工具脚本与工作文件</span></div>
+        <div class="legend-row"><code>wkdrs/</code><span><strong>工作目录</strong>——日志、指标、预测结果与产物</span></div>
       </div>
     </div>
   </div>
@@ -825,78 +825,78 @@
 <!-- ==================== WORKFLOW ==================== -->
 <section id="workflow">
   <div class="wrap">
-    <p class="kicker reveal">Research workflow</p>
-    <h2 class="reveal">Fifteen skills.<br>One constellation.</h2>
+    <p class="kicker reveal">研究工作流</p>
+    <h2 class="reveal">十五个技能。<br>同一片星图。</h2>
     <p class="section-lead reveal">
-      From a vague interest to a released repository — each skill writes its evidence into
-      project files, so the whole research programme is auditable and resumable at any point.
+      从模糊的兴趣到发布的仓库——每个 skill 都把自己的证据写进
+      项目文件，让整个研究过程随时可审计、可恢复。
     </p>
 
     <div class="phases">
       <div class="phase reveal" style="--phase-c: var(--gold); --phase-glow: rgba(255,216,107,0.45)">
         <div class="phase-head">
           <div class="phase-star">✦</div>
-          <h3>Shape<small>Converge on a topic and turn it into verifiable plans.</small></h3>
+          <h3>塑形<small>收敛出研究选题，并把它变成可验证的计划。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-proj-adopt</code><p>Adopt an already-started project without disturbing it — probe, symlink, record.</p></div>
-          <div class="skill"><code>$star-idea-storm</code><p>Converge a vague interest into a defensible research topic, scored on six dimensions.</p></div>
-          <div class="skill"><code>$star-plan-coach</code><p>Clarify the idea through staged questions into a strategic research plan.</p></div>
-          <div class="skill"><code>$star-refs-reviewer</code><p>Survey related work into analysis notes and a verified, classified bibliography.</p></div>
+          <div class="skill"><code>$star-proj-adopt</code><p>无损接入一个已经开工的项目——探查、符号链接、记录。</p></div>
+          <div class="skill"><code>$star-idea-storm</code><p>把模糊的兴趣收敛为站得住脚的研究选题，并按六个维度打分。</p></div>
+          <div class="skill"><code>$star-plan-coach</code><p>通过分阶段提问澄清想法，形成战略性研究计划。</p></div>
+          <div class="skill"><code>$star-refs-reviewer</code><p>调研相关工作，产出分析笔记和经过核验、分类的文献库。</p></div>
         </div>
       </div>
 
       <div class="phase reveal" style="--phase-c: var(--violet); --phase-glow: rgba(139,147,255,0.45)">
         <div class="phase-head">
           <div class="phase-star">✦</div>
-          <h3>Build<small>Stand up the codebase and the runtime it needs.</small></h3>
+          <h3>构建<small>搭起代码库及其所需的运行环境。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-code-architect</code><p>Bootstrap the codebase from a scored reference implementation and record the architecture.</p></div>
-          <div class="skill"><code>$star-env-builder</code><p>Build the conda env or venv from <em>.env</em>, resolve dependencies, smoke-verify.</p></div>
-          <div class="skill"><code>$star-plan-decomposer</code><p>Split strategic plans recursively into verifiable, executable sub-plans.</p></div>
+          <div class="skill"><code>$star-code-architect</code><p>从打分选出的参考实现奠基代码库，并记录架构。</p></div>
+          <div class="skill"><code>$star-env-builder</code><p>依据 <em>.env</em> 构建 conda 环境或 venv，解析依赖并做冒烟验证。</p></div>
+          <div class="skill"><code>$star-plan-decomposer</code><p>把战略计划递归拆解为可验证、可执行的子计划。</p></div>
         </div>
       </div>
 
       <div class="phase reveal" style="--phase-c: var(--blue); --phase-glow: rgba(76,195,255,0.45)">
         <div class="phase-head">
           <div class="phase-star">✦</div>
-          <h3>Execute<small>Implement each leaf plan and audit what it produced.</small></h3>
+          <h3>执行<small>实现每个叶子计划，并审计其产出。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-plan-executor</code><p>Implement and lightly validate one executable leaf plan, logging every run.</p></div>
-          <div class="skill"><code>$star-code-reviewer</code><p>Review code against project conventions and the plan's promised implementation.</p></div>
-          <div class="skill"><code>$star-expt-analyst</code><p>Audit a run against what the plan expected: artifacts, logs, metrics, meaning.</p></div>
+          <div class="skill"><code>$star-plan-executor</code><p>实现并初步验证一个可执行的叶子计划，记录每次运行。</p></div>
+          <div class="skill"><code>$star-code-reviewer</code><p>对照项目规范和计划承诺的实现审查代码。</p></div>
+          <div class="skill"><code>$star-expt-analyst</code><p>对照计划的预期审计一次运行：产物、日志、指标及其含义。</p></div>
         </div>
       </div>
 
       <div class="phase reveal" style="--phase-c: var(--teal); --phase-glow: rgba(62,230,192,0.45)">
         <div class="phase-head">
           <div class="phase-star">✦</div>
-          <h3>Steer<small>Keep the plan tree honest against execution evidence.</small></h3>
+          <h3>掌舵<small>用执行证据校准计划树，使其始终诚实可信。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-plan-reviser</code><p>Revise a plan in place against its execution evidence, with a revision history.</p></div>
-          <div class="skill"><code>$star-expt-digest</code><p>Summarize what the programme has done lately — verdicts, movement, gaps.</p></div>
-          <div class="skill"><code>$star-flow-status</code><p>Report progress across the whole flow and the single next action to take.</p></div>
+          <div class="skill"><code>$star-plan-reviser</code><p>以执行证据就地修订计划，并保留修订历史。</p></div>
+          <div class="skill"><code>$star-expt-digest</code><p>汇总项目近期的进展——结论、变动与缺口。</p></div>
+          <div class="skill"><code>$star-flow-status</code><p>报告整个流程的进度，以及下一步该做的唯一动作。</p></div>
         </div>
       </div>
 
       <div class="phase reveal" style="--phase-c: var(--rose); --phase-glow: rgba(255,126,182,0.45)">
         <div class="phase-head">
           <div class="phase-star">✦</div>
-          <h3>Deliver<small>Turn matured plans into papers and releases.</small></h3>
+          <h3>交付<small>把成熟的计划变成论文与发布。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-metd-summarize</code><p>Compile the plan tree into paper-ready method documents, flagging the unverified.</p></div>
-          <div class="skill"><code>$star-code-release</code><p>Prepare the repository for release: promote code, polish, compile the README, sweep for secrets.</p></div>
+          <div class="skill"><code>$star-metd-summarize</code><p>把计划树编译成可用于论文的方法文档，并标记未经验证的部分。</p></div>
+          <div class="skill"><code>$star-code-release</code><p>把仓库准备到可发布状态：晋升代码、打磨细节、汇编 README、清查密钥。</p></div>
         </div>
       </div>
     </div>
 
     <figure class="workflow-map reveal">
-      <img src="./srcs/star-research-workflow.svg" alt="STAR research workflow: thirteen skills in running order plus two that read across them, what each writes, and how the per-leaf loop closes" loading="lazy">
-      <figcaption>The full workflow map — running order, outputs, and how the per-leaf loop closes.</figcaption>
+      <img src="./srcs/star-research-workflow.svg" alt="STAR 研究工作流：十三个按运行顺序排列的 skill，外加两个横跨各环节的 skill、每个 skill 写出的内容，以及叶子级循环如何闭合" loading="lazy">
+      <figcaption>完整的工作流图——运行顺序、产出，以及叶子级循环如何闭合。</figcaption>
     </figure>
   </div>
 </section>
@@ -904,29 +904,29 @@
 <!-- ==================== QUICK START ==================== -->
 <section id="quickstart">
   <div class="wrap">
-    <p class="kicker reveal">Quick start</p>
-    <h2 class="reveal">Six commands to liftoff.</h2>
+    <p class="kicker reveal">快速开始</p>
+    <h2 class="reveal">六条命令，点火启航。</h2>
     <p class="section-lead reveal">
-      Start fresh from the template — or run <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>
-      inside an existing repository and STAR installs itself around your work without moving a single file.
+      从模板全新开始——或者在已有仓库中运行 <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>，
+      STAR 会围绕你的工作完成安装，不移动任何一个文件。
     </p>
     <div class="term reveal">
       <div class="window-bar">
         <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
         <span class="window-title">zsh — my-research</span>
       </div>
-      <div class="term-body"><span class="c"># 1 · Start a project from the STAR template</span>
+      <div class="term-body"><span class="c"># 1 · 从 STAR 模板创建项目</span>
 <span class="p">❯</span> <span class="cmd">git clone https://github.com/wanghao9610/STAR my-research <span class="flag">&amp;&amp;</span> cd my-research</span>
-<span class="p">❯</span> <span class="cmd">rm <span class="flag">-rf</span> .git .github <span class="flag">&amp;&amp;</span> git init</span>   <span class="c"># drop STAR's history and its maintainer CI</span>
+<span class="p">❯</span> <span class="cmd">rm <span class="flag">-rf</span> .git .github <span class="flag">&amp;&amp;</span> git init</span>   <span class="c"># 丢弃 STAR 的历史记录和维护者 CI</span>
 
-<span class="c"># 2 · Name your source package, then configure the local runtime</span>
+<span class="c"># 2 · 命名你的源码包，然后配置本地运行环境</span>
 <span class="p">❯</span> <span class="cmd">mv code my_pkg</span>
-<span class="p">❯</span> <span class="cmd">cp .env.example .env <span class="flag">&amp;&amp;</span> <span class="str">$EDITOR</span> .env</span>   <span class="c"># CODE_NAME=my_pkg, then PYTHON_HOME (or CONDA_HOME + ENV_NAME)</span>
+<span class="p">❯</span> <span class="cmd">cp .env.example .env <span class="flag">&amp;&amp;</span> <span class="str">$EDITOR</span> .env</span>   <span class="c"># CODE_NAME=my_pkg，然后是 PYTHON_HOME（或 CONDA_HOME + ENV_NAME）</span>
 
-<span class="c"># 3 · See what's runnable</span>
+<span class="c"># 3 · 看看有哪些可运行的实验</span>
 <span class="p">❯</span> <span class="cmd">bash execs/run.sh <span class="flag">--list</span></span>
 
-<span class="c"># 4 · Launch through the single entrypoint — 00_exp prints the resolved paths</span>
+<span class="c"># 4 · 通过统一入口启动——00_exp 会打印解析出的路径</span>
 <span class="p">❯</span> <span class="cmd">bash execs/run.sh 00_exp</span>
 <span class="p">❯</span> <span class="cursor-blink"></span></div>
     </div>
@@ -936,26 +936,26 @@
 <!-- ==================== FINAL CTA ==================== -->
 <section class="cta-final">
   <div class="wrap">
-    <p class="kicker reveal">Ready when you are</p>
-    <h2 class="reveal">Give your research a<br><span>structure worth returning to.</span></h2>
+    <p class="kicker reveal">随时就绪</p>
+    <h2 class="reveal">给你的研究一个<br><span>值得反复回来的结构。</span></h2>
     <p class="section-lead reveal">
-      STAR is free, MIT-licensed, and framework-agnostic.
-      Use it as a GitHub template, or adopt it into the project you already have.
+      STAR 免费、基于 MIT 许可证、不绑定任何框架。
+      既可用作 GitHub 模板，也可接入你已有的项目。
     </p>
     <div class="hero-ctas reveal">
-      <a class="btn btn-primary" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">✦ Use the Template</a>
-      <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR#quick-start" target="_blank" rel="noopener">Read the Docs</a>
+      <a class="btn btn-primary" href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">✦ 使用模板</a>
+      <a class="btn btn-ghost" href="https://github.com/wanghao9610/STAR/blob/main/README.zh-CN.md#快速开始" target="_blank" rel="noopener">阅读文档</a>
     </div>
   </div>
 </section>
 
 <footer>
-  <span>© 2026 STAR · Released under the MIT License</span>
+  <span>© 2026 STAR · 基于 MIT 许可证发布</span>
   <div class="f-links">
     <a href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://github.com/wanghao9610/STAR#research-workflow" target="_blank" rel="noopener">Workflow Guide</a>
-    <a href="./star_zh.html" hreflang="zh-CN">简体中文</a>
-    <a href="#top">Back to top ↑</a>
+    <a href="https://github.com/wanghao9610/STAR/blob/main/README.zh-CN.md#研究工作流" target="_blank" rel="noopener">工作流指南</a>
+    <a href="./star.html" hreflang="en">English</a>
+    <a href="#top">回到顶部 ↑</a>
   </div>
 </footer>
 
