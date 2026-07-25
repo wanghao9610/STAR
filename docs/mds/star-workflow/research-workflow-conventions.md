@@ -110,6 +110,8 @@ The tool-neutral half. **How** to ask — AskUserQuestion, Codex's structured us
 
    The user sets the level; the skill **resolves it once at the start of the run**, before the first question, from three sources in precedence order: `INVOLVE` in `.env` (`low` / `medium` / `high`; absent, unset, or invalid → `medium`), then an `involve=<level>` token in the invocation, then plain language mid-run ("ask me less", "ask me everything") — the last instruction wins for the rest of the run. Reading `INVOLVE` is a one-line `.env` lookup, done even by a skill that otherwise needs no runtime and no other `.env` value. A skill that keeps a durable run log records the effective level and its source there once.
 
+   **The token is not an argument.** `involve=<level>` is stripped from the invocation before anything else is resolved — the plan name (§5), the mode, the scope, the date window. This holds in **every** skill, including the ones whose `SKILL.md` never mentions the dial: a skill matching its first argument against `metds/plans/*_plan.md` must not see `involve=low` and treat it as a plan name, or match it as a mode word. A skill that accepts no arguments at all still strips it.
+
    - `medium` — the default: this file and every `SKILL.md` exactly as written. The dial adds nothing.
    - `low` — a judgment call is not asked: take the option you would have marked recommended, and log it (item 8). A genuinely open question (item 3) has no recommendation to take, so it is asked at every level — and when unsure which kind a question is, treat it as the more interactive kind.
    - `high` — judgment calls the skill's text batches into one gate, or takes autonomously between gates, are surfaced one at a time (item 2).
