@@ -89,7 +89,7 @@ description: >-
 - 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及目标一行目标变化时父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
 - Git：有落笔修订时，在 Step 7 提供一次提交目标计划（及一行目标变化时的父计划）的机会——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
-- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped`——与家族一致。
+- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 和其他修订候选一样：需要用户明确批准，理由写进本次 Revision History 条目。
 
 ## 对话纪律
 

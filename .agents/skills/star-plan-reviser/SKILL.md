@@ -91,7 +91,7 @@ Lead with the outcome, under about 400 words: the evidence base (what was read a
 - Edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status` — the latter two only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed. Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
 - Every write must trace to an individually approved candidate; `## Revision History` is append-only.
 - Git: when edits were applied, offer once at Step 7 to commit the target plan (plus the parent when its `## Sub-plans` line changed) — `star-plan-reviser: <slug> — <n> changes` (conventions §1). Core Principle 4's "older versions live in git" depends on these commits.
-- Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `skipped` — same as the family.
+- Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned` — same as the family. Setting `abandoned` is a revision candidate like any other: it needs the user's explicit approval, and the reason goes in the Revision History entry.
 
 ## Dialogue Discipline
 

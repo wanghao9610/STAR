@@ -10,7 +10,7 @@ Each `metds/plans/<prefix>_<slug>_plan.md` frontmatter may carry:
 
 - Strategy plans (from the coach): `status:` map over the six sections, optional `finalized:`, `updated:`, and (once decomposed) `children:` + a `## Sub-plans` body index.
 - Sub-plans (from the decomposer): `parent:`, `prefix:`, `level:`, `traces_to:`, `depends_on:`, a `status:` map over the six execution sections, `updated:`.
-- Executed leaves (from the executor): `exec_status:` (`pending`/`in_progress`/`done`/`blocked`) and `exec_runs:` — an append-only list of `wkdrs/<run>/` dirs, newest last, whose **last entry is the current run**; earlier entries are re-runs (a second seed, a fixed bug) and stay for the record. A plan written before this field carries a single `exec_run:`; read it as a one-item list — the executor migrates it on its next write.
+- Executed leaves (from the executor): `exec_status:` (`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`) — `done`, `skipped` and `abandoned` are all **terminal**: a leaf in any of them owes nothing further and does not hold a downstream gate shut. `abandoned` records a direction killed by its own kill-criterion; the reason belongs in the plan's `## Revision History`, so the negative result survives and `exec_runs:` — an append-only list of `wkdrs/<run>/` dirs, newest last, whose **last entry is the current run**; earlier entries are re-runs (a second seed, a fixed bug) and stay for the record. A plan written before this field carries a single `exec_run:`; read it as a one-item list — the executor migrates it on its next write.
 
 For a leaf with `exec_runs`, also read the current run's `wkdrs/<run>/EXEC_LOG.md`: the step-status table (count `done` / total, note any `blocked`), the "Awaiting user (STOP line)" list, and any "Strategy signal" in Notes.
 
@@ -31,7 +31,7 @@ Rebuild parent→child links from `parent:` (authoritative), not prefixes. Withi
 - `○` pending — nothing started (`exec_status` absent/`pending`, or all sections `pending`).
 - `⊘` blocked — leaf `exec_status: blocked`, or a leaf whose `depends_on` is unmet.
 - `⏸` awaiting user — leaf whose EXEC_LOG has un-checked "Awaiting user" STOP-line commands.
-- `⚠` needs attention — a coarse leaf that looks too big to execute (its own §3/§5 are largely `[TBD]`) → suggest `/skill:star-plan-decomposer`.
+- `⚠` needs attention — **too coarse to execute**, in either of two ways: a leaf whose own §3/§5 are largely `[TBD]`, **or** a strategy plan carrying `finalized:` with no `children:` — never decomposed, so it counts as a leaf (conventions §5.4) and the executor will reject it. This is the only definition; tier-3 eligibility follows it regardless of the glyph the lifecycle rule renders → suggest `/skill:star-plan-decomposer`.
 
 **One glyph per node, and lifecycle wins.** A node that qualifies for both a lifecycle glyph and `⚠` gets the lifecycle one: a finalized-then-edited root is `✔`, a done leaf with no run is `✔`. Drift belongs in the drift section, which is where the reader goes for it — never let a drift flag overwrite the state the node is actually in, or the tree stops meaning what it says.
 
@@ -53,7 +53,7 @@ The root above is `◐`, not `✔`, because its `finalized:` is unset — six `d
 ## Rollup (three numbers)
 
 1. **Strategy completeness** — across strategy plans (root/internal that came from the coach): sections `done` / (6 × number of strategy plans). Note any not `finalized:`.
-2. **Decomposition coverage** — internal nodes (decomposed) vs leaves flagged `⚠` coarse (a `done`-strategy node that was never decomposed, or a leaf whose §3/§5 are mostly `[TBD]`).
+2. **Decomposition coverage** — internal nodes (decomposed) vs leaves flagged `⚠` coarse (as defined above).
 3. **Execution progress** — leaves `exec_status: done` / total leaves; and summed EXEC_LOG steps `done` / total across leaves that have a run.
 
 ## Coverage band (the thin ring around the tree)
@@ -69,9 +69,12 @@ Each row fires **only when every condition in it holds**. Anything else is silen
 | 5 | Analysis missing | a leaf is `exec_status: done` **and** its current run dir exists **and** that dir holds no `EXPT_ANALYSIS_<date>.md` | `/skill:star-expt-analyst <leaf>` |
 | 6 | Ledger stale | ≥2 leaves have an `EXPT_ANALYSIS_<date>.md` **and** no ledger covering the scope is current — i.e. neither `wkdrs/results/results.md` nor (when scoped to `PLAN_NAME`) `wkdrs/results/results_<slug>.md` exists with a `generated:` at least as new as the newest of those report dates | `/skill:star-expt-analyst aggregate` |
 | 7 | Method docs stale | a compiled `metds/*.md` (one carrying `type:` + `generated:` + `sources:`) lists a plan in `sources:` whose recorded `updated` is older than that plan's current `updated` | `/skill:star-metd-summarize` |
-| 8 | Method docs missing | every leaf is `exec_status: done` **and** every strategy plan carries `finalized:` **and** no `metds/*.md` carries `type:` + `generated:` | `/skill:star-metd-summarize` |
+| 8 | Method docs missing | every leaf is terminal (`done` / `skipped` / `abandoned`) **and** every strategy plan carries `finalized:` **and** no `metds/*.md` carries `type:` + `generated:` | `/skill:star-metd-summarize` |
 | 9 | Adoption not backfilled | `metds/adopt.md` exists **and** its `backfilled:` is absent or `—` **and** ≥1 sub-plan carrying `parent:` exists | `/skill:star-proj-adopt backfill` |
 | 10 | Digest stale | `wkdrs/digests/` holds ≥1 `EXPT_DIGEST_<date>.md` **and** ≥1 run in scope has an `EXPT_ANALYSIS_<date>.md` dated after the newest **series** digest's `covers.through` | `/skill:star-expt-digest` |
+| 11 | Codebase missing | ≥1 executable leaf exists **and** `metds/codearc.md` does not exist | `/skill:star-code-architect` |
+| 12 | Runtime missing | ≥1 executable leaf exists **and** no `wkdrs/env_*/ENV_REPORT.md` exists | `/skill:star-env-builder` |
+| 13 | Release missing | every leaf is terminal (`done` / `skipped` / `abandoned`) **and** a compiled `metds/*.md` carries `type:` + `generated:` **and** `wkdrs/release/` holds no `RELEASE_<date>.md` | `/skill:star-code-release` |
 
 Five rows are easy to get wrong:
 
@@ -87,10 +90,10 @@ Walk the ladder top-down and take the **first** tier that yields a candidate. Ev
 
 1. **Awaiting user** — a leaf `⏸` with un-checked STOP-line commands. Name the command; the user is the only one who can clear it, so nothing below matters until they do.
 2. **Debt on finished work** — a triggered coverage row on work that is already done, taken in order of how fast the debt compounds: backfill (row 9) → review (rows 3, 4) → analysis (row 5) → aggregate (row 6) → summarize (rows 7, 8) → refs (row 2) → digest (row 10). Row 9 leads because it is the debt that hides the others: until an adopted project's finished leaves carry `exec_status: done`, rows 3 and 5 cannot fire on them at all, and tier 3 will happily recommend executing a leaf whose work is already sitting on disk. Every coverage row except row 1 is reachable here; row 1 is tier 4 because starting a new topic is not a debt. Digest comes last of all, and is the one debt on this list that costs nothing to defer: every digest is recompiled from analysis reports that stay on disk, and the series stays gapless however long the gap between runs — so a late digest loses no information, while every other row on this list gets more expensive the longer it waits. Refs comes second-to-last despite being early in the flow: a missing survey costs positioning at write-up time, while unreviewed code costs every leaf built on top of it — so "go read the literature" must never outrank "the run you just finished was never reviewed". Debt outranks progress because it compounds: every further leaf executed on unreviewed code, or quoted from a stale ledger, widens what has to be redone. The next leaf, by contrast, does not expire.
-3. **Next runnable leaf** — the **earliest leaf in execution order** satisfying all of: `exec_status` is not `done` and not `blocked`; every prefix in its `depends_on` resolves to a sibling whose `exec_status` is `done`; it is not `⚠` coarse (if it is, recommend decomposing it first instead). "Execution order" = the topological order from `depends_on`, tie-broken by ascending prefix, walked depth-first so a decomposed node's own leaves come before its later siblings. Output `→ next: /skill:star-plan-executor <prefix or slug>`.
+3. **Next runnable leaf** — the **earliest leaf in execution order** satisfying all of: `exec_status` is not terminal (`done` / `skipped` / `abandoned`) and not `blocked`; every prefix in its `depends_on` resolves to a sibling whose `exec_status` is `done`; it is not `⚠` coarse (if it is, recommend decomposing it first instead). "Execution order" = the topological order from `depends_on`, tie-broken by ascending prefix, walked depth-first so a decomposed node's own leaves come before its later siblings. Output `→ next: /skill:star-plan-executor <prefix or slug>`.
 4. **Finalized idea with no plan** — coverage row 1. Only reached when the tree is fully done and nothing is owed; that is exactly when starting the next topic is the right move.
 
-Give a one-line reason with the command. If no tier yields anything, state the blocker: an unmet dependency (name it), a coarse leaf needing decomposition, or an empty `metds/plans/` (route to `/skill:star-plan-coach`, or `/skill:star-idea-storm` when there are no ideas either).
+Give a one-line reason with the command. If no tier yields anything, say which of these it is: nothing is owed and every leaf is closed — the programme is finished, so route to `/skill:star-code-release`, or `/skill:star-idea-storm` for the next topic; an unmet dependency (name it); a coarse leaf needing decomposition; or an empty `metds/plans/` (route to `/skill:star-plan-coach`, or `/skill:star-idea-storm` when there are no ideas either).
 
 ## Drift / consistency flags (report, never fix)
 

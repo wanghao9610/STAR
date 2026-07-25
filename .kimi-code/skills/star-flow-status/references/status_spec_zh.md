@@ -10,7 +10,7 @@
 
 - 战略计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`）与 `exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的门。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来与 `exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
 
 对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（STOP 线）"清单、以及 Notes 里的任何"战略信号"。
 
@@ -69,9 +69,12 @@
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `/skill:star-expt-analyst <叶子>` |
 | 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `wkdrs/results/results.md` 与（限定到 `PLAN_NAME` 时的）`wkdrs/results/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/skill:star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `/skill:star-metd-summarize` |
-| 8 | 方法文档缺失 | 每个叶子都 `exec_status: done` **且** 每个策略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
+| 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 每个策略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `/skill:star-proj-adopt backfill` |
 | 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `/skill:star-expt-digest` |
+| 11 | 缺代码库规范 | 存在 ≥1 个可执行叶子 **且** `metds/codearc.md` 不存在 | `/skill:star-code-architect` |
+| 12 | 缺运行环境 | 存在 ≥1 个可执行叶子 **且** 不存在任何 `wkdrs/env_*/ENV_REPORT.md` | `/skill:star-env-builder` |
+| 13 | 缺发布准备 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 已有带 `type:` + `generated:` 的 `metds/*.md` **且** `wkdrs/release/` 下没有 `RELEASE_<date>.md` | `/skill:star-code-release` |
 
 有五行特别容易做错：
 
