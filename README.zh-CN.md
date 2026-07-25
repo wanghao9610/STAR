@@ -216,7 +216,18 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ## 研究工作流
 
-STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程：
+STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程。
+
+**调用方式。** 前缀因工具而异，下表中的技能清单统一采用 Codex 写法：
+
+| 工具 | 调用写法 | 示例 |
+| --- | --- | --- |
+| Codex | `$star-<name>` | `$star-plan-coach 开放词汇检测` |
+| Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
+| Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
+| Kimi | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
+
+每个 skill 都必须显式点名。四套工具都禁用了隐式调用，仅用自然语言描述需求不会启动任何 skill。
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的回环" width="100%">

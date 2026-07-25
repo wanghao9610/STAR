@@ -221,7 +221,18 @@ The stock `00_exp.sh` runs no science: it prints the interpreter the launcher re
 
 ## Research workflow
 
-STAR includes fifteen complementary skills that turn a vague research interest into an auditable execution process:
+STAR includes fifteen complementary skills that turn a vague research interest into an auditable execution process.
+
+**How to invoke them.** The prefix is tool-specific, and the table below uses the Codex form:
+
+| Tool | Invocation | Example |
+| --- | --- | --- |
+| Codex | `$star-<name>` | `$star-plan-coach open-vocabulary detection` |
+| Claude Code | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
+| Cursor | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
+| Kimi | `/skill:star-<name>` | `/skill:star-plan-coach open-vocabulary detection` |
+
+Every skill must be named explicitly. All four tools disable implicit invocation, so describing the task in prose does not start a skill.
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes" width="100%">

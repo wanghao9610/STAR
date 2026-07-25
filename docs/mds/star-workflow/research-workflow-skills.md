@@ -66,7 +66,7 @@ In Kimi, use `/skill:skill-name`:
 /skill:star-plan-coach open-vocabulary detection and segmentation
 ```
 
-You can also describe the task in natural language, such as “Break this research plan into executable sub-plans.” Naming the skill explicitly usually makes the intended workflow unambiguous.
+A skill must always be named explicitly. All four tools disable implicit invocation — the three markdown trees through `disable-model-invocation: true` in every `SKILL.md`, and Codex through `allow_implicit_invocation: false` in every `agents/openai.yaml` — so describing the task in prose (“Break this research plan into executable sub-plans.”) will not start the skill. The agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads.
 
 When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 

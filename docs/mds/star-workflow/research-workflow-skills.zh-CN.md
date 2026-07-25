@@ -66,7 +66,7 @@ $star-code-release
 /skill:star-plan-coach 开放词汇检测与分割
 ```
 
-也可以直接用自然语言说明需求，例如“帮我把这份研究计划拆成可执行子计划”。显式写出 skill 名通常更容易确保调用正确。
+skill 必须显式点名。四套工具都禁用了隐式调用——三套 markdown 目录通过每份 `SKILL.md` 里的 `disable-model-invocation: true`，Codex 通过每份 `agents/openai.yaml` 里的 `allow_implicit_invocation: false`——因此用自然语言描述需求（“帮我把这份研究计划拆成可执行子计划”）不会启动该 skill。agent 只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
