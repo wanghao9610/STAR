@@ -102,12 +102,30 @@ PYTHON_ENV="$(cd -- "$(dirname -- "${PYTHON_BIN}")/.." && pwd -P)"
 if [[ -n "${CONDA_HOME:-}" ]]; then
     CONDA_BIN="${CONDA_HOME}/bin/conda"
     [[ -x "${CONDA_BIN}" ]] || fail "Conda executable not found at CONDA_HOME/bin/conda."
-    eval "$("${CONDA_BIN}" shell.bash hook 2>/dev/null)"
+    # Capture stderr separately rather than discarding it: a broken CONDA_HOME
+    # otherwise dies later with a bare "conda: command not found". Do not fold
+    # stderr into stdout — conda writes deprecation warnings there on success,
+    # and they would be eval'd as shell code.
+    CONDA_HOOK_ERR="${TMPDIR:-/tmp}/star_conda_hook_err.$$"
+    if ! CONDA_HOOK="$("${CONDA_BIN}" shell.bash hook 2>"${CONDA_HOOK_ERR}")"; then
+        CONDA_MSG="$(head -3 "${CONDA_HOOK_ERR}" 2>/dev/null)"
+        rm -f "${CONDA_HOOK_ERR}"
+        fail "conda shell hook failed for CONDA_HOME=${CONDA_HOME}: ${CONDA_MSG:-no error output}"
+    fi
+    rm -f "${CONDA_HOOK_ERR}"
+    eval "${CONDA_HOOK}"
     conda activate "${PYTHON_ENV}"
 else
     PATH="$(dirname -- "${PYTHON_BIN}"):${PATH}"
     export PATH
 fi
+
+# Experiment scripts call `python`. When PYTHON_HOME names a python3-only
+# install, that directory has no `python` and the call silently falls through
+# to whatever else is on PATH — a different interpreter than the one reported
+# above. PYTHON_BIN is exported so scripts can be explicit, and is what the
+# stock 00_exp.sh reports.
+export PYTHON_BIN
 
 #######################################################################
 #                          PART 2  Project                            #
