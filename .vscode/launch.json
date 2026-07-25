@@ -5,11 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // Debugs through the interpreter and paths .env configures, so a file
+            // that reads ${CODE_DIR} / ${DATA_DIR} / ${WORK_DIR} behaves as it does
+            // under execs/run.sh. Requires PYTHON_HOME to be set in .env; with only
+            // CONDA_HOME + ENV_NAME set, point python at ${CONDA_HOME}/envs/<name>.
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "python": "${env:PYTHON_HOME}/bin/python",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "ROOT_DIR": "${workspaceFolder}",
+                "CODE_DIR": "${workspaceFolder}/${env:CODE_NAME}",
+                "DATA_DIR": "${workspaceFolder}/datas",
+                "INIT_DIR": "${workspaceFolder}/inits",
+                "WORK_DIR": "${workspaceFolder}/wkdrs",
+                "SCPT_DIR": "${workspaceFolder}/execs/scpts"
+            }
         },
     ]
 }
