@@ -110,7 +110,7 @@ skill 必须显式点名。四套工具都禁用了隐式调用——三套 mark
 - 研究计划统一放在 `metds/plans/`。
 - 奠基代码库或执行代码前，先创建本地 `.env` 并设置 `CODE_NAME`，再单独设置 `PYTHON_HOME`，或成对设置 `CONDA_HOME` 与 `ENV_NAME`。
 - 可复用代码放在 `${CODE_NAME}/`，数据放在 `datas/`，模型权重放在 `inits/`，生成结果放在 `wkdrs/`。
-- 支持中文和英文。skill 会跟随对话语言；已有计划继续使用其 frontmatter 中 `language` 指定的正文语言。
+- 支持中文和英文。skill 会跟随对话语言——若 `.env` 里设了 `STAR_LANG` 则跟随它（规约 §7.6）——已有计划继续使用其 frontmatter 中 `language` 指定的正文语言。
 
 - 所有 skill 共同遵守的部分——git、STOP 线、`.env` 运行时、真实日期、计划名解析、委派、对话纪律——只写在[研究工作流 Skill 通用规约](research-workflow-conventions.zh-CN.md)里一处。想知道这套工作流会对你的仓库做什么、不做什么，读它。
 

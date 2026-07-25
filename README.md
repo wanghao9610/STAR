@@ -175,6 +175,8 @@ Setting neither is an error.
 
 Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask before deciding — `low` takes the recommended option on judgment calls (and logs it), `medium` (the default) asks as documented, `high` confirms each step. Safety gates — the STOP line, commits, deletions — are asked at every level. To change it for a single run, add the same token when you call a skill — e.g. `$star-plan-executor 00 involve=low`. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.7.
 
+A second optional key, `STAR_LANG=en|zh`, fixes the language the agents reply in and newly generated workflow documents (plans, reports) are written in — unset, they follow the conversation's language, and an explicit in-conversation request overrides it. Existing documents keep the language declared in their frontmatter. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.6.
+
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
 ### 2b. Optional: enable Kimi model-id provenance

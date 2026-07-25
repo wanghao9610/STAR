@@ -170,6 +170,8 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 此外，可加上 `INVOLVE=low|medium|high` 设定 STAR skills 在决策前询问的程度——`low` 遇到需要判断的地方直接采用推荐项（并记录），`medium`（默认）按文档提问，`high` 逐步确认；STOP 线、提交、删除等安全门在任何档位都会询问。若只想对单次运行生效，可在调用 skill 时附带同一参数——如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
+另一个可选键 `STAR_LANG=en|zh` 用来固定 agents 的对话回复以及新生成工作流文档（计划、报告）的语言——未设时跟随对话语言，对话中明确提出时以对话要求为准；已有文档保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
+
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
 ### 2b. 可选：启用 Kimi 的 model-id 溯源

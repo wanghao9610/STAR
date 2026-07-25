@@ -110,7 +110,7 @@ Any skill invocation also accepts an optional `involve=low|medium|high` token th
 - Keep all research plans under `metds/plans/`.
 - Before bootstrapping the codebase or executing code, create a local `.env` and set `CODE_NAME`, plus either `PYTHON_HOME` alone or `CONDA_HOME` and `ENV_NAME` together.
 - Put reusable code under `${CODE_NAME}/`, data under `datas/`, model weights under `inits/`, and generated results under `wkdrs/`.
-- Both English and Chinese are supported. A skill follows the conversation language, while an existing plan continues to use the body language declared by its frontmatter `language` field.
+- Both English and Chinese are supported. A skill follows the conversation language — or `STAR_LANG` from `.env` when that is set (conventions §7.6) — while an existing plan continues to use the body language declared by its frontmatter `language` field.
 
 - What every skill does the same way — git, the STOP line, `.env` runtime, real dates, plan-name resolution, delegation, dialogue — is written once in [Research Workflow Skill Conventions](research-workflow-conventions.md). Read it if you want to know what the workflow will and will not do to your repository.
 

@@ -106,6 +106,14 @@ Before finishing:
 - The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
 - Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/` — `execs/update.sh` overwrites it.
 
+## 9. Reply Language
+
+**`.env` `STAR_LANG` sets the language of chat replies and newly generated workflow documents (plans, reports).**
+
+- Set (`en` or `zh`) → reply and write new documents in it, whatever the chat's language. Unset or empty → follow the user's dialogue language.
+- An explicit in-conversation request overrides it; an existing document keeps the language declared in its frontmatter.
+- Full rule: `docs/mds/star-workflow/research-workflow-conventions.md` §7.6.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to over complication, and clarifying questions come before implementation rather than after mistakes.
