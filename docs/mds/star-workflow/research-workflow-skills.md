@@ -1193,6 +1193,7 @@ Every skill directory has the same shape in all four roots: `SKILL.md` is the en
 | Codex | `.agents/skills/` | `$star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
+| Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 
 The fifteen skill directory names are:
 

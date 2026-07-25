@@ -1193,6 +1193,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Codex | `.agents/skills/` | `$star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
+| Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 
 十五个目录名分别是：
 
