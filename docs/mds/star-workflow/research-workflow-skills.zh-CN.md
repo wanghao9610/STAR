@@ -1181,7 +1181,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 ### 可以手工修改计划文件吗？
 
-可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status` 和 `exec_runs`。修改父计划后，先运行 `$star-flow-status` 检查 drift，再决定是否重新拆解。
+可以，但应保持 frontmatter 和正文一致，尤其是 `parent`、`children`、`depends_on`、`status`、`exec_status`、`exec_runs` 和 `finalized`。`finalized` 是三个 skill 把关的那一个——decomposer 不消费未定稿的策略计划，architect 会告警，`star-metd-summarize` 直接拒绝编译——而且只有 `star-plan-coach` 会设置它。修改父计划后，先运行 `$star-flow-status` 检查 drift，再决定是否重新拆解。
 
 ## 20. Skill 文件位置
 

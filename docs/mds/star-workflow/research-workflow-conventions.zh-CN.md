@@ -176,8 +176,10 @@ skill 写出的东西各归其位。每个归宿互斥——文件属于哪一�
 | 项目代码 | `${CODE_NAME}/`（取自 `.env`） |
 | 数据 | `datas/` |
 | 模型权重 | `inits/` |
-| 生成产物、执行记录、报告 | `wkdrs/<run>/` |
+| 某次 run 的产物、执行记录、报告 | `wkdrs/<run>/` |
+| 跨 run 的汇编产物 | `wkdrs/` 下的保留子树：`reviews/`、`results/`、`digests/`、`release/`、`env_*`、`ideas_*`、`refs_*`——不要拿这些当 run 名 |
 | 计划、笔记、方法文档 | `metds/` |
+| 项目文档 | `docs/mds/<topic>/`、`docs/htmls/`、`docs/srcs/`（`docs/mds/star-workflow/` 由上游管理） |
 | 计划自有工具脚本、计划执行期草稿 | `tasks/<plan-name>/` |
 | 实验入口 | `execs/run.sh` |
 | 可复用启动脚本 | `execs/scpts/<run>.sh` |

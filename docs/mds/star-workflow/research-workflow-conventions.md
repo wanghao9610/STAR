@@ -176,8 +176,10 @@ Where a skill puts what it writes. Each destination is exclusive — a file belo
 | Project code | `${CODE_NAME}/` (from `.env`) |
 | Data | `datas/` |
 | Model weights | `inits/` |
-| Generated artifacts, execution records, reports | `wkdrs/<run>/` |
+| A run's artifacts, execution records, reports | `wkdrs/<run>/` |
+| Cross-run compilations | reserved `wkdrs/` subtrees: `reviews/`, `results/`, `digests/`, `release/`, `env_*`, `ideas_*`, `refs_*` — never reuse these as a run name |
 | Plans, notes, method docs | `metds/` |
+| Project documentation | `docs/mds/<topic>/`, `docs/htmls/`, `docs/srcs/` (`docs/mds/star-workflow/` is upstream-managed) |
 | Plan-owned tool scripts, plan-execution scratch | `tasks/<plan-name>/` |
 | Run entrypoint | `execs/run.sh` |
 | Reusable launch scripts | `execs/scpts/<run>.sh` |

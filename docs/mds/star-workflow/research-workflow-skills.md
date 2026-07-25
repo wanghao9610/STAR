@@ -1181,7 +1181,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 ### Can I edit plan files manually?
 
-Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, and `exec_runs`. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
+Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, `exec_runs`, and `finalized`. `finalized` is the one three skills gate on — the decomposer will not consume an unfinalized strategy plan, the architect warns, and `star-metd-summarize` refuses to compile — and only `star-plan-coach` sets it. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
 
 ## 20. Skill locations
 

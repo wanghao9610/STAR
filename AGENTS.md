@@ -71,6 +71,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Put methodology notes in `metds/` and research plans in `metds/plans/`.
 - A plan's own tool scripts and its execution intermediate files belong in `tasks/<plan-name>/`; the scripts are durable, the rest is disposable scratch.
 - Launcher scripts belong in `execs/`: keep only `run.sh` and `update.sh` at its root, and put per-run scripts in `execs/scpts/<run>.sh`. Anything that is not a launcher does not go in `execs/` at all.
+- Project documentation belongs in `docs/`: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh` — do not edit it.
 - Output names must distinguish tasks, experiments, or runs.
 
 ## 6. Project Runtime
