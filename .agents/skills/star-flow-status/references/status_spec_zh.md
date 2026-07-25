@@ -10,7 +10,7 @@
 
 - 战略计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的门。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来与 `exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的门。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
 
 对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（STOP 线）"清单、以及 Notes 里的任何"战略信号"。
 
@@ -53,12 +53,12 @@
 ## Rollup（三个数）
 
 1. **战略完整度** —— 各战略计划（来自 coach 的根/内部节点）里：`done` 的章节数 /（6 × 战略计划数）。注明哪些未 `finalized:`。
-2. **拆解覆盖度** —— 内部节点（已拆解）vs 被标 `⚠` 的粗糙叶子（`done` 的战略节点却从未拆解，或 §3/§5 大量 `[TBD]` 的叶子）。
+2. **拆解覆盖度** —— 内部节点（已拆解）vs 被标 `⚠` 的粗糙叶子（已 `done` 却从未拆解的战略节点，或 §3/§5 大量 `[TBD]` 的叶子）。
 3. **执行进度** —— 叶子 `exec_status: done` / 总叶子数；以及所有有 run 的叶子的 EXEC_LOG 步 `done` / 总数之和。
 
 ## 覆盖带（树外面那一薄圈）
 
-每一行**必须其全部条件同时成立**才触发。其余一律沉默——特别是：还在跑的 run 什么都不欠，未 `done` 的叶子对下游什么都不欠。触发的行报一句话：欠的是什么、欠在哪个节点或哪个 run、以及补上它的命令。收敛规则：给了 `PLAN_NAME` 时，只检查属于该子树的产物（以及从其叶子 `exec_runs` 可达的 run）。
+每一行**必须全部条件同时成立**才触发。其余一律沉默——特别是：还在跑的 run 什么都不欠，未 `done` 的叶子对下游什么都不欠。触发的行报一句话：欠的是什么、欠在哪个节点或哪个 run、以及补上它的命令。收敛规则：给了 `PLAN_NAME` 时，只检查属于该子树的产物（以及从其叶子 `exec_runs` 可达的 run）。
 
 | # | 信号 | 触发条件（须全部成立） | 路由 |
 |---|---|---|---|
@@ -69,7 +69,7 @@
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `$star-expt-analyst <叶子>` |
 | 6 | 台账过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行台账——即 `wkdrs/results/results.md` 与（限定到 `PLAN_NAME` 时的）`wkdrs/results/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `$star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `$star-metd-summarize` |
-| 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 每个策略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `$star-metd-summarize` |
+| 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 每个战略计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `$star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `$star-proj-adopt backfill` |
 | 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `$star-expt-digest` |
 | 11 | 缺代码库规范 | 存在 ≥1 个可执行叶子 **且** `metds/codearc.md` 不存在 | `$star-code-architect` |
@@ -80,9 +80,9 @@
 
 - **第 4 行需要日志里有日期，没有就沉默。** EXEC_LOG 的步骤表并不强制带日期列。日志里没有可比对的带日期条目时，第 4 行无法判定——那就什么都不报，绝不退回去拿文件 mtime 猜。真正要紧的那种情况（压根没有审查）已经由第 3 行覆盖。
 - **第 7 行是精确对账，不是拿 mtime 猜。** `$star-metd-summarize` 会逐个源计划记下"读取时该计划带的 `updated` 值"。拿那个记录值和计划当前的 `updated` 比——绝不用文件 mtime，它会因为无关的事情变动（一次 checkout、一次格式化）。
-- **第 8 行要等整棵树。** summarizer 编译的是已确定的方法——只要还有叶子未执行、或策略计划未定稿，它自身的就绪门槛就会停下——所以覆盖带只在每个叶子都 `done`、每个策略计划都带 `finalized:` 之后才推荐它，无论更早已经完成了多少叶子。
-- **第 10 行只对已经在记 digest 的项目触发。** 与第 2、7、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，一个从没跑过 `$star-expt-digest` 的项目并不因此欠账。所以这一行问的是“已有的序列有没有落在分析报告后面”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不可被当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对水位线的定义一致。
-- **第 1 行是这里最弱的信号。** `$star-plan-coach` 把种子记在计划 §1 的散文里（"Seeded from `metds/ideas/<slug>_idea.md`"），不是 frontmatter 字段，所以检测靠 slug 匹配加上对想法文件名的正文 grep。一份由想法长出来、之后又被改名的计划，会被读成"未立项"。当只有第 1 行触发时，说明这条检查是启发式的。
+- **第 8 行要等整棵树。** summarizer 编译的是已确定的方法——只要还有叶子未执行、或战略计划未定稿，它自身的就绪门槛就不会放行——所以覆盖带只在每个叶子都 `done`、每个战略计划都带 `finalized:` 之后才推荐它，无论更早已经完成了多少叶子。
+- **第 10 行只对已经在记 digest 的项目触发。** 与第 2、7、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，一个从没跑过 `$star-expt-digest` 的项目并不因此欠账。所以这一行问的是“已有的序列有没有落在分析报告后面”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不能当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对水位线的定义一致。
+- **第 1 行是这里最弱的信号。** `$star-plan-coach` 把种子记在计划 §1 的正文里（"Seeded from `metds/ideas/<slug>_idea.md`"），不是 frontmatter 字段，所以检测靠 slug 匹配加上对想法文件名的正文 grep。一份由想法长出来、之后又被改名的计划，会被读成"未立项"。当只有第 1 行触发时，说明这条检查是启发式的。
 
 ## 下一步动作（唯一的建议）
 

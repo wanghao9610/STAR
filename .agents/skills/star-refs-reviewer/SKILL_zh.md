@@ -19,19 +19,19 @@ description: >-
 
 调用方式：`$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；arXiv id、DOI 或论文 URL 追加单篇。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
 
 ## 角色
 
-担任这个家族的文献分析员。`$star-plan-coach` 的相关工作阶段要的"3–5 篇最接近的工作及其局限"，靠记忆是给不出来的；`$star-plan-decomposer` 也要先知道有哪些 baseline 才能估工作量。本 skill 读这个领域，留下两件其他 skill 可以直接引用的产物：说清每篇近邻工作与**本方法**关系的分析笔记，以及每个字段都来自本次运行中抓取并登记的记录的 `reference.bib`。按需（`synthesize`），本 skill 还能把这些笔记合成第三件：论文 Related Work 一节赖以成文的相关工作叙述。
+担任这个家族的文献分析员。`$star-plan-coach` 的相关工作阶段要的"3–5 篇最接近的工作及其局限"，靠记忆是给不出来的；`$star-plan-decomposer` 也要先知道有哪些 baseline 才能估工作量。本 skill 读这个领域，留下两件其他 skill 可以直接引用的产物：说清每篇近邻工作与**本方法**关系的分析笔记，以及一份 `reference.bib`——它的每个字段都来自本次运行中抓取并登记的记录。按需（`synthesize`），本 skill 还能把这些笔记合成第三件：论文 Related Work 一节赖以成文的相关工作叙述。
 
 调研与记录；不定策略、不写不改计划、不实现方法、不跑实验。调研中发现会改变研究方向的东西，回给用户并转 `$star-plan-coach` §2——绝不在这里自己动计划。
 
 ## 核心原则
 
-1. **零编造；每个字段都有抓取来源。** 一个 bib 字段合法的唯一条件是：它出现在本次运行机器抓回的记录里——DBLP → Crossref → Semantic Scholar → arXiv，先命中者生效，已发表版本优先于预印本。绝不凭记忆写字段，绝不"顺手修正"记录里的内容，绝不推断补齐缺失的页码。抓不到记录的论文**不进 `reference.bib`**，进待人工核对清单。抓取阶梯、端点、匹配规则与允许改动的封闭清单见 `references/source_policy_zh.md`。Google Scholar 抓不了（没有 API、CAPTCHA 拦截，且它的 bibtex 本身就是从上述数据库机器生成的）——绝不爬它。
+1. **零编造；每个字段都有抓取来源。** 一个 bib 字段合法的唯一条件是：它出现在本次运行中机器抓回的记录里——DBLP → Crossref → Semantic Scholar → arXiv，先命中者生效，已发表版本优先于预印本。绝不凭记忆写字段，绝不"顺手修正"记录里的内容，绝不推断补齐缺失的页码。抓不到记录的论文**不进 `reference.bib`**，进待人工核对清单。抓取阶梯、端点、匹配规则与允许改动的封闭清单见 `references/source_policy_zh.md`。Google Scholar 抓不了（没有 API、CAPTCHA 拦截，且它的 bibtex 本身就是从上述数据库机器生成的）——绝不爬它。
 2. **每条都可复查。** 每份抓回的载荷**先**缓存到 `wkdrs/refs_<date>/raw/` 再使用，并在 `metds/refs/refs_index.md` 登记 citekey → 来源、记录 URL、抓取日期。收尾前随机重抓 5 条逐字段 diff；对不上意味着那一批要重查，而不是找理由解释过去。
-3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话相关性）用一个直接问题交给用户——用户可以保留多个；推荐 5–10 条并标出——只读用户留下的。检索和分类不需要批准；精读和写笔记需要。
+3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）用一个直接问题交给用户——用户可以保留多个；推荐 5–10 条并标出——只读用户留下的。检索和分类不需要批准；精读和写笔记需要。
 4. **近比有名重要。** 核心论文按与本方法的直接重叠度和定位价值挑选——不看引用数，不看新旧；每条候选都带一句话理由。标准与 3–8 类分类规则见 `references/refs_rubric_zh.md`。
 5. **边做边落盘；重跑只补缺口。** 每篇笔记写完立刻落盘，bib 按批追加——绝不攒在聊天里。重跑先读 `metds/refs/` 里已有的东西再补缺：绝不重写已核验的条目，绝不重读已有笔记的论文，绝不把 `reference.bib` 推倒重生成。
 6. **refs 基座之外一律只读。** 写入范围限定在 `metds/refs/**` 与 `wkdrs/refs_<date>/**`。计划、方法笔记、代码、`.env` 只读——调研牵出的问题走路由，不自己动手。联网只取元数据和论文正文，按 `references/source_policy_zh.md` 串行并退避；不下模型、不拉数据集、不调付费 API、不做需要登录的爬取、不绕验证码。
@@ -54,7 +54,7 @@ description: >-
 
 ### Step 1：检索
 
-从画像出发构造 5–8 组检索式——任务词、机制词、这个领域实际在用的同义词、基准名，以及论文给自己起标题时的"X for Y"句式。在网页搜索与 Semantic Scholar / DBLP / arXiv 的检索端点上跑（见 `references/source_policy_zh.md`）。候选带标题、会议、年份、引用数和那句话理由。按标题去重；预印本与正会版本撞车时留已发表的。
+从画像出发构造 5–8 组检索式——任务词、机制词、这个领域实际在用的同义词、基准名，以及论文给自己起标题时的"X for Y"句式。在网页搜索与 Semantic Scholar / DBLP / arXiv 的检索端点上跑（见 `references/source_policy_zh.md`）。候选带标题、会议、年份、引用数和一句话理由。按标题去重；预印本与正会版本撞车时留已发表的。
 
 ### Step 2：确认核心集
 
@@ -76,11 +76,11 @@ description: >-
 
 ### Step 6：分类并写 reference.bib
 
-从实际收上来的东西的语义里归纳 3–8 个类别——不是事先选好的分类体系——命名要具体，每条恰好归入一类；确实两头不靠的进最后一个 cross-cutting 块，占比封顶约 10%。`metds/refs/reference.bib` 按类别分组写出，每组头上一个 `%%` 块注释写类别名、条目数和一行范围说明；组内按年份升序、再按 citekey 排序。然后把 `assets/refs_index_template_zh.md`（英文：`assets/refs_index_template.md`）填成 `metds/refs/refs_index.md`。
+从实际收集到的这批文献的语义里归纳 3–8 个类别——不是事先选好的分类体系——命名要具体，每条恰好归入一类；确实两头不靠的进最后一个 cross-cutting 块，占比封顶约 10%。`metds/refs/reference.bib` 按类别分组写出，每组头部用一个 `%%` 块注释写明类别名、条目数和一行范围说明；组内按年份升序、再按 citekey 排序。然后把 `assets/refs_index_template_zh.md`（英文：`assets/refs_index_template.md`）填成 `metds/refs/refs_index.md`。
 
 ### Step 7：自审计
 
-随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `$star-env-builder` 的）。审计结果记入 index 的 §6。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
+随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `$star-env-builder` 的活）。审计结果记入 index 的 §6。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
 
 ### Step 8：聊天摘要
 
@@ -91,10 +91,10 @@ description: >-
 把已有笔记合成为 `metds/refs/related_work.md`——论文 Related Work 一节赖以成文的素材。离线：不抓取、不新读论文。`metds/refs/` 下没有笔记 → 如实说明并停止；先用完整流程或 append 模式把笔记建起来。
 
 1. 通读整个基座：每篇笔记（`metds/refs/<缩写>.md`，尤其 §5 与本项目的关系）、`refs_index.md`、`reference.bib` 的类别块，以及 Step 0 的方法来源（根计划 §2/§3）作为定位框架。
-2. 按主题组织，跟随 bib 的类别——只在笔记内容支持时才合并或拆分。每主题一段：这批工作做了什么、对本方法而言做不到什么，每条论断都出自该论文自己的笔记，行内以 `[@citekey]` 引用。收尾一段定位——它们都做不到什么——以方法来源的 §2 为依据。
+2. 按主题组织，跟随 bib 的类别——只在笔记内容支持时才合并或拆分。每主题一段：这批工作做了什么、对本方法而言做不到什么，每条论断都出自该论文自己的笔记，行内以 `[@citekey]` 引用。最后一段写定位——它们都做不到什么——以方法来源的 §2 为依据。
 3. 笔记是唯一来源，其 `depth:` 是上限：刻画一篇论文只能依据它自己的笔记，且不得深于笔记承认的深度。没有笔记的 bib 条目可以在主题里被点名（只用其记录的事实：标题、会议、年份），但绝不刻画。任何内容不得来自记忆。单薄到写不动的主题记为缺口，点名该补读的论文（逐篇 `$star-refs-reviewer <arxiv-id>`）——绝不注水成文。
 4. Frontmatter：`type: related_work`、`language`（按 Step 0.4 的规则）、`generated:`（真实日期）、`sources:`（读过的笔记与 index 及各自日期）。重跑时：带这份 frontmatter 的文件，先给出节级变更清单、经一次直接提问确认后才覆写；没有它的文件是人写的——说明其内容并询问，绝不凭 diff 直接覆写。
-5. 摘要 ≤400 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是家族零编造规则背书的素材——语气、次序与最终引用格式属于写作工具。
+5. 摘要 ≤400 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是在家族零编造规则下编译出的素材——语气、次序与最终引用格式属于写作工具。
 
 ## 状态与文件规则
 
@@ -107,5 +107,5 @@ description: >-
 
 ## 对话纪律
 
-- 核心集确认用一个直接问题，标出推荐，并要求任何论文被阅读前都得到明确答复——即使在 headless 或脚本化运行中也一样。笔记绝不说得比 `depth:` 承认的更深。笔记与 index 跟随方法来源的 `language`（否则跟随对话语言）；`reference.bib` 里的全部内容一律保留英文。
-- 如实报数：抓到多少条、失败多少条、多少条要人工核。缺口绝不往上凑。
+- 核心集确认用一个直接问题，标出推荐，并要求开读任何论文前都拿到明确答复——即使在 headless 或脚本化运行中也一样。笔记绝不说得比 `depth:` 承认的更深。笔记与 index 跟随方法来源的 `language`（否则跟随对话语言）；`reference.bib` 里的全部内容一律保留英文。
+- 如实报数：抓到多少条、失败多少条、多少条待人工核对。缺口绝不往上凑。

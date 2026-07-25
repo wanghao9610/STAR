@@ -43,15 +43,15 @@ description: >-
 ### Step 0：预检
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. `ENV_NAME` := 参数，否则 `CODE_NAME`。若参数是 `add <包名>…`，则选中 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的那个环境——不创建、不改名、不重建。
+2. `ENV_NAME` := 参数，否则 `CODE_NAME`。若参数是 `add <包名>…`，则进入 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的那个环境——不创建、不改名、不重建。
 3. 探测并记录（供安装计划与报告使用）：平台 + 架构；`nvidia-smi`（驱动支持的 CUDA 上限）；`nvcc --version` / `CUDA_HOME`（本机 toolkit，常缺失）；`$CONDA_HOME/bin/conda --version`；`uv --version`。
-4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/skill:star-code-architect`，用户坚持则可只建裸环境（仅 python）。
+4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/skill:star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
 
 ### Step 1：选择后端（确定性）
 
 - `CONDA_HOME` 非空**且**路径存在 → **conda 后端**：`$CONDA_HOME/bin/conda create -n <ENV_NAME> python=<X.Y> -y`。
 - 否则 → **venv 后端**，位于 `<项目根>/.venv`：优先 `uv venv .venv --python <X.Y>`；其次 `$PYTHON_HOME/bin/python -m venv .venv`；最后 `python3 -m venv .venv`。此时 `ENV_NAME` 参数无意义——若传了就说明一声，然后继续。
-- Python 版本：`requires-python`（pyproject.toml）→ `python_requires`（setup.py / setup.cfg）→ 上游 README 声明 → 默认 3.10。信号冲突 → 问。
+- Python 版本：`requires-python`（pyproject.toml）→ `python_requires`（setup.py / setup.cfg）→ 上游 README 声明的版本 → 默认 3.10。信号冲突 → 问。
 - 记录 `ENV_PY`（绝对路径），之后每条命令都用它。
 
 ### Step 2：冲突处理
@@ -105,13 +105,13 @@ description: >-
 
 ### Step 8：新增依赖（仅 add 模式）
 
-环境已经存在；本模式只往里装，并记录装了什么。它不创建、不改名、不重建——环境坏了是一次完整 run 的事（Step 2 的*就地校验与修复*）。
+环境已经存在；本模式只往里装，并记录装了什么。它不创建、不改名、不重建——环境坏了是一次完整 run 的事（Step 2 的*原地验证修复*）。
 
 1. 按原则 1 从 `.env` 解析 `ENV_PY`。没有可用解释器 → 如实说明并建议跑一次完整的 `/skill:star-env-builder`；什么都不装。
 2. 按 `references/installer_policy_zh.md` 给每个包归类——framework / runtime / optional / conda 专属——并说明各自会落进哪个 requirements 文件。
-3. **门**（原则 2——门前不装任何东西）：呈现这些包、它们的类别、将要使用的版本与索引源、下载量大时给出量级、以及任何 CUDA 耦合；询问*批准并安装* / *调整* / *中止*。
+3. **门**（原则 2——门前不装任何东西）：呈现这些包、它们的类别、将要使用的版本与索引源、下载量大时给出估计、以及任何 CUDA 耦合；询问*批准并安装* / *调整* / *中止*。
 4. 走阶梯安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在 STOP 线上：把确切命令备好，不要跑。
-5. 只对新增的包做冒烟（`references/smoke_test_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，有限重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
+5. 只对新增的包做冒烟（`references/smoke_test_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
 6. 把每个装好的包追加进它所属的 requirements 文件，保留该布局既有的顺序与锁定。在最新的 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` 追加一个 `## Added <日期>` 块（没有报告就新写一份）。提交：`star-env-builder: add <包名>`，只暂存 `${CODE_NAME}/requirements*`。
 7. 汇报 ≤400 字：装了什么、各 requirements 文件增加了什么、冒烟证据、blocked 或待用户处理的项。
 

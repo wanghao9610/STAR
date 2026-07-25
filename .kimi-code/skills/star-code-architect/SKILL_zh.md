@@ -6,7 +6,7 @@ description: >-
   完整性、许可证、活跃度），由用户选定后克隆、去除 git 历史、记录出处，并保守地重命名为 CODE_NAME。
   当代码已存在时：改为用只读 subagent 勘察代码。两条路径随后汇合：设计目标架构与迁移表，仅执行用户
   批准的迁移项（subagent 编排 + 逐组验证 + git 检查点），并把架构规范写入 metds/codearc.md，
-  在 AGENTS.md 与 .cursor/rules/ 留下薄指针。只要用户运行 /skill:star-code-architect，想为计划找参考实现
+  在 AGENTS.md 与 .cursor/rules/ 留下薄指针。当用户运行 /skill:star-code-architect，或想为计划找参考实现
   或起步代码库、想搭建 ${CODE_NAME}/、或想整理/重构现有代码库并沉淀架构规范时，都应使用本 skill。
   Bilingual (中/英) — also trigger in English whenever the user wants a reference
   implementation or starter codebase for a plan, wants to set up or scaffold ${CODE_NAME}/,
@@ -19,7 +19,7 @@ description: >-
 
 调用方式：`/skill:star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
 
 ## 角色
 
@@ -33,7 +33,7 @@ description: >-
 2. **两道门，门间自主。**门 1：用户从打分候选中选定参考库。门 2：用户批准目标架构与迁移表。两门之间和之后的工作自主推进、有界重试。门没有覆盖的事不做。
 3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项落地——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
-5. **主循环编排与复核，subagent 执行。**勘察与迁移交给职责狭窄的 subagent，文件所有权互不相交，返回结构化结果。主循环亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。契约见 `references/orchestration_spec_zh.md`。
+5. **主循环编排与复核，subagent 执行。**勘察与迁移交给职责单一的 subagent，文件所有权互不相交，返回结构化结果。主循环亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。契约见 `references/orchestration_spec_zh.md`。
 6. **单一规范，薄指针。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划组件落位映射、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行的摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻指针。规范内容绝不复制成多份。
 
 ## 工作流
@@ -41,8 +41,8 @@ description: >-
 ### Step 0：定向并选择分支
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用对话提问问选哪份）。
-3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `/skill:star-proj-adopt` 转介进来的状态。否则在对话里问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题据此检索*。
+2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用对话提问询问选哪份）。
+3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `/skill:star-proj-adopt` 转介进来的状态。否则在对话里问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划* 两个选项。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（奠基）**；已有真实代码 → **分支 B（整理）**；只有零散几个脚本 → 询问是围绕它们奠基还是整理现状。
 
@@ -54,7 +54,7 @@ description: >-
 
 #### Step A2：检索并入围
 
-优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划点名 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则退化为网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 从最小骨架从零起步。
+优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划点名 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则退化为网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 以最小骨架从零起步。
 
 #### Step A3：评分
 
@@ -114,7 +114,7 @@ description: >-
 
 #### Step C5：终验
 
-`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 若 CPU 上够便宜也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §7）。
+`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 在 CPU 上开销不大也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §7）。
 
 #### Step C6：汇报与交棒
 
@@ -131,6 +131,6 @@ description: >-
 
 ## 对话纪律
 
-- 两道门与所有提问都在对话里逐条问——每次只问一题。在非交互 `kimi -p` 下（无人应答）回退为普通文本，仍一次一题，且跨门的副作用必须先收到明确的批准文字。
+- 两道门与所有提问都在对话里逐条问——每次只问一题。在非交互 `kimi -p` 下（无人应答）回退为普通文本，仍一次一题，且任何跨门副作用都要先拿到明确的批准文字。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `metds/codearc.md` 正文语言跟随根计划的 `language`（无计划则用对话语言）；`UPSTREAM.md` 一律英文（事实元数据）；中文文档中专业术语保留英文。

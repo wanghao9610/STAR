@@ -18,7 +18,7 @@ description: >-
 
 调用方式：`$star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
 
 ## 角色
 
@@ -40,8 +40,8 @@ description: >-
 ### Step 0：定向并选择分支
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则问选哪份）。
-3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `$star-proj-adopt` 转介进来的状态。否则问：*先跑 `$star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题据此检索*。
+2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则询问选哪份）。
+3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `$star-proj-adopt` 转介进来的状态。否则问：*先跑 `$star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划* 两个选项。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（奠基）**；已有真实代码 → **分支 B（整理）**；只有零散几个脚本 → 询问是围绕它们奠基还是整理现状。
 
@@ -53,7 +53,7 @@ description: >-
 
 #### Step A2：检索并入围
 
-优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划点名 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则退化为网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 从最小骨架从零起步。
+优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划点名 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则退化为网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 以最小骨架从零起步。
 
 #### Step A3：评分
 
@@ -113,7 +113,7 @@ description: >-
 
 #### Step C5：终验
 
-`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 若 CPU 上够便宜也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §7）。
+`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 在 CPU 上开销不大也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §7）。
 
 #### Step C6：汇报与交棒
 

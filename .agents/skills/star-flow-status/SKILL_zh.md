@@ -1,7 +1,7 @@
 ---
 name: star-flow-status
 description: >-
-  只读地总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的
+  只读总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的
   章节状态、children、depends_on 与 exec_status（并读 wkdrs/<run>/EXEC_LOG.md 获取步级进度），然后渲染
   带状态的树、进度 rollup、唯一的下一步动作，以及任何 drift。同时检查周边阶段——想法、文献、代码审查、
   实验分析、方法文档——找出已完成工作里缺失或过期的后续环节。绝不写任何文件。只要用户运行
@@ -15,7 +15,7 @@ description: >-
 
 调用方式：`$star-flow-status [PLAN_NAME]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树和覆盖检查一起收敛到该计划的子树。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。
 
 ## 角色
 
@@ -32,7 +32,7 @@ description: >-
 
 ## 工作流
 
-具体规则遵循 `references/status_spec_zh.md`（英文对话读 `references/status_spec.md`）；形状是：
+具体规则遵循 `references/status_spec_zh.md`（英文对话读 `references/status_spec.md`）；骨架如下：
 
 ### Step 1：扫描
 列出 `metds/plans/*_plan.md`，读取各文件 frontmatter（根计划另读 `## Sub-plans` 索引）。若给了 `PLAN_NAME`，解析它并只保留该子树。

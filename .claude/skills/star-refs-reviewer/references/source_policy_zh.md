@@ -4,9 +4,9 @@
 
 ## 唯一的硬规则
 
-一个 bib 字段合法的唯一条件是：它出现在下列来源之一机器抓回的记录里。绝不凭模型记忆写字段。绝不"修正"记录里写错的字段。绝不靠推断补齐缺失字段——年份不行，页码不行，出版社也不行。抓不到记录的论文**不进 `reference.bib`**，进 index 的待人工核对清单。90% 转录 + 10% 记忆的条目，就是一条编造的条目。
+一个 bib 字段合法的唯一条件是：它出现在从下列来源之一机器抓回的记录里。绝不凭模型记忆写字段。绝不"修正"记录里写错的字段。绝不靠推断补齐缺失字段——年份不行，页码不行，出版社也不行。抓不到记录的论文**不进 `reference.bib`**，进 index 的待人工核对清单。90% 转录 + 10% 记忆的条目，就是一条编造的条目。
 
-Google Scholar 不作为来源：它没有 API，自动查询会被 CAPTCHA 拦，而且它导出的 bibtex 本身就是机器生成的——经常缺页码、用缩写会议名、优先给预印本而不是正式发表版。人可以去读它；本 skill 绝不爬它。下面这些数据库正是 Scholar 的 bibtex 被生成出来的**源头**，既抓得到，又更接近原始记录。
+Google Scholar 不作为来源：它没有 API，自动查询会被 CAPTCHA 拦，而且它导出的 bibtex 本身就是机器生成的——经常缺页码、用缩写会议名、优先给预印本而不是正式发表版。人可以去读它；本 skill 绝不爬它。下面这些数据库正是生成 Scholar bibtex 的**源头**，既抓得到，又更接近原始记录。
 
 ## 抓取阶梯
 
@@ -59,7 +59,7 @@ citekey 是你唯一"创作"的字段。其余全部是转录。
 允许，且仅限于此：
 
 - 把来源的 key 换成 citekey。
-- 删噪音字段：`bibsource`、`biburl`、`timestamp`、`abstract`、`keywords`、只是重复 DOI 的 `url`、会议已经确定时的 `month`。
+- 删噪音字段：`bibsource`、`biburl`、`timestamp`、`abstract`、`keywords`、只是重复 DOI 的 `url`、会议已能确定月份的 `month`。
 - 给 BibTeX 会自动转小写的大写加花括号保护：`{CLIP}`、`{ImageNet}`、`{T}ransformer`。这改的是渲染，不是内容。
 - 展开会议缩写，但**只能用抓回记录里已有的名称**：DBLP 的 `booktitle` 通常本来就写全 `IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)`，照抄就是转录；凭空造一个记录里没有的全称不是。
 

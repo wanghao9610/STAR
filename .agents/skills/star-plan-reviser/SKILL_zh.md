@@ -15,11 +15,11 @@ description: >-
 
 调用方式：`$star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-3way-ablation_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记 drift 的节点。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
 
 ## 角色
 
-闭合其他 skill 留下的环：`$star-plan-coach` 写战略、`$star-plan-decomposer` 拆解、`$star-plan-executor` 执行叶子并留下证据（`wkdrs/<run>/EXEC_LOG.md`、产物）——并且明确把"结果与计划相矛盾"交还给用户。接住**一个计划节点**，用这些证据审计它的意图，并在**用户对每处改动逐一拍板**的前提下**就地修订计划文件**。`$star-flow-status` 是全树的浅层只读仪表盘；本 skill 是被授权动笔的单计划深度审计。
+闭合其他 skill 留下的环：`$star-plan-coach` 写战略、`$star-plan-decomposer` 拆解、`$star-plan-executor` 执行叶子并留下证据（`wkdrs/<run>/EXEC_LOG.md`、产物）——并且明确把"结果与计划相矛盾"交还给用户。接住**一个计划节点**，用这些证据审计它的意图，并在**用户对每处改动逐一拍板**的前提下**就地修订计划文件**。`$star-flow-status` 是全树的浅层只读仪表盘；本 skill 是针对单个计划的深度审计，有权动笔。
 
 修订文本；不重跑实验、不重拆子树、不从零重推战略。
 
@@ -30,7 +30,7 @@ description: >-
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条以一次一问采纳 / 调整 / 跳过，标出推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `$star-plan-decomposer`；研究问题或方法级转向转给 `$star-plan-coach`。边界见 `references/revision_rules_zh.md`。
-6. **涟漪意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 的更新让 `$star-flow-status` 在下游自然浮现过期提示。
+6. **涟漪意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在下游的 `$star-flow-status` 浮现。
 
 ## 工作流
 
@@ -60,7 +60,7 @@ description: >-
 
 ### Step 4：修订问答（一次一条）
 
-1. 按报告顺序走候选，每条候选问一个直接问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；用户始终可以自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `$star-plan-decomposer` 或 `$star-plan-coach`*（推荐）vs *仍在本文件做有界的文本修订*。边走边记流水账（约定 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——当下一条候选与已定的某条相互牵连时，用一个从句把它挂在流水账上（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。绝不把整张候选清单打包成一个笼统问题。
+1. 按报告顺序走候选，每条候选问一个直接问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；用户始终可以自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `$star-plan-decomposer` 或 `$star-plan-coach`*（推荐）vs *仍在本文件做有界的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用一个从句点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。绝不把整张候选清单打包成一个笼统问题。
 2. 走完清单后问一次：还有其他要改的吗？用户新增的项同样作为候选（证据记"user directive"）。
 3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；落盘的报告就是交付物。
 
@@ -81,15 +81,15 @@ description: >-
 
 ### Step 7：汇报与交接
 
-以结果开头，约 400 字以内：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`$star-plan-decomposer <slug>`（结构变了 / children 过期）、`$star-plan-coach <slug>`（战略转向）、`$star-plan-executor <叶子>`（重跑修订后的叶子）、`$star-code-reviewer <叶子>`（审计实现代码）、`$star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提供一次提交的机会（见状态与文件规则）。
+以结果开头，约 400 字以内：证据基础（读了什么、核实了什么）、完成度结论、逐节落笔的改动、跳过的候选、涟漪提醒。结尾给出下一步命令：`$star-plan-decomposer <slug>`（结构变了 / children 过期）、`$star-plan-coach <slug>`（战略转向）、`$star-plan-executor <叶子>`（重跑修订后的叶子）、`$star-code-reviewer <叶子>`（审计实现代码）、`$star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有落笔的修订，提出一次提交提议（见状态与文件规则）。
 
 ## 状态与文件规则
 
 - 审查报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`。
-- 只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及目标一行目标变化时父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
+- 只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及当目标的一行目标变化时，父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
-- Git：有落笔修订时，在 Step 7 提供一次提交目标计划（及一行目标变化时的父计划）的机会——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
-- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 和其他修订候选一样：需要用户明确批准，理由写进本次 Revision History 条目。
+- Git：有落笔修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划）——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
+- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。
 
 ## 对话纪律
 

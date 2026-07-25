@@ -79,7 +79,7 @@ description: >-
 
 ### Step 7：摘要与路由
 
-≤400 字，先说周期：窗口与范围、报告支撑 / 临时各多少个 run、学到了什么的头条、相对上一份 digest 有什么变化、以及最主要的缺口。然后是路由：未分析的 run → `$star-expt-analyst <run dir>`；过期台账 → `$star-expt-analyst aggregate`；未执行或待用户的叶子 → `$star-plan-executor <slug>`；被证伪的 claim 或 kill-criterion 命中 → `$star-plan-reviser <slug>`；当前树态 → `$star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
+≤400 字，先说周期：窗口与范围、报告支撑 / 临时各多少个 run、头条（学到了什么）、相对上一份 digest 有什么变化、以及最主要的缺口。然后是路由：未分析的 run → `$star-expt-analyst <run dir>`；过期台账 → `$star-expt-analyst aggregate`；未执行或待用户的叶子 → `$star-plan-executor <slug>`；被证伪的 claim 或 kill-criterion 命中 → `$star-plan-reviser <slug>`；当前树态 → `$star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
 
 ### Step 8：台账（仅 ledger 模式）
 

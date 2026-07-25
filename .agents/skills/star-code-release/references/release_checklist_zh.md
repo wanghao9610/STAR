@@ -25,13 +25,13 @@
 | 根目录存在 `LICENSE` | 阻断 | 由用户选择 license；点名下面 §5 记录的约束并询问。绝不替用户选 |
 | 它与 `metds/codearc.md` §5 记录的上游许可证兼容 | 冲突时阻断 | 精确报出冲突——"上游是 GPL-3.0，根 LICENSE 是 MIT"——然后到此为止。解决许可证冲突是法律决定，不是 skill 的 |
 | `${CODE_NAME}/` 下上游的 `LICENSE` / `CITATION*` 仍在原处 | 被删则阻断 | 从 git 历史恢复 |
-| 代码库从某仓库奠基时存在 `${CODE_NAME}/UPSTREAM.md` | major | 由 `$star-code-architect` 记录来源 |
+| 代码库基于某个仓库搭建时存在 `${CODE_NAME}/UPSTREAM.md` | major | 由 `$star-code-architect` 记录来源 |
 | README 的 Acknowledgement 点名了上游仓库与核心论文 | major | 从 `UPSTREAM.md` 和 `metds/refs/refs_index.md` 编译 |
 | 拷进来但没有署名的第三方代码 | major | 点名文件及其出处（若还能追溯）；否则标出来交给用户 |
 
 ## 3. 命令可运行性
 
-README 打印的每条命令，按读者会遇到的顺序检查。这一族决定了这个仓库对作者以外的人是否成立。
+README 打印的每条命令，按读者会遇到的顺序检查。这一族决定了这个仓库在作者以外的人手里能不能跑。
 
 1. **安装**——README 点名的 requirements 文件存在；它写的 python 版本与最新 `ENV_REPORT.md` 一致；它打印的安装阶梯就是当初实际用的那套。
 2. **入口**——README 调用的每个模块能在 `.env` 解释器下导入（`python -c "import <module>"`）。导入失败是 major，并点名缺失的依赖或路径。

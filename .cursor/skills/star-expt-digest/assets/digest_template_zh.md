@@ -8,7 +8,7 @@ covers:
   from: <YYYY-MM-DD 或 "—">
   through: <YYYY-MM-DD>
 previous: <EXPT_DIGEST_<YYYY-MM-DD>.md 或 "—">
-model_id: <模型 id，照抄运行时本会话为你声明的那串——Cursor 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
+model_id: <模型 id，照抄本会话运行时声明的那个——Cursor 在会话开始时注入；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 sources:
@@ -48,7 +48,7 @@ sources:
 
 ## 4. 本周期的 run —— 临时（未核实）
 
-<!-- 有目录但没有分析报告的 run。只读 EXEC_LOG；只有当日志本身点名了数字及其文件时，数字才出现在
+<!-- 有目录但没有分析报告的 run。只读 EXEC_LOG；只有日志本身点名了数字及其文件，数字才出现在
      这里（references/digest_rubric_zh.md 第二层）。无判定、不评分、不出图。这些数字不得被引用、
      比较，或进入台账。若范围内每个 run 都已被分析，写"无"。 -->
 

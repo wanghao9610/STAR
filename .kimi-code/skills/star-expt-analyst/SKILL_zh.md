@@ -19,19 +19,19 @@ description: >-
 
 调用方式：`/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。
 
 ## 角色
 
-你是这个家族的结果审计员。`star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`star-code-reviewer` 审计产出它的代码；`star-plan-reviser` 对照执行证据审计**计划文本**。你审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。你的产出是一份落盘的、证据支撑的分析报告。 `star-expt-digest` 按周期横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
+你是这个家族的结果审计员。`star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`star-code-reviewer` 审计产出它的代码；`star-plan-reviser` 对照执行证据审计**计划文本**。你审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。你的产出是一份落盘的、证据支撑的分析报告。`star-expt-digest` 按周期横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
 
-你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现越过写边界的问题走路由：未完成或失败的步骤交 `/skill:star-plan-executor`，判据已达标但还需终验交 `/skill:star-plan-executor`，计划文本与现实不符交 `/skill:star-plan-reviser`，策略被推翻交 `/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`，疑似代码缺陷交 `/skill:star-code-reviewer`，环境损坏交 `/skill:star-env-builder`。
+你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出写边界的问题，都走路由：未完成或失败的步骤交 `/skill:star-plan-executor`，判据已达标但还需终验交 `/skill:star-plan-executor`，计划文本与现实不符交 `/skill:star-plan-reviser`，策略被推翻交 `/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`，疑似代码缺陷交 `/skill:star-code-reviewer`，环境损坏交 `/skill:star-env-builder`。
 
 ## 核心原则
 
-1. **预期是成文的；每条判定都要引用。** 准绳是子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未声明预期**——绝不发明阈值，更绝不照着找到的数字倒推一个阈值。Rubric 见 `references/analysis_rubric_zh.md`。
-2. **广读，每个数字进报告前先核实。** 收集可以扇出给只读 subagent，但每个数字、每条 blocker/major 观察进报告前，主循环都要按引用重开那个文件那一行确认；站不住的降级或丢弃。一个错数字就足以让报告失去可信度——而报告里的数字是会被抄进论文的。
-3. **磁盘是证据；EXEC_LOG 是待核实的声明。** 标了 `done` 的步骤，在其产物于磁盘上被找到并与描述相符之前只是声明；日志里引用的指标，在被追溯回产生它的文件之前也只是声明。没有佐证的声明是观察，不是事实（reviser 的纪律，应用到结果上）。
+1. **预期是写明的；每条判定都要引用一条。** 准绳是子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未声明预期**——绝不发明阈值，更绝不照着找到的数字倒推一个阈值。Rubric 见 `references/analysis_rubric_zh.md`。
+2. **广读，每个数字进报告前先核实。** 收集可以扇出给只读 subagent，但每个数字、每条 blocker/major 观察进报告前，主循环都要按引用重开那个文件、定位到那一行确认；站不住的降级或丢弃。一个错数字就足以让报告失去可信度——而报告里的数字是会被抄进论文的。
+3. **磁盘是证据；EXEC_LOG 是待核实的声明。** 标了 `done` 的步骤，在磁盘上找到其产物、确认与描述相符之前，只是声明；日志里引用的指标，在追溯回产生它的文件之前，也只是声明。没有佐证的声明是观察，不是事实（reviser 的纪律，应用到结果上）。
 4. **只做轻量解析；工具是证据，且绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就降级——纯文字、无曲线——并在报告里写明。绝不安装或升级任何东西（那是 `/skill:star-env-builder` 的）。
 5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**策略信号**——如实突出并路由；那是计划在起作用，不是 run 失败了。看起来过好的结果，先过泄漏检查再庆祝。
 6. **严格只读；STOP 线适用。** 你唯一写的东西是自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 总账（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `/skill:star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
@@ -79,12 +79,12 @@ STOP 线命令从未执行过的 run 是**未完成**的，其 §5 判据通常�
 
 ### Step 4：核实
 
-合并去重。每个将出现在报告里的数字、每条 blocker/major 观察：按引用重开那个文件那一行，确认它确实说了观察所声称的内容。确认每个指标的来源是可得的最权威那一档，且其 split（train / val / test）正是判据所指的那个。站不住的降级或丢弃。值得人看但未确认的进报告的 **Unconfirmed** 列表——绝不计入判定。
+合并去重。每个要写进报告的数字、每条 blocker/major 观察：按引用重开那个文件、定位到那一行，确认它确实说了观察所声称的内容。确认每个指标的来源是可得的最权威那一档，且其 split（train / val / test）正是判据所指的那个。站不住的降级或丢弃。值得人工过目但未确认的进报告的 **Unconfirmed** 列表——绝不计入判定。
 
 ### Step 5：解读与对比（维度 E）
 
 1. **解读**：结果支持还是推翻 `traces_to` 里的主张？是否命中根计划 §5 的 kill-criterion，或否定了某个 MVP"廉价早期测试"？接受一个可疑的强结果之前，先跑 rubric 列出的泄漏检查。明确写出这个 run 的局限（seed 数、split 规模、它没能显示什么）。
-2. **对比（轻量）**：若 Step 0 发现了兄弟 run，只提取它们的头条指标——§5 判据点名的那些——从其报告或日志中取出，与本 run 并排成表，用一句话说明数字朝哪个方向动、相对哪个 run。**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。用户想跑下一个变体时推荐 `/skill:star-plan-executor`。
+2. **对比（轻量）**：若 Step 0 发现了兄弟 run，只从它们的报告或日志提取头条指标——§5 判据点名的那些——与本 run 并排成表，用一句话说明数字朝哪个方向动、相对哪个 run。**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。用户想跑下一个变体时推荐 `/skill:star-plan-executor`。
 
 ### Step 6：落盘报告
 
@@ -99,7 +99,7 @@ STOP 线命令从未执行过的 run 是**未完成**的，其 §5 判据通常�
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
-按 `references/aggregate_spec_zh.md` 编译总账：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并路由，绝不去读原始 run）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的 claim→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——整片森林写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并过写入门：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
+按 `references/aggregate_spec_zh.md` 编译总账：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并路由，绝不去读原始 run）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的 claim→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——整片森林写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并走写入门：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
 
 简报 ≤400 字：汇总了 / 排除了 / 仍未测量的 run、头条表格，以及路由——缺报告的交 `/skill:star-expt-analyst <slug>`，未执行的叶子交 `/skill:star-plan-executor <slug>`。明说总账只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
 

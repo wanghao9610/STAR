@@ -6,7 +6,7 @@
 
 范围：`framework.txt` + `runtime.txt` 中的每个发行包，若装了 `optional.txt` 也包含在内。
 
-逐个把发行名映射回 import 名（解析映射表的反向），然后运行：
+逐个把发行名映射回 import 名（解析映射表反过来用），然后运行：
 
 ```bash
 $ENV_PY -c "import <mod>; print(getattr(<mod>, '__version__', 'n/a'))"

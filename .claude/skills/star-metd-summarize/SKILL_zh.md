@@ -4,7 +4,7 @@ description: >-
   把 metds/plans/ 下的研究计划树凝练成 metds/ 下可直接用于论文的方法文档。调用方式
   /star-metd-summarize [OPT]，OPT 为 overview、dataset、framework、training、evaluation 之一；不带
   参数则按依赖顺序编译全部五个（dataset → framework → training → evaluation → overview，overview 要
-  链接其余四个，故最后编译）。按 parent: 重建计划树，再依成文的提取映射抽取各文档所需内容（overview ←
+  链接其余四个，故最后编译）。按 parent: 重建计划树，再按写明的提取映射抽取各文档所需内容（overview ←
   根计划 §1 问题、§2 定位、§3 核心思想、§6 里程碑；dataset ← §4 数据选择加每个叶子 §2 的 datas/ 输入
   与数据构建步骤；framework ← §3 技术路线加建模类叶子及其 ${CODE_NAME}/ 路径；training ← §3 训练策略、
   §4 计算预算、inits/ 与超参数；evaluation ← §4 benchmark、baseline、指标与消融设计，加 §5
@@ -13,7 +13,7 @@ description: >-
   代码、日志、wkdrs/ 或对话记忆；结果数字归 star-expt-analyst。只写 metds/<OPT>.md，且覆盖已生成文档前
   必须先给出分节变更清单并获批准。收尾型 skill：就绪门槛只编译已完成的树——每个策略计划已 finalized、
   每个叶子 exec_status 为 done，即所有实验完成、方法已确定——否则停下，点名并路由未完成的工作；明知未
-  完成仍编译草稿必须由用户显式选择，绝非默认。当所有实验完成、计划定稿，用户运行 /star-metd-summarize，
+  完成仍要编译草稿，必须由用户显式选择，绝非默认。当所有实验完成、计划定稿，用户运行 /star-metd-summarize，
   或想把定稿的研究计划汇总 / 凝练成方法表述、产出 overview / dataset / framework / training /
   evaluation 文档，或想从计划里起草论文方法部分素材时使用。Bilingual（中/英）。
 ---
@@ -24,7 +24,7 @@ description: >-
 
 调用方式：`/star-metd-summarize [OPT]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。
 
 ## 角色
 
@@ -70,7 +70,7 @@ description: >-
 
 ### Step 4：填模板
 
-填 `assets/<OPT>_template_zh.md`（英文：`assets/<OPT>_template.md`）。保持模板的小节与顺序；没有覆盖的小节保留标题并写 `TODO`——既不删掉，也不注水。frontmatter 记录 `type`、`language`、`generated`（真实日期，绝不编造）与 `sources:`——每个喂过本文档的计划，以及读取时它所带的 `updated` 日期，这正是下次重跑能检测过期的依据。
+填 `assets/<OPT>_template_zh.md`（英文：`assets/<OPT>_template.md`）。保持模板的小节与顺序；没有覆盖的小节保留标题并写 `TODO`——既不删掉，也不注水。frontmatter 记录 `type`、`language`、`generated`（真实日期，绝不编造）与 `sources:`——每个喂过本文档的计划，以及读取时它所带的 `updated` 日期——下次重跑就是靠它检测过期。
 
 ### Step 5：写入，带 diff 门
 
@@ -89,7 +89,7 @@ description: >-
 
 - 唯一的写入是 `metds/overview.md`、`metds/dataset.md`、`metds/framework.md`、`metds/training.md`、`metds/evaluation.md`——五个 OPT 目标，除此之外不写任何东西、任何地方。
 - 绝不碰 `metds/plans/*`——计划文本属于 `/star-plan-coach`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-plan-reviser`；你发现的缺口或错误表述只汇报与路由，绝不就地修改。绝不碰 `metds/codearc.md`（`/star-code-architect` 的）、`metds/refs/*`（`/star-refs-reviewer` 的）、`wkdrs/*`（含 `/star-expt-analyst` 的结果总账 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
-- 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：执行现实经由 executor 的同步回写进入计划，所以如果某个 run 的细节在这里缺失，该修的是 plan sync，而不是把读取面扩大。
+- 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：执行现实经由 executor 的同步回写进入计划，所以如果某个 run 的细节在这里缺失，该修的是 plan sync，而不是扩大读取面。
 - 本 skill 不跑任何东西：不跑 python、不训练、不评测、不安装——没有哪条命令的输出是它需要的。
 - Git：只读；本 skill 绝不提交（规约 §1）。
 - 它不设置任何计划 frontmatter，也不创建 run 目录；每份文档的 `sources:` 块就是全部审计轨迹。
@@ -97,5 +97,5 @@ description: >-
 ## 对话纪律
 
 - 对话回复控制在 ~400 字以内；编译出的文档不计入。
-- AskUserQuestion 承载五道门：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。若不可用（headless / 脚本化），退化为纯文本，且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
+- 五道门都走 AskUserQuestion：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。若不可用（headless / 脚本化），退化为纯文本，且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
 - 按用户语言对话；文档跟随计划的 `language`（Step 1），可能与对话语言不同。中文文档里技术术语——指标名、模块路径、数据集名——保留英文。

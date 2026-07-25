@@ -2,7 +2,7 @@
 type: model_ledger
 language: zh
 generated: <YYYY-MM-DD>
-model_id: <模型 id，照抄运行时本会话为你声明的那串——Kimi 会话有报告就照记；仅当本会话未声明任何模型才写 "unrecorded">
+model_id: <模型 id，照抄本会话运行时声明的那个——Kimi 会话有报告就照记；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 artifacts_scanned: <n>
@@ -14,7 +14,7 @@ artifacts_without_trail: <n>
 <!-- 由 /skill:star-expt-digest ledger 写入。本文件是把磁盘上每份已注册产物的 model_trail 汇总而成的**生成物**，
      从不手工维护，在这里改它不产生任何效果。要修正某一行，去改它来源产物里的 trail，然后重新生成。
      每个值都抄自某条 trail，这里不做任何推断。trail 是自报的（规约 §8），本台账因此继承同一限制：
-     它报告的是各运行时当时的声称，而非经核实的出处。 -->
+     它报告的是各运行时的自述，而非经核实的出处。 -->
 
 ## 1. 概要
 
@@ -57,4 +57,4 @@ artifacts_without_trail: <n>
 
 | 产物 | 缺口 | 为什么要紧 |
 |---|---|---|
-| `metds/codearc.md` | 无 `model_trail` | 早于该字段——它的作者身份是未知，而非单一模型 |
+| `metds/codearc.md` | 无 `model_trail` | 早于该字段——它的作者未知，而非单一模型 |

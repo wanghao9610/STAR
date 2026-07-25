@@ -14,7 +14,7 @@
 
 ## import 扫描
 
-1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取第一段点号前的名字。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。
+1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。
 2. 去掉 stdlib：与 `python -c "import sys; print(sorted(sys.stdlib_module_names))"` 对照（任何 ≥ 3.10 的 Python 都能做这一步）。
 3. 去掉本地模块：`${CODE_NAME}/` 内的顶层包目录与 `.py` 文件。
 4. import 名 → 发行名映射（见下表）。未知名先上 PyPI 验证（`https://pypi.org/pypi/<name>/json`）再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到门上。
@@ -34,7 +34,7 @@
 | `attr` | `attrs` | `hydra` | `hydra-core` |
 | `OpenSSL` | `pyOpenSSL` | `pkg_resources` | `setuptools` |
 
-同名直映的科研常用包（import 名 = 发行名）：`torch`、`torchvision`、`numpy`、`scipy`、`pandas`、`matplotlib`、`tqdm`、`einops`、`timm`、`transformers`、`datasets`、`accelerate`、`wandb`、`pycocotools`、`omegaconf`、`mmcv`、`mmengine`。拿不准就上 PyPI 验证——不要猜。
+同名映射的科研常用包（import 名 = 发行名）：`torch`、`torchvision`、`numpy`、`scipy`、`pandas`、`matplotlib`、`tqdm`、`einops`、`timm`、`transformers`、`datasets`、`accelerate`、`wandb`、`pycocotools`、`omegaconf`、`mmcv`、`mmengine`。拿不准就上 PyPI 验证——不要猜。
 
 ## 类别路由
 
@@ -68,7 +68,7 @@ torch==<pin if the source pinned one>
 torchvision
 ```
 
-`requirements/conda.txt`——**不**被任何 `-r` 引用（pip 装不了）：
+`requirements/conda.txt`——任何 `-r` 行都**不**引用它（pip 装不了）：
 
 ```text
 # Install via conda, not pip:
@@ -79,5 +79,5 @@ ffmpeg
 ## 版本策略
 
 - 来自优先级 1/2 的约束逐字保留。
-- 扫描得到的依赖不锁版本，但已知耦合组要一起锁：`torch` / `torchvision` / `torchaudio`（按官方配对表）、`mmcv` ↔ `torch`、当锁定的 torch 早于 NumPy 2 支持时加 `numpy<2`。
+- 扫描得到的依赖不锁版本，但已知耦合组要一起锁：`torch` / `torchvision` / `torchaudio`（按官方配对表）、`mmcv` ↔ `torch`、若锁定的 torch 尚不支持 NumPy 2，则加 `numpy<2`。
 - 构建成功后，运行目录里的 `freeze.txt` 就是精确快照；只有用户要求时才把其中的锁定版本提升进 requirements。

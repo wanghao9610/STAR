@@ -20,7 +20,7 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)用 `Task` 派一个 subagent
 
 ## agent 返回后
 
-**主循环——而非 agent——重跑绑定的 check** 确认,再 checkpoint 到 EXEC_LOG。没有证据不轻信自报的 `pass`。
+**主循环——而非 agent——重跑绑定的 check** 确认,再 checkpoint 到 EXEC_LOG。没有证据就不轻信自报的 `pass`。
 
 - **通过** → 在 EXEC_LOG 把该步标 `done`,附产物路径 + 检查结果;更新子计划 `exec_status` / `updated`。
 - **失败** → 有限重试(≤2),把失败喂回下一次派发。仍失败 → 该步标 `blocked`,记下 blocker,带日志停下。

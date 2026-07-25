@@ -11,7 +11,7 @@
 | conda（仅白名单） | conda 后端**且**包在白名单上 | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <包> -y` |
 
 - uv 缺失 → 问一次并带推荐：装 uv（如 `$PYTHON_HOME/bin/python -m pip install --user uv`，用户偏好官方独立安装器亦可）/ 本次改用 pip。拒装只损失速度，不损失正确性。
-- 阶梯之外不混用管理器：uv/pip 装的由 uv/pip 升级。绝不用 conda 覆盖 pip 管理的包——conda 只拥有白名单，而白名单 pip 从不涉足。
+- 阶梯之外不混用管理器：uv/pip 装的由 uv/pip 升级。绝不用 conda 覆盖 pip 管理的包——conda 只管白名单，而白名单 pip 从不涉足。
 
 ## 安装顺序
 
@@ -35,7 +35,7 @@ venv 后端需要白名单项 → 不要即兴发挥（不 `sudo`、不 apt/brew
 2. **锁定**：依赖来源中的 torch 锁定版本，加上上游 README 点名的 CUDA 版本。
 3. **选择**：不超过上限、又满足锁定的最高官方 `cuXXX` wheel 源——当前可用的源以 pytorch.org/get-started 为准（源会轮换；不要凭记忆）。例：`--extra-index-url https://download.pytorch.org/whl/cu121`。
 4. macOS → 默认 PyPI wheel（CPU + MPS）。无 NVIDIA GPU 的 Linux → `/whl/cpu`。
-5. **不匹配**（锁定版本比上限新；上游要求的 nvcc 机器上没有）→ 作为门上的问题给出具体选项：满足锁定的旧 wheel / 更新的 torch（说明 API 风险）/ CPU 构建。
+5. **不匹配**（锁定版本比上限新；机器上没有上游要求的 nvcc）→ 作为门上的问题给出具体选项：满足锁定的旧 wheel / 更新的 torch（说明 API 风险）/ CPU 构建。
 
 `nvcc` 只在源码构建时才重要（那本来就在 STOP 线外）；装 wheel 只需要驱动。
 

@@ -28,7 +28,7 @@ description: >-
 
 ## 核心原则
 
-1. **准绳是成文的；每条 finding 都要引用。** 规则来自 CLAUDE.md（尤其 §2 简洁、§3 外科手术式修改、§5 布局、§6 运行时）、存在时的 `metds/codearc.md`（放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条 finding 携带 {file:line、违反的规则、证据、具体修法}；没有成文准绳支撑的抱怨是风格偏好，不是 finding。Rubric 见 `references/review_rubric_zh.md`。
+1. **准绳是成文的；每条 finding 都要引用。** 规则来自 CLAUDE.md（尤其 §2 简洁、§3 外科手术式修改、§5 布局、§6 运行时）、`metds/codearc.md`（若存在：放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条 finding 携带 {file:line、违反的规则、证据、具体修法}；没有成文准绳支撑的抱怨是风格偏好，不是 finding。Rubric 见 `references/review_rubric_zh.md`。
 2. **广收集，先核实再报告。** 收集可以扇出给只读 `Agent` subagent（`subagent_type: Explore`），但每条要进报告的 blocker/major finding，主循环都要重读被引用的代码确认；站不住的降级或丢弃。评价一份 review 看的是 finding 的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
 3. **符合度对照磁盘打分，绝不对照日志。** 计划模式下，§3 任务映射为 `implemented` / `partial` / `missing` 并带指针，§4 交付物查磁盘，§5 完成判据查支撑机制——EXEC_LOG 的声明要对照实际代码核实，绝不采信（reviser 的纪律，应用到代码上）。
 4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出喂给 findings，不替代读代码。环境不可用 → 审查降级为纯阅读，报告里写明，并建议 `/star-env-builder`。绝不改动环境。
@@ -51,7 +51,7 @@ description: >-
 
 ### Step 1：载入准绳
 
-读 CLAUDE.md；存在时读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的准绳——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（CLAUDE.md §3）。
+读 CLAUDE.md；若存在则读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的准绳——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（CLAUDE.md §3）。
 
 ### Step 2：廉价静态证据
 
@@ -73,7 +73,7 @@ description: >-
 
 ### Step 6：聊天摘要
 
-≤400 字，结论先行：审了多少文件、各严重度数量、top ≤10 findings 一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给越界 finding 的路由（`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`），然后在存在机械 findings 时提议修复 pass——用户也可以就此打住；落盘的报告本身就是完整交付物。
+≤400 字，结论先行：审了多少文件、各严重度数量、top ≤10 findings 一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给越界 finding 的路由（`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`），然后若有机械 findings，提议修复 pass——用户也可以就此打住；落盘的报告本身就是完整交付物。
 
 ### Step 7：可选修复 pass（仅机械项）
 
@@ -89,7 +89,7 @@ description: >-
 - 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类 finding 路由给 `/star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
 - 绝不移动、重命名或删除文件与目录——结构性变更属于 `/star-code-architect`。残留清单名称只标记，绝不改名。
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的 STOP 线同样适用）。
-- Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。
+- Git：只读，外加可选的一次修复提交、只 stage 修复 pass 碰过的文件（规约 §1）。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计痕迹就是报告文件，外加（若有）那次修复提交。
 
 ## 对话纪律

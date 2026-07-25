@@ -5,10 +5,10 @@ description: >-
   自己的 README.md。扫描 tasks/、wkdrs/ 和项目根下值得随版本发出去的代码，只提升通过三选一证据
   检验的文件（README 会引用它、某个已执行叶子的交付物或完成判据需要它、或它能复现 wkdrs/results/results.md
   中的某个数字），并严格按 metds/codearc.md 的放置规则落位——绝不自造目录。打磨只覆盖发布面（本次
-  提升的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文映射表逐节
+  提升的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文的映射表逐节
   编译自 metds/overview.md、framework.md、dataset.md、training.md、evaluation.md、results.md、
   codearc.md、UPSTREAM.md、requirements* 与 reference.bib：数字只来自结果账本，凡打印的命令都先
-  验证其存在。最后跑一遍阻断式发布体检——误提交的 secret、机器本地绝对路径、内网主机名、与已记录的
+  验证其存在。最后跑一遍阻断式发布体检——提交进仓库的 secret、机器本地绝对路径、内网主机名、与已记录的
   上游许可证冲突的 LICENSE——并写出 wkdrs/release/RELEASE_<date>.md。它只做发布准备，绝不代为发布：
   不 push、不建仓库、不打 tag、不上传权重。当用户运行 /skill:star-code-release，想开源 / 发布项目、想要
   一份仓库 README，或想把散在 tasks/ 的代码归拢进代码库时使用。Bilingual（中/英）。
@@ -20,21 +20,21 @@ description: >-
 
 调用方式：`/skill:star-code-release [gather | polish | readme | check]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。
 
 ## 角色
 
 你是这个家族的最后一公里。上游所有 skill 都在为项目自己的记忆而写——计划、执行记录、分析报告、方法文档、结果账本。你为一个把仓库 clone 下来的陌生人而写：代码归拢到 `metds/codearc.md` 指定的位置，发布面读起来清楚，README 由项目实际拥有的东西编译而成。别的 skill 让工作**可审计**，你让它**可读**。
 
-你归拢、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。发布过程中越出写边界的问题一律走路由：尚不存在的放置规则交 `/skill:star-code-architect`，宽范围的代码质量问题交 `/skill:star-code-reviewer`，缺失的方法文档交 `/skill:star-metd-summarize`，缺失或过期的结果账本交 `/skill:star-expt-analyst aggregate`，缺失的文献条目交 `/skill:star-refs-reviewer`，环境不可用交 `/skill:star-env-builder`，被移动搞过期的计划文本交 `/skill:star-plan-reviser`。
+你归拢、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。发布过程中越出写边界的问题一律走路由：尚不存在的放置规则交 `/skill:star-code-architect`，宽范围的代码质量问题交 `/skill:star-code-reviewer`，缺失的方法文档交 `/skill:star-metd-summarize`，缺失或过期的结果账本交 `/skill:star-expt-analyst aggregate`，缺失的文献条目交 `/skill:star-refs-reviewer`，环境不可用交 `/skill:star-env-builder`，因移动而过期的计划文本交 `/skill:star-plan-reviser`。
 
 ## 核心原则
 
 1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，它同时规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造——而公开 README 里的编造是代价最高的那种。
-2. **数字只来自账本；命令只来自磁盘。** README 里每个数字都从 `wkdrs/results/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 在自己脸上就写着它不是拿去引用数字的文件），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级形容是一种主张："state-of-the-art"、"outperforms X"、"best" 只在账本自己的结论支撑时才出现。
+2. **数字只来自账本；命令只来自磁盘。** README 里每个数字都从 `wkdrs/results/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 自己就写明它不是引用数字的来源），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级说法是主张："state-of-the-art"、"outperforms X"、"best" 只在账本自己的结论支撑时才出现。
 3. **提升要有证据；落位要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的 scratch 本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/skill:star-code-architect` 的架构缺口，绝不在这里自造目录。Rubric 见 `references/gather_rubric_zh.md`。
-4. **只打磨发布面。** 范围内：本次提升的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、读者会去查的东西的 docstring、`codearc.md` 符合度、移动留下的残渣、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/skill:star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
-5. **体检项是阻断性的，且在宣布"就绪"之前就查。** 误提交的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。带着未清的阻断项收尾的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
+4. **只打磨发布面。** 范围内：本次提升的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残渣、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/skill:star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
+5. **体检项是阻断性的，且在宣布"就绪"之前就查。** 提交进仓库的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。带着未清的阻断项收尾的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **你做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，且是用户的决定——你把仓库准备好，把命令交回去。STOP 线原样适用：不训练、不做全量评测、不做高成本 API 调用——账本里没有的数字就留成 TODO。
 
 ## 工作流
@@ -42,15 +42,15 @@ description: >-
 ### Step 0：定向并解析阶段
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. 解释参数：`gather` / `polish` / `readme` / `check` → 只跑该阶段；无参数 → 按顺序跑完整流程；其他 → 列出四个阶段名，在对话里询问指的是哪个。
+2. 解析参数：`gather` / `polish` / `readme` / `check` → 只跑该阶段；无参数 → 按顺序跑完整流程；其他 → 列出四个阶段名，在对话里询问指的是哪个。
 3. 动手之前先打印**就绪表**：映射表需要的每个输入一行（五份 `metds/*.md`、`results.md`、`codearc.md`、`UPSTREAM.md`、`requirements*`、最新 `ENV_REPORT.md`、`reference.bib`、`LICENSE`），标 `present` / `absent` / `stale`，并写明产出它的 skill。过期与否按各生产者自己的记录方式比对——方法文档的 `sources:` 日期落后于计划当前的 `updated`，账本早于最新的 `EXPT_ANALYSIS`。
 4. 带缺口编译是允许且正常的——缺口会变成 README 的 TODO——但用户要先看到这张表。当多数来源都缺失时，直白地说现在编译出来的 README 大半是 TODO，并在对话里提议：*先跑生产者（推荐，点名是哪些）* / *就用现有的编译*。
 5. 点名启动时就带未提交改动的路径（规约 §1）。本次运行绝不 stage 它们。
 
 ### Step 1 —— `gather`：找出值得发出去的代码
 
-1. 按 `references/gather_rubric_zh.md` 列出的候选根扫描：`tasks/<plan>/`、`wkdrs/<run>/` 里的脚本与复现配置、项目根散落文件、`execs/scpts/`。绝不扫 `datas/`、绝不扫 `inits/`、绝不扫生成产物。
-2. 对每个候选跑三选一提升检验，记录它通过的是哪一条以及证据——README 的哪一节、计划的 §4/§5 哪一行、账本的哪一行。一条都不过的原地保留，列为 `keep in place`，这不是问题。
+1. 按 `references/gather_rubric_zh.md` 列出的候选根扫描：`tasks/<plan>/`、`wkdrs/<run>/` 里的脚本与复现配置、项目根下的散落文件、`execs/scpts/`。绝不扫 `datas/`、绝不扫 `inits/`、绝不扫生成产物。
+2. 对每个候选跑三选一提升检验，记录它通过的是哪一条以及证据——README 的哪一节、计划的 §4/§5 哪一行、账本的哪一行。一条都不过的原地保留，列为 `keep in place`，不算失败。
 3. 为每个被提升的候选从 `codearc.md` §2 解析目的地，检测 `${CODE_NAME}/` 中已有的近似重复，标注动作 `move` / `merge` / `keep in place` / `route`。路径被计划文件点名的候选标 `plan-referenced`：移动它会让那行计划文本过期，而计划文本不归你改——该行要带上会过期的确切行号，让用户在看得见后果的前提下批准。
 4. **Gate 1：** 以普通文本呈现提升表——路径、证据、目的地、动作、风险——然后在对话里询问。候选 ≤4 条时把各行列出、逐条确认；更多时提供 *全部批准* / *除某几条外全部批准（写出行号）* / *重做*。一条都不批准是有效结果 → 直接进 Step 2。
 5. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用了旧路径的调用点。每行做完，主循环自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 回滚该行，标 `blocked`，继续其余。
@@ -72,7 +72,7 @@ description: >-
    - **是 STAR 自己的模板 README**（它的图标、"Systematic Toolchain for AI Research" 标语、STAR 项目结构块）→ 说明它描述的是模板而不是这个项目，确认一次再替换。编译出的 README 保留 "Built with STAR" 页脚，署名不会因替换而丢失。
    - **其他人工撰写的 README** → 不做"比对即覆盖"。说明它现在有什么、编译会换成什么，然后询问。保持原样是有效结果；编译到用户指定的另一个路径也是。
 4. `README.md` 用英文。当根计划的 `language` 是 `zh` 时，在对话里额外提供 `README.zh-CN.md`；两者都存在时各自带上互链的 `**Language:**` 行。中文 README 里，技术术语、指标名、数据集名和文件路径保持英文。
-5. 把溯源标记写成文件第一行——用 HTML 注释，绝不用 YAML frontmatter，否则 GitHub 会把它渲染成页首的一张表。标记里带 skill 名、日期、`model_id`，以及各来源被读取时所带的日期（规约 §8；该标记就是这份产物的 header line）。
+5. 把溯源标记写成文件第一行——用 HTML 注释，绝不用 YAML frontmatter，否则 GitHub 会把它渲染成页首的一张表。标记里带 skill 名、日期、`model_id`，以及各来源在读取时带的日期（规约 §8；该标记就是这份产物的 header line）。
 
 ### Step 4 —— `check`：发布体检
 
@@ -86,7 +86,7 @@ description: >-
 ## 状态与文件规则
 
 - 写入仅限：`README.md`（以及被提议并接受时的 `README.zh-CN.md`）、提升进 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、发布面内逐项批准的打磨改动、`wkdrs/release/RELEASE_<date>.md`。
-- 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有生产者，而一次去改自己输入的发布运行已经不叫编译了。绝不写结果总账 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
+- 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有生产者；发布运行动手改自己的输入，就不算编译了。绝不写结果总账 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
 - 什么都不删。被提升的文件是移走的；没被提升的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
 - 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未点名的目录——那是 `/skill:star-code-architect` 的。

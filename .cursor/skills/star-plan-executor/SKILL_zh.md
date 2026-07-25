@@ -21,17 +21,17 @@ description: >-
 
 ## 角色
 
-你把一份**叶子执行子计划**真正做出来——通过修改代码、跑轻量验证，把它推到完成判据。上游 skill `star-plan-decomposer` 产出可执行子计划（§1 目标 / §2 输入与依赖 / §3 任务分解 / §4 产出物 / §5 完成判据 / §6 局部风险）；本 skill 产出**结果**：`${CODE_NAME}/` 下的代码、`tasks/<plan-name>/` 下的中间工作文件、`wkdrs/<run>/` 下的生成产物与持久执行记录，以及一条被验证的完成判据。`<plan-name>` 取选定计划文件名去掉 `_plan.md` 后的部分。
+你把一份**叶子执行子计划**真正做出来——通过修改代码、跑轻量验证，把它推到完成判据。上游 skill `star-plan-decomposer` 产出可执行子计划（§1 目标 / §2 输入与依赖 / §3 任务分解 / §4 产出物 / §5 完成判据 / §6 局部风险）；本 skill 产出**结果**：`${CODE_NAME}/` 下的代码、`tasks/<plan-name>/` 下的中间工作文件、`wkdrs/<run>/` 下的生成产物与持久执行记录，以及一条验证过的完成判据。`<plan-name>` 取选定计划文件名去掉 `_plan.md` 后的部分。
 
 你**只执行,不重做研究规划、也不重新拆解**。若 §3 或 §5 太模糊、无法执行,把用户送回 `star-plan-decomposer`——不要在这里重新推导战略。
 
 ## 核心原则
 
-1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察——读子计划 §2 指向的模块/入口。产出一份"现状 vs §3 要求"的差距清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划要从零搭骨架——更好的做法是先用 `/star-code-architect` 奠基参考代码库。参见 `references/orient_checklist_zh.md`。
+1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察——读子计划 §2 指向的模块/入口。产出一份"现状 vs §3 要求"的差距清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划要从零搭骨架——更好的做法是先用 `/star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
 2. **规划走审批门,执行走 agent**。那份细化的可执行 plan(EXEC_PLAN)在 **Cursor plan 模式**里产出(`SwitchMode` → `plan`),必须经**用户明确批准**后才允许有任何副作用。批准后切回 agent 模式(`SwitchMode` → `agent`),执行**下放给 Task subagent,每步(或每个连贯步骤组)一个**——主循环负责编排与验证,自己不改代码、不启动任务。参见 `references/agent_dispatch_spec_zh.md`。
 3. **重实验前停**。agent 只写代码、跑**轻量验证**(smoke test、小规模/不微调的检查,如 MVP 完成判据)。在任何长时/多卡训练或大开销 API 调用前**停下**:把备好的命令写进 EXEC_LOG 的"待用户执行"区,交回用户。绝不自主启动昂贵或不可逆的任务。规则见 `references/stop_line_rules_zh.md`。
-4. **文件是真源;每步 checkpoint;子计划保持真实**。执行态存在 `wkdrs/<run>/`(`EXEC_PLAN.md` + `EXEC_LOG.md`),中间工作文件存在 `tasks/<plan-name>/`。每验证完一步就更新日志。子计划文件拿到轻量的 `exec_status` + `exec_runs` 指针——当执行被证实偏离它、或敲定了它留白而某份方法文档会引用的值时,还会经**用户确认后同步回写**受影响的 §2–§5 内容并追加 `## Revision History` 条目(`references/plan_sync_rules_zh.md`),让用户日后重读计划时看到的就是实际执行的内容。对话会结束,文件不会。
-5. **每步以检查收尾;整轮以完成判据收尾**。每步先做窄验证,通过才派下一步;整轮以子计划 §5 完成判据结束。相关处复用项目的 `/verify`、`/run` skill。这是项目 Goal-Driven Execution(AGENTS.md §4)和 Verification(§7)的执行体。
+4. **文件是真源;每步 checkpoint;子计划保持真实**。执行态存在 `wkdrs/<run>/`(`EXEC_PLAN.md` + `EXEC_LOG.md`),中间工作文件存在 `tasks/<plan-name>/`。每验证完一步就更新日志。子计划文件拿到轻量的 `exec_status` + `exec_runs` 指针——当执行确实偏离了它、或敲定了它留白而某份方法文档会引用的值时,还会经**用户确认后同步回写**受影响的 §2–§5 内容并追加 `## Revision History` 条目(`references/plan_sync_rules_zh.md`),让用户日后重读计划时看到的就是实际执行的内容。对话会结束,文件不会。
+5. **每步以检查收尾;整轮以完成判据收尾**。每步先做窄验证,通过才派下一步;整轮以子计划 §5 完成判据结束。相关处复用项目的 `/verify`、`/run` skill。这就是项目 Goal-Driven Execution(AGENTS.md §4)和 Verification(§7)的落地。
 6. **用项目运行环境与运行入口**。所有运行命令走 `.env` 的 `CONDA_HOME` / `PYTHON_HOME`——绝不用系统 python、绝不硬编码本地路径(AGENTS.md §6)——存在运行入口时经项目入口 `execs/run.sh` 调用。为计划执行过程的中间工作文件新建 `tasks/<plan-name>/`;可复用的启动脚本(含备好的 STOP 线命令)放到 `execs/scpts/<run>.sh`;生成输出及持久执行记录、数据、权重分别落到 `wkdrs/<run>/`、`datas/`、`inits/`。不要把生成的 run 产物放在 `tasks/`。
 
 ## 工作流
@@ -61,7 +61,7 @@ description: >-
 1. 调用 `SwitchMode`, `target_mode_id: plan`(简短说明:副作用前需要受控的 EXEC_PLAN)。
 2. 把 §3 + 差距清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 conda) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。每个动作绑一个可验证 check;末尾动作绑 §5 完成判据。
 3. **显式画出 STOP 线**(`references/stop_line_rules_zh.md`):标出哪些动作 agent 执行、哪些是"备好命令交用户"(重实验)。
-4. **收集实质性偏差**:把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入,以 delta 形式(ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`)记入 EXEC_PLAN 的"与子计划的偏差"表。在子计划自身粒度上的矛盾算偏差;"更具体"不算——除非那是计划未写明、而某份方法文档会引用的值,那要记为一条 ENRICHED 行并点名该章节。
+4. **收集实质性偏差**:把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入,以 delta 形式(ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`)记入 EXEC_PLAN 的"与子计划的偏差"表。与子计划自身粒度相矛盾算偏差;"更具体"不算——除非那是计划未写明、而某份方法文档会引用的值,那要记为一条 ENRICHED 行并点名该章节。
 
 ### Step 4：审批门
 
@@ -74,7 +74,7 @@ description: >-
 对 EXEC_PLAN 的每个步骤,依次:
 
 1. 按 `references/agent_dispatch_spec_zh.md` 的契约用 `Task` 派一个 subagent(`subagent_type: generalPurpose`;只读勘察可用 `explore`):本步目标、要碰的确切文件、如何走 conda 运行、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
-2. agent 返回后,**主循环重跑绑定的 check** 确认(没有证据不轻信自报通过)。通过 → checkpoint 到 `EXEC_LOG.md`、更新子计划轻量状态,并在门批准了 checkpoint 时提交本步触碰的文件。失败 → 诊断,有限重试(≤2)并把失败喂回;仍失败 → 该步标 `blocked`,带日志停下。
+2. agent 返回后,**主循环重跑绑定的 check** 确认(没有证据就不轻信自报的通过)。通过 → checkpoint 到 `EXEC_LOG.md`、更新子计划轻量状态,并在门批准了 checkpoint 时提交本步触碰的文件。失败 → 诊断,有限重试(≤2)并把失败喂回;仍失败 → 该步标 `blocked`,带日志停下。
 3. **若该步在 STOP 线上**(重实验)→ **不**派它执行;把备好的命令写进 EXEC_LOG 的"待用户执行"区,停下交回用户。
 4. 若重试或 blocker 导致做法在子计划粒度上变了(步骤增/删/替换、产出路径或完成判据移位),在 EXEC_LOG 的"待同步修正"区记一行 delta 后继续——这些留到 Step 6 同步,不在执行中途处理。
 
@@ -82,11 +82,11 @@ description: >-
 
 ### Step 6：收尾 / 完成判据验证
 
-所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——还值得留的先提升到 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户自己点名才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
+所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——还值得留的内容先挪进 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户自己点名才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
 
 **修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,一次性呈现整批(*全部同步 / 逐条挑 / 不同步*,标出你推荐的一项),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是战略信号——走下面的反馈回流,绝不同步。
 
-**反馈回流(战略信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——这是战略层面的发现,而不只是某步失败。你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `/star-plan-reviser <slug>`(以证据审计并在逐条批准下修订计划)、`/star-plan-coach <slug>`(重审风险/方法)或 `/star-plan-decomposer <slug>`(重新拆分子计划)。这样在不破坏写入纪律的前提下,把执行→战略的回路闭合。
+**反馈回流(战略信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——这是战略层面的发现,而不只是某步失败。你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `/star-plan-reviser <slug>`(审计证据并在逐条批准下修订计划)、`/star-plan-coach <slug>`(重审风险/方法)或 `/star-plan-decomposer <slug>`(重新拆分子计划)。这样在不破坏写入纪律的前提下,把执行→战略的回路闭合。
 
 ### Step 7：检查点与续跑语义
 
@@ -97,7 +97,7 @@ description: >-
 
 ### Step 8：简报
 
-验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了战略信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`)。run 完整跑完后,建议先用 `/star-code-reviewer <叶子>` 对照规范与子计划审一遍实现,再修订计划或继续推进。若有命令在 STOP 线交回给了用户,补一句:等它们的输出就位后,`/star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 400 字以内。
+验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了战略信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`)。run 完整跑完后,建议先用 `/star-code-reviewer <叶子>` 对照规约与子计划审一遍实现,再修订计划或继续推进。若有命令在 STOP 线交回给了用户,补一句:等它们的输出就位后,`/star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 400 字以内。
 
 ## 状态与文件规则
 
@@ -111,7 +111,7 @@ description: >-
 
 ## 对话纪律
 
-- 若无法使用 plan 模式(`SwitchMode`)(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行,仍然重实验前停,任何同步回写子计划前仍需纯文本确认。
+- 若无法使用 plan 模式(`SwitchMode`)(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行,仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
 - 用户用什么语言就用什么语言对话;中文对话加载 `*_zh.md` 资源。
 - 子计划正文语言以其 `language` 为准;中文计划中专业术语保留英文。
 - 参与度档位(规约 §7.7)。本 skill 中不受档位影响:Step 4 审批门(含按步提交的确认)、STOP 线(Step 5)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会(它把关一次删除)。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退(取推荐项:送回 decomposer 并停下)。`high` 档:Step 5 每步派发 subagent 前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

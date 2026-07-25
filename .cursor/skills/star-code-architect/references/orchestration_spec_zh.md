@@ -1,6 +1,6 @@
 # 编排规范
 
-本 skill 的主循环如何调度 `Task` subagent。同门契约：executor 的 `agent_dispatch_spec.md`——同一套哲学，适配到勘察与迁移场景。主循环负责编排、复核、提交；它自己不改代码。
+本 skill 的主循环如何调度 `Task` subagent。同门契约：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。主循环负责编排、复核、提交；它自己不改代码。
 
 ## 角色
 

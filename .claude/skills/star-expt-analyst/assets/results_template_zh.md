@@ -14,8 +14,8 @@ sources:
 
 # 结果
 
-<!-- 由 /star-expt-analyst aggregate 写入。下面每个数字入表前都在其来源处被重开确认过
-     （references/aggregate_spec_zh.md），并携带它的出处。这些数字是在什么协议下测出来的见
+<!-- 由 /star-expt-analyst aggregate 写入。下面每个数字入表前都在其来源处重开确认过
+     （references/aggregate_spec_zh.md），并携带它的出处。这些数字是在什么协议下测出来的，见
      metds/evaluation.md——本文件只放分数。请把它当作生成物：要改一个数字，去修或重跑那个 run
      再重新编译，绝不在这里手改。 -->
 

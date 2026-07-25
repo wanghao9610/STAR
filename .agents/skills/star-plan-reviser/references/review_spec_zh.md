@@ -9,7 +9,7 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 | 计划文件本身 | 意图：§1 目标、§3 任务、§4 交付物路径、§5 done-criterion、§6 风险；frontmatter 的 `status` / `exec_status` / `exec_runs` / `depends_on` / `children` / `updated` |
 | `wkdrs/<run>/EXEC_PLAN.md` | executor 当时承诺的动作，以及 STOP 线划在哪 |
 | `wkdrs/<run>/EXEC_LOG.md` | 步骤状态、绑定检查的结果、产物路径、"待用户执行"命令、Notes/decisions（含 **Strategy signal** 记录） |
-| `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`（若存在） | star-expt-analyst 的结果审计：run 判定、带每个指标来源的完成判据记分卡、日志健康，以及含 kill-criteria 命中的解读——一份已核实过的证据基础，但仍与其他声明一样要对照磁盘复核 |
+| `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`（若存在） | star-expt-analyst 的结果审计：run 判定、带每个指标来源的完成判据记分卡、日志健康，以及含 kill-criteria 命中的解读——一份预先核实过的证据基础，但仍要和其他声明一样对照磁盘复核 |
 | §4 交付物路径 | 磁盘上的产物：是否存在、大小、修改时间、廉价 sanity 检查 |
 | §2/§3 点名的 `${CODE_NAME}/` 模块 | 承诺的代码是否落地、与日志声称的改动是否吻合 |
 | children 的 frontmatter（根/内部目标） | 每个子计划的章节状态、`exec_status`、`updated`、`depends_on` |
@@ -30,17 +30,17 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 
 - `path` / `exists` / `size` / `mtime`
 - `sanity`——一项廉价内容检查（非空、可解析、行数/键数符合预期），或 `not cheaply checkable`
-- `verdict`——`found` / `missing` / `suspect`（存在但 sanity 不过，或早于声称产出它的步骤）
+- `verdict`——`found` / `missing` / `suspect`（存在但通不过 sanity 检查，或早于声称产出它的步骤）
 
 **Code collector**——针对点名的每个模块/入口：
 
 - `path` / `exists` / `consistent`（文件现状与日志声称的新建/修改是否说得通）/ `notes`
 
-所有收集器：只读；宁报"unknown"不猜测；不提修订建议；对 `datas/`、`inits/`、`wkdrs/` 除读取外零接触。
+所有收集器：只读；宁报"unknown"不猜测；不提修订建议；对 `datas/`、`inits/`、`wkdrs/` 除读取外一概不碰。
 
 ## 核实阶梯
 
-每条完成度声明按实际站住的最高一级打分：
+每条完成度声明按实际成立的最高一级打分：
 
 1. 日志说 `done` →
 2. ……且绑定的产物在磁盘上存在 →
@@ -60,7 +60,7 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 ## 按节点类型圈定范围
 
 - **叶子**：对它自己的 run 走完整阶梯。
-- **根/内部**：不逐后代展开——直接读 children 的 frontmatter；只对确实存在的 run 派 log collector；用汇总后的信号审计本节点自己 §1–§6 的假设（子计划的 strategy signal 就是反对父假设的证据）。
+- **根/内部**：不逐后代展开——直接读 children 的 frontmatter；只对确实存在的 run 派 log collector；用汇总后的信号审计本节点自己 §1–§6 的假设（子计划的 strategy signal 就是质疑父假设的证据）。
 - **处处无执行证据**：纯文档审查——记分卡记 `unverifiable`/absent；偏差与候选依据计划文本和用户补充的信息。
 
 ## 报告各节
