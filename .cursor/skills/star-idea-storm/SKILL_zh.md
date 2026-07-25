@@ -13,7 +13,7 @@ description: >-
 
 # Research Idea Storm — 从模糊兴趣到站得住的选题
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。
 

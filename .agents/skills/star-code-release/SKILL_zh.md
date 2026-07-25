@@ -16,7 +16,7 @@ description: >-
 
 # Research Code Release
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`$star-code-release [gather | polish | readme | check]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。
 

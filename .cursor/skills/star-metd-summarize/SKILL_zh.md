@@ -20,7 +20,7 @@ description: >-
 
 # Research Method Summarizer — 计划 → 方法文档
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-metd-summarize [OPT]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。
 

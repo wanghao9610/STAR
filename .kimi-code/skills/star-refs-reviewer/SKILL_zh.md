@@ -15,7 +15,7 @@ description: >-
 
 # Research Refs Reviewer — 相关工作基座与可核验文献库
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；arXiv id、DOI 或论文 URL 追加单篇。
 

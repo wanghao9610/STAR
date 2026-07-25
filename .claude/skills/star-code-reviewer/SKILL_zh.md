@@ -14,7 +14,7 @@ description: >-
 
 # Research Code Reviewer — 规范与符合度审计
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。
 

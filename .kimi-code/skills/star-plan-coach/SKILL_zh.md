@@ -6,7 +6,7 @@ description: >-
 
 # Research Plan Coach — 研究计划引导
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则从那份定稿的 idea 文件播种新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。可选的 `involve=low|medium|high` 记号可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
 

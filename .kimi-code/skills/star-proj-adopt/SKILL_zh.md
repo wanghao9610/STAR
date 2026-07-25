@@ -14,7 +14,7 @@ description: >-
 
 # Research Project Adopt — 把做了一半的项目接入 STAR
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-proj-adopt [survey | backfill]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。
 

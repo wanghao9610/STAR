@@ -13,7 +13,7 @@ description: >-
 
 # Research Plan Executor — 计划执行器
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-plan-executor PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。可选的 `involve=low|medium|high` 记号可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 

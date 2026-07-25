@@ -17,7 +17,7 @@ description: >-
 
 # Research Env Builder — 研究环境构建师
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-env-builder [ENV_NAME | add <包名>…]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。
 

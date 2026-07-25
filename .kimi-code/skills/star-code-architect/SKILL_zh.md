@@ -15,7 +15,7 @@ description: >-
 
 # Research Code Architect — 研究代码架构师
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 

@@ -15,7 +15,7 @@ description: >-
 
 # Research Experiment Analyst — 结果审计
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。
+> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 总账 `wkdrs/results/results.md`，限定到某一棵子树时则编译进 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。
 
