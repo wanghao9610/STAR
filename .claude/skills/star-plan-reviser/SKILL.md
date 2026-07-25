@@ -64,7 +64,7 @@ Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If
 
 ### Step 4: Revision Q&A (one candidate at a time)
 
-1. Walk the candidates in report order, one AskUserQuestion per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the built-in "Other" field lets the user answer freely. For **structural** or **strategic** candidates the options are *route to `/star-plan-decomposer` or `/star-plan-coach`* (recommended) vs *bounded text edit here anyway*.
+1. Walk the candidates in report order, one AskUserQuestion per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the built-in "Other" field lets the user answer freely. For **structural** or **strategic** candidates the options are *route to `/star-plan-decomposer` or `/star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running ledger as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without the ledger the user approves edit 9 with no view of edits 1–8.
 2. After the list, ask once whether anything else should change. User-added items become candidates too (evidence: "user directive").
 3. If nothing is adopted, skip to Step 7 — a pure review is a valid outcome; the persisted report is the deliverable.
 

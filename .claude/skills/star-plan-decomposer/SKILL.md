@@ -67,7 +67,7 @@ If the target itself carries execution evidence (`exec_runs` non-empty, or `exec
 
 ### Step 2: Choose the decomposition axis
 
-Propose 2–3 axes via AskUserQuestion (one question, recommend the first). Details and how to pick: `references/decomposition_axes.md`.
+Propose 2–3 axes via AskUserQuestion (one question, recommend the first). Details and how to pick: `references/decomposition_axes.md`. Each axis option states what it commits to, not just its name (conventions §7.3): the shape of the split, the dependency pattern it implies (linear chain / small DAG / mostly independent), and that changing the axis after Step 4 means re-running the split over files that may already carry hand edits.
 
 | Axis | Splits the plan by | Best when |
 |------|--------------------|-----------|
@@ -79,7 +79,7 @@ Mixed decomposition is allowed but confirm it explicitly.
 
 ### Step 3: Propose the sub-plan list
 
-From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and confirm via AskUserQuestion (*looks good* / *edit the list* / *change granularity*, with your recommendation marked).
+Open with the anchor (conventions §7.10): the axis just chosen and what it yields here — "milestone axis → 4 units, a linear chain". From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and confirm via AskUserQuestion (*looks good* / *edit the list* / *change granularity*, with your recommendation marked).
 
 - **Give data its own leaf.** Where the root §4 names a dataset `datas/` does not yet hold, one unit is a data-readiness leaf: §3 acquires it, §4 places it under `datas/<name>/` **and names the verification script under `tasks/<plan-name>/`**, and §5's done-criterion is an integrity check — a manifest, a file count, a checksum — never "the download finished". The check's verdict and evidence land in the run's `EXEC_LOG.md` like any other step check; bulky raw output — the manifest itself, a checksum list — goes in a run subdirectory or a non-`.md` file, never a free-named report `.md` at the top of `wkdrs/<run>/` — a name conventions §8 does not register. The acquisition command itself crosses the STOP line, so `star-plan-executor` hands it back rather than running it. Every leaf that consumes the dataset `depends_on` this one. Without it, execution stops at a missing input no plan owns.
 - **Enforce N ≤ 10.** If you believe more than 10 units are needed, do not append a second digit — instead group them, or recommend a two-level split (decompose into ≤10 now, then recurse into the heavy ones). Say so explicitly.
@@ -112,7 +112,7 @@ Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
 
 **Reached via the Step 1 repair branch?** Derive every field from the existing child files rather than from a Step 3 list: topological order and the `depends on:` annotations from their `depends_on`, the `→ §<n>` reference from their `traces_to`, the decomposition date from their own frontmatter (never invented). Each one-liner is *condensed* from that child's §1 objective, not copied — so show the drafted section for review before writing it.
 
-Also add/merge a `children:` list into the parent frontmatter. Do not rewrite the parent's existing body sections — the `## Sub-plans` index and `children:` are the only edits you make to the parent.
+Also add/merge a `children:` list into the parent frontmatter. Do not rewrite the parent's existing body sections — the `## Sub-plans` index and `children:` are the only edits you make to the parent. Close the boundary (conventions §7.10): 2–3 sentences on the axis chosen, the N files written, and the execution order that follows — and the way back, since `/star-plan-decomposer <slug>` re-enters through Step 1's already-decomposed branch rather than overwriting, and a still-coarse unit can be refined with `/star-plan-decomposer <that unit's prefix>` (Step 6).
 
 ### Step 6: Offer to recurse
 
