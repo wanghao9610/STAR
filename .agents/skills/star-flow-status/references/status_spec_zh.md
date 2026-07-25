@@ -10,7 +10,7 @@
 
 - 战略计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的门。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它（一个 `wkdrs/<run>/` 目录）。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的门。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它。
 
 对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（STOP 线）"清单、以及 Notes 里的任何"战略信号"。
 
