@@ -306,7 +306,7 @@ Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and 
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-To preview an update without changing any file, pass `--diff` (optionally with a ref or `--skill NAME`). It lists upstream files that are new or differ from your local copies, marks project-local files an update would keep, and exits `1` when an update would change anything — `0` when everything already matches:
+To preview an update without changing any file, pass `--diff` (optionally with a ref or `--skill NAME`). It lists upstream files that are new or differ from your local copies, marks project-local files an update would keep, and exits `2` when an update would change anything, `0` when everything already matches, and `1` on error — so a script can tell an available update from a failed check:
 
 ```bash
 bash execs/update.sh --diff

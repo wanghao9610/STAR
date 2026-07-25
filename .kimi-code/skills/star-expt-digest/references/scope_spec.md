@@ -15,7 +15,7 @@ Interpret the argument, **first match wins**:
 
 `<N>d` starts `N` days before today, inclusive. A bare `<YYYY-MM-DD>` means "since that date", inclusive. An argument that parses as neither a window nor a plan name is not a guess to make: list the nearest plan candidates and ask (conventions §5.2).
 
-**plan mode is a family, not a subtree.** Given a node, the run set is every run of every **descendant leaf** — that is the evidence. Its **ancestors up to the root** are read too, but only for context: the root's §4 claim map and §5 kill-criteria are what make a leaf's number mean something, and the digest's headline is written against them. An ancestor contributes no runs of its own; internal nodes are not executable (conventions §5.4). This is what "including parent and sub-plan results" means in practice: the parent supplies the question, the descendants supply the answers.
+**Plan mode is a family, not a subtree.** Given a node, the run set is every run of every **descendant leaf** — that is the evidence. Its **ancestors up to the root** are read too, but only for context: the root's §4 claim map and §5 kill-criteria are what make a leaf's number mean something, and the digest's headline is written against them. An ancestor contributes no runs of its own; internal nodes are not executable (conventions §5.4). This is what "including parent and sub-plan results" means in practice: the parent supplies the question, the descendants supply the answers.
 
 ## Dating a run
 

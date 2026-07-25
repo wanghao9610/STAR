@@ -60,7 +60,8 @@ the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
-when everything already matches and 1 when an update would change files.
+when everything already matches, 2 when an update would change files, and 1 on error — so a
+script can tell "an update is available" from "the check itself failed".
 
 --adopt installs the STAR skeleton into an already-started project instead of updating one.
 It runs against the current working directory, which must be a git repository root, and
@@ -272,7 +273,9 @@ if [[ "${ADOPT}" == false ]]; then
             log "${changed} differ, ${added} new upstream, ${kept} extra local."
             log "'differs' is direction-blind: it includes files you edited yourself."
             log "Run '${hint}' to apply the upstream versions."
-            exit 1
+            # 2, not 1: fail() uses 1 for every hard error, so a caller could not
+            # distinguish "an update is available" from "the check broke".
+            exit 2
         fi
         log "Everything STAR manages matches upstream ref '${STAR_REF}'. Nothing to update."
         exit 0

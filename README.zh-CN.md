@@ -301,7 +301,7 @@ bash execs/update.sh
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-如需在不改动任何文件的情况下预览更新，可加 `--diff`（可选地搭配 ref 或 `--skill NAME`）。它会列出上游新增或与本地不同的文件，并标注仅存在于本项目、更新时会保留的文件；有可更新内容时以 `1` 退出，完全一致时以 `0` 退出：
+如需在不改动任何文件的情况下预览更新，可加 `--diff`（可选地搭配 ref 或 `--skill NAME`）。它会列出上游新增或与本地不同的文件，并标注仅存在于本项目、更新时会保留的文件；有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”：
 
 ```bash
 bash execs/update.sh --diff
