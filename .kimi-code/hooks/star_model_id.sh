@@ -38,10 +38,17 @@ else
   sid=$(printf '%s' "$input" | grep -oE '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')
 fi
 
-marker="${TMPDIR:-/tmp}/star_kimi_model_id_${sid:-nosession}"
-# Already injected for this session → stay silent (exit 0, no stdout).
-[ -e "$marker" ] && exit 0
-: > "$marker" 2>/dev/null || true
+# Dedup only when we actually have a session id. Without one, every session
+# would share a single marker: the first would create it and every later one
+# would exit silently, which is indistinguishable from healthy dedup and leaves
+# provenance permanently "unrecorded". Injecting once per turn is noisier than
+# intended but always correct, so that is the safer failure.
+if [ -n "${sid}" ]; then
+  marker="${TMPDIR:-/tmp}/star_kimi_model_id_${sid}"
+  # Already injected for this session → stay silent (exit 0, no stdout).
+  [ -e "$marker" ] && exit 0
+  : > "$marker" 2>/dev/null || true
+fi
 
 # --- configured default model from config.toml (global; Kimi has no per-project config) ---
 model=""
