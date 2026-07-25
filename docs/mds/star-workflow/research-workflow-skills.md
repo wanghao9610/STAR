@@ -159,7 +159,7 @@ Nothing moves, nothing is renamed, and nothing already written is overwritten �
 - Ledger the runs whose numbers you would still quote. The rest belong in the inventory as evidence, not in `wkdrs/`.
 - Run `backfill` even when it only covers two leaves. A tree reading 0% while a third of the work is done is a tree nobody trusts.
 
-See the complete definition in [`star-proj-adopt/SKILL.md`](../../../.agents/skills/star-proj-adopt/SKILL.md).
+See the complete definition in [`star-proj-adopt/SKILL.md`](../../../.claude/skills/star-proj-adopt/SKILL.md).
 
 ## 4. `$star-idea-storm`: converge on a research topic
 
@@ -220,7 +220,7 @@ The idea file holds the seed and constraints, all candidate directions, the per-
 - The scan prices a direction; it does not veto it. A crowded field with a real angle can still be the right call, and the file records that choice with its reason.
 - This is topic selection, not the survey: expect abstracts and a map, not per-paper analyses. The deep read on the winner belongs to `$star-refs-reviewer`.
 
-See the complete definition in [`star-idea-storm/SKILL.md`](../../../.agents/skills/star-idea-storm/SKILL.md).
+See the complete definition in [`star-idea-storm/SKILL.md`](../../../.claude/skills/star-idea-storm/SKILL.md).
 
 ## 5. `$star-plan-coach`: write a research plan
 
@@ -296,7 +296,7 @@ The plan contains six research sections and their statuses. When all sections ar
 - If you are unsure about an experiment or metric, say so. The skill will offer two or three concrete candidates.
 - Avoid decomposing the plan before its key sections are confirmed, or downstream sub-plans may contain many `[TBD]` items.
 
-See the complete definition in [`star-plan-coach/SKILL.md`](../../../.agents/skills/star-plan-coach/SKILL.md).
+See the complete definition in [`star-plan-coach/SKILL.md`](../../../.claude/skills/star-plan-coach/SKILL.md).
 
 ## 6. `$star-refs-reviewer`: survey the related work
 
@@ -354,7 +354,7 @@ Google Scholar is deliberately not a source: it has no API, gates automated quer
 - Prefer a reported shortfall to padding: 43 entries you can defend beat 50 you cannot.
 - The *Relation to This Project* section is what makes a note worth more than the paper's own abstract — read it before writing the plan's positioning.
 
-See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.agents/skills/star-refs-reviewer/SKILL.md).
+See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.claude/skills/star-refs-reviewer/SKILL.md).
 
 ## 7. `$star-code-architect`: bootstrap or organize the codebase
 
@@ -410,7 +410,7 @@ Environment builds involving CUDA compilation, downloads over ~1 GB, full test s
 - Read the license column at Gate 1 carefully — it also constrains how you can release your own code later.
 - Keep migrations small. The upstream layout survived real training runs; wholesale restructuring of unfamiliar research code rarely does.
 
-See the complete definition in [`star-code-architect/SKILL.md`](../../../.agents/skills/star-code-architect/SKILL.md).
+See the complete definition in [`star-code-architect/SKILL.md`](../../../.claude/skills/star-code-architect/SKILL.md).
 
 ## 8. `$star-env-builder`: build the runtime environment
 
@@ -461,7 +461,7 @@ Gate-approved installs run autonomously, including large framework wheels. The s
 - Re-running it later is safe: choose *verify & repair in place* to fix a broken environment without rebuilding, or *backup & rebuild* to start clean.
 - On a CUDA mismatch the skill stops and presents concrete options instead of guessing — have your target torch/CUDA combination in mind.
 
-See the complete definition in [`star-env-builder/SKILL.md`](../../../.agents/skills/star-env-builder/SKILL.md).
+See the complete definition in [`star-env-builder/SKILL.md`](../../../.claude/skills/star-env-builder/SKILL.md).
 
 ## 9. `$star-plan-decomposer`: create execution sub-plans
 
@@ -528,7 +528,7 @@ $star-plan-decomposer 01
 - Do not manually renumber existing prefixes; that can break deeper plans and dependency references.
 - A dataset the root §4 names but `datas/` does not hold gets its own **data-readiness leaf** — acquisition in §3, an integrity check (manifest, file count, checksum) as the §5 done-criterion, and every consumer depending on it. The acquisition command crosses the STOP line, so it comes back to you to run. Without that leaf, execution stops at a missing input no plan owns.
 
-See the complete definition in [`star-plan-decomposer/SKILL.md`](../../../.agents/skills/star-plan-decomposer/SKILL.md).
+See the complete definition in [`star-plan-decomposer/SKILL.md`](../../../.claude/skills/star-plan-decomposer/SKILL.md).
 
 ## 10. `$star-plan-executor`: execute one leaf plan
 
@@ -603,7 +603,7 @@ When the same plan is invoked again, the skill treats `EXEC_LOG.md` as the sourc
 
 Execution rarely matches the written plan exactly. When the difference is material at the plan's own granularity — a step added, dropped, or replaced; a dependency that turned out wrong; a changed deliverable path; an adjusted done-criterion — the skill records it as an ADDED / MODIFIED / REMOVED delta and confirms it with you: deviations found while planning are confirmed together with the executable plan itself, and deviations that emerge during execution are batch-confirmed once at finalization. Confirmed deltas are then written back into the sub-plan — the affected §2–§5 passages are updated in place and a `## Revision History` entry records the date, run, change, and reason — so the plan you reread later matches what was actually executed. A fourth delta type, ENRICHED, covers a value the plan left open that execution settled — a learning rate, the backbone, the reproduction command — but only where a method document would cite it: the plans are what `$star-metd-summarize` compiles from, so a value that stays in the run log alone becomes a permanent TODO in `metds/training.md`. Objective- or strategy-level divergence is never synced this way; it routes to `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`.
 
-See the complete definition in [`star-plan-executor/SKILL.md`](../../../.agents/skills/star-plan-executor/SKILL.md).
+See the complete definition in [`star-plan-executor/SKILL.md`](../../../.claude/skills/star-plan-executor/SKILL.md).
 
 ## 11. `$star-code-reviewer`: review code against conventions and the plan
 
@@ -654,7 +654,7 @@ The fix pass never changes behavior: no feature completion, no signature changes
 - `diff` mode is the cheapest habit: review what you just wrote while it is still uncommitted.
 - A finding you disagree with can simply be skipped in the fix pass; the report keeps the record either way.
 
-See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.agents/skills/star-code-reviewer/SKILL.md).
+See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.claude/skills/star-code-reviewer/SKILL.md).
 
 ## 12. `$star-expt-analyst`: analyze a run's results
 
@@ -713,7 +713,7 @@ This skill is **read-only apart from its own report**. It never edits plan files
 - The run verdict is deliberately blunt. `inconclusive` means the evidence is not there — usually a STOP-line command that was never run. `invalid` means the numbers exist but cannot be trusted, and a re-run is cheaper than an interpretation.
 - A negative result that hits a root kill-criterion is the most valuable thing this skill can find: route it to `$star-plan-reviser` while the evidence is fresh.
 
-See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.agents/skills/star-expt-analyst/SKILL.md).
+See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.claude/skills/star-expt-analyst/SKILL.md).
 
 ## 13. `$star-expt-digest`: summarize progress over a period
 
@@ -782,7 +782,7 @@ This skill is **read-only apart from its own digest**. It never edits plans, `ex
 - Use plan mode before a milestone review, when you want a family's whole story rather than a date range.
 - `wkdrs/` is git-ignored by default, so the digest series lives on your disk and not in the repository history. Digests are regenerable from the analysis reports, so this is recoverable — but do not treat a digest as the archival record.
 
-See the complete definition in [`star-expt-digest/SKILL.md`](../../../.agents/skills/star-expt-digest/SKILL.md).
+See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/skills/star-expt-digest/SKILL.md).
 
 ## 14. `$star-plan-reviser`: review and revise one plan
 
@@ -831,7 +831,7 @@ metds/plans/<prefix>_<slug>_plan.md   # revised in place, with a Revision Histor
 - Revising a parent bumps its `updated`, so `$star-flow-status` will flag its children as stale; that is the intended signal to re-decompose the affected children.
 - For a quick progress overview use `$star-flow-status`; the reviser is for depth on one plan, with write access.
 
-See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.agents/skills/star-plan-reviser/SKILL.md).
+See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.claude/skills/star-plan-reviser/SKILL.md).
 
 ## 15. `$star-flow-status`: inspect the whole flow
 
@@ -870,7 +870,7 @@ $star-flow-status 01
 
 This skill is **strictly read-only**. It scans the artifacts registered in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, and the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, `wkdrs/digests/`, and `wkdrs/results/`) — without creating or modifying any file.
 
-See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
+See the complete definition in [`star-flow-status/SKILL.md`](../../../.claude/skills/star-flow-status/SKILL.md).
 
 ## 16. `$star-metd-summarize`: compile the plans into method documents
 
@@ -928,7 +928,7 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 - Treat these documents as generated. To change one, change the plan it came from and recompile — hand edits are overwritten on the next run, though a file the skill did not generate is never overwritten without asking first.
 - A regeneration whose sections are all unchanged writes nothing, so re-running it costs you only the reading.
 
-See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.agents/skills/star-metd-summarize/SKILL.md).
+See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.claude/skills/star-metd-summarize/SKILL.md).
 
 ## 17. `$star-code-release`: prepare the repository for release
 
@@ -983,7 +983,7 @@ It prepares a release; it never publishes one. No `git push`, no remote or branc
 - Most of `tasks/` should come back `keep in place`. That is the promotion test working, not failing — scratch is meant to be disposable.
 - Re-run `readme` whenever the ledger or the method documents move. Hand edits to a section survive the regeneration; the marker is what makes that possible.
 
-See the complete definition in [`star-code-release/SKILL.md`](../../../.agents/skills/star-code-release/SKILL.md).
+See the complete definition in [`star-code-release/SKILL.md`](../../../.claude/skills/star-code-release/SKILL.md).
 
 ## 18. End-to-end example
 
@@ -1187,7 +1187,7 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all four roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. In Chinese dialogue the entry point reads `SKILL_zh.md` in full before acting, then loads other `*_zh.md` resources as they are referenced; where the two conflict, `SKILL.md` is authoritative. This guide follows the Codex example from §1, so its "complete definition" links point into `.agents/`.
+Every skill directory has the same shape in all four roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. In Chinese dialogue the entry point reads `SKILL_zh.md` in full before acting, then loads other `*_zh.md` resources as they are referenced; where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other three are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
 
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |
