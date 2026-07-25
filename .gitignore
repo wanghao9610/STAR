@@ -1,7 +1,9 @@
 .env
 
-inits/
-datas/
+inits/*
+!inits/.gitkeep
+datas/*
+!datas/.gitkeep
 
 wkdrs/**
 !wkdrs/**/
