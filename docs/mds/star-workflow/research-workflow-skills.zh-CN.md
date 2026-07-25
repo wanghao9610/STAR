@@ -1146,7 +1146,7 @@ $star-code-release
 
 两条路径。按叶子选，不是按项目选。
 
-**轻路径——`$star-flow-status` → `$star-plan-executor` → `$star-expt-analyst`。** 适合探索性叶子：一次试探、一次可行性检查、一个只负责告诉你"这个方向值不值得继续"的 MVP。executor 自己的边界检查加上 analyst 的完成判据记分卡就够了。跳过代码审查和计划修订——这些代码很可能是要扔掉的脚手架，而计划文本并没有被推翻，只是被测试了一下。
+**轻路径——`$star-flow-status` → `$star-plan-executor` → `$star-expt-analyst`。** 适合探索性叶子：一次试探、一次可行性检查、一个只负责告诉你"这个方向值不值得继续"的 MVP。executor 自己绑定的检查加上 analyst 的完成判据记分卡就够了。跳过代码审查和计划修订——这些代码很可能是要扔掉的脚手架，而计划文本并没有被推翻，只是被测试了一下。
 
 **全路径——`$star-flow-status` → `$star-plan-executor` → `$star-code-reviewer` →（STOP 线：你来跑命令，期间用 `$star-expt-analyst watch <叶子>` 看着）→ `$star-expt-analyst` → `$star-plan-reviser`。** 适合数字会被写进论文、代码会被后续叶子依赖、或结果会牵动战略的叶子。这时代码审查值回票价：它让 bug 死在 GPU 工时之前，也死在错误数字进入表格之前；而 reviser 把这次运行教给我们的东西回灌进计划——方法文档正是从计划编译出来的。
 
@@ -1188,7 +1188,7 @@ $star-code-release
 - **跑到门口会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停，直到 diff 被确认；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的门口。
 - **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与门就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些门要保护的审计链。
 
-参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一道门。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问它的裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`$star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`$star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。永远不会安静的是：STOP 线、提交提议、删除与覆盖、对计划的同步回写、各道审批门、以及真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。`high` 反向拨动：skill 本会打包进一道门、或在门与门之间自行决定的裁量题，逐条浮出。
+参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一道门。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问它的裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`$star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`$star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。永远不会安静的是：STOP 线、提交提议、删除与覆盖、对计划的同步回写、各道审批门、以及真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。`high` 反向拨动：skill 本会打包进一道门、或在门与门之间自行决定的裁量题，逐条单独问出。
 
 一个实用的无人值守组合：启动 STOP 线交回的训练命令，训练期间定时跑 `$star-expt-analyst watch <叶子>`，打分与修订留到你回来再做。
 
