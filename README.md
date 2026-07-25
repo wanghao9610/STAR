@@ -3,6 +3,7 @@
   <h1>STAR</h1>
   <p><strong>Systematic Toolchain for AI Research</strong></p>
   <p><em>A reusable foundation for reproducible and well-structured AI research.</em></p>
+  <p><a href="https://wanghao9610.github.io/STAR/"><strong>Documentation site</strong></a></p>
 </div>
 
 **Language:** English | [简体中文](README.zh-CN.md)
