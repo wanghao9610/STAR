@@ -22,6 +22,54 @@ fail() {
 EXEC_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd -- "${EXEC_DIR}/.." && pwd -P)"
 ENV_FILE="${ROOT_DIR}/.env"
+SCPT_DIR="${EXEC_DIR}/scpts"
+
+# Options that need no runtime are answered before the .env gate, so a user
+# who has not configured .env yet can still discover what this launcher does.
+usage() {
+    cat <<EOF
+Usage: bash execs/run.sh [experiment] [arguments...]
+
+Launch an experiment from execs/scpts/. The default experiment is 00_exp.sh.
+
+Options:
+  -h, --help    Show this help message.
+  -l, --list    List available experiment scripts.
+
+Examples:
+  bash execs/run.sh
+  bash execs/run.sh 00_exp --config config.yaml
+EOF
+}
+
+list_experiments() {
+    local script
+    local found=0
+
+    for script in "${SCPT_DIR}"/*.sh; do
+        [[ -e "${script}" ]] || continue
+        printf '%s\n' "$(basename -- "${script}" .sh)"
+        found=1
+    done
+
+    if (( found == 0 )); then
+        log "No experiment scripts found in ${SCPT_DIR}."
+    fi
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+    -l|--list)
+        list_experiments
+        exit 0
+        ;;
+    -*)
+        fail "Unknown option: $1. Run 'bash execs/run.sh --help' for usage."
+        ;;
+esac
 
 [[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy .env.example to .env and configure it first."
 
@@ -68,7 +116,8 @@ CODE_DIR="${ROOT_DIR}/${CODE_NAME}"
 DATA_DIR="${ROOT_DIR}/datas"
 INIT_DIR="${ROOT_DIR}/inits"
 WORK_DIR="${ROOT_DIR}/wkdrs"
-SCPT_DIR="${EXEC_DIR}/scpts"
+
+[[ -d "${CODE_DIR}" ]] || fail "Code directory not found: ${CODE_DIR}. Check CODE_NAME in ${ENV_FILE}."
 
 export ROOT_DIR CODE_DIR DATA_DIR INIT_DIR WORK_DIR SCPT_DIR
 
@@ -77,48 +126,6 @@ cd "${ROOT_DIR}"
 #######################################################################
 #                          PART 3  Launcher                           #
 #######################################################################
-usage() {
-    cat <<EOF
-Usage: bash execs/run.sh [experiment] [arguments...]
-
-Launch an experiment from execs/scpts/. The default experiment is 00_exp.sh.
-
-Options:
-  -h, --help    Show this help message.
-  -l, --list    List available experiment scripts.
-
-Examples:
-  bash execs/run.sh
-  bash execs/run.sh 00_exp --config config.yaml
-EOF
-}
-
-list_experiments() {
-    local script
-    local found=0
-
-    for script in "${SCPT_DIR}"/*.sh; do
-        [[ -e "${script}" ]] || continue
-        printf '%s\n' "$(basename -- "${script}" .sh)"
-        found=1
-    done
-
-    if (( found == 0 )); then
-        log "No experiment scripts found in ${SCPT_DIR}."
-    fi
-}
-
-case "${1:-}" in
-    -h|--help)
-        usage
-        exit 0
-        ;;
-    -l|--list)
-        list_experiments
-        exit 0
-        ;;
-esac
-
 EXPERIMENT_NAME="${1:-00_exp}"
 if (( $# > 0 )); then
     shift
@@ -128,7 +135,7 @@ fi
 [[ "${EXPERIMENT_NAME}" == *.sh ]] || EXPERIMENT_NAME="${EXPERIMENT_NAME}.sh"
 
 EXPERIMENT_SCRIPT="${SCPT_DIR}/${EXPERIMENT_NAME}"
-[[ -f "${EXPERIMENT_SCRIPT}" ]] || fail "Experiment script not found: ${EXPERIMENT_NAME}"
+[[ -f "${EXPERIMENT_SCRIPT}" ]] || fail "Experiment script not found: ${EXPERIMENT_NAME}. Run 'bash execs/run.sh --list' to see available experiments."
 
 log "Python: ${PYTHON_BIN}"
 log "Experiment: ${EXPERIMENT_NAME}"
