@@ -44,7 +44,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, Kimi, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
-See [Research workflow](#research-workflow) for the responsibilities, invocation patterns, and complete examples for all fifteen skills.
+See [Research workflow](#research-workflow) for what each of the fifteen skills is responsible for, what it writes, and how to invoke it in your tool. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting.
 
 ## Project structure
 
@@ -79,8 +79,10 @@ STAR/
 ├── .kimi-code/hooks/       # Model-id provenance hook for Kimi (see Quick start 2b)
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
+├── .github/                # STAR's own maintainer CI; delete it in your project
 ├── .env.example            # Portable environment configuration example
 ├── AGENTS.md               # Shared instructions for AI coding agents
+├── CLAUDE.md               # Symlink to AGENTS.md, so Claude Code loads the same rules
 └── README.md
 ```
 
@@ -97,6 +99,9 @@ The abbreviated directory names are deliberate:
 | `scpts/` | Scripts | Individual runnable experiment definitions |
 | `tasks/` | Tasks | Each plan's own tool scripts plus the intermediate files produced while executing it, grouped by plan name |
 | `wkdrs/` | Work directories | Run logs, metrics, predictions, and other generated outputs |
+| `mds/` | Markdowns | Markdown documentation, grouped by topic |
+| `htmls/` | HTMLs | Rendered HTML documentation pages |
+| `srcs/` | Static sources | Images and other static assets the docs embed |
 
 For example, executing `metds/plans/00_demo_plan.md` creates `tasks/00_demo/` for that plan's own tool scripts — a verification or indexing script its done-criterion runs — and its intermediate execution files; any generated experiment artifacts still go to the applicable `wkdrs/<run-name>/` directory.
 

@@ -18,11 +18,12 @@ STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊
   → star-plan-executor：实现并验证一个叶子子计划
   → star-code-reviewer：对照规范与计划审计实现代码
   → star-expt-analyst：对照计划的预期审计这个 run 的结果
-  → star-expt-digest：汇总本阶段实验做了什么、什么发生了变化
   → star-plan-reviser：以执行证据审查计划并修订
   → star-metd-summarize：所有叶子执行完、计划定稿后，把计划编译成方法文档
   → star-code-release：归拢代码并编译出项目自己的 README
 
+  ⌾ star-expt-digest：按周期横向通读整个回环——
+    本阶段实验做了什么、什么发生了变化
   ⌾ star-flow-status：随时通读上述全部产物——
     进度到哪里、还欠什么、下一步该做哪一件
 ```
@@ -781,7 +782,7 @@ digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它�
 - 里程碑评审前用 plan 模式，这时你要的是一个家族的完整故事，而不是一个日期区间。
 - `wkdrs/` 默认被 git 忽略，因此 digest 序列存在你的磁盘上，不在仓库历史里。digest 可以从分析报告重新生成，所以这是可恢复的——但别把 digest 当成存档记录。
 
-完整定义见 [`star-expt-digest/SKILL.md`](../../../.agents/skills/star-expt-digest/SKILL.md)。
+完整定义见 [`star-expt-digest/SKILL_zh.md`](../../../.agents/skills/star-expt-digest/SKILL_zh.md)。
 
 ## 14. `$star-plan-reviser`：审查并修订一个计划
 

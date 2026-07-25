@@ -44,7 +44,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **面向 AI 协作的规范**：为 Codex、Claude、Kimi 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
-十五个 skill 的职责、调用方式和完整示例见[研究工作流](#研究工作流)。
+十五个 skill 各自负责什么、产出什么、以及在你所用工具里怎么调用，见[研究工作流](#研究工作流)；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
 
 ## 项目结构
 
@@ -79,8 +79,10 @@ star-ai-research/
 ├── .kimi-code/hooks/       # Kimi 的 model-id 溯源钩子（见快速开始 2b）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
+├── .github/                # STAR 自身的维护 CI；用于你的项目时请删除
 ├── .env.example            # 本地运行环境配置示例
 ├── AGENTS.md               # AI 编程助手共享的协作规范
+├── CLAUDE.md               # 指向 AGENTS.md 的符号链接，供 Claude Code 加载同一份规范
 └── README.md
 ```
 
@@ -97,6 +99,9 @@ HTML 页面放在 `docs/htmls/`，按主题组织的 Markdown 文档放在 `docs
 | `scpts/` | Scripts | 可独立运行的实验定义 |
 | `tasks/` | Tasks | 每个计划自有的工具脚本，以及执行该计划时产生的中间文件，按计划名称分目录保存 |
 | `wkdrs/` | Work directories | run 日志、指标、预测结果及其他实验输出 |
+| `mds/` | Markdowns | 按主题分组的 Markdown 文档 |
+| `htmls/` | HTMLs | 渲染后的 HTML 文档页面 |
+| `srcs/` | Static sources | 文档引用的图片及其他静态资源 |
 
 例如，执行 `metds/plans/00_demo_plan.md` 时会新建 `tasks/00_demo/`，用于存放该计划自有的工具脚本（完成判据要跑的校验或索引脚本）以及执行过程的中间文件；生成的实验产物仍放在相应的 `wkdrs/<运行名称>/` 目录中。
 

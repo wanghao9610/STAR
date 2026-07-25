@@ -18,11 +18,12 @@ vague research interest
   → star-plan-executor: implement and verify one leaf sub-plan
   → star-code-reviewer: audit the implementation against conventions and the plan
   → star-expt-analyst: audit the run's results against what the plan expected
-  → star-expt-digest: summarize what the programme did this period, and what moved
   → star-plan-reviser: review a plan against execution evidence and revise it
   → star-metd-summarize: once every leaf is executed and the plans finalized, compile them into method documents
   → star-code-release: consolidate the code and compile the project's README
 
+  ⌾ star-expt-digest: reads across the loop on a cadence —
+    what the programme did this period, and what moved
   ⌾ star-flow-status: reads all of the above at any point —
     where things stand, what is owed, and the one next action
 ```
