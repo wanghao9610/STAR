@@ -132,4 +132,5 @@ When these already exist, update in place — never append duplicates.
 ## Dialogue Discipline
 
 - Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. Any gate-crossing side effect requires an explicit approval first.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

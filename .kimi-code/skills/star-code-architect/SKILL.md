@@ -133,4 +133,5 @@ When these already exist, update in place — never append duplicates.
 ## Dialogue Discipline
 
 - Both gates and all questions are asked in the conversation — one at a time. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one question at a time, and require an explicit approval message before any gate-crossing side effect.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

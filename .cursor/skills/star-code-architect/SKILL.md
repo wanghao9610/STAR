@@ -136,4 +136,5 @@ When these already exist, update in place — never append duplicates.
 ## Dialogue Discipline
 
 - Ask one plain-text question at a time and wait for the answer (Cursor has no structured question tool). Any gate-crossing side effect requires an explicit approval message first.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.
