@@ -331,9 +331,9 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
 ## 更新日志
 
-尚未版本化——按日期列出要点，最新在前。
+按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **2026-07-23** — 第一个正式版本发布。
+- **[v0.1.0](https://github.com/wanghao9610/STAR/releases/tag/v0.1.0)** (2026-07-24) — 第一个正式版本：面向 Codex、Claude、Cursor 和 Kimi 的十五个双语研究工作流 skill、model-id 溯源钩子，以及支持钩子同步与 `--diff` 预览的更新脚本。
 - **2026-07-15** — STAR 首个发布。
 
 ## 引用
