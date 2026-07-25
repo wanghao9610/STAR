@@ -19,7 +19,7 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `/star-flow-status [PLAN_NAME]` — with no argument, report the whole flow; with a slug / numeric prefix / filename, scope both the tree and the coverage checks to that plan's subtree.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load the sections a read-only skill can act on — §0 vocabulary, §5 plan-name resolution, §7 dialogue, §8 the artifact registry, §9 project layout — in one call: `sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p; /^## 7\./,$p' docs/mds/star-workflow/research-workflow-conventions.md`. §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates and §6 delegation govern skills that commit, run, or write; this one does none of that. Read the whole file if you ever need one of them.
 
 ## Role
 
@@ -38,15 +38,21 @@ You give the researcher a single, honest picture of where the whole flow stands 
 
 Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for the exact rules; the shape is:
 
+**One scan, then reason.** Step 1 collects everything this skill reads in a single call, and Steps 2–9 work from that digest. Do not re-open a file it already covered. Only two things earn a second read: a plan section you must quote rather than count, and a file the digest lists as present but whose contents it did not print. This is the most-run skill in the flow, and a per-file read loop is the one thing that makes it slow — it buys nothing the digest does not already hold.
+
 ### Step 1: Scan
-List `metds/plans/*_plan.md` and read each one's frontmatter (and `## Sub-plans` index on roots). If `PLAN_NAME` was given, resolve it and keep only that subtree.
+Run the collector once: `bash <this skill's directory>/scripts/scan.sh`, with the project root as the working directory — every path it prints is relative to that root. It prints one digest: every plan's frontmatter, its `## Sub-plans` index and its §3/§5 `[TBD]` counts; every run log's frontmatter, step table, awaiting-user checkboxes, strategy signals and dates; the frontmatter of every other registered artifact; and a depth-1 listing of `metds/` and `wkdrs/`. That is the whole input for Steps 2–9.
+
+The script gathers, it never judges — it knows nothing about glyphs, coverage rows, the ladder, or which filenames the registry expects, so every rule stays in this file and in `references/status_spec.md`. Read what it prints as raw file content, exactly as if you had opened each file yourself. If it is missing or fails, fall back to reading the files directly, and say in your reply that the scan fell back.
+
+If `PLAN_NAME` was given, resolve it and keep only that subtree. The scan is always project-wide: scoping a subtree needs every plan's `parent:` first.
 
 ### Step 2: Build the tree
 Link children to parents via `parent:`. Order siblings by `depends_on` (topological), falling back to prefix order. Mark each node **root / internal / leaf** (leaf = empty or absent `children:`).
 
 ### Step 3: Read per-node state
 - **Strategy nodes** (root/internal): the coach `status:` map — how many of the six sections are `done` / `in_progress` / `pending` / `skipped`; whether `finalized:` is set; whether it has been decomposed (`children:` present).
-- **Leaves**: `exec_status` (default `pending` if absent) and `exec_runs` (the last entry is the current run; earlier ones are re-runs worth naming when there are any). If the current run names a `wkdrs/<run>/EXEC_LOG.md`, read it for step-level progress (steps done / total, any `blocked`, any "Awaiting user" STOP-line commands, any recorded **Strategy signal**).
+- **Leaves**: `exec_status` (default `pending` if absent) and `exec_runs` (the last entry is the current run; earlier ones are re-runs worth naming when there are any). The digest carries every `wkdrs/<run>/EXEC_LOG.md`; take step-level progress from the current run's block (steps done / total, any `blocked`, any "Awaiting user" STOP-line commands, any recorded **Strategy signal**).
 
 ### Step 4: Render the tree
 One line per node, indented by level, each with a status glyph and a short state (see the spec for the glyph legend). Show `depends_on` on leaves and flag blocked / awaiting-user leaves.
@@ -55,7 +61,7 @@ One line per node, indented by level, each with a status glyph and a short state
 Report three numbers: strategy completeness (sections done across strategy plans), decomposition coverage (leaves vs still-coarse nodes), and execution progress (leaves `done` / total, and steps done / total from logs).
 
 ### Step 6: Coverage band
-Walk the coverage table in the spec over the scoped artifacts — idea not planned, refs missing, code review missing or stale, experiment analysis missing, ledger stale, method documents missing or stale. Report only the triggered rows, one line each, naming the skill that closes it. Omit the whole section when nothing fires.
+Walk the coverage table in the spec over the scoped artifacts, using the digest's listing for presence and filename dates and its artifact frontmatter for state fields — idea not planned, refs missing, code review missing or stale, experiment analysis missing, ledger stale, method documents missing or stale. Report only the triggered rows, one line each, naming the skill that closes it. Omit the whole section when nothing fires.
 
 ### Step 7: Next action
 Pick the single next action by the priority ladder: an awaiting-user STOP command, then an outstanding debt on finished work, then the next runnable leaf, then a finalized idea with no plan. Give the one-line reason and the exact command. If nothing qualifies, name the blocker.
@@ -64,7 +70,7 @@ Pick the single next action by the priority ladder: an awaiting-user STOP comman
 Flag, without fixing: any leaf whose parent's `updated` is newer than the leaf's `updated` (parent may have changed since decomposition → suggest re-running `/star-plan-decomposer`); any `children:` entry with no matching file, or plan file not listed in its parent's `## Sub-plans`; any `depends_on` prefix that doesn't resolve to a sibling.
 
 ### Step 9: Self-audit line
-Count report-shaped files matching no pattern in the registry (spec's self-audit rules). Report one line with the count and up to three example paths. Omit entirely when the count is zero. This line is how a producer skill's renamed output gets noticed, instead of silently dropping out of the coverage band.
+Over the digest's listing, count report-shaped files matching no pattern in the registry (spec's self-audit rules). Report one line with the count and up to three example paths. Omit entirely when the count is zero. This line is how a producer skill's renamed output gets noticed, instead of silently dropping out of the coverage band.
 
 ## Output & Dialogue Discipline
 

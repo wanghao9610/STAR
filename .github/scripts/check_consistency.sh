@@ -284,6 +284,28 @@ while IFS= read -r manifest; do
 done < <(find .kimi-code/skills -name 'SKILL.md' | sort)
 (( desc_errors == 0 )) && note "all Kimi descriptions within ${KIMI_DESC_MAX} bytes"
 
+# 13. Skill helper scripts are byte-identical across the four trees, and executable.
+#     The .md files are adapted per tree — invocation tokens, harness vocabulary —
+#     but a script reads project files and names no harness, so it has nothing to
+#     adapt. A copy that has drifted is a bug, not a variant. Check 3 compares file
+#     sets only, so without this a script could differ in every tree and pass.
+section "Skill script parity"
+script_errors=0
+while IFS= read -r rel; do
+    baseline="${SKILL_ROOTS[0]}/${rel}"
+    [[ -x "${baseline}" ]] || { fail "${baseline} is not executable"; script_errors=1; }
+    for root in "${SKILL_ROOTS[@]:1}"; do
+        other="${root}/${rel}"
+        [[ -f "${other}" ]] || continue   # inventory parity is check 3's job
+        [[ -x "${other}" ]] || { fail "${other} is not executable"; script_errors=1; }
+        if ! cmp -s "${baseline}" "${other}"; then
+            fail "${other} differs from ${baseline}; skill scripts must be byte-identical"
+            script_errors=1
+        fi
+    done
+done < <(cd "${SKILL_ROOTS[0]}" && find . -type f -name '*.sh' | sed 's|^\./||' | sort)
+(( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all four trees"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
