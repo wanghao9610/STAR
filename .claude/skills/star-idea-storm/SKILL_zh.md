@@ -52,7 +52,7 @@ description: >-
 
 ### Stage 3：文献扫描（`scan`）
 
-对每个入围方向，按 `references/scan_policy.md`：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、拥挤度注记（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇 closest works 及各自摘要**没有**声称的东西、表面 gap。默认深度为标题 + 摘要；只有用户点名某方向、或某条 gap 判断直接决定两个决赛方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读 collector `Agent` 子代理（`subagent_type: Explore`），最多 3 个并行、每个负责一个方向、各自交回一张填好的扫描表；主循环负责写文件，并亲自下所有判断行（拥挤度、closest works、gap）。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
+对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、拥挤度注记（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇 closest works 及各自摘要**没有**声称的东西、表面 gap。默认深度为标题 + 摘要；只有用户点名某方向、或某条 gap 判断直接决定两个决赛方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读 collector `Agent` 子代理（`subagent_type: Explore`），最多 3 个并行、每个负责一个方向、各自交回一张填好的扫描表；主循环负责写文件，并亲自下所有判断行（拥挤度、closest works、gap）。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
 
 ### Stage 4：收敛（`converge`）
 
