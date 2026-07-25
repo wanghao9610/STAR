@@ -278,6 +278,19 @@ if [[ "${ADOPT}" == false ]]; then
         exit 0
     fi
 
+    # The extract below overwrites in place and cannot be rolled back. Git is the
+    # only safety net, so refuse to run when it would not hold: uncommitted edits
+    # under a synced path would be destroyed with no copy anywhere.
+    if git -C "${ROOT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
+        DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${SYNCED[@]}" 2>/dev/null || true)"
+        if [[ -n "${DIRTY}" ]]; then
+            printf '%s\n' "${DIRTY}" | sed 's/^/      /' >&2
+            fail "The paths above have uncommitted changes and would be overwritten with no way back. Commit or stash them first, or preview with 'bash execs/update.sh --diff'."
+        fi
+    else
+        log "NOTE: not a git repository, so an update cannot be undone. Back up the STAR-managed paths first if you have local edits."
+    fi
+
     tar -C "${SOURCE_DIR}" -cf "${ARCHIVE_FILE}" "${SYNCED[@]}"
     tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
 
