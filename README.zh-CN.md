@@ -358,7 +358,7 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 - 用第一个实际实验替换 `execs/scpts/00_exp.sh`。
 - 说明数据集和预训练权重的获取方式，不要直接提交大文件。
 - 明确预期输出、评估指标和复现命令。
-- 更新 `LICENCE` 中的年份和版权所有者。
+- 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
 - 删掉用不到的 harness 目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.kimi-code/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。
 
@@ -386,4 +386,4 @@ bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
 ## 许可证
 
-STAR 基于 [MIT 许可证](LICENCE) 发布。
+STAR 基于 [MIT 许可证](LICENSE) 发布。

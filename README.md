@@ -363,7 +363,7 @@ When starting a new research repository from STAR:
 - Replace `execs/scpts/00_exp.sh` with the first meaningful experiment.
 - Document how datasets and pretrained weights are obtained; do not commit large artifacts directly.
 - Define the expected outputs, metrics, and reproduction commands for the project.
-- Update the copyright holder and year in `LICENCE`.
+- Update the copyright holder and year in `LICENSE`.
 - Replace `docs/htmls/star.html` and `docs/srcs/` — they are STAR's own landing page and images, not your project's. Leave `docs/mds/star-workflow/` alone; `execs/update.sh` keeps it current.
 - Delete the harness trees you will not use. Each of `.agents/` (Codex), `.claude/`, `.cursor/` and `.kimi-code/` is a self-contained copy of the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest.
 
@@ -391,4 +391,4 @@ If you find STAR useful in your research, please cite:
 
 ## License
 
-STAR is released under the [MIT License](LICENCE).
+STAR is released under the [MIT License](LICENSE).
