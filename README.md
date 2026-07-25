@@ -214,7 +214,7 @@ bash execs/run.sh
 bash execs/run.sh 00_exp --config config.yaml
 ```
 
-The stock `00_exp.sh` is a blank placeholder — replace it with your first real experiment when starting a project from STAR. Run names and output directories should distinguish tasks, experiments, or repetitions. Generated artifacts belong under `wkdrs/<run-name>/`.
+The stock `00_exp.sh` runs no science: it prints the interpreter the launcher resolved and the six exported paths, so a fresh checkout has something that visibly succeeds and you can confirm `.env` is wired correctly. Replace it with your first real experiment when starting a project from STAR. Run names and output directories should distinguish tasks, experiments, or repetitions. Generated artifacts belong under `wkdrs/<run-name>/`.
 
 ## Research workflow
 
