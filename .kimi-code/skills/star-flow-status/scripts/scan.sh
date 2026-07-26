@@ -36,12 +36,15 @@
 #                 one-line change in that skill and nothing here. Without this the
 #                 depth-2 sweep stays frontmatter-only, as before.
 #
-#   --runs DIR,DIR  restrict the per-run body index and dates line to these run
-#                 directories. Frontmatter is still printed for every run, and
-#                 PLANS, ARTIFACT FRONTMATTER, LISTING and DIRS stay project-wide:
-#                 a subtree question still needs every plan's parent:, and the
-#                 drift check counts report-shaped files across the whole project.
-#                 A run outside the scope is named as omitted, never dropped silently.
+#   --runs DIR,DIR  restrict the per-run body index and dates line, and any
+#                 --bodies sections, to these run directories. Frontmatter is still
+#                 printed for every run and every artifact, and PLANS, LISTING and
+#                 DIRS stay project-wide: a subtree question still needs every
+#                 plan's parent:, and the drift check counts report-shaped files
+#                 across the whole project. A run outside the scope is named as
+#                 omitted, never dropped silently. Pair it with --bodies whenever
+#                 the caller has already decided which runs it is reading: without
+#                 it, --bodies prints every report in the project's history.
 #
 # Reads only. Writes nothing, anywhere.
 
@@ -302,10 +305,18 @@ while IFS= read -r f; do
     if [ -n "$BODY_SECTIONS" ]; then
         case "$f" in
             wkdrs/*/*)
-                bodies=$(sections_by_number "$f" "$BODY_SECTIONS")
-                if [ -n "$bodies" ]; then
-                    say "[bodies: sections $BODY_SECTIONS]"
-                    printf '%s\n' "$bodies"
+                # --runs gates the bodies for the same reason it gates the per-run
+                # body index: a report inside wkdrs/<run>/ is that run's content.
+                # Frontmatter above stays project-wide either way, so a caller that
+                # scopes the bodies still sees every artifact exists.
+                if ! in_runs_scope "$f"; then
+                    say "[bodies omitted — outside --runs scope]"
+                else
+                    bodies=$(sections_by_number "$f" "$BODY_SECTIONS")
+                    if [ -n "$bodies" ]; then
+                        say "[bodies: sections $BODY_SECTIONS]"
+                        printf '%s\n' "$bodies"
+                    fi
                 fi
                 ;;
         esac
