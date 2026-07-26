@@ -36,7 +36,7 @@ Missing evidence is reported as "unknown" or "absent" — never guessed.
 
 - `path` / `exists` / `consistent` (does the file's state plausibly agree with what the log claims was created/modified?) / `notes`
 
-All collectors: read-only; return "unknown" over guessing; no revision proposals; touch nothing under `datas/`, `inits/`, or `wkdrs/` beyond reading.
+All collectors: read-only; return the fields listed above and nothing else; return "unknown" over guessing; no revision proposals; touch nothing under `datas/`, `inits/`, or `wkdrs/` beyond reading. A verdict a collector returns is a lead the main agent confirms before it reaches the user (conventions §6.6).
 
 ## Verification levels
 

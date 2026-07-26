@@ -58,6 +58,8 @@ Larger than that: dispatch parallel read-only subagents per the collector contra
 
 Cross-check disagreements in the main agent — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks yourself; never anything heavy.
 
+A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate — Step 4 asks the user about each one, and the answers rewrite the plan file — the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the `path[:line]` it confirmed at is what the candidate carries as evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
+
 ### Step 3: Synthesize and persist the review report
 
 Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_template_zh.md`; the report follows the plan's `language`), seven sections: ① intent recap ② what actually happened ③ completion scorecard (per §3 task plus the §5 done-criterion: `met` / `partial` / `unmet` / `unverifiable`, each with evidence) ④ divergences ⑤ blockers & leftovers ⑥ knock-on effects ⑦ revision candidates, each graded **local / structural / strategic**.

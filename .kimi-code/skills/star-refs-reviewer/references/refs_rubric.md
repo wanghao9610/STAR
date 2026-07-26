@@ -33,11 +33,11 @@ Each note (`assets/ref_analysis_template.md`) is graded on:
 
 ## Note collector contract
 
-What a read-only subagent returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`, and for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8), and for `category`, which is derived at Step 6 from the whole collected pool and cannot exist yet. A collector that fills those writes a record that is provably false.
+What a read-only subagent returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`, and for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8), and for `category`, which is derived at Step 6 from the whole collected pool and cannot exist yet, and for §7's follow-ups, which are citekeys already in `reference.bib` — a file Step 5 has not yet built. A collector that fills those writes a record that is provably false.
 
 One paper each. The return:
 
-- `note_body` — the template's §1, §2, §3, §4, §6 and §7, filled. **§5 is left empty**: it needs the project's method context, and it is the reason the note exists.
+- `note_body` — the template's §1, §2, §3, §4 and §6, filled. **§5 and §7 are left empty**: §5 needs the project's method context and is the reason the note exists; §7 wants citekeys from a `reference.bib` that does not exist until Step 5.
 - `title` / `venue` / `year` — exactly as the paper's own page states them.
 - `links` — paper / code / project, or `none found`.
 - `depth` — what it actually read.

@@ -33,11 +33,11 @@
 
 ## 笔记收集器的返回格式
 
-Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,要求填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而 category 要到 Step 6 才从整个池子推导出来,此刻根本不可能存在。收集器把这些填上,写下的就是一份可证伪的记录。
+Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,要求填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而 category 要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,它要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可证伪的记录。
 
 一个收集器一篇论文。返回:
 
-- `note_body`——模板的 §1、§2、§3、§4、§6、§7,填好。**§5 留空**:它需要本项目的方法上下文,而这正是这篇笔记存在的理由。
+- `note_body`——模板的 §1、§2、§3、§4、§6,填好。**§5 与 §7 留空**:§5 需要本项目的方法上下文,而这正是这篇笔记存在的理由;§7 要的是 Step 5 之前还不存在的 `reference.bib` 里的 citekey。
 - `title` / `venue` / `year`——完全照论文自己页面上的写法。
 - `links`——paper / code / project,或 `none found`。
 - `depth`——它实际读到了哪一层。

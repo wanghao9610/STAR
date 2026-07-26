@@ -54,6 +54,8 @@ description: >-
 
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 
+收集器给出的 `suspect` 或 `inconsistent` 是线索，不是结论。它成为编号修订候选之前——后面每条候选都要问用户，而答案会改写计划文件——主 agent 亲自打开被引用的路径，确认该发现仍然成立（规约 §6.6）；确认时落在的那个 `path[:line]`，就是这条候选携带的证据。站不住的丢掉，或降格成 §5 里一条不引发任何改动的备注。
+
 ### Step 3：汇总并落盘审查报告
 
 按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`；报告语言跟随计划的 `language`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 done-criterion：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 影响范围图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
