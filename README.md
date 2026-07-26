@@ -188,7 +188,7 @@ If you drive STAR with **Kimi Code**, run this once per machine so skills record
 bash .kimi-code/hooks/install.sh
 ```
 
-It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor register their hooks automatically. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
+It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor ship their hook registered. On Codex, registered is not yet running: a project hook fires only once the project is trusted and the hook approved, so run `/hooks` in the Codex CLI and approve it — and again whenever it changes. Until you do, `model_id` reads `unrecorded` in every report and nothing reports the gap. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
 
 ### 2c. Optional: pre-approve the status collector
 

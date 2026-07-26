@@ -183,7 +183,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 bash .kimi-code/hooks/install.sh
 ```
 
-它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 会自动注册各自的钩子。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发，所以要在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 2c. 可选：为状态收集脚本预先授权
 

@@ -394,10 +394,19 @@ if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     fi
 fi
 for cfg in "${HOOK_CONFIGS[@]}"; do
-    if [[ -e "${ROOT_DIR}/${cfg}" ]] && \
-       ! grep -q 'star_model_id\.sh' "${ROOT_DIR}/${cfg}" 2>/dev/null; then
+    if [[ ! -e "${ROOT_DIR}/${cfg}" ]]; then
+        continue
+    elif ! grep -q 'star_model_id\.sh' "${ROOT_DIR}/${cfg}" 2>/dev/null; then
         log "NOTE: your ${cfg} was kept and does not register the STAR model-id provenance hook."
         log "      Merge the hook entry from upstream ${cfg} to enable provenance."
+    elif [[ "${cfg}" == ".codex/hooks.json" ]]; then
+        # Registering it is not enough on Codex: a project hook runs only once the
+        # project is trusted and the hook itself approved, and a new or changed hook
+        # needs approving again. Nothing reports the gap — the hook simply does not
+        # fire, and every model_id this workflow records reads "unrecorded".
+        log "NOTE: ${cfg} is registered, but Codex runs a project hook only after you approve it."
+        log "      Run /hooks in the Codex CLI and approve it — re-approve whenever it changes."
+        log "      Until then model_id stays unrecorded in every report, with nothing to see."
     fi
 done
 
