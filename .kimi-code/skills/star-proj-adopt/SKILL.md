@@ -63,7 +63,7 @@ In this order, each step reported as done or skipped-because-it-exists:
 
 #### Step S4: Build the work inventory
 
-From git log, the entrypoints, the output directories, and the README, assemble the inventory defined in `references/adopt_spec.md`: one row per identifiable unit of finished or in-flight work — what it is, its state (`built` / `run` / `concluded` / `abandoned`), and its evidence paths. This is the seed `/skill:star-plan-coach` reads; it is a description of the repository, not a plan (Principle 5). Probing may fan out to read-only collector subagents (conventions §6), at most 3, each returning a filled inventory block; the main agent merges and owns every judgment.
+From git log, the entrypoints, the output directories, and the README, assemble the inventory defined in `references/adopt_spec.md`: one row per identifiable unit of finished or in-flight work — what it is, its state (`built` / `run` / `concluded` / `abandoned`), and its evidence paths. This is the seed `/skill:star-plan-coach` reads; it is a description of the repository, not a plan (Principle 5). Probing may fan out **by lane** — source, runtime, data, weights, outputs, entrypoints — one read-only subagent each, at most 3 in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: `adopt_spec.md` makes confidence decide what reaches Gate 1 at all, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line is a command (`test -d`, an interpreter version check), not a re-read, so the repository's bulk does not come back. The inventory step below reuses what the lanes gathered rather than re-walking their sources; the main agent merges and owns every judgment, including the rule that two commits plus an output directory describing one thing is one row.
 
 #### Step S5: Gate 2 — record the historical runs worth keeping
 
@@ -77,7 +77,7 @@ Write `metds/adopt.md` from `assets/adopt_template.md`. Then route, in order: `/
 
 #### Step B1: Match inventory to leaves
 
-Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). Propose a mapping table: inventory item → leaf → the state it argues for (`done` / `in_progress`) → the evidence. Report both kinds of misfit honestly — inventory items no leaf covers (work the plan tree forgot), and leaves nothing in the inventory reaches (genuinely new work, which is the normal case and not a problem).
+Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A small tree (≤ ~8 leaves) is read by the main agent. Larger: partition the leaves into at most 3 disjoint read-only collectors returning, per leaf, `{leaf, deliverable_paths, step_paths, done_criterion (quoted verbatim), exec_status, overlap, weak}` — the matching rule uses only those, never the whole plan body. The main agent re-reads §5 in full for every leaf it proposes as `done`, and keeps the many-to-many rule and the gate. Propose a mapping table: inventory item → leaf → the state it argues for (`done` / `in_progress`) → the evidence. Report both kinds of misfit honestly — inventory items no leaf covers (work the plan tree forgot), and leaves nothing in the inventory reaches (genuinely new work, which is the normal case and not a problem).
 
 #### Step B2: Gate 3 — per-leaf confirmation
 

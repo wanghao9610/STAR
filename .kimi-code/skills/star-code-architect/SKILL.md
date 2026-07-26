@@ -83,7 +83,7 @@ If a usable conda env from `.env` exists, run `python -c "import <package>"` thr
 
 #### Step A8: Light survey
 
-Complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`, light mode) — the scoring pass already covered the broad structure; for small repos the main agent may do this itself.
+Count the clone's `.py` files first. Under the light-mode threshold: complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and for small repos the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for both the architecture and the migration table.
 
 ### Branch B: Organize the existing codebase
 

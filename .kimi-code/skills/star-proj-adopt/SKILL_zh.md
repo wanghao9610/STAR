@@ -61,7 +61,7 @@ description: >-
 
 #### Step S4：建立工作清单
 
-从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `/skill:star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。勘察可以并行分派只读的收集型子代理（规约 §6），至多 3 个，各自返回填好的清单块；主 agent 负责合并，并独占全部判断。
+从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `/skill:star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。探测可以**按勘察面**分派——源码、运行时、数据、权重、输出、启动入口——每面一个只读子代理，至多 3 个并行，每个的交办说明逐字写明："只读——不要跑这个项目的代码，不要 import 它的包，不要创建或修复任何环境；什么都不要写。"各自返回发现、证据路径、备选与未知项——**不返回置信标签**：`adopt_spec_zh.md` 里，置信度决定了什么才够格走到确认点 1，所以 `certain` / `likely` / `unknown` 由主 agent 自己判。确认一条 `certain` 是跑一条命令（`test -d`、查一下解释器版本），不是重读一遍，所以仓库的体量不会再回来。下面的清单步骤复用这些勘察面已经收集到的证据，而不是把它们的来源再走一遍；主 agent 负责合并，并独占全部判断，包括"两条提交加一个输出目录讲的是同一件事，就只算一行"这条规则。
 
 #### Step S5：确认点 2——把值得留存的历史 run 入账
 
@@ -75,7 +75,7 @@ description: >-
 
 #### Step B1：清单与 leaf 对账
 
-读 `metds/adopt.md` 和 `metds/plans/` 里的每个 leaf（规约 §5.4）。给出映射表：清单条目 → leaf → 它支持的状态（`done` / `in_progress`）→ 证据。两类错配都要如实报告——没有任何 leaf 覆盖的清单条目（计划树漏掉的工作），以及清单够不着的 leaf（真正的新工作，这是常态，不是问题）。
+读 `metds/adopt.md` 和 `metds/plans/` 里的每个 leaf（规约 §5.4）。小树（≤ ~8 个 leaf）由主 agent 自己读。更大的：把 leaf 切成至多 3 份互不相交的只读收集，逐 leaf 返回 `{leaf, deliverable_paths, step_paths, done_criterion（原文照录）, exec_status, overlap, weak}`——匹配规则只用得到这些，用不着整份计划正文。主 agent 对每个它准备判为 `done` 的 leaf 重读完整 §5，并保留多对多那条规则和确认点。给出映射表：清单条目 → leaf → 它支持的状态（`done` / `in_progress`）→ 证据。两类错配都要如实报告——没有任何 leaf 覆盖的清单条目（计划树漏掉的工作），以及清单够不着的 leaf（真正的新工作，这是常态，不是问题）。
 
 #### Step B2：确认点 3——逐 leaf 确认
 

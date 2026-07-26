@@ -15,7 +15,7 @@ Work the areas sequentially by default; delegate a bounded area only when collab
 | Scripts & tools | tools/, scripts/, shell files, notebooks | What is essential vs one-off cruft? |
 | Tests & docs | tests/, CI config, docs/ | What is covered? What can serve as a quick verification suite? |
 
-**Light mode** (Branch A fresh clones, or repos under ~50 Python files): collapse to a single inline pass over all areas.
+**Light mode** (repos under ~50 Python files — size only; a fresh clone is routinely 3–12× that, so provenance is not the test): collapse to a single inline pass over all areas.
 
 ## Contract per area (local or delegated)
 
@@ -28,6 +28,9 @@ Work the areas sequentially by default; delegate a bounded area only when collab
   - `unknowns` — what it could not determine and why.
 
 ## Merging into the repo map
+
+
+A ranked smell becomes a numbered migration item only after the main agent re-opens its cited path at the cited evidence and confirms the finding still holds (conventions §6.6). What does not hold up is dropped, or demoted to a §3 style note for `codearc.md`. The confirming `path:line` goes in the migration table's reason column — this is the one path in the skill where an unverified delegate claim would otherwise cross a user gate and then move files.
 
 The main agent merges area reports into one repo map:
 
