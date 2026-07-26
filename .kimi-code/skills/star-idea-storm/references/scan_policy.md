@@ -46,5 +46,5 @@ Default reading is title + abstract, nothing more. Deepen only when (a) the user
 ## Caching, rate limits, failure
 
 - Cache every fetched payload under `wkdrs/ideas_<date>/raw/<direction-slug>.<source>.<ext>` **before** using it — the cache is the audit trail and the resume point.
-- Serialize per host: ~1 request/second to Semantic Scholar and DBLP; one request per ~3 seconds to arXiv. HTTP 429 / 503 → exponential backoff (2s, 4s, 8s), at most 3 retries, then record the failure and move on. A rate limit is never a reason to fill the gap from memory.
+- Serialize per host: ~1 request/second to Semantic Scholar and DBLP; one request per ~3 seconds to arXiv. This is the session's budget against each host, not each agent's (conventions §6.9) — a session that already ran a fetching skill has spent part of it. HTTP 429 / 503 → exponential backoff (2s, 4s, 8s), at most 3 retries, then record the failure and move on. A rate limit is never a reason to fill the gap from memory.
 - A direction whose searches all fail is reported as "scan failed: <hosts and errors>" — never padded, never silently downgraded to recall.

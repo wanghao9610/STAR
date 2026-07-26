@@ -4,7 +4,7 @@
 
 ## 分组
 
-一条关注点一个 `Task` subagent（`subagent_type: explore`），最多 3 个并行（只读，所以并行是安全的）：
+一条关注点一个 `Task` subagent（`subagent_type: explore`），最多 3 个并行（它们不写任何别的勘察者会写的文件，所以这里并行是安全的——但并非一概安全：会抓取远端的 fan-out 共用同一份按 host 的预算，规约 §6.9）：
 
 | 分组 | 看什么 | 关键问题 |
 |---|---|---|

@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Areas
 
-One `Agent` subagent (`subagent_type: Explore`) per area, at most 3 in parallel (they are read-only, so parallelism is safe):
+One `Agent` subagent (`subagent_type: Explore`) per area, at most 3 in parallel (they write nothing another surveyor might write, so parallelism is safe here — it is not safe in general: a fan-out that fetches shares one per-host budget, conventions §6.9):
 
 | Area | Looks at | Key questions |
 |---|---|---|

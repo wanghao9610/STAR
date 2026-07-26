@@ -76,7 +76,7 @@ AI-conference templates (NeurIPS / CVPR / ICML / ICLR / ACL) render author, titl
 
 ## Rate limits and failure
 
-- Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool).
+- Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool). This is the session's budget against each host, not each agent's (conventions §6.9); a step that fans out divides it and states each share as a number.
 - HTTP 429 / 503 → exponential backoff (2s, 4s, 8s), at most 3 retries, then move on and record the failure. A rate limit is never a reason to fill the gap from memory.
 - A source returning nothing is logged as "not found in `<source>`" — that is a fetch outcome, not evidence the paper does not exist.
 
