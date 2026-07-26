@@ -109,6 +109,17 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     compared after stripping parentheticals (both `(...)` and `（...）`) and inline code, so
     harness vocabulary inside a heading is allowed to differ. Currently exact, with no exception list.
 12. **Kimi `SKILL.md` descriptions stay within their length budget** — see above.
+13. **Skill helper scripts are byte-identical across the four trees, and executable.** A script names no
+    harness, so it has nothing to adapt; a copy that has drifted is a bug, not a variant.
+14. **`.agents` manifests carry the same `##` sections as `.claude`** — the set, not the sequence, since
+    check 11 exempts `.agents` and content had already been lost through that gap.
+15. **Shared scripts parse, and the strings they match byte-exactly still have a producer.** Check 13
+    compares the four copies against each other, so a break introduced into all four at once — which is
+    how these files are normally edited — passes it. This one runs `bash -n` on each copy, and holds a
+    registry of the strings a scanner matches on against the templates that must still write them.
+    `【待定】` is why it exists: `star-plan-decomposer` wrote it into every Chinese sub-plan, `scan.sh`
+    counted only `[TBD]`, and the "too coarse to run" rule silently never fired on a Chinese project
+    from `ab4246c` to `9c25079` with CI green the whole time.
 
 ## What the checks do not catch
 
@@ -128,6 +139,10 @@ Be honest with yourself about this list; it is where the real drift lives.
 - **Whether a shortened description still says the important thing.** Check 12 enforces the Kimi
   length budget below, but nothing checks that what was cut to fit was expendable — see the budget
   section.
+- **A newly grepped string that nobody registered.** Check 15 holds a hand-written registry: add a
+  byte-exact match to a scanner without adding its row, and the next person to reword the producer
+  breaks it silently, exactly as before. When you teach a script to match on a new string, register it
+  in the same commit.
 
 ## Before you commit
 

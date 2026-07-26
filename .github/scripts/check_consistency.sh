@@ -369,6 +369,84 @@ while IFS= read -r skill; do
 done < <(printf '%s\n' "${SKILLS}")
 (( section_errors == 0 )) && note ".agents manifests carry the same ## sections as .claude (${section_files} files)"
 
+# 15. The shared scripts parse, and every string they match byte-exactly still has
+#     a producer. Check 13 compares the four copies against each other, so a script
+#     that is broken or silently mismatched the same way in all four passes it: the
+#     copies agree, and agreement is all it asks. Two failure modes get through.
+#     A syntax error edited into all four at once — which is how these files are
+#     normally edited — stays byte-identical and executable. And a scanner matches
+#     on strings some *other* skill's template writes, with nothing linking the two:
+#     reword the producer and the scan does not error, it just reports zero, and a
+#     rule downstream quietly stops firing. That is what happened to `【待定】`
+#     (fixed in 9c25079): star-plan-decomposer wrote it into every Chinese sub-plan,
+#     scan.sh counted only `[TBD]`, and the "too coarse to run" rule never fired on
+#     a Chinese project from ab4246c until now, with CI green throughout.
+#
+#     Each row below is a string a shared script matches on, and the files that must
+#     still contain it. Both directions are checked, because a row that outlives its
+#     scanner is as misleading as a producer that outlives its row. Deliberately
+#     absent: `Strategy signal` / `战略信号`, the pre-rename labels body_index still
+#     accepts so EXEC_LOG files already on disk keep indexing — they have no producer
+#     by design and must not be given one.
+section "Grepped literals have a producer"
+LITERAL_REGISTRY=(
+    "Sub-plans|star-plan-decomposer/SKILL.md"
+    "Revision History|star-plan-reviser/references/revision_rules.md"
+    "Plan-level finding|star-plan-executor/assets/exec_log_template.md"
+    "方向性信号|star-plan-executor/assets/exec_log_template_zh.md"
+    "[TBD]|star-plan-decomposer/SKILL.md"
+    "【待定】|star-plan-decomposer/SKILL.md"
+    "model_trail:|star-plan-coach/assets/plan_template.md"
+    "model_id|star-code-reviewer/assets/code_review_template.md,star-plan-reviser/assets/review_report_template.md,star-refs-reviewer/assets/refs_index_template.md"
+)
+
+literal_errors=0
+SHARED_SCRIPTS=()
+while IFS= read -r path; do
+    SHARED_SCRIPTS+=("${path}")
+done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' | sort)
+
+if (( ${#SHARED_SCRIPTS[@]} == 0 )); then
+    fail "no shared skill scripts found; the literal registry has nothing to check against"
+    literal_errors=1
+fi
+
+for script in "${SHARED_SCRIPTS[@]:-}"; do
+    [[ -n "${script}" ]] || continue
+    if ! parse_err="$(bash -n "${script}" 2>&1)"; then
+        fail "${script} does not parse:"
+        printf '%s\n' "${parse_err}" | sed 's/^/      /'
+        literal_errors=1
+    fi
+done
+
+for row in "${LITERAL_REGISTRY[@]}"; do
+    (( ${#SHARED_SCRIPTS[@]} > 0 )) || break
+    literal="${row%%|*}"
+    producers="${row#*|}"
+
+    if ! grep -qF -- "${literal}" "${SHARED_SCRIPTS[@]}"; then
+        fail "no shared script matches on '${literal}' any more; drop the registry row or restore the match"
+        literal_errors=1
+    fi
+
+    for root in "${SKILL_ROOTS[@]}"; do
+        found=0
+        IFS=',' read -r -a paths <<< "${producers}"
+        for rel in "${paths[@]}"; do
+            producer="${root}/${rel}"
+            [[ -f "${producer}" ]] || continue
+            if grep -qF -- "${literal}" "${producer}"; then found=1; break; fi
+        done
+        if (( found == 0 )); then
+            fail "'${literal}' is matched byte-exactly by a shared script but no longer produced in ${root} (expected in: ${producers})"
+            literal_errors=1
+        fi
+    done
+done
+
+(( literal_errors == 0 )) && note "${#SHARED_SCRIPTS[@]} shared scripts parse; ${#LITERAL_REGISTRY[@]} grepped literals still produced in all four trees"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
