@@ -22,7 +22,7 @@ Each group's execution binds:
 - **Scope** — the group's migration items verbatim, plus: "do **ONLY** these items; no opportunistic edits, no renames beyond the items, no style improvements" (AGENTS.md §3).
 - **Files** — the explicit file list it owns (moves + import-fix sites).
 - **Mechanics** — moves/renames plus the import/path fixes they force; nothing behavioral.
-- **Runtime** — checks run through the `.env` conda env (`CONDA_HOME`/`PYTHON_HOME`); `python -m compileall -q` is always available (no deps needed).
+- **Runtime** — the absolute interpreter path the main agent already resolved, given verbatim; the migrator does not re-read `.env`. `python -m compileall -q` is always available (no deps needed). A missing package is a blocker it returns, never something it installs (conventions §3.5).
 - **Return** (structured): `changed` — files, one line each; `ran` — commands + outcomes, or `none`; `check` — the group's bound check result, `pass`/`fail` + evidence; `blockers` — or `none`.
 
 ## After a group completes

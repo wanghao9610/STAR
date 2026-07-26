@@ -71,7 +71,7 @@ description: >-
 
 1. 选择本地执行或选择性委派。委派时遵循 `references/agent_dispatch_spec_zh.md`，保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其窄范围范围受限检查。
-3. 在主 agent 中重跑或独立验证范围受限检查。通过后，checkpoint 证据和工件路径；若已批准 checkpoint，则提交该 action 的文件。失败后，若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked` 并停止。
+3. 在主 agent 中重跑或独立验证范围受限检查。通过后，checkpoint 证据和工件路径；若已批准 checkpoint，则提交该 action 的文件。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked` 并停止。
 4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，不运行并停止。
 5. 若重试或 blocker 在子计划粒度改变了方法（新增/删除/替换步骤，交付物路径或完成判据变化），在 EXEC_LOG 的 `Pending amendments` 下记录变更项行并继续——这些在 finalize 时同步，而不是运行中同步。
 

@@ -21,3 +21,5 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 9. **The sub-plan is true to what ran** — every user-confirmed material deviation is synced into the sub-plan's §2–§5 with a `## Revision History` entry (`plan_sync_rules.md`); no row sits unsynced in EXEC_PLAN "Divergences" or EXEC_LOG "Pending amendments" without an explicit user decision to skip it.
 
 10. **Values a document will cite are captured** — every value this run settled that the sub-plan left unstated and a `metds/*.md` section cites (hyperparameters, initialization, the reproduction command) is in the sub-plan already or sits as an ENRICHED row awaiting the user (`plan_sync_rules.md`). A value only EXEC_LOG knows is a value `star-metd-summarize` will report as a permanent gap.
+
+11. **No abandoned edits** — a step that ended `blocked` says in EXEC_LOG what became of its files: restored, or kept by an explicit user decision. No commit stages a failed attempt's leftovers (`agent_dispatch_spec.md`).

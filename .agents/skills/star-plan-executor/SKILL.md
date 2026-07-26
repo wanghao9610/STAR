@@ -73,7 +73,7 @@ For each unfinished action:
 
 1. Choose local execution or selective delegation. When delegating, use `references/agent_dispatch_spec.md` and keep file ownership non-overlapping.
 2. Make only the action's necessary changes and run its own narrow check through the project environment.
-3. Re-run or independently inspect the action's own check in the main agent. On pass, checkpoint the evidence and artifact path, and commit this action's files when checkpointing was approved. On fail, diagnose and retry at most twice when a concrete fix is available; otherwise mark the action `blocked` and stop.
+3. Re-run or independently inspect the action's own check in the main agent. On pass, checkpoint the evidence and artifact path, and commit this action's files when checkpointing was approved. On fail, the main agent's own re-run is the evidence: read the `file:line` the failure names, and open the delegate's full diff only when deciding `blocked` or when the failure looks like a sub-plan-granularity problem. Restore this action's files before retrying, diagnose and retry at most twice when a concrete fix is available; otherwise mark the action `blocked` and stop.
 4. If the action crosses the STOP line, prepare the exact command (and optionally `execs/scpts/<run>.sh`), record it under `Awaiting user`, and stop without running it.
 5. If a retry or blocker changes the approach at the sub-plan's granularity (a step added/dropped/replaced, a deliverable path or done-criterion shifted), record a delta row under EXEC_LOG's `Pending amendments` and continue — these sync at finalize, not mid-run.
 

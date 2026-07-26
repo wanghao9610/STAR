@@ -21,3 +21,5 @@
 9. **子计划与实际执行一致**——每条经用户确认的实质性偏差都已写回子计划 §2–§5 并留有 `## Revision History` 条目(`plan_sync_rules_zh.md`);EXEC_PLAN"与子计划的偏差"和 EXEC_LOG"待同步修正"里,没有既未同步、又未经用户明确决定跳过的行。
 
 10. **文档会引用的值都已捕获**——本轮敲定、子计划未写明、且某个 `metds/*.md` 章节会引用的值(超参、初始化、复现命令),要么已经在子计划里,要么作为一条 ENRICHED 行等待用户确认(`plan_sync_rules_zh.md`)。只有 EXEC_LOG 知道的值,`star-metd-summarize` 只会把它报成一个永久缺口。
+
+11. **没有无人认领的改动**——以 `blocked` 收场的步骤，要在 EXEC_LOG 里写明它那些文件最后怎么了：恢复了，还是经用户明确决定保留。任何一次提交都不会 stage 到某次失败尝试的残留（`agent_dispatch_spec_zh.md`）。
