@@ -62,7 +62,7 @@ description: >-
 1. 把 §3 和 gap 列表细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。
 2. 明确标出 STOP line；已知时估算运行时间/成本。
 3. 把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入，以变更项形式（ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`）记入 EXEC_PLAN 的“与子计划的偏差”表。与子计划自身粒度相矛盾算偏差；“更具体”不算——除非那是计划未写明、而某份方法文档会引用的值，那要记为一条 ENRICHED 行并写明该章节。
-4. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
+4. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。并说明拒绝的代价：没有逐 action 提交，每个已验证 action 都停在未提交状态，后面要恢复时能依据的只有本次运行自己记下的每个 action 起点（`references/agent_dispatch_spec_zh.md`）。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
 5. 为计划中间文件创建 `tasks/<plan-name>/`。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `$star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的 divergence 行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
 
 ### Step 4：执行与验证
@@ -99,4 +99,4 @@ description: >-
 
 - 在非交互的 `codex exec` 中（`ask_user_question` 不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行，仍然重实验前停，在任何同步回写子计划前仍需纯文本确认。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
-- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交确认与 divergence 行确认（它回写计划 §2–§5）、Step 5 的 Pending amendments 整批同步、以及删草稿文件的提议（它把关一次删除）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交确认与 divergence 行确认（它回写计划 §2–§5）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

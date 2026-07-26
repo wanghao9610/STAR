@@ -4,7 +4,7 @@ The exact rules behind `star-proj-adopt`. `SKILL.md` states the shape; this file
 
 ## 1. The probe (read-only)
 
-Six areas. Each returns findings plus a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Gate 1 — a `certain` line is reported, not asked about.
+Six areas. Each carries a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Gate 1 — a `certain` line is reported, not asked about. Because the label decides that, the main agent assigns it. A lane handed to a delegate returns findings and evidence paths with the confidence column left empty; filling it there would let a delegate decide what the user is asked about.
 
 | Area | Look at | `certain` when |
 |---|---|---|

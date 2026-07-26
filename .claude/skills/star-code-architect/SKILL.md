@@ -84,7 +84,7 @@ Follow `references/rebrand_checklist.md`: top-level package directory, all impor
 
 If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan gate.
 
-#### Step A8: Light survey
+#### Step A8: Survey the clone
 
 Count the clone's `.py` files first. Under the light-mode threshold: complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and for small repos the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for both the architecture and the migration table.
 
@@ -98,7 +98,7 @@ Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per topic �
 
 #### Step C1: Design the target architecture
 
-From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, CLAUDE.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. Keep it minimal.
+From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, CLAUDE.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. No row exists until the main agent has re-opened the smell's cited location and confirmed it (`references/survey_spec.md`); the confirming `path:line` is what the reason column carries. Keep it minimal.
 
 #### Step C2: Gate 2 — the user approves
 

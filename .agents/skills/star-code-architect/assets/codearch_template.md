@@ -53,9 +53,9 @@ model_trail:                    # append-only: one entry per write session, neve
 
 <!-- Append-only log of structural migrations executed (or blocked) by star-code-architect. -->
 
-| Date | Item | From → To | Status | Verified by |
-|---|---|---|---|---|
-| <YYYY-MM-DD> | M1 | `<old>` → `<new>` | done / blocked | <check> |
+| Date | Item | From → To | Confirmed at | Status | Verified by |
+|---|---|---|---|---|---|
+| <YYYY-MM-DD> | M1 | `<old>` → `<new>` | `<path:line>` | done / blocked | <check> |
 
 ## 7. Names left unchanged on purpose
 
