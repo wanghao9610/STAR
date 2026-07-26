@@ -324,6 +324,51 @@ done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | so
 
 (( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all four trees"
 
+# 14. Top-level section parity between .agents and .claude manifests.
+#     Check 11 excludes .agents on purpose: it is an adapted variant, not a copy,
+#     and its ### sequence and reference-file headings carry their own vocabulary
+#     (7-step executor against the others' 9; "contract per area" for "contract
+#     per surveyor"). But a SKILL.md's ## sections are its shape, not its wording
+#     — Role, Core Principles, Workflow, State & File Rules, Dialogue Discipline —
+#     and those are shared. Nothing compared them, and the gap already cost
+#     .agents its "## Dialogue Discipline" in 7 of 15 manifests silently
+#     (restored in 042ece5). Manifests only, and the SET rather than the sequence,
+#     so ordering and every adaptation below ## stay free.
+section "Manifest section parity (.agents vs .claude)"
+norm_sections() { # $1 = file; prints the file's normalized ## headings, sorted unique
+    awk '
+        /^## / {
+            line = $0
+            p = index(line, "(")
+            q = index(line, "（")
+            if (q > 0 && (p == 0 || q < p)) p = q
+            if (p > 0) line = substr(line, 1, p - 1)
+            gsub(/`/, "", line)
+            gsub(/[ \t]+/, " ", line)
+            sub(/^ +/, "", line)
+            sub(/ +$/, "", line)
+            print tolower(line)
+        }
+    ' "$1" | sort -u
+}
+
+section_errors=0
+section_files=0
+while IFS= read -r skill; do
+    for manifest in SKILL.md SKILL_zh.md; do
+        baseline=".claude/skills/${skill}/${manifest}"
+        other=".agents/skills/${skill}/${manifest}"
+        [[ -f "${baseline}" && -f "${other}" ]] || continue   # checks 3 and 5 own missing files
+        section_files=$(( section_files + 1 ))
+        if ! diff -q <(norm_sections "${baseline}") <(norm_sections "${other}") > /dev/null; then
+            fail "${other}: ## sections differ from ${baseline}:"
+            diff <(norm_sections "${baseline}") <(norm_sections "${other}") | sed 's/^/      /'
+            section_errors=1
+        fi
+    done
+done < <(printf '%s\n' "${SKILLS}")
+(( section_errors == 0 )) && note ".agents manifests carry the same ## sections as .claude (${section_files} files)"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
