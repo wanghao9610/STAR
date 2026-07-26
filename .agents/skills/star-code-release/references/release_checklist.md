@@ -1,6 +1,6 @@
 # Release Checklist
 
-Four families of check, run over the **tracked** repository plus anything this run promoted. Every finding carries `file:line`, the check that caught it, and a concrete fix. Severity is fixed by the family, not by how the rest of the run went: a single open blocker means the run's verdict is `blocked`, never "ready with one caveat".
+Five families of check, run over the **tracked** repository plus anything this run promoted. Every finding carries `file:line`, the check that caught it, and a concrete fix. Severity is fixed by the family, not by how the rest of the run went: a single open blocker means the run's verdict is `blocked`, never "ready with one caveat".
 
 Scope note: check what a stranger who clones the repository would receive. `git ls-files` is the authority on that, plus the paths promoted this run. A secret sitting in a git-ignored `wkdrs/` file is not a release blocker — but a secret in a file this run is about to promote is, which is why the sweep runs after gather.
 
@@ -54,13 +54,13 @@ Nothing is *executed* beyond imports and `--help`. Verifying that a training com
 
 ## 5. Numbers & claims
 
-The two README rules with no other backstop: families 3 and 4 already re-check every printed command, image, relative link and anchor, but nothing checks where a number came from.
+The three README rules with no other backstop: families 3 and 4 already re-check every printed command, image, relative link and anchor, but nothing checks where a number came from.
 
 | Check | How | Fix |
 |---|---|---|
 | Every figure traces to the results table | For each number in `README.md`, name the `wkdrs/results/results.md` row it was copied from | No row → the number does not ship. A number traceable to an `EXPT_ANALYSIS` or a digest instead of the results table is a **blocker**: those are per-run and provisional, and the README is neither |
 | Every superlative is carried by a verdict | For each "state-of-the-art", "outperforms", "best", "significantly", name the results-table verdict that carries it | No verdict carries it → drop the word, or quote the comparison it actually rests on |
-| Unverified numbers are marked | A number the ledger does not hold appears as a TODO, never as a result | Route to `star-expt-analyst aggregate`; never produce the number to fill the gap (the red line) |
+| Unverified numbers are marked | A number the results table does not hold appears as a TODO, never as a result | Route to `star-expt-analyst aggregate`; never produce the number to fill the gap (the red line) |
 
 ## Reporting
 

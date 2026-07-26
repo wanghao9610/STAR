@@ -978,7 +978,7 @@ $star-code-release check        # 只跑发布体检——除报告外只读
 2. 扫描 `tasks/`、`wkdrs/` 里的脚本与配置、以及根目录散落文件，只移入通过三选一证据检验的文件——README 会引用它、某个已执行叶子的 §4 交付物或 §5 完成判据需要它、或它能复现 `wkdrs/results/results.md` 里的某个数字。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选报成架构缺口，而不是自造一个目录。**Gate 1：** 你逐行批准移入表，每行都标明风险，以及它会让哪行计划文本过期；
 3. 只打磨对外发布的部分——本次移入的文件、README 会打印的入口 / 配置 / 脚本、以及它展示的公共 API。每处改动逐项批准且不改行为；
 4. 按一张成文映射表逐节编译 `README.md`：头部与摘要来自 `metds/overview.md`，方法来自 `metds/framework.md`，安装来自 `requirements*` 与最新的 `ENV_REPORT.md`，数据准备来自 `metds/dataset.md`，训练与评测来自 `metds/training.md` 和 `metds/evaluation.md`，结果与模型库来自 `wkdrs/results/results.md`，仓库结构来自 `metds/codearc.md`，引用来自 `reference.bib`，致谢来自 `UPSTREAM.md`；
-5. 最后跑一遍阻断式体检：密钥凭据与机器本地路径、许可证与署名、它打印的每条命令是否真的能解析、它写下的每个链接与图片是否指向存在的文件。
+5. 最后跑一遍阻断式体检：密钥凭据与机器本地路径、许可证与署名、它打印的每条命令是否真的能解析、它写下的每个链接与图片是否指向存在的文件，以及它打印的每个数字是否追得回 `wkdrs/results/results.md` 的某一行。
 
 ### 主要输出
 

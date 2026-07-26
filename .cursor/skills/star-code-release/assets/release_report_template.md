@@ -74,6 +74,8 @@
 
 ### Assets & links
 
+### Numbers & claims
+
 ## 7. Awaiting User
 
 <!-- The publishing commands, prepared and never run (SKILL.md Core Principle 6). For each: the

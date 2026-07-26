@@ -43,7 +43,7 @@ description: >-
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. 解析参数：`gather` / `polish` / `readme` / `check` → 只跑该阶段；无参数 → 按顺序跑完整流程；其他 → 列出四个阶段名，直接问一个问题，确认指的是哪个。
-3. 动手之前先打印**就绪表**：映射表需要的每个输入一行（五份 `metds/*.md`、`results.md`、`codearc.md`、`UPSTREAM.md`、`requirements*`、最新 `ENV_REPORT.md`、`reference.bib`、`LICENSE`），标 `present` / `absent` / `stale`，并写明产出它的 skill。这一步只读每份输入的 frontmatter——判定过期靠的是比日期，方法文档只有到 Step 3 真要从它编译时才整份打开。过期与否按各产出方自己的记录方式比对——方法文档的 `sources:` 日期落后于计划当前的 `updated`，结果汇总表早于最新的 `EXPT_ANALYSIS`。
+3. 动手之前先打印**就绪表**：映射表需要的每个输入一行（五份 `metds/*.md`、`results.md`、`codearc.md`、`UPSTREAM.md`、`requirements*`、最新 `ENV_REPORT.md`、`reference.bib`、`LICENSE`），标 `present` / `absent` / `stale`，并写明产出它的 skill。这一步只读每份输入的 frontmatter——判定过期靠的是比日期，方法文档只有到 Step 3 真要从它编译时才整份打开。`requirements*`、`reference.bib`、`LICENSE` 既没有 frontmatter 也没有日期：这三行只按文件清单判 `present` / `absent`，永远不标 `stale`，而不是整份打开去回答一个它们回答不了的问题。过期与否按各产出方自己的记录方式比对——方法文档的 `sources:` 日期落后于计划当前的 `updated`，结果汇总表早于最新的 `EXPT_ANALYSIS`。
 4. 带缺口编译是允许且正常的——缺口会变成 README 的 TODO——但用户要先看到这张表。当多数来源都缺失时，直白地说现在编译出来的 README 大半是 TODO，并直接提问：*先跑产出方（推荐，写明是哪些）* / *就用现有的编译*。
 5. 列出启动时就带未提交改动的路径（规约 §1）。本次运行绝不 stage 它们。
 
@@ -77,7 +77,7 @@ description: >-
 
 ### Step 4 —— `check`：发布前检查
 
-对被 git 跟踪的仓库加上本次收编的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。每个阻断项进报告之前，主 agent 都要回到它标注的 `file:line` 重开确认：一份对外的发布报告，不是让一条没人读过的 grep 命中直接落地的地方。
+对被 git 跟踪的仓库加上本次收编的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性，以及数字与断言——最后这一族是全流程里唯一把打印出来的数字追回 `wkdrs/results/results.md` 的地方，它的第一行就是阻断项。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。每个阻断项进报告之前，主 agent 都要回到它标注的 `file:line` 重开确认：一份对外的发布报告，不是让一条没人读过的 grep 命中直接落地的地方。
 
 ### Step 5：报告与交接
 
