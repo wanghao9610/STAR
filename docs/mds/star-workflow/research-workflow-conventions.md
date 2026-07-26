@@ -14,28 +14,19 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 
 | Term | In one clause | Defined in |
 |---|---|---|
-| STOP line | the line a skill never crosses on its own — for heavy, costly, or irreversible work it writes the exact command out and hands it to you to run | §2 |
-| leaf | a plan with empty or absent `children:`; only leaves are executable | §5.4 |
 | top-level plan | the plan `star-plan-coach` writes, covering problem through milestones | §5, §8 |
 | done-criterion | a leaf's §5: the binary test that decides whether its run succeeded | the guide, §3 of each plan |
 | kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
 | `finalized:` | set by the coach when all six sections are `done`; three skills gate on it — `star-plan-decomposer`, `star-code-architect`, `star-metd-summarize` | §8 |
 | `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
-| `depends_on` | the prefixes of sibling plans that must finish first | §5.5 |
 | too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
-| output table | the §8 table naming every skill's durable output and its state field | §8 |
-| `model_trail` | one line per writing session, added never edited | §8 |
-| involve level | how much a run asks before deciding — `low` / `medium` / `high` | §7.7 |
 | backfill | `star-proj-adopt`'s second phase, recording work finished before any plan existed | §8 |
-| read-only subagent | a subagent that fills in a form you give it and writes no files | §6.4 |
-| main agent | the agent running the skill itself; it owns integration and judgment | §6.3 |
 | follow-up checks | `star-flow-status`'s checks on finished work whose review, analysis, or write-up is missing or out of date | `status_spec.md` |
 | summary counts | a parent's progress counted up from its children | `status_spec.md` |
 | plan-level finding | a result that changes the plan itself, not just the leaf that produced it | `star-plan-reviser` |
 | last covered date | the newest digest's `covers.through`, where the next digest starts | `star-expt-digest` |
 | the step's own check | the check an `EXEC_PLAN` step binds to itself, run before that step counts as done | `star-plan-executor` |
-| unrecognized-files line | the count of report-shaped files matching no row of the output table | §8 |
 
 ## 1. Git
 
@@ -180,7 +171,7 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
 | Release | `star-code-release` | `README.md`, `wkdrs/release/RELEASE_<date>.md` | the README's provenance marker (date + `sources:`) |
 
-**Every artifact records the model that wrote it.** Each producer writes `model_id` into what it creates — a frontmatter key where the artifact has frontmatter, and the header line where it does not (`CODE_REVIEW`, `REVIEW`, `refs_index.md`, `UPSTREAM.md`, and `README.md`, whose header line is an HTML comment because GitHub would render frontmatter as a table at the top of the page). The value is the model id the runtime reports for the writing session, copied verbatim — and the runtime does report it: it is stated in your session context. Claude Code names it in the system prompt, and each supported runtime injects a line naming it at session start through a STAR `SessionStart` hook — `.claude/hooks/star_model_id.sh` (Claude Code), `.codex/hooks/star_model_id.sh` (Codex), `.cursor/hooks/star_model_id.sh` (Cursor); transcribe that string. Kimi is a best-effort exception — its `SessionStart` cannot inject context and exposes no model id, so `.kimi-code/hooks/star_model_id.sh` runs on `UserPromptSubmit` instead and injects the configured `default_model` from `~/.kimi-code/config.toml` (registered manually per `.kimi-code/hooks.example.toml`), which can be stale if the model was overridden mid-session. If no injected line is present in context — the hook fires on `UserPromptSubmit`, which slash-command skill activation does not pass through, so a skill opened before any plain user message has seen nothing — run one read yourself before writing `unrecorded`: `grep -E '^[[:space:]]*default_model[[:space:]]*=' "${KIMI_CODE_HOME:-$HOME/.kimi-code}/config.toml"`, and record the value verbatim (still self-reported, still possibly stale); write `unrecorded` only when that read also comes up empty. Claude Code has its own gap and its own fallback: the `model` field rides on `SessionStart` alone and is omitted whenever the session did not start fresh — after `/clear`, resume, compact, or fork — so in those sessions the injected line carries a recovery command in place of an id. Run it before writing `unrecorded`: `bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path>`, with the path the injected line names, and record what it prints verbatim. It reads `message.model` off this session's own assistant turns, so it is the runtime's record rather than a guess — though it can drop a context-window suffix the `SessionStart` field would have carried (`claude-opus-5[1m]` resolves as `claude-opus-5`). Write `unrecorded` only when the session names no model anywhere — a runtime that states none, or a session where every read above also came up empty, in which case the injected line says so. Never infer it from behavior, never reason about which model this is "probably", and never copy one artifact's value into another.
+**Every artifact records the model that wrote it.** Each producer writes `model_id` into what it creates — a frontmatter key where the artifact has frontmatter, and the header line where it does not (`CODE_REVIEW`, `REVIEW`, `refs_index.md`, `UPSTREAM.md`, and `README.md`, whose header line is an HTML comment because GitHub would render frontmatter as a table at the top of the page). The value is the model id the runtime reports for the writing session, copied verbatim — and the runtime does report it: it is stated in your session context, by a STAR `SessionStart` hook and, in Claude Code, by the system prompt. Where that line is missing, or carries a recovery command in place of an id, `model_id_spec.md` holds the per-runtime fallback — run it before writing `unrecorded`, which is for a session that names no model anywhere. Never infer it from behavior, never reason about which model this is "probably", and never copy one artifact's value into another.
 
 Two limits matter, because this field will be used to compare work across models:
 

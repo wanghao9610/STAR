@@ -126,6 +126,12 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     The drift it exists for shipped twice: layout and runtime moved to §8 and §9, and both
     `star-code-reviewer` and `star-expt-analyst` kept citing §5 and §6 with CI green, because no check
     had ever looked at a citation.
+17. **The conventions document's numbered structure is pinned, and the workflow docs stay line-aligned
+    across languages.** Skills cite that file at sub-section granularity — §7.7 sixty-four times, §6.3
+    forty — so inserting an item into the middle of a section repoints every citation after it. The
+    headings are pinned; item counts are pinned for the sections whose items are cited (§1, §3, §4, §5,
+    §6, §7), and both languages are counted, since a §n that means different things per language is the
+    same bug. The line-count parity is the "keep them line-aligned" rule below, enforced.
 
 ## What the checks do not catch
 
@@ -159,8 +165,9 @@ Be honest with yourself about this list; it is where the real drift lives.
 - Editing `AGENTS.md` means editing `.cursor/rules/agent-instructions.mdc` in the same commit — check 9
   compares their bodies directly.
 - Editing a numbered section of the conventions document: do not renumber. Section 7.7 alone has 62
-  references across the repository.
+  references across the repository. Check 17 holds the section headings and the item counts; adding an
+  item to §1, §3, §4, §5, §6 or §7 fails it until every `§n.m` citation has been re-audited.
 - Same for `AGENTS.md`: renumbering a section means re-auditing every `§n` citation in the skill trees
   and updating `AGENTS_SECTIONS` in the check script. Check 16 fails until both are done.
 - Keep the English and Chinese workflow guides line-aligned. They currently match line for line, which
-  makes cross-language diffs readable.
+  makes cross-language diffs readable — and check 17 now fails if a pair stops matching.

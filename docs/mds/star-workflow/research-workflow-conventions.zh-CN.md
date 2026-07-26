@@ -14,28 +14,19 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 
 | 术语 | 一句话 | 定义处 |
 |---|---|---|
-| 红线 | skill 绝不自行越过的那条线——重的、贵的、不可逆的活儿，它把确切命令写出来交给你去跑 | §2 |
-| 叶子 | `children:` 为空或缺失的计划；只有叶子可执行 | §5.4 |
 | 总体计划 | `star-plan-coach` 写出的那份计划，覆盖从问题定义到里程碑 | §5、§8 |
 | 完成判据 | 叶子的 §5：判定该 run 是否成功的二值测试 | 指南、各计划 §3 |
 | kill-criterion | 根计划的 §5：出现即表明这个方向该停的结果 | `star-plan-coach` |
 | `finalized:` | 六节全 `done` 时由 coach 设置；三个 skill 没有它就不往下走——`star-plan-decomposer`、`star-code-architect`、`star-metd-summarize` | §8 |
 | `exec_status:` | 叶子的执行状态；`done` / `skipped` / `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
 | `traces_to` | 这份子计划支撑根计划里的哪条主张 | `star-plan-decomposer` |
-| `depends_on` | 必须先完成的那些兄弟计划的前缀 | §5.5 |
 | 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]` / `【待定】`，或已定稿却从未拆解 | `status_spec_zh.md` |
-| 产物登记表 | §8 的表，列出每个 skill 的持久产物及其状态字段 | §8 |
-| `model_trail` | 每次写入会话一行，只追加、不改写 | §8 |
-| 参与度档位 | 一次运行决策前问多少——`low` / `medium` / `high` | §7.7 |
 | backfill | `star-proj-adopt` 的第二阶段，记录在任何计划存在之前就完成的工作 | §8 |
-| 只读子代理 | 把你给它的表格填好返回、不写任何文件的子代理 | §6.4 |
-| 主 agent | 跑这个 skill 的本体，拥有集成与判断权 | §6.3 |
 | 后续检查项 | `star-flow-status` 对已完成工作的检查：审查、分析或成文缺失或过期 | `status_spec_zh.md` |
 | 汇总计数 | 由子节点向上累计出的父节点进度 | `status_spec_zh.md` |
 | 方向性信号 | 会改变计划本身、而不只是产出它的那个叶子的结果 | `star-plan-reviser` |
 | 上次覆盖到的日期 | 最新一份 digest 的 `covers.through`，下一份从这里往后接 | `star-expt-digest` |
 | 步骤自带的检查 | `EXEC_PLAN` 每一步绑定给自己的检查，过了它这一步才算做完 | `star-plan-executor` |
-| 自审行 | 统计形似报告、却不匹配产物登记表任何一行的文件数的那一行 | §8 |
 
 ## 1. Git
 
@@ -180,7 +171,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 | 方法文档 | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`、`sources:` |
 | 发布 | `star-code-release` | `README.md`、`wkdrs/release/RELEASE_<日期>.md` | README 的溯源标记（日期 + `sources:`） |
 
-**每份产物都记录写它的模型。** 每个产出方把 `model_id` 写进自己创建的产物——产物有 frontmatter 就作为 frontmatter 键，没有就写在文件首行里（`CODE_REVIEW`、`REVIEW`、`refs_index.md`、`UPSTREAM.md`，以及 `README.md`——它的文件首行是一条 HTML 注释，因为 GitHub 会把 frontmatter 渲染成页首的一张表）。取值是运行时为当次写入会话报出的模型 id，原样抄录——而运行时确实会报：它就写在你的会话上下文里。Claude Code 在系统提示里写明，且每个受支持的运行时都通过 STAR 的 `SessionStart` 钩子在会话开始注入一行写明它——`.claude/hooks/star_model_id.sh`（Claude Code）、`.codex/hooks/star_model_id.sh`（Codex）、`.cursor/hooks/star_model_id.sh`（Cursor），照抄那串即可。Kimi 是尽力而为的例外——它的 `SessionStart` 无法注入上下文、也不暴露模型 id，因此 `.kimi-code/hooks/star_model_id.sh` 改在 `UserPromptSubmit` 上运行，注入 `~/.kimi-code/config.toml` 里配置的 `default_model`（需手动注册，见 `.kimi-code/hooks.example.toml`），若会话中途换过模型则可能过期。若上下文里没有注入的那一行——钩子挂在 `UserPromptSubmit` 上，斜杠命令激活 skill 不经过该事件，因此在任何普通用户消息之前打开的 skill 看不到它——在写 `unrecorded` 之前自己执行一次读取：`grep -E '^[[:space:]]*default_model[[:space:]]*=' "${KIMI_CODE_HOME:-$HOME/.kimi-code}/config.toml"`，把读到的值原样记录（仍是自报、仍可能过期）；只有这次读取也为空时才写 `unrecorded`。Claude Code 有自己的缺口，也有自己的兜底：`model` 字段只挂在 `SessionStart` 上，且只要会话不是全新开始——`/clear`、resume、compact、fork 之后——它就会缺失，此时注入的那一行带来的是一条恢复命令，而不是一个 id。在写 `unrecorded` 之前先跑它：`bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path>`，路径用注入行点出的那个，把打印出来的值原样记录。它读的是本次会话自己的 assistant 轮次上的 `message.model`，因此是运行时的记录而非猜测——只是可能丢掉 `SessionStart` 字段本会带上的上下文窗口后缀（`claude-opus-5[1m]` 会解析成 `claude-opus-5`）。只有当会话里任何地方都没写明模型时才写 `unrecorded`——运行时确实没报，或上面每一次读取也都为空，那时注入的那行会这么说。绝不凭行为推断，绝不去想“这大概是哪个模型”，也绝不把一份产物的值抄到另一份上。
+**每份产物都记录写它的模型。** 每个产出方把 `model_id` 写进自己创建的产物——产物有 frontmatter 就作为 frontmatter 键，没有就写在文件首行里（`CODE_REVIEW`、`REVIEW`、`refs_index.md`、`UPSTREAM.md`，以及 `README.md`——它的文件首行是一条 HTML 注释，因为 GitHub 会把 frontmatter 渲染成页首的一张表）。取值是运行时为当次写入会话报出的模型 id，原样抄录——而运行时确实会报：它就写在你的会话上下文里，由 STAR 的 `SessionStart` 钩子注入，Claude Code 还会在系统提示里写明。那一行缺失、或带来的是一条恢复命令而不是 id 时，各运行时的兜底在 `model_id_spec.zh-CN.md`——写 `unrecorded` 之前先按它执行；`unrecorded` 只留给会话里任何地方都没写明模型的情况。绝不凭行为推断，绝不去想"这大概是哪个模型"，也绝不把一份产物的值抄到另一份上。
 
 有两条限制必须说明，因为这个字段会被用来横向比较不同模型的产出：
 

@@ -544,6 +544,81 @@ done
 
 (( cite_errors == 0 )) && note "AGENTS.md heading map pinned; ${cite_checked} labelled citations resolve"
 
+# 17. The conventions document's numbered structure is pinned, and the workflow
+#     docs stay line-aligned across languages.
+#     Skills cite this file at sub-section granularity — §7.7 is cited 64 times,
+#     §6.3 40 times — so renumbering a section, or inserting an item into the
+#     middle of one, silently repoints every citation after it. CONTRIBUTING has
+#     said "do not renumber" in prose since the beginning; this is the part of it
+#     a script can hold.
+#     Item counts are pinned only for the sections whose items are cited as
+#     §n.m. §0, §2, §8 and §9 have none, so only their headings are pinned.
+section "Conventions document structure"
+
+CONV_EN="docs/mds/star-workflow/research-workflow-conventions.md"
+CONV_ZH="docs/mds/star-workflow/research-workflow-conventions.zh-CN.md"
+CONV_HEADINGS=(
+    '0. Vocabulary'
+    '1. Git'
+    '2. The STOP line'
+    '3. `.env` and the project runtime'
+    '4. Real dates'
+    '5. Plan-name resolution'
+    '6. Delegation'
+    '7. Dialogue'
+    '8. The output table'
+    '9. Project layout'
+)
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|10")
+
+conv_items() { # $1 = file, $2 = section number -> top-level numbered items in it
+    awk -v want="$2" '
+        /^## / { n = $2; sub(/\./, "", n); insec = (n == want) }
+        insec && /^[0-9]+\. / { c++ }
+        END { print c + 0 }
+    ' "$1"
+}
+
+conv_errors=0
+
+expected_conv="$(printf '%s\n' "${CONV_HEADINGS[@]}")"
+actual_conv="$(sed -nE 's/^## (.+)$/\1/p' "${CONV_EN}")"
+if [[ "${expected_conv}" != "${actual_conv}" ]]; then
+    fail "${CONV_EN} headings changed; skills cite this file as §n and §n.m. Re-audit the citations, then update CONV_HEADINGS in this script:"
+    diff <(printf '%s\n' "${expected_conv}") <(printf '%s\n' "${actual_conv}") | sed 's/^/      /'
+    conv_errors=1
+fi
+
+if [[ "$(sed -nE 's/^## ([0-9]+)\..*/\1/p' "${CONV_EN}")" != "$(sed -nE 's/^## ([0-9]+)\..*/\1/p' "${CONV_ZH}")" ]]; then
+    fail "${CONV_ZH} does not carry the same section numbers as ${CONV_EN}; a §n citation resolves to a different rule per language"
+    conv_errors=1
+fi
+
+for row in "${CONV_ITEMS[@]}"; do
+    sec="${row%%|*}"
+    want="${row#*|}"
+    for f in "${CONV_EN}" "${CONV_ZH}"; do
+        got="$(conv_items "${f}" "${sec}")"
+        if [[ "${got}" != "${want}" ]]; then
+            fail "${f}: §${sec} carries ${got} numbered items, pinned at ${want} — every §${sec}.n citation past the change now points at a different item"
+            conv_errors=1
+        fi
+    done
+done
+
+while IFS= read -r en_doc; do
+    zh_doc="${en_doc%.md}.zh-CN.md"
+    [[ -f "${zh_doc}" ]] || continue   # check 8 already reports a missing twin
+    en_lines="$(wc -l < "${en_doc}" | tr -d ' ')"
+    zh_lines="$(wc -l < "${zh_doc}" | tr -d ' ')"
+    if [[ "${en_lines}" != "${zh_lines}" ]]; then
+        fail "${en_doc} is ${en_lines} lines and ${zh_doc} is ${zh_lines}; the workflow docs are kept line-aligned so cross-language diffs stay readable"
+        conv_errors=1
+    fi
+done < <(find docs/mds/star-workflow -type f -name '*.md' ! -name '*.zh-CN.md' | sort)
+
+(( conv_errors == 0 )) && note "conventions headings and item counts pinned; workflow docs line-aligned en/zh"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
