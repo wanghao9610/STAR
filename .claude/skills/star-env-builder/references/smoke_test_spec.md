@@ -1,6 +1,6 @@
 # Smoke Test Spec — three layers, evidence required
 
-Run after installation, through the absolute `$ENV_PY`. Budget: minutes, CPU-light, no data, no weights, no network downloads. Every check records its exact command and output tail as evidence in ENV_REPORT's smoke matrix.
+Run after installation, through the absolute `$ENV_PY`. Budget: minutes, CPU-light, no data, no weights, no network downloads. Every check records its exact command and output tail as evidence in ENV_REPORT's smoke-test results table.
 
 ## L1 — imports
 
@@ -39,9 +39,9 @@ A failed layer → diagnose from the traceback:
 - Missing transitive dependency → install it, **and** append it to the correct generated requirements file (a diagnosis that fixes the env but not the layout will break the next rebuild). Pre-existing (priority-1) layouts are not edited — record the gap in the report instead.
 - Wrong wheel (CPU torch on a GPU box, ABI mismatch) → back to the installer policy's wheel selection.
 
-≤2 fix rounds per layer; still failing → mark the layer `blocked` in the matrix with the error tail, continue to later layers only where independent, and surface it in the final report.
+≤2 fix rounds per layer; still failing → mark the layer `blocked` in the results table with the error tail, continue to later layers only where independent, and point it out in the final report.
 
-## Evidence format (smoke matrix rows)
+## Evidence format (smoke-test results rows)
 
 | Layer | Check | Command | Result | Evidence |
 |---|---|---|---|---|

@@ -80,13 +80,14 @@ section_body() {
 }
 
 # Structured lines only, each under the "## " heading it sits below: table rows,
-# checkbox items, and strategy-signal notes. Language-agnostic apart from the one
-# bilingual token pair, and it keeps prose out of the digest.
+# checkbox items, and plan-level-finding notes. Language-agnostic apart from the
+# bilingual token pairs (the current labels plus the pre-rename ones, so
+# EXEC_LOG.md files already on disk still index), and it keeps prose out of the digest.
 body_index() {
     awk '
         /^## / { heading = $0; printed = 0; next }
         heading == "" { next }
-        /^\|/ || /^[ \t]*- \[/ || /Strategy signal/ || /战略信号/ {
+        /^\|/ || /^[ \t]*- \[/ || /Plan-level finding/ || /方向性信号/ || /Strategy signal/ || /战略信号/ {
             if (!printed && heading != "") { print heading; printed = 1 }
             print
         }

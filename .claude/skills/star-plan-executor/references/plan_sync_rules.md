@@ -1,6 +1,6 @@
-# Plan Sync-back Rules — keep the sub-plan true to execution
+# Plan Write-back Rules — keep the sub-plan true to execution
 
-When execution provably diverges from the sub-plan, the divergence is confirmed with the user and then **written back into the sub-plan** (`metds/plans/<prefix>_<slug>_plan.md`), so the plan a user rereads later matches what was actually executed. This file defines what qualifies, the delta form, the write-back procedure, and the boundary where sync-back must **not** be used.
+When execution provably diverges from the sub-plan, the divergence is confirmed with the user and then **written back into the sub-plan** (`metds/plans/<prefix>_<slug>_plan.md`), so the plan a user rereads later matches what was actually executed. This file defines what qualifies, the delta form, the write-back procedure, and the boundary where the write-back must **not** be used.
 
 ## Material (sync) vs detail (don't)
 
@@ -50,7 +50,7 @@ Rows found while planning go in EXEC_PLAN's "Divergences from sub-plan" table; r
 
 For each confirmed row:
 
-1. **Re-read the sub-plan first.** If its §2–§5 changed since the run started (user edit, re-decomposition), surface the conflict — do not overwrite blindly.
+1. **Re-read the sub-plan first.** If its §2–§5 changed since the run started (user edit, re-decomposition), report the conflict — do not overwrite blindly.
 2. **Update the affected §2–§5 passages in place** to the confirmed content; the body must read as current truth, not as a patch.
 3. **Append a `## Revision History` entry** — the same append-only section `star-plan-reviser` writes (create it at the end of the file if absent; never rewrite past entries). One `###` block per sync event, format-compatible with the reviser's:
 
@@ -64,16 +64,16 @@ For each confirmed row:
    ```
 
 4. **Bump frontmatter `updated`**; touch nothing else in the frontmatter.
-5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). Sync-back is idempotent: a marked row is never applied twice.
+5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). The write-back is idempotent: a marked row is never applied twice.
 
 Dates come from the user/session context — never invent timestamps.
 
 ## Boundary: what never syncs
 
-- **§1 Objective & Scope, §6 Local Risks** — an objective-level divergence means the task changed, not the tactics; that is re-decomposition (`star-plan-decomposer`), not sync-back.
-- **Any parent plan** — parents belong to `star-plan-coach` / `star-plan-decomposer` (feedback reflux).
-- **A §5 change that relaxes the criterion into conflict with the root's §4 metrics / §5 kill-criteria** — that is a strategy signal: record it, surface it, route it through feedback reflux. Do not sync it.
+- **§1 Objective & Scope, §6 Local Risks** — an objective-level divergence means the task changed, not the tactics; that is re-decomposition (`star-plan-decomposer`), not a write-back.
+- **Any parent plan** — parents belong to `star-plan-coach` / `star-plan-decomposer` (route it back to the parent plan).
+- **A §5 change that relaxes the criterion into conflict with the root's §4 metrics / §5 kill-criteria** — that is a plan-level finding: record it, report it, route it back to the plan. Do not sync it.
 - **A measured result** — an ENRICHED row carries a value execution *chose* (lr, backbone, split), never one it *measured*. Scores live in `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; a plan that records its own result reads as design intent in every document compiled from it.
-- **Post-hoc audit and evidence-based revision** — scoring what a run actually achieved and revising a plan (including §1/§6) from that evidence is `star-plan-reviser`'s job; sync-back only keeps §2–§5 current with user-confirmed execution reality during a run.
+- **Post-hoc audit and evidence-based revision** — scoring what a run actually achieved and revising a plan (including §1/§6) from that evidence is `star-plan-reviser`'s job; the write-back only keeps §2–§5 current with user-confirmed execution reality during a run.
 
-A §5 sync-back must always quote old → new in the Revision History entry, so "what counts as done" never shifts silently.
+A §5 write-back must always quote old → new in the Revision History entry, so "what counts as done" never shifts silently.

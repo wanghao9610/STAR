@@ -1,11 +1,11 @@
 # Orchestration Spec
 
-How the main loop coordinates `Task` subagents for this skill. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main loop orchestrates, verifies, and commits; it does not edit code itself.
+How the main agent coordinates `Task` subagents for this skill. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.
 
 ## Roles
 
-- **Main loop (the architect)** — plans, runs the gates, partitions work, re-runs checks, commits checkpoints, rolls back failures.
-- **Surveyors** — read-only `Task` subagents (`subagent_type: explore`), one lane each (`survey_spec.md`).
+- **The main agent (the architect)** — plans, runs the gates, partitions work, re-runs checks, commits checkpoints, rolls back failures.
+- **Surveyors** — read-only `Task` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
 - **Migrators** — `Task` subagents (`subagent_type: generalPurpose`), one per migration group, write access limited to their group's files.
 
 ## Partitioning migrations
@@ -27,7 +27,7 @@ Give each migrator:
 
 ## After a migrator returns
 
-The **main loop re-runs the verification itself** — never trust a self-reported `pass`:
+The **main agent re-runs the verification itself** — never trust a self-reported `pass`:
 
 1. `python -m compileall -q ${CODE_NAME}`; import sweep and quick tests when the env is usable.
 2. **Pass** → commit `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths; update the migration record.

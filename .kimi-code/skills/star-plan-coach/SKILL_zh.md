@@ -8,9 +8,9 @@ description: >-
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则从那份定稿的 idea 文件播种新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。可选的 `involve=low|medium|high` 记号可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
+调用方式：`/skill:star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则以那份定稿的 idea 文件为起点生成新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。可选的 `involve=low|medium|high` 写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 STOP 线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物注册表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
 
 ## 角色
 
@@ -19,7 +19,7 @@ description: >-
 ## 核心原则
 
 1. **思考由用户完成，结构由你提供**：引导用户自己得出答案。每道题仍然都要附候选选项（见第 2 条）——选项降低的是思考成本，不是思考量。用户明显卡住（回答"不知道"、连续含糊、或直接求助）时，做法要变：不再反复追问，转而请用户直接挑选或修改某个候选——实验设计、评测指标等环节尤其适合倚重选项。
-2. **一次只问一个问题，且在对话里**：每一道引导问题都用对话提问工具发出——每次调用只问一个问题，等用户答完再发下一题。禁止在一条普通文本消息里一口气列出多道题。每道题附 2–4 个短而具体的候选选项，选项来自问题库并结合用户已说内容起草，并标出你推荐的一项——选项降低思考成本，而用户始终可以自由作答，因此选项不会框死用户。**每个选项要写清它会往章节里落下什么**，而不只是它叫什么（规约 §7.3）："只做单图"是标题，"§3 就此定为单图方法，视频扩展移入 §5 作为未来工作"才是用户真正在选的东西。承接前面答案的问题，用一个从句点明承接之处（§7.10）。每答完 2–3 题，暂停并用一两句普通文本复述你听到的要点，再继续——这能及早暴露误解。例外：无法给出有意义候选的开放题（例如最初的研究主题）可用普通文本提问。
+2. **一次只问一个问题，且在对话里**：每一道引导问题都用对话提问工具发出——每次调用只问一个问题，等用户答完再发下一题。禁止在一条普通文本消息里一口气列出多道题。每道题附 2–4 个短而具体的候选选项，选项来自问题库并结合用户已说内容起草，并标出你推荐的一项——选项降低思考成本，而用户始终可以自由作答，因此选项不会框死用户。**每个选项要写清它会往章节里落下什么**，而不只是它叫什么（规约 §7.3）："只做单图"是标题，"§3 就此定为单图方法，视频扩展移入 §5 作为未来工作"才是用户真正在选的东西。承接前面答案的问题，用半句话点明承接之处（§7.10）。每答完 2–3 题，暂停并用一两句普通文本复述你听到的要点，再继续——这能及早暴露误解。例外：无法给出有意义候选的开放题（例如最初的研究主题）可用普通文本提问。
 3. **增量落盘**：每完成一个章节立即写入计划文件。宁可多写几次文件，也不要把成果只留在对话里——对话会结束，文件不会。
 4. **尊重用户节奏**：用户随时可以说"跳过""这节先这样""直接帮我写"。照做，并在文件中如实标注该节状态（`skipped`，或标注"由 AI 起草，待确认"）。
 
@@ -30,7 +30,7 @@ description: >-
 1. 列出 `metds/plans/` 下现有的 `*_plan.md`，读取各文件的 frontmatter。
 2. **带 `SECTION` 键的 `PLAN_NAME`** → 只重开那一节：把它的 `status` 退回 `in_progress`，**清除 `finalized:`**——有章节开着时这份计划对下游就不可用，而 `/skill:star-plan-decomposer` 与 `/skill:star-code-architect` 都读这个字段——用 2–3 句从它所依赖的章节恢复上下文，单独辅导这一节，完成后对整份计划重跑 Step 7，由它重新设上。这是回到一份 `finalized` 计划的入口——`/skill:star-refs-reviewer` 翻出了更近的工作、某个结果改变了定位、审稿人提了异议。
 3. 若存在 `status` 中有非 `done` 章节的计划，在对话里确认是否继续（选项如：继续该计划 / 新建计划）；继续则从第一个非 `done` 章节恢复提问（恢复前先用 2–3 句话总结已完成章节的要点，帮用户找回上下文）。若还没有任何计划、但 `metds/ideas/` 下存在 `finalized` 的 idea 文件，先用对话提问提议以它为种子（选项如：用这份 idea / 从新主题开始），再落到问主题。
-4. **带 `IDEA_NAME`**——参数按 slug 或文件名命中 `metds/ideas/*_idea.md`（计划名与 idea 名同时命中时计划名优先）→ 从那份 idea 文件播种新计划。若文件没有 `finalized:`，如实说明，并建议先用 `/skill:star-idea-storm <slug>` 把它定稿——或者带着现状继续，标注未确认的部分。计划 slug 沿用 idea 的 slug；按第 5 条创建计划文件；然后预填：用 idea 的选题陈述（§5——问题、gap、why-now）起草 Stage 1，开场即展示这份草稿供确认与打磨，而不是从零提问，并在 §1 正文注明种子来源（"Seeded from `metds/ideas/<slug>_idea.md`"）。idea 的首个验证实验与风险，等 Stage 4–5 到来时喂给它们。
+4. **带 `IDEA_NAME`**——参数按 slug 或文件名命中 `metds/ideas/*_idea.md`（计划名与 idea 名同时命中时计划名优先）→ 以那份 idea 文件为起点生成新计划。若文件没有 `finalized:`，如实说明，并建议先用 `/skill:star-idea-storm <slug>` 把它定稿——或者带着现状继续，标注未确认的部分。计划 slug 沿用 idea 的 slug；按第 5 条创建计划文件；然后预填：用 idea 的选题陈述（§5——问题、缺口、为什么是现在）起草 Stage 1，开场即展示这份草稿供确认与打磨，而不是从零提问，并在 §1 正文注明种子来源（"Seeded from `metds/ideas/<slug>_idea.md`"）。idea 的首个验证实验与风险，等 Stage 4–5 到来时输入给它们。
 5. 若新建：先问清研究主题（一两句即可），据此生成简短英文 slug，取 0–9 中未被现有根计划前缀占用的最小数字（新项目为 `0`；十个数字全被占用时询问要淘汰哪个根计划，而不是发明更长的前缀），按模板创建 `metds/plans/<数字>_<slug>_plan.md` 并填好 frontmatter——英文对话用 `assets/plan_template.md`，中文对话用 `assets/plan_template_zh.md`，`language` 相应填 `en` 或 `zh`。
 
 ### Step 1–6：逐阶段引导
@@ -39,10 +39,10 @@ description: >-
 
 | # | 章节 | status 键 | 目标 | 完成标准 |
 |---|------|-----------|------|----------|
-| 1 | 问题定义与动机 | problem | 一句话研究问题 + 为什么现在值得做 | 研究问题一句话说清，gap 明确 |
+| 1 | 问题定义与动机 | problem | 一句话研究问题 + 为什么现在值得做 | 研究问题一句话说清，缺口明确 |
 | 2 | 相关工作与定位 | related_work | 最接近的 3–5 项工作及其不足 | 能说出"它们都做不到 X" |
 | 3 | 核心方法 | method | 关键 insight 与技术路线 | 有"为什么该有效"的依据 |
-| 4 | 实验与验证设计 | experiments | 数据集 / baseline / 指标 / 消融 / 算力 | 每个 claim 有对应实验 |
+| 4 | 实验与验证设计 | experiments | 数据集 / baseline / 指标 / 消融 / 算力 | 每个主张有对应实验 |
 | 5 | 风险与备选方案 | risks | 最大风险 + fallback | 说得出什么结果会否定这个方向 |
 | 6 | 里程碑与产出 | milestones | 时间线、目标 venue、资源 | 第一个最小验证实验明确 |
 
@@ -51,17 +51,17 @@ description: >-
 - 至少 2 轮对话，约 5 轮封顶。到 5 轮仍未收敛，就基于已有信息起草该节，把未定事项以 `[TBD]` / `【待定】` 标注在文中，不要拖住整体进度。
 - 阶段结束时：把该章节整理成 150–400 字的结构化正文（不是问答记录），展示给用户，再在对话里确认（选项如："写入文件" / "需要修改"）；确认后写入计划文件对应章节，把 frontmatter `status` 中该节改为 `done`、下一节改为 `in_progress`，更新 `updated` 日期。然后按规约 §7.10 收束这个边界：用 2–3 句讲清本阶段定下了什么、它在文件里落成了什么、下一阶段将打开什么——并且，既然写下的章节并没有冻结，点明 `/skill:star-plan-coach <slug> <section>` 可以单独重开这一节（这会清掉 `finalized:`，见第 7 步）。
 
-阶段 2 的衔接：最接近的工作及其局限应当是读出来的，不是回忆出来的。若 `metds/refs/` 已有分析笔记与 `reference.bib`，就以它们为依据来写这一节并引用其 citekey。若没有，建议**先**抽身去跑 `/skill:star-refs-reviewer`，再用 `/skill:star-plan-coach <slug> related_work` 回来续写——凭记忆写定位，正是这一阶段要防的失败。用户若不愿意，就基于他已知的内容继续，并标出日后需要调研确认的部分。计划由 idea 文件播种时，其 §3 的扫描表为这一阶段点出首批候选——但那些只读到摘要深度：它们为调研指路，不能替代调研。
+阶段 2 的衔接：最接近的工作及其局限应当是读出来的，不是回忆出来的。若 `metds/refs/` 已有分析笔记与 `reference.bib`，就以它们为依据来写这一节并引用其 citekey。若没有，建议**先**抽身去跑 `/skill:star-refs-reviewer`，再用 `/skill:star-plan-coach <slug> related_work` 回来续写——凭记忆写定位，正是这一阶段要防的失败。用户若不愿意，就基于他已知的内容继续，并标出日后需要调研确认的部分。计划据 idea 文件起草时，其 §3 的扫描表为这一阶段点出首批候选——但那些只读到摘要深度：它们为调研指路，不能替代调研。
 
 ### Step 7：收尾质检
 
-全部章节 `done`（或 `skipped`）后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。把不达标项列给用户（最多 5 条，按重要性排序），询问是否回到对应章节补强。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个，没有更宽松的解释：六节全部 `done` 或 `skipped`，且 rubric 跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
+全部章节 `done`（或 `skipped`）后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。把不达标项列给用户（最多 5 条，按重要性排序），询问是否回到对应章节补强。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个，没有更宽松的解释：六节全部 `done` 或 `skipped`，且评分表跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
 
-**向下游交棒。** 定稿后，告诉用户推荐顺序：若 `${CODE_NAME}/` 还是空的，先给方法安一个代码家（`/skill:star-code-architect`，它读的正是这份根计划）和运行环境（`/skill:star-env-builder`），再用 `/skill:star-plan-decomposer <slug>` 把战略落成可执行子计划——代码库已存在时写出的叶子能点到真实模块，而不是猜路径。子计划树建立后，`/skill:star-flow-status` 给出整棵树的总览。并就计划文件提供一次提交提议（见状态与文件规则）。
+**向下游交棒。** 定稿后，告诉用户推荐顺序：若 `${CODE_NAME}/` 还是空的，先给方法安一个代码家（`/skill:star-code-architect`，它读的正是这份根计划）和运行环境（`/skill:star-env-builder`），再用 `/skill:star-plan-decomposer <slug>` 把总体方向落成可执行子计划——代码库已存在时写出的叶子能点到真实模块，而不是猜路径。子计划树建立后，`/skill:star-flow-status` 给出整棵树的总览。并就计划文件提供一次提交提议（见状态与文件规则）。
 
 ## 状态与文件规则
 
-- 计划文件是唯一真源：`metds/plans/<数字>_<slug>_plan.md`。对话中用户确认过的内容必须体现在文件里。
+- 计划文件是唯一依据：`metds/plans/<数字>_<slug>_plan.md`。对话中用户确认过的内容必须体现在文件里。
 - frontmatter 结构见模板。`status` 各键的合法值：`pending` / `in_progress` / `done` / `skipped`。
 - 不要创建其他中间文件，不要把计划写到 `metds/plans/` 以外的位置。
 - Git：会话结束时（计划定稿，或用户暂停），就本次会话创建或编辑过的计划文件提供一次提交提议——`star-plan-coach: <slug> — <里程碑>`（规约 §1）。用户拒绝也没问题，但 `/skill:star-plan-reviser` 所依赖的"旧版本存于 git"正是靠这些提交才成立。

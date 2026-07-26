@@ -1,4 +1,4 @@
-# 依赖解析——来源、映射、两层布局
+# 依赖解析——来源、映射、生成哪些文件
 
 如何决定装什么、往 `${CODE_NAME}/requirements*` 写什么。先到先用：只有前面的来源全部缺失时才看后一级。
 
@@ -7,18 +7,18 @@
 | 优先级 | 信号 | 动作 |
 |---|---|---|
 | 1 | `${CODE_NAME}/requirements/` 目录或 `${CODE_NAME}/requirements.txt` | 按原样采用。绝不改写、重排或"优化"已有布局——它声明什么就装什么。 |
-| 2 | `pyproject.toml` 的 `[project.dependencies]`（+ `[project.optional-dependencies]`）、`setup.py` / `setup.cfg` 的 `install_requires` / `extras_require`、`environment.yml` | 转写进下方的两层布局，版本约束逐字保留。 |
+| 2 | `pyproject.toml` 的 `[project.dependencies]`（+ `[project.optional-dependencies]`）、`setup.py` / `setup.cfg` 的 `install_requires` / `extras_require`、`environment.yml` | 转写进下方生成的文件，版本约束逐字保留。 |
 | 3 | import 扫描（见下） | 生成布局；除已知耦合组外不锁版本。 |
 
-优先级 2 的细节：`environment.yml` 的 conda 段条目——在白名单内的（见安装器策略）进 `conda.txt`，否则换成 PyPI 等价物；其 `pip:` 块直接转写。同时存在多个优先级 2 来源 → 合并，取更严格的约束；出现直接冲突时在安装计划门上摆出来，不悄悄裁决。
+优先级 2 的细节：`environment.yml` 的 conda 段条目——在白名单内的（见安装器策略）进 `conda.txt`，否则换成 PyPI 等价物；其 `pip:` 块直接转写。同时存在多个优先级 2 来源 → 合并，取更严格的约束；出现直接冲突时在安装计划确认点上摆出来，不悄悄裁决。
 
 ## import 扫描
 
 1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。
 2. 去掉 stdlib：与 `python -c "import sys; print(sorted(sys.stdlib_module_names))"` 对照（任何 ≥ 3.10 的 Python 都能做这一步）。
 3. 去掉本地模块：`${CODE_NAME}/` 内的顶层包目录与 `.py` 文件。
-4. import 名 → 发行名映射（见下表）。未知名先上 PyPI 验证（`https://pypi.org/pypi/<name>/json`）再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到门上。
-5. 带保护的 import 单独路由：`try: … except ImportError` 或 `if TYPE_CHECKING` 之下的 import 天然是可选项 → `optional.txt`。
+4. import 名 → 发行名映射（见下表）。未知名先上 PyPI 验证（`https://pypi.org/pypi/<name>/json`）再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
+5. 带保护的 import 单独归类：`try: … except ImportError` 或 `if TYPE_CHECKING` 之下的 import 天然是可选项 → `optional.txt`。
 
 ## import 名 → 发行名（常见分歧）
 
@@ -36,7 +36,7 @@
 
 同名映射的科研常用包（import 名 = 发行名）：`torch`、`torchvision`、`numpy`、`scipy`、`pandas`、`matplotlib`、`tqdm`、`einops`、`timm`、`transformers`、`datasets`、`accelerate`、`wandb`、`pycocotools`、`omegaconf`、`mmcv`、`mmengine`。拿不准就上 PyPI 验证——不要猜。
 
-## 类别路由
+## 类别划分
 
 | 类别 | 文件 | 内容 |
 |---|---|---|
@@ -45,9 +45,9 @@
 | optional | `requirements/optional.txt` | 日志、可视化、notebook、测试、lint——训练/评测运行不需要的：`wandb`、`tensorboard`、`jupyter`、`pytest`、`ruff` |
 | conda | `requirements/conda.txt` | pip 管不了、需系统隔离的项（安装器策略白名单）：`cudatoolkit`、`cudnn`、`ffmpeg`、`openmpi` |
 
-路由看的是**代码怎么用这个包，而不是包的名声**：核心代码无条件 import 的 `matplotlib` 属于 runtime；同一个包若在 ImportError 保护之下、或只出现在 notebook/工具脚本里，就是 optional。
+归类看的是**代码怎么用这个包，而不是包的名声**：核心代码无条件 import 的 `matplotlib` 属于 runtime；同一个包若在 ImportError 保护之下、或只出现在 notebook/工具脚本里，就是 optional。
 
-## 两层布局（生成形态）
+## 生成的文件（requirements.txt 加 requirements/ 文件夹）
 
 `requirements.txt`——只放引用，每个必需类别一行 `-r`：
 
@@ -80,4 +80,4 @@ ffmpeg
 
 - 来自优先级 1/2 的约束逐字保留。
 - 扫描得到的依赖不锁版本，但已知耦合组要一起锁：`torch` / `torchvision` / `torchaudio`（按官方配对表）、`mmcv` ↔ `torch`、若锁定的 torch 尚不支持 NumPy 2，则加 `numpy<2`。
-- 构建成功后，运行目录里的 `freeze.txt` 就是精确快照；只有用户要求时才把其中的锁定版本提升进 requirements。
+- 构建成功后，运行目录里的 `freeze.txt` 就是精确快照；只有用户要求时才把其中的锁定版本移入 requirements。

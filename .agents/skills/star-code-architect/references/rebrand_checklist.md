@@ -4,7 +4,7 @@ Rename the imported codebase to `${CODE_NAME}` without silently breaking it. The
 
 ## Preconditions
 
-- `${CODE_NAME}/UPSTREAM.md` written and the import commit landed (rollback anchor).
+- `${CODE_NAME}/UPSTREAM.md` written and the import commit is in place (rollback anchor).
 - Know the upstream Python package name: the top-level importable directory (may differ from the repo name; may live under `src/`).
 
 ## Steps, in order — verify after each
@@ -20,7 +20,7 @@ Each step ends with: `grep -rn '<old-name>' ${CODE_NAME} | wc -l` (count must dr
 
 Then commit: `star-code-architect: rebrand to <CODE_NAME>` (stage only `${CODE_NAME}/`).
 
-## Do-NOT-touch list → residual table
+## Do-NOT-touch list → the do-not-rename table
 
 These look like the package name but are resolved by frameworks, checkpoints, or services at **runtime as strings**. Renaming them breaks things with no traceback at rename time:
 
@@ -32,7 +32,7 @@ These look like the package name but are resolved by frameworks, checkpoints, or
 | Service names | wandb project, logger names, HF hub ids | External records reference them |
 | Class-name prefixes | `XDetBackbone` and friends | Coupled to all of the above |
 
-For each occurrence class, add a row to the residual table (`codearc.md` §7): location pattern, category, risk, suggested later action. Suggest — never auto-apply — casing for future renames (e.g. `code` → `Code` prefix). Later renames go through `star-plan-executor` steps, each with its own check.
+For each occurrence class, add a row to the do-not-rename table (`codearc.md` §7): location pattern, category, risk, suggested later action. Suggest — never auto-apply — casing for future renames (e.g. `code` → `Code` prefix). Later renames go through `star-plan-executor` steps, each with its own check.
 
 ## Import smoke (post-env)
 

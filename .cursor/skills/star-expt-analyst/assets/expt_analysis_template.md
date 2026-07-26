@@ -30,7 +30,7 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 3. Done-Criteria Scorecard
 
-<!-- The headline. One row per yardstick: sub-plan §5 first, then root §4 metrics, then any
+<!-- The headline. One row per review rule: sub-plan §5 first, then root §4 metrics, then any
      baseline the plan states. `threshold: none stated` → report the value, leave the verdict blank.
      Value as the source prints it — rounding that flips a verdict is an error, not a tidy-up. -->
 
@@ -43,7 +43,7 @@ model_trail:                    # append-only: one entry per write session, neve
 <!-- A: §4 deliverables vs disk, with the integrity result. B: EXEC_LOG's `done` claims corroborated
      against artifacts, and each "Awaiting user" STOP-line command as run / still pending. A `done`
      step with no artifact is a blocker. Close with the run's size on disk, and any unsynced
-     "Pending amendments" or Strategy signal the log carries. -->
+     "Pending amendments" or plan-level finding the log carries. -->
 
 | Deliverable (§4) | On disk | Integrity | Note |
 | --- | --- | --- | --- |
@@ -81,7 +81,7 @@ model_trail:                    # append-only: one entry per write session, neve
 ## 7. Interpretation
 
 <!-- E: does the result support / refute / leave open the claim in `traces_to`? Any root §5
-     kill-criterion hit (state it prominently — a strategy signal is the plan working). The leakage
+     kill-criterion hit (state it prominently — a plan-level finding is the plan working). The leakage
      and too-good checks that were run and what they showed. Then the limits, as limits: seeds,
      split size, variance, what this run does NOT show. -->
 

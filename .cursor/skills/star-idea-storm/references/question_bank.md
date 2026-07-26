@@ -52,7 +52,7 @@ What the scan must answer per direction — the how (sources, limits, caching) l
 - Which benchmark or dataset does everyone share, and does it look saturated?
 - Is the apparent gap empty because nobody tried, or because attempts failed? Flag any paper that reads like a failed attempt; it is a priority intro-read if the direction becomes a finalist.
 
-When the scan surprises — crowded where empty was expected, empty where crowded was expected, a same-question preprint in the last 6 months — surface it immediately, not at stage end.
+When the scan surprises — crowded where empty was expected, empty where crowded was expected, a same-question preprint in the last 6 months — report it immediately, not at stage end.
 
 ---
 

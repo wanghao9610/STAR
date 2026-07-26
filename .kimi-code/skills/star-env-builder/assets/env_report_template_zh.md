@@ -37,7 +37,7 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 <!-- 实际处理过的类别每类一行。Failed 填数量，细节写在"失败与受阻"。 -->
 
-| 类别 | 文件 | 应装 | 已装 | 失败 | 路由 |
+| 类别 | 文件 | 应装 | 已装 | 失败 | 安装器 |
 |---|---|---|---|---|---|
 | conda | requirements/conda.txt | | | | conda |
 | framework | requirements/framework.txt | | | | uv |
@@ -45,9 +45,9 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 | optional | requirements/optional.txt | | | | skipped |
 | project | `-e ${CODE_NAME}`（`--no-deps`） | | | | uv |
 
-## 冒烟矩阵
+## 冒烟测试结果表
 
-<!-- 由主循环亲自运行后填写。结果：pass / blocked / skipped（写明原因）。
+<!-- 由主 agent 亲自运行后填写。结果：pass / blocked / skipped（写明原因）。
      证据是真实输出尾部——pass 的证据栏不允许为空。 -->
 
 | 层 | 检查 | 命令 | 结果 | 证据 |
@@ -60,9 +60,9 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 <!-- 错误尾部、诊断、尝试过什么（每层 ≤2 轮）、当前状态。 -->
 
-## 待用户执行（STOP 线）
+## 待用户执行（红线）
 
-<!-- 源码编译、sudo/系统级安装、>10 GB 下载。确切命令 + 越线原因 + 完成后怎么做。 -->
+<!-- 源码编译、sudo/系统级安装、>10 GB 下载。确切命令 + 越过红线原因 + 完成后怎么做。 -->
 
 - [ ] `<确切命令>`——<原因：源码编译 / sudo / 体量>。完成后：重新运行 `/skill:star-env-builder <ENV_NAME>` 并选择*原地验证修复*。
 

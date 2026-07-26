@@ -1,4 +1,4 @@
-# Scope Spec — the four selectors, run dating, and the watermark
+# Scope Spec — the four selectors, run dating, and the last covered date
 
 A digest is only as honest as its period. This file defines how the argument becomes a run set, how a run is dated, and how the series resumes without skipping or double-counting work.
 
@@ -8,10 +8,10 @@ Interpret the argument, **first match wins**:
 
 | Argument | Mode | Scope |
 |---|---|---|
-| *(none)* | `incremental` | every run dated in `(watermark, today]`, whole forest |
-| `<N>d` (`7d`, `30d`) or `<YYYY-MM-DD>` | `window` | every run dated in `[start, today]`, whole forest |
+| *(none)* | `incremental` | every run dated in `(last covered date, today]`, all plan trees |
+| `<N>d` (`7d`, `30d`) or `<YYYY-MM-DD>` | `window` | every run dated in `[start, today]`, all plan trees |
 | a slug / numeric prefix / filename | `plan` | the node's **family**, no time bound |
-| `all` | `all` | every run in the project, whole forest |
+| `all` | `all` | every run in the project, all plan trees |
 
 `<N>d` starts `N` days before today, inclusive. A bare `<YYYY-MM-DD>` means "since that date", inclusive. An argument that parses as neither a window nor a plan name is not a guess to make: list the nearest plan candidates and ask (conventions §5.2).
 
@@ -27,11 +27,11 @@ A run's date decides whether it falls in the window. Take the **first available*
 
 **Never use file mtime.** It moves for a checkout, a formatter, a `cp -r`, a backup — and a digest keyed on mtime silently reshuffles history. This is the same discipline conventions §4 sets for written dates and `status_spec.md` applies to staleness: compare recorded values, never filesystem timestamps.
 
-A run is dated **once**, by the rule above, even when its two candidate dates disagree. A run executed in April and analyzed in July is a July run for windowing purposes, because the digest reports when the *evidence* landed, not when the GPU ran. Say so in the run's row when the two dates differ by more than the window's own length.
+A run is dated **once**, by the rule above, even when its two candidate dates disagree. A run executed in April and analyzed in July is a July run for windowing purposes, because the digest reports when the *evidence* was in place, not when the GPU ran. Say so in the run's row when the two dates differ by more than the window's own length.
 
-## The watermark
+## The last covered date
 
-The watermark is the newest digest's `covers.through` — read from frontmatter, never inferred. It is what makes `/star-expt-digest` with no argument mean "since last time".
+The last covered date is the newest digest's `covers.through` — read from frontmatter, never inferred. It is what makes `/star-expt-digest` with no argument mean "since last time".
 
 **Resolving the incremental window:**
 
@@ -42,15 +42,15 @@ The watermark is the newest digest's `covers.through` — read from frontmatter,
 
 - `incremental` and `<N>d` / `<YYYY-MM-DD>` windows end today → they advance it.
 - `plan` mode has no time bound, and a retrospective read is not progress → it writes `covers.through` as the newest in-scope run date and **does not** become the resume point for the next incremental run.
-- `all` ends today and re-seeds the series → it advances it.
+- `all` ends today and restarts the series → it advances it.
 
-The rule this protects: **a backward-looking digest must never cause the next incremental run to skip work.** Since the watermark is "the newest digest's `covers.through`", a `plan`-mode digest whose `covers.through` is an old date is naturally ignored by the max — but a `plan`-mode digest written *today* over a family whose runs all finished today would otherwise poison it. So the next incremental run takes the newest `covers.through` **among digests whose `mode` is `incremental`, `window`, or `all`**, ignoring `plan`-mode files entirely.
+The rule this protects: **a backward-looking digest must never cause the next incremental run to skip work.** Since the last covered date is "the newest digest's `covers.through`", a `plan`-mode digest whose `covers.through` is an old date is naturally ignored by the max — but a `plan`-mode digest written *today* over a family whose runs all finished today would otherwise poison it. So the next incremental run takes the newest `covers.through` **among digests whose `mode` is `incremental`, `window`, or `all`**, ignoring `plan`-mode files entirely.
 
 ## Overlap and idempotence
 
 - Two digests **may** cover overlapping periods. That is not an error: a `7d` digest written for a report on Friday does not invalidate Monday's incremental one. Overlap is visible because every digest states its own window.
 - Re-running the same selector on the same day **overwrites that day's file** (conventions §4.3). It does not append and does not create `_v2`.
-- A run appearing in two digests is expected and needs no reconciliation. What must never happen is a run appearing in **none** — which is exactly what the half-open incremental window and the `plan`-mode carve-out above prevent.
+- A run appearing in two digests is expected and needs no reconciliation. What must never happen is a run appearing in **none** — which is exactly what the half-open incremental window and the `plan`-mode exception above prevent.
 
 ## Frontmatter contract
 
@@ -60,7 +60,7 @@ type: digest
 language: <en|zh>
 generated: <YYYY-MM-DD>          # a real date from the system clock; never invented
 mode: <incremental|window|plan|all>
-scope: <whole forest | family of <prefix>_<slug>>
+scope: <all plan trees | family of <prefix>_<slug>>
 covers:
   from: <YYYY-MM-DD or "—">      # "—" only when the period is unbounded at the start
   through: <YYYY-MM-DD>

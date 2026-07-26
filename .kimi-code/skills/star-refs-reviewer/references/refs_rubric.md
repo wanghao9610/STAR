@@ -26,7 +26,7 @@ Every candidate carries a one-clause justification. A candidate you cannot justi
 Each note (`assets/ref_analysis_template.md`) is graded on:
 
 - **Concrete over vague.** "Contrastive loss over 400M image-text pairs" — not "leverages large-scale data". Numbers from the paper, named datasets, named baselines.
-- **The method is reconstructible.** A reader who has not opened the paper can say what it does and why it should work. Load-bearing formulas only, symbols defined.
+- **The method is reconstructible.** A reader who has not opened the paper can say what it does and why it should work. Only the formulas the method depends on, symbols defined.
 - **Relation-to-this-project is the point.** Generic summaries are free on the internet; the note earns its place through §5 — shared ground, where it differs, what is borrowable, and what it lets this project claim. A §5 that would fit any project has failed.
 - **Honest about what was read.** Abstract, intro, method, and the main results table at minimum. If only the abstract and intro were reachable, `depth:` says so — a shallow note that admits it is useful, one that pretends is not.
 - **Claims are the paper's, not yours.** Report numbers as reported (metric + dataset + split). Never extrapolate, never compare across incomparable settings, mark anything uncertain `[unverified]`.

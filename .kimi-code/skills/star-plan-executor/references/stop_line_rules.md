@@ -21,7 +21,7 @@ Dispatched agents write code and run **light validation**. Anything **heavy or i
 
 For each STOP action, write into EXEC_LOG "Awaiting user":
 
-- the **exact command**, invoked through the `.env` conda env (never system python) via the project's run surface (`execs/run.sh`) where one exists;
+- the **exact command**, invoked through the `.env` conda env (never system python) via the project's launch entry point (`execs/run.sh`) where one exists;
 - **what it produces and where** (`wkdrs/<run>/…`);
 - **what output to bring back** so the done-criterion can be verified.
 

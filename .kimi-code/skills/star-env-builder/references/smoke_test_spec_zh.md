@@ -1,6 +1,6 @@
 # 冒烟测试规范——三层递进，必须留证据
 
-安装完成后运行，全程走绝对路径 `$ENV_PY`。预算：分钟级、CPU 轻量、不碰数据、不碰权重、不做网络下载。每项检查都把确切命令和输出尾部作为证据记入 ENV_REPORT 的冒烟矩阵。
+安装完成后运行，全程走绝对路径 `$ENV_PY`。预算：分钟级、CPU 轻量、不碰数据、不碰权重、不做网络下载。每项检查都把确切命令和输出尾部作为证据记入 ENV_REPORT 的冒烟测试结果表。
 
 ## L1——import
 
@@ -28,7 +28,7 @@ $ENV_PY -c "import <mod>; print(getattr(<mod>, '__version__', 'n/a'))"
 
 1. `$ENV_PY -m compileall -q ${CODE_NAME}`——语法层，不需要装依赖。
 2. 已做可编辑安装 → `$ENV_PY -c "import <包名>"`——能抓到 compileall 看不见的 import 期依赖缺口。
-3. 最便宜的入口，按存在顺序取第一个：console 入口跑 `--help`；`$ENV_PY ${CODE_NAME}/<train|main|demo>.py --help`（优先用 README 点名的那个）；有测试 → `$ENV_PY -m pytest --collect-only -q`（收集阶段会 import 测试模块但不运行）。
+3. 最便宜的入口，按存在顺序取第一个：console 入口跑 `--help`；`$ENV_PY ${CODE_NAME}/<train|main|demo>.py --help`（优先用 README 提到的那个）；有测试 → `$ENV_PY -m pytest --collect-only -q`（收集阶段会 import 测试模块但不运行）。
 
 没有任何入口 → 如实说明；L3 就是 compileall + 包 import。
 
@@ -39,9 +39,9 @@ $ENV_PY -c "import <mod>; print(getattr(<mod>, '__version__', 'n/a'))"
 - 缺传递依赖 → 装上它，**并**补进对应的生成 requirements 文件（只修环境不修布局，下次重建还会坏）。已有布局（优先级 1）不改——把缺口写进报告。
 - wheel 装错（GPU 机器上装了 CPU torch、ABI 不匹配）→ 回安装器策略的 wheel 选择重来。
 
-每层 ≤2 轮修复；仍失败 → 在矩阵中标 `blocked` 并附错误尾部，相互独立的后续层继续跑，最终报告里明确列出。
+每层 ≤2 轮修复；仍失败 → 在结果表中标 `blocked` 并附错误尾部，相互独立的后续层继续跑，最终报告里明确列出。
 
-## 证据格式（冒烟矩阵行）
+## 证据格式（冒烟测试结果表的行）
 
 | 层 | 检查 | 命令 | 结果 | 证据 |
 |---|---|---|---|---|

@@ -23,10 +23,10 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 2. Mapping
 
-<!-- The confirmed probe result, one row per lane. `confidence` is what it was at Gate 1, kept so a
+<!-- The confirmed probe result, one row per area. `confidence` is what it was at Gate 1, kept so a
      later reader knows which lines were guessed at and confirmed rather than detected. -->
 
-| Lane | Mapped to | Target | Confidence | Note |
+| Area | Mapped to | Target | Confidence | Note |
 |---|---|---|---|---|
 | Source | `CODE_NAME=<dir>` | — | | |
 | Runtime | `PYTHON_HOME=<path>` | — | | |
@@ -52,10 +52,10 @@ model_trail:                    # append-only: one entry per write session, neve
 |---|---|---|---|---|---|
 | W1 | | | | | |
 
-## 5. Ledgered runs
+## 5. Recorded runs
 
 <!-- The prior runs the user chose to bring into wkdrs/, and how many were left as evidence only.
-     Each ledgered run has a reconstructed EXEC_LOG.md marked as such. -->
+     Each recorded run has a reconstructed EXEC_LOG.md marked as such. -->
 
 | Run | Linked from | Date | Reconstructed log | Note |
 |---|---|---|---|---|

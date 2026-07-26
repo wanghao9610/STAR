@@ -32,9 +32,9 @@ One entry per scored expectation — this is what fills the scorecard:
   source: <path, + line number or JSON key>
 ```
 
-Collectors return exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written.
+Read-only subagents return exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written.
 
-## Severity ladder (observations)
+## Severity levels (observations)
 
 - **blocker** — the run's results cannot be trusted or used: the process died before producing them, an eval read the training split, a checkpoint is empty/corrupt, the metric quoted in the log is not in the file it cites, a §4 deliverable the done-criterion depends on is missing.
 - **major** — materially changes the reading: a §5 criterion missed, NaN/Inf in training, loss diverged, train↓/val↑ divergence, a STOP-line command never run, an artifact written outside the layout rules (§5), a metric available only from a weaker source than the plan implies.
@@ -43,7 +43,7 @@ Collectors return exactly these two lists (plus `files_read: <n>`) and nothing e
 
 When severity is in doubt, grade down and say why in `implication`.
 
-## Run verdict ladder
+## Run verdict levels
 
 Exactly one, for the report's headline:
 
@@ -67,7 +67,7 @@ Not an observation: the routine debris a normal run leaves (`__pycache__/`, `eve
 - Every EXEC_LOG step marked `done`: does the artifact it names exist, and is it consistent with what the step claims to have produced? A `done` step whose artifact is absent is a **blocker** — the log is wrong about reality.
 - Every "Awaiting user" STOP-line item: `run by the user` (the output it promised exists) or `still pending` (it does not). Never assume it ran because time passed.
 - EXEC_LOG's frontmatter `status` vs its own step rows: a log saying `done` with `blocked` rows, or `in_progress` with every row `done`, is an inconsistency worth a minor observation.
-- "Pending amendments" left unsynced, and any recorded **Strategy signal**: carry them into the report — they are the executor's own note that the plan and reality diverged.
+- "Pending amendments" left unsynced, and any recorded **plan-level finding**: carry them into the report — they are the executor's own note that the plan and reality diverged.
 
 The rule: the log is a claim, disk is the evidence. Corroborate in that direction, never the reverse.
 
@@ -81,7 +81,7 @@ Scan every log the run wrote (`*.log`, stdout captures, framework logs under `wk
 
 **Dynamics signals** (major or minor, per severity of the gap): train loss falling while val loss rises (overfitting) — say from which epoch; a val metric that plateaued long before the run ended (wasted compute, or a learning-rate problem); a metric that peaked mid-run and was not the one checkpointed.
 
-**Warnings worth surfacing** (minor): dataloader workers dying and restarting; checkpoint-save failures that were retried; mixed-precision overflow warnings; a dataset silently smaller than the plan's §2 says.
+**Warnings worth reporting** (minor): dataloader workers dying and restarting; checkpoint-save failures that were retried; mixed-precision overflow warnings; a dataset silently smaller than the plan's §2 says.
 
 Not an observation: deprecation warnings, tqdm/progress noise, framework banner spam, expected early stopping that the plan called for.
 
@@ -92,7 +92,7 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 ## D. Metrics vs expectations
 
 - Extract each metric from the most authoritative source available, in this order: a results JSON/CSV the run wrote > the eval log's final summary block > a TB event file (only if tensorboard is already installed) > the last matching line in a training log. Record which one it came from; a criterion that only survives at the weakest tier is a minor observation about the run's reporting.
-- Score every yardstick as a metric row: §5 done-criteria first, then root §4 metrics, then any baseline the plan states.
+- Score every review rule as a metric row: §5 done-criteria first, then root §4 metrics, then any baseline the plan states.
 - **Split discipline**: name the split every number came from. If the plan states a threshold without one ("mAP ≥ 30"), report the number from the split the plan's §5 context implies, name the ambiguity, and never pick the flattering split.
 - **No stated expectation** is a legitimate row: report the number, leave `threshold: none stated`, and do not grade it. An ungraded number is honest; a retrofitted threshold is not.
 - **Unmeasurable** means the number is not on disk anywhere. Say what would produce it and hand that command back — never run it (§ the STOP line).
@@ -101,7 +101,7 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 ## E. Interpretation
 
 - **Against the claim**: the sub-plan's `traces_to` names the root claim or section this run serves. State plainly whether the result supports it, refutes it, or leaves it open — and for "open", what is still missing.
-- **Kill-criteria**: check the result against the root's §5 kill-criteria and against any MVP done-criterion the plan called a cheap early test. A hit is a **strategy signal**: report it prominently, route it (F), and never soften it. A plan that kills a bad idea early is working.
+- **Kill-criteria**: check the result against the root's §5 kill-criteria and against any MVP done-criterion the plan called a cheap early test. A hit is a **plan-level finding**: report it prominently, route it (F), and never soften it. A plan that kills a bad idea early is working.
 - **Leakage and too-good checks** — run these before accepting a strong number: is the val/test split named in the training config's data paths? Is val ≈ train to an implausible degree? Does the number beat the published state of the art on a first run? Is the metric at or near its ceiling (1.000, 100%)? Was the checkpoint selected on the same split it is reported on? Any hit → the verdict is `invalid` until the user rules it out.
 - **Limits, stated as limits**: one seed is not significance; a subset is not the benchmark; a metric with no baseline is not an improvement; a single run's gap smaller than the framework's known variance is not a result. Write what the run does *not* show.
 

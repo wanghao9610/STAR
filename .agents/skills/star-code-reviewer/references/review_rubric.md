@@ -1,6 +1,6 @@
 # Code Review Rubric
 
-How findings are formed, graded, and returned. Read the code, not just its names: apply every dimension to every file in scope (F only in plan mode). A finding must name the dimension, severity, violated rule, exact location, and a concrete fix — a complaint no written yardstick backs is a style preference, not a finding. When two dimensions overlap (an unused import is both C and E), file it once, under the more specific one.
+How findings are formed, graded, and returned. Read the code, not just its names: apply every dimension to every file in scope (F only in plan mode). A finding must name the dimension, severity, violated rule, exact location, and a concrete fix — a complaint no written review rule backs is a style preference, not a finding. When two dimensions overlap (an unused import is both C and E), file it once, under the more specific one.
 
 The project guidelines cited as §n below are AGENTS.md's numbered sections; architecture rules live in metds/codearc.md.
 
@@ -19,11 +19,11 @@ One entry per finding, in file order:
   fix: <concrete change in one sentence, or the exact replacement>
 ```
 
-Collectors return exactly this list (plus `files_reviewed: <n>`) and nothing else: no prose verdicts, no fixes applied, no files written.
+Read-only delegates return exactly this list (plus `files_reviewed: <n>`) and nothing else: no prose verdicts, no fixes applied, no files written.
 
-## Severity ladder
+## Severity levels
 
-- **blocker** — breaks something or violates a hard project constraint: syntax/import errors, hardcoded machine-local absolute paths, writes landing outside the layout rules, an edited name from the rename-residual list.
+- **blocker** — breaks something or violates a hard project constraint: syntax/import errors, hardcoded machine-local absolute paths, writes that end up outside the layout rules, an edited name from the do-not-rename list.
 - **major** — violates a written convention in a way that misleads or degrades the codebase: a §3 task claimed done but missing/partial in code, a §4 deliverable absent, a public class without a docstring, a module placed against codearc.md's placement rules, a speculative feature or single-use abstraction, duplicated logic an existing helper already provides.
 - **minor** — convention gaps that do not mislead: a missing one-line docstring on a public function, a non-PEP 8 name, a dead branch, an overlong function doing several jobs.
 - **nit** — polish: a comment narrating the obvious, inconsistent naming style within one file. Report nits only for files that already carry higher findings; nits never dominate a report.
@@ -45,7 +45,7 @@ Not a finding: `_private` helpers a few lines long whose name is the documentati
 - Names say what things are: no `data2`, `tmp_fn`, `do_stuff`; booleans read as predicates (`is_`, `has_`); ambiguous quantities carry units (`timeout_s`).
 - Follow the naming conventions recorded in metds/codearc.md and the upstream style of the surrounding code (§3: match existing style, even one you would not choose).
 
-Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`); upstream-inherited names outside the reviewed scope; residual-list names (those become a blocker only if someone changed them).
+Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`); upstream-inherited names outside the reviewed scope; names on the do-not-rename list (those become a blocker only if someone changed them).
 
 ## C. Simplicity (§2)
 
@@ -61,7 +61,7 @@ Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`);
 - Data is read from `datas/`, weights from `inits/`, generated outputs go to `wkdrs/`; nothing writes into `metds/` or into the package itself at runtime (§5).
 - New modules sit where codearc.md's placement rules and plan-component map assign them.
 - Runtime assumptions match the project: entrypoints documented to run via the `.env` conda env / `execs/run.sh`; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
-- Rename residuals (codearc.md §7) — registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/project names — are untouched.
+- Names left unchanged on purpose (codearc.md §7) — registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/project names — are untouched.
 
 ## E. Correctness smells (high-confidence only)
 
@@ -82,4 +82,4 @@ Score against disk, never against EXEC_LOG claims:
 - §5 done-criterion: the machinery to check it exists (a test, an eval script, an assertion) — verify the machinery statically; running heavy checks is the executor's business, not the reviewer's.
 - Cross-check EXEC_LOG: files it claims changed exist and contain the claimed change; a claim without matching code is a major finding.
 
-Conformance rows land in the report's scorecard section, separate from the A–E findings.
+Conformance rows go in the report's scorecard section, separate from the A–E findings.

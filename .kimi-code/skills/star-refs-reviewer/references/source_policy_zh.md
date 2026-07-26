@@ -8,7 +8,7 @@
 
 Google Scholar 不作为来源：它没有 API，自动查询会被 CAPTCHA 拦，而且它导出的 bibtex 本身就是机器生成的——经常缺页码、用缩写会议名、优先给预印本而不是正式发表版。人可以去读它；本 skill 绝不爬它。下面这些数据库正是生成 Scholar bibtex 的**源头**，既抓得到，又更接近原始记录。
 
-## 抓取阶梯
+## 抓取优先顺序
 
 逐篇论文，命中第一条匹配记录即停：
 
@@ -27,7 +27,7 @@ Google Scholar 不作为来源：它没有 API，自动查询会被 CAPTCHA 拦�
    - `http://export.arxiv.org/api/query?id_list=<id>`（Atom）
    - 转成 `@misc`，带 `eprint`、`archivePrefix = {arXiv}`、`primaryClass`、`year`
 
-每份抓回的载荷在**使用之前**缓存到 `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`。这份缓存既是审计痕迹，也是重跑的续跑点。
+每份抓回的原始内容在**使用之前**缓存到 `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`。这份缓存既是审计线索，也是重跑的续跑点。
 
 ## 记录与论文的匹配判定
 
@@ -80,9 +80,9 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 - HTTP 429 / 503 → 指数退避（2s、4s、8s），最多重试 3 次，然后跳过并记录失败。被限流绝不构成"凭记忆补上"的理由。
 - 某个来源返回空 → 记为"`<来源>` 未找到"——那是一次抓取结果，不是这篇论文不存在的证据。
 
-## 收尾前的自审计
+## 收尾前的自查
 
-1. `reference.bib` 里的每个 citekey 都在运行缓存里有载荷，**且**在 `refs_index.md` 里有 provenance 行。
+1. `reference.bib` 里的每个 citekey 都在运行缓存里有原始内容，**且**在 `refs_index.md` 里有 provenance 行。
 2. 随机重抓 5 条；与文件逐字段 diff。有出入 → 把文件改成与来源一致，然后重查该条所在的整批。
-3. `.env` 的 conda 环境里**已装** `bibtexparser` 时用它解析（绝不安装——那是 `/skill:star-env-builder` 的活）；否则机械检查花括号配平与 key 唯一性。
+3. `.env` 的 conda 环境里**已装** `bibtexparser` 时用它解析（绝不安装——那是 `/skill:star-env-builder` 的活）；否则例行检查花括号配平与 key 唯一性。
 4. 没有条目的必填字段为空；没有 key 出现两次。

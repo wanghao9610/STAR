@@ -4,7 +4,7 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 
 1. **Done-criterion actually checked** — the sub-plan's §5 check was run and its evidence (test pass / metric vs threshold / output exists) is recorded in EXEC_LOG, not merely asserted.
 
-2. **Every step has a real check result** — no step is `done` in EXEC_LOG without a pass recorded by the **main loop**, not only a delegate's self-report.
+2. **Every step has a real check result** — no step is `done` in EXEC_LOG without a pass recorded by the **main agent**, not only a delegate's self-report.
 
 3. **Nothing heavy ran autonomously** — every long/multi-GPU training, full-dataset eval, or costly API call is in "Awaiting user", not silently executed (`stop_line_rules.md`).
 

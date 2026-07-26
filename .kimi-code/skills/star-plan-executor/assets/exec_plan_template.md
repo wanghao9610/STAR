@@ -17,7 +17,7 @@ model_trail:                    # append-only: one entry per write session, neve
 ## Orientation (current state vs required)
 
 <!-- The gap list from Step 2. For each area the plan touches, what exists in ${CODE_NAME}/ today
-     vs what must be created/changed. State "greenfield" if ${CODE_NAME}/ is empty. Point at real
+     vs what must be created/changed. State "empty codebase" if ${CODE_NAME}/ is empty. Point at real
      paths, not guesses. -->
 
 ## Divergences from sub-plan
@@ -38,7 +38,7 @@ model_trail:                    # append-only: one entry per write session, neve
 
 <!-- Ordered. Each action binds a check. `run by` = `agent` (executes here) or `stop → user`
      (agent prepares the command, user runs it — see STOP line). Commands go through the .env conda
-     env; artifacts land under wkdrs/<run>/. -->
+     env; artifacts are written under wkdrs/<run>/. -->
 
 | # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | run by |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|

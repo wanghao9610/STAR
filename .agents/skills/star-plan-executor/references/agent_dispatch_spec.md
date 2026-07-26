@@ -4,7 +4,7 @@ Delegate only when Codex collaboration tools are available and the work is bound
 
 ## What to give a delegate
 
-- **Scope** — one coherent goal from EXEC_PLAN plus its bound check. State: "Do only this scope; do not continue into later actions."
+- **Scope** — one coherent goal from EXEC_PLAN plus the action's own check. State: "Do only this scope; do not continue into later actions."
 - **Files** — exact files/modules the delegate may create or modify. Assign non-overlapping ownership across concurrent delegates and require surgical changes that follow `AGENTS.md`.
 - **Context** — the relevant raw plan section, gap-list facts, and existing interfaces. Do not leak an intended answer when the delegate is being used for independent validation.
 - **Runtime** — use `.env`'s `CONDA_HOME` / `PYTHON_HOME`, never system Python or hardcoded local paths.
@@ -21,7 +21,7 @@ Delegate only when Codex collaboration tools are available and the work is bound
 
 ## Main-agent responsibility
 
-The main agent reviews the diff, resolves integration issues, and re-runs or independently inspects the bound check before checkpointing EXEC_LOG. Never treat a delegate's self-reported pass as final evidence.
+The main agent reviews the diff, resolves integration issues, and re-runs or independently inspects the action's own check before checkpointing EXEC_LOG. Never treat a delegate's self-reported pass as final evidence.
 
 - Pass → mark the action `done` with artifact and check evidence.
 - Fail → retry only when a concrete correction is available, at most twice; otherwise mark `blocked` and stop.

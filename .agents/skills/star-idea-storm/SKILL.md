@@ -2,13 +2,13 @@
 name: star-idea-storm
 description: >-
   Coach a researcher from a vague interest to a defensible research topic through
-  diverge–scan–converge: clarify the seed and its constraints, generate 3–5 genuinely
+  diverge–scan–converge: clarify the starting idea and its constraints, generate 3–5 genuinely
   distinct candidate directions, ground the kept ones in an abstract-level literature
   scan (every named paper transcribed from a record fetched during the run, source URL
   logged — never from memory), score them on a six-dimension rubric with Pursue /
   Refine / Park verdicts, then frame the winner into a topic statement with a first
   validation experiment — written incrementally to metds/ideas/<slug>_idea.md with
-  cross-session resume. The finalized idea file seeds $star-plan-coach. Use when the
+  cross-session resume. The finalized idea file is the starting point for $star-plan-coach. Use when the
   user runs $star-idea-storm, wants to brainstorm / 头脑风暴 research directions, has
   an interest area but no committed topic, asks "what should I research", or mentions
   idea files under metds/ideas. Bilingual (en/zh).
@@ -20,7 +20,7 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `$star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
@@ -33,8 +33,8 @@ You are the family's ideation coach, one step upstream of `$star-plan-coach`: th
 3. **Diverge before converging**: never latch onto the seed's first framing. Candidates must differ in the problem, the bet, or the setting — three rewordings of one direction are one direction. The user's own candidates enter the pool on equal terms.
 4. **Scanned, not recalled**: every paper named in chat or in the idea file is transcribed from a record fetched during this run — title, venue, year, citations, with the record URL logged in the file, the payload cached under `wkdrs/ideas_<date>/raw/` before use. Memory may propose queries; only fetched records enter the file. Sources, rate limits, and depth rules are in `references/scan_policy.md` — Google Scholar is never scraped. Depth is stated honestly: abstracts, unless a deepening was triggered and recorded.
 5. **Incremental writes**: Write each finished stage to the idea file immediately. Prefer more file writes over leaving results only in chat — chats end; files do not.
-6. **Verdicts advise, the user decides**: rubric verdicts (Pursue / Refine / Park) are evidence-backed advice, not rulings. A user choice against the verdict is recorded with its reason — once discussed, it is their call. Parked directions are never deleted: they keep their scan evidence and a revive-when line.
-7. **Respect pace**: The user may say "skip", "no scan for this one", or "just draft it for me". Do so, and mark it honestly in the file (`skipped`, or "AI-drafted, pending confirmation") — a skipped scan makes the rubric's novelty and crowdedness lines read "per the user's knowledge, unverified by scan".
+6. **Verdicts advise, the user decides**: rubric verdicts (Pursue / Refine / Park) are evidence-backed advice, not rulings. A user choice against the verdict is recorded with its reason — once discussed, it is their call. Parked directions are never deleted: they keep their scan evidence and a note on what would make it worth revisiting.
+7. **Respect pace**: The user may say "skip", "no scan for this one", or "just draft it for me". Do so, and mark it honestly in the file (`skipped`, or "AI-drafted, pending confirmation") — a skipped scan makes the rubric's lines on novelty and on how crowded the area is say "per the user's knowledge, unverified by scan".
 
 ## Workflow
 
@@ -55,11 +55,11 @@ Generate 3–5 candidate directions from the seed using the generation moves in 
 
 ### Stage 3: Landscape scan (`scan`)
 
-Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a crowdedness note (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's own abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scan locally by default; delegate selectively — only when several kept directions can be scanned independently and read-only, one direction per delegate, each returning a filled scan table. Write the file from the main agent, which also owns every judgment line (crowdedness, closest works, gap). Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are surfaced the moment they are found, not at stage end. A failed search is reported as failed, never padded.
+Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a note on how crowded the area is (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's own abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scan locally by default; delegate selectively — only when several kept directions can be scanned independently and read-only, one direction per delegate, each returning a filled scan table. Write the file from the main agent, which also owns every judgment line (how crowded the area is, closest works, gap). Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are reported the moment they are found, not at stage end. A failed search is reported as failed, never padded.
 
 ### Stage 4: Converge (`converge`)
 
-Read `references/idea_rubric.md` (Chinese dialogue: `references/idea_rubric_zh.md`). Score every scanned direction: six one-line judgments — novelty, impact, feasibility, crowdedness/scoop-risk, personal fit, evaluability — each citing its evidence (a §1 constraint or §3 papers); then one verdict per direction, **Pursue / Refine / Park**, with a one-line reason. Present the comparison table with your recommendation, then discuss one question at a time (question-bank Stage 4). The user may pick a winner; refine a direction (apply the named fix, rescore once); merge two (a merge must answer one question — otherwise it is two topics stapled); or add a new direction, which goes back through Stage 3 — at most one such loop-back round, because needing a second means the seed itself has moved: say so and reopen Stage 1 honestly. The decision is the user's (Principle 6). Write §4 — table, reasons, decision — and fill §6 Parked Directions (name, verdict reason, revive-when) for everything not chosen.
+Read `references/idea_rubric.md` (Chinese dialogue: `references/idea_rubric_zh.md`). Score every scanned direction: six one-line judgments — novelty, impact, feasibility, how crowded the area is / scoop risk, personal fit, evaluability — each citing its evidence (a §1 constraint or §3 papers); then one verdict per direction, **Pursue / Refine / Park**, with a one-line reason. Present the comparison table with your recommendation, then discuss one question at a time (question-bank Stage 4). The user may pick a winner; refine a direction (apply the named fix, rescore once); merge two (a merge must answer one question — otherwise it is two topics stapled); or add a new direction, which goes back through Stage 3 — at most one such loop-back round, because needing a second means the seed itself has moved: say so and reopen Stage 1 honestly. The decision is the user's (Principle 6). Write §4 — table, reasons, decision — and fill §6 Parked Directions (name, verdict reason, revive-when) for everything not chosen.
 
 ### Stage 5: Frame the topic (`frame`)
 
@@ -88,7 +88,7 @@ Check the draft against the rubric's topic-statement gate (Part C); list failing
 
 ## Dialogue Discipline
 
-- Ask through the `ask_user_question` tool; fall back to plain text only in non-interactive `codex exec`, where human-input tools are unavailable — still one question at a time, and the two gates — the keep-set (Stage 2) and the decision (Stage 4) — always wait for an explicit answer.
+- Ask through the `ask_user_question` tool; fall back to plain text only in non-interactive `codex exec`, where human-input tools are unavailable — still one question at a time, and the two gates — the set of directions to keep (Stage 2) and the decision (Stage 4) — always wait for an explicit answer.
 - Judge directions with the rubric and the scan, never with taste alone: every verdict line cites its evidence. Challenge vagueness — mild tone, sharp questions. The seed itself is never disparaged: even a crowded, infeasible seed gets its honest scan and a respectful Park.
 - Report honestly: depth never overstated ("the abstracts suggest" is the honest verb at abstract depth); a crowded field is reported as crowded even when it kills the favorite; a skipped scan is marked everywhere that would have cited it.
 - Reply in the user's language; resources ship as English default (no suffix) and Chinese `*_zh.md` — pick by dialogue language. Idea-file body language follows frontmatter `language`: set at creation from the dialogue language, kept on resume even if chat language changes, rewritten only on explicit request. In Chinese files, keep technical terms, paper titles, and venue names in English.

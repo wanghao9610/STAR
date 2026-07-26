@@ -6,18 +6,18 @@ The light sibling of the bibliography's source policy: that one builds a verifie
 
 Every paper named in dialogue or in the idea file is transcribed from a record fetched during this run — title, venue, year, citation count from the record, the record's URL logged next to the row. Memory may propose queries and synonyms; only fetched records enter the file. Never "fix" what a record says, never fill a field it lacks. A paper that search cannot find is evidence of exactly one thing: that it was not found — say so if it matters, and never paraphrase a remembered paper as if scanned. No authenticated scraping, no CAPTCHA circumvention. Google Scholar is not a source (no API, CAPTCHA-gated); the endpoints below are what it indexes anyway.
 
-## Sources — breadth over ladder
+## Sources — breadth over a fixed search order
 
-Unlike the bibliography's first-match-wins ladder, scanning wants disagreement: run at least two sources per direction — crowdedness estimated from one index is an artifact of that index.
+Unlike the bibliography's first-match-wins search order, scanning wants disagreement: run at least two sources per direction — how crowded an area looks from a single index is an artifact of that index.
 
-1. **Semantic Scholar search** — primary for crowdedness and citation signal:
+1. **Semantic Scholar search** — primary for how crowded an area is and for citation signal:
    - `https://api.semanticscholar.org/graph/v1/paper/search?query=<q>&fields=title,year,venue,abstract,citationCount,externalIds&limit=20`
    - add `&year=<from>-` for the recency probe (e.g. the last 18 months).
 2. **arXiv API** — primary for trajectory and the newest work:
    - `http://export.arxiv.org/api/query?search_query=all:<terms>&sortBy=submittedDate&sortOrder=descending&max_results=20` (Atom)
-3. **DBLP search** — venue confirmation for what the other two surfaced:
+3. **DBLP search** — venue confirmation for what the other two reported:
    - `https://dblp.org/search/publ/api?q=<query>&format=json&h=20`
-4. **Web search** — surveys, workshop pages, blog posts that name the field's vocabulary. A paper a web result mentions still enters the file only through a record from sources 1–3; a useful non-paper page (a survey blog, a leaderboard) may be cited in the crowdedness note with its URL, marked `web context`.
+4. **Web search** — surveys, workshop pages, blog posts that name the field's vocabulary. A paper a web result mentions still enters the file only through a record from sources 1–3; a useful non-paper page (a survey blog, a leaderboard) may be cited in the note on how crowded the area is, with its URL, marked `web context`.
 
 ## Queries
 
@@ -25,8 +25,8 @@ Unlike the bibliography's first-match-wins ladder, scanning wants disagreement: 
 
 ## What is recorded, per direction
 
-- **The scan table** — 8–15 papers, deduplicated by title (preprint vs published: keep the published record when both surface): title / venue / year / citations / one clause of relevance / record URL.
-- **The crowdedness note** — results-per-year trend, the venues involved, named groups where evident, whether a survey newer than ~18 months exists, benchmark saturation if visible. Web-context links allowed here, marked as such.
+- **The scan table** — 8–15 papers, deduplicated by title (preprint vs published: keep the published record when both appear): title / venue / year / citations / one clause of relevance / record URL.
+- **The note on how crowded the area is** — results-per-year trend, the venues involved, named groups where evident, whether a survey newer than ~18 months exists, benchmark saturation if visible. Web-context links allowed here, marked as such.
 - **The 3 closest works** — one line each: what it does, and what its own abstract does not claim.
 - **The apparent gap** — phrased as what none of the scanned works do. At abstract depth the honest verb is "the abstracts suggest".
 - **The depth line** — `abstracts`, `abstracts+intros`, or `skipped`.

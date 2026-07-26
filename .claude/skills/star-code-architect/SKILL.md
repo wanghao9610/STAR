@@ -3,14 +3,14 @@ name: star-code-architect
 disable-model-invocation: true
 description: >-
   Bootstrap or reorganize the project codebase (${CODE_NAME}/, read from .env) so research
-  plans under metds/plans/ have a code home. When ${CODE_NAME}/ is missing or empty: mine
-  the research plan for a search profile, find and score candidate reference implementations
+  plans under metds/plans/ have a place for the code to live. When ${CODE_NAME}/ is missing or empty: read
+  the research plan for what to search for, find and score candidate reference implementations
   on GitHub (plan fit, completeness, license, activity), let the user pick one, then clone
   it, strip its git history, record provenance, and conservatively rebrand it to CODE_NAME.
   When code already exists: survey it with read-only subagents instead. Both paths then
   design a target architecture plus a migration table, execute only user-approved migrations
   via orchestrated subagents with per-group verification and git checkpoints, and write the
-  architecture spec to metds/codearc.md with thin pointers in AGENTS.md and
+  architecture spec to metds/codearc.md with short cross-references in AGENTS.md and
   .cursor/rules/. Use when the user runs /star-code-architect, wants a reference
   implementation or starter codebase for a plan, wants to set up / scaffold ${CODE_NAME}/,
   or wants to organize / refactor the existing codebase and record its architecture.
@@ -23,11 +23,11 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `/star-code-architect [GITHUB_URL | PLAN_NAME]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
-You give the research plan a code home. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the strategy and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) that tells every later agent where code belongs.
+You give the research plan a place for the code to live. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the top-level plan and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) that tells every later agent where code belongs.
 
 You **architect; you do not implement research features.** Feature work belongs to `star-plan-executor` against its sub-plans. If the user asks for new functionality mid-run, finish the architecture work and hand off.
 
@@ -36,9 +36,9 @@ You **architect; you do not implement research features.** Feature work belongs 
 1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/star-plan-coach` first — or take a topic / URL directly and proceed without one.
 2. **Two gates; autonomous between them.** Gate 1: the user picks the reference repo from a scored shortlist. Gate 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a gate did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
-4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into a residual list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
-5. **The main loop orchestrates and verifies; subagents execute.** Surveys and migrations are delegated to narrow `Agent` subagents (`subagent_type: general-purpose`) with disjoint file ownership and structured returns. The main loop re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
-6. **One spec, thin pointers.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, rename residuals. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
+4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
+5. **The main agent orchestrates and verifies; subagents execute.** Surveys and migrations are delegated to narrow `Agent` subagents (`subagent_type: general-purpose`) with disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
+6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
 
 ## Workflow
 
@@ -68,7 +68,7 @@ Score each candidate with the rubric (`references/repo_rubric.md`): plan fit 30,
 
 Present the top 3–5 via AskUserQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
 
-#### Step A5: Land the clone
+#### Step A5: Put the clone in place
 
 1. Shallow-clone to a temporary directory; record URL, commit SHA, commit date, and license.
 2. If the implementation is a subdirectory of a monorepo, confirm the sub-path with the user and take only it.
@@ -78,7 +78,7 @@ Present the top 3–5 via AskUserQuestion, one option per candidate: one-line wh
 
 #### Step A6: Conservative rebrand
 
-Follow `references/rebrand_checklist.md`: top-level package directory, all imports, packaging metadata (`setup.py` / `pyproject.toml` name, packages, console entry points), README title and install snippets. After each rename: grep the old name to verify the count dropped as expected, then `python -m compileall -q ${CODE_NAME}` (needs no dependencies). Names on the do-not-touch list (registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/wandb project names) go into the **residual table** for `codearc.md` §7. Commit: `star-code-architect: rebrand to <CODE_NAME>`.
+Follow `references/rebrand_checklist.md`: top-level package directory, all imports, packaging metadata (`setup.py` / `pyproject.toml` name, packages, console entry points), README title and install snippets. After each rename: grep the old name to verify the count dropped as expected, then `python -m compileall -q ${CODE_NAME}` (needs no dependencies). Names on the do-not-touch list (registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/wandb project names) go into the **do-not-rename table** for `codearc.md` §7. Commit: `star-code-architect: rebrand to <CODE_NAME>`.
 
 #### Step A7: Runtime smoke (STOP-line aware)
 
@@ -86,13 +86,13 @@ If a usable conda env from `.env` exists, run `python -c "import <package>"` thr
 
 #### Step A8: Light survey
 
-Complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`, light mode) — the scoring pass already covered the coarse structure; for small repos the main loop may do this itself.
+Complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`, light mode) — the scoring pass already covered the broad structure; for small repos the main agent may do this itself.
 
 ### Branch B: Organize the existing codebase
 
 #### Step B1: Survey
 
-Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per concern lane — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — at most 3 in parallel, each returning the structured report in `references/survey_spec.md`. The main loop merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
+Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — at most 3 in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
 
 ### Converged: architecture, migration, specs
 
@@ -106,7 +106,7 @@ Show the architecture summary and the numbered migration table as normal text. T
 
 #### Step C3: Execute migrations
 
-Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run ≤3 in parallel, dependent groups serially. Dispatch one `Agent` subagent (`subagent_type: general-purpose`) per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main loop re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
+Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run ≤3 in parallel, dependent groups serially. Dispatch one `Agent` subagent (`subagent_type: general-purpose`) per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
 
 #### Step C4: Write the specs
 
@@ -122,16 +122,16 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C6: Report & hand off
 
-≤400 words: repo chosen (with license note), what landed where, renames done + residual count, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a code home; `/star-flow-status` shows the tree.
+≤400 words: repo chosen (with license note), what ended up where, renames done + how many names were left unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a place for the code to live; `/star-flow-status` shows the tree.
 
 ## State & File Rules
 
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, the `## Code Architecture` section of `AGENTS.md`, and `.cursor/rules/code-codearc.mdc`. Never touch `metds/plans/*`.
-- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are surfaced at Gate 1 and recorded in `codearc.md` §5.
-- Git: one commit per landed phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
+- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Gate 1 and recorded in `codearc.md` §5.
+- Git: one commit per finished phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
 - The audit trail is the git checkpoints plus `codearc.md` §6 (migration record); this skill creates no `wkdrs/` run directory — it produces code and specs, not experiment artifacts.
 - STOP line: environment builds with CUDA compilation, downloads over ~1 GB, full test suites, any training — prepare the command and hand it to the user; never launch autonomously.
-- The residual rename list lives in `codearc.md` §7; later renames go through `star-plan-executor` steps or a re-run of this skill, each individually verified.
+- The do-not-rename list lives in `codearc.md` §7; later renames go through `star-plan-executor` steps or a re-run of this skill, each individually verified.
 
 ## Dialogue Discipline
 

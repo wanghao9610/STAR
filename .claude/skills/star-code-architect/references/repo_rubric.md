@@ -37,7 +37,7 @@ Shortlist 5–10. Drop immediately: archived repos, inference-/demo-only repos, 
 
 ## 4. License guidance
 
-Surface this at Gate 1 — the user decides with eyes open:
+Report this at Gate 1 — the user decides with eyes open:
 
 | License | Verdict |
 |---|---|

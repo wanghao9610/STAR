@@ -1,4 +1,4 @@
-# Gather Rubric — promotion, placement, and release-surface polish
+# Gather Rubric — promotion, placement, and polishing what a reader will open
 
 How a candidate file is found, judged, placed, and verified, and what the polish pass is allowed to touch afterwards. The bar is deliberately high: at release time the temptation is to tidy the whole repository, and a promotion nobody can justify is churn that costs a reviewer their trust in the diff.
 
@@ -19,7 +19,7 @@ A candidate is promoted only if it passes **at least one** part, and the passing
 
 - **A. The README will cite it.** A section from `references/readme_map.md` prints its path or the command that runs it — a data-prep script §7 names, an eval entry point §11 prints, a demo §9 shows.
 - **B. An executed leaf needs it.** The file is named by a leaf's §4 deliverables or is the machinery its §5 done-criterion runs, and that leaf's `exec_status` is `done`. Evidence is the plan file and line.
-- **C. It reproduces a ledger number.** Running it is how a row in `wkdrs/results/results.md` was produced — the config of a run the ledger cites, the script that computed a reported metric. Evidence is the ledger row.
+- **C. It reproduces a number in the results table.** Running it is how a row in `wkdrs/results/results.md` was produced — the config of a run the results table cites, the script that computed a reported metric. Evidence is the results-table row.
 
 Passing none → **keep in place**. Say so on the row and move on; that is the expected outcome for most of `tasks/`, and it is not a finding.
 
@@ -51,7 +51,7 @@ One entry per candidate, in sweep order:
 - path: <path from project root>
   kind: <tool script | config | data pipeline | model component | analysis | test | other>
   passes: A | B | C | none
-  evidence: <the README section, the plan file:line, or the ledger row>
+  evidence: <the README section, the plan file:line, or the results-table row>
   destination: <path under ${CODE_NAME}/, or "—">
   action: move | merge | keep in place | route
   plan_referenced: <plan file:line whose text goes stale if this moves, or "no">
@@ -62,7 +62,7 @@ One entry per candidate, in sweep order:
 
 ## Verification per row
 
-After each approved row, the main loop re-runs the checks itself — never a self-reported pass:
+After each approved row, the main agent re-runs the checks itself — never a self-reported pass:
 
 1. `python -m compileall -q <destination>` through the `.env` interpreter.
 2. `grep -rn "<old path>" --include="*.py" --include="*.sh" --include="*.md" .` over the repository — any remaining hit is a call site still to fix, or the row is not done.
@@ -70,16 +70,16 @@ After each approved row, the main loop re-runs the checks itself — never a sel
 
 A row that fails after the fix attempt is reverted (`git checkout` for tracked paths, move back otherwise), marked `blocked` in the report with the failure text, and the run continues with the remaining rows.
 
-## Release-surface polish
+## Polishing what a reader will open
 
-Applies to: the files promoted this run, the entrypoints / configs / `execs/scpts/*.sh` the README prints, and the public API the README shows. Nothing else — the six-dimension audit of `${CODE_NAME}/` belongs to `/skill:star-code-reviewer`, and a finding outside this surface is recorded for routing rather than fixed.
+Applies to: the files promoted this run, the entrypoints / configs / `execs/scpts/*.sh` the README prints, and the public API the README shows. Nothing else — the six-dimension audit of `${CODE_NAME}/` belongs to `/skill:star-code-reviewer`, and a finding outside these files is recorded for routing rather than fixed.
 
 What counts as a finding here:
 
 - **Move leftovers** — an import the move stranded, a path constant pointing at the old location, a docstring describing the file's former home.
 - **Scratch that survived promotion** — commented-out experiment variants, `print()` debugging, a hardcoded `if True:` switch, an unused `sys.path.append`.
-- **`codearc.md` conformance** — the file's name and placement match §2's rules and §3's naming conventions; a residual-list name (§7) is flagged, never renamed.
+- **`codearc.md` conformance** — the file's name and placement match §2's rules and §3's naming conventions; a name on the do-not-rename list (§7) is flagged, never renamed.
 - **Documentation of what the README names** — every symbol, script flag, or config key a reader will look up after reading the README has a docstring or comment saying what it does. A file the README never mentions is out of scope even when it is in the same directory.
 - **Reader-facing clarity** — a function doing several jobs that the README presents as one step, a name that contradicts what the README calls it. The fix is the smaller change: usually the docstring, sometimes the name, never a redesign.
 
-Ineligible, always: behavior changes, signatures used outside the surface, files outside the surface, rename-residual names, and upstream-inherited code (AGENTS.md §3 — report it, do not touch it).
+Ineligible, always: behavior changes, signatures used outside these files, files outside them, names on the do-not-rename list, and upstream-inherited code (AGENTS.md §3 — report it, do not touch it).

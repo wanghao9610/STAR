@@ -72,7 +72,7 @@
 ## 🛠️ Installation
 
 <!-- (M §6) From ${CODE_NAME}/requirements* and the newest wkdrs/env_*/ENV_REPORT.md: the python
-     version, the backend, and the install ladder that was actually used. Every command here is
+     version, the backend, and the install order that was actually used. Every command here is
      resolved before it is printed (readme_map.md rule 2) — this is the first command a stranger
      runs, and the one they judge the repository by. -->
 
@@ -92,12 +92,12 @@ pip install -r <CODE_NAME>/requirements.txt
 ## 📦 Model Zoo
 
 <!-- (O §8) One row per released checkpoint, from wkdrs/results/results.md, linked only when the file is
-     on disk under inits/ or already published. Columns follow what the ledger actually carries;
+     on disk under inits/ or already published. Columns follow what the results table actually carries;
      the shape below is the community default. -->
 
 | Model | Backbone | Data | <metric> | Weights |
 |---|---|---|---|---|
-| <name> | <backbone> | <training data> | <number, from the ledger> | [download](<URL>) |
+| <name> | <backbone> | <training data> | <number, from the results table> | [download](<URL>) |
 
 ## 📂 Data preparation
 
@@ -147,7 +147,7 @@ bash execs/scpts/<eval>.sh
 ## 📈 Results
 
 <!-- (O §12) From wkdrs/results/results.md and nowhere else. Reproduce its tables with the run behind each
-     number. Numbers the ledger excluded as invalid or inconclusive do not appear here at all.
+     number. Numbers the results table excluded as invalid or inconclusive do not appear here at all.
      A comparison against a baseline needs that baseline's number in the same table. -->
 
 | Method | <benchmark> | <metric> | Run |

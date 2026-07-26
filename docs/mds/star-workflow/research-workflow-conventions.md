@@ -2,9 +2,9 @@
 
 **Language:** English | [简体中文](research-workflow-conventions.zh-CN.md)
 
-The rules every STAR research workflow skill follows. The fifteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize`, `star-code-release` — each carry their own workflow, write boundary, and rubric. What they share lives here, once.
+The rules every STAR research workflow skill follows. The fifteen skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-flow-status`, `star-metd-summarize`, `star-code-release` — each carry their own workflow, their own limit on what they may write, and their own rubric. What they share lives here, once.
 
-**Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower write boundary, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
+**Precedence.** This file is the **baseline**. A skill's `SKILL.md` may be **stricter** — a narrower limit on what it may write, a lower threshold, an extra gate, a rule that it never commits at all — and the stricter rule wins. A skill never loosens what this file sets. Where a `SKILL.md` carries a one-line summary of a rule below, that line is the binding reminder and this file is the full rule.
 
 This file is a contract for the skills and a description for the reader: it is what the workflow will and will not do to your repository.
 
@@ -14,21 +14,28 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 
 | Term | In one clause | Defined in |
 |---|---|---|
-| STOP line | the boundary a skill never crosses on its own — heavy, costly, or irreversible work is handed back as a command | §2 |
+| STOP line | the line a skill never crosses on its own — for heavy, costly, or irreversible work it writes the exact command out and hands it to you to run | §2 |
 | leaf | a plan with empty or absent `children:`; only leaves are executable | §5.4 |
-| strategy plan | a non-leaf plan from `star-plan-coach`, carrying the six-section `status:` map | §5, §8 |
+| top-level plan | the plan `star-plan-coach` writes, covering problem through milestones | §5, §8 |
 | done-criterion | a leaf's §5: the binary test that decides whether its run succeeded | the guide, §3 of each plan |
 | kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
-| `finalized:` | set by the coach when all six sections are `done`; three skills gate on it | §8 |
-| `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are terminal | `status_spec.md` |
-| `traces_to` | the sub-plan field naming the parent claim it serves | `star-plan-decomposer` |
-| `depends_on` | sibling prefixes, the machine-readable execution order | §5.5 |
-| coarse | too big to execute — §3/§5 largely `[TBD]`, or finalized but never decomposed | `status_spec.md` |
-| artifact registry | the §8 table naming every skill's durable output and its state field | §8 |
-| `model_trail` | the append-only per-write-session provenance list on every artifact | §8 |
-| involve dial | how much a run asks before deciding — `low` / `medium` / `high` | §7.7 |
+| `finalized:` | set by the coach when all six sections are `done`; three skills gate on it — `star-plan-decomposer`, `star-code-architect`, `star-metd-summarize` | §8 |
+| `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
+| `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
+| `depends_on` | the prefixes of sibling plans that must finish first | §5.5 |
+| too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]`, or finalized but never decomposed | `status_spec.md` |
+| output table | the §8 table naming every skill's durable output and its state field | §8 |
+| `model_trail` | one line per writing session, added never edited | §8 |
+| involve level | how much a run asks before deciding — `low` / `medium` / `high` | §7.7 |
 | backfill | `star-proj-adopt`'s second phase, recording work finished before any plan existed | §8 |
-| collector delegate | a read-only subagent that returns a filled contract and writes nothing | §6.4 |
+| read-only subagent | a subagent that fills in a form you give it and writes no files | §6.4 |
+| main agent | the agent running the skill itself; it owns integration and judgment | §6.3 |
+| follow-up checks | `star-flow-status`'s checks on finished work whose review, analysis, or write-up is missing or out of date | `status_spec.md` |
+| summary counts | a parent's progress counted up from its children | `status_spec.md` |
+| plan-level finding | a result that changes the plan itself, not just the leaf that produced it | `star-plan-reviser` |
+| last covered date | the newest digest's `covers.through`, where the next digest starts | `star-expt-digest` |
+| the step's own check | the check an `EXEC_PLAN` step binds to itself, run before that step counts as done | `star-plan-executor` |
+| unrecognized-files line | the count of report-shaped files matching no row of the output table | §8 |
 
 ## 1. Git
 
@@ -43,11 +50,11 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | `star-plan-coach` | offered once when the session ends | the plan files this session created or edited |
 | `star-plan-decomposer` | offered once at the end of the run | the sub-plans written plus the parent's updated index |
 | `star-plan-reviser` | offered once at Step 7, when edits were applied | the target plan, plus the parent when its `## Sub-plans` line changed |
-| `star-code-architect` | one per landed phase or verified migration group | `${CODE_NAME}/` and the spec files it owns |
+| `star-code-architect` | one per finished phase or verified migration group | `${CODE_NAME}/` and the spec files it owns |
 | `star-env-builder` | at most one per run | `${CODE_NAME}/requirements*` only |
 | `star-plan-executor` | one per verified action, only when the gate approved checkpointing | the files that action touched |
 | `star-code-reviewer` | one optional commit after the fix pass | only the files the fix pass touched |
-| `star-code-release` | one per landed phase (gather / polish / readme) | only that phase's paths: the promoted files plus the call sites their move broke, the polish-pass files, `README.md` |
+| `star-code-release` | one per finished phase (gather / polish / readme) | only that phase's paths: the promoted files plus the call sites their move broke, the polish-pass files, `README.md` |
 
 **Universal rules:**
 
@@ -56,7 +63,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 3. **No pushes, no history rewrites** (`rebase`, `amend`, `reset --hard`), **no branch switches, no tag creation.** The user owns the branch and the remote.
 4. **A path that already carried uncommitted changes when the run started is never staged.** Name those paths when asking, so the user can commit or stash them first — a skill's commit must never bundle work it did not do.
 5. **Never commit silently.** Every commit is either covered by a gate the user approved or offered as its own question. Declining is always a valid answer.
-6. **Never force-add an ignored path.** `.env`, `datas/`, and `inits/` are git-ignored by default and stay out of history. `wkdrs/` is **not** wholly ignored: everything under it is ignored *except* `*.md`, so the workflow's own reports — exec logs, analyses, digests, reviews, the results ledger — are versionable on purpose, and a run's record can outlive the machine that made it. `tasks/` is tracked in full: a plan's tool scripts are durable by design, and the scratch beside them is small enough not to warrant a carve-out.
+6. **Never force-add an ignored path.** `.env`, `datas/`, and `inits/` are git-ignored by default and stay out of history. `wkdrs/` is **not** wholly ignored: everything under it is ignored *except* `*.md`, so the workflow's own reports — exec logs, analyses, digests, reviews, the results table — are versionable on purpose, and a run's record can outlive the machine that made it. `tasks/` is tracked in full: a plan's tool scripts are durable by design, and the scratch beside them is small enough not to warrant an exception.
 
 **Why it matters.** `star-plan-reviser` tells users that "older versions live in git"; that is only true if the plan writers actually offer the commits. And a single stray `git add -A` in a project holding `inits/` and `wkdrs/` is the difference between a 40 KB diff and a 40 GB one.
 
@@ -69,7 +76,7 @@ Skills may write code and run **light validation**. Anything **heavy, costly, or
 - Unit and smoke tests, import checks, `python -m compileall`, a forward pass on a tiny batch.
 - Small-scale, **no-finetune** inference on a small subset — e.g. an MVP done-criterion: "no training, small subset, swap the text input and compare".
 - Dry runs, config validation, shape/dtype checks, a few-step overfit sanity run.
-- Anything that finishes in **minutes on modest resources** and writes only where the skill's write boundary allows.
+- Anything that finishes in **minutes on modest resources** and writes only where the skill is allowed to write.
 
 **Crosses the STOP line — hand it to the user:**
 
@@ -82,7 +89,7 @@ Skills may write code and run **light validation**. Anything **heavy, costly, or
 
 Download-size thresholds are **skill-specific** — `star-env-builder` runs framework-scale downloads once its install plan is approved; `star-code-architect` hands anything over ~1 GB back. Each skill states its own; this list is what crosses regardless.
 
-**How to hand off.** Give the user the exact command, invoked through the `.env` environment (§3) and the project's run surface (`execs/run.sh`) where one exists; say what it produces and where; say what output to bring back so the criterion can be verified. Writing the command into a runnable script is light; running it is not.
+**How to hand off.** Give the user the exact command, invoked through the `.env` environment (§3) and the project's launch entry point (`execs/run.sh`) where one exists; say what it produces and where; say what output to bring back so the criterion can be verified. Writing the command into a runnable script is light; running it is not.
 
 ## 3. `.env` and the project runtime
 
@@ -90,7 +97,7 @@ The operational form of `AGENTS.md` §6.
 
 1. **`.env` at the project root is the only source** of `CODE_NAME`, `ENV_NAME`, `CONDA_HOME`, and `PYTHON_HOME`. Never guess a local path, never hardcode one, never read them from memory of another project.
 2. **`PYTHON_HOME` is authoritative.** Set → use it as given; `CONDA_HOME` and `ENV_NAME` may be empty, and the interpreter then runs directly rather than through conda. Empty → derive it as `$CONDA_HOME/envs/$ENV_NAME`, which requires both to be set. Neither → a blocker to report, not a value to invent.
-3. **Missing `.env`** → for a skill that needs the interpreter, create it from `.env.example`, ask the user to fill the machine-specific values, and stop until they do. Never invent a value to keep going. **This binds only skills that are about to run something.** A skill that needs no runtime — a status report, a plan edit, a survey — notes the absence, treats `INVOLVE` as `medium` (§7.7) and `STAR_LANG` as unset (§7.6), and continues; a read-only skill never creates the file, since its own write boundary outranks this rule. A fresh clone has no `.env`, and reading a plan tree does not require one.
+3. **Missing `.env`** → for a skill that needs the interpreter, create it from `.env.example`, ask the user to fill the machine-specific values, and stop until they do. Never invent a value to keep going. **This binds only skills that are about to run something.** A skill that needs no runtime — a status report, a plan edit, a survey — notes the absence, treats `INVOLVE` as `medium` (§7.7) and `STAR_LANG` as unset (§7.6), and continues; a read-only skill never creates the file, since its own rule against writing outranks this one. A fresh clone has no `.env`, and reading a plan tree does not require one.
 4. **The shell is stateless.** `source activate` does not survive to the next command. Resolve the interpreter once to an absolute path — `$PYTHON_HOME/bin/python`, from §3.2 — and run every command through it. Never system python.
 5. **Only `star-env-builder` creates, repairs, or modifies an environment.** No other skill installs or upgrades anything, ever. A tool that is absent (ruff, matplotlib, bibtexparser, pandas) is a **degraded check**: run without it, say so in the report, and route to `star-env-builder`. Installing it to finish your own check is out of bounds.
 6. An environment that cannot run python is a **blocker to report**, not a problem to work around.
@@ -115,7 +122,7 @@ The operational form of `AGENTS.md` §6.
 1. **Execute locally by default.** Delegate only work that is bounded, independent, and materially helped by delegation. Never create one delegate per trivial sequential step.
 2. **A delegate is given** its exact file list, the rubric or contract it must return, and its scope stated verbatim ("ONLY these items"). Concurrent delegates hold **disjoint file ownership**.
 3. **The main agent owns integration and judgment.** It re-runs every check itself and never trusts a self-reported pass. A delegate never grades the overall verdict.
-4. **A collector delegate** — the common case, reading logs, papers, packages, or plans — reads and returns a filled contract. It writes no files and reads nothing outside its list.
+4. **A read-only subagent** — the commonest kind of delegate, reading logs, papers, packages, or plans — reads and returns the form it was given, filled in. It writes no files and reads nothing outside its list.
 5. **Only `star-plan-executor` dispatches an implementing delegate** that may change files; that contract is its own `references/agent_dispatch_spec.md`.
 
 ## 7. Dialogue
@@ -124,30 +131,30 @@ The tool-neutral half. **How** to ask — AskUserQuestion, Codex's structured us
 
 1. **Keep each chat reply under about 400 words.** Files written to disk do not count. Detail belongs in the artifact; the reply is the digest.
 2. **Ask one question at a time and wait for an explicit answer** before acting on it. Never bundle-approve, never assume a yes. **This holds in headless and scripted runs**: a skill that reaches a gate stops and waits rather than proceeding — see the guide's "Which parts can run unattended?".
-3. **Every question carries 2–4 concrete options with the recommendation marked**, and the user may always answer freely outside them. **Each option states its consequence, not its label again**: what choosing it produces or changes, what it rules out, and — where the answer is not plainly undoable — whether it can be reverted and at what cost. "Milestone axis" is a label; "splits by the root's §6 stages into a linear chain; re-running the split later overwrites the sub-plan files" is a consequence. An option the user cannot price is a choice made blind. Genuinely open questions (an initial research topic) may be asked without options.
+3. **Every question carries 2–4 concrete options with the recommendation marked**, and the user may always answer freely outside them. **Each option states its consequence, not its label again**: what choosing it produces or changes, what it rules out, and — where the answer is not plainly undoable — whether it can be reverted and at what cost. "Milestone axis" is a label; "splits by the root's §6 stages into a linear chain; re-running the split later overwrites the sub-plan files" is a consequence. An option whose cost the user cannot see is a choice made blind. Genuinely open questions (an initial research topic) may be asked without options.
 4. **Report honestly.** Never round a shortfall up. Never present a check as run when it was skipped or degraded. Never state or imply that a file, a status, or a plan was changed when it was not.
 5. **Lead with the outcome**, then the evidence, then the routing to the next skill.
 6. **Reply in the user's dialogue language, unless `STAR_LANG` overrides it.** `STAR_LANG` in `.env` (`en` or `zh`; absent, unset, or any other value → the dialogue language) replaces the dialogue language everywhere a skill picks one: chat replies, localized `*_zh.md`-style resources, templates, and the frontmatter `language` of documents it creates — a Chinese chat with `STAR_LANG=en` gets English replies and English new plans. It never rewrites an existing document: a document's body language follows its own frontmatter `language` (or its source's), **not** the chat's and not `STAR_LANG`'s — a Chinese conversation about an English plan still writes English into that plan. An explicit in-conversation request ("reply in English", "this plan in Chinese") overrides `STAR_LANG` for what it names. Like `INVOLVE` (item 7), it is a one-line `.env` lookup resolved once at the start of the run, even by a skill that needs no runtime and no other `.env` value. Inside Chinese documents keep technical terms, metric names, venue names, file paths, and everything inside `reference.bib` in English.
-7. **The `involve` dial: the user chooses how much is asked.** Every question a workflow poses is one of three kinds. **Hard gates** are asked at every level: anything on the STOP line (§2), every commit offer (§1.5), every question gating a deletion or an overwrite, every write to user-confirmed content that a named protocol already gates (execution sync-back, per-item revision approval), the approval gate a skill places before its side effects, and every ambiguity about what the user meant (§5.2 is the plan-name case). **Judgment calls** — questions item 3 equips with a marked recommendation, where every offered option is safe — are what the dial moves. **Derivable details** — anything with a conventional default — are decided silently at every level; they were never questions.
+7. **The `involve` level: the user chooses how much is asked.** Every question a workflow poses is one of three kinds. **Hard gates** are asked at every level: anything on the STOP line (§2), every commit offer (§1.5), every question gating a deletion or an overwrite, every write to user-confirmed content that a named protocol already gates (writing an execution change back into the plan, per-item revision approval), the approval gate a skill places before its side effects, and every ambiguity about what the user meant (§5.2 is the plan-name case). **Judgment calls** — questions item 3 equips with a marked recommendation, where every offered option is safe — are what the level moves. **Derivable details** — anything with a conventional default — are decided silently at every level; they were never questions.
 
    The user sets the level; the skill **resolves it once at the start of the run**, before the first question, from three sources in precedence order: `INVOLVE` in `.env` (`low` / `medium` / `high`; absent, unset, or invalid → `medium`), then an `involve=<level>` token in the invocation, then plain language mid-run ("ask me less", "ask me everything") — the last instruction wins for the rest of the run. Reading `INVOLVE` is a one-line `.env` lookup, done even by a skill that otherwise needs no runtime and no other `.env` value. A skill that keeps a durable run log records the effective level and its source there once.
 
-   **The token is not an argument.** `involve=<level>` is stripped from the invocation before anything else is resolved — the plan name (§5), the mode, the scope, the date window. This holds in **every** skill, including the ones whose `SKILL.md` never mentions the dial: a skill matching its first argument against `metds/plans/*_plan.md` must not see `involve=low` and treat it as a plan name, or match it as a mode word. A skill that accepts no arguments at all still strips it.
+   **The token is not an argument.** `involve=<level>` is stripped from the invocation before anything else is resolved — the plan name (§5), the mode, the scope, the date window. This holds in **every** skill, including the ones whose `SKILL.md` never mentions the level: a skill matching its first argument against `metds/plans/*_plan.md` must not see `involve=low` and treat it as a plan name, or match it as a mode word. A skill that accepts no arguments at all still strips it.
 
-   - `medium` — the default: this file and every `SKILL.md` exactly as written. The dial adds nothing.
+   - `medium` — the default: this file and every `SKILL.md` exactly as written. The level adds nothing.
    - `low` — a judgment call is not asked: take the option you would have marked recommended, and log it (item 8). A genuinely open question (item 3) has no recommendation to take, so it is asked at every level — and when unsure which kind a question is, treat it as the more interactive kind.
-   - `high` — judgment calls the skill's text batches into one gate, or takes autonomously between gates, are surfaced one at a time (item 2).
+   - `high` — judgment calls the skill's text batches into one gate, or takes autonomously between gates, are asked one at a time (item 2).
 
-   For every question that is asked, item 2 holds unchanged: the dial decides which judgment calls are asked at all, never whether an asked question may be assumed answered.
-8. **Decide-then-disclose.** Every run keeps a decisions record — `EXEC_LOG.md`'s "Notes / decisions" where the skill keeps one, otherwise a "Decisions taken" list in the final reply — one line per settled question, as `question → choice → what it set`. At `low` it captures every judgment call taken unasked, and the final reply states that count whenever it is nonzero: `low` moves review after the fact, it never removes it. At `medium` and `high` it captures what the user answered, so a long run's decisions outlive the scrollback and a resumed run can restore them. Lines are appended as questions settle — this is a ledger, never a growing recap replayed before each question.
-9. **The dial tightens per skill; it never loosens.** A `SKILL.md` may declare a judgment call it always asks, or flatten levels that make no sense for it (a coaching skill has no meaningful `low`). No skill treats a hard gate as dial-able, and a skill that declares nothing follows exactly the rule above.
+   For every question that is asked, item 2 holds unchanged: the level decides which judgment calls are asked at all, never whether an asked question may be assumed answered.
+8. **Decide-then-disclose.** Every run keeps a decisions record — `EXEC_LOG.md`'s "Notes / decisions" where the skill keeps one, otherwise a "Decisions taken" list in the final reply — one line per settled question, as `question → choice → what it set`. At `low` it captures every judgment call taken unasked, and the final reply states that count whenever it is nonzero: `low` moves review after the fact, it never removes it. At `medium` and `high` it captures what the user answered, so a long run's decisions outlive the scrollback and a resumed run can restore them. Lines are appended as questions settle — this is a running record, never a growing recap replayed before each question.
+9. **The level tightens per skill; it never loosens.** A `SKILL.md` may declare a judgment call it always asks, or flatten levels that make no sense for it (a coaching skill has no meaningful `low`). No skill treats a hard gate as adjustable, and a skill that declares nothing follows exactly the rule above.
 10. **Carry the thread.** A user answering a long series of questions loses the thread — what they already settled, and what the current question turns on. Three cheap habits, and deliberately not a recap replayed before every question: that grows with the question count until the user skims it, and skimming the recap is how they start skimming the question too.
 
     - **Anchor the question.** A question that depends on an earlier answer names it in one clause — "milestone axis → 4 units; now: which one owns the data leaf?". One line, carrying only the decisions this question actually rests on, never the whole history.
     - **Recap at boundaries, not between questions.** At each stage, step, or section end — where the user is already pausing — restate in 2–3 sentences what was decided, what it produced (the file written, the field set), and what it opens next. Fixed cost per boundary, however many questions the boundary took.
     - **Name the way back.** When a boundary closes something the user can still change, say how: the skill and argument that reopens it, and what reopening costs. A user who knows a decision is cheap to revisit stops trying to hold every decision in their head — which is the actual failure this item addresses.
 
-## 8. The artifact registry
+## 8. The output table
 
 Every skill's durable output, in one table. `star-flow-status` reads this as the contract for its coverage checks: a stage is "covered" when the artifact below exists and its state field is current. Keep the table honest — a skill that changes what it writes updates this row in the same commit, or the status skill silently stops checking that stage.
 
@@ -163,9 +170,9 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Code review | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md`, else `wkdrs/reviews/code_<scope>_<date>.md` | date in filename |
 | Plan review | `star-plan-reviser` | `wkdrs/<run>/REVIEW_<date>.md`, else `wkdrs/reviews/<prefix>_<slug>_<date>.md` | date in filename |
 | Analysis | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, `wkdrs/<run>/analysis/` | date in filename |
-| Ledger | `star-expt-analyst aggregate` | `wkdrs/results/results.md`, else `wkdrs/results/results_<slug>.md` when scoped | `generated:` |
+| Results table | `star-expt-analyst aggregate` | `wkdrs/results/results.md`, else `wkdrs/results/results_<slug>.md` when scoped | `generated:` |
 | Digest | `star-expt-digest` | `wkdrs/digests/EXPT_DIGEST_<date>.md` | `covers:`, `sources:` |
-| Model ledger | `star-expt-digest ledger` | `wkdrs/digests/MODEL_LEDGER.md` | `generated:` |
+| Model record file | `star-expt-digest ledger` | `wkdrs/digests/MODEL_LEDGER.md` | `generated:` |
 | Method docs | `star-metd-summarize` | `metds/{overview,framework,dataset,training,evaluation}.md` | `generated:`, `sources:` |
 | Release | `star-code-release` | `README.md`, `wkdrs/release/RELEASE_<date>.md` | the README's provenance marker (date + `sources:`) |
 
@@ -182,7 +189,7 @@ Where an artifact already has per-event rows, those carry the model too and are 
 
 `star-expt-digest ledger` rolls every trail into `wkdrs/digests/MODEL_LEDGER.md`, the one place the whole flow is visible at once. It is generated, never hand-maintained: to correct a row, fix the trail it came from and regenerate. Because it is compiled from self-reported trails, it inherits their limit — and, being counts of write events, it carries no quality signal at all. More writes is not better work.
 
-**One carve-out.** In its `backfill` phase, `star-proj-adopt` may write `exec_status:` and `exec_runs:` — and nothing else — onto leaves in `metds/plans/`, each leaf individually confirmed by the user. Those two fields are the Run row's state, and adoption is the one case where the work they describe happened before any plan existed to record it. Every other part of a plan file, in both of adoption's phases, stays with the producers named in the Plan row.
+**One exception.** In its `backfill` phase, `star-proj-adopt` may write `exec_status:` and `exec_runs:` — and nothing else — onto leaves in `metds/plans/`, each leaf individually confirmed by the user. Those two fields are the Run row's state, and adoption is the one case where the work they describe happened before any plan existed to record it. Every other part of a plan file, in both of adoption's phases, stays with the producers named in the Plan row.
 
 Two properties of this table matter more than its contents:
 

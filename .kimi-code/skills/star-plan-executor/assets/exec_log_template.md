@@ -18,7 +18,7 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 
 ## Step status
 
-<!-- One row per EXEC_PLAN action. `check result` is filled by the MAIN LOOP re-running the bound
+<!-- One row per EXEC_PLAN action. `check result` is filled by the main agent re-running the step's own
      check, not by the agent's self-report. Legal status: pending / in_progress / done / blocked /
      skipped. -->
 
@@ -50,5 +50,5 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 <!-- Anything a resuming session needs: assumptions made, blockers hit and how they were resolved
      (material deviations from the sub-plan go under "Pending amendments" above, not here).
      If a result hit a root §5 kill-criterion, record it here as a
-     **Strategy signal** and note the recommended feedback path (/skill:star-plan-coach or
+     **Plan-level finding** and note the recommended feedback path (/skill:star-plan-coach or
      /skill:star-plan-decomposer) — the executor never edits the parent plan itself. -->

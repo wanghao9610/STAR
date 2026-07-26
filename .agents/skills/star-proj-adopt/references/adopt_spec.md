@@ -4,9 +4,9 @@ The exact rules behind `star-proj-adopt`. `SKILL.md` states the shape; this file
 
 ## 1. The probe (read-only)
 
-Six lanes. Each returns findings plus a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Gate 1 — a `certain` line is reported, not asked about.
+Six areas. Each returns findings plus a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Gate 1 — a `certain` line is reported, not asked about.
 
-| Lane | Look at | `certain` when |
+| Area | Look at | `certain` when |
 |---|---|---|
 | Source | Top-level dirs holding `__init__.py`; what the entrypoints import; `pyproject.toml` / `setup.py` `name` and `packages` | exactly one importable top-level package, and the entrypoints import it |
 | Runtime | `conda env list`, `.venv/`, `which python`, env names inside existing scripts, `environment.yml` / `requirements*.txt` | exactly one env whose name matches the project or whose python imports the source package |
@@ -17,11 +17,11 @@ Six lanes. Each returns findings plus a confidence: `certain` (one unambiguous m
 
 Also record, for the inventory: first commit date, commit count, the 20 most recently changed paths, and any README section describing status or results.
 
-**Nothing in this lane writes.** Do not run the project's code, do not import its package, do not create the environment.
+**Nothing in this area writes.** Do not run the project's code, do not import its package, do not create the environment.
 
 ## 2. The mapping block
 
-Report the probe as one block before Gate 1, one line per lane:
+Report the probe as one block before Gate 1, one line per area:
 
 ```
 source     CODE_NAME=<dir>            certain   (only importable package; imported by train.py)
@@ -76,7 +76,7 @@ One row per identifiable unit of finished or in-flight work. Fewer, well-evidenc
 
 **What never enters a row:** why the work was done, what claim it supports, whether it succeeded, what should happen next. Those are the coach's to elicit and the analyst's to judge (SKILL.md Principle 5).
 
-## 6. Ledger rules (Gate 2)
+## 6. Recording rules (Gate 2)
 
 For each run the user selects:
 
@@ -85,7 +85,7 @@ For each run the user selects:
 3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — adopted before the plan tree existed)`, the command if it is recoverable verbatim from a script or a saved config, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this whole rule exists to prevent.
 4. Never write into the linked directory itself. The `EXEC_LOG.md` goes at the `wkdrs/` level.
 
-An `EXEC_LOG.md` already present in a selected run directory is left untouched, and the run is reported as `already ledgered`.
+An `EXEC_LOG.md` already present in a selected run directory is left untouched, and the run is reported as `already recorded`.
 
 ## 7. Backfill matching (Phase `backfill`)
 
@@ -100,6 +100,6 @@ State proposed per matched leaf:
 | `built` | `in_progress` |
 | `abandoned` | no proposal — report it and let the user decide |
 
-`exec_runs` is set only when that row's run was ledgered in Gate 2; a `done` leaf with no ledgered run is left with `exec_status` alone and flagged in the report as one `$star-flow-status` will list under done-with-no-run. On a confirmed match whose run was ledgered, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
+`exec_runs` is set only when that row's run was recorded in Gate 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `$star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
 
 Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree, which is information, not an error to smooth over.

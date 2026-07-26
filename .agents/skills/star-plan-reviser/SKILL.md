@@ -2,9 +2,9 @@
 name: star-plan-reviser
 description: >-
   Review one research plan from metds/plans/ against its execution evidence, then revise it in
-  place with per-item user approval. Read the wkdrs/<run>/ execution logs and artifacts (children
-  rollups for internal nodes), score completion claim-by-claim against files on disk, write a
-  seven-part review report to wkdrs/, walk revision candidates one question at a time, edit the
+  place with per-item user approval. Read the wkdrs/<run>/ execution logs and artifacts (a summary of the children
+  for internal nodes), score completion claim-by-claim against files on disk, write a
+  seven-part review report to wkdrs/, go through revision candidates one question at a time, edit the
   plan file directly, and append a Revision History entry — routing structural re-shaping to
   star-plan-decomposer and strategy pivots to star-plan-coach. Use when the user invokes
   $star-plan-reviser or asks Codex to review, audit, or revise a plan after (partial) execution,
@@ -17,7 +17,7 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`00`), or a filename (`00_mvp-3way-ablation_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
@@ -32,7 +32,7 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped through one direct question at a time, with a recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
 5. **Stay inside the family's write discipline.** Never renumber prefixes; never touch `EXEC_PLAN.md` / `EXEC_LOG.md` (the executor's); structural re-shaping (add/remove sub-plans, redraw the dependency graph) routes to `$star-plan-decomposer`; research-question or method pivots route to `$star-plan-coach`. Boundaries: `references/revision_rules.md`.
-6. **Ripple awareness.** A revision can invalidate work built on the old text. Surface reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; the bumped `updated` lets `$star-flow-status` surface staleness downstream.
+6. **Knock-on effects.** A revision can invalidate work built on the old text. Point out reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; the bumped `updated` lets `$star-flow-status` show staleness downstream.
 
 ## Workflow
 
@@ -40,29 +40,29 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 
 1. Match `PLAN_NAME` (slug / numeric prefix / full filename) against `metds/plans/*_plan.md`; read the resolved plan in full.
 2. If the target is absent or ambiguous, list concise candidates (prefix + slug + one-line state) and ask one direct question — prefer nodes with execution evidence (`exec_runs` non-empty) or known drift.
-3. Classify the node: **leaf** (audit its own run) vs **root/internal** (audit strategy sections + children rollup). This sets the evidence set for Step 1.
+3. Classify the node: **leaf** (audit its own run) vs **root/internal** (audit strategy sections + a summary of the children). This sets the evidence set for Step 1.
 
 ### Step 1: Scope the evidence
 
 - **Leaf**: its current run's dir (the last `exec_runs` entry — `EXEC_PLAN.md`, `EXEC_LOG.md`), every §4 deliverable path, and the §2-named inputs (`datas/`, `inits/`) and code modules (`${CODE_NAME}/`, resolved from `.env`).
-- **Root/internal**: children frontmatter (`status`, `exec_status`, `updated`, `depends_on`), executed descendants' logs (notably **Strategy signal** notes and kill-criteria hits), plus this node's own §1–§6 assumptions.
+- **Root/internal**: children frontmatter (`status`, `exec_status`, `updated`, `depends_on`), executed descendants' logs (notably **Plan-level finding** notes and kill-criteria hits), plus this node's own §1–§6 assumptions.
 - State plainly what evidence exists. If nothing was executed anywhere, say the review will be **document-only**: completion cannot be scored; the report's intent / divergence / candidate sections still apply, informed by what the user knows that the plan does not.
 
 ### Step 2: Collect evidence (read-only)
 
-Gather per the collector contracts in `references/review_spec.md` — the **log evidence** (step statuses, claimed checks, "Awaiting user" commands, strategy signals), the **artifact evidence** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, the **code evidence** (are the promised modules present and consistent with what the log claims changed?). Collect locally by default; delegate selectively per Core Principle 2.
+Gather per the collector contracts in `references/review_spec.md` — the **log evidence** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), the **artifact evidence** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, the **code evidence** (are the promised modules present and consistent with what the log claims changed?). Collect locally by default; delegate selectively per Core Principle 2.
 
 Cross-check disagreements — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks; never anything heavy.
 
 ### Step 3: Synthesize and persist the review report
 
-Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_template_zh.md`; the report follows the plan's `language`), seven sections: ① intent recap ② what actually happened ③ completion scorecard (per §3 task plus the §5 done-criterion: `met` / `partial` / `unmet` / `unverifiable`, each with evidence) ④ divergences ⑤ blockers & leftovers ⑥ ripple map ⑦ revision candidates, each graded **local / structural / strategic**.
+Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_template_zh.md`; the report follows the plan's `language`), seven sections: ① intent recap ② what actually happened ③ completion scorecard (per §3 task plus the §5 done-criterion: `met` / `partial` / `unmet` / `unverifiable`, each with evidence) ④ divergences ⑤ blockers & leftovers ⑥ knock-on effects ⑦ revision candidates, each graded **local / structural / strategic**.
 
 Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a digest under about 400 words: verdict, top divergences, and the candidate list as one-liners.
 
 ### Step 4: Revision Q&A (one candidate at a time)
 
-1. Walk the candidates in report order, one direct question per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the user may always answer freely instead. For **structural** or **strategic** candidates the options are *route to `$star-plan-decomposer` or `$star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running ledger as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without the ledger the user approves edit 9 with no view of edits 1–8. Never dump the whole list as one blanket question.
+1. Walk the candidates in report order, one direct question per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the user may always answer freely instead. For **structural** or **strategic** candidates the options are *route to `$star-plan-decomposer` or `$star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running record as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without that record the user approves edit 9 with no view of edits 1–8. Never dump the whole list as one blanket question.
 2. After the list, ask once whether anything else should change. User-added items become candidates too (evidence: "user directive").
 3. If nothing is adopted, skip to Step 7 — a pure review is a valid outcome; the persisted report is the deliverable.
 
@@ -83,7 +83,7 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ### Step 7: Report & handoff
 
-Lead with the outcome, under about 400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, ripple warnings. End with the next command: `$star-plan-decomposer <slug>` (structure changed / children stale), `$star-plan-coach <slug>` (strategy pivot), `$star-plan-executor <leaf>` (re-run a revised leaf), `$star-code-reviewer <leaf>` (audit the implementation's code), `$star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
+Lead with the outcome, under about 400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `$star-plan-decomposer <slug>` (structure changed / children stale), `$star-plan-coach <slug>` (strategy pivot), `$star-plan-executor <leaf>` (re-run a revised leaf), `$star-code-reviewer <leaf>` (audit the implementation's code), `$star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
 
 ## State & File Rules
 

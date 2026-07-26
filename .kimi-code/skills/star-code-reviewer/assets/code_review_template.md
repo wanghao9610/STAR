@@ -7,7 +7,7 @@
 ## 1. Scope & Evidence Base
 
 <!-- How the scope resolved (plan mode: which of §2 / §4 deliverables / EXEC_LOG contributed which
-     files). Yardsticks loaded (project guidelines, metds/codearc.md, plan §2–§5) and which
+     files). Review rules loaded (project guidelines, metds/codearc.md, plan §2–§5) and which
      were absent. Static evidence: compileall result; ruff/flake8 result or "not installed";
      "reading-only review" when the env was unusable. -->
 
@@ -24,7 +24,7 @@
 ### Blocker
 
 - **F1** `<file>:<line>` — <issue>
-  - Rule: <yardstick> · Evidence: <snippet> · Fix: <concrete change>
+  - Rule: <review rule> · Evidence: <snippet> · Fix: <concrete change>
 
 ### Major
 
@@ -53,7 +53,7 @@
 
 ## 6. Next Actions
 
-<!-- Routing for out-of-boundary findings: feature gaps → /skill:star-plan-executor <leaf>; plan-text
+<!-- Routing for findings outside what this skill may write: feature gaps → /skill:star-plan-executor <leaf>; plan-text
      divergence → /skill:star-plan-reviser <slug>; structural reorganization → /skill:star-code-architect;
      unusable env → /skill:star-env-builder. Then the fix-pass candidates (mechanical findings, by number). -->
 

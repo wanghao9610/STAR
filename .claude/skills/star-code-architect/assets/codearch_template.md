@@ -35,7 +35,7 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 3. Naming & style conventions
 
-<!-- Module/file naming, config naming, class-prefix conventions, and the style baseline (usually: match upstream style). Include style notes surfaced by the survey that did NOT become migrations. -->
+<!-- Module/file naming, config naming, class-prefix conventions, and the style baseline (usually: match upstream style). Include style notes the survey reported that did NOT become migrations. -->
 
 ## 4. Plan component map
 
@@ -57,7 +57,7 @@ model_trail:                    # append-only: one entry per write session, neve
 |---|---|---|---|---|
 | <YYYY-MM-DD> | M1 | `<old>` → `<new>` | done / blocked | <check> |
 
-## 7. Rename residuals
+## 7. Names left unchanged on purpose
 
 <!-- Upstream names intentionally left in place (registry strings, config type keys, checkpoint-coupled names, service names). Each row: where, what kind, risk if renamed, suggested later action. -->
 

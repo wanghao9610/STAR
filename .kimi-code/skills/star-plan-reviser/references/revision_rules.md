@@ -1,4 +1,4 @@
-# Revision Rules — authority, trail, and ripple
+# Revision Rules — authority, trail, and knock-on effects
 
 What star-plan-reviser may change, how changes are recorded, and what must be routed elsewhere. One session revises **one target file** (plus, at most, the single matching index line in its parent).
 
@@ -56,7 +56,7 @@ Never reset silently; the offer names the consequence (the leaf rejoins the runn
 - A confirmed rewrite with no open gaps → the section stays (or becomes) `done`.
 - Never mark a section `done` while it still carries `[TBD]`.
 
-## Ripple duties
+## Knock-on effect duties
 
 - Bump `updated` on every edited file. Downstream, star-flow-status flags children older than a revised parent — that staleness is the intended signal, not a bug to suppress.
 - If the revised content is something children were derived from, name the affected children in the final report and recommend re-decomposition for them.

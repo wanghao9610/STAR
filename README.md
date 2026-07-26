@@ -126,7 +126,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` holds the consistency check STAR uses to keep its four skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a harness tree you do not use. The adopt path in step 1b never installs it.
+`.github/` holds the consistency check STAR uses to keep its four skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should be included directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before running `git add .`.
 
@@ -192,7 +192,7 @@ It registers the provenance hook in your global `~/.kimi-code/config.toml` (idem
 
 ### 2c. Optional: pre-approve the status collector
 
-`star-flow-status` and `star-expt-digest` open the same plans, run logs, and reports before doing anything else, so each gathers them with one read-only script — `scripts/scan.sh` in its own directory inside your harness's tree — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
+`star-flow-status` and `star-expt-digest` open the same plans, run logs, and reports before doing anything else, so each gathers them with one read-only script — `scripts/scan.sh` in its own directory inside your tool's directory — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
 
 Claude Code needs nothing on a fresh install — `.claude/settings.json` ships allow rules for exactly those two scripts and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rules there yourself:
 
@@ -205,9 +205,9 @@ Claude Code needs nothing on a fresh install — `.claude/settings.json` ships a
 }
 ```
 
-Elsewhere, approve it once when asked, or pre-approve it in the harness:
+Elsewhere, approve it once when asked, or pre-approve it in the tool:
 
-| Harness | Where to pre-approve |
+| Tool | Where to pre-approve |
 |---|---|
 | Codex | its approval-policy / sandbox setting (global config, not per project) |
 | Cursor | its command allowlist, in the app's settings |
@@ -292,8 +292,8 @@ Every skill must be named explicitly. All four tools disable implicit invocation
 | `$star-plan-coach` | Clarify a research idea through staged questions | `metds/plans/<digit>_<topic>_plan.md` |
 | `$star-refs-reviewer` | Survey the work related to the method: read the closest papers into analysis notes and build a classified bibliography whose every entry is transcribed from a fetched record | `metds/refs/<ABBREV>.md`, `metds/refs/reference.bib`, and `metds/refs/refs_index.md` |
 | `$star-code-architect` | Bootstrap `${CODE_NAME}/` from a scored reference implementation, or organize existing code, and record the architecture | `${CODE_NAME}/` with `UPSTREAM.md`, plus `metds/codearc.md` |
-| `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies through a uv > pip > conda ladder, and smoke-verify the result; `add` installs new packages into the existing env and records them | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
-| `$star-plan-decomposer` | Split a strategic plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
+| `$star-env-builder` | Build the conda env or venv from `.env`, resolve and install dependencies in the uv > pip > conda install order, and smoke-verify the result; `add` installs new packages into the existing env and records them | Environment plus `wkdrs/env_<name>_<date>/ENV_REPORT.md` and `freeze.txt` |
+| `$star-plan-decomposer` | Split a top-level plan into verifiable sub-plans | `metds/plans/<prefix>_<task>_plan.md` |
 | `$star-plan-executor` | Implement and lightly validate one executable leaf plan | The plan's own tool scripts and intermediate working files under `tasks/<plan-name>/`; code plus `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and generated artifacts; confirmed deviations synced back into the plan with a Revision History entry |
 | `$star-code-reviewer` | Review code against project conventions and a plan's promised implementation, then apply approved mechanical fixes | `wkdrs/<run>/CODE_REVIEW_<date>.md` or `wkdrs/reviews/code_<scope>_<date>.md` |
 | `$star-expt-analyst` | Audit what a run produced against what the plan expected: artifacts, log health, metrics scored against the done-criteria, and what the result means for the claim | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` plus `wkdrs/<run>/analysis/` figures; `wkdrs/results/results.md` (or `wkdrs/results/results_<slug>.md` when scoped) in `aggregate` mode |
@@ -301,7 +301,7 @@ Every skill must be named explicitly. All four tools disable implicit invocation
 | `$star-plan-reviser` | Review one plan against its execution evidence and revise it in place | `wkdrs/<run>/REVIEW_<date>.md` plus the plan revised with a Revision History entry |
 | `$star-flow-status` | Report progress across the whole flow — the plan tree, plus finished work whose review, analysis, or write-up is missing or stale — and the single next action | Read-only status summary |
 | `$star-metd-summarize` | Once every experiment is finished and the plans are finalized, compile the plan tree into paper-ready method documents, turning what no plan covers into TODOs | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` |
-| `$star-code-release` | Prepare the repository for release: promote scattered code into `${CODE_NAME}/` by the recorded placement rules, polish the release surface, compile the README from the method documents and the results ledger, and sweep for secrets, machine-local paths, and commands that do not resolve | `README.md` plus `wkdrs/release/RELEASE_<date>.md` |
+| `$star-code-release` | Prepare the repository for release: promote scattered code into `${CODE_NAME}/` by the recorded placement rules, polish the files a reader will open, compile the README from the method documents and the results table, and sweep for secrets, machine-local paths, and commands that do not resolve | `README.md` plus `wkdrs/release/RELEASE_<date>.md` |
 
 ### Model selection
 
@@ -393,9 +393,9 @@ When starting a new research repository from STAR:
 - Define the expected outputs, metrics, and reproduction commands for the project.
 - Update the copyright holder and year in `LICENSE`.
 - Replace `docs/htmls/star.html`, `docs/htmls/star_zh.html` and `docs/srcs/` — they are STAR's own landing pages and images, not your project's. `docs/index.html` and `docs/index_zh.html` are symlinks that serve those pages at the site root, and the two pages link to each other absolutely (`/STAR/index_zh.html`), so rewrite that `/STAR` prefix to your own repository name or the language switch will break. Leave `docs/mds/star-workflow/` alone; `execs/update.sh` keeps it current.
-- Delete the harness trees you will not use. Each of `.agents/` (Codex), `.claude/`, `.cursor/` and `.kimi-code/` is a self-contained copy of the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest.
+- Delete the tool directories you will not use. Each of `.agents/` (Codex), `.claude/`, `.cursor/` and `.kimi-code/` is a self-contained copy of the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest.
 
-Keep only the structure that remains useful—STAR should support the research, not constrain it. The skeleton stands alone: the directory layout, `.env` and `execs/run.sh` work with no skills installed at all, so removing every harness tree is a supported way to use STAR.
+Keep only the structure that remains useful—STAR should support the research, not constrain it. The skeleton stands alone: the directory layout, `.env` and `execs/run.sh` work with no skills installed at all, so removing every tool directory is a supported way to use STAR.
 
 ## Change log
 

@@ -15,7 +15,7 @@ artifacts_without_trail: <n>
      every registered artifact on disk — it is never hand-maintained, and editing it here changes
      nothing. To correct a row, fix the trail in the artifact it came from and regenerate.
      Every value is copied from a trail; nothing here is inferred. Trails are self-reported
-     (conventions §8), so this ledger inherits that limit: it reports what each runtime claimed,
+     (conventions §8), so this model record file inherits that limit: it reports what each runtime claimed,
      not verified provenance. -->
 
 ## 1. Summary
@@ -58,7 +58,7 @@ artifacts_without_trail: <n>
 
 <!-- Registered artifacts on disk carrying no model_trail (written before the field existed, or by a
      skill that skipped it), and trail entries whose model is `unrecorded`. These are the blind spots
-     in the ledger; a reader must be able to see how much is missing before drawing a conclusion.
+     in the model record file; a reader must be able to see how much is missing before drawing a conclusion.
      Write "None" if every artifact is fully attributed. -->
 
 | Artifact | Gap | Why it matters |

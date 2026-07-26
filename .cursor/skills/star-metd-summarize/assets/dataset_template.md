@@ -46,7 +46,7 @@ sources:
 ## 4. Constructed Data
 
 <!-- Only if the method builds its own data: the generation pipeline stage by stage, its inputs,
-     the quality controls that decide what is kept, and where the artifact lands under datas/.
+     the quality controls that decide what is kept, and where the artifact is written under datas/.
      Write "None — all datasets are used as published" when nothing is built. -->
 
 ## 5. Statistics

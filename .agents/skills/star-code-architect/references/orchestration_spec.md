@@ -1,11 +1,11 @@
 # Orchestration Spec
 
-How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Execute locally by default; delegate a bounded lane or group only when collaboration tools are available and delegation materially helps. The main agent always owns gates, verification, commits, and rollback.
+How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Execute locally by default; delegate a bounded area or group only when collaboration tools are available and delegation materially helps. The main agent always owns gates, verification, commits, and rollback.
 
 ## Roles
 
 - **Main agent (the architect)** — plans, runs the gates, partitions work, re-runs checks, commits checkpoints, rolls back failures.
-- **Survey lanes** — read-only (`survey_spec.md`); sequential locally, or delegated when bounded and independent.
+- **Survey areas** — read-only (`survey_spec.md`); sequential locally, or delegated when bounded and independent.
 - **Migration groups** — one unit of work each; writes limited to the group's files, whether executed locally or delegated.
 
 ## Partitioning migrations

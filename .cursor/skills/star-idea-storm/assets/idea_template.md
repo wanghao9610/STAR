@@ -27,11 +27,11 @@ status:
 
 ## 3. Landscape Scan
 
-<!-- one block per kept direction: query terms used; scan table (title | venue | year | citations | one-clause relevance | record URL); crowdedness note (rate, trajectory, venues, groups, survey existence); 3 closest works, each with what its own abstract does not claim; the apparent gap; depth: abstracts / abstracts+intros / skipped -->
+<!-- one block per kept direction: query terms used; scan table (title | venue | year | citations | one-clause relevance | record URL); note on how crowded the area is (rate, trajectory, venues, groups, survey existence); 3 closest works, each with what its own abstract does not claim; the apparent gap; depth: abstracts / abstracts+intros / skipped -->
 
 ## 4. Evaluation & Decision
 
-<!-- per direction: six one-line judgments (novelty, impact, feasibility, crowdedness/scoop-risk, personal fit, evaluability), each citing its evidence; verdict (Pursue / Refine / Park) + one-line reason; the comparison table; the user's decision and why — including a choice made against the verdict -->
+<!-- per direction: six one-line judgments (novelty, impact, feasibility, how crowded the area is / scoop risk, personal fit, evaluability), each citing its evidence; verdict (Pursue / Refine / Park) + one-line reason; the comparison table; the user's decision and why — including a choice made against the verdict -->
 
 ## 5. Topic Statement
 

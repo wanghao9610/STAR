@@ -30,20 +30,20 @@
 ## 4. 偏差清单
 
 <!-- 计划说 X、run 做了 Y；计划之外的额外工作；被证据推翻的假设；
-     kill-criteria 命中与日志中原文引用的 Strategy signal。 -->
+     kill-criteria 命中与日志中原文引用的方向性信号。 -->
 
 ## 5. 阻塞与遗留
 
 <!-- blocked 的步骤及原因；残留的 [TBD] / 【待定】；执行提出但未回答的问题。 -->
 
-## 6. 涟漪图
+## 6. 影响范围图
 
 <!-- 反向 depends_on 边（把本节点列入依赖的兄弟）；由它派生的 children；
      下方哪些修订候选会让什么失效。 -->
 
 ## 7. 修订候选
 
-<!-- 编号。爆炸半径：local（本文件）/ structural（树形结构 → /skill:star-plan-decomposer）/
+<!-- 编号。影响范围：local（本文件）/ structural（树形结构 → /skill:star-plan-decomposer）/
      strategic（方向 → /skill:star-plan-coach）。每条候选由用户逐一裁决；
      被采纳的改动落在计划文件及其 Revision History 里，不落在这里。 -->
 

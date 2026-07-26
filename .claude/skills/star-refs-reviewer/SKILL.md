@@ -24,7 +24,7 @@ Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full befo
 
 Invocation: `/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | ARXIV_ID | URL]` — no argument reads the method from `metds/` and runs the full pass; a plan name (slug / numeric prefix / filename) or free-text topic scopes the search; `verify` re-fetches and diffs every existing entry; `organize` re-classifies the existing bib without touching the network; `synthesize` compiles the existing notes and the bib's categories into `metds/refs/related_work.md`; an arXiv id, DOI, or paper URL appends that one paper.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the artifact registry, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 
@@ -34,12 +34,12 @@ You survey and record; you do not set strategy, write or revise plans, implement
 
 ## Core Principles
 
-1. **Zero fabrication; every field has a fetched origin.** A bib field is legal only if it appears in a record machine-fetched during this run — DBLP → Crossref → Semantic Scholar → arXiv, first match wins, published version preferred over preprint. Never write a field from memory, never "correct" what the record says, never infer a missing page range. A paper whose record cannot be fetched **does not enter `reference.bib`**; it goes to the Needs-manual-check list. The ladder, endpoints, matching rule, and the closed list of permitted edits are in `references/source_policy.md`. Google Scholar is not fetchable (no API, CAPTCHA-gated, and its bibtex is itself machine-generated from the databases above) — never scrape it.
+1. **Zero fabrication; every field has a fetched origin.** A bib field is legal only if it appears in a record machine-fetched during this run — DBLP → Crossref → Semantic Scholar → arXiv, first match wins, published version preferred over preprint. Never write a field from memory, never "correct" what the record says, never infer a missing page range. A paper whose record cannot be fetched **does not enter `reference.bib`**; it goes to the Needs-manual-check list. The search order, endpoints, matching rule, and the closed list of permitted edits are in `references/source_policy.md`. Google Scholar is not fetchable (no API, CAPTCHA-gated, and its bibtex is itself machine-generated from the databases above) — never scrape it.
 2. **Every entry is re-checkable.** Cache each fetched payload under `wkdrs/refs_<date>/raw/` **before** using it, and log citekey → source, record URL, fetch date in `metds/refs/refs_index.md`. Before finishing, re-fetch 5 entries at random and diff them field by field; a mismatch means that batch gets re-checked, not explained away.
 3. **Confirm the shape, then read.** Reading is the expensive step: bring ~15 ranked candidates (title / venue / year / citations / one clause of why) to a single AskUserQuestion (multiSelect, 5–10 recommended and marked) and read only what the user keeps. Searching and classifying need no approval; reading and writing notes do.
 4. **Close beats famous.** Core papers are chosen for direct overlap with this method and for positioning value — not citation count, not recency; every candidate carries a one-clause justification. The bar and the 3–8 category rules are in `references/refs_rubric.md`.
-5. **Write as you go; re-runs only fill gaps.** Each note lands on disk the moment it is written; bib entries are appended per batch — never held in chat. A re-run reads what `metds/refs/` already has and fills what is missing: it never rewrites a verified entry, never re-reads a paper that already has a note, and never regenerates `reference.bib` from scratch.
-6. **Read-only outside the refs base.** Writes are confined to `metds/refs/**` and `wkdrs/refs_<date>/**`. Plans, method notes, code, and `.env` are read-only — what the survey surfaces there gets routed, not applied. Network use is metadata and paper text only, serialized and backed off per `references/source_policy.md`; no model or dataset downloads, no paid API calls, no authenticated scraping, no CAPTCHA circumvention.
+5. **Write as you go; re-runs only fill gaps.** Each note is on disk the moment it is written; bib entries are appended per batch — never held in chat. A re-run reads what `metds/refs/` already has and fills what is missing: it never rewrites a verified entry, never re-reads a paper that already has a note, and never regenerates `reference.bib` from scratch.
+6. **Read-only outside the refs base.** Writes are confined to `metds/refs/**` and `wkdrs/refs_<date>/**`. Plans, method notes, code, and `.env` are read-only — what the survey reports there gets routed, not applied. Network use is metadata and paper text only, serialized and backed off per `references/source_policy.md`; no model or dataset downloads, no paid API calls, no authenticated scraping, no CAPTCHA circumvention.
 
 ## Workflow
 
@@ -69,7 +69,7 @@ Rank candidates by the core-paper criteria in `references/refs_rubric.md` and pr
 
 Per confirmed paper: fetch the paper page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page), read at minimum the abstract, intro, method, and main results table, fill `assets/ref_analysis_template.md` (Chinese: `assets/ref_analysis_template_zh.md`), and **write it immediately** to `metds/refs/<ABBREV>.md`. `ABBREV` is the paper's own abbreviation (`CLIP.md`, `DETR.md`), a coined CamelCase handle when it has none (marked coined in the index), suffixed `_<year>` on collision. Set `depth:` to what you actually read, honestly.
 
-Reading may fan out to read-only `Agent` subagents (`subagent_type: Explore`), at most 3 in parallel, one paper each, each returning a filled template. The main loop writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
+Reading may fan out to read-only `Agent` subagents (`subagent_type: Explore`), at most 3 in parallel, one paper each, each returning a filled template. The main agent writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
 
 ### Step 4: Expand to ≥50
 
@@ -77,7 +77,7 @@ Grow outward from the core set: the core papers' reference lists (Semantic Schol
 
 ### Step 5: Fetch and transcribe
 
-Per paper: walk the ladder in `references/source_policy.md`, cache the payload under `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`, confirm the record matches (title **and** first-author surname **and** year ±1 — one field agreeing is not a match), then transcribe it, changing only the citekey and the closed list of permitted normalizations. Append to `reference.bib` per batch of ~10 and log each provenance row in the index as you go. Not found, ambiguous, or rate-limited past retry → Needs-manual-check, never a guess.
+Per paper: follow the search order in `references/source_policy.md`, cache the payload under `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`, confirm the record matches (title **and** first-author surname **and** year ±1 — one field agreeing is not a match), then transcribe it, changing only the citekey and the closed list of permitted normalizations. Append to `reference.bib` per batch of ~10 and log each provenance row in the index as you go. Not found, ambiguous, or rate-limited past retry → Needs-manual-check, never a guess.
 
 ### Step 6: Classify and write reference.bib
 

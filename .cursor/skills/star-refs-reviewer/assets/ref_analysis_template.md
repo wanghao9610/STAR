@@ -32,7 +32,7 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 3. Method
 
-<!-- The core insight in one sentence, then the components or pipeline. Load-bearing formulas only,
+<!-- The core insight in one sentence, then the components or pipeline. Only the formulas the method depends on,
      symbols defined. Name the training data and the objective. Separate what is new here from what
      is inherited from prior work. -->
 

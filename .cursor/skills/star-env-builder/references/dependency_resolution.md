@@ -1,16 +1,16 @@
-# Dependency Resolution — sources, mapping, two-tier layout
+# Dependency Resolution — sources, mapping, and what gets written
 
-How to decide what to install and what to write into `${CODE_NAME}/requirements*`. First signal wins: consult a later source only when every earlier one is absent.
+How to decide what to install and what to write into `${CODE_NAME}/requirements*`. The first source that has them wins: consult a later source only when every earlier one is absent.
 
-## Source priority (first signal wins)
+## Source priority (the first source that has them wins)
 
 | Priority | Signal | Action |
 |---|---|---|
 | 1 | `${CODE_NAME}/requirements/` directory or `${CODE_NAME}/requirements.txt` | Adopt as-is. Never rewrite, reorder, or "improve" an existing layout — install exactly what it declares. |
-| 2 | `pyproject.toml` `[project.dependencies]` (+ `[project.optional-dependencies]`), `setup.py` / `setup.cfg` `install_requires` / `extras_require`, `environment.yml` | Transcribe into the two-tier layout below, keeping every version constraint verbatim. |
+| 2 | `pyproject.toml` `[project.dependencies]` (+ `[project.optional-dependencies]`), `setup.py` / `setup.cfg` `install_requires` / `extras_require`, `environment.yml` | Transcribe into the generated files below, keeping every version constraint verbatim. |
 | 3 | Import scan (below) | Generate the layout; versions stay unpinned except known-coupled sets. |
 
-Priority-2 details: `environment.yml` conda-section entries route to `conda.txt` when whitelisted (see installer policy) or to their PyPI equivalents otherwise; its `pip:` block transcribes directly. Multiple priority-2 sources present → merge, prefer the stricter constraint; a direct conflict is surfaced at the install-plan gate, not resolved silently.
+Priority-2 details: `environment.yml` conda-section entries route to `conda.txt` when whitelisted (see installer policy) or to their PyPI equivalents otherwise; its `pip:` block transcribes directly. Multiple priority-2 sources present → merge, prefer the stricter constraint; a direct conflict is reported at the install-plan gate, not resolved silently.
 
 ## Import scan
 
@@ -47,7 +47,7 @@ Identity-mapped research staples (import name = distribution name): `torch`, `to
 
 Routing follows **how the code uses a package, not its reputation**: `matplotlib` imported unconditionally by core code is runtime; the same package behind an ImportError guard or only in notebooks/tools is optional.
 
-## The two-tier layout (generated form)
+## What gets generated (requirements.txt plus a requirements/ folder)
 
 `requirements.txt` — references only, one `-r` line per required category:
 

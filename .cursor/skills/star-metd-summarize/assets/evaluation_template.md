@@ -18,7 +18,7 @@ sources:
 
 ## 1. Protocol Overview
 
-<!-- The whole evaluation surface in one table, from the root §4: which task, on which benchmark,
+<!-- The whole evaluation setup in one table, from the root §4: which task, on which benchmark,
      by which metric, against which baselines. No scores — a number here would be a claim this
      document has no evidence for. -->
 
@@ -61,6 +61,6 @@ sources:
 ## 5. Running the Evaluation
 
 <!-- Per benchmark: the entry point, config, and command as the plans record them, plus where the
-     outputs land under wkdrs/. Link a run's analysis report rather than copying its numbers —
+     outputs are written under wkdrs/. Link a run's analysis report rather than copying its numbers —
      results and their interpretation belong to the experiment-analysis skill, and a number
      copied here is a number that will silently go stale. -->

@@ -1,6 +1,6 @@
 # Extraction map — plan sections → method documents
 
-Plan sections cited as §n are the two plan templates: **strategy plans** (roots and internal nodes) carry §1 problem & motivation, §2 related work & positioning, §3 core method, §4 experiments & validation design, §5 risks & fallbacks, §6 milestones & deliverables; **execution sub-plans** (leaves) carry §1 objective & scope, §2 inputs & dependencies, §3 task breakdown, §4 deliverables & outputs, §5 verification & done-criteria, §6 local risks & fallback. Project guidelines cited as §n are AGENTS.md's numbered sections.
+Plan sections cited as §n are the two plan templates: **top-level plans** (roots and internal nodes) carry §1 problem & motivation, §2 related work & positioning, §3 core method, §4 experiments & validation design, §5 risks & fallbacks, §6 milestones & deliverables; **execution sub-plans** (leaves) carry §1 objective & scope, §2 inputs & dependencies, §3 task breakdown, §4 deliverables & outputs, §5 verification & done-criteria, §6 local risks & fallback. Project guidelines cited as §n are AGENTS.md's numbered sections.
 
 ## Relevance: which leaves feed which document
 
@@ -72,7 +72,7 @@ Read every row as *source → the document section it fills*. A source that does
 | 4. Ablations | root §4 ablation design + root §5 kill-criteria (the "refutes it if" column) |
 | 5. Running the Evaluation | eval leaves' §3/§4 entry points, commands, and output locations |
 
-**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`, and the cross-run ledger of those numbers is `wkdrs/results/results.md` (`star-expt-analyst aggregate`).
+**Scores never enter evaluation.md.** It defines the protocol; what a run measured lives in that run's analysis report under `wkdrs/<run>/`, and the cross-run results table of those numbers is `wkdrs/results/results.md` (`star-expt-analyst aggregate`).
 
 ## Merge & conflict rules
 
@@ -121,7 +121,7 @@ sources:                          # every plan that fed this document, with the 
 
 ## Extraction contract (structured return)
 
-Collectors return exactly these two lists plus `plans_read: <n>`, and nothing else:
+Read-only subagents return exactly these two lists plus `plans_read: <n>`, and nothing else:
 
 ```yaml
 passages:
@@ -135,7 +135,7 @@ gaps:
 plans_read: 7
 ```
 
-Collectors extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile overview — it needs the other four documents' compiled content.
+Read-only subagents extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile overview — it needs the other four documents' compiled content.
 
 ## Change list (the diff gate)
 

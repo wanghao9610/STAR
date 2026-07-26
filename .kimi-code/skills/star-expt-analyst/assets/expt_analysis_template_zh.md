@@ -28,7 +28,7 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 ## 3. 完成判据记分卡
 
-<!-- 头条。一条准绳一行：先子计划 §5，再根计划 §4 指标，再计划写明的任何 baseline。
+<!-- 核心结论。一条评判依据一行：先子计划 §5，再根计划 §4 指标，再计划写明的任何 baseline。
      `threshold: none stated` → 报出数值，判定留空。数值按来源打印的原样——四舍五入到翻转判定
      是错误，不是"整理"。 -->
 
@@ -39,10 +39,10 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 ## 4. 产物与完成度
 
 <!-- A：§4 交付物 vs 磁盘，附完整性检查结果。B：EXEC_LOG 的 `done` 声明用产物核实的结果，以及每条
-     "Awaiting user" STOP 线命令是已跑还是仍待跑。`done` 而没有产物是 blocker。结尾给这个 run 在磁盘
-     上的体积，以及日志里带的任何未同步 "Pending amendments" 或 Strategy signal。 -->
+     "Awaiting user" 红线命令是已跑还是仍待跑。`done` 而没有产物是 blocker。结尾给这个 run 在磁盘
+     上的体积，以及日志里带的任何未同步 "Pending amendments" 或 方向性信号。 -->
 
-| 交付物（§4） | 在盘 | 完整性 | 备注 |
+| 交付物（§4） | 在磁盘上 | 完整性 | 备注 |
 | --- | --- | --- | --- |
 | <路径> | present / missing / unexpected | <非空、可解析、大小合理> | <…> |
 
@@ -64,7 +64,7 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 ### 跨 run 对比
 
-<!-- 仅当存在同计划的兄弟 run（同 <prefix>_<slug> 词干）时才有。只放头条指标——§5 点名的那些。说明
+<!-- 仅当存在同计划的兄弟 run（同 <prefix>_<slug> 共同前缀）时才有。只放关键指标——§5 写明的那些。说明
      数字朝哪个方向动；**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。
      本 run 是独苗时整节删掉。 -->
 
@@ -75,13 +75,13 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 ## 7. 解读
 
-<!-- E：结果支持 / 推翻 / 悬置 `traces_to` 里的主张？是否命中根计划 §5 的 kill-criterion（突出写——
-     策略信号是计划在起作用）。跑了哪些泄漏与"过好"检查、结果如何。然后把局限当局限写：seed 数、
+<!-- E：结果支持 / 推翻 `traces_to` 里的主张，还是暂不下结论？是否命中根计划 §5 的 kill-criterion（突出写——
+     方向性信号是计划在起作用）。跑了哪些泄漏与结果好得反常的排查、结果如何。然后把局限当局限写：seed 数、
      split 规模、方差，以及这个 run 没有显示什么。 -->
 
-## 8. 建议与路由
+## 8. 建议与转交
 
-<!-- 一个未决项一个归属；本 skill 除这份报告外什么都不写。步骤未完成或 STOP 线命令仍待跑 →
+<!-- 一个未决项一个归属；本 skill 除这份报告外什么都不写。步骤未完成或红线命令仍待跑 →
      /skill:star-plan-executor <slug>；§5 已达标、待 finalize → /skill:star-plan-executor <slug>（exec_status 归它）；
      计划文本已不属实 → /skill:star-plan-reviser <slug>；命中 kill-criterion 或主张被推翻 →
      /skill:star-plan-reviser / /skill:star-plan-coach / /skill:star-plan-decomposer；日志指向的代码缺陷 →

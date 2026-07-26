@@ -33,7 +33,7 @@ Grep through the tracked file list, and read every hit before reporting it: a do
 
 Every command the README prints, checked in the order a reader would meet them. This is the check that decides whether the repository works for anyone but its author.
 
-1. **Install** — the requirements files the README names exist; the python version it states matches the newest `ENV_REPORT.md`; the install ladder it prints is the one that was actually used.
+1. **Install** — the requirements files the README names exist; the python version it states matches the newest `ENV_REPORT.md`; the install order it prints is the one that was actually used.
 2. **Entry points** — each module the README invokes imports under the `.env` interpreter (`python -c "import <module>"`). An import failure is a major finding naming the missing dependency or path.
 3. **Scripts** — every `execs/scpts/*.sh` and tool script the README prints exists, is executable, and its `--help` or first 20 lines confirm the flags the README shows.
 4. **Configs** — every config path a printed command names exists at that path.

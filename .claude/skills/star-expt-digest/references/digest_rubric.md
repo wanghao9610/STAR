@@ -1,10 +1,10 @@
 # Digest Rubric — the two tiers, what moved, and what a digest never does
 
-The digest is a **progress record**, not a results table. `wkdrs/results/results.md` is the verified ledger; `metds/evaluation.md` is the protocol; this is the narrative of what happened between two dates. This file defines what may enter it, at what level of trust, and where the line is.
+The digest is a **progress record**, not a results table. `wkdrs/results/results.md` is the verified results table; `metds/evaluation.md` is the protocol; this is the narrative of what happened between two dates. This file defines what may enter it, at what level of trust, and where the line is.
 
 ## The two tiers
 
-Every run in scope lands in exactly one tier, and the tiers never share a table.
+Every run in scope belongs to exactly one tier, and the tiers never share a table.
 
 ### Tier 1 — report-backed
 
@@ -13,7 +13,7 @@ The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and fr
 - the run verdict (`met` / `partially met` / `not met` / `inconclusive` / `invalid`);
 - the §5 done-criteria scorecard, condensed to one line;
 - the headline metrics, each carried over as `{value, source, split}` exactly as the report records them;
-- any blocker or major observation, and any strategy signal or kill-criterion hit it names.
+- any blocker or major observation, and any plan-level finding or kill-criterion hit it names.
 
 **Do not open the run's raw logs to supplement a report.** The report is the interface. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `/star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`/star-expt-analyst <run dir>` to refresh it), not corrected here.
 
@@ -23,7 +23,7 @@ Numbers are copied **with provenance, not re-verified** (`SKILL.md` Core Princip
 
 The run has a directory but no analysis report. It exists in the digest so a week's work is **visible**, not so it can be graded.
 
-**Read only `EXEC_LOG.md`.** From it: the log `status`, steps done / total, any `blocked` step, any unchecked "Awaiting user" STOP-line command, any recorded Strategy signal. If the log itself names a headline number **and** the file it came from, quote it with `path:line`; otherwise the cell is `not measured`.
+**Read only `EXEC_LOG.md`.** From it: the log `status`, steps done / total, any `blocked` step, any unchecked "Awaiting user" STOP-line command, any recorded plan-level finding. If the log itself names a headline number **and** the file it came from, quote it with `path:line`; otherwise the cell is `not measured`.
 
 Hard bounds on this tier:
 
@@ -41,10 +41,10 @@ A provisional number may **never**:
 1. appear in the report-backed table, or in a table that mixes the two;
 2. be used to compute or claim a delta in "What Moved";
 3. be quoted in the digest's headline, or in the chat reply, as a result or an outcome;
-4. enter `wkdrs/results/results.md` or any scoped `wkdrs/results/results_<slug>.md` — a digest writes no ledger, and the ledger's own trust model re-verifies from source, which a provisional number by definition has not passed;
+4. enter `wkdrs/results/results.md` or any scoped `wkdrs/results/results_<slug>.md` — a digest writes no results table, and the results table's own trust model re-verifies from source, which a provisional number by definition has not passed;
 5. be described with a word that implies a judgment — `improved`, `beat`, `met`, `confirms`, `works`. The neutral verb is "reports": *the log reports 0.41 at `train.log:812` (provisional)*.
 
-This wall is the reason the provisional tier is safe to have. Remove it and the digest becomes a second, unverified analyst producing numbers that contradict the ledger.
+This wall is the reason the provisional tier is safe to have. Remove it and the digest becomes a second, unverified analyst producing numbers that contradict the results table.
 
 ## What moved
 
@@ -66,9 +66,9 @@ No previous digest → the section is omitted, and §1 says the series starts he
 - **Never attributes a delta to a cause.** Inherited verbatim from `aggregate_spec.md`. A variant that won, won; naming the reason needs a controlled comparison no skill in this family runs.
 - **Never scores a criterion.** The verdict is quoted from the analysis report or it is absent. The digest has no opinion on whether a done-criterion was met.
 - **Never restates a protocol or a method.** How a benchmark is run is `metds/evaluation.md`; what the method is, `metds/overview.md`. The digest cites and moves on.
-- **Never becomes the quotable source.** Every digest says, in its own header, that its numbers are copied from reports and that `wkdrs/results/results.md` is the verified ledger. A number quoted into a paper from a digest is a misuse the file warns against on its face.
+- **Never becomes the quotable source.** Every digest says, in its own header, that its numbers are copied from reports and that `wkdrs/results/results.md` is the verified results table. A number quoted into a paper from a digest is a misuse the file warns against on its face.
 - **Never fills a gap by running something.** An unexecuted leaf, an unanalyzed run, an awaiting STOP-line command: each is a listed gap with the command that closes it, handed back to the user (conventions §2).
-- **Never reports an empty period as an achievement.** No runs in the window is written as "no runs in this period", with the newest run date and the watermark, and nothing else. Padding an empty digest with the state of the tree is `/star-flow-status`'s output, not this one's.
+- **Never reports an empty period as an achievement.** No runs in the window is written as "no runs in this period", with the newest run date and the last covered date, and nothing else. Padding an empty digest with the state of the tree is `/star-flow-status`'s output, not this one's.
 
 ## Writing the headline
 

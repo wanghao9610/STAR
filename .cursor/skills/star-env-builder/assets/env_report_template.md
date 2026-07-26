@@ -45,9 +45,9 @@ A fresh session should be able to use — or rebuild — this environment from t
 | optional | requirements/optional.txt | | | | skipped |
 | project | `-e ${CODE_NAME}` (`--no-deps`) | | | | uv |
 
-## Smoke matrix
+## Smoke-test results
 
-<!-- Filled by the main loop from its own runs. Result: pass / blocked / skipped (reason).
+<!-- Filled by the main agent from its own runs. Result: pass / blocked / skipped (reason).
      Evidence is the actual output tail — an empty cell is not acceptable for pass. -->
 
 | Layer | Check | Command | Result | Evidence |

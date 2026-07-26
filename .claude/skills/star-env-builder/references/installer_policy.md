@@ -1,8 +1,8 @@
-# Installer Policy — the uv > pip > conda ladder
+# Installer Policy — install in the order uv > pip > conda
 
 Which tool installs what, in what order, and what happens on failure. Every command runs through the absolute `$ENV_PY` or `$CONDA_HOME/bin/conda` — never `source activate`, never system python.
 
-## The ladder
+## The uv > pip > conda order
 
 | Tier | When | Command shape |
 |---|---|---|
@@ -11,7 +11,7 @@ Which tool installs what, in what order, and what happens on failure. Every comm
 | conda (whitelist only) | conda backend **and** the package is on the whitelist | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <pkg> -y` |
 
 - uv missing → ask once, with a recommendation: install uv (e.g. `$PYTHON_HOME/bin/python -m pip install --user uv`, or the official standalone installer if the user prefers) / use pip for this run. Declining costs speed, not correctness.
-- Do not mix managers beyond the ladder: what uv/pip installed, uv/pip upgrades. Never conda-install over pip-managed packages — the whitelist is the only conda territory, and pip never owns it.
+- Do not mix managers beyond these three: what uv/pip installed, uv/pip upgrades. Never conda-install over pip-managed packages — the whitelist is the only conda territory, and pip never owns it.
 
 ## Install order
 
@@ -44,7 +44,7 @@ Venv backend needing a whitelist item → do not improvise (no `sudo`, no apt/br
 - Per package: uv → pip retry, ≤2 attempts total; capture the error tail.
 - A failed package does not abort the run: record it, keep installing the rest, then resolve or hand over the failures in one batch at the end.
 - Source-build signatures — `--no-build-isolation` required, `setup.py` probing `CUDA_HOME`, "Building wheel …" that runs minutes (`flash-attn`, full `mmcv`, `detectron2` from git) → STOP line: write the exact prepared command into ENV_REPORT's "Awaiting user"; never run it autonomously.
-- Resolver conflicts (uv/pip backtracking errors) → never force with `--no-deps` (the editable project install is the sole exception); surface the conflicting pair at the gate or in the report.
+- Resolver conflicts (uv/pip backtracking errors) → never force with `--no-deps` (the editable project install is the sole exception); point out the conflicting pair at the gate or in the report.
 
 ## Mirrors & indexes
 

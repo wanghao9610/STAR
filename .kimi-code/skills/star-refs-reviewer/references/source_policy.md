@@ -8,7 +8,7 @@ A bib field is legal only if it appears in a machine-fetched record from a sourc
 
 Google Scholar is not a source here: it has no API, blocks automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — frequently missing pages, using abbreviated venue strings, and preferring the preprint over the published record. A human may read it; this skill never scrapes it. The databases below are what a Scholar bibtex is generated *from*, so they are both fetchable and closer to the source.
 
-## Retrieval ladder
+## Search order
 
 Per paper, stop at the first source that yields a matching record:
 

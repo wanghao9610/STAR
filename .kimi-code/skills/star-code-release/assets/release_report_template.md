@@ -28,7 +28,7 @@
 
 | # | Candidate | Passes | Evidence | Destination | Action | Outcome |
 |---|---|---|---|---|---|---|
-| 1 | `<path>` | A / B / C / none | <README section, plan file:line, or ledger row> | `<path>` | move / merge / keep in place / route | done / blocked / not approved |
+| 1 | `<path>` | A / B / C / none | <README section, plan file:line, or results-table row> | `<path>` | move / merge / keep in place / route | done / blocked / not approved |
 
 **Verified by:** <the compileall and stale-reference greps that were re-run per row>
 
@@ -36,14 +36,14 @@
 
 ## 4. Polish Record
 
-<!-- Release surface only: file count, then one line per finding — applied / skipped / reverted.
-     Findings outside the surface are listed separately for routing, never fixed here. -->
+<!-- Only the files a reader will open: file count, then one line per finding — applied / skipped / reverted.
+     Findings outside them are listed separately for routing, never fixed here. -->
 
 | # | File:line | Finding | Outcome |
 |---|---|---|---|
 | P1 | `<file>:<line>` | <one line> | applied / skipped / reverted (<reason>) |
 
-**Out of surface, routed to `/skill:star-code-reviewer`:** <count and one-line summary, or "none">
+**Outside those files, routed to `/skill:star-code-reviewer`:** <count and one-line summary, or "none">
 
 ## 5. README Section Map
 
@@ -87,6 +87,6 @@
 
 ## 8. Next Actions
 
-<!-- Routing, worst first: which producer fills each README TODO, where the out-of-surface code
-     findings go, which plans need `/skill:star-plan-reviser` after a promotion, and what the user must
+<!-- Routing, worst first: which producer fills each README TODO, where the code findings outside
+     those files go, which plans need `/skill:star-plan-reviser` after a promotion, and what the user must
      decide before publishing. -->
