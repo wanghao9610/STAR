@@ -66,7 +66,7 @@ description: >-
 
 逐篇：抓论文页（arXiv abs/HTML、ACL Anthology、CVF open access 或项目主页），至少读摘要、intro、方法和主结果表，填 `assets/ref_analysis_template_zh.md`（英文：`assets/ref_analysis_template.md`），**立刻落盘**到 `metds/refs/<缩写>.md`。`<缩写>` 用论文自己的缩写（`CLIP.md`、`DETR.md`），没有就自拟一个紧凑的 CamelCase 名（在 index 里标注为自拟），冲突时加 `_<年份>` 后缀。`depth:` 如实写你真正读到的深度。
 
-精读可以并行分派给只读 `Agent` subagent（`subagent_type: Explore`），至多 3 个并行，一个 subagent 一篇，各自按 `references/refs_rubric_zh.md` 的笔记收集器返回格式返回——不是"填好的模板",模板里有些字段只有真正写文件的那次会话才能填。只有 `depth_evidence` 带着真实的表题和一行数据时才接受 `depth: full`,否则降级。主 agent 负责写文件并亲自写 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。
+精读可以并行分派给只读 `Agent` subagent（`subagent_type: Explore`），至多 3 个并行，一个 subagent 一篇，各自按 `references/refs_rubric_zh.md` 的笔记收集器返回格式返回——不是"填好的模板",模板里有些字段只有真正写文件的那次会话才能填。只有 `depth_evidence` 带着真实的表题和一行数据时才接受 `depth: full`,否则降级。主 agent 负责写文件并亲自写 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。每个收集器拿到**除过份数**的按 host 速率配额（写成具体数字），并返回 `failures: [{host, error, retries}]`；它抓到的页面缓存在本次运行自己的 `raw/` 前缀下、按它那篇论文划分，两个收集器绝不共用一个前缀（规约 §6.4）。这和 Step 1、Step 4 给它们各自收集器的是同样三样东西——这一步抓的是另一批 host，不是另一套规矩。
 
 ### Step 4：扩展到 ≥50
 
