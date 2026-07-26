@@ -80,7 +80,7 @@ Read every row as *source → the document section it fills*. A source that does
 2. **Merge, do not concatenate.** Sections are written in one voice, with no per-plan seams and no "as plan 01 says". A section that reads as a list of excerpts has failed.
 3. **Conflicts: leaf beats parent; newer `updated` beats older.** Leaves are more specific and receive the executor's sync-back from what was actually run.
 4. **Unresolvable conflicts are printed, not decided.** When two sources of equal standing disagree (two leaves, same level, different learning rate), write both values inline, prefix ⚠, and name both plans and sections. Never silently pick a winner; never average.
-5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block.
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: strategy nodes do not carry one, and an invented value there would mark design intent as verified work or the reverse.
 
 ## Gaps
 
@@ -121,21 +121,30 @@ sources:                          # every plan that fed this document, with the 
 
 ## Extraction contract (structured return)
 
-Read-only subagents return exactly these two lists plus `plans_read: <n>`, and nothing else:
+Read-only subagents return exactly these three lists plus `plans_read: <n>`, and nothing else:
 
 ```yaml
 passages:
-  - target_section: "3. Preprocessing"
+  - target: dataset                 # which of the five documents this feeds
+    target_section: "3. Preprocessing"
     content: "<the fact, rewritten to stand alone — no 'this plan says'>"
     source: {plan: "00_data-pipeline_plan.md", section: "§3.2", updated: "2026-07-15", exec_status: "done"}
 gaps:
-  - target_section: "5. Statistics"
+  - target: dataset
+    target_section: "5. Statistics"
     wanted: "per-split counts"
     suggest: "00_data-pipeline_plan.md §4"
+unread:                             # a plan in the slice that could not be read
+  - plan: "03_eval_plan.md"
+    reason: "<what went wrong>"
 plans_read: 7
 ```
 
-Read-only subagents extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile overview — it needs the other four documents' compiled content.
+`target:` is required because a collector holds plans, not a document — nothing about its identity says which of the five a passage belongs to, and the five templates' section names collide only by accident. `exec_status` is a leaf field: strategy nodes do not carry one, and the collector omits it there rather than filling a plausible value.
+
+`unread` is not a gap. A gap means no plan covers the section, and it reaches the delivered document as a TODO; a plan the collector could not open is a plan the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
+
+Read-only subagents extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile a document. `overview` is compiled last, from the other four documents' compiled content — but extraction for it is ordinary work: a collector returns its slice's `overview` rows like any other target's.
 
 ## Change list (the diff gate)
 
