@@ -49,20 +49,28 @@ You review and polish; you do not implement features, revise plans, reorganize t
    - No argument → all of `${CODE_NAME}/`.
    - Nothing matches → list the nearest plan and path candidates and ask in the conversation.
 3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip.
-4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, say so and offer to narrow (one sub-package, or diff mode) in the conversation.
+4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — it is grep and `wc`, and needs no environment — then say so and offer to narrow (one sub-package, or diff mode) in the conversation. An offer that asks the user to guess a sub-package is a worse offer.
 
 ### Step 1: Load the review rules
 
-Read AGENTS.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 do-not-rename list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which review rules are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (AGENTS.md §3).
+Read AGENTS.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 do-not-rename list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which review rules are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (AGENTS.md §3). Then assemble the **review rule digest** defined in `references/review_rubric.md`: the one block Step 3 hands to every collector verbatim.
 
 ### Step 2: Cheap static evidence
 
 Through the `.env` conda env: run `python -m compileall -q` over the scope, always. If ruff (preferred) or flake8 is already installed in that env, run it on the scope and keep the output as evidence input. Never install or upgrade anything (that is `/skill:star-env-builder`'s). Env unusable → skip the tools, mark the review **reading-only** in the report, recommend `/skill:star-env-builder`.
 
+**Whole-tree screen**, run over all of `${CODE_NAME}/` whatever the reviewed scope is — two of the rubric's always-blocker classes become invisible the moment the scope narrows, and narrowing is the normal outcome:
+
+- `grep -rnE` for machine-local path literals (`/Users/`, `/home/`, `C:\\`). Every hit is a candidate blocker (dimension D).
+- A **presence** check per `codearc.md` §7 residual name: a count that has dropped to zero is the finding. §7 lists names that are supposed to still be there, so a grep for hits returns the places they correctly remain — the non-findings.
+- `wc -l` across the tree, ranked descending, to name dimension-C giant-file candidates.
+
+It is grep and `wc`, never a tree-wide linter run: a repo-wide `ruff check` is thousands of lines entering the report's own context, which is context inflation dressed as a screen. A screen hit is re-opened at its line by the main agent before it enters the report (Step 4), and one outside the reviewed files is filed with `found by screen, outside reading scope`.
+
 ### Step 3: Collect findings
 
 - **Small scope** (≤ ~20 files — a diff-mode review usually is): the main agent reads every file and applies `references/review_rubric.md` directly.
-- **Larger scope**: partition by package/directory into read-only subagents, at most 3 in parallel, each given the rubric, a review rule digest, and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
+- **Larger scope**: partition by package/directory into read-only subagents, at most 3 in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
 - **plan mode adds dimension F** (main agent, not the read-only subagents — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
 
 ### Step 4: Verify

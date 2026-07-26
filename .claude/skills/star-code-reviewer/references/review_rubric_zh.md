@@ -17,9 +17,21 @@
   issue: <一句话——哪里不对>
   evidence: <出问题的代码片段或一行引文>
   fix: <一句话的具体改法，或直接给出替换文本>
+  confidence: high | low
 ```
 
-收集器只返回这个列表（外加 `files_reviewed: <n>`），不返回其他：不写叙述性结论、不动手修、不写任何文件。
+收集器只返回这个列表（外加 `files_reviewed: <n>` 与 `unknowns: [<读不了或解析不了的文件，每个一行>]`），不返回其他：不写叙述性结论、不动手修、不写任何文件。每条问题项都带 `confidence: high | low`；`low` 归到报告的 Unconfirmed 一栏，绝不因此改动严重级别。`files_reviewed` 少于交给该收集器的文件数，意味着差额要重新派发（conventions §6.3）——没有 `unknowns` 和这个计数，一个解析不了的文件保持沉默，与一个干净的文件毫无区别。
+
+## 评判依据摘要
+
+一整块内容,由主 agent 在 Step 1 构建一次,**逐字且一模一样地**发给每个收集器。三个收集器各自即兴发挥三套规则,产出的问题项在 Step 4 根本没法比对,同一种写法会在这个包里算问题、在那个包里不算:
+
+- `layout_rules`——`codearc.md` §2 的放置规则,原文照录。
+- `naming_rules`——`codearc.md` §3 的命名与风格约定,原文照录。
+- `residual_names`——`codearc.md` §7 的残留清单,原文照录。它们被**改动**才触发 blocker,仅仅还存在绝不是问题。
+- `absent_rules`——本项目没有的那些依据,好让每个收集器以同样的方式退回默认(Step 1 已记下)。
+- `style_baseline`——`codearc.md` 没说的地方,PEP 8 加周边代码的 upstream 风格。
+- `language`——报告语言,由主 agent 解析。收集器绝不自己选。
 
 ## 严重度分级
 

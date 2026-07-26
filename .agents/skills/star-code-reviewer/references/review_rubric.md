@@ -17,9 +17,21 @@ One entry per finding, in file order:
   issue: <one sentence — what is wrong>
   evidence: <offending snippet or 1-line quote>
   fix: <concrete change in one sentence, or the exact replacement>
+  confidence: high | low
 ```
 
-Read-only delegates return exactly this list (plus `files_reviewed: <n>`) and nothing else: no prose verdicts, no fixes applied, no files written.
+Read-only delegates return exactly this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the number of files the collector was given is the remainder to re-dispatch (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
+
+## The review rule digest
+
+One block, built by the main agent at Step 1 and handed to every collector **verbatim and identically**. Three collectors improvising three rule sets produce findings Step 4 cannot compare, and the same construct becomes a finding in one package and not in another:
+
+- `layout_rules` — `codearc.md` §2 placement rules, verbatim.
+- `naming_rules` — `codearc.md` §3 naming and style conventions, verbatim.
+- `residual_names` — `codearc.md` §7's do-not-rename list, verbatim. These trigger a blocker when **edited**, never when merely present.
+- `absent_rules` — which yardsticks this project does not have, so every collector falls back the same way (Step 1 records them).
+- `style_baseline` — PEP 8 plus the surrounding upstream style, wherever `codearc.md` is silent.
+- `language` — the report's language, resolved by the main agent. A collector never picks one.
 
 ## Severity levels
 
