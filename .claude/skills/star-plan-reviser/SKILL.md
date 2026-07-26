@@ -52,7 +52,9 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ### Step 2: Collect evidence (read-only subagents)
 
-Dispatch parallel read-only `Agent` subagents (`subagent_type: Explore`) per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
+**Small evidence set** — one run, ≤ ~5 steps, ≤ ~3 deliverable paths, and no code modules named in §2–§3 — is read by the main agent itself: `EXEC_PLAN.md`, `EXEC_LOG.md`, and a stat per deliverable. Three collectors at that size is the case conventions §6.1 rules out.
+
+Larger than that: dispatch parallel read-only `Agent` subagents (`subagent_type: Explore`) per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
 
 Cross-check disagreements in the main agent — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks yourself; never anything heavy.
 

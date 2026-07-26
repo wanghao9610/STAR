@@ -48,7 +48,7 @@ You compile and reorganize; you do not decide method, revise plans, read code, o
 
 ### Step 1: Scan the plan tree
 
-List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the tree from `parent:` — authoritative; the numeric prefix only hints, since two unrelated roots can both be `0_` (`/skill:star-flow-status`'s rule). Record per node: root / internal / leaf, `updated`, `language`, the `status:` map, and on leaves `exec_status` and `traces_to`.
+List `metds/plans/*_plan.md`; read each one's **frontmatter** — every field this step records lives there, and plan bodies are Step 2's input, not this step's. Rebuild the tree from `parent:` — authoritative, and where it is missing or ambiguous that plan's `## Sub-plans` index may be read to place the node; the numeric prefix only hints, since two unrelated roots can both be `0_` (`/skill:star-flow-status`'s rule). Record per node: root / internal / leaf, `updated`, `language`, the `status:` map, and on leaves `exec_status` and `traces_to`.
 
 - **Output language** follows the plans: the root's `language:`; with several roots, the majority; a tie takes the dialogue language.
 - **One document set describes one method.** If the tree has several unrelated roots, say so and ask in the conversation which root's subtree these documents describe; the answer scopes the whole run.
@@ -59,7 +59,7 @@ List `metds/plans/*_plan.md`; read each one's frontmatter and body. Rebuild the 
 
 Follow `references/extract_map.md`: for each target it names the plan sections that feed each document section, and how to tell which leaves are relevant — by what a leaf's §2 inputs, §3 steps, and §4 deliverables actually **name** (a `datas/` input, an `inits/` weight, a `${CODE_NAME}/` module, a benchmark), never by guessing from its title. A leaf may feed several documents. Carry every passage with its provenance `{plan file, §, updated, exec_status}` — Steps 3–5 need it for conflict resolution, the not-yet-verified marks, and the `sources:` frontmatter.
 
-**Scale**: a small tree (≤ ~15 plans) is read by the main agent. For a larger one, partition **by document target** into read-only subagents, at most 3 in parallel, each given the map, its exact file list, and the extraction contract in `extract_map.md`. These read-only subagents extract and return; they never write files, never resolve cross-plan conflicts, and never compile `overview` (it needs the other four documents' compiled content).
+**Scale**: Step 1 read frontmatter only, so this is the step that brings plan bodies into the run at all. A small tree (≤ ~15 plans) is read by the main agent. For a larger one, partition **by document target** into read-only subagents, at most 3 in parallel, each given the map, its exact file list, and the extraction contract in `extract_map.md`. These read-only subagents extract and return; they never write files, never resolve cross-plan conflicts, and never compile `overview` (it needs the other four documents' compiled content).
 
 ### Step 3: Merge & resolve
 

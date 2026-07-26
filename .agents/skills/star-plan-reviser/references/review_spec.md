@@ -60,7 +60,7 @@ Never promote `unverifiable` to `met` on the log's word alone.
 ## Scoping by node type
 
 - **Leaf**: all three levels over its own run.
-- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run log collectors only on runs that exist; audit this node's own §1–§6 assumptions against the aggregated signals (a child's plan-level finding is evidence against a parent assumption).
+- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run log collectors only on runs that exist, at most 3 in parallel — more executed descendants than that are taken in batches of 3, never dispatched at once; audit this node's own §1–§6 assumptions against the aggregated signals (a child's plan-level finding is evidence against a parent assumption).
 - **No execution evidence anywhere**: document-only review — the scorecard reads `unverifiable`/absent; divergences and candidates draw on the plan text and on what the user supplies.
 
 ## Report sections

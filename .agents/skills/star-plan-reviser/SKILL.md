@@ -50,7 +50,9 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 
 ### Step 2: Collect evidence (read-only)
 
-Gather per the collector contracts in `references/review_spec.md` — the **log evidence** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), the **artifact evidence** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, the **code evidence** (are the promised modules present and consistent with what the log claims changed?). Collect locally by default; delegate selectively per Core Principle 2.
+**Small evidence set** — one run, ≤ ~5 steps, ≤ ~3 deliverable paths, and no code modules named in §2–§3 — is read by the main agent itself: `EXEC_PLAN.md`, `EXEC_LOG.md`, and a stat per deliverable. Three collectors at that size is the case conventions §6.1 rules out.
+
+Larger than that: gather per the collector contracts in `references/review_spec.md` — the **log evidence** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), the **artifact evidence** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, the **code evidence** (are the promised modules present and consistent with what the log claims changed?). Collect locally by default; delegate selectively per Core Principle 2.
 
 Cross-check disagreements — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks; never anything heavy.
 

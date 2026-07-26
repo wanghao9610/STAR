@@ -51,7 +51,7 @@ description: >-
 
 ### Step 1：扫描计划树
 
-列出 `metds/plans/*_plan.md`；读每个的 frontmatter 与正文。按 `parent:` 重建树——`parent:` 权威，数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
+列出 `metds/plans/*_plan.md`；只读每个的 **frontmatter**——本步骤要记录的每个字段都在那里，计划正文是步骤 2 的输入，不进这一步。按 `parent:` 重建树——`parent:` 权威，缺失或有歧义时可以读该计划的 `## Sub-plans` 索引来定位它，数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
 
 - **输出语言跟随计划**：取根计划的 `language:`；多根时取多数；打平时用对话语言。
 - **一套文档描述一个方法。** 树里有多个互不相关的根时，如实说明，并直接问一个问题：这套文档描述的是哪个根的子树；答案决定整轮的范围。
@@ -62,7 +62,7 @@ description: >-
 
 遵循 `references/extract_map_zh.md`：它为每个目标列出输入给各文档小节的计划小节，以及如何判定哪些叶子相关——看叶子的 §2 输入、§3 步骤、§4 交付物**写明**了什么（一个 `datas/` 输入、一个 `inits/` 权重、一个 `${CODE_NAME}/` 模块、一个 benchmark），绝不靠标题猜。一个叶子常常同时输入给多份文档。每段内容都要带上出处 `{计划文件, §, updated, exec_status}`——Step 3–5 要靠它做冲突解析、"尚未验证"标注与 `sources:` frontmatter。
 
-**规模**：小树（≤ ~15 个计划）由主 agent 直接读。更大的树则**按文档目标**切分给只读 `Task` subagent（`subagent_type: explore`），最多 3 个并行，各自拿到映射、确切文件清单与 `extract_map_zh.md` 里的提取格式约定。收集器只提取并返回；不写文件，不做跨计划的冲突解析，也不编译 `overview`（它需要其余四份文档编译后的内容）。
+**规模**：步骤 1 只读了 frontmatter，所以计划正文是在这一步才进入本次运行的。小树（≤ ~15 个计划）由主 agent 直接读。更大的树则**按文档目标**切分给只读 `Task` subagent（`subagent_type: explore`），最多 3 个并行，各自拿到映射、确切文件清单与 `extract_map_zh.md` 里的提取格式约定。收集器只提取并返回；不写文件，不做跨计划的冲突解析，也不编译 `overview`（它需要其余四份文档编译后的内容）。
 
 ### Step 3：合并与消解
 
