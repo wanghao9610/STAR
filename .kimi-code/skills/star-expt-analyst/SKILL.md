@@ -80,7 +80,7 @@ Merge and dedup. For every number that will appear in the report, and every bloc
 
 ### Step 5: Interpret & compare (dimension E)
 
-1. **Interpret**: does the result support or refute the claim in `traces_to`? Does it match a root §5 kill-criterion, or negate an MVP "cheap early test"? Run the leakage checks the rubric lists before accepting a suspiciously strong number. State the run's limits explicitly (seeds, split size, what it does not show).
+1. **Interpret**: does the result support or refute the claim in `traces_to`? Does it match a root §5 kill-criterion, or negate an MVP "cheap early test"? Run the leakage checks the rubric lists before accepting a suspiciously strong number — where dimension C fanned out, they run against the `config_echo` each collector returned, and the cited line range is re-opened only on a hit. State the run's limits explicitly (seeds, split size, what it does not show).
 2. **Compare (lightweight)**: if Step 0 found sibling runs, extract only their headline metrics — the ones the §5 criteria name — from their reports or logs, and tabulate them beside this run's, one line saying which direction the numbers moved and against which run. Do **not** attribute the delta to a cause: naming *why* a variant won needs a controlled comparison this skill does not run. Recommend `/skill:star-plan-executor` for the next variant if the user wants one.
 
 ### Step 6: Persist the report

@@ -46,8 +46,8 @@
 - run: <slug>
   report: <它读的那份 EXPT_ANALYSIS 的路径>
   report_verdict: <该报告自己的判定,原文照录>
+  verdict_reason: <该报告自己给这条判定写的那一行原因,原文照录>
   metric_rows: [<该报告指标表的各行,原文照录,各自保留 source 与 split>]
-  degradations: [<报告写明的降级项>]
   absent: [<报告判为 unmeasurable、或点名缺失的判据>]
   protocol_note: <该报告的协议注意事项,原文照录,没有则 none>
 reports_read: <n>
@@ -74,7 +74,7 @@ reports_read: <n>
 
 ## 已排除的 run
 
-报告判定为 `invalid` 或 `inconclusive` 的 run，或其数字复核未通过的 run，**不**出现在结果表里。它进 §5 已排除，附判定与一行原因。悄悄排除一个 run，结果表就是这么开始撒谎的：读者必须能看见被拿掉了什么、并数得出来。
+报告判定为 `invalid` 或 `inconclusive` 的 run，或其数字复核未通过的 run，**不**出现在结果表里。它进 §5 已排除，附判定与一行原因——这行原因随判定一起在收集器的返回里带回来，所以排除一个 run 不用把收集器已经读完关掉的那份报告再整份打开一次。悄悄排除一个 run，结果表就是这么开始撒谎的：读者必须能看见被拿掉了什么、并数得出来。
 
 **`not met` 的 run 不排除**——负结果也是结果，它带着自己的判定留在它该在的表里。
 

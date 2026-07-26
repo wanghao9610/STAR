@@ -46,8 +46,8 @@ A programme of ≤ ~6 reports is read by the main agent. Above that, partition t
 - run: <slug>
   report: <path to the EXPT_ANALYSIS it read>
   report_verdict: <the report's own verdict, verbatim>
+  verdict_reason: <the report's own one-line reason for that verdict, verbatim>
   metric_rows: [<the report's metric table rows, verbatim, each keeping its source and split>]
-  degradations: [<degradations the report states>]
   absent: [<criteria the report scores unmeasurable, or names as missing>]
   protocol_note: <the report's protocol caveat, verbatim, or none>
 reports_read: <n>
@@ -74,7 +74,7 @@ Rows within a table are the runs §4 assigns to it, in the order §4 gives (else
 
 ## Excluded runs
 
-A run whose report verdict is `invalid` or `inconclusive`, or whose number failed re-verification, does **not** appear in a results table. It goes to §5 Excluded with its verdict and one line of why. Excluding a run silently is how a results table starts lying: a reader must be able to see what was left out and count it.
+A run whose report verdict is `invalid` or `inconclusive`, or whose number failed re-verification, does **not** appear in a results table. It goes to §5 Excluded with its verdict and one line of why — the why travels with the verdict in the collector's return, so an excluded run does not cost a second reading of the whole report a collector has already closed. Excluding a run silently is how a results table starts lying: a reader must be able to see what was left out and count it.
 
 A **`not met` run is not excluded** — a negative result is a result. It belongs in its table with its verdict shown.
 

@@ -9,7 +9,8 @@
 <!-- How the scope resolved (plan mode: which of §2 / §4 deliverables / EXEC_LOG contributed which
      files). Review rules loaded (project guidelines, metds/codearc.md, plan §2–§5) and which
      were absent. Static evidence: compileall result; ruff/flake8 result or "not installed";
-     "reading-only review" when the env was unusable. -->
+     "reading-only review" when the env was unusable. Whole-tree screen: what each of the three
+     probes returned, since it runs whatever the scope and whatever the env. -->
 
 ## 2. Verdict
 
