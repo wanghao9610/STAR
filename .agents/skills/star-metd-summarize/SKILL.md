@@ -76,6 +76,8 @@ Follow `references/extract_map.md`: for each target it names the plan sections t
 
 Per `extract_map.md`: dedupe the same fact stated at two levels; resolve conflicts (leaf > parent, newer > older) and mark the unresolvable with ⚠ plus both sources; mark passages from `exec_status` ≠ `done` leaves as not yet verified; record every uncovered section as a gap with the plan section that should fill it.
 
+Where Step 2 fanned out, spot-check the collectors before trusting them — they return passages **rewritten to stand alone**, into documents whose own Principle 2 names invention as the failure mode. Open the cited plan at the cited § for (a) three passages per collector, chosen at random, and (b) **every** passage carrying a numeric or path-valued fact — a hyperparameter, a split size, a threshold, a `datas/` / `inits/` / `${CODE_NAME}/` path. A passage its source does not carry invalidates that collector's whole return: re-run it, or read its slice locally. Report how many were checked and how many failed. Sampling bounds the risk; it does not remove it — which is why the numeric and path facts are checked exhaustively, since those are the ones that become wrong numbers in a paper.
+
 ### Step 4: Fill the template
 
 Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and their order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), and `sources:` — every plan that fed this document with the `updated` date it carried when read, which is what makes staleness detectable on the next run.

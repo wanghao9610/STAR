@@ -31,6 +31,14 @@ Unlike the bibliography's first-match-wins search order, scanning wants disagree
 - **The apparent gap** — phrased as what none of the scanned works do. At abstract depth the honest verb is "the abstracts suggest".
 - **The depth line** — `abstracts`, `abstracts+intros`, or `skipped`.
 
+## Contract per scan collector
+
+When Stage 3's scanning fans out, the main agent builds each collector's briefing — a collector never builds its own. It carries: the direction's slug and one-line question; the 2–3 queries and the recency probe already constructed; the run's date, for the cache prefix (a collector never calls its own clock); the resolved output language; and its **divided** per-host rate share, stated as a number — with 3 concurrent collectors that is 1 request per 3s to Semantic Scholar and DBLP, 1 per 9s to arXiv. The budget above is per host, not per agent: three collectors each honouring it separately triple the real rate against every host this skill promises to be polite to.
+
+The return: `direction`, `rows` (8–15, deduped, each with its `record_url` and the cache path it wrote), `recency`, `web_context`, `surprises`, `failures: [{host, error, retries}]`, `queries_run` — and nothing else. Prohibitions, verbatim: never fill a field the record does not carry; never deepen (deepening is a main-agent trigger, or the `depth:` line becomes a lie); never score the direction and never characterize the field. Payloads are cached under this run's own prefix, scoped to the collector's own direction slug (conventions §6.4), and nothing else is written.
+
+The main agent adds one bounded duty: per direction, re-open one cached payload and confirm two of its rows verbatim.
+
 ## Depth — default shallow, deepen on trigger
 
 Default reading is title + abstract, nothing more. Deepen only when (a) the user names a direction, or (b) a gap claim decides between finalist directions. Deepening means: the direction's top-3 closest works, intro and first paragraph of related work, from the paper's own page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page) — then record `abstracts+intros` in that direction's depth line. Never deepen silently, never claim more than the depth line admits.
