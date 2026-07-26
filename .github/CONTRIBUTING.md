@@ -120,6 +120,12 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     `【待定】` is why it exists: `star-plan-decomposer` wrote it into every Chinese sub-plan, `scan.sh`
     counted only `[TBD]`, and the "too coarse to run" rule silently never fired on a Chinese project
     from `ab4246c` to `9c25079` with CI green the whole time.
+16. **Numbered citations of `AGENTS.md` sections still name the section they claim.** 16a pins the
+    heading map, so renumbering or retitling a section fails here before anything else notices. 16b
+    re-checks the citations that carry a label — `§8 layout`, `布局符合度（§8）` — against the live map.
+    The drift it exists for shipped twice: layout and runtime moved to §8 and §9, and both
+    `star-code-reviewer` and `star-expt-analyst` kept citing §5 and §6 with CI green, because no check
+    had ever looked at a citation.
 
 ## What the checks do not catch
 
@@ -139,6 +145,9 @@ Be honest with yourself about this list; it is where the real drift lives.
 - **Whether a shortened description still says the important thing.** Check 12 enforces the Kimi
   length budget below, but nothing checks that what was cut to fit was expendable — see the budget
   section.
+- **A bare `§n` citation.** Most citations of `AGENTS.md` are bare — `(AGENTS.md §3)` says nothing
+  about what §3 contains, so check 16b cannot verify it. Only 16a stands behind those: it makes the
+  renumber loud, not the citation correct.
 - **A newly grepped string that nobody registered.** Check 15 holds a hand-written registry: add a
   byte-exact match to a scanner without adding its row, and the next person to reword the producer
   breaks it silently, exactly as before. When you teach a script to match on a new string, register it
@@ -151,5 +160,7 @@ Be honest with yourself about this list; it is where the real drift lives.
   compares their bodies directly.
 - Editing a numbered section of the conventions document: do not renumber. Section 7.7 alone has 62
   references across the repository.
+- Same for `AGENTS.md`: renumbering a section means re-auditing every `§n` citation in the skill trees
+  and updating `AGENTS_SECTIONS` in the check script. Check 16 fails until both are done.
 - Keep the English and Chinese workflow guides line-aligned. They currently match line for line, which
   makes cross-language diffs readable.

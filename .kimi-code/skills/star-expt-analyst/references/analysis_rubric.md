@@ -37,7 +37,7 @@ Read-only subagents return exactly these two lists (plus `files_read: <n>`) and 
 ## Severity levels (observations)
 
 - **blocker** — the run's results cannot be trusted or used: the process died before producing them, an eval read the training split, a checkpoint is empty/corrupt, the metric quoted in the log is not in the file it cites, a §4 deliverable the done-criterion depends on is missing.
-- **major** — materially changes the reading: a §5 criterion missed, NaN/Inf in training, loss diverged, train↓/val↑ divergence, a STOP-line command never run, an artifact written outside the layout rules (§5), a metric available only from a weaker source than the plan implies.
+- **major** — materially changes the reading: a §5 criterion missed, NaN/Inf in training, loss diverged, train↓/val↑ divergence, a STOP-line command never run, an artifact written outside the layout rules (§8), a metric available only from a weaker source than the plan implies.
 - **minor** — worth recording, does not move the verdict: a recoverable warning storm, a dataloader worker that died and restarted, an extra artifact nobody promised, a metric reported at lower precision than the threshold needs.
 - **nit** — polish: an inconsistently named artifact, a log without timestamps. Report nits only for runs that already carry higher observations.
 
@@ -57,7 +57,7 @@ Exactly one, for the report's headline:
 
 - Every §4 deliverable, by its stated path: `present` / `missing` / `unexpected` (on disk, promised nowhere).
 - Light integrity, per artifact type: file is non-empty; JSON/CSV parses and has the fields the plan names; a checkpoint is neither 0 bytes nor implausibly small for the architecture; an image opens; a directory holds roughly the expected count (e.g. one checkpoint per saved epoch).
-- Layout conformance (§5): generated outputs under `wkdrs/<run>/`, data under `datas/`, weights under `inits/`; nothing generated left in `metds/` or inside the package.
+- Layout conformance (§8): generated outputs under `wkdrs/<run>/`, data under `datas/`, weights under `inits/`; nothing generated left in `metds/` or inside the package.
 - Record the run's real size on disk — a researcher deciding what to keep needs it.
 
 Not an observation: the routine debris a normal run leaves (`__pycache__/`, `events.out.tfevents.*`, `.lock`, editor swap files); artifacts an ordinary framework writes without being promised (a `config.yaml` snapshot, a `latest.ckpt` symlink).

@@ -13,7 +13,7 @@
   line: <首个受影响行>
   dimension: A | B | C | D | E | F
   severity: blocker | major | minor | nit
-  rule: <违反的规则，如 "§6：禁止硬编码本地路径">
+  rule: <违反的规则，如 "§9：禁止硬编码本地路径">
   issue: <一句话——哪里不对>
   evidence: <出问题的代码片段或一行引文>
   fix: <一句话的具体改法，或直接给出替换文本>
@@ -69,8 +69,8 @@
 
 ## D. STAR 项目约定
 
-- **禁止硬编码机器本地路径**（`/Users/...`、`/home/...`、`C:\...`）；机器相关根路径来自 `.env` / 环境变量 / 配置（§6）。一律 blocker。
-- 数据从 `datas/` 读、权重从 `inits/` 读、生成输出写 `wkdrs/`；运行时不写 `metds/`、不写包自身（§5）。
+- **禁止硬编码机器本地路径**（`/Users/...`、`/home/...`、`C:\...`）；机器相关根路径来自 `.env` / 环境变量 / 配置（§9）。一律 blocker。
+- 数据从 `datas/` 读、权重从 `inits/` 读、生成输出写 `wkdrs/`；运行时不写 `metds/`、不写包自身（§8）。
 - 新模块放在 codearc.md 放置规则与计划组件映射指定的位置。
 - 运行时假设与项目一致：入口按 `.env` conda 环境 / `execs/run.sh` 运行；不假设系统 python shebang；可复用启动脚本放 `execs/scpts/`。
 - 改名残留（codearc.md §7）——registry 字符串、config `type:` 键、checkpoint `state_dict` 前缀、logger/项目名——原样不动。

@@ -447,6 +447,103 @@ done
 
 (( literal_errors == 0 )) && note "${#SHARED_SCRIPTS[@]} shared scripts parse; ${#LITERAL_REGISTRY[@]} grepped literals still produced in all four trees"
 
+# 16. Numbered citations of AGENTS.md sections still name the section they claim.
+#     Around 130 places cite AGENTS.md by number, so renumbering one section
+#     invalidates every citation of the ones after it. That has already happened
+#     twice: layout and runtime became §8 and §9, while star-code-reviewer and
+#     star-expt-analyst went on citing §5 and §6 with CI green, because nothing
+#     here looked at citations at all.
+#
+#     Two guards, since a bare "(AGENTS.md §3)" carries no label and cannot be
+#     verified from its own text:
+#       16a pins the heading map, so a renumber or retitle fails here first;
+#       16b re-checks every citation that does carry a label — "§8 layout",
+#           "布局符合度（§8）" — against the live map.
+#     Lines naming the conventions document are skipped: it carries its own
+#     §1-§9, including its own "project layout".
+section "AGENTS.md section citations"
+
+AGENTS_SECTIONS=(
+    "1|Think Before Coding"
+    "2|Simplicity First"
+    "3|Surgical Changes"
+    "4|Goal-Driven Execution"
+    "5|Research Workflow"
+    "6|Reply Language"
+    "7|Reply Wording"
+    "8|Project Layout"
+    "9|Project Runtime"
+    "10|Verification"
+)
+
+# title|regex — every match must contain exactly one §n, and that n must be the
+# number AGENTS.md currently gives that title.
+CITATION_LABELS=(
+    "Project Layout|§[0-9]+ layout"
+    "Project Layout|§[0-9]+ 布局"
+    "Project Layout|[Ll]ayout (conformance|rules) \(((AGENTS|CLAUDE)\.md )?§[0-9]+\)"
+    "Project Layout|布局(符合度|规则)（((AGENTS|CLAUDE)\.md )?§[0-9]+）"
+    "Project Runtime|§[0-9]+ runtime"
+    "Project Runtime|§[0-9]+ 运行时"
+    "Project Runtime|§[0-9]+: no hardcoded"
+    "Project Runtime|§[0-9]+：禁止硬编码"
+    "Simplicity First|§[0-9]+ simplicity"
+    "Simplicity First|§[0-9]+ 简洁"
+    "Surgical Changes|§[0-9]+ surgical"
+    "Surgical Changes|§[0-9]+ 外科手术"
+    "Goal-Driven Execution|Goal-Driven Execution ?(\(|（)((AGENTS|CLAUDE)\.md )?§[0-9]+"
+    "Verification|Verification ?(\(|（)§[0-9]+"
+)
+
+CITATION_SCAN=("${SKILL_ROOTS[@]}" docs/mds/star-workflow)
+cite_errors=0
+cite_checked=0
+
+expected_map="$(printf '%s\n' "${AGENTS_SECTIONS[@]}" | sed 's/|/. /')"
+actual_map="$(sed -nE 's/^## ([0-9]+\. .+)$/\1/p' AGENTS.md)"
+if [[ "${expected_map}" != "${actual_map}" ]]; then
+    fail "AGENTS.md section numbering or titles changed; citations elsewhere are numbered against the old map. Re-audit them, then update AGENTS_SECTIONS in this script:"
+    diff <(printf '%s\n' "${expected_map}") <(printf '%s\n' "${actual_map}") | sed 's/^/      /'
+    cite_errors=1
+fi
+
+for rule in "${CITATION_LABELS[@]}"; do
+    title="${rule%%|*}"
+    pattern="${rule#*|}"
+    want="$(sed -nE "s/^## ([0-9]+)\. ${title}\$/\1/p" AGENTS.md | head -n 1)"
+    if [[ -z "${want}" ]]; then
+        fail "citation rule names '${title}', which is no longer a heading in AGENTS.md"
+        cite_errors=1
+        continue
+    fi
+
+    rule_hits=0
+    while IFS= read -r hit; do
+        [[ -n "${hit}" ]] || continue
+        file="${hit%%:*}"
+        rest="${hit#*:}"
+        lineno="${rest%%:*}"
+        text="${rest#*:}"
+        while IFS= read -r match; do
+            [[ -n "${match}" ]] || continue
+            rule_hits=$(( rule_hits + 1 ))
+            got="$(printf '%s' "${match}" | grep -oE '[0-9]+' | head -n 1)"
+            if [[ "${got}" != "${want}" ]]; then
+                fail "${file}:${lineno}: \"${match}\" cites §${got}, but '${title}' is AGENTS.md §${want}"
+                cite_errors=1
+            fi
+        done < <(printf '%s\n' "${text}" | grep -oE "${pattern}")
+    done < <(grep -rnE "${pattern}" --include='*.md' "${CITATION_SCAN[@]}" 2>/dev/null | grep -v 'research-workflow-conventions')
+
+    if (( rule_hits == 0 )); then
+        fail "citation rule '${pattern}' matches nothing any more; drop the row or restore the citation"
+        cite_errors=1
+    fi
+    cite_checked=$(( cite_checked + rule_hits ))
+done
+
+(( cite_errors == 0 )) && note "AGENTS.md heading map pinned; ${cite_checked} labelled citations resolve"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
