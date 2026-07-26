@@ -75,7 +75,7 @@ description: >-
 - **C——日志健康**：按评分表扫描 run 的日志，找致命信号、数值信号与动态信号。大日志用 grep 找模式、只读头尾，绝不整体载入（`references/analysis_rubric_zh.md`，"读大日志"）。
 - **D——指标**：对 §5 判据、根计划 §4 或计划写明的 baseline 写明的每个指标，从可得的最权威来源提取数值（结果 JSON/CSV > 评测日志的汇总段 > TB event 文件 > 训练日志里最后一条匹配行），并记下来源。每条判据打分 `met` / `not met` / `unmeasurable`。
 - **图（尽力而为）**：若 `.env` 环境里已装 matplotlib，且日志中有值得一看的逐 step / 逐 epoch 序列（loss、§5 指标），渲染到 `wkdrs/<run>/analysis/<name>.png`，并把生成它的脚本存在旁边，让图可重现。没装、或没有序列 → 聊天里静默跳过，报告里写明降级。绝不为画图而安装 matplotlib。
-- **规模**：小 run（少量产物、没有超大日志）由主 agent 读。大的——日志文件很多，或日志大到读不完——按文件切分给只读 subagent，至多 3 个并行，每个拿到评分表、预期摘要和确切文件清单，按结构化观察格式约定返回。收集器绝不写文件、绝不越出清单、绝不给 run 的判定打分。
+- **规模**：小 run（少量产物、没有超大日志）由主 agent 读。大的——日志文件很多，或日志大到读不完——**维度 C** 按日志文件切分给只读 subagent，至多 3 个并行，每个拿到评分表、预期摘要和确切文件清单，按结构化观察格式约定返回。**维度 D 留在主 agent**：它那条来源权威阶梯是把几个来源**互相**排序（结果 JSON > 评测汇总 > TB event > 日志最后一行），只拿着一个文件的收集器根本没法应用它；而且指标来源本来就小，委派出去省下的，步骤 4 立刻又会花回来。只有一个例外：某个指标唯一的来源就是收集器清单里那份超大日志中的某一行——那就由该收集器连同 `source:` 一起返回这条指标行，步骤 4 照常复核。收集器绝不写文件、绝不越出清单、绝不给 run 的判定打分。
 
 ### Step 4：核实
 
@@ -99,7 +99,7 @@ description: >-
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
-按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并走写入确认点：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
+按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把报告路径切分给收集器）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并走写入确认点：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
 
 简报 ≤400 字：汇总了 / 排除了 / 仍未测量的 run、关键指标表格，以及转交——缺报告的交 `/skill:star-expt-analyst <slug>`，未执行的叶子交 `/skill:star-plan-executor <slug>`。明说结果汇总表只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
 

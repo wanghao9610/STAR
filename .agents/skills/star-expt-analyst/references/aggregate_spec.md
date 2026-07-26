@@ -38,6 +38,23 @@ For every number that will enter `results.md`:
 
 Never read a metric out of a raw log no report covers. That is per-run analysis, and it belongs in a per-run pass with its own dimension-D verification — not here.
 
+## Scale
+
+A programme of ≤ ~6 reports is read by the main agent. Above that, partition the **report paths** across read-only delegates, selectively per the executor's Core Principle 2, at most 3 in parallel, each given its exact list and this return contract:
+
+```yaml
+- run: <slug>
+  report: <path to the EXPT_ANALYSIS it read>
+  report_verdict: <the report's own verdict, verbatim>
+  metric_rows: [<the report's metric table rows, verbatim, each keeping its source and split>]
+  degradations: [<degradations the report states>]
+  absent: [<criteria the report scores unmeasurable, or names as missing>]
+  protocol_note: <the report's protocol caveat, verbatim, or none>
+reports_read: <n>
+```
+
+and nothing else. What makes this safe is the trust model above rather than the collector: the target of re-verification is the **cited source**, never the report, so nothing a collector transcribed is what a number is finally read from. `protocol_note` travels verbatim per report and is never merged — merging protocols is exactly what "never combine numbers measured under different protocols" forbids. A collector never re-opens a source, never groups by claim, never excludes a run, and never writes. A `reports_read` below the number of reports it was given is the remainder to re-dispatch (conventions §6.3).
+
 ## The claim axis, not the run axis
 
 The plan tree is organised by decomposition; a reader needs the numbers organised by **what they show**. Group from the root's §4:

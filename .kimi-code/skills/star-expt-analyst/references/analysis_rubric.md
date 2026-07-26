@@ -32,7 +32,7 @@ One entry per scored expectation — this is what fills the scorecard:
   source: <path, + line number or JSON key>
 ```
 
-Read-only subagents return exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written.
+Read-only subagents return exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written. A dimension-C collector returns observations; it fills a metric row only for a metric whose sole source is a line in a log on its own list, because D's source ladder is a comparison across files and belongs to the agent holding all of them. Alongside the lists it returns one `config_echo` per log — `{source: <path>:<first–last line>, lines: <the verbatim config / argv / data-path block, ≤40 lines, kept to the data-path and split portion>}`, or `none` where the log has no echo — quoted, never paraphrased and never judged: the leakage and too-good checks in D are run against it by the main agent, which re-opens the cited range only on a hit. A `files_read` below the number of files the collector was given is the remainder to re-dispatch (conventions §6.3).
 
 ## Severity levels (observations)
 
@@ -91,7 +91,7 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 
 ## D. Metrics vs expectations
 
-- Extract each metric from the most authoritative source available, in this order: a results JSON/CSV the run wrote > the eval log's final summary block > a TB event file (only if tensorboard is already installed) > the last matching line in a training log. Record which one it came from; a criterion that only survives at the weakest tier is a minor observation about the run's reporting.
+- Extract each metric from the most authoritative source available, in this order — a ranking that compares sources against one another, so it is applied by the main agent holding all of them, never by a collector holding one file: a results JSON/CSV the run wrote > the eval log's final summary block > a TB event file (only if tensorboard is already installed) > the last matching line in a training log. Record which one it came from; a criterion that only survives at the weakest tier is a minor observation about the run's reporting.
 - Score every review rule as a metric row: §5 done-criteria first, then root §4 metrics, then any baseline the plan states.
 - **Split discipline**: name the split every number came from. If the plan states a threshold without one ("mAP ≥ 30"), report the number from the split the plan's §5 context implies, name the ambiguity, and never pick the flattering split.
 - **No stated expectation** is a legitimate row: report the number, leave `threshold: none stated`, and do not grade it. An ungraded number is honest; a retrofitted threshold is not.
