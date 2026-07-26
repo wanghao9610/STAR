@@ -12,7 +12,7 @@
 |---|---|---|
 | `.env` 被提交 | `git ls-files .env` 有输出 | `git rm --cached .env`；确认 `.gitignore` 覆盖它。同时直白说明历史里仍有它，而重写历史是用户的决定 |
 | API key 与 token | 在被跟踪的文件树里 grep `sk-`、`hf_`、`ghp_`、`AKIA`、`api[_-]?key`、`secret`、`token`、`password`、`WANDB_API_KEY`、`Bearer ` | 移到 `.env` / 环境变量，从那里读 |
-| 机器本地绝对路径 | grep `/home/`、`/Users/`、`/mnt/`、`/data1/`、`C:\\`，以及用户本人的用户名 | 从 `.env` 读根路径（AGENTS.md §6）。永远是阻断项——它是研究仓库在别人机器上跑不起来的头号原因 |
+| 机器本地绝对路径 | grep `/home/`、`/Users/`、`/mnt/`、`/data1/`、`C:\\`，以及用户本人的用户名 | 从 `.env` 读根路径（AGENTS.md §10）。永远是阻断项——它是研究仓库在别人机器上跑不起来的头号原因 |
 | 内网主机与端点 | grep 像内网的主机名、私有 IP 段（`10.`、`192.168.`、`172.16–31.`）、集群节点名、非公开 URL | 删除，或换成公开等价物 |
 | 个人数据 | 引用信息之外的作者邮箱、SSH 配置、`.netrc`、私有数据集 URL | 删除 |
 

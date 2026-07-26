@@ -60,7 +60,43 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Project Layout
+## 5. Verification
+
+**Prove the change works before calling it done.**
+
+Before finishing:
+- Run the narrowest relevant checks first.
+- Broaden checks when changes touch shared behavior, public interfaces, or risky paths.
+- If a check cannot be run, say why and name the remaining risk.
+- Report what was verified, not just that it "works."
+
+## 6. Research Workflow
+
+**This project uses the STAR research workflow. Its records are files, not chat history.**
+
+- Plans live in `metds/plans/`; each leaf's execution record is under `wkdrs/<run>/` (`EXEC_PLAN.md`, `EXEC_LOG.md`).
+- Run the status skill first when you do not know where things stand — it reads the plan tree and the reports on disk and names the single next action.
+- The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
+- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/` — `execs/update.sh` overwrites it.
+
+## 7. Reply Language
+
+**`.env` `STAR_LANG` sets the language of chat replies and newly generated workflow documents (plans, reports).**
+
+- Set (`en` or `zh`) → reply and write new documents in it, whatever the chat's language. Unset or empty → follow the user's dialogue language.
+- An explicit in-conversation request overrides it; an existing document keeps the language declared in its frontmatter.
+- Full rule: `docs/mds/star-workflow/research-workflow-conventions.md` §7.6.
+
+## 8. Reply Wording
+
+**Say what happens. The reader should never have to decode a term to know what you did.**
+
+- Name the action, not the metaphor: "I stop here and hand you the command" over "the STOP line"; "confirmation point" over "gate"; "the file is written" over "on disk".
+- A term from the workflow docs is fine when its meaning sits in the same sentence. Never coin a new compound noun.
+- Exception: literal values (`exec_status: done`, `**Plan-level finding**`) stay verbatim — skills grep them byte-exactly.
+- Technical prose, no filler and no emoji. Plain does not mean chatty.
+
+## 9. Project Layout
 
 **Keep project files in their designated directories.**
 
@@ -74,7 +110,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Project documentation belongs in `docs/`: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh` — do not edit it.
 - Output names must distinguish tasks, experiments, or runs.
 
-## 6. Project Runtime
+## 10. Project Runtime
 
 **Use the project environment. Do not guess local paths.**
 
@@ -83,33 +119,6 @@ Before running Python, tests, or dependency checks:
 - If `.env` is missing, create it from `.env.example` and fill in machine-specific values first.
 - Run through that interpreter, not system Python. Conda is optional: when `CONDA_HOME` is empty, `PYTHON_HOME` is used directly, which is also how a plain venv is used.
 - Do not hardcode local paths.
-
-## 7. Verification
-
-**Prove the change works before calling it done.**
-
-Before finishing:
-- Run the narrowest relevant checks first.
-- Broaden checks when changes touch shared behavior, public interfaces, or risky paths.
-- If a check cannot be run, say why and name the remaining risk.
-- Report what was verified, not just that it "works."
-
-## 8. Research Workflow
-
-**This project uses the STAR research workflow. Its records are files, not chat history.**
-
-- Plans live in `metds/plans/`; each leaf's execution record is under `wkdrs/<run>/` (`EXEC_PLAN.md`, `EXEC_LOG.md`).
-- Run the status skill first when you do not know where things stand — it reads the plan tree and the reports on disk and names the single next action.
-- The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
-- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/` — `execs/update.sh` overwrites it.
-
-## 9. Reply Language
-
-**`.env` `STAR_LANG` sets the language of chat replies and newly generated workflow documents (plans, reports).**
-
-- Set (`en` or `zh`) → reply and write new documents in it, whatever the chat's language. Unset or empty → follow the user's dialogue language.
-- An explicit in-conversation request overrides it; an existing document keeps the language declared in its frontmatter.
-- Full rule: `docs/mds/star-workflow/research-workflow-conventions.md` §7.6.
 
 ---
 

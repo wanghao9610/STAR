@@ -29,7 +29,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ## Core Principles
 
-1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies to you too). This applies the project's Verification rule (CLAUDE.md §7) to the plan itself. Rules: `references/review_spec.md`.
+1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies to you too). This applies the project's Verification rule (CLAUDE.md §5) to the plan itself. Rules: `references/review_spec.md`.
 2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to parallel **read-only `Agent` subagents** (`subagent_type: Explore`) (execution log / artifacts / code state), each returning the structured collector contract in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
 3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped via AskUserQuestion, one candidate per call, with your recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
@@ -58,7 +58,7 @@ Larger than that: dispatch parallel read-only `Agent` subagents (`subagent_type:
 
 Cross-check disagreements in the main agent — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks yourself; never anything heavy.
 
-A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate — Step 4 asks the user about each one, and the answers rewrite the plan file — the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the `path[:line]` it confirmed at is what the candidate carries as evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
+A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate — Step 4 asks the user about each one, and the answers rewrite the plan file — the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the candidate then carries that `path[:line]` as its evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
 
 ### Step 3: Synthesize and persist the review report
 

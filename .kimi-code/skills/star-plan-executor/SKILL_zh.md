@@ -32,7 +32,7 @@ description: >-
 3. **重实验前停**。agent 只写代码、跑**轻量验证**(smoke test、小规模/不微调的检查,如 MVP 完成判据)。在任何长时/多卡训练或大开销 API 调用前**停下**:把备好的命令写进 EXEC_LOG 的"待用户执行"区,交回用户。绝不自主启动昂贵或不可逆的任务。规则见 `references/stop_line_rules_zh.md`。
 4. **文件是唯一依据;每步 checkpoint;子计划保持真实**。执行态存在 `wkdrs/<run>/`(`EXEC_PLAN.md` + `EXEC_LOG.md`),中间工作文件存在 `tasks/<plan-name>/`。每验证完一步就更新日志。子计划文件拿到轻量的 `exec_status` + `exec_runs` 索引——当执行确实偏离了它、或敲定了它留白而某份方法文档会引用的值时,还会经**用户确认后同步回写**受影响的 §2–§5 内容并追加 `## Revision History` 条目(`references/plan_sync_rules_zh.md`),让用户日后重读计划时看到的就是实际执行的内容。对话会结束,文件不会。
 5. **每步以检查收尾;整轮以完成判据收尾**。每步先做窄验证,通过才派下一步;整轮以子计划 §5 完成判据结束。相关处复用项目的验证与运行辅助。这就是项目 Goal-Driven Execution(AGENTS.md §4)和 Verification(§7)的落地。
-6. **用项目运行环境与运行入口**。所有运行命令走 `.env` 的 `CONDA_HOME` / `PYTHON_HOME`——绝不用系统 python、绝不硬编码本地路径(AGENTS.md §6)——存在运行入口时经项目入口 `execs/run.sh` 调用。为计划执行过程的中间工作文件新建 `tasks/<plan-name>/`;可复用的启动脚本(含备好的红线命令)放到 `execs/scpts/<run>.sh`;生成输出及持久执行记录、数据、权重分别落到 `wkdrs/<run>/`、`datas/`、`inits/`。不要把生成的 run 产物放在 `tasks/`。
+6. **用项目运行环境与运行入口**。所有运行命令走 `.env` 的 `CONDA_HOME` / `PYTHON_HOME`——绝不用系统 python、绝不硬编码本地路径(AGENTS.md §10)——存在运行入口时经项目入口 `execs/run.sh` 调用。为计划执行过程的中间工作文件新建 `tasks/<plan-name>/`;可复用的启动脚本(含备好的红线命令)放到 `execs/scpts/<run>.sh`;生成输出及持久执行记录、数据、权重分别落到 `wkdrs/<run>/`、`datas/`、`inits/`。不要把生成的 run 产物放在 `tasks/`。
 
 ## 工作流
 
@@ -65,7 +65,7 @@ description: >-
 
 ### Step 4：审批确认点（退出 Plan 模式）
 
-1. 退出 Plan 模式，呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明拒绝的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,能依据的只有本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。
+1. 退出 Plan 模式，呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。
 2. 批准后,把选定计划文件名去掉 `_plan.md` 得到 `<plan-name>`,为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 落盘 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs` 列表,而不是替换它:正是这段历史让 `/skill:star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
 3. **把偏差同步回子计划**。若偏差表非空,刚获得的批准已覆盖此事:原地更新受影响的 §2–§5 段落,追加一条 `## Revision History` 条目,更新 `updated`,并给每行标记 `synced`(`references/plan_sync_rules_zh.md`)。子计划从此与即将执行的内容一致。
 
@@ -102,7 +102,7 @@ description: >-
 ## 状态与文件规则
 
 - 中间工作文件放在 `tasks/<plan-name>/`,执行态及生成产物放在 `wkdrs/<run>/`。绝不把执行日志写进 `metds/plans/`——子计划只拿 `exec_status` + `exec_runs` + `updated`。`tasks/<plan-name>/` 存放本计划自有的工具脚本(持久)与可弃置草稿,草稿的生命周期归本 skill:收尾且 §5 达标时提供一次删除草稿的机会,绝不删脚本(规约 §9)。生成产物与持久证据绝不放在那里;绝不擅自删除,也绝不碰其他计划的 `tasks/` 目录。
-- 代码改动进 `${CODE_NAME}/`;数据进 `datas/`;权重进 `inits/`;运行脚本进 `execs/scpts/`、以 `execs/run.sh` 为入口(AGENTS.md §5)。
+- 代码改动进 `${CODE_NAME}/`;数据进 `datas/`;权重进 `inits/`;运行脚本进 `execs/scpts/`、以 `execs/run.sh` 为入口(AGENTS.md §9)。
 - 绝不自主启动重型或不可逆任务(长时/多卡训练、全量评测、大开销 API);这些越过红线交给用户。
 - 所有运行命令走 `.env` 的 conda 环境;绝不用系统 python、绝不硬编码本地路径。
 - 子计划的 frontmatter(`exec_status`、`exec_runs`、`updated`)可自由编辑;它的 §2–§5 **只能**经用户确认的同步回写协议修改(`references/plan_sync_rules_zh.md`)——始终原地更新、始终配一条 `## Revision History` 条目。绝不改写 §1 或 §6、绝不碰父计划——目标级/总体计划级偏差走 `star-plan-coach` / `star-plan-decomposer`(向上反馈)。

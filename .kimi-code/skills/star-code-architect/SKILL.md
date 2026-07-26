@@ -95,7 +95,7 @@ Dispatch read-only subagents, one per topic — structure & dependencies, config
 
 #### Step C1: Design the target architecture
 
-From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. No row exists until the main agent has re-opened the smell's cited location and confirmed it (`references/survey_spec.md`); the confirming `path:line` is what the reason column carries. Keep it minimal.
+From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. A row goes in only after the main agent has re-opened the location the smell cites and confirmed it still holds (`references/survey_spec.md`); the reason column carries that `path:line`. Keep it minimal.
 
 #### Step C2: Gate 2 — the user approves
 
@@ -115,7 +115,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C5: Final verification
 
-`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §7).
+`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §5).
 
 #### Step C6: Report & hand off
 

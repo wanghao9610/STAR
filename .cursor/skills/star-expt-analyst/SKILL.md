@@ -73,7 +73,7 @@ A missing §5 done-criterion is not a blocker for the analysis — it means the 
 
 Follow `references/analysis_rubric.md`:
 
-- **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (AGENTS.md §5).
+- **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (AGENTS.md §9).
 - **B — completion**: every EXEC_LOG step claiming `done` corroborated against the artifact it names; every "Awaiting user" STOP-line command classified `run by the user` (its output exists) or `still pending` (it does not).
 
 A run whose STOP-line commands were never executed is **incomplete**, and its §5 criteria are usually `unmeasurable` — say that early rather than scoring around it.
@@ -91,7 +91,7 @@ Merge and dedup. For every number that will appear in the report, and every bloc
 
 ### Step 5: Interpret & compare (dimension E)
 
-1. **Interpret**: does the result support or refute the claim in `traces_to`? Does it match a root §5 kill-criterion, or negate an MVP "cheap early test"? Run the leakage checks the rubric lists before accepting a suspiciously strong number — where dimension C fanned out, they run against the `config_echo` each collector returned, and the cited line range is re-opened only on a hit. State the run's limits explicitly (seeds, split size, what it does not show).
+1. **Interpret**: does the result support or refute the claim in `traces_to`? Does it match a root §5 kill-criterion, or negate an MVP "cheap early test"? Run the leakage checks the rubric lists before accepting a suspiciously strong number — where dimension C was delegated, run them against the `config_echo` each collector returned, and re-open the cited lines only where one of them hits. State the run's limits explicitly (seeds, split size, what it does not show).
 2. **Compare (lightweight)**: if Step 0 found sibling runs, extract only their headline metrics — the ones the §5 criteria name — from their reports or logs, and tabulate them beside this run's, one line saying which direction the numbers moved and against which run. Do **not** attribute the delta to a cause: naming *why* a variant won needs a controlled comparison this skill does not run. Recommend `/star-plan-executor` for the next variant if the user wants one.
 
 ### Step 6: Persist the report

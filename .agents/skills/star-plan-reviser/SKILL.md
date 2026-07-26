@@ -27,7 +27,7 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 
 ## Core Principles
 
-1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies here too). This applies the project's Verification rule (AGENTS.md §7) to the plan itself. Rules: `references/review_spec.md`.
+1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies here too). This applies the project's Verification rule (AGENTS.md §5) to the plan itself. Rules: `references/review_spec.md`.
 2. **Collect locally by default; delegate selectively.** Read the logs, artifacts, and code state yourself. Delegate collection only when bounded, independent, read-only inspection of several runs or artifact sets materially helps; any delegate follows the collector contract in `references/review_spec.md` and never writes or proposes revisions. Synthesis and judgment stay with the main agent.
 3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped through one direct question at a time, with a recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
@@ -56,7 +56,7 @@ Larger than that: gather per the collector contracts in `references/review_spec.
 
 Cross-check disagreements — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks; never anything heavy.
 
-A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate — the user is asked about each one, and the answers rewrite the plan file — the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the `path[:line]` it confirmed at is what the candidate carries as evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
+A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate — the user is asked about each one, and the answers rewrite the plan file — the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the candidate then carries that `path[:line]` as its evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
 
 ### Step 3: Synthesize and persist the review report
 

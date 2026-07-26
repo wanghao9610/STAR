@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Areas
 
-One `Task` subagent (`subagent_type: explore`) per area, at most 3 in parallel (they write nothing another surveyor might write, so parallelism is safe here — it is not safe in general: a fan-out that fetches shares one per-host budget, conventions §6.9):
+One `Task` subagent (`subagent_type: explore`) per area, at most 3 in parallel (none of them writes a file another surveyor writes, so running them together is safe here — it is not safe everywhere: subagents that fetch share one budget per host, conventions §6.9):
 
 | Area | Looks at | Key questions |
 |---|---|---|
@@ -35,6 +35,6 @@ The main agent merges area reports into one repo map:
 2. **Dependency direction** — which layers import which; note violations.
 3. **Ranked smells** — deduplicated across areas, ranked by how much they would obstruct the plan's work; keep only those worth a migration item. Everything else is recorded as style notes for `codearc.md` §3, not as migrations.
 
-   A ranked smell becomes a numbered migration item only after the main agent re-opens its cited path at the cited evidence and confirms the finding still holds (conventions §6.6). What does not hold up is dropped, or demoted to a §3 style note for `codearc.md`. The confirming `path:line` goes in the migration table's reason column — this is the one path in the skill where an unverified delegate claim would otherwise cross a user gate and then move files.
+   A ranked smell becomes a numbered migration item only after the main agent re-opens its cited path at the cited evidence and confirms the finding still holds (conventions §6.6). What does not hold up is dropped, or demoted to a §3 style note for `codearc.md`. The `path:line` it was confirmed at goes in the migration table's reason column — this is the one place in the skill where an unconfirmed subagent claim would otherwise pass a user gate and then move files.
 
 The repo map feeds Step C1 directly and is summarized (not dumped) to the user.

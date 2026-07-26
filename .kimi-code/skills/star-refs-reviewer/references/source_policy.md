@@ -76,8 +76,8 @@ AI-conference templates (NeurIPS / CVPR / ICML / ICLR / ACL) render author, titl
 
 ## Rate limits and failure
 
-- Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool). This is the session's budget against each host, not each agent's (conventions §6.9); a step that fans out divides it and states each share as a number.
-- Paper pages fetched at Step 3 — arXiv abs/HTML, ACL Anthology, CVF open access, project pages — get the same polite default as a plain page fetch anywhere: ~1 request/second, and ~1 per 3 seconds to arXiv, which asks for it. Step 3 fetches one page per paper, so the budget binds only when that step fans out.
+- Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool). The budget belongs to the whole session against each host; it is not one budget per agent (conventions §6.9). A step that fans out splits it and writes each share as a number.
+- Paper pages fetched at Step 3 — arXiv abs/HTML, ACL Anthology, CVF open access, project pages — follow the same polite default as any other page fetch: ~1 request/second, and ~1 per 3 seconds to arXiv, which asks for that. Step 3 fetches one page per paper, so this only constrains the step when it fans out.
 - HTTP 429 / 503 → exponential backoff (2s, 4s, 8s), at most 3 retries, then move on and record the failure. A rate limit is never a reason to fill the gap from memory.
 - A source returning nothing is logged as "not found in `<source>`" — that is a fetch outcome, not evidence the paper does not exist.
 

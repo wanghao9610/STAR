@@ -62,11 +62,11 @@ Read AGENTS.md; `metds/codearc.md` if present (placement rules, naming conventio
 
 Through the `.env` conda env: run `python -m compileall -q` over the scope, always. If ruff (preferred) or flake8 is already installed in that env, run it on the scope and keep the output as evidence input. Never install or upgrade anything (that is `$star-env-builder`'s). Env unusable → skip the tools, mark the review **reading-only** in the report, recommend `$star-env-builder`.
 
-**Whole-tree screen**, run over all of `${CODE_NAME}/` whatever the reviewed scope is and whatever the environment does — it is grep and `wc`, so a broken env is no reason to skip it, and a review that cannot run its tools is exactly the one that needs these two classes found — two of the rubric's always-blocker classes become invisible the moment the scope narrows, and narrowing is the normal outcome:
+**Whole-tree screen**, run over all of `${CODE_NAME}/` whatever the reviewed scope is, and whether or not the environment works — it needs only grep and `wc`, and a review that could not run its tools is exactly the one that needs these found. Two of the rubric's always-blocker classes become invisible the moment the scope narrows, and narrowing is the normal outcome:
 
 - `grep -rnE` for machine-local path literals (`/Users/`, `/home/`, `C:\\`). Every hit is a candidate blocker (dimension D).
 - A **presence** check per `codearc.md` §7 residual name: a count that has dropped to zero is the finding. §7 lists names that are supposed to still be there, so a grep for hits returns the places they correctly remain — the non-findings.
-- `wc -l` across the tree, ranked descending, keeping the top ~20, to name dimension-C giant-file candidates. Unlike the other two probes this one has no natural hit count: every file is a row.
+- `wc -l` across the tree, longest first, keeping the top ~20, to name dimension-C giant-file candidates. The other two probes stop at their hits; this one would list every file in the tree, which is why it is cut off at 20.
 
 It is grep and `wc`, never a tree-wide linter run: a repo-wide `ruff check` is thousands of lines entering the report's own context, which is context inflation dressed as a screen. A screen hit is re-opened at its line by the main agent before it enters the report (Step 4), and one outside the reviewed files is filed with `found by screen, outside reading scope`.
 
@@ -78,7 +78,7 @@ It is grep and `wc`, never a tree-wide linter run: a repo-wide `ruff check` is t
 
 ### Step 4: Verify
 
-Reconcile first: every file dispatched comes back inside some collector's `files_reviewed` count or its `unknowns` list, and the remainder is re-dispatched with the unknowns (conventions §6.3) — a file nobody could parse must not arrive as a clean one. Then merge and dedup. For every blocker/major: re-open the cited file at the cited lines and confirm the issue is real and the rule applies, whatever `confidence` the collector attached — a `low` on a blocker is a reason to read it, not to discount it. Downgrade or drop what fails; a `low` finding the re-read cannot settle goes to Unconfirmed. Spot-check minors. Findings worth flagging but not confirmed go to the report's **Unconfirmed** list — never into the verdict counts.
+Account for every file first: each file dispatched comes back either in a collector's `files_reviewed` count or in its `unknowns` list, and whatever is missing is re-dispatched together with the unknowns (conventions §6.3) — a file nobody could parse must not pass for a clean one. Then merge and dedup. For every blocker/major: re-open the cited file at the cited lines and confirm the issue is real and the rule applies, whatever `confidence` the collector attached — a `low` on a blocker is a reason to read it, not a reason to take it less seriously. Downgrade or drop what fails; a `low` finding the re-read cannot settle goes to Unconfirmed. Spot-check minors. Findings worth flagging but not confirmed go to the report's **Unconfirmed** list — never into the verdict counts.
 
 ### Step 5: Persist the report
 

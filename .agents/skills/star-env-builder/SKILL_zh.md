@@ -35,7 +35,7 @@ description: >-
 3. **只改名，绝不删除。**已有环境通过重命名为 `<名称>_<YYYYMMDD>` 备份——日期用运行时的 `date +%Y%m%d` 获取，绝不编造。本 skill 永不删除任何环境；过期备份由用户自行清理。
 4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装方式与失败处理：优先 uv，逐包降级 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
 5. **沿用已有的，只生成缺失的。**已有 requirements 布局按原样安装，绝不改写。生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后作为代码资产提交。
-6. **证据式验收。**亲自跑三层冒烟测试（`references/smoke_test_spec_zh.md`），报告"验证了什么"并附证据，而不是一句"能用了"（AGENTS.md §7）。Chats end, files do not：报告与版本快照写入 `wkdrs/env_<ENV_NAME>_<日期>/`。
+6. **证据式验收。**亲自跑三层冒烟测试（`references/smoke_test_spec_zh.md`），报告"验证了什么"并附证据，而不是一句"能用了"（AGENTS.md §5）。Chats end, files do not：报告与版本快照写入 `wkdrs/env_<ENV_NAME>_<日期>/`。
 
 ## 工作流
 

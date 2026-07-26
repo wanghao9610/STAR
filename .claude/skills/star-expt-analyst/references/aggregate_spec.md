@@ -74,7 +74,7 @@ Rows within a table are the runs §4 assigns to it, in the order §4 gives (else
 
 ## Excluded runs
 
-A run whose report verdict is `invalid` or `inconclusive`, or whose number failed re-verification, does **not** appear in a results table. It goes to §5 Excluded with its verdict and one line of why — the why travels with the verdict in the collector's return, so an excluded run does not cost a second reading of the whole report a collector has already closed. Excluding a run silently is how a results table starts lying: a reader must be able to see what was left out and count it.
+A run whose report verdict is `invalid` or `inconclusive`, or whose number failed re-verification, does **not** appear in a results table. It goes to §5 Excluded with its verdict and one line of why — that reason comes back together with the verdict in the collector's return, so excluding a run costs no second reading of a report the collector has already finished with. Excluding a run silently is how a results table starts lying: a reader must be able to see what was left out and count it.
 
 A **`not met` run is not excluded** — a negative result is a result. It belongs in its table with its verdict shown.
 

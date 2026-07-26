@@ -76,8 +76,8 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 
 ## 限速与失败
 
-- 按 host 串行：DBLP 与 Semantic Scholar 约 1 请求/秒，Crossref 约 3 请求/秒（带上 `mailto` 进它的 polite pool）。这是整个会话对每个 host 的预算，不是每个 agent 各有一份（规约 §6.9）；分派出去的步骤要把它除开，并把各自那份写成具体数字。
-- Step 3 抓的论文页面——arXiv abs/HTML、ACL Anthology、CVF open access、项目主页——按抓取普通网页一样的礼貌默认值：约 1 请求/秒，其中 arXiv 约 3 秒 1 次（它自己要求如此）。Step 3 每篇论文只抓一页，所以这份预算只在这一步分派出去时才起约束作用。
+- 按 host 串行：DBLP 与 Semantic Scholar 约 1 请求/秒，Crossref 约 3 请求/秒（带上 `mailto` 进它的 polite pool）。这份预算属于整个会话、按 host 算，不是每个 agent 各有一份（规约 §6.9）；分派出去的步骤要把它按份数分开，并把各自那份写成具体数字。
+- Step 3 抓的论文页面——arXiv abs/HTML、ACL Anthology、CVF open access、项目主页——和抓普通网页用同一套礼貌默认值：约 1 请求/秒，其中 arXiv 约 3 秒 1 次（它自己这么要求）。Step 3 每篇论文只抓一页，所以只有这一步并行分派时，这份预算才真正构成限制。
 - HTTP 429 / 503 → 指数退避（2s、4s、8s），最多重试 3 次，然后跳过并记录失败。被限流绝不构成"凭记忆补上"的理由。
 - 某个来源返回空 → 记为"`<来源>` 未找到"——那是一次抓取结果，不是这篇论文不存在的证据。
 
