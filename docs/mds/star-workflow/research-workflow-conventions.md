@@ -93,7 +93,7 @@ Download-size thresholds are **skill-specific** — `star-env-builder` runs fram
 
 ## 3. `.env` and the project runtime
 
-The operational form of `AGENTS.md` §10.
+The operational form of `AGENTS.md` §9.
 
 1. **`.env` at the project root is the only source** of `CODE_NAME`, `ENV_NAME`, `CONDA_HOME`, and `PYTHON_HOME`. Never guess a local path, never hardcode one, never read them from memory of another project.
 2. **`PYTHON_HOME` is authoritative.** Set → use it as given; `CONDA_HOME` and `ENV_NAME` may be empty, and the interpreter then runs directly rather than through conda. Empty → derive it as `$CONDA_HOME/envs/$ENV_NAME`, which requires both to be set. Neither → a blocker to report, not a value to invent.

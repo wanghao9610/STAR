@@ -51,9 +51,10 @@ Usage: bash execs/update.sh [ref] [--skill NAME]
        bash execs/update.sh --diff [ref] [--skill NAME]
        bash update.sh [ref] --adopt
 
-Overwrite STAR-managed skills, model-id provenance hooks, and research workflow
-documentation with files from upstream. The default ref is main; a branch or tag may be
-supplied instead. By default, all skills, hooks, and workflow documentation are updated.
+Overwrite STAR-managed agent instructions (AGENTS.md and the Cursor rule that copies it),
+skills, model-id provenance hooks, and research workflow documentation with files from
+upstream. The default ref is main; a branch or tag may be supplied instead. By default all
+of them are updated, so local edits to AGENTS.md are replaced along with everything else.
 Hook registration configs (.claude/settings.json, .codex/hooks.json, .cursor/hooks.json)
 are installed only when missing and never overwritten. Use --skill to update only
 the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
@@ -172,6 +173,9 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     fi
 else
     SYNC_PATHS=(
+        # The shared agent instructions and the Cursor rule that copies their body.
+        "AGENTS.md"
+        ".cursor/rules"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
@@ -213,7 +217,10 @@ if [[ "${ADOPT}" == false ]]; then
         git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
-        # non-cone mode; the tar below still copies only SYNC_PATHS.
+        # non-cone mode; the tar below still copies only SYNC_PATHS. AGENTS.md is
+        # absent on purpose: cone mode rejects a file argument here, and the clone
+        # above already checks out every root file. Should a checkout ever miss it,
+        # the SYNCED loop below stops with "Upstream ref is missing AGENTS.md".
         git -C "${SOURCE_DIR}" sparse-checkout set \
             .agents .claude .codex .cursor .kimi-code docs/mds/star-workflow docs/srcs
     fi
@@ -378,6 +385,7 @@ if [[ -e "${ROOT_DIR}/AGENTS.md" ]] && \
    ! cmp -s "${SOURCE_DIR}/AGENTS.md" "${ROOT_DIR}/AGENTS.md"; then
     log "NOTE: your AGENTS.md was kept, so STAR's project conventions are not in it."
     log "      Compare against ${STAR_REPOSITORY} AGENTS.md and merge what you want."
+    log "      Adopt keeps it, but a later 'bash execs/update.sh' overwrites it."
 fi
 if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     # Checked per directory, and tolerant of the glob forms (datas/*, wkdrs/**)

@@ -316,6 +316,7 @@ bash execs/update.sh
 
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
+- `AGENTS.md` 与 `.cursor/rules/`——共享的 agent 协作规范，以及抄录其正文的 Cursor 规则；你对它们的改动会被替换
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`

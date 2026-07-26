@@ -12,7 +12,7 @@ Nothing here is a judgement call, and nothing here is waived.
 |---|---|---|
 | `.env` committed | `git ls-files .env` returns anything | `git rm --cached .env`; confirm `.gitignore` covers it. Say plainly that history still holds it, and that rewriting history is the user's call |
 | API keys and tokens | Grep the tracked tree for `sk-`, `hf_`, `ghp_`, `AKIA`, `api[_-]?key`, `secret`, `token`, `password`, `WANDB_API_KEY`, `Bearer ` | Move it to `.env` / an environment variable and read it there |
-| Machine-local absolute paths | Grep for `/home/`, `/Users/`, `/mnt/`, `/data1/`, `C:\\`, and the user's own username | Read the root from `.env` (AGENTS.md §10). Always a blocker — it is the single most common reason a research repo does not run for anyone else |
+| Machine-local absolute paths | Grep for `/home/`, `/Users/`, `/mnt/`, `/data1/`, `C:\\`, and the user's own username | Read the root from `.env` (AGENTS.md §9). Always a blocker — it is the single most common reason a research repo does not run for anyone else |
 | Internal hosts & endpoints | Grep for internal-looking hostnames, private IP ranges (`10.`, `192.168.`, `172.16–31.`), cluster node names, and non-public URLs | Remove, or replace with the public equivalent |
 | Personal data | Author emails beyond the citation, an SSH config, a `.netrc`, private dataset URLs | Remove |
 

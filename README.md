@@ -321,6 +321,7 @@ bash execs/update.sh
 
 By default, the command updates these paths from STAR's `main` branch:
 
+- `AGENTS.md` and `.cursor/rules/` — the shared agent instructions and the Cursor rule that copies their body; your own edits to them are replaced
 - `.agents/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`

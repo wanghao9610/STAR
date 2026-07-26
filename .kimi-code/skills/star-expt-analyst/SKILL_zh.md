@@ -65,7 +65,7 @@ description: >-
 
 依照 `references/analysis_rubric_zh.md`：
 
-- **A——清点**：每个 §4 交付物记为 `present` / `missing` / `unexpected`，附轻量完整性检查（非空、可解析、大小合理）与布局符合度（AGENTS.md §9）。
+- **A——清点**：每个 §4 交付物记为 `present` / `missing` / `unexpected`，附轻量完整性检查（非空、可解析、大小合理）与布局符合度（AGENTS.md §8）。
 - **B——完成度**：EXEC_LOG 中每个自称 `done` 的步骤，用它写明的产物核实；每条 "Awaiting user" 红线命令归类为 `用户已跑`（其输出存在）或 `仍待跑`（不存在）。
 
 红线命令从未执行过的 run 是**未完成**的，其 §5 判据通常是 `unmeasurable`——早点说清楚，而不是绕着它打分。

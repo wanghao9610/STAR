@@ -93,7 +93,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 
 ## 3. `.env` 与项目运行时
 
-`AGENTS.md` §10 的操作化版本。
+`AGENTS.md` §9 的操作化版本。
 
 1. **项目根的 `.env` 是 `CODE_NAME`、`ENV_NAME`、`CONDA_HOME`、`PYTHON_HOME` 的唯一来源。** 绝不猜本地路径、绝不硬编码、绝不凭别的项目的记忆填。
 2. **以 `PYTHON_HOME` 为准。** 已设置 → 按其取值使用，`CONDA_HOME` 与 `ENV_NAME` 可留空，此时不走 conda、直接调用该解释器。留空 → 由 `$CONDA_HOME/envs/$ENV_NAME` 推导，此时两者都必须设置。两者都没有 → 这是要上报的 blocker，不是可以编造的值。
