@@ -23,7 +23,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
 | `depends_on` | the prefixes of sibling plans that must finish first | §5.5 |
-| too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]`, or finalized but never decomposed | `status_spec.md` |
+| too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
 | output table | the §8 table naming every skill's durable output and its state field | §8 |
 | `model_trail` | one line per writing session, added never edited | §8 |
 | involve level | how much a run asks before deciding — `low` / `medium` / `high` | §7.7 |

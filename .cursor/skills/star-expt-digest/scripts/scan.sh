@@ -24,7 +24,7 @@
 #                 provenance ledger reads; the default mode drops all of it because
 #                 an unbounded trail would crowd out the fields everything else needs.
 #                 It also drops what a provenance read has no use for: the sub-plans
-#                 index, the [TBD] counts, the per-run dates line, and DIRS.
+#                 index, the placeholder counts, the per-run dates line, and DIRS.
 #                 model_trail itself is never capped — printing every entry is the
 #                 whole point of the mode, and a ledger with a hole in it is worse
 #                 than a long one.
@@ -122,8 +122,10 @@ body_index() {
     ' "$1"
 }
 
-# How much of §3 and §5 is still [TBD] — the input to the "too coarse" rule.
-# Content lines exclude blanks and HTML-comment template guidance.
+# How much of §3 and §5 is still a placeholder — the input to the "too coarse" rule.
+# Both markers count: star-plan-decomposer writes `[TBD]` in English sub-plans and
+# `【待定】` in Chinese ones, so matching only the first reports every Chinese leaf as
+# fully written. Content lines exclude blanks and HTML-comment template guidance.
 tbd_counts() {
     awk '
         /^## +3\./ { sec = 3; next }
@@ -135,7 +137,7 @@ tbd_counts() {
         /-->/ { incomment = 0 }
         was { next }
         NF == 0 { next }
-        { content[sec]++; if (index($0, "[TBD]")) tbd[sec]++ }
+        { content[sec]++; if (index($0, "[TBD]") || index($0, "【待定】")) tbd[sec]++ }
         END { printf "[tbd] §3: %d TBD / %d content lines | §5: %d TBD / %d content lines\n",
                      tbd[3]+0, content[3]+0, tbd[5]+0, content[5]+0 }
     ' "$1"

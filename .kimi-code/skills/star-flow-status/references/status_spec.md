@@ -31,7 +31,7 @@ Rebuild parent→child links from `parent:` (authoritative), not prefixes. Withi
 - `○` pending — nothing started (`exec_status` absent/`pending`, or all sections `pending`).
 - `⊘` blocked — leaf `exec_status: blocked`, or a leaf whose `depends_on` is unmet.
 - `⏸` awaiting user — leaf whose EXEC_LOG has un-checked "Awaiting user" STOP-line commands.
-- `⚠` needs attention — **too big to run**, in either of two ways: a leaf whose own §3/§5 are largely `[TBD]`, **or** a top-level plan carrying `finalized:` with no `children:` — never decomposed, so it counts as a leaf (conventions §5.4) and the executor will reject it. This is the only definition; tier-3 eligibility follows it regardless of the status symbol the lifecycle rule renders → suggest `/skill:star-plan-decomposer`.
+- `⚠` needs attention — **too big to run**, in either of two ways: a sub-plan leaf whose own §3 Task Breakdown / §5 Done-Criteria are largely `[TBD]` or `【待定】` (both markers count — a Chinese plan writes the second, and the scan counts them together), **or** a top-level plan carrying `finalized:` with no `children:` — never decomposed, so it counts as a leaf (conventions §5.4) and the executor will reject it. This is the only definition; tier-3 eligibility follows it regardless of the status symbol the lifecycle rule renders → suggest `/skill:star-plan-decomposer`.
 
 **One status symbol per node, and lifecycle wins.** A node that qualifies for both a lifecycle status symbol and `⚠` gets the lifecycle one: a finalized-then-edited root is `✔`, a done leaf with no run is `✔`. Drift belongs in the drift section, which is where the reader goes for it — never let a drift flag overwrite the state the node is actually in, or the tree stops meaning what it says.
 

@@ -23,7 +23,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | `exec_status:` | 叶子的执行状态；`done` / `skipped` / `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
 | `traces_to` | 这份子计划支撑根计划里的哪条主张 | `star-plan-decomposer` |
 | `depends_on` | 必须先完成的那些兄弟计划的前缀 | §5.5 |
-| 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]`，或已定稿却从未拆解 | `status_spec_zh.md` |
+| 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]` / `【待定】`，或已定稿却从未拆解 | `status_spec_zh.md` |
 | 产物登记表 | §8 的表，列出每个 skill 的持久产物及其状态字段 | §8 |
 | `model_trail` | 每次写入会话一行，只追加、不改写 | §8 |
 | 参与度档位 | 一次运行决策前问多少——`low` / `medium` / `high` | §7.7 |
