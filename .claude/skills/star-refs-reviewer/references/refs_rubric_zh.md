@@ -31,6 +31,22 @@
 - **对读到什么程度诚实。** 至少读摘要、intro、方法和主结果表。若只够到摘要和 intro，`depth:` 就如实写——承认自己浅的笔记有用，装深的没用。
 - **主张是论文的，不是你的。** 数字照论文报（指标 + 数据集 + split）。绝不外推，绝不跨不可比设定做比较，不确定的标 `[unverified]`。
 
+## 笔记收集器的返回格式
+
+Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,要求填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而 category 要到 Step 6 才从整个池子推导出来,此刻根本不可能存在。收集器把这些填上,写下的就是一份可证伪的记录。
+
+一个收集器一篇论文。返回:
+
+- `note_body`——模板的 §1、§2、§3、§4、§6、§7,填好。**§5 留空**:它需要本项目的方法上下文,而这正是这篇笔记存在的理由。
+- `title` / `venue` / `year`——完全照论文自己页面上的写法。
+- `links`——paper / code / project,或 `none found`。
+- `depth`——它实际读到了哪一层。
+- `depth_evidence`——`{sections_reached: [...], results_table: <表题加一行,原文照录>}`,或 `none reachable`。
+- `relation_material`——`[{claim, where}]`:给 §5 用的原料,绝不是 §5 本身。
+- `cited_works`——这篇论文相关工作章节引的东西,趁论文已经打开时顺手采下来。
+
+别的都不返回:不填 frontmatter 溯源、不填 `category`、不填 `read_on`、不写 §5。文件全部由主 agent 来写。
+
 ## reference.bib 的组织
 
 - **3–8 个类别。** 少于 3 类算不上分类；多于 8 类把领域切碎了。

@@ -31,6 +31,22 @@ Each note (`assets/ref_analysis_template.md`) is graded on:
 - **Honest about what was read.** Abstract, intro, method, and the main results table at minimum. If only the abstract and intro were reachable, `depth:` says so — a shallow note that admits it is useful, one that pretends is not.
 - **Claims are the paper's, not yours.** Report numbers as reported (metric + dataset + split). Never extrapolate, never compare across incomparable settings, mark anything uncertain `[unverified]`.
 
+## Note collector contract
+
+What a read-only subagent returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`, and for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8), and for `category`, which is derived at Step 6 from the whole collected pool and cannot exist yet. A collector that fills those writes a record that is provably false.
+
+One paper each. The return:
+
+- `note_body` — the template's §1, §2, §3, §4, §6 and §7, filled. **§5 is left empty**: it needs the project's method context, and it is the reason the note exists.
+- `title` / `venue` / `year` — exactly as the paper's own page states them.
+- `links` — paper / code / project, or `none found`.
+- `depth` — what it actually read.
+- `depth_evidence` — `{sections_reached: [...], results_table: <the caption plus one row, verbatim>}`, or `none reachable`.
+- `relation_material` — `[{claim, where}]`: raw material for §5, never §5 itself.
+- `cited_works` — what this paper's related-work section cites, harvested while the paper was already open.
+
+and nothing else: no frontmatter provenance, no `category`, no `read_on`, no §5. The main agent writes every file.
+
 ## reference.bib organization
 
 - **3–8 categories.** Fewer than 3 is not a classification; more than 8 fragments the field.

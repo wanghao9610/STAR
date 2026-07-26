@@ -58,6 +58,8 @@ You survey and record; you do not set strategy, write or revise plans, implement
 
 Build 5–8 queries from the profile — task terms, mechanism terms, the synonyms the field actually uses, benchmark names, and the "X for Y" phrasing papers title themselves with. Run them across web search and the Semantic Scholar / DBLP / arXiv search endpoints (`references/source_policy.md`). Collect candidates with title, venue, year, citation count, and the one clause of why. Deduplicate by title; when a preprint and a proceedings version collide, keep the published record.
 
+Searching may fan out by query group, at most 3, each given 2–3 of the queries, the search profile, its **divided** per-host rate share stated numerically, and the same candidate contract Step 4 uses — plus a capped verbatim `abstract` (~60 words) per candidate. That field is not optional: the main agent must present ~15 ranked candidates at this skill's only mandatory gate and re-rank them against `refs_rubric.md`, whose core criterion is direct overlap with this method, and that is unjudgeable from title, venue, year and citation count. The re-rank is the main agent's: it drops any candidate it cannot justify in one clause itself.
+
 ### Step 2: Confirm the core set
 
 Rank candidates by the core-paper criteria in `references/refs_rubric.md` and present ~15 in one table, most relevant first. Ask via one question (the candidates listed as text, 5–10 marked as recommended) which to read deeply. The user may add papers of their own — fetch their records like any other.
@@ -66,11 +68,13 @@ Rank candidates by the core-paper criteria in `references/refs_rubric.md` and pr
 
 Per confirmed paper: fetch the paper page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page), read at minimum the abstract, intro, method, and main results table, fill `assets/ref_analysis_template.md` (Chinese: `assets/ref_analysis_template_zh.md`), and **write it immediately** to `metds/refs/<ABBREV>.md`. `ABBREV` is the paper's own abbreviation (`CLIP.md`, `DETR.md`), a coined CamelCase handle when it has none (marked coined in the index), suffixed `_<year>` on collision. Set `depth:` to what you actually read, honestly.
 
-Reading may fan out to read-only subagents, at most 3 in parallel, one paper each, each returning a filled template. The main agent writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
+Reading may fan out to read-only subagents, at most 3 in parallel, one paper each, each returning the note collector contract in `references/refs_rubric.md` — not a filled template, which asks for fields only the writing session may set. Accept `depth: full` only where `depth_evidence` carries a real table caption and row; otherwise downgrade it. The main agent writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists.
 
 ### Step 4: Expand to ≥50
 
 Grow outward from the core set: the core papers' reference lists (Semantic Scholar `/references`), the work citing them (`/citations`, most-cited first), the related-work sections of the core papers themselves, and gap-filling queries for sub-topics the pool is thin on. Deduplicate against existing citekeys. Published work outranks preprints; keep a preprint only when no published version exists. Stop at ~60 candidates. If the pool cannot reach 50 without padding, **report the real number** — the rubric prefers 43 honest entries to 50 padded ones.
+
+Expansion may fan out over the core papers, **one paper each**, at most 3 — a single serial collector is the safe default, because `source_policy.md`'s ~1 request per second is a **per-host** budget that three concurrent collectors would triple against every host this skill promises to be polite to. Each returns `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <one clause>}]`, `queries_run`, `failures: [{host, error, retries}]`, `papers_seen`, and nothing else. It fetches no bibliographic record and decides nothing about what is core; the payloads it fetches are cached under this run's own `raw/` prefix, scoped to its own paper (conventions §6.4), and nothing else is written. Nothing it returns is trusted as a bib field — Step 5 re-fetches an authoritative record for every survivor from scratch, so a mis-transcribed title costs one failed match, routed to Needs-manual-check.
 
 ### Step 5: Fetch and transcribe
 
