@@ -42,7 +42,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument: `gather` / `polish` / `readme` / `check` → that phase alone; no argument → the full pass in order; anything else → name the four phases and ask in the conversation which was meant.
-3. Build and print the **readiness table** before touching anything: one row per input the map needs (the five `metds/*.md`, `results.md`, `codearc.md`, `UPSTREAM.md`, `requirements*`, the newest `ENV_REPORT.md`, `reference.bib`, `LICENSE`), each `present` / `absent` / `stale`, with the skill that produces it. Staleness is compared the way the producers record it — a method document whose `sources:` dates trail the plans' current `updated`, a results table older than the newest `EXPT_ANALYSIS`.
+3. Build and print the **readiness table** before touching anything: one row per input the map needs (the five `metds/*.md`, `results.md`, `codearc.md`, `UPSTREAM.md`, `requirements*`, the newest `ENV_REPORT.md`, `reference.bib`, `LICENSE`), each `present` / `absent` / `stale`, with the skill that produces it. Read only each input's frontmatter here — staleness is a date comparison, and a method document is opened in full only when Step 3 compiles from it. Staleness is compared the way the producers record it — a method document whose `sources:` dates trail the plans' current `updated`, a results table older than the newest `EXPT_ANALYSIS`.
 4. Compiling with gaps is allowed and normal — the gaps become README TODOs — but the user sees the table first. When the majority of sources are absent, say plainly that a README compiled now would be mostly TODOs, and offer in the conversation: *run the producers first (recommended, name them)* / *compile what exists anyway*.
 5. Name the paths that already carry uncommitted changes (conventions §1). This run never stages them.
 
@@ -51,9 +51,10 @@ You consolidate, polish, and document; you do not implement features, restructur
 1. Sweep the candidate roots named in `references/gather_rubric.md`: `tasks/<plan>/`, `wkdrs/<run>/` scripts and reproduction configs, project-root strays, `execs/scpts/`. Never `datas/`, never `inits/`, never generated artifacts.
 2. Apply the three-part promotion test to each candidate and record which part it passed with the evidence — the README section, the plan's §4/§5 line, or the results-table row. A candidate passing none stays put and is listed as `keep in place`, not as a failure.
 3. Resolve each promoted candidate's destination from `codearc.md` §2, detect near-duplicates already in `${CODE_NAME}/`, and mark the action `move` / `merge` / `keep in place` / `route`. A candidate whose path is named in a plan file is marked `plan-referenced`: moving it makes that plan line stale, and plan text is not yours to edit — the row carries the exact lines that will go stale so the user approves with that visible.
-4. **Gate 1:** present the promotion table as normal text — path, evidence, destination, action, risk — then ask in the conversation. With ≤4 candidates use list the rows for individual approval; with more, offer *approve all* / *approve all except (name the rows)* / *redesign*. Approving nothing is a valid outcome → skip to Step 2.
-5. Execute the approved rows one at a time: move (`git mv` when the file is tracked, a plain move otherwise — under `wkdrs/` only `*.md` is tracked), then fix the moved file's imports and every call site that referenced its old path. After each row, re-verify yourself: `python -m compileall -q` on the destination, and a grep for the old path across the repository proving no stale reference remains. A row that fails → revert that row, mark it `blocked`, continue with the rest.
-6. Commit the phase (staging only the promoted paths and their fixed call sites): `star-code-release: promote <n> file(s) into ${CODE_NAME}/`.
+4. Above ~15 candidates, say so and narrow with the user before building the table. Re-open each row's cited evidence line before the gate — the gate approves a file move, and no row should reach it on evidence nobody has opened.
+5. **Gate 1:** present the promotion table as normal text — path, evidence, destination, action, risk — then ask in the conversation. With ≤4 candidates use list the rows for individual approval; with more, offer *approve all* / *approve all except (name the rows)* / *redesign*. Approving nothing is a valid outcome → skip to Step 2.
+6. Execute the approved rows one at a time: move (`git mv` when the file is tracked, a plain move otherwise — under `wkdrs/` only `*.md` is tracked), then fix the moved file's imports and every call site that referenced its old path. After each row, re-verify yourself: `python -m compileall -q` on the destination, and a grep for the old path across the repository proving no stale reference remains. A row that fails → revert that row, mark it `blocked`, continue with the rest.
+7. Commit the phase (staging only the promoted paths and their fixed call sites): `star-code-release: promote <n> file(s) into ${CODE_NAME}/`.
 
 ### Step 2 — `polish`: the files a reader will open
 
@@ -75,7 +76,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 ### Step 4 — `check`: the hygiene sweep
 
-Run every family in `references/release_checklist.md` over the tracked repository: secrets and machine-local paths (blocking), license and attribution, runnable commands, asset and link integrity. This phase writes nothing but the report. Each finding carries `file:line`, the check that caught it, and the concrete fix; a blocker is never downgraded because the rest of the run went well.
+Run every family in `references/release_checklist.md` over the tracked repository: secrets and machine-local paths (blocking), license and attribution, runnable commands, asset and link integrity. This phase writes nothing but the report. Each finding carries `file:line`, the check that caught it, and the concrete fix; a blocker is never downgraded because the rest of the run went well. The main agent re-opens the cited `file:line` for every blocker before it enters the report: a public release report is not somewhere a bare grep line arrives unread.
 
 ### Step 5: Report & hand off
 

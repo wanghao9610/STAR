@@ -6,13 +6,22 @@
 
 范围：`framework.txt` + `runtime.txt` 中的每个发行包，若装了 `optional.txt` 也包含在内。
 
-逐个把发行名映射回 import 名（解析映射表反过来用），然后运行：
+把发行名映射回 import 名（解析映射表反过来用），然后**一次**把整层跑完——每个发行包一行制表符分隔：发行名、import 名、`ok` 或 `FAIL`、版本号或错误尾巴、以及实际用的那条命令。
 
 ```bash
-$ENV_PY -c "import <mod>; print(getattr(<mod>, '__version__', 'n/a'))"
+$ENV_PY - <<'EOF'
+import importlib, importlib.metadata as md
+for dist, mod in PAIRS:                    # 映射好的清单，按 framework.txt + runtime.txt 的顺序
+    try:
+        m = importlib.import_module(mod)
+        v = getattr(m, "__version__", None) or md.version(dist)
+        print(f"{dist}\t{mod}\tok\t{v}\timport {mod}")
+    except Exception as e:
+        print(f"{dist}\t{mod}\tFAIL\t{type(e).__name__}: {e}\timport {mod}")
+EOF
 ```
 
-版本为 `n/a` → 回退用 `importlib.metadata.version("<dist>")`。通过 = import 成功；记下版本号。
+通过 = import 成功；记下版本号。矩阵是从这一份输出照抄下来的，而不是从三四十次单独调用里拼回来的——后者正是"证据栏空着、检查却被记成跑过了"最可能的来路。这个循环由主 agent 自己跑；原则 6 不变，把命令合成一批并不等于把它们委派出去。每一行都带着它实际用的命令，失败的行带着错误尾巴，否则这个循环就成了藏住失败的那个东西。
 
 ## L2——框架深检
 

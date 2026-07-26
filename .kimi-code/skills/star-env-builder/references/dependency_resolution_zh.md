@@ -14,10 +14,10 @@
 
 ## import 扫描
 
-1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。
+1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。**这一遍要用已解析的解释器一次跑完，每行打印一个名字。**绝不要逐个文件去读：进入本次运行的是这一遍的输出，不是源码——一个中等规模的代码库有好几 MB，而它要产出的只是约七十个名字。用 AST 解析而不是 grep：grep 会把 `all`、`input`、`metadata` 当成 import 名，AST 不会。
 2. 去掉 stdlib：与 `python -c "import sys; print(sorted(sys.stdlib_module_names))"` 对照（任何 ≥ 3.10 的 Python 都能做这一步）。
 3. 去掉本地模块：`${CODE_NAME}/` 内的顶层包目录与 `.py` 文件。
-4. import 名 → 发行名映射（见下表）。未知名先上 PyPI 验证（`https://pypi.org/pypi/<name>/json`）再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
+4. import 名 → 发行名映射（见下表）。未知名要用取字段的方式验证，绝不是把整份文档抓回来——`curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`，没有 jq 时用已解析的解释器跑等价的一行（绝不去装 jq）——验证过再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
 5. 带保护的 import 单独归类：`try: … except ImportError` 或 `if TYPE_CHECKING` 之下的 import 天然是可选项 → `optional.txt`。
 
 ## import 名 → 发行名（常见分歧）

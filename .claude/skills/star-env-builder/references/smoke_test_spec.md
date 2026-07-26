@@ -6,13 +6,22 @@ Run after installation, through the absolute `$ENV_PY`. Budget: minutes, CPU-lig
 
 Scope: every distribution in `framework.txt` + `runtime.txt`, plus `optional.txt` if it was installed.
 
-For each, map distribution → import name (reverse of the resolution table) and run:
+Map distribution → import name (reverse of the resolution table), then emit the whole layer in **one** run — one tab-separated row per distribution: dist, import name, `ok` or `FAIL`, the version or the error tail, and the exact command used.
 
 ```bash
-$ENV_PY -c "import <mod>; print(getattr(<mod>, '__version__', 'n/a'))"
+$ENV_PY - <<'EOF'
+import importlib, importlib.metadata as md, traceback
+for dist, mod in PAIRS:                    # the mapped list, in framework.txt + runtime.txt order
+    try:
+        m = importlib.import_module(mod)
+        v = getattr(m, "__version__", None) or md.version(dist)
+        print(f"{dist}\t{mod}\tok\t{v}\timport {mod}")
+    except Exception as e:
+        print(f"{dist}\t{mod}\tFAIL\t{type(e).__name__}: {e}\timport {mod}")
+EOF
 ```
 
-Version `n/a` → fall back to `importlib.metadata.version("<dist>")`. Pass = the import succeeds; record the version.
+Pass = the import succeeds; record the version. The matrix is transcribed from this one output rather than reassembled from thirty-odd separate calls — which is the likeliest way an evidence cell ends up empty while the check is recorded as run. The main agent runs the loop itself; Principle 6 is unchanged, and batching commands is not delegating them. Every row carries its exact command, and a failing row carries the error tail, or the loop becomes the thing that hides one.
 
 ## L2 — framework deep check
 

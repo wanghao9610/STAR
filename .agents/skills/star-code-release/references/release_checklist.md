@@ -16,7 +16,7 @@ Nothing here is a judgement call, and nothing here is waived.
 | Internal hosts & endpoints | Grep for internal-looking hostnames, private IP ranges (`10.`, `192.168.`, `172.16–31.`), cluster node names, and non-public URLs | Remove, or replace with the public equivalent |
 | Personal data | Author emails beyond the citation, an SSH config, a `.netrc`, private dataset URLs | Remove |
 
-Grep through the tracked file list, and read every hit before reporting it: a docstring saying "do not hardcode `/home/...`" is not a finding, and `token` inside `tokenizer` is not a secret. A false blocker costs the checklist its authority.
+Grep through the tracked file list with `grep -InE -B2 -A2`, so the surrounding lines a false positive needs arrive with the hit in one command, and read every hit before reporting it: a docstring saying "do not hardcode `/home/...`" is not a finding, and `token` inside `tokenizer` is not a secret. A false blocker costs the checklist its authority.
 
 ## 2. License & attribution
 
@@ -51,6 +51,16 @@ Nothing is *executed* beyond imports and `--help`. Verifying that a training com
 | No link points into `datas/`, `inits/`, or a non-`.md` path under `wkdrs/` — the `.md` reports there are tracked and safe to link | major — it resolves for the author and 404s for everyone else |
 | `.gitignore` still covers `.env`, `datas/`, `inits/`, `wkdrs/` | blocker if not |
 | No file over ~10 MB is tracked | major — name it and suggest a release asset or a download script |
+
+## 5. Numbers & claims
+
+The two README rules with no other backstop: families 3 and 4 already re-check every printed command, image, relative link and anchor, but nothing checks where a number came from.
+
+| Check | How | Fix |
+|---|---|---|
+| Every figure traces to the results table | For each number in `README.md`, name the `wkdrs/results/results.md` row it was copied from | No row → the number does not ship. A number traceable to an `EXPT_ANALYSIS` or a digest instead of the results table is a **blocker**: those are per-run and provisional, and the README is neither |
+| Every superlative is carried by a verdict | For each "state-of-the-art", "outperforms", "best", "significantly", name the results-table verdict that carries it | No verdict carries it → drop the word, or quote the comparison it actually rests on |
+| Unverified numbers are marked | A number the ledger does not hold appears as a TODO, never as a result | Route to `star-expt-analyst aggregate`; never produce the number to fill the gap (the red line) |
 
 ## Reporting
 

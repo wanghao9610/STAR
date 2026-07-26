@@ -14,10 +14,10 @@ Priority-2 details: `environment.yml` conda-section entries route to `conda.txt`
 
 ## Import scan
 
-1. Collect top-level imports: walk `${CODE_NAME}/**/*.py`, AST-parse `import X` / `from X import …`, keep the first dotted component. Skip `tests/`, `docs/`, and vendored third-party directories.
+1. Collect top-level imports: walk `${CODE_NAME}/**/*.py`, AST-parse `import X` / `from X import …`, keep the first dotted component. Skip `tests/`, `docs/`, and vendored third-party directories. **Run the walk as one invocation of the resolved interpreter, printing one name per line.** Never read the files one by one: the output of that pass is what enters the run, not the source — a mid-size codebase is several megabytes to produce a list of about seventy names. AST-parse rather than grep: grep matches `all`, `input` and `metadata` as import names, and AST does not.
 2. Drop stdlib names: compare against `python -c "import sys; print(sorted(sys.stdlib_module_names))"` (any Python ≥ 3.10 works for this check).
 3. Drop local modules: top-level package directories and `.py` files inside `${CODE_NAME}/`.
-4. Map import name → distribution name (table below). Verify unknown names on PyPI (`https://pypi.org/pypi/<name>/json`) before trusting an identity mapping; a name not on PyPI goes to the gate as an *unresolved import*.
+4. Map import name → distribution name (table below). Verify an unknown name with a field extraction, never a document fetch — `curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`, or the equivalent one-liner through the resolved interpreter where jq is absent (never install jq) — before trusting an identity mapping; a name not on PyPI goes to the gate as an *unresolved import*.
 5. Route guarded imports: a module imported inside `try: … except ImportError` or under `if TYPE_CHECKING` is optional by construction → `optional.txt`.
 
 ## Import name → distribution name (common divergences)

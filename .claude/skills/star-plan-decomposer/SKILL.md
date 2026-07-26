@@ -122,7 +122,7 @@ Tell the user any sub-plan can be decomposed further with `/star-plan-decomposer
 
 ### Step 7: Rubric pass
 
-Read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`) and check the sub-plans you just wrote. Report failing items (at most 5, ranked), each with the file and a concrete fix, and ask whether to revise. Then offer once to commit the plan files written this run (State & File Rules).
+First, the half that is a computation rather than a judgement: rebuild the `depends_on` graph from the files just written, assert it is acyclic, and diff it against the parent's `## Sub-plans` index. That is an N+1-file invariant no drafting step checks end to end, and it is checked, not claimed. Then read `references/subplan_rubric.md` (Chinese: `references/subplan_rubric_zh.md`) and check the sub-plans you just wrote. Report failing items (at most 5, ranked), each with the file and a concrete fix, and ask whether to revise. Then offer once to commit the plan files written this run (State & File Rules).
 
 ## State & File Rules
 

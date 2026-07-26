@@ -21,7 +21,7 @@ Unlike the bibliography's first-match-wins search order, scanning wants disagree
 
 ## Queries
 
-2–3 per direction: the task phrasing, the mechanism phrasing, and the "X for Y" phrasing papers title themselves with — plus one recency probe (submissions in the last 18 months) for the trajectory read. Steal vocabulary from the first round's results to sharpen the second; the field's own words out-search yours.
+2–3 per direction: the task phrasing, the mechanism phrasing, and the "X for Y" phrasing papers title themselves with — plus one recency probe (submissions in the last 18 months) for the trajectory read. Steal vocabulary from the first round's results to sharpen the second; the field's own words out-search yours. But one of the 2–3 must use terminology the direction does **not** use — an adjacent field's name for the same mechanism, the older name for the task, or the benchmark's name instead of the task's — and the §3 block records which alternate terms were tried. Building every query from the direction's own vocabulary is right for reading how crowded an area is and exactly wrong for catching a scoop: the paper that answers your question first answers it in words you did not think to use.
 
 ## What is recorded, per direction
 

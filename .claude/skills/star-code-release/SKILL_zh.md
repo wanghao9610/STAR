@@ -43,7 +43,7 @@ description: >-
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. 解析参数：`gather` / `polish` / `readme` / `check` → 只跑该阶段；无参数 → 按顺序跑完整流程；其他 → 列出四个阶段名，经 AskUserQuestion 询问指的是哪个。
-3. 动手之前先打印**就绪表**：映射表需要的每个输入一行（五份 `metds/*.md`、`results.md`、`codearc.md`、`UPSTREAM.md`、`requirements*`、最新 `ENV_REPORT.md`、`reference.bib`、`LICENSE`），标 `present` / `absent` / `stale`，并写明产出它的 skill。过期与否按各产出方自己的记录方式比对——方法文档的 `sources:` 日期落后于计划当前的 `updated`，结果汇总表早于最新的 `EXPT_ANALYSIS`。
+3. 动手之前先打印**就绪表**：映射表需要的每个输入一行（五份 `metds/*.md`、`results.md`、`codearc.md`、`UPSTREAM.md`、`requirements*`、最新 `ENV_REPORT.md`、`reference.bib`、`LICENSE`），标 `present` / `absent` / `stale`，并写明产出它的 skill。这一步只读每份输入的 frontmatter——判定过期靠的是比日期，方法文档只有到 Step 3 真要从它编译时才整份打开。过期与否按各产出方自己的记录方式比对——方法文档的 `sources:` 日期落后于计划当前的 `updated`，结果汇总表早于最新的 `EXPT_ANALYSIS`。
 4. 带缺口编译是允许且正常的——缺口会变成 README 的 TODO——但用户要先看到这张表。当多数来源都缺失时，直白地说现在编译出来的 README 大半是 TODO，并经 AskUserQuestion 提议：*先跑产出方（推荐，写明是哪些）* / *就用现有的编译*。
 5. 列出启动时就带未提交改动的路径（规约 §1）。本次运行绝不 stage 它们。
 
@@ -52,9 +52,10 @@ description: >-
 1. 按 `references/gather_rubric_zh.md` 列出的候选根扫描：`tasks/<plan>/`、`wkdrs/<run>/` 里的脚本与复现配置、项目根下的散落文件、`execs/scpts/`。绝不扫 `datas/`、绝不扫 `inits/`、绝不扫生成产物。
 2. 对每个候选跑三选一收编检验，记录它通过的是哪一条以及证据——README 的哪一节、计划的 §4/§5 哪一行、结果汇总表的哪一行。一条都不过的原地保留，列为 `keep in place`，不算失败。
 3. 为每个被收编的候选从 `codearc.md` §2 解析目的地，检测 `${CODE_NAME}/` 中已有的近似重复，标注动作 `move` / `merge` / `keep in place` / `route`。路径被计划文件写明的候选标 `plan-referenced`：移动它会让那行计划文本过期，而计划文本不归你改——该行要带上会过期的确切行号，让用户在看得见后果的前提下批准。
-4. **Gate 1：** 以普通文本呈现收编表——路径、证据、目的地、动作、风险——然后经 AskUserQuestion 询问。候选 ≤4 条时用 multiSelect 逐行勾选；更多时提供 *全部批准* / *除某几条外全部批准（在 Other 里写行号）* / *重做*。一条都不批准是有效结果 → 直接进 Step 2。
-5. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用了旧路径的调用点。每行做完，主 agent 自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 回滚该行，标 `blocked`，继续其余。
-6. 提交本阶段（只 stage 被收编的路径及其修好的调用点）：`star-code-release: promote <n> file(s) into ${CODE_NAME}/`。
+4. 候选超过约 15 条时先说明，与用户一起收窄，再去搭这张表。每一行标注的证据行都要在确认点之前重开一遍——这个确认点批准的是文件搬家，不该有哪一行是靠没人打开过的证据走到这里的。
+5. **Gate 1：** 以普通文本呈现收编表——路径、证据、目的地、动作、风险——然后经 AskUserQuestion 询问。候选 ≤4 条时用 multiSelect 逐行勾选；更多时提供 *全部批准* / *除某几条外全部批准（在 Other 里写行号）* / *重做*。一条都不批准是有效结果 → 直接进 Step 2。
+6. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用了旧路径的调用点。每行做完，主 agent 自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 回滚该行，标 `blocked`，继续其余。
+7. 提交本阶段（只 stage 被收编的路径及其修好的调用点）：`star-code-release: promote <n> file(s) into ${CODE_NAME}/`。
 
 ### Step 2 —— `polish`：对外发布的部分
 
@@ -76,7 +77,7 @@ description: >-
 
 ### Step 4 —— `check`：发布前检查
 
-对被 git 跟踪的仓库加上本次收编的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。
+对被 git 跟踪的仓库加上本次收编的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。每个阻断项进报告之前，主 agent 都要回到它标注的 `file:line` 重开确认：一份对外的发布报告，不是让一条没人读过的 grep 命中直接落地的地方。
 
 ### Step 5：报告与交接
 
