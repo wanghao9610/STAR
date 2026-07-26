@@ -8,7 +8,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 
 ### 第一层 —— 有报告依据的
 
-该 run 有 `EXPT_ANALYSIS_<date>.md`。取**最新**的一份。只从它、且只从它读取：
+该 run 有 `EXPT_ANALYSIS_<date>.md`。取**最新**的一份。只从它、且只从它读取——报告的 **§2、§3、§7** 三节承载了下面全部内容，扫描因此带 `--bodies 2,3,7` 来跑；报告若重新编号，改的是这一行，脚本里什么都不用动：
 
 - run 判定（`met` / `partially met` / `not met` / `inconclusive` / `invalid`）；
 - §5 done-criteria 记分卡，压缩成一行；

@@ -8,7 +8,7 @@ Every run in scope belongs to exactly one tier, and the tiers never share a tabl
 
 ### Tier 1 — report-backed
 
-The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and from nothing else:
+The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and from nothing else — sections **2, 3 and 7** of the report carry all of it, which is why the scan is run with `--bodies 2,3,7`; a report that renumbers its sections changes this line and nothing in the script:
 
 - the run verdict (`met` / `partially met` / `not met` / `inconclusive` / `invalid`);
 - the §5 done-criteria scorecard, condensed to one line;

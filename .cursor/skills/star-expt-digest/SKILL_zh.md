@@ -42,7 +42,7 @@ description: >-
 
 **先扫一次。** 在 Step 0 之前，以项目根目录为工作目录，运行一次收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh`。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、方向性信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。
 
-脚本只收集，从不判断——它不认识时间窗、上次覆盖到的日期、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md` 里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。Step 2 是刻意的例外：`EXPT_ANALYSIS` 正文是内容而非元数据，因此仍然逐 run 读取。若脚本缺失或执行失败，退回逐文件读取，并在报告里说明这次走了退路。若无法解析出本 skill 自己的目录，仓库里任一份拷贝都可以——每份 `scripts/scan.sh` 逐字节相同，CI 会强制这一点：`bash "$(find . -path '*/skills/*/scripts/scan.sh' | head -1)"`。
+脚本只收集，从不判断——它不认识时间窗、上次覆盖到的日期、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md` 里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。Step 2 要的报告正文也来自同一次调用：加上 `--bodies 2,3,7`，扫描就会把每份报告的判定、完成判据记分卡和解读三节一并纳入深度 2 的扫描。这三个编号是本 skill 的规则、写在 `references/digest_rubric_zh.md` 里，不是脚本的规则——脚本只打印交给它的那些编号小节，对里面是什么一无所知，所以报告改了编号，改的是评分表里的一行，脚本一个字都不用动。若脚本缺失或执行失败，退回逐文件读取，并在报告里说明这次走了退路。若无法解析出本 skill 自己的目录，仓库里任一份拷贝都可以——每份 `scripts/scan.sh` 逐字节相同，CI 会强制这一点：`bash "$(find . -path '*/skills/*/scripts/scan.sh' | head -1)"`。
 
 ### Step 0：确定周期与范围
 

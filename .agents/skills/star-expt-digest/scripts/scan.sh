@@ -14,28 +14,56 @@
 # the single home of every rule, so a producer skill that renames its output
 # never has to be mirrored here.
 #
-# Usage: bash <skill-dir>/scripts/scan.sh [--trails]   # run from the project root
+# Usage: bash <skill-dir>/scripts/scan.sh [--trails] [--bodies N,N] [--runs DIR,DIR]
+#        # run from the project root
 #
-#   --trails   provenance mode: print every model_trail entry in full rather
-#              than counting it, add each plan's ## Revision History and the
-#              model_id header line of files that carry no frontmatter, and
-#              widen the sweep to metds/refs/. This is what a cross-artifact
-#              provenance ledger reads; the default mode drops all of it because
-#              an unbounded trail would crowd out the fields everything else needs.
+#   --trails      provenance mode: print every model_trail entry in full rather
+#                 than counting it, add each plan's ## Revision History and the
+#                 model_id header line of files that carry no frontmatter, and
+#                 widen the sweep to metds/refs/. This is what a cross-artifact
+#                 provenance ledger reads; the default mode drops all of it because
+#                 an unbounded trail would crowd out the fields everything else needs.
+#                 It also drops what a provenance read has no use for: the sub-plans
+#                 index, the [TBD] counts, the per-run dates line, and DIRS.
+#                 model_trail itself is never capped — printing every entry is the
+#                 whole point of the mode, and a ledger with a hole in it is worse
+#                 than a long one.
+#
+#   --bodies N,N  for each depth-2 wkdrs artifact, also print the body of the
+#                 "## <N>." sections named, capped. The caller names the numbers:
+#                 which sections carry the facts is the reading skill's rule, not
+#                 this script's, so a producer that renumbers its report is a
+#                 one-line change in that skill and nothing here. Without this the
+#                 depth-2 sweep stays frontmatter-only, as before.
+#
+#   --runs DIR,DIR  restrict the per-run body index and dates line to these run
+#                 directories. Frontmatter is still printed for every run, and
+#                 PLANS, ARTIFACT FRONTMATTER, LISTING and DIRS stay project-wide:
+#                 a subtree question still needs every plan's parent:, and the
+#                 drift check counts report-shaped files across the whole project.
+#                 A run outside the scope is named as omitted, never dropped silently.
 #
 # Reads only. Writes nothing, anywhere.
 
 set -u
 
 TRAILS=0
-case "${1:-}" in
-    "") ;;
-    --trails) TRAILS=1 ;;
-    *) printf 'usage: scan.sh [--trails]\n' >&2; exit 2 ;;
-esac
+BODY_SECTIONS=""
+RUNS_SCOPE=""
+usage() { printf 'usage: scan.sh [--trails] [--bodies N,N] [--runs DIR,DIR]\n' >&2; exit 2; }
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --trails) TRAILS=1 ;;
+        --bodies) [ $# -ge 2 ] || usage; BODY_SECTIONS="$2"; shift ;;
+        --runs)   [ $# -ge 2 ] || usage; RUNS_SCOPE="$2"; shift ;;
+        *) usage ;;
+    esac
+    shift
+done
 
 FM_CAP=120   # frontmatter lines printed per file before truncation
 [ "$TRAILS" = 0 ] || FM_CAP=500
+BODY_CAP=60  # lines printed per --bodies section before truncation
 
 say() { printf '%s\n' "$*"; }
 
@@ -117,6 +145,38 @@ dates_seen() {
     grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' "$1" | sort -u | tr '\n' ' '
 }
 
+# Bodies of the numbered "## <n>." sections the caller asked for, capped per
+# section. It matches on the number only, never on the heading text, so it stays
+# language-agnostic and knows nothing about what any section is called.
+sections_by_number() {   # $1 = file, $2 = comma-separated section numbers
+    awk -v want="$2" -v cap="$BODY_CAP" '
+        BEGIN { n = split(want, a, ","); for (i = 1; i <= n; i++) { gsub(/[^0-9]/, "", a[i]); if (a[i] != "") sel[a[i]] = 1 } }
+        /^## / {
+            inside = 0
+            if (match($0, /^##[ \t]+[0-9]+\./)) {
+                num = substr($0, RSTART, RLENGTH); gsub(/[^0-9]/, "", num)
+                if (num in sel) { inside = 1; printed = 0; lines = 0; head = $0 }
+            }
+            next
+        }
+        inside {
+            if (lines >= cap) { if (lines == cap) { print "  … (section truncated at " cap " lines)"; lines++ } next }
+            if (!printed) { print head; printed = 1 }
+            print; lines++
+        }
+    ' "$1"
+}
+
+# Is this run directory inside the --runs scope? Empty scope means every run.
+in_runs_scope() {   # $1 = path under wkdrs/
+    [ -n "$RUNS_SCOPE" ] || return 0
+    d=${1#wkdrs/}; d=${d%%/*}
+    case ",$RUNS_SCOPE," in
+        *",$d,"*) return 0 ;;
+    esac
+    return 1
+}
+
 # File selection never goes through a shell glob. An unmatched pattern is a fatal
 # error in zsh and expands to itself in POSIX sh, and either one would quietly
 # corrupt the digest — a missing wkdrs/*.md took the whole listing with it. find
@@ -154,16 +214,20 @@ while IFS= read -r f; do
     say "=== $f"
     say "[frontmatter]"
     frontmatter "$f"
-    index=$(section_body "$f" '^##[ \t]*Sub-plans')
-    if [ -n "$index" ]; then
-        say "[sub-plans index]"
-        printf '%s\n' "$index" | grep -v '^[ \t]*$'
+    # The tree shape and the "too coarse" input are what a status or digest read
+    # needs; a provenance read has no use for either, so --trails drops both.
+    if [ "$TRAILS" = 0 ]; then
+        index=$(section_body "$f" '^##[ \t]*Sub-plans')
+        if [ -n "$index" ]; then
+            say "[sub-plans index]"
+            printf '%s\n' "$index" | grep -v '^[ \t]*$'
+        fi
     fi
     # The one body fact the coverage band needs: an idea file named anywhere in
     # the plan, since the coach records its seed as prose rather than a field.
     seeds=$(grep -o '[A-Za-z0-9._-]*_idea\.md' "$f" | sort -u | tr '\n' ' ')
     [ -z "$seeds" ] || say "[idea refs] $seeds"
-    tbd_counts "$f"
+    [ "$TRAILS" = 1 ] || tbd_counts "$f"
     if [ "$TRAILS" = 1 ]; then
         # Not named `history`: that is a special array in zsh, and assigning to it
         # aborts the loop there while working fine everywhere else.
@@ -189,9 +253,13 @@ while IFS= read -r f; do
     say "=== $f"
     say "[frontmatter]"
     frontmatter "$f"
-    say "[body: headings with their table rows, checkboxes, and signals]"
-    body_index "$f"
-    say "[dates seen] $(dates_seen "$f")"
+    if ! in_runs_scope "$f"; then
+        say "[body and dates omitted — outside --runs scope]"
+    else
+        say "[body: headings with their table rows, checkboxes, and signals]"
+        body_index "$f"
+        [ "$TRAILS" = 1 ] || say "[dates seen] $(dates_seen "$f")"
+    fi
 done <<RUNS
 $(find_md wkdrs 2 'EXEC_LOG.md')
 RUNS
@@ -229,6 +297,17 @@ while IFS= read -r f; do
     say ""
     say "=== $f"
     printf '%s\n' "$fm"
+    if [ -n "$BODY_SECTIONS" ]; then
+        case "$f" in
+            wkdrs/*/*)
+                bodies=$(sections_by_number "$f" "$BODY_SECTIONS")
+                if [ -n "$bodies" ]; then
+                    say "[bodies: sections $BODY_SECTIONS]"
+                    printf '%s\n' "$bodies"
+                fi
+                ;;
+        esac
+    fi
 done <<ARTIFACTS
 $(artifact_files)
 ARTIFACTS
@@ -253,11 +332,13 @@ else
     say "(none)"
 fi
 
-say ""
-say "## DIRS — metds/ and wkdrs/ subdirectories"
-dirs=$(find_dirs metds; find_dirs wkdrs)
-if [ -n "$dirs" ]; then
-    printf '%s\n' "$dirs" | sort
-else
-    say "(none)"
+if [ "$TRAILS" = 0 ]; then
+    say ""
+    say "## DIRS — metds/ and wkdrs/ subdirectories"
+    dirs=$(find_dirs metds; find_dirs wkdrs)
+    if [ -n "$dirs" ]; then
+        printf '%s\n' "$dirs" | sort
+    else
+        say "(none)"
+    fi
 fi
