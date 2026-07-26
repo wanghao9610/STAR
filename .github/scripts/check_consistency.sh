@@ -628,26 +628,43 @@ done < <(find docs/mds/star-workflow -type f -name '*.md' ! -name '*.zh-CN.md' |
 #     that still point at a heading. What a section *says* is still on you.
 section "Skills guide coverage"
 
-GUIDES=(docs/mds/star-workflow/research-workflow-skills.md
-        docs/mds/star-workflow/research-workflow-skills.zh-CN.md)
+# file|mode. guide: one numbered section per skill. readme: the landing page,
+# where a skill only has to be named — its shape is a table, not sections.
+GUIDES=("docs/mds/star-workflow/research-workflow-skills.md|guide"
+        "docs/mds/star-workflow/research-workflow-skills.zh-CN.md|guide"
+        "README.md|readme"
+        "README.zh-CN.md|readme")
 guide_errors=0
 
-for guide in "${GUIDES[@]}"; do
+for guide_row in "${GUIDES[@]}"; do
+    guide="${guide_row%%|*}"
+    guide_mode="${guide_row#*|}"
     [[ -f "${guide}" ]] || { fail "${guide} is missing"; guide_errors=1; continue; }
 
-    # one numbered section per skill, and no numbered skill section beyond them
-    while IFS= read -r skill; do
-        n="$(grep -E '^## [0-9]+\.' "${guide}" | grep -cF "\`\$${skill}\`")"
-        if (( n != 1 )); then
-            fail "${guide}: ${n} sections for ${skill}, expected 1 — a skill was added, removed, or renamed without the guide"
+    if [[ "${guide_mode}" == "guide" ]]; then
+        # one numbered section per skill, and no numbered skill section beyond them
+        while IFS= read -r skill; do
+            n="$(grep -E '^## [0-9]+\.' "${guide}" | grep -cF "\`\$${skill}\`")"
+            if (( n != 1 )); then
+                fail "${guide}: ${n} sections for ${skill}, expected 1 — a skill was added, removed, or renamed without the guide"
+                guide_errors=1
+            fi
+        done < <(printf '%s\n' "${SKILLS}")
+        sections="$(grep -cE '^## [0-9]+\. `\$star-' "${guide}")"
+        expected_sections="$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ')"
+        if [[ "${sections}" != "${expected_sections}" ]]; then
+            fail "${guide} has ${sections} per-skill sections for ${expected_sections} skills"
             guide_errors=1
         fi
-    done < <(printf '%s\n' "${SKILLS}")
-    sections="$(grep -cE '^## [0-9]+\. `\$star-' "${guide}")"
-    expected_sections="$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ')"
-    if [[ "${sections}" != "${expected_sections}" ]]; then
-        fail "${guide} has ${sections} per-skill sections for ${expected_sections} skills"
-        guide_errors=1
+    else
+        # the name must end where the skill's name ends: a plain substring match
+        # would accept `$star-expt-digestx` as a mention of `star-expt-digest`
+        while IFS= read -r skill; do
+            if ! grep -qE "\\\$${skill}([^A-Za-z0-9_-]|\$)" "${guide}"; then
+                fail "${guide} never names ${skill} — a skill was added or renamed without the landing page"
+                guide_errors=1
+            fi
+        done < <(printf '%s\n' "${SKILLS}")
     fi
 
     # every relative link target exists (the per-section "complete definition"
@@ -658,10 +675,15 @@ for guide in "${GUIDES[@]}"; do
             fail "${guide}: link target ${target} does not exist"
             guide_errors=1
         fi
-    done < <(grep -oE '\]\([^)#][^)]*\)' "${guide}" | sed 's/^](//; s/)$//' | grep -vE '^(https?|mailto):' | sort -u)
+    done < <(grep -oE '\]\([^)#][^)]*\)' "${guide}" | sed 's/^](//; s/)$//; s/#.*$//' | grep -vE '^(https?|mailto):' | grep -v '^$' | sort -u)
 
     # citations of the conventions document land on a section, and on an item
-    # that section actually has (CONV_ITEMS is pinned by check 17)
+    # that section actually has (CONV_ITEMS is pinned by check 17). Two forms:
+    # the guides write "conventions §7.7", while the landing page cites it
+    # through a link, putting the name and the § on either side of the target —
+    # so that form is matched by the line. Keep both greps free of comments:
+    # inside a process substitution bash runs a comment as a command, and the
+    # error goes to stderr while the check still reports ok.
     while IFS= read -r cite; do
         [[ -n "${cite}" ]] || continue
         c_sec="${cite%%.*}"
@@ -679,7 +701,9 @@ for guide in "${GUIDES[@]}"; do
                 guide_errors=1
             fi
         done
-    done < <(grep -oE '(conventions|规约) §[0-9]+(\.[0-9]+)?' "${guide}" | grep -oE '[0-9]+(\.[0-9]+)?' | sort -u)
+    done < <({ grep -oE '(conventions|规约) §[0-9]+(\.[0-9]+)?' "${guide}"
+               grep -h 'research-workflow-conventions' "${guide}" | grep -oE '§[0-9]+(\.[0-9]+)?'
+             } | grep -oE '[0-9]+(\.[0-9]+)?' | sort -u)
 
     # in-page anchors still match a heading. GitHub lowercases, drops
     # punctuation, and turns spaces into dashes; CJK passes through.

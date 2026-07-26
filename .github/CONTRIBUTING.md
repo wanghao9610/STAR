@@ -132,12 +132,14 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     headings are pinned; item counts are pinned for the sections whose items are cited (§1, §3, §4, §5,
     §6, §7), and both languages are counted, since a §n that means different things per language is the
     same bug. The line-count parity is the "keep them line-aligned" rule below, enforced.
-18. **The skills guide stays tied to the skills it describes.** Roughly 69% of that guide paraphrases
-    the fifteen `SKILL.md` files, which are authoritative and change far more often. This holds the
-    joins a script can see, in both languages: one numbered section per skill and no more; every
-    relative link target on disk (the per-section "complete definition" links included); every
-    `conventions §n.m` citation landing on a section and an item that exists; every in-page anchor
-    still matching a heading. What a section *says* about a skill is checked by nobody.
+18. **The skills guide and the two READMEs stay tied to the skills they describe.** Roughly 69% of that
+    guide paraphrases the fifteen `SKILL.md` files, which are authoritative and change far more often.
+    This holds the joins a script can see, across all four documents: every relative link target on
+    disk (the guide's per-section "complete definition" links included); every `conventions §n.m`
+    citation landing on a section and an item that exists; every in-page anchor still matching a
+    heading. On skill coverage the two shapes differ — the guide owes one numbered section per skill
+    and no more, the READMEs only have to name each skill, since there it is a table row. What a
+    section *says* about a skill is checked by nobody.
 
 ## What the checks do not catch
 

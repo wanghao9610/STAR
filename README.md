@@ -21,11 +21,12 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
   - [1. Start a project with STAR](#1-start-a-project-with-star)
   - [1b. Or adopt a project that already exists](#1b-or-adopt-a-project-that-already-exists)
   - [2. Configure the local runtime](#2-configure-the-local-runtime)
-  - [2b. Optional: enable Kimi model-id provenance](#2b-optional-enable-kimi-model-id-provenance)
-  - [2c. Optional: pre-approve the status collector](#2c-optional-pre-approve-the-status-collector)
   - [3. Add an experiment](#3-add-an-experiment)
   - [4. Run it](#4-run-it)
   - [5. Start the research workflow](#5-start-the-research-workflow)
+- [Per-tool setup (optional)](#per-tool-setup-optional)
+  - [Model-id provenance hooks](#model-id-provenance-hooks)
+  - [Pre-approve the status collector](#pre-approve-the-status-collector)
 - [Research workflow](#research-workflow)
   - [Model selection](#model-selection)
 - [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides)
@@ -77,7 +78,7 @@ STAR/
 ├── .claude/hooks/          # Model-id provenance hook for Claude
 ├── .codex/hooks/           # Model-id provenance hook for Codex
 ├── .cursor/hooks/          # Model-id provenance hook for Cursor
-├── .kimi-code/hooks/       # Model-id provenance hook for Kimi (see Quick start 2b)
+├── .kimi-code/hooks/       # Model-id provenance hook for Kimi (see Per-tool setup)
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .github/                # STAR's own maintainer CI; delete it in your project
@@ -180,41 +181,6 @@ A second optional key, `STAR_LANG=en|zh`, fixes the language the agents reply in
 
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
-### 2b. Optional: enable Kimi model-id provenance
-
-If you drive STAR with **Kimi Code**, run this once per machine so skills record the real `model_id` instead of `unrecorded`:
-
-```bash
-bash .kimi-code/hooks/install.sh
-```
-
-It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor ship their hook registered. On Codex, registered is not yet running: a project hook fires only once the project is trusted and the hook approved, so run `/hooks` in the Codex CLI and approve it — and again whenever it changes. Until you do, `model_id` reads `unrecorded` in every report and nothing reports the gap. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
-
-### 2c. Optional: pre-approve the status collector
-
-`star-flow-status` and `star-expt-digest` open the same plans, run logs, and reports before doing anything else, so each gathers them with one read-only script — `scripts/scan.sh` in its own directory inside your tool's directory — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
-
-Claude Code needs nothing on a fresh install — `.claude/settings.json` ships allow rules for exactly those two scripts and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rules there yourself:
-
-```json
-"permissions": {
-  "allow": [
-    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
-  ]
-}
-```
-
-Elsewhere, approve it once when asked, or pre-approve it in the tool:
-
-| Tool | Where to pre-approve |
-|---|---|
-| Codex | its approval-policy / sandbox setting (global config, not per project) |
-| Cursor | its command allowlist, in the app's settings |
-| Kimi | your global `~/.kimi-code/config.toml` — Kimi does not read project-level config |
-
-The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
-
 ### 3. Add an experiment
 
 Put reusable project code under the directory named by `CODE_NAME`, then add an experiment script under `execs/scpts/`. For example:
@@ -266,6 +232,45 @@ The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` 
 
 `star-flow-status` is the one to remember: it reads the plan tree and the reports on disk and names the single next action, so you never have to recall where you left off.
 
+## Per-tool setup (optional)
+
+Neither is needed to get started. Do them when the tool you drive STAR with needs them.
+
+### Model-id provenance hooks
+
+If you drive STAR with **Kimi Code**, run this once per machine so skills record the real `model_id` instead of `unrecorded`:
+
+```bash
+bash .kimi-code/hooks/install.sh
+```
+
+It registers the provenance hook in your global `~/.kimi-code/config.toml` (idempotent, backs up first). One run covers every STAR project. Skip it if you use another agent — Codex, Claude, and Cursor ship their hook registered. On Codex, registered is not yet running: a project hook fires only once the project is trusted and the hook approved, so run `/hooks` in the Codex CLI and approve it — and again whenever it changes. Until you do, `model_id` reads `unrecorded` in every report and nothing reports the gap. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
+
+### Pre-approve the status collector
+
+`star-flow-status` and `star-expt-digest` open the same plans, run logs, and reports before doing anything else, so each gathers them with one read-only script — `scripts/scan.sh` in its own directory inside your tool's directory — instead of opening each file. That is a shell call, so your agent asks to approve it the first time it runs.
+
+Claude Code needs nothing on a fresh install — `.claude/settings.json` ships allow rules for exactly those two scripts and nothing else. A project adopted earlier keeps its own `settings.json` (`execs/update.sh` installs that file only when missing, never overwriting it), so add the rules there yourself:
+
+```json
+"permissions": {
+  "allow": [
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
+  ]
+}
+```
+
+Elsewhere, approve it once when asked, or pre-approve it in the tool:
+
+| Tool | Where to pre-approve |
+|---|---|
+| Codex | its approval-policy / sandbox setting (global config, not per project) |
+| Cursor | its command allowlist, in the app's settings |
+| Kimi | your global `~/.kimi-code/config.toml` — Kimi does not read project-level config |
+
+The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
+
 ## Research workflow
 
 STAR includes fifteen complementary skills that turn a vague research interest into an auditable execution process.
@@ -305,7 +310,14 @@ Every skill must be named explicitly. All four tools disable implicit invocation
 
 ### Model selection
 
-Different stages benefit from different model strengths. Model names below are as of 2026-07 and will age; a parenthesis marks an equally good alternative at that tier. For brainstorming and judging research directions, for drafting, decomposing, and revising research plans, for judging how related work positions the method, for interpreting what experiment results mean, and for compiling the plans into method write-ups, we recommend using Claude Fable5 Extra, ChatGPT5.6 Sol High, or Kimi K3 with `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, and `$star-metd-summarize`. For codebase bootstrapping, environment builds, plan execution, code review, periodic progress digests, and progress summaries, we recommend using Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), Cursor Grok4.5 High, or Kimi K3 with `$star-proj-adopt`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-expt-digest`, `$star-flow-status`, and `$star-code-release`. When resources permit, using the strongest available model across all fifteen workflows generally delivers the best overall results.
+Different stages benefit from different model strengths. Model names are as of 2026-07 and will age; a parenthesis marks an equally good alternative at that tier.
+
+| Stage | Skills | Recommended |
+|---|---|---|
+| **Judgment and writing** — research directions, plans, how related work positions the method, what results mean, method write-ups | `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer`, `$star-plan-decomposer`, `$star-expt-analyst`, `$star-plan-reviser`, `$star-metd-summarize` | Claude Fable5 Extra, ChatGPT5.6 Sol High, or Kimi K3 |
+| **Building and running** — codebase, environment, plan execution, code review, progress digests, status, release | `$star-proj-adopt`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-expt-digest`, `$star-flow-status`, `$star-code-release` | Claude Opus4.8 Medium (Sonnet5 High), ChatGPT5.6 Sol Medium (Terra High), Cursor Grok4.5 High, or Kimi K3 |
+
+When resources permit, using the strongest available model across all fifteen workflows generally delivers the best overall results.
 
 These skills preserve decisions and progress in project files instead of relying on chat history. English and Chinese research workflows are both supported.
 
@@ -322,10 +334,7 @@ bash execs/update.sh
 By default, the command updates these paths from STAR's `main` branch:
 
 - `AGENTS.md` and `.cursor/rules/` — the shared agent instructions and the Cursor rule that copies their body; your own edits to them are replaced
-- `.agents/skills/`
-- `.claude/skills/`
-- `.cursor/skills/`
-- `.kimi-code/skills/`
+- `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.kimi-code/skills/`
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.kimi-code/hooks/`, and `.kimi-code/hooks.example.toml` — the model-id provenance hooks
 - `docs/mds/star-workflow/`
 
@@ -335,38 +344,13 @@ Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and 
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-To preview an update without changing any file, pass `--diff` (optionally with a ref or `--skill NAME`). It lists upstream files that are new or differ from your local copies, marks project-local files an update would keep, and exits `2` when an update would change anything, `0` when everything already matches, and `1` on error — so a script can tell an available update from a failed check:
+The general form is `bash execs/update.sh [--diff] [ref] [--skill NAME]`:
 
-```bash
-bash execs/update.sh --diff
-```
+- `--diff` previews an update without changing a file, and exits `2` when one is available, `0` when everything already matches, `1` on error — so a script can tell an available update from a failed check.
+- A `ref` pins the update to a tag or branch.
+- `--skill NAME` updates that one skill across all four tool directories, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the four upstream skill directories, stops the command without overwriting anything.
 
-To pin the update to a tag or branch, pass it as an argument:
-
-```bash
-bash execs/update.sh TAG_OR_BRANCH
-```
-
-To update one skill only, pass its directory name with `--skill`:
-
-```bash
-bash execs/update.sh --skill star-plan-coach
-```
-
-This updates the matching skill in all four tool-specific directories:
-
-- `.agents/skills/star-plan-coach/`
-- `.claude/skills/star-plan-coach/`
-- `.cursor/skills/star-plan-coach/`
-- `.kimi-code/skills/star-plan-coach/`
-
-The workflow documentation under `docs/mds/star-workflow/` and the provenance hooks are not updated in single-skill mode. To update a skill from a specific tag or branch, combine the ref and option:
-
-```bash
-bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
-```
-
-The general command form is `bash execs/update.sh [--diff] [ref] [--skill NAME]`. If the named skill is invalid or is missing from any of the four upstream skill directories, the command stops without overwriting local files. Run `bash execs/update.sh --help` for the built-in usage summary.
+`bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.
 
 Files at matching paths are overwritten and new upstream files are added. Project-specific files that exist only in the updated directories are preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 

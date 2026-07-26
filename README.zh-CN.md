@@ -21,11 +21,12 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
   - [1. 使用 STAR 创建项目](#1-使用-star-创建项目)
   - [1b. 或者：接入一个已经存在的项目](#1b-或者接入一个已经存在的项目)
   - [2. 配置本地运行环境](#2-配置本地运行环境)
-  - [2b. 可选：启用 Kimi 的 model-id 溯源](#2b-可选启用-kimi-的-model-id-溯源)
-  - [2c. 可选：为状态收集脚本预先授权](#2c-可选为状态收集脚本预先授权)
   - [3. 添加实验](#3-添加实验)
   - [4. 运行实验](#4-运行实验)
   - [5. 启动研究工作流](#5-启动研究工作流)
+- [分工具配置（可选）](#分工具配置可选)
+  - [model-id 溯源钩子](#model-id-溯源钩子)
+  - [为状态收集脚本预先授权](#为状态收集脚本预先授权)
 - [研究工作流](#研究工作流)
   - [模型选择建议](#模型选择建议)
 - [更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)
@@ -77,7 +78,7 @@ star-ai-research/
 ├── .claude/hooks/          # Claude 的 model-id 溯源钩子
 ├── .codex/hooks/           # Codex 的 model-id 溯源钩子
 ├── .cursor/hooks/          # Cursor 的 model-id 溯源钩子
-├── .kimi-code/hooks/       # Kimi 的 model-id 溯源钩子（见快速开始 2b）
+├── .kimi-code/hooks/       # Kimi 的 model-id 溯源钩子（见分工具配置）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .github/                # STAR 自身的维护 CI；用于你的项目时请删除
@@ -175,41 +176,6 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
-### 2b. 可选：启用 Kimi 的 model-id 溯源
-
-如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，让各 skill 记录真实的 `model_id` 而不是 `unrecorded`：
-
-```bash
-bash .kimi-code/hooks/install.sh
-```
-
-它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发，所以要在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
-
-### 2c. 可选：为状态收集脚本预先授权
-
-`star-flow-status` 与 `star-expt-digest` 在动手之前都要打开同一批计划、run 日志与报告，因此各自用一个只读脚本一次收齐——即所用工具目录下各自的 `scripts/scan.sh`——而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
-
-全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带只针对这两个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这些规则：
-
-```json
-"permissions": {
-  "allow": [
-    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
-  ]
-}
-```
-
-其他工具可在被询问时授权一次，或预先加入白名单：
-
-| 工具 | 在哪里预先授权 |
-|---|---|
-| Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
-| Cursor | 应用设置里的命令白名单 |
-| Kimi | 全局 `~/.kimi-code/config.toml`——Kimi 不读取项目级配置 |
-
-该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。
-
 ### 3. 添加实验
 
 将可复用的项目代码放在 `CODE_NAME` 指定的目录中，再在 `execs/scpts/` 下添加实验脚本。例如：
@@ -261,6 +227,45 @@ bash execs/run.sh 00_exp --config config.yaml
 
 最值得记住的是 `star-flow-status`：它会读取计划树和磁盘上的报告，直接给出下一步该做什么，因此你不必再回忆上次停在哪里。
 
+## 分工具配置（可选）
+
+两项都不影响开始使用；用到哪个工具，再做哪一项。
+
+### model-id 溯源钩子
+
+如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，让各 skill 记录真实的 `model_id` 而不是 `unrecorded`：
+
+```bash
+bash .kimi-code/hooks/install.sh
+```
+
+它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发，所以要在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+
+### 为状态收集脚本预先授权
+
+`star-flow-status` 与 `star-expt-digest` 在动手之前都要打开同一批计划、run 日志与报告，因此各自用一个只读脚本一次收齐——即所用工具目录下各自的 `scripts/scan.sh`——而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
+
+全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带只针对这两个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这些规则：
+
+```json
+"permissions": {
+  "allow": [
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
+  ]
+}
+```
+
+其他工具可在被询问时授权一次，或预先加入白名单：
+
+| 工具 | 在哪里预先授权 |
+|---|---|
+| Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
+| Cursor | 应用设置里的命令白名单 |
+| Kimi | 全局 `~/.kimi-code/config.toml`——Kimi 不读取项目级配置 |
+
+该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。
+
 ## 研究工作流
 
 STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程。
@@ -300,7 +305,14 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。头脑风暴并评判研究方向，编写、拆解和修订研究计划，判断相关工作如何定位本方法，解读实验结果意味着什么，以及把计划凝练成方法表述时，建议为 `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser` 和 `$star-metd-summarize` 选用 Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3；搭建代码库、构建环境、执行计划、审查代码、周期性进展汇总、全局状态汇总和发布准备时，建议为 `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status` 和 `$star-code-release` 选用 Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3。条件允许时，十五个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+不同阶段对模型能力的侧重有所不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。
+
+| 阶段 | Skills | 建议模型 |
+|---|---|---|
+| **判断与写作**——研究方向、计划、相关工作如何定位本方法、结果意味着什么、方法表述 | `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser`、`$star-metd-summarize` | Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3 |
+| **搭建与执行**——代码库、运行环境、执行计划、代码审查、进展汇总、全局状态、发布准备 | `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status`、`$star-code-release` | Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3 |
+
+条件允许时，十五个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
@@ -317,10 +329,7 @@ bash execs/update.sh
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
 - `AGENTS.md` 与 `.cursor/rules/`——共享的 agent 协作规范，以及抄录其正文的 Cursor 规则；你对它们的改动会被替换
-- `.agents/skills/`
-- `.claude/skills/`
-- `.cursor/skills/`
-- `.kimi-code/skills/`
+- `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/`
 
@@ -330,38 +339,13 @@ bash execs/update.sh
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-如需在不改动任何文件的情况下预览更新，可加 `--diff`（可搭配 ref 或 `--skill NAME`）。它会列出上游新增或与本地不同的文件，并标注仅存在于本项目、更新时会保留的文件；有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”：
+命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--skill NAME]`：
 
-```bash
-bash execs/update.sh --diff
-```
+- `--diff` 在不改动任何文件的情况下预览更新，有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”。
+- `ref` 把更新固定到某个 tag 或分支。
+- `--skill NAME` 只更新四个工具目录中的这一个 skill，不动工作流文档和溯源钩子。名称无效、或上游四个 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
 
-如需固定到某个 tag 或分支，可以将其作为参数传入：
-
-```bash
-bash execs/update.sh TAG_OR_BRANCH
-```
-
-如需只更新一个 skill，通过 `--skill` 传入其目录名：
-
-```bash
-bash execs/update.sh --skill star-plan-coach
-```
-
-该命令会更新四个工具目录中对应的 skill：
-
-- `.agents/skills/star-plan-coach/`
-- `.claude/skills/star-plan-coach/`
-- `.cursor/skills/star-plan-coach/`
-- `.kimi-code/skills/star-plan-coach/`
-
-单 skill 模式不会更新 `docs/mds/star-workflow/` 下的工作流文档，也不会更新溯源钩子。如需从指定 tag 或分支更新某个 skill，可以组合 ref 和选项：
-
-```bash
-bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
-```
-
-命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--skill NAME]`。如果 skill 名称无效，或上游四个 skill 目录中有任何一处缺少该 skill，命令会停止且不会覆盖本地文件。可运行 `bash execs/update.sh --help` 查看内置用法摘要。
+`bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
 
 上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；更新范围内，仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 
