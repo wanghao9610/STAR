@@ -132,6 +132,12 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     headings are pinned; item counts are pinned for the sections whose items are cited (§1, §3, §4, §5,
     §6, §7), and both languages are counted, since a §n that means different things per language is the
     same bug. The line-count parity is the "keep them line-aligned" rule below, enforced.
+18. **The skills guide stays tied to the skills it describes.** Roughly 69% of that guide paraphrases
+    the fifteen `SKILL.md` files, which are authoritative and change far more often. This holds the
+    joins a script can see, in both languages: one numbered section per skill and no more; every
+    relative link target on disk (the per-section "complete definition" links included); every
+    `conventions §n.m` citation landing on a section and an item that exists; every in-page anchor
+    still matching a heading. What a section *says* about a skill is checked by nobody.
 
 ## What the checks do not catch
 
@@ -151,6 +157,9 @@ Be honest with yourself about this list; it is where the real drift lives.
 - **Whether a shortened description still says the important thing.** Check 12 enforces the Kimi
   length budget below, but nothing checks that what was cut to fit was expendable — see the budget
   section.
+- **Whether the skills guide still describes the skill correctly.** Check 18 proves a section exists
+  for each skill and that its links resolve. Rewrite a skill's workflow and leave the guide's "What it
+  does" list describing the old one, and every check stays green.
 - **A bare `§n` citation.** Most citations of `AGENTS.md` are bare — `(AGENTS.md §3)` says nothing
   about what §3 contains, so check 16b cannot verify it. Only 16a stands behind those: it makes the
   renumber loud, not the citation correct.

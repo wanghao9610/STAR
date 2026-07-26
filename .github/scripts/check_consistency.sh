@@ -619,6 +619,91 @@ done < <(find docs/mds/star-workflow -type f -name '*.md' ! -name '*.zh-CN.md' |
 
 (( conv_errors == 0 )) && note "conventions headings and item counts pinned; workflow docs line-aligned en/zh"
 
+# 18. The skills guide stays tied to the skills it describes.
+#     Nothing else connects them: 69% of that guide paraphrases the fifteen
+#     SKILL.md files, which are authoritative and change far more often, and a
+#     skill added, removed, or renamed leaves the guide silently describing a
+#     workflow that no longer exists. This holds the joins a script can see —
+#     one section per skill, links that resolve, citations that land, anchors
+#     that still point at a heading. What a section *says* is still on you.
+section "Skills guide coverage"
+
+GUIDES=(docs/mds/star-workflow/research-workflow-skills.md
+        docs/mds/star-workflow/research-workflow-skills.zh-CN.md)
+guide_errors=0
+
+for guide in "${GUIDES[@]}"; do
+    [[ -f "${guide}" ]] || { fail "${guide} is missing"; guide_errors=1; continue; }
+
+    # one numbered section per skill, and no numbered skill section beyond them
+    while IFS= read -r skill; do
+        n="$(grep -E '^## [0-9]+\.' "${guide}" | grep -cF "\`\$${skill}\`")"
+        if (( n != 1 )); then
+            fail "${guide}: ${n} sections for ${skill}, expected 1 — a skill was added, removed, or renamed without the guide"
+            guide_errors=1
+        fi
+    done < <(printf '%s\n' "${SKILLS}")
+    sections="$(grep -cE '^## [0-9]+\. `\$star-' "${guide}")"
+    expected_sections="$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ')"
+    if [[ "${sections}" != "${expected_sections}" ]]; then
+        fail "${guide} has ${sections} per-skill sections for ${expected_sections} skills"
+        guide_errors=1
+    fi
+
+    # every relative link target exists (the per-section "complete definition"
+    # links point into .claude/skills/, four directory levels up)
+    while IFS= read -r target; do
+        [[ -n "${target}" ]] || continue
+        if [[ ! -e "$(dirname "${guide}")/${target}" ]]; then
+            fail "${guide}: link target ${target} does not exist"
+            guide_errors=1
+        fi
+    done < <(grep -oE '\]\([^)#][^)]*\)' "${guide}" | sed 's/^](//; s/)$//' | grep -vE '^(https?|mailto):' | sort -u)
+
+    # citations of the conventions document land on a section, and on an item
+    # that section actually has (CONV_ITEMS is pinned by check 17)
+    while IFS= read -r cite; do
+        [[ -n "${cite}" ]] || continue
+        c_sec="${cite%%.*}"
+        c_item=""
+        [[ "${cite}" == *.* ]] && c_item="${cite#*.}"
+        if (( c_sec > 9 )); then
+            fail "${guide}: cites conventions §${cite}, which has no such section"
+            guide_errors=1
+            continue
+        fi
+        for row in "${CONV_ITEMS[@]}"; do
+            [[ "${row%%|*}" == "${c_sec}" ]] || continue
+            if [[ -n "${c_item}" ]] && (( c_item > ${row#*|} )); then
+                fail "${guide}: cites conventions §${cite}, but §${c_sec} has only ${row#*|} items"
+                guide_errors=1
+            fi
+        done
+    done < <(grep -oE '(conventions|规约) §[0-9]+(\.[0-9]+)?' "${guide}" | grep -oE '[0-9]+(\.[0-9]+)?' | sort -u)
+
+    # in-page anchors still match a heading. GitHub lowercases, drops
+    # punctuation, and turns spaces into dashes; CJK passes through.
+    # perl, not sed/tr: the Chinese guide's headings are multibyte, and a
+    # byte-oriented normalizer mangles them into anchors that match nothing.
+    anchor_of() { printf '%s' "$1" | perl -CSD -Mutf8 -ne '
+        chomp; $_ = lc;
+        s/[`\$.,:;?!()\[\]{}"\x27\/\\|<>*#+=~^&%@]//g;
+        s/[\x{2014}\x{2013}\x{ff1f}\x{ff01}\x{ff0c}\x{3001}\x{ff1a}\x{ff1b}\x{3002}\x{ff08}\x{ff09}\x{201c}\x{201d}\x{2018}\x{2019}]//g;
+        s/ /-/g; print "$_\n"'; }
+    headings_file="$(mktemp)"
+    while IFS= read -r h; do anchor_of "${h#\#* }" >> "${headings_file}"; done < <(grep -E '^#{2,3} ' "${guide}")
+    while IFS= read -r anchor; do
+        [[ -n "${anchor}" ]] || continue
+        if ! grep -qxF "${anchor}" "${headings_file}"; then
+            fail "${guide}: in-page link #${anchor} matches no heading"
+            guide_errors=1
+        fi
+    done < <(grep -oE '\]\(#[^)]+\)' "${guide}" | sed 's/^](#//; s/)$//' | sort -u)
+    rm -f "${headings_file}"
+done
+
+(( guide_errors == 0 )) && note "skills guide covers every skill once, links and anchors resolve, conventions citations land"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
