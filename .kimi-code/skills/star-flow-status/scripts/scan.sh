@@ -14,6 +14,14 @@
 # the single home of every rule, so a producer skill that renames its output
 # never has to be mirrored here.
 #
+# Each of the three sweeps is one awk pass over its whole file list, not one
+# process per file. Pulling a file's frontmatter, section bodies, placeholder
+# counts and dates costs four or five processes when each extractor is its own
+# utility, and on a project with a few hundred registered files that startup
+# overhead is most of the runtime — the reading itself is microseconds. The awk
+# program below holds the same extractors as functions over one buffered file at
+# a time, so the output is unchanged and the process count stays constant.
+#
 # Usage: bash <skill-dir>/scripts/scan.sh [--trails] [--bodies N,N] [--runs DIR,DIR]
 #        # run from the project root
 #
@@ -70,116 +78,266 @@ BODY_CAP=60  # lines printed per --bodies section before truncation
 
 say() { printf '%s\n' "$*"; }
 
-# Leading --- block, capped. Prints nothing for a file that has no frontmatter
-# (CODE_REVIEW, REVIEW, refs_index.md carry a header line instead).
+# The extractors, as one awk program run once per sweep. `mode` picks which of
+# the three per-file routines each input path goes through; paths arrive on
+# stdin and the file itself is read with getline, so an unreadable or empty file
+# behaves as it did when every extractor opened the file for itself.
 #
-# Without --trails, model_trail entries are counted rather than printed: the list
-# grows without bound over a plan's life and sits above `status:`, so printing it
-# would eventually push the fields the readers actually need past the cap. No
-# other list is dropped — `sources:` in particular is what a stale-document check
-# compares against.
-frontmatter() {
-    awk -v cap="$FM_CAP" -v trails="$TRAILS" '
-        function flush_trail() {
-            if (trail_open && trailn > 0) print "  … (" trailn " model_trail entries omitted)"
-            trail_open = 0; trailn = 0
-        }
-        NR == 1 { if ($0 !~ /^---[ \t]*$/) exit; next }
-        /^---[ \t]*$/ { flush_trail(); exit }
-        trails == 0 && /^model_trail:/ { flush_trail(); trail_open = 1; n++; print; next }
-        trails == 0 && trail_open && /^[ \t]/ { trailn++; next }
-        trails == 0 && trail_open { flush_trail() }
-        { n++
-          if (n > cap) { print "  … (frontmatter truncated at " cap " lines)"; exit }
-          print }
-        END { flush_trail() }
-    ' "$1"
+# Every routine works over buf[1..n], the whole file buffered. Registered
+# artifacts are small, and buffering is what lets one pass do the work that
+# frontmatter, section_body, tbd_counts and dates_seen each used to open the
+# file for.
+SCAN_AWK='
+function readfile(path,   n, line) {
+    n = 0
+    split("", buf)
+    while ((getline line < path) > 0) buf[++n] = line
+    close(path)
+    return n
+}
+
+# Leading --- block, capped, collected into fm[1..fmn]. Collects nothing for a
+# file that has no frontmatter (CODE_REVIEW, REVIEW, refs_index.md carry a
+# header line instead).
+#
+# Without --trails, model_trail entries are counted rather than printed: the
+# list grows without bound over the life of a plan and sits above `status:`, so
+# printing it would eventually push the fields the readers actually need past
+# the cap. No other list is dropped — `sources:` in particular is what a
+# stale-document check compares against.
+function fm_flush() {
+    if (trail_open && trailn > 0) fm[++fmn] = "  … (" trailn " model_trail entries omitted)"
+    trail_open = 0; trailn = 0
+}
+function frontmatter(n,   i, c, line) {
+    fmn = 0; split("", fm)
+    trail_open = 0; trailn = 0
+    if (n == 0 || buf[1] !~ /^---[ \t]*$/) return
+    c = 0
+    for (i = 2; i <= n; i++) {
+        line = buf[i]
+        if (line ~ /^---[ \t]*$/) { fm_flush(); return }
+        if (trails == 0 && line ~ /^model_trail:/) { fm_flush(); trail_open = 1; c++; fm[++fmn] = line; continue }
+        if (trails == 0 && trail_open && line ~ /^[ \t]/) { trailn++; continue }
+        if (trails == 0 && trail_open) fm_flush()
+        c++
+        if (c > cap) { fm[++fmn] = "  … (frontmatter truncated at " cap " lines)"; return }
+        fm[++fmn] = line
+    }
+    fm_flush()
 }
 
 # Provenance carried on a header line instead of in frontmatter.
-header_model() {
-    awk 'NR > 10 { exit } /model_id/ { print }' "$1"
+function header_model(n,   i, last) {
+    fmn = 0; split("", fm)
+    last = (n < 10) ? n : 10
+    for (i = 1; i <= last; i++) if (buf[i] ~ /model_id/) fm[++fmn] = buf[i]
 }
 
-# A "## <heading>" section body, up to the next "## ".
-section_body() {
-    awk -v pat="$2" '
-        $0 ~ pat { inside = 1; next }
-        inside && /^## / { exit }
-        inside { print }
-    ' "$1"
+function fm_print(   i) { for (i = 1; i <= fmn; i++) print fm[i] }
+
+# Trailing blank lines are not content — what a `$(...)` capture did to these
+# blocks before the callers compared them against the empty string.
+function fm_trim() { while (fmn > 0 && fm[fmn] == "") fmn-- }
+function sec_trim() { while (secn > 0 && sec[secn] == "") secn-- }
+
+# A "## <heading>" section body, up to the next "## ", into sec[1..secn].
+function section_body(n, pat,   i, inside) {
+    secn = 0; split("", sec); inside = 0
+    for (i = 1; i <= n; i++) {
+        if (buf[i] ~ pat) { inside = 1; continue }
+        if (inside && buf[i] ~ /^## /) return
+        if (inside) sec[++secn] = buf[i]
+    }
+}
+function print_section(n, pat, label,   i) {
+    section_body(n, pat)
+    sec_trim()
+    if (secn == 0) return
+    print label
+    for (i = 1; i <= secn; i++) if (sec[i] !~ /^[ \t]*$/) print sec[i]
 }
 
 # Structured lines only, each under the "## " heading it sits below: table rows,
 # checkbox items, and plan-level-finding notes. Language-agnostic apart from the
 # bilingual token pairs (the current labels plus the pre-rename ones, so
-# EXEC_LOG.md files already on disk still index), and it keeps prose out of the digest.
-body_index() {
-    awk '
-        /^## / { heading = $0; printed = 0; next }
-        heading == "" { next }
-        /^\|/ || /^[ \t]*- \[/ || /Plan-level finding/ || /方向性信号/ || /Strategy signal/ || /战略信号/ {
-            if (!printed && heading != "") { print heading; printed = 1 }
-            print
+# EXEC_LOG.md files already on disk still index), and it keeps prose out of the
+# digest.
+function body_index(n,   i, line, heading, printed) {
+    heading = ""; printed = 0
+    for (i = 1; i <= n; i++) {
+        line = buf[i]
+        if (line ~ /^## /) { heading = line; printed = 0; continue }
+        if (heading == "") continue
+        if (line ~ /^\|/ || line ~ /^[ \t]*- \[/ || line ~ /Plan-level finding/ ||
+            line ~ /方向性信号/ || line ~ /Strategy signal/ || line ~ /战略信号/) {
+            if (!printed) { print heading; printed = 1 }
+            print line
         }
-    ' "$1"
+    }
 }
 
-# How much of §3 and §5 is still a placeholder — the input to the "too coarse" rule.
-# Both markers count: star-plan-decomposer writes `[TBD]` in English sub-plans and
-# `【待定】` in Chinese ones, so matching only the first reports every Chinese leaf as
-# fully written. Content lines exclude blanks and HTML-comment template guidance.
-tbd_counts() {
-    awk '
-        /^## +3\./ { sec = 3; next }
-        /^## +5\./ { sec = 5; next }
-        /^## / { sec = 0; next }
-        sec == 0 { next }
-        /<!--/ { incomment = 1 }
-        { was = incomment }
-        /-->/ { incomment = 0 }
-        was { next }
-        NF == 0 { next }
-        { content[sec]++; if (index($0, "[TBD]") || index($0, "【待定】")) tbd[sec]++ }
-        END { printf "[tbd] §3: %d TBD / %d content lines | §5: %d TBD / %d content lines\n",
-                     tbd[3]+0, content[3]+0, tbd[5]+0, content[5]+0 }
-    ' "$1"
+# How much of §3 and §5 is still a placeholder — the input to the "too coarse"
+# rule. Both markers count: star-plan-decomposer writes `[TBD]` in English
+# sub-plans and `【待定】` in Chinese ones, so matching only the first reports
+# every Chinese leaf as fully written. Content lines exclude blanks and
+# HTML-comment template guidance.
+function tbd_counts(n,   i, line, s, was, incomment, c3, c5, t3, t5) {
+    s = 0; incomment = 0; c3 = 0; c5 = 0; t3 = 0; t5 = 0
+    for (i = 1; i <= n; i++) {
+        line = buf[i]
+        if (line ~ /^## +3\./) { s = 3; continue }
+        if (line ~ /^## +5\./) { s = 5; continue }
+        if (line ~ /^## /) { s = 0; continue }
+        if (s == 0) continue
+        if (line ~ /<!--/) incomment = 1
+        was = incomment
+        if (line ~ /-->/) incomment = 0
+        if (was) continue
+        if (line ~ /^[ \t]*$/) continue
+        if (s == 3) { c3++; if (index(line, "[TBD]") || index(line, "【待定】")) t3++ }
+        else        { c5++; if (index(line, "[TBD]") || index(line, "【待定】")) t5++ }
+    }
+    printf "[tbd] §3: %d TBD / %d content lines | §5: %d TBD / %d content lines\n", t3, c3, t5, c5
 }
 
-dates_seen() {
-    grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' "$1" | sort -u | tr '\n' ' '
+function ssort(arr, n,   i, j, t) {
+    for (i = 2; i <= n; i++) {
+        t = arr[i]; j = i - 1
+        while (j >= 1 && arr[j] > t) { arr[j + 1] = arr[j]; j-- }
+        arr[j + 1] = t
+    }
+}
+
+# Every match of a pattern across the file, sorted, deduplicated, space-joined
+# with a trailing space — the shape the grep | sort -u | tr pipelines produced.
+function scan_all(n, pat,   i, s, k, cnt, out) {
+    cnt = 0; split("", hits); split("", hitseen)
+    for (i = 1; i <= n; i++) {
+        s = buf[i]
+        while (match(s, pat)) {
+            k = substr(s, RSTART, RLENGTH)
+            if (!(k in hitseen)) { hitseen[k] = 1; hits[++cnt] = k }
+            s = substr(s, RSTART + RLENGTH)
+        }
+    }
+    ssort(hits, cnt)
+    out = ""
+    for (i = 1; i <= cnt; i++) out = out hits[i] " "
+    return out
 }
 
 # Bodies of the numbered "## <n>." sections the caller asked for, capped per
-# section. It matches on the number only, never on the heading text, so it stays
-# language-agnostic and knows nothing about what any section is called.
-sections_by_number() {   # $1 = file, $2 = comma-separated section numbers
-    awk -v want="$2" -v cap="$BODY_CAP" '
-        BEGIN { n = split(want, a, ","); for (i = 1; i <= n; i++) { gsub(/[^0-9]/, "", a[i]); if (a[i] != "") sel[a[i]] = 1 } }
-        /^## / {
+# section, into sec[1..secn]. It matches on the number only, never on the
+# heading text, so it stays language-agnostic and knows nothing about what any
+# section is called.
+function sections_by_number(n, want,   i, j, parts, sel, line, num, inside, printed, lines, head) {
+    secn = 0; split("", sec); split("", sel)
+    j = split(want, parts, ",")
+    for (i = 1; i <= j; i++) { gsub(/[^0-9]/, "", parts[i]); if (parts[i] != "") sel[parts[i]] = 1 }
+    inside = 0
+    for (i = 1; i <= n; i++) {
+        line = buf[i]
+        if (line ~ /^## /) {
             inside = 0
-            if (match($0, /^##[ \t]+[0-9]+\./)) {
-                num = substr($0, RSTART, RLENGTH); gsub(/[^0-9]/, "", num)
-                if (num in sel) { inside = 1; printed = 0; lines = 0; head = $0 }
+            if (match(line, /^##[ \t]+[0-9]+\./)) {
+                num = substr(line, RSTART, RLENGTH); gsub(/[^0-9]/, "", num)
+                if (num in sel) { inside = 1; printed = 0; lines = 0; head = line }
             }
-            next
+            continue
         }
-        inside {
-            if (lines >= cap) { if (lines == cap) { print "  … (section truncated at " cap " lines)"; lines++ } next }
-            if (!printed) { print head; printed = 1 }
-            print; lines++
+        if (!inside) continue
+        if (lines >= bodycap) {
+            if (lines == bodycap) { sec[++secn] = "  … (section truncated at " bodycap " lines)"; lines++ }
+            continue
         }
-    ' "$1"
+        if (!printed) { sec[++secn] = head; printed = 1 }
+        sec[++secn] = line; lines++
+    }
 }
 
 # Is this run directory inside the --runs scope? Empty scope means every run.
-in_runs_scope() {   # $1 = path under wkdrs/
-    [ -n "$RUNS_SCOPE" ] || return 0
-    d=${1#wkdrs/}; d=${d%%/*}
-    case ",$RUNS_SCOPE," in
-        *",$d,"*) return 0 ;;
-    esac
-    return 1
+function in_runs_scope(path,   d) {
+    if (scope == "") return 1
+    d = path; sub(/^wkdrs\//, "", d); sub(/\/.*$/, "", d)
+    return index("," scope ",", "," d ",") > 0
+}
+
+function do_plan(path,   n, seeds) {
+    n = readfile(path)
+    seen++
+    print ""
+    print "=== " path
+    print "[frontmatter]"
+    frontmatter(n); fm_print()
+    # The tree shape and the "too coarse" input are what a status or digest read
+    # needs; a provenance read has no use for either, so --trails drops both.
+    if (trails == 0) print_section(n, "^##[ \t]*Sub-plans", "[sub-plans index]")
+    # The one body fact the coverage band needs: an idea file named anywhere in
+    # the plan, since the coach records its seed as prose rather than a field.
+    seeds = scan_all(n, "[A-Za-z0-9._-]*_idea[.]md")
+    if (seeds != "") print "[idea refs] " seeds
+    if (trails == 0) tbd_counts(n)
+    else print_section(n, "^##[ \t]*Revision History", "[revision history]")
+}
+
+function do_run(path,   n) {
+    n = readfile(path)
+    seen++
+    print ""
+    print "=== " path
+    print "[frontmatter]"
+    frontmatter(n); fm_print()
+    if (!in_runs_scope(path)) {
+        print "[body and dates omitted — outside --runs scope]"
+        return
+    }
+    print "[body: headings with their table rows, checkboxes, and signals]"
+    body_index(n)
+    if (trails == 0) print "[dates seen] " scan_all(n, "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
+}
+
+function do_artifact(path,   n, i, tmp, slashes) {
+    if (path ~ /\/EXEC_LOG\.md$/) return
+    n = readfile(path)
+    frontmatter(n); fm_trim()
+    if (fmn == 0) {
+        # No frontmatter. In provenance mode its header line may still name a writer.
+        if (trails == 0) return
+        header_model(n); fm_trim()
+        if (fmn == 0) return
+    }
+    seen++
+    print ""
+    print "=== " path
+    fm_print()
+    if (bodysel == "") return
+    tmp = path; slashes = gsub(/\//, "/", tmp)
+    if (path !~ /^wkdrs\// || slashes < 2) return
+    # --runs gates the bodies for the same reason it gates the per-run body
+    # index: a report inside wkdrs/<run>/ belongs to that run. Frontmatter above
+    # stays project-wide either way, so a caller that scopes the bodies still
+    # sees every artifact exists.
+    if (!in_runs_scope(path)) { print "[bodies omitted — outside --runs scope]"; return }
+    sections_by_number(n, bodysel)
+    sec_trim()
+    if (secn == 0) return
+    print "[bodies: sections " bodysel "]"
+    for (i = 1; i <= secn; i++) print sec[i]
+}
+
+{
+    if ($0 == "") next
+    if (mode == "plans") do_plan($0)
+    else if (mode == "runs") do_run($0)
+    else do_artifact($0)
+}
+END { if (seen == 0) print nonemsg }
+'
+
+sweep() {   # $1 = mode, $2 = what to say when the sweep found nothing; paths on stdin
+    awk -v mode="$1" -v nonemsg="$2" -v cap="$FM_CAP" -v bodycap="$BODY_CAP" \
+        -v trails="$TRAILS" -v scope="$RUNS_SCOPE" -v bodysel="$BODY_SECTIONS" "$SCAN_AWK"
 }
 
 # File selection never goes through a shell glob. An unmatched pattern is a fatal
@@ -211,64 +369,12 @@ say "# Apply your skill's own rules to what follows."
 # ---------------------------------------------------------------- plans
 say ""
 say "## PLANS — metds/plans/*_plan.md"
-plans=0
-while IFS= read -r f; do
-    [ -n "$f" ] && [ -f "$f" ] || continue
-    plans=$(( plans + 1 ))
-    say ""
-    say "=== $f"
-    say "[frontmatter]"
-    frontmatter "$f"
-    # The tree shape and the "too coarse" input are what a status or digest read
-    # needs; a provenance read has no use for either, so --trails drops both.
-    if [ "$TRAILS" = 0 ]; then
-        index=$(section_body "$f" '^##[ \t]*Sub-plans')
-        if [ -n "$index" ]; then
-            say "[sub-plans index]"
-            printf '%s\n' "$index" | grep -v '^[ \t]*$'
-        fi
-    fi
-    # The one body fact the coverage band needs: an idea file named anywhere in
-    # the plan, since the coach records its seed as prose rather than a field.
-    seeds=$(grep -o '[A-Za-z0-9._-]*_idea\.md' "$f" | sort -u | tr '\n' ' ')
-    [ -z "$seeds" ] || say "[idea refs] $seeds"
-    [ "$TRAILS" = 1 ] || tbd_counts "$f"
-    if [ "$TRAILS" = 1 ]; then
-        # Not named `history`: that is a special array in zsh, and assigning to it
-        # aborts the loop there while working fine everywhere else.
-        revisions=$(section_body "$f" '^##[ \t]*Revision History')
-        if [ -n "$revisions" ]; then
-            say "[revision history]"
-            printf '%s\n' "$revisions" | grep -v '^[ \t]*$'
-        fi
-    fi
-done <<PLANS
-$(find_md metds/plans 1 '*_plan.md')
-PLANS
-[ "$plans" -gt 0 ] || say "(none)"
+find_md metds/plans 1 '*_plan.md' | sweep plans "(none)"
 
 # ---------------------------------------------------------------- runs
 say ""
 say "## RUNS — wkdrs/*/EXEC_LOG.md"
-runs=0
-while IFS= read -r f; do
-    [ -n "$f" ] && [ -f "$f" ] || continue
-    runs=$(( runs + 1 ))
-    say ""
-    say "=== $f"
-    say "[frontmatter]"
-    frontmatter "$f"
-    if ! in_runs_scope "$f"; then
-        say "[body and dates omitted — outside --runs scope]"
-    else
-        say "[body: headings with their table rows, checkboxes, and signals]"
-        body_index "$f"
-        [ "$TRAILS" = 1 ] || say "[dates seen] $(dates_seen "$f")"
-    fi
-done <<RUNS
-$(find_md wkdrs 2 'EXEC_LOG.md')
-RUNS
-[ "$runs" -gt 0 ] || say "(none)"
+find_md wkdrs 2 'EXEC_LOG.md' | sweep runs "(none)"
 
 # ---------------------------------------------------------------- other artifacts
 # Every other registered-area .md, one depth level down as the self-audit rule
@@ -285,46 +391,7 @@ artifact_files() {
     find_md wkdrs 2 '*.md'
     [ "$TRAILS" = 0 ] || find_md metds/refs 1 '*.md'
 }
-others=0
-while IFS= read -r f; do
-    [ -n "$f" ] && [ -f "$f" ] || continue
-    case "$f" in
-        */EXEC_LOG.md) continue ;;
-    esac
-    fm=$(frontmatter "$f")
-    if [ -z "$fm" ]; then
-        # No frontmatter. In provenance mode its header line may still name a writer.
-        [ "$TRAILS" = 1 ] || continue
-        fm=$(header_model "$f")
-        [ -n "$fm" ] || continue
-    fi
-    others=$(( others + 1 ))
-    say ""
-    say "=== $f"
-    printf '%s\n' "$fm"
-    if [ -n "$BODY_SECTIONS" ]; then
-        case "$f" in
-            wkdrs/*/*)
-                # --runs gates the bodies for the same reason it gates the per-run
-                # body index: a report inside wkdrs/<run>/ is that run's content.
-                # Frontmatter above stays project-wide either way, so a caller that
-                # scopes the bodies still sees every artifact exists.
-                if ! in_runs_scope "$f"; then
-                    say "[bodies omitted — outside --runs scope]"
-                else
-                    bodies=$(sections_by_number "$f" "$BODY_SECTIONS")
-                    if [ -n "$bodies" ]; then
-                        say "[bodies: sections $BODY_SECTIONS]"
-                        printf '%s\n' "$bodies"
-                    fi
-                fi
-                ;;
-        esac
-    fi
-done <<ARTIFACTS
-$(artifact_files)
-ARTIFACTS
-[ "$others" -gt 0 ] || say "(none with frontmatter)"
+artifact_files | sweep artifacts "(none with frontmatter)"
 
 # ---------------------------------------------------------------- listing
 # Presence and filename dates for the coverage band, and the raw material for the
