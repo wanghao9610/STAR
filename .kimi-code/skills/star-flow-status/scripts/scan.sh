@@ -22,8 +22,26 @@
 # program below holds the same extractors as functions over one buffered file at
 # a time, so the output is unchanged and the process count stays constant.
 #
-# Usage: bash <skill-dir>/scripts/scan.sh [--trails] [--bodies N,N] [--runs DIR,DIR]
+# Usage: bash <skill-dir>/scripts/scan.sh [--slim] [--trails] [--bodies N,N] [--runs DIR,DIR]
 #        # run from the project root
+#
+#   --slim        summarise the two things that grow with a project's history
+#                 rather than its plan tree. A table of more than six rows in a
+#                 run's body index becomes counts — its header row, how many data
+#                 rows follow, and a value histogram per column, with a column
+#                 whose values never repeat given as a count. Six rows or fewer
+#                 print as they are, since a tally of them is no shorter. Two
+#                 kinds of line are never summarised, because a count cannot
+#                 stand in for them: un-ticked checkboxes and plan-level
+#                 findings. And an artifact sitting inside a run
+#                 directory prints no frontmatter, because LISTING already carries
+#                 its name and the date in it; how many were left out is printed,
+#                 never dropped silently. A run directory here is a wkdrs/ subdir
+#                 holding an EXEC_LOG.md, which is the same thing the RUNS sweep
+#                 globs for — no new knowledge of the registry enters the script.
+#                 Frontmatter, dates, plans, LISTING and DIRS are untouched, and
+#                 --trails keeps every artifact, since a provenance read wants the
+#                 writers this would drop.
 #
 #   --trails      provenance mode: print every model_trail entry in full rather
 #                 than counting it, add each plan's ## Revision History and the
@@ -59,11 +77,13 @@
 set -u
 
 TRAILS=0
+SLIM=0
 BODY_SECTIONS=""
 RUNS_SCOPE=""
-usage() { printf 'usage: scan.sh [--trails] [--bodies N,N] [--runs DIR,DIR]\n' >&2; exit 2; }
+usage() { printf 'usage: scan.sh [--slim] [--trails] [--bodies N,N] [--runs DIR,DIR]\n' >&2; exit 2; }
 while [ $# -gt 0 ]; do
     case "$1" in
+        --slim)   SLIM=1 ;;
         --trails) TRAILS=1 ;;
         --bodies) [ $# -ge 2 ] || usage; BODY_SECTIONS="$2"; shift ;;
         --runs)   [ $# -ge 2 ] || usage; RUNS_SCOPE="$2"; shift ;;
@@ -175,6 +195,99 @@ function body_index(n,   i, line, heading, printed) {
             print line
         }
     }
+}
+
+# The same lines body_index prints, counted instead. A finished run contributes
+# a step table that never changes again, and printing it in full is most of what
+# a late-project digest costs; the counts carry what a reader still has to know
+# and the histogram keeps the per-status breakdown the rows carried. Meaning is
+# assigned here, so the histogram prints the cell values it saw and names no
+# state: which of them counts as finished is a rule the reading skill holds.
+# Two kinds of line are never summarised, because a count cannot stand in for
+# them — an un-ticked checkbox and a plan-level finding.
+function split_row(line, cells,   raw, nf, i, s, cnt) {
+    nf = split(line, raw, "|")
+    cnt = 0
+    for (i = 2; i <= nf; i++) {
+        s = raw[i]
+        gsub(/^[ \t]+/, "", s); gsub(/[ \t]+$/, "", s)
+        if (i == nf && s == "") continue
+        cells[++cnt] = s
+    }
+    return cnt
+}
+function tally_reset() {
+    tmaxcol = 0; trows = 0; thead = ""; tchecks = 0; tunticked = 0; tverbn = 0
+    split("", tcount); split("", tdistinct); split("", tdn); split("", tverb); split("", trow)
+}
+function tally_flush(   c, i, k, v, out, seg, sv) {
+    if (theading == "") return
+    if (thead == "" && trows == 0 && tchecks == 0 && tverbn == 0) return
+    print theading
+    if (thead != "") print thead
+    # Under seven rows a tally is not smaller than the rows, so print them. That
+    # also removes the only way this could lose something: a column is summarised
+    # by count alone when its values never repeat, and for a column holding one of
+    # a fixed handful of states that cannot happen once the rows outnumber the
+    # states — every short table, where it could, is printed in full instead.
+    if (trows > 0 && trows <= 6) {
+        for (i = 1; i <= trows; i++) print trow[i]
+    } else if (trows > 0) {
+        out = "[tally] " trows " data rows"
+        for (c = 1; c <= tmaxcol; c++) {
+            if (tdn[c] == 0) continue
+            if (tdn[c] == trows) { out = out " | c" c ": " trows " distinct"; continue }
+            for (i = 1; i <= tdn[c]; i++) sv[i] = tdistinct[c SUBSEP i]
+            ssort(sv, tdn[c])
+            seg = ""
+            for (i = 1; i <= tdn[c]; i++) {
+                v = sv[i]; k = tcount[c SUBSEP v]
+                seg = seg (i == 1 ? "" : ", ") v "×" k
+            }
+            out = out " | c" c ": " seg
+        }
+        print out
+    }
+    if (tchecks > 0) print "[checks] " tchecks " total, " tunticked " un-ticked"
+    for (i = 1; i <= tverbn; i++) print tverb[i]
+    theading = ""
+}
+function tally_row(line,   cells, nc, c, v) {
+    if (line ~ /^\|[-:| \t]*$/) return
+    nc = split_row(line, cells)
+    if (thead == "") { thead = line; return }
+    trows++
+    trow[trows] = line
+    if (nc > tmaxcol) tmaxcol = nc
+    for (c = 1; c <= nc; c++) {
+        v = cells[c]
+        # Two statements, not `tdistinct[c SUBSEP ++tdn[c]]`: awk reads a ++ that
+        # follows a concatenation as a post-increment of what came before, so
+        # that subscript increments SUBSEP itself and silently corrupts every
+        # key built from it.
+        if (!((c SUBSEP v) in tcount)) {
+            tdn[c]++
+            tdistinct[c SUBSEP tdn[c]] = v
+        }
+        tcount[c SUBSEP v]++
+    }
+}
+function body_tally(n,   i, line) {
+    theading = ""; tally_reset()
+    for (i = 1; i <= n; i++) {
+        line = buf[i]
+        if (line ~ /^## /) { tally_flush(); theading = line; tally_reset(); continue }
+        if (theading == "") continue
+        if (line ~ /^\|/) { tally_row(line); continue }
+        if (line ~ /^[ \t]*- \[/) {
+            tchecks++
+            if (line ~ /^[ \t]*- \[[ \t]*\]/) { tunticked++; tverb[++tverbn] = line }
+            continue
+        }
+        if (line ~ /Plan-level finding/ || line ~ /方向性信号/ ||
+            line ~ /Strategy signal/ || line ~ /战略信号/) tverb[++tverbn] = line
+    }
+    tally_flush()
 }
 
 # How much of §3 and §5 is still a placeholder — the input to the "too coarse"
@@ -292,13 +405,28 @@ function do_run(path,   n) {
         print "[body and dates omitted — outside --runs scope]"
         return
     }
-    print "[body: headings with their table rows, checkboxes, and signals]"
-    body_index(n)
+    if (slim == 0) {
+        print "[body: headings with their table rows, checkboxes, and signals]"
+        body_index(n)
+    } else {
+        print "[body: counted per heading; un-ticked checkboxes and findings verbatim]"
+        body_tally(n)
+    }
     if (trails == 0) print "[dates seen] " scan_all(n, "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
 }
 
-function do_artifact(path,   n, i, tmp, slashes) {
+function do_artifact(path,   n, i, tmp, slashes, d) {
     if (path ~ /\/EXEC_LOG\.md$/) return
+    # Inside a run directory, LISTING already carries the name and the date in
+    # it, which is all a presence-and-freshness check reads. --trails is the one
+    # read that wants more, so it keeps them.
+    if (slim == 1 && trails == 0) {
+        d = path
+        if (sub(/^wkdrs\//, "", d) && sub(/\/.*$/, "", d) && index("," rundirs ",", "," d ",") > 0) {
+            skipped++
+            return
+        }
+    }
     n = readfile(path)
     frontmatter(n); fm_trim()
     if (fmn == 0) {
@@ -332,12 +460,16 @@ function do_artifact(path,   n, i, tmp, slashes) {
     else if (mode == "runs") do_run($0)
     else do_artifact($0)
 }
-END { if (seen == 0) print nonemsg }
+END {
+    if (seen == 0) print nonemsg
+    if (skipped > 0) print "(" skipped " artifact(s) inside run directories omitted by --slim — see LISTING)"
+}
 '
 
 sweep() {   # $1 = mode, $2 = what to say when the sweep found nothing; paths on stdin
     awk -v mode="$1" -v nonemsg="$2" -v cap="$FM_CAP" -v bodycap="$BODY_CAP" \
-        -v trails="$TRAILS" -v scope="$RUNS_SCOPE" -v bodysel="$BODY_SECTIONS" "$SCAN_AWK"
+        -v trails="$TRAILS" -v slim="$SLIM" -v scope="$RUNS_SCOPE" \
+        -v bodysel="$BODY_SECTIONS" -v rundirs="$RUN_DIRS" "$SCAN_AWK"
 }
 
 # File selection never goes through a shell glob. An unmatched pattern is a fatal
@@ -359,6 +491,13 @@ if [ ! -d metds ] && [ ! -d wkdrs ]; then
     say "(no metds/ or wkdrs/ in $(pwd -P) — run this from the project root)"
     exit 0
 fi
+
+# Which wkdrs/ subdirs --slim treats as run directories: the ones holding an
+# EXEC_LOG.md, which is the same set the RUNS sweep globs. wkdrs/digests/,
+# wkdrs/results/ and wkdrs/env_*/ hold no log, so their frontmatter is never
+# skipped — and the script still has no list of what the registry expects.
+RUN_DIRS=""
+[ "$SLIM" = 0 ] || RUN_DIRS=$(find_md wkdrs 2 'EXEC_LOG.md' | sed 's|^wkdrs/||; s|/EXEC_LOG\.md$||' | tr '\n' ',')
 
 say "# STAR flow scan — $(pwd -P)"
 say "# today: $(date +%Y-%m-%d)"

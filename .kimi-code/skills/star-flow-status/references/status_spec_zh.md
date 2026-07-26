@@ -12,7 +12,7 @@
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
 - 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的确认点。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它。
 
-对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（红线）"清单、以及 Notes 里的任何"方向性信号"。
+对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（红线）"清单、以及 Notes 里的任何"方向性信号"。加了 `--slim` 时，超过六行的表已经数好了——`[tally] 8 data rows | c3: done×7, blocked×1` 一行里就是这个计数和这个提醒，而写成 `N distinct` 的列装的是步骤名或日期，不会是状态。无论表怎么处理，未勾选的待办项与方向性信号都原样打印，所以红线规则和 Step 3 需要的东西不会被藏在计数后面。
 
 覆盖检查所需的其它注册产物，只按"存在与否"和各自那一个日期字段来读——绝不读它们的正文。注册表见规约 §8；下面覆盖表逐行写明用的是哪个字段。
 
