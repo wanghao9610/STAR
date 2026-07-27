@@ -387,7 +387,7 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Highlights by release, newest first. Each release is a git tag, so `bash execs/update.sh v0.1.0` pins an update to that version.
 
-- **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-26) — Faster `$star-flow-status`: the plan tree is scanned once and cached, and `$star-expt-digest` reads the same scan. Adds `STAR_LANG` to pin the language of replies and newly generated workflow documents, and `execs/update.sh` now syncs `AGENTS.md` as well.
+- **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-26) — Faster `$star-flow-status`: the plan tree is scanned once and cached, and `$star-expt-digest` reads the same scan. Adds `STAR_LANG` to pin the language of replies and newly generated workflow documents; `execs/update.sh` now syncs `AGENTS.md` as well, and takes `--force` to update over uncommitted changes and hook registration configs.
 - **[v0.1.0](https://github.com/wanghao9610/STAR/tree/v0.1.0)** (2026-07-24) — First official release: fifteen bilingual research workflow skills for Codex, Claude, Cursor, and Kimi, model-id provenance hooks, an `INVOLVE=low|medium|high` dial (default `medium`) setting how much the skills ask before deciding, and an updater with hook sync and `--diff` preview.
 - **2026-07-15** — Initial STAR release.
 

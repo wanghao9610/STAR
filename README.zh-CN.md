@@ -382,7 +382,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-26) — `$star-flow-status` 提速：计划树只扫描一次并缓存，`$star-expt-digest` 复用同一份扫描结果。新增 `STAR_LANG`，用于固定对话回复以及新生成工作流文档的语言；`execs/update.sh` 现在也会同步 `AGENTS.md`。
+- **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-26) — `$star-flow-status` 提速：计划树只扫描一次并缓存，`$star-expt-digest` 复用同一份扫描结果。新增 `STAR_LANG`，用于固定对话回复以及新生成工作流文档的语言；`execs/update.sh` 现在也会同步 `AGENTS.md`，并新增 `--force` 覆盖未提交改动与钩子注册配置。
 - **[v0.1.0](https://github.com/wanghao9610/STAR/tree/v0.1.0)** (2026-07-24) — 第一个正式版本：面向 Codex、Claude、Cursor 和 Kimi 的十五个双语研究工作流 skill、model-id 溯源钩子、设定 skills 在决策前询问程度的 `INVOLVE=low|medium|high` 三档开关（默认 `medium`），以及支持钩子同步与 `--diff` 预览的更新脚本。
 - **2026-07-15** — STAR 首个发布。
 
