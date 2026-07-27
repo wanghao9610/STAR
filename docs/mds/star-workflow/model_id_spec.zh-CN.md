@@ -8,22 +8,22 @@
 
 | 运行时 | 钩子 | 事件 | 注入什么 |
 |---|---|---|---|
-| Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart` | id；运行时没报时是一条恢复命令 |
+| Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart` | 一条在你记录当刻读取 id 的命令；没有 transcript 可指时才是 id 本身 |
 | Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | id |
 | Cursor | `.cursor/hooks/star_model_id.sh` | `SessionStart` | id |
 | Kimi | `.kimi-code/hooks/star_model_id.sh` | `UserPromptSubmit` | `~/.kimi-code/config.toml` 里的 `default_model` |
 
 Claude Code 还会在系统提示里写明模型。钩子文件在，不等于已注册——各运行时的注册方式不同（`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`，以及需手动配置的 `.kimi-code/hooks.example.toml`），所以一个项目可能有脚本却什么都没注入。
 
-## Claude Code：会话不是全新开始时
+## Claude Code：为什么 id 要在写入当刻才读
 
-`model` 字段只挂在 `SessionStart` 上，`/clear`、resume、compact、fork 之后就会缺失。此时注入行带来的是一条恢复命令而不是 id。写 `unrecorded` 之前先跑它：
+`model` 字段只挂在 `SessionStart` 上：`/clear`、resume、compact、fork 之后它会缺失；即便有，它描述的也只是会话开启那一刻——之后 `/model` 换模型不会触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的会是开始时那个。因此只要载荷里给出了 transcript，注入行带来的就是一条命令而不是 id。记录该值的当刻跑它：
 
 ```bash
-bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path>
+bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 ```
 
-路径用那行点出的那个，把打印出来的值原样记录。它读的是本次会话自己的 assistant 轮次上的 `message.model`，因此是运行时的记录而非猜测——只是可能丢掉 `SessionStart` 字段本会带上的上下文窗口后缀（`claude-opus-5[1m]` 会解析成 `claude-opus-5`）。
+参数用那行已经填好的，把打印出来的值原样记录。它读的是本次会话自己主循环 assistant 轮次上的 `message.model`——委派出去的子 agent 轮次会跳过，因为要问的是哪个模型在写这份产物——因此是运行时的记录而非猜测。`session_model` 是 `SessionStart` 报出的那个：transcript 还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住 transcript 丢掉的上下文窗口后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那个不同就是会话中途换过模型，而看见这件事的是 transcript。
 
 ## Kimi：一行都没注入时
 
