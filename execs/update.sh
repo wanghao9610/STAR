@@ -7,6 +7,7 @@ SKILL_NAME=""
 REF_SET=false
 ADOPT=false
 DIFF=false
+FORCE=false
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
@@ -47,8 +48,8 @@ fail() {
 
 usage() {
     cat <<'EOF'
-Usage: bash execs/update.sh [ref] [--skill NAME]
-       bash execs/update.sh --diff [ref] [--skill NAME]
+Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
+       bash execs/update.sh --diff [ref] [--skill NAME] [--force]
        bash update.sh [ref] --adopt
 
 Overwrite STAR-managed agent instructions (AGENTS.md and the Cursor rule that copies it),
@@ -64,6 +65,12 @@ or differ from the local copies, plus project-local files an update would keep. 
 when everything already matches, 2 when an update would change files, and 1 on error — so a
 script can tell "an update is available" from "the check itself failed".
 
+--force updates the same paths with both refusals lifted: uncommitted changes under them
+are overwritten instead of stopping the command, and the hook registration configs above are
+overwritten instead of kept. It widens nothing — the path list is unchanged, and a file
+upstream does not have is still left alone. Combined with --diff it previews that scope
+without changing anything.
+
 --adopt installs the STAR skeleton into an already-started project instead of updating one.
 It runs against the current working directory, which must be a git repository root, and
 never overwrites a file that is already there: every existing path is left alone and
@@ -73,6 +80,7 @@ Examples:
   bash execs/update.sh
   bash execs/update.sh TAG_OR_BRANCH
   bash execs/update.sh --diff
+  bash execs/update.sh --force
   bash execs/update.sh --skill star-plan-coach
   bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
 
@@ -105,6 +113,9 @@ while (( $# > 0 )); do
         --diff)
             DIFF=true
             ;;
+        --force)
+            FORCE=true
+            ;;
         -*)
             fail "Unknown option: $1"
             ;;
@@ -120,6 +131,9 @@ done
 if [[ "${ADOPT}" == true ]]; then
     [[ -z "${SKILL_NAME}" ]] || fail "--adopt cannot be combined with --skill."
     [[ "${DIFF}" == false ]] || fail "--adopt cannot be combined with --diff."
+    # Adopt's whole contract is that it never touches an existing file, which is
+    # the opposite of what --force asks for.
+    [[ "${FORCE}" == false ]] || fail "--adopt cannot be combined with --force."
 
     ROOT_DIR="$(pwd -P)"
     git -C "${ROOT_DIR}" rev-parse --git-dir >/dev/null 2>&1 || \
@@ -268,7 +282,12 @@ if [[ "${ADOPT}" == false ]]; then
                     printf '  new      %s (hook registration)\n' "${cfg}"
                     added=$(( added + 1 ))
                 elif ! cmp -s "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"; then
-                    printf '  config   %s (differs from upstream; update never overwrites it)\n' "${cfg}"
+                    if [[ "${FORCE}" == true ]]; then
+                        printf '  differs  %s (hook registration; --force overwrites it)\n' "${cfg}"
+                        changed=$(( changed + 1 ))
+                    else
+                        printf '  config   %s (differs from upstream; update never overwrites it)\n' "${cfg}"
+                    fi
                 fi
             done
         fi
@@ -277,6 +296,7 @@ if [[ "${ADOPT}" == false ]]; then
             hint="bash execs/update.sh"
             [[ "${REF_SET}" == false ]] || hint="${hint} ${STAR_REF}"
             [[ -z "${SKILL_NAME}" ]] || hint="${hint} --skill ${SKILL_NAME}"
+            [[ "${FORCE}" == false ]] || hint="${hint} --force"
             log "${changed} differ, ${added} new upstream, ${kept} extra local."
             log "'differs' is direction-blind: it includes files you edited yourself."
             log "Run '${hint}' to apply the upstream versions."
@@ -292,10 +312,20 @@ if [[ "${ADOPT}" == false ]]; then
     # only safety net, so refuse to run when it would not hold: uncommitted edits
     # under a synced path would be destroyed with no copy anywhere.
     if git -C "${ROOT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
-        DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${SYNCED[@]}" 2>/dev/null || true)"
+        # --force also overwrites the hook registration configs, so they belong in
+        # what gets reported as about to be lost.
+        DIRTY_PATHS=("${SYNCED[@]}")
+        if [[ "${FORCE}" == true && -z "${SKILL_NAME}" ]]; then
+            DIRTY_PATHS+=("${HOOK_CONFIGS[@]}")
+        fi
+        DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)"
         if [[ -n "${DIRTY}" ]]; then
             printf '%s\n' "${DIRTY}" | sed 's/^/      /' >&2
-            fail "The paths above have uncommitted changes and would be overwritten with no way back. Commit or stash them first, or preview with 'bash execs/update.sh --diff'."
+            if [[ "${FORCE}" == true ]]; then
+                log "--force: the uncommitted changes above are being overwritten with no way back."
+            else
+                fail "The paths above have uncommitted changes and would be overwritten with no way back. Commit or stash them first, or preview with 'bash execs/update.sh --diff'."
+            fi
         fi
     else
         log "NOTE: not a git repository, so an update cannot be undone. Back up the STAR-managed paths first if you have local edits."
@@ -311,6 +341,9 @@ if [[ "${ADOPT}" == false ]]; then
                 mkdir -p "$(dirname -- "${ROOT_DIR}/${cfg}")"
                 cp -p "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"
                 log "Installed ${cfg} (hook registration)"
+            elif [[ "${FORCE}" == true ]]; then
+                cp -p "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"
+                log "Overwrote ${cfg} (hook registration; --force), including any settings you added to it."
             elif ! grep -q 'star_model_id\.sh' "${ROOT_DIR}/${cfg}" 2>/dev/null; then
                 log "NOTE: ${cfg} was kept and does not register the STAR model-id provenance hook."
                 log "      Merge the hook entry from upstream ${cfg} to enable provenance."

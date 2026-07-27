@@ -336,19 +336,20 @@ By default, the command updates these paths from STAR's `main` branch:
 - `AGENTS.md` and `.cursor/rules/` — the shared agent instructions and the Cursor rule that copies their body; your own edits to them are replaced
 - `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.kimi-code/skills/`
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.kimi-code/hooks/`, and `.kimi-code/hooks.example.toml` — the model-id provenance hooks
-- `docs/mds/star-workflow/`
+- `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
 
-Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing and never overwritten; when a kept config does not register the STAR hook, the command prints a note. Projects created before hooks joined the update set should refresh the updater itself once, since `execs/update.sh` never overwrites itself:
+Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing and never overwritten unless you pass `--force`; when a kept config does not register the STAR hook, the command prints a note. Projects created before hooks joined the update set should refresh the updater itself once, since `execs/update.sh` never overwrites itself:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-The general form is `bash execs/update.sh [--diff] [ref] [--skill NAME]`:
+The general form is `bash execs/update.sh [--diff] [ref] [--skill NAME] [--force]`:
 
 - `--diff` previews an update without changing a file, and exits `2` when one is available, `0` when everything already matches, `1` on error — so a script can tell an available update from a failed check.
 - A `ref` pins the update to a tag or branch.
 - `--skill NAME` updates that one skill across all four tool directories, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the four upstream skill directories, stops the command without overwriting anything.
+- `--force` updates the same paths with both refusals lifted: uncommitted changes under them are overwritten instead of stopping the command, and the hook registration configs are overwritten instead of kept. It widens nothing — a file upstream does not have is still left alone, so your own skills and documents under those directories stay.
 
 `bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.
 
