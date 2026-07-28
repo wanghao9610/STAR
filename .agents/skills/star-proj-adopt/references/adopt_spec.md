@@ -4,7 +4,7 @@ The exact rules behind `star-proj-adopt`. `SKILL.md` states the shape; this file
 
 ## 1. The probe (read-only)
 
-Six areas. Each carries a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Gate 1 — a `certain` line is reported, not asked about. Because that label decides it, the main agent is the one who sets it. An area handed to a subagent comes back with findings and evidence paths and the confidence column left empty; filling it in there would let the subagent decide what the user gets asked about.
+Six areas. Each carries a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1 — a `certain` line is reported, not asked about. Because that label decides it, the main agent is the one who sets it. An area handed to a subagent comes back with findings and evidence paths and the confidence column left empty; filling it in there would let the subagent decide what the user gets asked about.
 
 | Area | Look at | `certain` when |
 |---|---|---|
@@ -21,7 +21,7 @@ Also record, for the inventory: first commit date, commit count, the 20 most rec
 
 ## 2. The mapping block
 
-Report the probe as one block before Gate 1, one line per area:
+Report the probe as one block before Confirmation point 1, one line per area:
 
 ```
 source     CODE_NAME=<dir>            certain   (only importable package; imported by train.py)
@@ -76,7 +76,7 @@ One row per identifiable unit of finished or in-flight work. Fewer, well-evidenc
 
 **What never enters a row:** why the work was done, what claim it supports, whether it succeeded, what should happen next. Those are the coach's to elicit and the analyst's to judge (SKILL.md Principle 5).
 
-## 6. Recording rules (Gate 2)
+## 6. Recording rules (Confirmation point 2)
 
 For each run the user selects:
 
@@ -100,6 +100,6 @@ State proposed per matched leaf:
 | `built` | `in_progress` |
 | `abandoned` | no proposal — report it and let the user decide |
 
-`exec_runs` is set only when that row's run was recorded in Gate 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `$star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
+`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `$star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
 
 Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree, which is information, not an error to smooth over.

@@ -43,7 +43,7 @@ Rows found while planning go in EXEC_PLAN's "Divergences from sub-plan" table; r
 
 ## Two sync points, both user-confirmed
 
-1. **Approval gate.** Divergences known at planning time are part of the EXEC_PLAN the user approves — approving the plan approves syncing those rows. Write them back immediately after approval, before executing.
+1. **The user's approval.** Divergences known at planning time are part of the EXEC_PLAN the user approves — approving the plan approves syncing those rows. Write them back immediately after approval, before executing.
 2. **Finalize.** Deviations that emerge mid-run accumulate under "Pending amendments" — never interrupt the run for them. At finalize, present the batch **once** (*sync all / select which / skip*) and write back only confirmed rows. If a run is abandoned or blocked, unsynced rows stay in the log and are re-offered at the next resume's finalize.
 
 ## Write-back procedure
@@ -57,7 +57,7 @@ For each confirmed row:
    ```markdown
    ## Revision History
 
-   ### <YYYY-MM-DD> — star-plan-executor · <model_id> (run: <prefix>_<slug>, approval gate | finalize)
+   ### <YYYY-MM-DD> — star-plan-executor · <model_id> (run: <prefix>_<slug>, approval | finalize)
    - MODIFIED §3.2: "<old>" → "<new>" — <reason>
    - ADDED §3.5: "<new step>" — <reason>
    - ENRICHED §3.3: lr unstated → 1e-4 — cited by: training.md §3

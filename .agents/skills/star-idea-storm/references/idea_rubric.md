@@ -1,6 +1,6 @@
-# Idea Rubric — scoring directions, issuing verdicts, gating the topic statement
+# Idea Rubric — scoring directions, issuing verdicts, testing the topic statement
 
-Three parts. Part A scores each scanned direction on six dimensions; Part B turns scores into a verdict; Part C is the gate the topic statement must pass before `finalized:` is set. Judgments are **High / Medium / Low with a clause of evidence** — never a bare grade. Evidence means a Stage-1 constraint or scanned papers; a judgment that cites neither is an opinion and does not belong in the file.
+Three parts. Part A scores each scanned direction on six dimensions; Part B turns scores into a verdict; Part C is the test the topic statement must pass before `finalized:` is set. Judgments are **High / Medium / Low with a clause of evidence** — never a bare grade. Evidence means a Stage-1 constraint or scanned papers; a judgment that cites neither is an opinion and does not belong in the file.
 
 ## Part A: the six dimensions
 
@@ -23,7 +23,7 @@ One verdict per direction, with a one-line reason:
 
 The verdict is advice. The user decides; a choice against the verdict is recorded with its reason and then respected. No dimension is averaged into a total — six honest lines beat one blended number.
 
-## Part C: the topic-statement gate
+## Part C: the topic-statement test
 
 Before `finalized:` is set, all of these hold:
 

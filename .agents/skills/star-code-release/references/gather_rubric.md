@@ -32,7 +32,7 @@ Two disqualifiers override a pass:
 
 1. The destination comes from `metds/codearc.md` §2 placement rules, matched on what the file *is* — a data-pipeline script, a model component, a config, a tool, a test.
 2. Where §2 has no rule for this kind of file, check §4's plan-component map for the component it implements.
-3. Still unresolved → the row's action is `route`, not a guessed path. Creating a directory `codearc.md` does not name is `$star-code-architect`'s decision, and a release run that invents `${CODE_NAME}/utils/` has quietly amended the architecture spec without a gate.
+3. Still unresolved → the row's action is `route`, not a guessed path. Creating a directory `codearc.md` does not name is `$star-code-architect`'s decision, and a release run that invents `${CODE_NAME}/utils/` has quietly amended the architecture spec without a confirmation point.
 4. No `codearc.md` at all → every row is `route`, and the whole gather phase reports that the architecture spec is the blocker. Compiling the README can still proceed.
 
 ## Duplicate detection

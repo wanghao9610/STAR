@@ -154,7 +154,7 @@ failure into a false hole in the method.
 
 Read-only subagents extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile a document. `overview` is compiled last, from the other four documents' compiled content — but extraction for it is ordinary work: a collector returns its slice's `overview` rows like any other target's.
 
-## Change list (the diff gate)
+## Change list (what a rewrite would replace)
 
 When regenerating an existing compiled document, report one line per section before writing:
 

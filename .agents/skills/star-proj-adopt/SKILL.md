@@ -37,7 +37,7 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`$
 4. **Reconstruction is always labeled.** A record written after the fact is not an execution record. Every historical run recorded this way carries a header saying it was reconstructed during adoption, on what date, from what evidence — so no later reader mistakes it for something `$star-plan-executor` produced.
 5. **Adoption does not invent research strategy.** You can read what was built and what was run; you cannot read why, what claim it serves, or what would have killed it. The inventory stays descriptive, and §4-style claims and kill-criteria are left for `$star-plan-coach` to elicit from the user. A plan tree fabricated from a git log is worse than no plan tree.
 6. **The narrow write on plans.** `metds/plans/*` belongs to the coach, the decomposer, the executor, and the reviser (conventions §8). Your one exception is frontmatter `exec_status:` and `exec_runs:` on leaves, in `backfill`, each leaf individually confirmed by the user. Plan bodies, `status:`, `finalized:`, `children:`, `depends_on` — never yours, in either phase.
-7. **Two gates; autonomous between them.** Gate 1: the user confirms the probe mapping (source, runtime, data / weights / outputs) before anything is written. Gate 2: the user picks which historical runs get recorded. `backfill` adds one gate of its own, per-leaf. Never do work a gate did not cover.
+7. **Two confirmation points; autonomous between them.** Confirmation point 1: the user confirms the probe mapping (source, runtime, data / weights / outputs) before anything is written. Confirmation point 2: the user picks which historical runs get recorded. `backfill` adds one confirmation point of its own, per-leaf. Never do work a confirmation point did not cover.
 
 ## Workflow
 
@@ -49,11 +49,11 @@ Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) for t
 
 Detect, without writing anything: candidate source directories (top-level importable packages, the one the entrypoints import), the runtime actually in use (`conda env list`, a `.venv`, `which python`, an env name in existing scripts), where data / weights / outputs currently live, the launch entrypoints and how they are invoked, the existing tests, and the git history shape (first commit, commit count, active paths). Present the mapping as one compact block, marking every low-confidence line.
 
-Probe locally by default; delegate selectively. Probing may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only delegate each, selectively per conventions §6, at most 3 in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Gate 1 at all, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
+Probe locally by default; delegate selectively. Probing may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only delegate each, selectively per conventions §6, at most 3 in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Confirmation point 1 at all, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
 
-#### Step S2: Gate 1 — confirm the mapping
+#### Step S2: Confirmation point 1 — confirm the mapping
 
-Ask one question at a time — the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec` — only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until this gate closes.
+Ask one question at a time — the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec` — only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
 
 #### Step S3: Put the mechanical setup in place
 
@@ -68,7 +68,7 @@ In this order, each step reported as done or skipped-because-it-exists:
 
 From git log, the entrypoints, the output directories, and the README, assemble the inventory defined in `references/adopt_spec.md`: one row per identifiable unit of finished or in-flight work — what it is, its state (`built` / `run` / `concluded` / `abandoned`), and its evidence paths. This is the seed `$star-plan-coach` reads; it is a description of the repository, not a plan (Principle 5). The S1 areas already walked git history, the entrypoints and the output directories: build the inventory from what they returned, and open only what none of them covered. The main agent merges and owns every judgment, including the rule that two commits plus an output directory describing one thing is one row.
 
-#### Step S5: Gate 2 — record the historical runs worth keeping
+#### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
 List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once, as one question, which of these to record (the user may pick several). For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
 
@@ -80,9 +80,9 @@ Write `metds/adopt.md` from `assets/adopt_template.md`. Then route, in order: `$
 
 #### Step B1: Match inventory to leaves
 
-Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A small tree (≤ ~8 leaves) is read by the main agent. Larger: partition the leaves into at most 3 disjoint read-only collectors returning, per leaf, `{leaf, deliverable_paths, step_paths, done_criterion (quoted verbatim), exec_status, overlap, weak}` — the matching rule uses only those, never the whole plan body. The main agent re-reads §5 in full for every leaf it proposes as `done`, and keeps the many-to-many rule and the gate. Propose a mapping table: inventory item → leaf → the state it argues for (`done` / `in_progress`) → the evidence. Report both kinds of misfit honestly — inventory items no leaf covers (work the plan tree forgot), and leaves nothing in the inventory reaches (genuinely new work, which is the normal case and not a problem).
+Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A small tree (≤ ~8 leaves) is read by the main agent. Larger: partition the leaves into at most 3 disjoint read-only collectors returning, per leaf, `{leaf, deliverable_paths, step_paths, done_criterion (quoted verbatim), exec_status, overlap, weak}` — the matching rule uses only those, never the whole plan body. The main agent re-reads §5 in full for every leaf it proposes as `done`, and keeps the many-to-many rule and the confirmation point. Propose a mapping table: inventory item → leaf → the state it argues for (`done` / `in_progress`) → the evidence. Report both kinds of misfit honestly — inventory items no leaf covers (work the plan tree forgot), and leaves nothing in the inventory reaches (genuinely new work, which is the normal case and not a problem).
 
-#### Step B2: Gate 3 — per-leaf confirmation
+#### Step B2: Confirmation point 3 — per-leaf confirmation
 
 The user confirms leaf by leaf — one question listing the proposed rows when there are several (the user may confirm several), one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `$star-flow-status` will flag it as done-with-no-run, which is the honest state.
 
@@ -100,7 +100,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 
 ## Dialogue Discipline
 
-- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. All three gates require an explicit answer before any gate-crossing write.
+- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. All three confirmation points require an explicit answer before any write past a confirmation point.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.
 - `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

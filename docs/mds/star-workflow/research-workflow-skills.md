@@ -102,7 +102,7 @@ When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
 Multiple root plans may currently start with `0_`. If a match is ambiguous, use the slug or full filename.
 
-Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `$star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Safety gates — the STOP line, commits, deletions — always ask, at every level. Full rule: [conventions §7.7](research-workflow-conventions.md).
+Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `$star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Mandatory confirmation points — the STOP line, commits, deletions — always ask, at every level. Full rule: [conventions §7.7](research-workflow-conventions.md).
 
 ## 2. Before you start
 
@@ -151,16 +151,16 @@ With no argument the phase is detected: no `metds/adopt.md` yet → `survey`; an
 Phase `survey`, before the plan tree exists:
 
 1. Probes the repository **read-only** across six areas — the source directory, the runtime actually in use, where data / weights / outputs currently live, the launch entrypoints, the existing tests, and the shape of the git history — and reports the mapping as one block with a confidence on every line;
-2. **Gate 1:** you confirm the mapping, one question at a time and only for what the probe could not settle. Nothing is written until this gate closes;
+2. **Confirmation point 1:** you confirm the mapping, one question at a time and only for what the probe could not settle. Nothing is written until the user answers;
 3. Puts the mechanical setup in place: `.env` from `.env.example`, symlinks at `datas/` / `inits/` / `wkdrs/` that *reach* the existing trees instead of relocating them, and one `execs/scpts/<name>.sh` per entrypoint that calls the project's existing command unchanged;
 4. Builds a work inventory — one row per identifiable unit of finished or in-flight work: what it is, its state (`built` / `run` / `concluded` / `abandoned`), and the paths, commits, scripts, or log lines that evidence it;
-5. **Gate 2:** you pick which of the prior runs found on disk are recorded. Each chosen run is symlinked to `wkdrs/<run>/` and given a reconstructed `EXEC_LOG.md` — labelled as reconstructed, with no step table, because there were no steps to record. The rest stay in the inventory as evidence, and the report says how many were left out;
+5. **Confirmation point 2:** you pick which of the prior runs found on disk are recorded. Each chosen run is symlinked to `wkdrs/<run>/` and given a reconstructed `EXEC_LOG.md` — labelled as reconstructed, with no step table, because there were no steps to record. The rest stay in the inventory as evidence, and the report says how many were left out;
 6. Writes `metds/adopt.md`, then routes on: `$star-code-architect` for the architecture spec (its organize path surveys the existing code, which adoption deliberately does not duplicate), `$star-plan-coach` for the research plan (it reads the work inventory as its seed), `$star-plan-decomposer` for the leaves, and finally `$star-proj-adopt backfill`.
 
 Phase `backfill`, once the leaves exist:
 
 1. Matches inventory rows to leaves on evidence overlap — a shared path, script, or module, never name similarity alone — and reports both misfits honestly: inventory items no leaf covers, and leaves nothing in the inventory reaches;
-2. **Gate 3:** you confirm leaf by leaf. An unconfirmed leaf is left exactly as it is;
+2. **Confirmation point 3:** you confirm leaf by leaf. An unconfirmed leaf is left exactly as it is;
 3. Writes `exec_status` and, where that row's run was recorded, `exec_runs` on the confirmed leaves (updating that reconstructed log's `source_plan:` to the leaf in the same pass), appends a dated backfill record to `metds/adopt.md` and stamps its `backfilled:` date, and hands off to `$star-flow-status` for the first honest picture of the adopted project.
 
 ### Main output
@@ -404,12 +404,12 @@ When `${CODE_NAME}/` is missing or empty (bootstrap):
 
 1. Extracts a search profile from the plan: task domain, method keywords, named baselines, framework constraints;
 2. Searches GitHub and scores candidates on plan fit, completeness, license, activity, code quality, and environment match;
-3. **Gate 1:** you pick the repository from the scored shortlist, with license implications stated;
+3. **Confirmation point 1:** you pick the repository from the scored shortlist, with license implications stated;
 4. Clones it, strips git history, records provenance in `${CODE_NAME}/UPSTREAM.md`, keeps the upstream LICENSE, and conservatively rebrands the package to `CODE_NAME` — registry strings and checkpoint-coupled names are left untouched and listed as names left unchanged on purpose.
 
 When code already exists (organize): surveys it read-only, concern by concern, into a repo map.
 
-Both paths then design a target architecture with a numbered migration table — the current layout is the baseline, so migrations stay minimal. **Gate 2:** you approve migration items individually. Approved migrations run as disjoint groups with verification and a git checkpoint per group; failed groups are rolled back and marked blocked.
+Both paths then design a target architecture with a numbered migration table — the current layout is the baseline, so migrations stay minimal. **Confirmation point 2:** you approve migration items individually. Approved migrations run as disjoint groups with verification and a git checkpoint per group; failed groups are rolled back and marked blocked.
 
 ### Main outputs
 
@@ -430,7 +430,7 @@ Environment builds involving CUDA compilation, downloads over ~1 GB, full test s
 ### Practical guidance
 
 - Run it once between decomposition and the first execution; re-run it later to record new placement rules or execute the next round of approved migrations.
-- Read the license column at Gate 1 carefully — it also constrains how you can release your own code later.
+- Read the license column at Confirmation point 1 carefully — it also constrains how you can release your own code later.
 - Keep migrations small. The upstream layout survived real training runs; wholesale restructuring of unfamiliar research code rarely does.
 
 See the complete definition in [`star-code-architect/SKILL.md`](../../../.claude/skills/star-code-architect/SKILL.md).
@@ -459,7 +459,7 @@ With no argument, the environment name is `CODE_NAME` from `.env`. A valid `COND
 1. Probes `.env`, the GPU/driver (the CUDA ceiling), conda, and uv;
 2. If the target environment already exists, asks whether to **back it up** (rename to `<name>_<YYYYMMDD>` with the real run date — never deleted), **verify & repair in place**, or **abort**;
 3. Resolves dependencies first-signal-wins: existing `${CODE_NAME}/requirements*` → `pyproject.toml` / `setup.py` / `environment.yml` → an import scan of the code. Generated results land in a two-tier layout: `requirements.txt` referencing `requirements/framework|runtime|optional.txt`, with conda-only items in `requirements/conda.txt`;
-4. **Gate:** you approve the install plan — backend, python version, per-category packages, the torch↔CUDA wheel match, download sizes, and every flagged uncertainty;
+4. **Confirmation point:** you approve the install plan — backend, python version, per-category packages, the torch↔CUDA wheel match, download sizes, and every flagged uncertainty;
 5. Installs in the uv > pip > conda install order (conda only for system-isolation items such as `cudatoolkit` or `ffmpeg`), respecting any configured mirrors;
 6. Smoke-tests in three layers — imports, framework/GPU check, project entrypoint — with the main agent recording evidence for every check.
 
@@ -476,7 +476,7 @@ The report records the absolute interpreter path (`ENV_PY`) that every later com
 
 ### The STOP line
 
-Gate-approved installs run autonomously, including large framework wheels. The skill never runs `sudo` or system package managers, never compiles CUDA extensions from source (flash-attn-style builds are prepared as exact commands for you), never downloads more than ~10 GB, and never deletes an environment.
+Installs approved at the confirmation point run autonomously, including large framework wheels. The skill never runs `sudo` or system package managers, never compiles CUDA extensions from source (flash-attn-style builds are prepared as exact commands for you), never downloads more than ~10 GB, and never deletes an environment.
 
 ### Practical guidance
 
@@ -922,7 +922,7 @@ $star-metd-summarize
 
 ### What it does
 
-1. Gates on readiness: unless every top-level plan carries `finalized:` and every leaf is `exec_status: done`, it stops before compiling anything, names what is still open, and routes it — compiling a draft anyway is an explicit choice it asks for, never a default;
+1. Checks readiness: unless every top-level plan carries `finalized:` and every leaf is `exec_status: done`, it stops before compiling anything, names what is still open, and routes it — compiling a draft anyway is an explicit choice it asks for, never a default;
 2. Rebuilds the plan tree from each plan's `parent:`, exactly as the status skill does;
 3. Extracts what each document needs through a written map — the root's §1–§3 and §6 for the overview, §4 data choices plus every leaf's `datas/` inputs for the dataset document, the §3 technical route plus modeling leaves and their `${CODE_NAME}/` paths for the framework, §3 strategy plus `inits/` and hyperparameters for training, §4 benchmarks, baselines, metrics and ablation design plus §5 kill-criteria for evaluation;
 4. Merges the passages along the method's axis rather than the plan's, resolving conflicts leaf-over-parent and newer-over-older, and printing ⚠ with both sources when neither dominates;
@@ -947,7 +947,7 @@ Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat
 
 ### Practical guidance
 
-- Compile once the loop has closed — every leaf executed, the plans finalized. A premature run stops at the readiness gate and hands back what is still open: while the method is moving, the route is `$star-plan-executor` and `$star-plan-coach`, not a draft document. Run it as soon as the gate opens, though — the gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
+- Compile once the loop has closed — every leaf executed, the plans finalized. A premature run stops at the readiness check and hands back what is still open: while the method is moving, the route is `$star-plan-executor` and `$star-plan-coach`, not a draft document. Run it as soon as the confirmation point opens, though — the gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
 - Treat these documents as generated. To change one, change the plan it came from and recompile — hand edits are overwritten on the next run, though a file the skill did not generate is never overwritten without asking first.
 - A regeneration whose sections are all unchanged writes nothing, so re-running it costs you only the reading.
 
@@ -975,7 +975,7 @@ $star-code-release check        # only the hygiene sweep — read-only apart fro
 ### What it does
 
 1. Prints a **readiness table** before anything else: which of the compile's inputs exist and which are stale, each with the skill that produces it. Compiling with gaps is allowed — they become README TODOs — but you see the table first;
-2. Sweeps `tasks/`, `wkdrs/` scripts and configs, and root strays, promoting only what passes a three-part evidence test — the README will cite it, an executed leaf's §4 deliverable or §5 done-criterion needs it, or it reproduces a number in `wkdrs/results/results.md`. Destinations come from `metds/codearc.md` §2; a candidate no placement rule covers is reported as an architecture gap rather than given an invented directory. **Gate 1:** you approve the promotion table row by row, with each row's risk and any plan line it would make stale shown;
+2. Sweeps `tasks/`, `wkdrs/` scripts and configs, and root strays, promoting only what passes a three-part evidence test — the README will cite it, an executed leaf's §4 deliverable or §5 done-criterion needs it, or it reproduces a number in `wkdrs/results/results.md`. Destinations come from `metds/codearc.md` §2; a candidate no placement rule covers is reported as an architecture gap rather than given an invented directory. **Confirmation point 1:** you approve the promotion table row by row, with each row's risk and any plan line it would make stale shown;
 3. Polishes only the files a reader will open — the promoted files, the entrypoints and configs and scripts the README prints, the public API it shows. Each edit is individually approved and behavior-preserving;
 4. Compiles `README.md` section by section through a written map: the header and abstract from `metds/overview.md`, the method from `metds/framework.md`, installation from `requirements*` and the newest `ENV_REPORT.md`, data preparation from `metds/dataset.md`, training and evaluation from `metds/training.md` and `metds/evaluation.md`, the results and model zoo from `wkdrs/results/results.md`, the repository structure from `metds/codearc.md`, the citation from `reference.bib`, and the acknowledgement from `UPSTREAM.md`;
 5. Ends with a hygiene sweep whose findings block: secrets and machine-local paths, license and attribution, whether every command it printed actually resolves, whether every link and image it wrote points at a file that exists, and whether every number it printed can be traced to a row of `wkdrs/results/results.md`.
@@ -1048,7 +1048,7 @@ Interleaving matters: §2 positioning and the §1 gap are claims about what the 
 $star-code-architect
 ```
 
-After Gate 1 (pick the scored reference repository) and Gate 2 (approve the migration table), `${CODE_NAME}/` holds the renamed, provenance-tracked codebase and `metds/codearc.md` records the architecture every later step follows. This runs off the **root plan**, so it needs no sub-plans yet.
+After Confirmation point 1 (pick the scored reference repository) and Confirmation point 2 (approve the migration table), `${CODE_NAME}/` holds the renamed, provenance-tracked codebase and `metds/codearc.md` records the architecture every later step follows. This runs off the **root plan**, so it needs no sub-plans yet.
 
 ### Step 3: build the runtime environment (first run only)
 
@@ -1056,7 +1056,7 @@ After Gate 1 (pick the scored reference repository) and Gate 2 (approve the migr
 $star-env-builder
 ```
 
-After the install-plan gate, the environment is created, dependencies install in the uv > pip > conda install order, and a three-layer smoke test writes its evidence to `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md`.
+After the install-plan confirmation point, the environment is created, dependencies install in the uv > pip > conda install order, and a three-layer smoke test writes its evidence to `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md`.
 
 ### Step 4: split it into execution units
 
@@ -1109,7 +1109,7 @@ Once the loop has closed — every leaf executed, every top-level plan finalized
 $star-metd-summarize
 ```
 
-This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness gate enforces the timing: while any leaf is unexecuted or any top-level plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. The commonest reason the gate stays shut is a writing or submission leaf: it cannot be executed until the method documents exist, and the documents wait on it. Keep write-up out of the plan tree, or mark that leaf `skipped` before compiling. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
+This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness check enforces the timing: while any leaf is unexecuted or any top-level plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. The commonest reason the confirmation point stays shut is a writing or submission leaf: it cannot be executed until the method documents exist, and the documents wait on it. Keep write-up out of the plan tree, or mark that leaf `skipped` before compiling. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
 
 ### Step 9: prepare the repository for release
 
@@ -1182,13 +1182,13 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 
 ### Which parts can run unattended?
 
-The approval gates do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
+The confirmation points do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
-- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness gate, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of overwriting.
-- **Runs until its gate**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their gates.
-- **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and gates are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
+- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness check, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of overwriting.
+- **Runs until its confirmation point**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
+- **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and confirmation points are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
-The involve level (conventions §7.7–7.8) moves these boundaries, never past a gate. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill stops asking its judgment calls: it takes the option it would have marked recommended and logs the choice instead. Runs stretch further before needing you: `$star-plan-decomposer`'s axis and sub-plan-list confirmations go quiet, and `$star-plan-executor`, pointed at a parent, starts the first ready leaf itself. What never goes quiet: the STOP line, commit offers, deletions and overwrites, writing changes back into plans, the approval gates, and genuinely open questions — `low` lengthens the unattended span, it does not make any skill fully unattended. `high` runs the other way: judgment calls a skill would batch into one gate, or take on its own between gates, are asked one at a time.
+The involve level (conventions §7.7–7.8) moves these boundaries, never past a confirmation point. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill stops asking its judgment calls: it takes the option it would have marked recommended and logs the choice instead. Runs stretch further before needing you: `$star-plan-decomposer`'s axis and sub-plan-list confirmations go quiet, and `$star-plan-executor`, pointed at a parent, starts the first ready leaf itself. What never goes quiet: the STOP line, commit offers, deletions and overwrites, writing changes back into plans, the confirmation points, and genuinely open questions — `low` lengthens the unattended span, it does not make any skill fully unattended. `high` runs the other way: judgment calls a skill would batch into one confirmation point, or take on its own between confirmation points, are asked one at a time.
 
 A practical unattended pattern: run the STOP-line training command, keep `$star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
 
@@ -1204,7 +1204,7 @@ Each of these could have been a skill. They are not, because the answer would ha
 
 ### Can I edit plan files manually?
 
-Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, `exec_runs`, and `finalized`. `finalized` is the one three skills gate on — the decomposer will not take an unfinalized top-level plan, the architect warns, and `star-metd-summarize` refuses to compile — and only `star-plan-coach` sets it. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
+Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, `exec_runs`, and `finalized`. `finalized` is the one three skills wait on — the decomposer will not take an unfinalized top-level plan, the architect warns, and `star-metd-summarize` refuses to compile — and only `star-plan-coach` sets it. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
 
 ## 20. Skill locations
 

@@ -2,7 +2,7 @@
 
 Per-run analysis answers *did this run meet its plan*. Aggregate answers *what does the whole experiment programme show, and where did each number come from* — compiling every run's verified numbers into one results table, `wkdrs/results/results.md`: the material a paper's results section is written from, and the counterpart to `metds/evaluation.md`, which defines the protocol these numbers were measured under.
 
-This file defines scope, the destination, the trust model, the axis, what the results table never does, exclusion, and the write gate.
+This file defines scope, the destination, the trust model, the axis, what the results table never does, exclusion, and the write rules.
 
 ## Scope
 
@@ -95,7 +95,7 @@ sources:                          # every run that fed this results table
 
 `type: results` + `generated:` are what mark the file compiled and therefore safe to regenerate. `sources:` is the staleness check: a run whose newest report is newer than the one recorded here means the results table is stale.
 
-## Write gate
+## Write rules
 
 Applied to the destination the scope selected above — never to the other one.
 

@@ -6,7 +6,7 @@ description: >-
   Invoked as /skill:star-metd-summarize [OPT] where OPT is overview, dataset, framework, training, or
   evaluation; no argument compiles all five in dependency order (dataset → framework → training →
   evaluation → overview, which links the other four and so compiles last). An end-of-flow skill:
-  the readiness gate compiles only a finished tree — every top-level plan finalized and every leaf
+  the readiness check compiles only a finished tree — every top-level plan finalized and every leaf
   exec_status done, i.e. all experiments finished and the method determined — and otherwise stops,
   naming and routing the unfinished work; a draft compile is an explicit user choice, never the
   default. Use when all experiments are finished and the plans are finalized and the user runs
@@ -35,7 +35,7 @@ You compile and reorganize; you do not decide method, revise plans, read code, o
 2. **Compile, never invent.** Rewriting, reordering, and merging into one voice is the job; adding facts is not. A plausible default (an unstated learning rate, an obvious preprocessing step, a standard metric definition) is an invention — it does not go in. If it is not in a plan, it is a gap.
 3. **Gaps are output, not embarrassment.** A template section no plan covers becomes a `TODO` naming the plan and section that should carry it, and the gap list is a headline of the report. The document is a mirror: it shows the researcher exactly where the method is still unwritten, and pushes the fix back into the plans, which the coach and decomposer own.
 4. **Organize along the method's axis, not the plan's.** One plan section may feed several documents; one document section may merge a dozen plans. Merge, do not concatenate — a section that reads as a list of plan excerpts, or that says the same thing twice because a parent and a leaf both said it, has failed. Where they disagree: **leaf beats parent, newer `updated` beats older**. When neither dominates, print both values with ⚠ and name both sources — never silently pick a winner.
-5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` — present only in an explicitly chosen draft compile (Step 1's readiness gate) — is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, and their cross-run results table is `wkdrs/results/results.md`; `evaluation.md` defines the protocol, not the scores.
+5. **Never let a plan read as a result.** Content from a leaf whose `exec_status` is not `done` — present only in an explicitly chosen draft compile (Step 1's readiness check) — is design intent: close that subsection with one italic line marking it not yet verified, and name the plan it came from. Verified content carries no marker. Result numbers never enter these documents at all — a metric a run produced belongs to `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, and their cross-run results table is `wkdrs/results/results.md`; `evaluation.md` defines the protocol, not the scores.
 6. **Generated docs are overwritten only with the diff on the table; hand-authored docs are not targets at all.** A doc carrying this skill's `type:` / `generated:` frontmatter is a compiled artifact: on re-run, show the section-level change list and get approval before writing. A doc without that frontmatter was written by a human — show what it holds and ask; never overwrite it on the strength of a diff.
 
 ## Workflow
@@ -52,7 +52,7 @@ List `metds/plans/*_plan.md`; read each one's **frontmatter** — every field th
 
 - **Output language** follows the plans: the root's `language:`; with several roots, the majority; a tie takes the dialogue language.
 - **One document set describes one method.** If the tree has several unrelated roots, say so and ask in the conversation which root's subtree these documents describe; the answer scopes the whole run.
-- **Readiness gate — compile only a determined method.** The tree in scope is ready only when every top-level plan carries `finalized:` and every leaf is `exec_status: done` — all experiments finished, the plans final. Anything less: compile nothing, list what is open (each leaf not `done` with its `exec_status`, each top-level plan missing `finalized:`), and route it — unexecuted or blocked leaves to `/skill:star-plan-executor`, an unfinalized top-level plan to `/skill:star-plan-coach`, the whole picture to `/skill:star-flow-status` — then stop. Past the gate there is one path: the user, shown exactly what is unfinished, explicitly chooses in the conversation to compile a draft anyway — then every passage from an unfinished leaf carries the not-yet-verified mark (Step 3).
+- **Readiness check — compile only a determined method.** The tree in scope is ready only when every top-level plan carries `finalized:` and every leaf is `exec_status: done` — all experiments finished, the plans final. Anything less: compile nothing, list what is open (each leaf not `done` with its `exec_status`, each top-level plan missing `finalized:`), and route it — unexecuted or blocked leaves to `/skill:star-plan-executor`, an unfinalized top-level plan to `/skill:star-plan-coach`, the whole picture to `/skill:star-flow-status` — then stop. Past that check there is one path: the user, shown exactly what is unfinished, explicitly chooses in the conversation to compile a draft anyway — then every passage from an unfinished leaf carries the not-yet-verified mark (Step 3).
 - **A plan whose relevant sections are still `pending`** contributes nothing but a gap — note it now, so the report can name it instead of silently thinning the document.
 
 ### Step 2: Extract
@@ -75,7 +75,7 @@ Where Step 2 fanned out, reconcile before you merge: every plan dispatched comes
 
 Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and their order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), and `sources:` — every plan that fed this document with the `updated` date it carried when read, which is what makes staleness detectable on the next run.
 
-### Step 5: Write, with the diff gate
+### Step 5: Write, comparing against what is already there
 
 For each target, in dependency order:
 
@@ -86,7 +86,7 @@ For each target, in dependency order:
 
 ### Step 6: Report
 
-≤400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `/skill:star-plan-coach`, execution detail to `/skill:star-plan-decomposer`, a value an executed run settled to `/skill:star-plan-executor`, plan text contradicting reality to `/skill:star-plan-reviser`, results to `/skill:star-expt-analyst`, citations to `/skill:star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-gate override) says so in the report's first line.
+≤400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `/skill:star-plan-coach`, execution detail to `/skill:star-plan-decomposer`, a value an executed run settled to `/skill:star-plan-executor`, plan text contradicting reality to `/skill:star-plan-reviser`, results to `/skill:star-expt-analyst`, citations to `/skill:star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-check override) says so in the report's first line.
 
 ## State & File Rules
 
@@ -99,5 +99,5 @@ For each target, in dependency order:
 
 ## Dialogue Discipline
 
-- The five gates are all asked in the conversation: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (non-interactive `kimi -p`), fall back to plain text and still require an explicit approval before overwriting any existing file — and never compile past the readiness gate without one.
+- The five confirmation points are all asked in the conversation: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (non-interactive `kimi -p`), fall back to plain text and still require an explicit approval before overwriting any existing file — and never compile past the readiness check without one.
 - Reply in the user's language; the documents follow the plans' `language` (Step 1), which may differ from the dialogue. Keep technical terms — metric names, module paths, dataset names — in English inside Chinese documents.

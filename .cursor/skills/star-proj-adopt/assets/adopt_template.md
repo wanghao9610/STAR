@@ -23,7 +23,7 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 2. Mapping
 
-<!-- The confirmed probe result, one row per area. `confidence` is what it was at Gate 1, kept so a
+<!-- The confirmed probe result, one row per area. `confidence` is what it was at Confirmation point 1, kept so a
      later reader knows which lines were guessed at and confirmed rather than detected. -->
 
 | Area | Mapped to | Target | Confidence | Note |

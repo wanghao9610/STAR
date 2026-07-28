@@ -113,6 +113,6 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 
 ## Dialogue Discipline
 
-- Ask via AskUserQuestion only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). If it is unavailable (headless / scripted), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own digest, there is no approval gate — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
+- Ask via AskUserQuestion only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). If it is unavailable (headless / scripted), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
 - Never present a provisional number as a result in chat either. If the digest tagged it unverified, the reply says so too.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.

@@ -35,7 +35,7 @@ Venv backend needing a whitelist item → do not improvise (no `sudo`, no apt/br
 2. **Pin**: any torch pin from the dependency source, plus any CUDA version the upstream README names.
 3. **Choose**: the highest official `cuXXX` wheel index ≤ ceiling that satisfies the pin — verify current index availability on pytorch.org/get-started (indexes rotate; do not trust memory). Example: `--extra-index-url https://download.pytorch.org/whl/cu121`.
 4. macOS → default PyPI wheels (CPU + MPS). Linux without an NVIDIA GPU → `/whl/cpu`.
-5. **Mismatch** (pin newer than the ceiling; upstream demands an nvcc the machine lacks) → a gate question with concrete options: older wheel that matches the pin / newer torch (name the API risk) / CPU build.
+5. **Mismatch** (pin newer than the ceiling; upstream demands an nvcc the machine lacks) → a question at the confirmation point with concrete options: older wheel that matches the pin / newer torch (name the API risk) / CPU build.
 
 `nvcc` matters only for source builds (STOP line anyway); wheel installs need only the driver.
 
@@ -44,7 +44,7 @@ Venv backend needing a whitelist item → do not improvise (no `sudo`, no apt/br
 - Per package: uv → pip retry, ≤2 attempts total; capture the error tail.
 - A failed package does not abort the run: record it, keep installing the rest, then resolve or hand over the failures in one batch at the end.
 - Source-build signatures — `--no-build-isolation` required, `setup.py` probing `CUDA_HOME`, "Building wheel …" that runs minutes (`flash-attn`, full `mmcv`, `detectron2` from git) → STOP line: write the exact prepared command into ENV_REPORT's "Awaiting user"; never run it autonomously.
-- Resolver conflicts (uv/pip backtracking errors) → never force with `--no-deps` (the editable project install is the sole exception); point out the conflicting pair at the gate or in the report.
+- Resolver conflicts (uv/pip backtracking errors) → never force with `--no-deps` (the editable project install is the sole exception); point out the conflicting pair at the confirmation point or in the report.
 
 ## Mirrors & indexes
 

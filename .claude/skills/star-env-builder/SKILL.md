@@ -11,7 +11,7 @@ description: >-
   import scan of the code, with generated results written as requirements.txt plus a
   requirements/ folder (framework|runtime|optional.txt; conda-only items in
   requirements/conda.txt). Installs in the order uv > pip > conda with CUDA-aware framework
-  wheel selection behind a single install-plan gate, then smoke-tests in three layers
+  wheel selection behind a single install-plan confirmation point, then smoke-tests in three layers
   (imports → framework/GPU → project entrypoint) and writes ENV_REPORT.md plus a version
   freeze under wkdrs/. Use when the user runs /star-env-builder, wants the project's conda
   env or venv created or rebuilt, needs dependencies resolved and installed, or wants the
@@ -35,7 +35,7 @@ You **build the environment; you do not implement or refactor research code.** T
 ## Core Principles
 
 1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: it is the only one that may create, rename, or install into one.
-2. **One gate; situational asks.** The single gate is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via AskUserQuestion, one question per call, each with a recommendation.
+2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via AskUserQuestion, one question per call, each with a recommendation.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the install order is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed as a code asset once the build is verified.
@@ -73,7 +73,7 @@ Recipe and mapping table: `references/dependency_resolution.md`.
 
 Generated layout: `requirements.txt` holds only `-r requirements/framework.txt` and `-r requirements/runtime.txt` lines (optional referenced as a comment); `requirements/framework.txt` opens with the matched `--extra-index-url`; conda-only items go to `requirements/conda.txt` with a "conda installs this, not pip" header. Files are written now, committed in Step 7 after the build is verified.
 
-### Step 4: Gate — the user approves the install plan
+### Step 4: Confirmation point — the user approves the install plan
 
 Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask via AskUserQuestion: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
 
@@ -112,7 +112,7 @@ The environment already exists; this mode installs into it and records what it i
 
 1. Resolve `ENV_PY` from `.env` (Principle 1). No usable interpreter → say so and recommend a full `/star-env-builder` run; install nothing.
 2. Categorise each package per `references/installer_policy.md` — framework / runtime / optional / conda-only — and say which requirements file each will be recorded in.
-3. **Gate** (Principle 2 — nothing installs before it): present the packages, their categories, the versions and index that will be used, the download size when it is large, and any CUDA coupling; ask *approve and install* / *adjust* / *abort*.
+3. **Confirmation point** (Principle 2 — nothing installs before it): present the packages, their categories, the versions and index that will be used, the download size when it is large, and any CUDA coupling; ask *approve and install* / *adjust* / *abort*.
 4. Install in the uv > pip > conda order (conda only under a conda backend and only for the whitelist). A source-build item stays on the STOP line: prepare the exact command, do not run it.
 5. Smoke-test only the new packages (`references/smoke_test_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
 6. Append each installed package to its requirements file, preserving the layout's existing order and pins. Append an `## Added <date>` block to the newest `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` (none exists → write a fresh report). Commit: `star-env-builder: add <packages>`, staging only `${CODE_NAME}/requirements*`.
@@ -123,12 +123,12 @@ The environment already exists; this mode installs into it and records what it i
 - Writes are limited to: the environment itself (under `$CONDA_HOME/envs/` or `<project>/.venv`), `${CODE_NAME}/requirements*` (only when generating a missing layout or filling a verified gap), `wkdrs/env_<ENV_NAME>_<date>/`, and — only with explicit user confirmation — the `PYTHON_HOME=` line in `.env`. Never touch source code, `metds/plans/*`, or other skills' outputs.
 - Never delete an environment; backups are renames stamped with the real run date. Never invent timestamps.
 - Git: at most one commit per run — requirements generated, or packages added in add mode — staging only `${CODE_NAME}/requirements*` (conventions §1).
-- Gate-approved installs run autonomously, including framework-scale downloads. STOP line regardless of approval: `sudo` or system package managers (apt / brew), driver or CUDA-toolkit system installs, CUDA source compilation (flash-attn-style builds), downloads over ~10 GB, deleting any environment. Prepare those as exact commands in the report instead.
+- Installs approved at the confirmation point run autonomously, including framework-scale downloads. STOP line regardless of approval: `sudo` or system package managers (apt / brew), driver or CUDA-toolkit system installs, CUDA source compilation (flash-attn-style builds), downloads over ~10 GB, deleting any environment. Prepare those as exact commands in the report instead.
 - Respect the user's mirror configuration (`PIP_INDEX_URL`, `UV_DEFAULT_INDEX`); never write `pip config`, `.condarc`, or `uv.toml`.
 - Re-invoke semantics: if a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present, prefer **verify & repair in place** (Step 2) — resume from its failures instead of rebuilding.
 
 ## Dialogue Discipline
 
-- The gate and all situational questions go through AskUserQuestion — one question per call, each with a recommendation. If it is unavailable (headless / scripted), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
+- The confirmation point and all situational questions go through AskUserQuestion — one question per call, each with a recommendation. If it is unavailable (headless / scripted), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

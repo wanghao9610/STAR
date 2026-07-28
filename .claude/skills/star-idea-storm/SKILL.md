@@ -72,7 +72,7 @@ Draft §5 from everything above, 150–400 words of structured prose:
 - the first validation experiment: the cheapest test of the riskiest assumption, about a week within §1's constraints, its kill-condition explicit;
 - known risks and open questions, addressed to the survey and the plan.
 
-Check the draft against the rubric's topic-statement gate (Part C); list failing items (at most 5, ranked by importance) and fix them or let the user explicitly accept them. Show the draft, confirm via AskUserQuestion (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the gate run and answered, the statement user-confirmed. It is the signal `/star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
+Check the draft against the rubric's topic-statement test (Part C); list failing items (at most 5, ranked by importance) and fix them or let the user explicitly accept them. Show the draft, confirm via AskUserQuestion (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `/star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
 
 ### Step 6: Digest & handoff
 
@@ -89,7 +89,7 @@ Check the draft against the rubric's topic-statement gate (Part C); list failing
 
 ## Dialogue Discipline
 
-- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text questions — still one at a time, and still waiting for an explicit answer at the two gates: the set of directions to keep (Stage 2) and the decision (Stage 4).
+- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text questions — still one at a time, and still waiting for an explicit answer at the two confirmation points: the set of directions to keep (Stage 2) and the decision (Stage 4).
 - Judge directions with the rubric and the scan, never with taste alone: every verdict line cites its evidence. Challenge vagueness — mild tone, sharp questions. The seed itself is never disparaged: even a crowded, infeasible seed gets its honest scan and a respectful Park.
 - Report honestly: depth never overstated ("the abstracts suggest" is the honest verb at abstract depth); a crowded field is reported as crowded even when it kills the favorite; a skipped scan is marked everywhere that would have cited it.
 - Reply in the user's language; resources ship as English default (no suffix) and Chinese `*_zh.md` — pick by dialogue language. Idea-file body language follows frontmatter `language`: set at creation from the dialogue language, kept on resume even if chat language changes, rewritten only on explicit request. In Chinese files, keep technical terms, paper titles, and venue names in English.

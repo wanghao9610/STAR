@@ -31,7 +31,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 ## Core Principles
 
 1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/skill:star-plan-coach` first — or take a topic / URL directly and proceed without one.
-2. **Two gates; autonomous between them.** Gate 1: the user picks the reference repo from a scored shortlist. Gate 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a gate did not cover.
+2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
 4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
 5. **The main agent orchestrates and verifies; subagents execute.** Surveys go to read-only subagents; migrations go to subagents whose writes are limited to their own group's files. Both carry disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
@@ -61,7 +61,7 @@ Prefer `gh search repos` / `gh api` (structured stars / license / pushed_at), pl
 
 Score each candidate with the rubric (`references/repo_rubric.md`): plan fit 30, completeness 20, license 15, activity 15, code quality 10, environment match 10. Shallow-read each README (and setup files if needed) — do not clone yet.
 
-#### Step A4: Gate 1 — the user picks the repo
+#### Step A4: Confirmation point 1 — the user picks the repo
 
 Present the top 3–5 in the conversation, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
 
@@ -79,7 +79,7 @@ Follow `references/rebrand_checklist.md`: top-level package directory, all impor
 
 #### Step A7: Runtime smoke (STOP-line aware)
 
-If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan gate.
+If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan confirmation point.
 
 #### Step A8: Survey the clone
 
@@ -97,7 +97,7 @@ Dispatch read-only subagents, one per topic — structure & dependencies, config
 
 From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. A row goes in only after the main agent has re-opened the location the smell cites and confirmed it still holds (`references/survey_spec.md`); the reason column carries that `path:line`. Keep it minimal.
 
-#### Step C2: Gate 2 — the user approves
+#### Step C2: Confirmation point 2 — the user approves
 
 Show the architecture summary and the numbered migration table as normal text. Then ask in the conversation: with ≤4 migration items, list them for individual approval; with more, offer *approve all* / *approve all except (name the numbers)* / *redesign*. Only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
 
@@ -124,7 +124,7 @@ When these already exist, update in place — never append duplicates.
 ## State & File Rules
 
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, the `## Code Architecture` section of `AGENTS.md`, and `.cursor/rules/code-codearc.mdc`. Never touch `metds/plans/*`.
-- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Gate 1 and recorded in `codearc.md` §5.
+- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Confirmation point 1 and recorded in `codearc.md` §5.
 - Git: one commit per finished phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
 - The audit trail is the git checkpoints plus `codearc.md` §6 (migration record); this skill creates no `wkdrs/` run directory — it produces code and specs, not experiment artifacts.
 - STOP line: environment builds with CUDA compilation, downloads over ~1 GB, full test suites, any training — prepare the command and hand it to the user; never launch autonomously.
@@ -132,6 +132,6 @@ When these already exist, update in place — never append duplicates.
 
 ## Dialogue Discipline
 
-- Both gates and all questions are asked in the conversation — one at a time. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one question at a time, and require an explicit approval message before any gate-crossing side effect.
+- Both confirmation points and all questions are asked in the conversation — one at a time. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one question at a time, and require an explicit approval message before any side effect past a confirmation point.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

@@ -4,13 +4,13 @@ How the main agent coordinates `Task` subagents for this skill. Sibling contract
 
 ## Roles
 
-- **The main agent (the architect)** — plans, runs the gates, partitions work, re-runs checks, commits checkpoints, rolls back failures.
+- **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits checkpoints, rolls back failures.
 - **Surveyors** — read-only `Task` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
 - **Migrators** — `Task` subagents (`subagent_type: generalPurpose`), one per migration group, write access limited to their group's files.
 
 ## Partitioning migrations
 
-1. Take only Gate-2-approved items.
+1. Take only the items approved at confirmation point 2.
 2. Group items so that **file ownership is disjoint**: no file may belong to two groups. Compute it rather than assume it — per candidate item, `grep -rln "<the module's dotted import path>" ${CODE_NAME}`; the union of those hits plus the item's moved files **is** that item's ownership set, and intersecting sets merge into one group. Use the dotted path, not a bare module name: over-merging costs parallelism, never correctness. Import-fix sites are exactly what a migrator discovers after dispatch, which is why this cannot wait until then — without it two parallel migrators can edit one file and per-group `git restore` stops working.
 3. Groups with no mutual dependencies may run in parallel, **at most 3 at a time**; groups linked by import chains run serially, upstream first.
 4. Precondition per group: its paths are clean in git (nothing unstaged/uncommitted touching them).

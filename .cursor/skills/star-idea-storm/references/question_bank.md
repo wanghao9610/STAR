@@ -72,7 +72,7 @@ When the scan surprises — crowded where empty was expected, empty where crowde
 
 ## Stage 5: Frame (frame)
 
-Checks to apply while drafting — the formal gate lives in the rubric's Part C:
+Checks to apply while drafting — the formal test lives in the rubric's Part C:
 - Say the research question in one sentence with no "and". Two sentences are two topics.
 - Name the 2–3 closest scanned works inside the gap statement. A gap that names no papers is a hope, not a gap.
 - Why now: what changed — a model, a dataset, a proof, a price — that makes this tractable today and not two years ago?

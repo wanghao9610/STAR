@@ -37,7 +37,7 @@ Shortlist 5–10. Drop immediately: archived repos, inference-/demo-only repos, 
 
 ## 4. License guidance
 
-Report this at Gate 1 — the user decides with eyes open:
+Report this at Confirmation point 1 — the user decides with eyes open:
 
 | License | Verdict |
 |---|---|
@@ -46,6 +46,6 @@ Report this at Gate 1 — the user decides with eyes open:
 | CC-NC, "research only", custom (e.g. some corporate research licenses) | Strong flag: check the intended release path before choosing. |
 | No license file | All rights reserved by default. Do not pick without the user's explicit acceptance. |
 
-## 5. Present the shortlist (Gate 1)
+## 5. Present the shortlist (Confirmation point 1)
 
 One option per candidate, top 3–5, each carrying: one-line why-it-fits, license, stars, last update, main risk (one phrase). Recommend the highest-scoring candidate first. Always include the escape option: "none of these — refine the search / start from scratch". Record the final scores; the chosen repo's row goes into `codearc.md` §5.

@@ -80,4 +80,4 @@ Over the digest's listing, count report-shaped files matching no pattern in the 
 
 - Order: tree → summary counts → follow-up checks → the single next action → drift flags → unrecognized-files line. Omit the coverage, drift, and unrecognized-files sections when they are empty. Keep the whole reply under ~500 words; use a compact tree, not prose per node.
 - Reply in the user's language; the tree/labels follow the chat language even though plan and report bodies may be `zh`.
-- Since you write nothing, there is no approval gate — but for the same reason, never state or imply that you changed anything.
+- Since you write nothing, there is no confirmation point — but for the same reason, never state or imply that you changed anything.
