@@ -11,7 +11,7 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 | `wkdrs/<run>/EXEC_LOG.md` | 步骤状态、绑定检查的结果、产物路径、"待用户执行"命令、Notes/decisions（含 **方向性信号** 记录） |
 | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`（若存在） | star-expt-analyst 的结果审计：run 判定、带每个指标来源的完成判据记分卡、日志健康，以及含 kill-criteria 命中的解读——一份预先核实过的证据基础，但仍要和其他声明一样对照磁盘复核 |
 | §4 交付物路径 | 磁盘上的产物：是否存在、大小、修改时间、低开销 合理性检查 |
-| §2/§3 写明的 `${CODE_NAME}/` 模块 | 承诺的代码是否落地、与日志声称的改动是否吻合 |
+| §2/§3 写明的 `${CODE_NAME}/` 模块 | 承诺的代码是否真的写出来了、与日志声称的改动是否吻合 |
 | children 的 frontmatter（根/内部目标） | 每个子计划的章节状态、`exec_status`、`updated`、`depends_on` |
 | 已执行后代的日志（根/内部目标） | 与本节点假设相关的 kill-criteria 命中与方向性信号 |
 

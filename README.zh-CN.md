@@ -8,7 +8,7 @@
 
 **语言：** [English](README.md) | 简体中文
 
-STAR 为人工智能研究项目提供了一个轻量起点。它将源代码、数据集、模型权重、实验输出和方法记录分别放在约定好的目录中，并提供统一的实验入口，以及供研究者和 AI 编程助手共同遵循的项目规范。内置的研究工作流进一步串联“研究构想 → 计划 → 可执行子计划 → 实现与验证 → 状态追踪”，并将关键决策、任务依赖和验证记录沉淀到项目文件中，以便跨会话延续工作和审计研究过程。
+STAR 为人工智能研究项目提供了一个轻量起点。它将源代码、数据集、模型权重、实验输出和方法记录分别放在约定好的目录中，并提供统一的实验入口，以及供研究者和 AI 编程助手共同遵循的项目规范。内置的研究工作流进一步串联“研究构想 → 计划 → 可执行子计划 → 实现与验证 → 状态追踪”，并将关键决策、任务依赖和验证记录写进项目文件，以便跨会话延续工作和审计研究过程。
 
 STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验证记录，你仍可自行选择模型技术栈、依赖管理工具和实验跟踪平台。
 
@@ -291,7 +291,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域（每篇论文都转录自抓取的记录）、六维打分，最后连同首个验证实验定稿选题 | `metds/ideas/<slug>_idea.md` |
 | `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
 | `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md` |
-| `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并沉淀架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
+| `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
 | `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并做冒烟验证；`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
 | `$star-plan-decomposer` | 将总体计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |

@@ -50,13 +50,13 @@ description: >-
 
 **证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径，且 §2–§3 没有点名任何代码模块——由主 agent 自己读：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
 
-规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`）——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否落地、与日志声称的改动是否一致）。
+规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`）——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 
 收集器给出的 `suspect` 或 `inconsistent` 是线索，不是结论。它成为编号修订候选之前——后面每条候选都要拿去问用户，而用户的回答会改写计划文件——主 agent 亲自打开被引用的路径，确认这个发现仍然成立（规约 §6.6）；确认时落在的那个 `path[:line]`，就作为这条候选的证据。站不住的丢掉，或降格成 §5 里一条不引发任何改动的备注。
 
-### Step 3：汇总并落盘审查报告
+### Step 3：汇总并写出审查报告
 
 按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`；报告语言跟随计划的 `language`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 done-criterion：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 影响范围图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
 
@@ -66,7 +66,7 @@ description: >-
 
 1. 按报告顺序走候选，每条一次 AskUserQuestion：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；内置"Other"始终允许自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/star-plan-decomposer` 或 `/star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
 2. 走完清单后问一次：还有其他要改的吗？用户新增的项同样作为候选（证据记"user directive"）。
-3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；落盘的报告就是交付物。
+3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；写出的报告就是交付物。
 
 ### Step 5：写入已批准的修订
 

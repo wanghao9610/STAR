@@ -21,7 +21,7 @@
 | `metds/codearc.md` | | `/skill:star-code-architect` | |
 | `${CODE_NAME}/requirements*` | | `/skill:star-env-builder` | |
 
-## 3. 收编记录
+## 3. 移入记录
 
 <!-- 扫描找到的每个候选一行，按扫描顺序——包括原地保留的那些，它们是多数，也是预期结果。 -->
 
@@ -89,4 +89,4 @@
 ## 8. 下一步
 
 <!-- 转交，最严重的在前：每条 README TODO 由哪个产出方来填、对外发布的部分之外的代码问题项去哪里、
-     哪些计划在收编之后需要 `/skill:star-plan-reviser`、以及用户在发布前必须先决定什么。 -->
+     哪些计划在移入之后需要 `/skill:star-plan-reviser`、以及用户在发布前必须先决定什么。 -->

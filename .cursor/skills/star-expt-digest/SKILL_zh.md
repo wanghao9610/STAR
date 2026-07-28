@@ -40,7 +40,7 @@ description: >-
 
 ## 工作流
 
-**先扫一次，再扫窗口。** 在 Step 0 之前，以项目根目录为工作目录，运行收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh`。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、方向性信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。该模式同时丢掉一次溯源阅读用不上的东西——子计划索引、占位符计数、逐 run 的日期行和 DIRS——但它从不给 trail 本身封顶：一份有缺口的台账比一份长台账更糟。
+**先扫一次，再扫窗口。** 在 Step 0 之前，以项目根目录为工作目录，运行收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh`。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、方向性信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。该模式同时丢掉一次溯源阅读用不上的东西——子计划索引、占位符计数、逐 run 的日期行和 DIRS——但它从不给 trail 本身封顶：一份有缺口的记录表比一份长记录表更糟。
 
 脚本只收集，从不判断——它不认识时间窗、上次覆盖到的日期、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md` 里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。只有两种情况值得再读一次：必须逐字引用而不是计数的段落；以及扫描列出存在、但没有打印内容的文件——没有 frontmatter 的产物只被列出、从不被打印，因此从来不算被覆盖。
 

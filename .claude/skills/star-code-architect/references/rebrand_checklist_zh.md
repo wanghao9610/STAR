@@ -4,7 +4,7 @@
 
 ## 前置条件
 
-- `${CODE_NAME}/UPSTREAM.md` 已写好，import 提交已落地（回滚锚点）。
+- `${CODE_NAME}/UPSTREAM.md` 已写好，import 提交已完成（回滚锚点）。
 - 弄清上游 Python 包名：顶层可 import 的目录（可能与仓库名不同；可能在 `src/` 下）。
 
 ## 步骤按序执行——每步验证

@@ -41,11 +41,11 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | `star-plan-coach` | 会话结束时提供一次 | 本次会话创建或编辑过的计划文件 |
 | `star-plan-decomposer` | 运行结束时提供一次 | 本次所写子计划及父计划的索引更新 |
 | `star-plan-reviser` | Step 7 有写入修订时提供一次 | 目标计划；父计划的 `## Sub-plans` 行变化时，连父计划一起 |
-| `star-code-architect` | 每个落地阶段或已验证的迁移组一次 | `${CODE_NAME}/` 及本 skill 拥有的规约文件 |
+| `star-code-architect` | 每完成一个阶段或验证完一个迁移组一次 | `${CODE_NAME}/` 及本 skill 拥有的规约文件 |
 | `star-env-builder` | 每次运行至多一次 | 仅 `${CODE_NAME}/requirements*` |
 | `star-plan-executor` | 每个已验证动作一次，且仅在确认点批准了 checkpoint 时 | 该动作触碰的文件 |
 | `star-code-reviewer` | 修复轮之后可选的一次 | 仅修复轮触碰的文件 |
-| `star-code-release` | 每个落地阶段一次（gather / polish / readme） | 仅该阶段的路径：被移入的文件，以及这次移动破坏的调用点、打磨轮触碰的文件、`README.md` |
+| `star-code-release` | 每完成一个阶段一次（gather / polish / readme） | 仅该阶段的路径：被移入的文件，以及这次移动破坏的调用点、打磨轮触碰的文件、`README.md` |
 
 **通用规则：**
 

@@ -6,7 +6,7 @@ description: >-
   检查（§3 任务是否实现、§4 交付物是否在磁盘上、§5 完成判据是否有支撑）；传已存在的路径审查该路径；传
   `diff` 或 git range 只审改动过的文件。经 .env 的 conda 环境收集低开销静态证据（绝不安装工具），按
   六维评分表（docstring、命名、简洁性、STAR 约定、正确性可疑写法、计划符合度）收集问题项，
-  blocker/major 级问题项复核后才写入报告，报告落盘 wkdrs/，随后提供逐项批准的修复轮——只修
+  blocker/major 级问题项复核后才写入报告，报告写入 wkdrs/，随后提供逐项批准的修复轮——只修
   例行且不改行为的问题；功能缺口转给 star-plan-executor，计划偏差转给 star-plan-reviser，结构性
   重组转给 star-code-architect。当用户运行 /star-code-reviewer，或想审查 / 审计代码质量、检查编码
   规范或 docstring、核对某个计划的代码实现是否完备时使用。Bilingual（中/英）。
@@ -22,7 +22,7 @@ description: >-
 
 ## 角色
 
-你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**；`star-code-release` 负责发布前的最后一遍清扫——确定去处、密钥、机器本地路径——并且默认本轮代码审查已经做过。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份落盘的、证据支撑的审查报告；可选地，加上逐项批准的例行修复。
+你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**；`star-code-release` 负责发布前的最后一遍清扫——确定去处、密钥、机器本地路径——并且默认本轮代码审查已经做过。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份写进文件的、证据支撑的审查报告；可选地，加上逐项批准的例行修复。
 
 你审查与润色；你不实现功能、不修订计划、不重组代码库、不跑实验。审查发现越过写边界的问题一律转交：功能缺口交 `/star-plan-executor`，计划文本偏差交 `/star-plan-reviser`，结构性重组交 `/star-code-architect`，环境不可用交 `/star-env-builder`。
 
@@ -75,13 +75,13 @@ description: >-
 
 先把文件数对上：发出去的每个文件，都要落在某个收集器的 `files_reviewed` 计数里，或者落在它的 `unknowns` 列表里；对不上的那些，连同 unknowns 一起重新派发（conventions §6.3）——没人能解析的文件，绝不能被当成干净文件算过去。然后合并去重。每条 blocker/major：不论收集器给的 `confidence` 是什么，都重新打开被引用的文件与行，确认问题真实、规则确实适用——blocker 上标着 `low`，是更该去读它的理由，不是可以少当回事的理由。不成立的降级或丢弃；重读也定不下来的 `low` 条目进 Unconfirmed。minor 抽查。值得一提但未确认的进报告的 **Unconfirmed** 列表——绝不计入结论统计。
 
-### Step 5：落盘报告
+### Step 5：写出报告
 
 按 `assets/code_review_template_zh.md`（英文计划用 `assets/code_review_template.md`；计划模式下报告跟随计划的 `language`，否则跟随对话语言）填写：范围与证据基础、结论、按严重度分组的问题项（`blocker` / `major` / `minor` / `nit`，编号 F1、F2、…）、计划符合度记分卡（计划模式）、好实践（≤3）、下一步。计划模式且有 run 时写入 `wkdrs/<run>/CODE_REVIEW_<YYYY-MM-DD>.md`；否则 `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md`（`scope-slug` = 计划前缀+slug、路径（`/`→`-`）、`diff` 或 `full`）。日期必须真实，绝不编造。
 
 ### Step 6：聊天摘要
 
-≤400 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`），然后若有例行问题项，提议修复轮——用户也可以就此打住；落盘的报告本身就是完整交付物。
+≤400 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`），然后若有例行问题项，提议修复轮——用户也可以就此打住；写出的报告本身就是完整交付物。
 
 ### Step 7：可选修复轮（仅例行项）
 

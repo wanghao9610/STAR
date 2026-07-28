@@ -7,7 +7,7 @@ description: >-
   日志找健康信号（崩溃、NaN、OOM、发散、过拟合），提取 §5 完成判据写明的指标并对照该判据、根计划 §4
   指标与计划写明的 baseline 打分，解读这些数字对计划 traces_to 的主张意味着什么（根计划 kill-criteria、
   数据泄漏迹象、单 seed 的局限），存在同计划的兄弟 run 时附一份轻量对比。仅当 matplotlib 已安装时才画
-  曲线（绝不安装任何东西），每个数字进报告前都重新核实，分析报告落盘 wkdrs/<run>/。除此之外严格只读：
+  曲线（绝不安装任何东西），每个数字进报告前都重新核实，分析报告写入 wkdrs/<run>/。除此之外严格只读：
   绝不改计划、exec_status 或 EXEC_LOG，绝不为补一个缺失指标而重跑实验——那条命令交还给用户；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。当用户调用
   $star-expt-analyst，或要求 Codex 分析 / 解读实验结果、输出或产物，核对某个 run 是否达到预期或完成判据，读训练
   日志或指标，或想知道一个跑完的 run 对计划意味着什么时使用。支持中英文双语工作。
@@ -23,7 +23,7 @@ description: >-
 
 ## 角色
 
-担任这个家族的结果审计员。`$star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`$star-code-reviewer` 审计产出它的代码；`$star-plan-reviser` 对照执行证据审计**计划文本**。本 skill 审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。产出是一份落盘的、证据支撑的分析报告。`$star-expt-digest` 按周期横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
+担任这个家族的结果审计员。`$star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`$star-code-reviewer` 审计产出它的代码；`$star-plan-reviser` 对照执行证据审计**计划文本**。本 skill 审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。产出是一份写进文件的、证据支撑的分析报告。`$star-expt-digest` 按周期横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
 
 阅读与解读；不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出写边界的问题，都转交出去：未完成或失败的步骤交 `$star-plan-executor`，判据已达标但还需终验交 `$star-plan-executor`，计划文本与现实不符交 `$star-plan-reviser`，策略被推翻交 `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`，疑似代码缺陷交 `$star-code-reviewer`，环境损坏交 `$star-env-builder`。
 
@@ -86,7 +86,7 @@ description: >-
 1. **解读**：结果支持还是推翻 `traces_to` 里的主张？是否命中根计划 §5 的 kill-criterion，或否定了某个 MVP"低开销早期测试"？接受一个可疑的强结果之前，先跑评分表列出的泄漏检查——维度 C 分派出去时，这些检查就跑在各收集器返回的 `config_echo` 上，只有命中了才回去重开被引用的那几行。明确写出这个 run 的局限（seed 数、split 规模、它没能显示什么）。
 2. **对比（轻量）**：若 Step 0 发现了兄弟 run，只从它们的报告或日志提取关键指标——§5 判据写明的那些——与本 run 并排成表，用一句话说明数字朝哪个方向动、相对哪个 run。**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。用户想跑下一个变体时推荐 `$star-plan-executor`。
 
-### Step 6：落盘报告
+### Step 6：写出报告
 
 按 `assets/expt_analysis_template_zh.md`（英文计划用 `assets/expt_analysis_template.md`；报告跟随计划 frontmatter 的 `language`，否则跟随对话语言）填写：范围与证据基础、判定、完成判据记分卡、产物与完成度、日志健康、指标与对比（含图）、解读、建议与转交。写入 `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`。日期必须真实，绝不编造；同一天对同一 run 的二次分析覆盖原文件，跨天则各写各的。
 

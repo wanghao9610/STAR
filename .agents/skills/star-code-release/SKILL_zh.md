@@ -2,10 +2,10 @@
 name: star-code-release
 description: >-
   为项目公开发布做准备：把散落的代码收集进 ${CODE_NAME}/（从 .env 读取）、打磨对外发布的部分、编译出项目
-  自己的 README.md。扫描 tasks/、wkdrs/ 和项目根下值得随版本发出去的代码，只收编通过三选一证据
+  自己的 README.md。扫描 tasks/、wkdrs/ 和项目根下值得随版本发出去的代码，只移入通过三选一证据
   检验的文件（README 会引用它、某个已执行叶子的交付物或完成判据需要它、或它能复现 wkdrs/results/results.md
   中的某个数字），并严格按 metds/codearc.md 的放置规则确定去处——绝不自造目录。打磨只覆盖对外发布的部分（本次
-  收编的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文的映射表逐节
+  移入的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文的映射表逐节
   编译自 metds/overview.md、framework.md、dataset.md、training.md、evaluation.md、results.md、
   codearc.md、UPSTREAM.md、requirements* 与 reference.bib：数字只来自结果汇总表，凡打印的命令都先
   验证其存在。最后跑一遍发布前检查（不通过就不能发布）——提交进仓库的密钥凭据、机器本地绝对路径、内网主机名、与已记录的
@@ -32,8 +32,8 @@ description: >-
 
 1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，它同时规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造——而公开 README 里的编造是代价最高的那种。
 2. **数字只来自结果汇总表；命令只来自磁盘。** README 里每个数字都从 `wkdrs/results/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 自己就写明它不是引用数字的来源），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级说法是主张："state-of-the-art"、"outperforms X"、"best" 只在结果汇总表自己的结论支撑时才出现。
-3. **收编要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `$star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
-4. **只打磨对外发布的部分。** 范围内：本次收编的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `$star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
+3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `$star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
+4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `$star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
 5. **发布前检查项是阻断性的，且在宣布"就绪"之前就查。** 提交进仓库的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。带着未清的阻断项收尾的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **只做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，且是用户的决定——把仓库准备好，把命令交回去。红线原样适用：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里没有的数字就留成 TODO。
 
@@ -50,19 +50,19 @@ description: >-
 ### Step 1 —— `gather`：找出值得发出去的代码
 
 1. 按 `references/gather_rubric_zh.md` 列出的候选根扫描：`tasks/<plan>/`、`wkdrs/<run>/` 里的脚本与复现配置、项目根下的散落文件、`execs/scpts/`。绝不扫 `datas/`、绝不扫 `inits/`、绝不扫生成产物。
-2. 对每个候选跑三选一收编检验，记录它通过的是哪一条以及证据——README 的哪一节、计划的 §4/§5 哪一行、结果汇总表的哪一行。一条都不过的原地保留，列为 `keep in place`，不算失败。
-3. 为每个被收编的候选从 `codearc.md` §2 解析目的地，检测 `${CODE_NAME}/` 中已有的近似重复，标注动作 `move` / `merge` / `keep in place` / `route`。路径被计划文件写明的候选标 `plan-referenced`：移动它会让那行计划文本过期，而计划文本不归你改——该行要带上会过期的确切行号，让用户在看得见后果的前提下批准。
+2. 对每个候选跑三选一移入检验，记录它通过的是哪一条以及证据——README 的哪一节、计划的 §4/§5 哪一行、结果汇总表的哪一行。一条都不过的原地保留，列为 `keep in place`，不算失败。
+3. 为每个被移入的候选从 `codearc.md` §2 解析目的地，检测 `${CODE_NAME}/` 中已有的近似重复，标注动作 `move` / `merge` / `keep in place` / `route`。路径被计划文件写明的候选标 `plan-referenced`：移动它会让那行计划文本过期，而计划文本不归你改——该行要带上会过期的确切行号，让用户在看得见后果的前提下批准。
 4. 候选超过约 15 条时先说明，与用户一起收窄，再去搭这张表。每一行标注的证据行都要在确认点之前重开一遍——这个确认点批准的是文件搬家，不该有哪一行是靠没人打开过的证据走到这里的。
-5. **确认点 1：** 以普通文本呈现收编表——路径、证据、目的地、动作、风险——然后直接问一个问题。候选 ≤4 条时让用户按行号选；更多时提供 *全部批准* / *除某几条外全部批准（写出行号）* / *重做*。一条都不批准是有效结果 → 直接进 Step 2。
+5. **确认点 1：** 以普通文本呈现移入表——路径、证据、目的地、动作、风险——然后直接问一个问题。候选 ≤4 条时让用户按行号选；更多时提供 *全部批准* / *除某几条外全部批准（写出行号）* / *重做*。一条都不批准是有效结果 → 直接进 Step 2。
 6. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用了旧路径的调用点。每行做完，自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 回滚该行，标 `blocked`，继续其余。
-7. 提交本阶段（只 stage 被收编的路径及其修好的调用点）：`star-code-release: promote <n> file(s) into ${CODE_NAME}/`。
+7. 提交本阶段（只 stage 被移入的路径及其修好的调用点）：`star-code-release: promote <n> file(s) into ${CODE_NAME}/`。
 
 ### Step 2 —— `polish`：对外发布的部分
 
-1. 解析对外发布的部分：Step 1 收编的文件，加上 README 会打印的入口、配置、`execs/scpts/*.sh`，加上它会展示的公共 API。报出文件数。范围之外的东西不读、不收问题项。
+1. 解析对外发布的部分：Step 1 移入的文件，加上 README 会打印的入口、配置、`execs/scpts/*.sh`，加上它会展示的公共 API。报出文件数。范围之外的东西不读、不收问题项。
 2. 按 `references/gather_rubric_zh.md` 的"对外发布的部分打磨"一节收集问题项——codearc 符合度、README 提到之物的 docstring、搬移后的残留引用、调试输出、被注释掉的实验代码、脚本里的过期路径。对外发布的部分之外的问题项只记录待转交，绝不动手修。
 3. 按文件顺序一次一问逐条走——*按提议修* / *调整后修* / *跳过*，标出推荐，一次一条问题项（或一批同类项）。每处批准的修改写入后对该文件重跑 `compileall`；复检失败就回滚该处并标 `reverted`。
-4. 有任何改动落地时提交本阶段：`star-code-release: polish release surface — <summary>`。
+4. 有任何改动完成时提交本阶段：`star-code-release: polish release surface — <summary>`。
 
 ### Step 3 —— `readme`：编译 README
 
@@ -77,26 +77,26 @@ description: >-
 
 ### Step 4 —— `check`：发布前检查
 
-对被 git 跟踪的仓库加上本次收编的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性，以及数字与断言——最后这一族是全流程里唯一一处，把 README 打印的数字追回 `wkdrs/results/results.md`，而它的第一条检查就是阻断项。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。每个阻断项进报告之前，主 agent 都要回到它标注的 `file:line` 重开确认：一份对外的发布报告，不是让一条没人读过的 grep 命中直接落地的地方。
+对被 git 跟踪的仓库加上本次移入的路径，跑完 `references/release_checklist_zh.md` 的每一族：密钥凭据与机器本地路径（阻断）、许可证与署名、命令可运行性、静态资源与链接完整性，以及数字与断言——最后这一族是全流程里唯一一处，把 README 打印的数字追回 `wkdrs/results/results.md`，而它的第一条检查就是阻断项。本阶段除报告外不写任何文件。每条问题项带 `file:line`、命中的检查项和具体修法；绝不因为这次运行别的部分都好就给阻断项降级。每个阻断项进报告之前，主 agent 都要回到它标注的 `file:line` 重开确认：一份对外的发布报告，不是让一条没人读过的 grep 命中直接进去的地方。
 
 ### Step 5：报告与交接
 
-1. 用 `assets/release_report_template_zh.md` 写 `wkdrs/release/RELEASE_<YYYY-MM-DD>.md`——日期取系统时钟的真实日期（规约 §4）。它记录就绪表、带逐行结果的收编表、打磨记录、带每节来源的 README 小节映射、发布前检查结果，以及等待用户执行的命令。
-2. 聊天摘要 ≤400 字，先给结论：只有在没有未清阻断项时才写 **release-ready**，否则写 `blocked (<n>)` 并列出阻断项。然后是收编了什么、打磨了什么、README 哪些节带 TODO 及各自由谁来填、以及转交去向。最后给出为用户准备好的发布命令——由用户去跑，绝不由你跑。
+1. 用 `assets/release_report_template_zh.md` 写 `wkdrs/release/RELEASE_<YYYY-MM-DD>.md`——日期取系统时钟的真实日期（规约 §4）。它记录就绪表、带逐行结果的移入表、打磨记录、带每节来源的 README 小节映射、发布前检查结果，以及等待用户执行的命令。
+2. 聊天摘要 ≤400 字，先给结论：只有在没有未清阻断项时才写 **release-ready**，否则写 `blocked (<n>)` 并列出阻断项。然后是移入了什么、打磨了什么、README 哪些节带 TODO 及各自由谁来填、以及转交去向。最后给出为用户准备好的发布命令——由用户去跑，绝不由你跑。
 
 ## 状态与文件规则
 
-- 写入仅限：`README.md`（以及被提议并接受时的 `README.zh-CN.md`）、收编进 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、对外发布的部分内逐项批准的打磨改动、`wkdrs/release/RELEASE_<date>.md`。
+- 写入仅限：`README.md`（以及被提议并接受时的 `README.zh-CN.md`）、移入 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、对外发布的部分内逐项批准的打磨改动、`wkdrs/release/RELEASE_<date>.md`。
 - 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有产出方；发布运行动手改自己的输入，就不算编译了。绝不写结果汇总表 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
-- 什么都不删。被收编的文件是移走的；没被收编的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
+- 什么都不删。被移入的文件是从原处移走的；没移入的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
 - 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未写明的目录——那是 `$star-code-architect` 的。
 - 绝不发布：不 `git push`、不改 remote 或分支、不打 tag、不 `gh repo create` / `gh release`、不把权重或数据上传到任何主机。准备好的命令写进报告。
 - 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `$star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
-- Git：每个落地阶段一次提交，只 stage 该阶段的路径（规约 §1）；Step 0 时就已 dirty 的路径绝不 stage。
+- Git：每个完成的阶段一次提交，只 stage 该阶段的路径（规约 §1）；Step 0 时就已 dirty 的路径绝不 stage。
 - 本 skill 不设置任何计划 frontmatter，也不创建 run 目录；它的审计线索是 `wkdrs/release/RELEASE_<date>.md`、README 的溯源标记，以及各阶段的提交。
 
 ## 对话纪律
 
-- 所有确认点都一次一问：参数无法识别时的阶段选择、来源大面积缺失时的就绪决策、收编表的 确认点 1、每条打磨问题项、每处 README 小节变更、STAR README 或人工 README 的替换确认、以及中文 README 的提议。任何写入前都必须拿到明确答复——headless / 脚本化运行也不例外。
+- 所有确认点都一次一问：参数无法识别时的阶段选择、来源大面积缺失时的就绪决策、移入表的 确认点 1、每条打磨问题项、每处 README 小节变更、STAR README 或人工 README 的替换确认、以及中文 README 的提议。任何写入前都必须拿到明确答复——headless / 脚本化运行也不例外。
 - 用用户的语言回复。无论对话语言为何，`README.md` 都是英文；发布报告跟随根计划的 `language`（没有计划时跟随对话语言）；中文文档里技术术语保持英文。

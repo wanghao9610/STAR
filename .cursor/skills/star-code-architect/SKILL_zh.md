@@ -8,7 +8,7 @@ description: >-
   用户批准的迁移项（Task subagent 编排 + 逐组验证 + git 检查点），并把架构规范写入
   metds/codearc.md，在 AGENTS.md 与 .cursor/rules/ 留下一小段指路说明。当用户运行
   /star-code-architect，或想为计划找参考实现或起步代码库、想搭建 ${CODE_NAME}/、或想整理/重构现有
-  代码库并沉淀架构规范时，都应使用本 skill。Bilingual (中/英) — also trigger in English whenever
+  代码库并写下架构规范时，都应使用本 skill。Bilingual (中/英) — also trigger in English whenever
   the user wants a reference implementation or starter codebase for a plan, wants to set up
   or scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase and record
   its architecture.
@@ -32,7 +32,7 @@ description: >-
 
 1. **计划驱动代码。**先读 `metds/plans/` 下的根计划：检索要素（分支 A）、勘察重点（分支 B）、目标架构都从计划推导。既无计划也无 URL 时，建议先跑 `/star-plan-coach`——或者直接收一个主题 / URL 继续。
 2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。两个确认点都是普通文本提问——等到明确答复再跨过。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
-3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项落地——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
+3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
 5. **主 agent 编排与复核，Task subagent 执行。**勘察交给只读 `Task` subagent（`subagent_type: explore`）；迁移交给 `Task` subagent（`subagent_type: generalPurpose`），其写入仅限本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。格式约定见 `references/orchestration_spec_zh.md`。
 6. **单一规范，一小段指路说明。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划各组件对应的代码路径、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行的摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻的指路说明。规范内容绝不复制成多份。
@@ -65,7 +65,7 @@ description: >-
 
 以普通文本呈现 top 3–5 的对比，每个候选一行：一句话贴合理由、许可证、stars、最近更新、主要风险。得分最高者注明推荐，始终保留兜底选项（"都不合适——细化检索 / 从零起步"），然后问用哪个。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 
-#### Step A5：落地克隆
+#### Step A5：克隆到位
 
 1. 浅克隆到临时目录；记下 URL、commit SHA、commit 日期、许可证。
 2. 若实现只是 monorepo 的子目录，与用户确认子路径，只取该部分。
@@ -105,7 +105,7 @@ description: >-
 
 把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 `Task` subagent（`subagent_type: generalPurpose`），格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
-#### Step C4：落地规范
+#### Step C4：写出规范
 
 1. 按 `assets/codearch_template_zh.md` 写 `metds/codearc.md`，填全各节；正文语言跟随根计划的 `language`（无计划则用对话语言）。
 2. `AGENTS.md`：追加或更新 `## Code Architecture` 一节——≤10 行：一句话定位、3–5 条放置要点、"写代码前先读 `metds/codearc.md`"。只改 `AGENTS.md`；绝不新建独立的 `CLAUDE.md`。
@@ -125,7 +125,7 @@ description: >-
 
 - 只写这些位置：`${CODE_NAME}/`、`metds/codearc.md`、`AGENTS.md` 的 `## Code Architecture` 一节、`.cursor/rules/code-codearc.mdc`。绝不碰 `metds/plans/*`。
 - 溯源不可省略：import 提交前 `${CODE_NAME}/UPSTREAM.md` 必须存在；上游 `LICENSE` / `CITATION*` 文件绝不删除或改写；许可证问题在确认点 1 就摆到台面，并记入 `codearc.md` §5。
-- Git：每落地一个阶段或验证完一个迁移组提交一次，只 stage `${CODE_NAME}/` 与本 skill 拥有的规约文件；开工前该组待改路径必须干净（规约 §1）。
+- Git：每完成一个阶段或验证完一个迁移组提交一次，只 stage `${CODE_NAME}/` 与本 skill 拥有的规约文件；开工前该组待改路径必须干净（规约 §1）。
 - 审计线索 = git 检查点 + `codearc.md` §6 迁移记录；本 skill 不建 `wkdrs/` 运行目录——它产出代码与规范，不产出实验产物。
 - 红线：涉及 CUDA 编译的环境构建、超过约 1 GB 的下载、完整测试套件、任何训练——准备好命令交给用户，绝不擅自启动。
 - 改名残留清单在 `codearc.md` §7；后续改名走 `star-plan-executor` 的步骤或再次运行本 skill，逐项验证。
