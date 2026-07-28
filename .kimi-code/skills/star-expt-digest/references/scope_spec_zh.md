@@ -8,10 +8,10 @@
 
 | 参数 | 模式 | 范围 |
 |---|---|---|
-| *(无)* | `incremental` | 日期落在 `(上次覆盖到的日期, 今天]` 的全部 run，全森林 |
-| `<N>d`（`7d`、`30d`）或 `<YYYY-MM-DD>` | `window` | 日期落在 `[起点, 今天]` 的全部 run，全森林 |
+| *(无)* | `incremental` | 日期落在 `(上次覆盖到的日期, 今天]` 的全部 run，全部计划树 |
+| `<N>d`（`7d`、`30d`）或 `<YYYY-MM-DD>` | `window` | 日期落在 `[起点, 今天]` 的全部 run，全部计划树 |
 | slug / 数字前缀 / 文件名 | `plan` | 该节点的**家族**，不设时间界 |
-| `all` | `all` | 项目里的全部 run，全森林 |
+| `all` | `all` | 项目里的全部 run，全部计划树 |
 
 `<N>d` 从今天往前 `N` 天起算，含端点。裸的 `<YYYY-MM-DD>` 表示"自该日期起"，含端点。一个参数如果既解析不成窗口、也解析不成计划名，就不要猜：列出最接近的计划候选并提问（规约 §5.2）。
 
@@ -60,7 +60,7 @@ type: digest
 language: <en|zh>
 generated: <YYYY-MM-DD>          # 系统时钟取的真实日期；绝不编造
 mode: <incremental|window|plan|all>
-scope: <whole forest | family of <prefix>_<slug>>
+scope: <all plan trees | family of <prefix>_<slug>>
 covers:
   from: <YYYY-MM-DD 或 "—">      # 仅当周期起点无界时写 "—"
   through: <YYYY-MM-DD>

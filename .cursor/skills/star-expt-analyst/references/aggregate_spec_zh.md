@@ -85,7 +85,7 @@ reports_read: <n>
 type: results
 language: <en|zh>
 generated: <YYYY-MM-DD>          # 真实日期；绝不编造
-scope: <这些数字来自哪个子树，或 "whole forest">
+scope: <这些数字来自哪个子树，或 "all plan trees">
 sources:                          # 输入给这份结果汇总表的每一个 run
   - run: <prefix>_<slug>
     report: EXPT_ANALYSIS_<YYYY-MM-DD>.md

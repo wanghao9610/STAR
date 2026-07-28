@@ -65,7 +65,7 @@ description: >-
 
 ### Step 4：审批确认点
 
-1. 呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。在任何副作用前等待用户明确批准。
+1. 呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。在任何副作用前等待用户明确批准。
 2. 批准后,调用 `SwitchMode`, `target_mode_id: agent`,把选定计划文件名去掉 `_plan.md` 得到 `<plan-name>`,为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 落盘 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs` 列表,而不是替换它:正是这段历史让 `/star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
 3. **把偏差同步回子计划**。若偏差表非空,刚获得的批准已覆盖此事:原地更新受影响的 §2–§5 段落,追加一条 `## Revision History` 条目,更新 `updated`,并给每行标记 `synced`(`references/plan_sync_rules_zh.md`)。子计划从此与即将执行的内容一致。
 

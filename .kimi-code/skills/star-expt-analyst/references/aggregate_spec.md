@@ -18,7 +18,7 @@ A scope where no leaf has a report is a valid answer: say so and stop. Never com
 
 **The scope decides the filename, because a results table that silently replaces a wider one is how a results section loses rows.**
 
-- **Whole forest** (`aggregate`, no plan name) → `wkdrs/results/results.md`. The project results table.
+- **All plan trees** (`aggregate`, no plan name) → `wkdrs/results/results.md`. The project results table.
 - **Scoped** (`aggregate PLAN_NAME`) → `wkdrs/results/results_<slug>.md`, where `<slug>` is the scoped node's slug — `wkdrs/results/results_core-method-pipeline.md`. One file per subtree anyone aggregates.
 
 The two never write to each other's path, in either direction. A scoped run must never overwrite `wkdrs/results/results.md`: it holds fewer runs by construction, so replacing the project results table with it deletes every row outside the subtree while leaving a file that still looks complete. The `scope:` frontmatter records what the file covers; the filename is what keeps it from being overwritten.

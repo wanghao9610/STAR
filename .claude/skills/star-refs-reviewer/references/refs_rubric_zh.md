@@ -33,7 +33,7 @@
 
 ## 笔记收集器的返回格式
 
-Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,要求填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而 category 要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,它要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可证伪的记录。
+Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,要求填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而 category 要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,它要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可被证明为假的记录。
 
 一个收集器一篇论文。返回:
 

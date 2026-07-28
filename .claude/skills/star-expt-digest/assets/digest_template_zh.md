@@ -3,7 +3,7 @@ type: digest
 language: zh
 generated: <YYYY-MM-DD>
 mode: <incremental|window|plan|all>
-scope: <whole forest | family of <prefix>_<slug>>
+scope: <all plan trees | family of <prefix>_<slug>>
 covers:
   from: <YYYY-MM-DD 或 "—">
   through: <YYYY-MM-DD>

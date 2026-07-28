@@ -64,7 +64,7 @@ Follow `references/orient_checklist.md`:
 
 ### Step 3: Enter plan mode → produce the executable plan
 
-1. Call `SwitchMode` with `target_mode_id: plan` (explain briefly: need a gated EXEC_PLAN before side effects).
+1. Call `SwitchMode` with `target_mode_id: plan` (explain briefly: the EXEC_PLAN needs the user's approval before anything is written or run).
 2. Refine §3 + the gap list into **EXEC_PLAN**: an ordered list of actions, each annotated `{files to touch / command to run (via conda) / artifact under wkdrs/<run>/ / the step's own check}`. Each action binds a verifiable check; the terminal action binds the §5 done-criterion.
 3. **Draw the STOP line explicitly** (`references/stop_line_rules.md`): mark which actions the agent executes vs which are "prepare command, hand to user" (heavy experiments).
 4. **Collect material divergences** from the sub-plan's §2–§5 into EXEC_PLAN's "Divergences from sub-plan" table, in delta form (ADDED / MODIFIED / REMOVED / ENRICHED — `references/plan_sync_rules.md`). A contradiction at the sub-plan's own granularity is a divergence; extra concreteness is not — except a value the plan left unstated that a method document will cite, which is an ENRICHED row naming that section.

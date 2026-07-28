@@ -81,7 +81,7 @@ Run every family in `references/release_checklist.md` over the tracked repositor
 ### Step 5: Report & hand off
 
 1. Write `wkdrs/release/RELEASE_<YYYY-MM-DD>.md` from `assets/release_report_template.md` — a real date from the system clock (conventions §4). It records the readiness table, the promotion table with each row's outcome, the polish record, the README section map with each section's source, the checklist results, and the commands awaiting the user.
-2. Chat digest ≤400 words, verdict first: **release-ready** only when no blocker is open, else `blocked (<n>)` with the blockers named. Then what was promoted, what was polished, which README sections carry TODOs and which producer fills each, and the routing. Close with the publish commands prepared for the user to run — never run by you.
+2. Chat digest ≤400 words, verdict first: **release-ready** only when no blocker is open, else `blocked (<n>)` with the blockers named. Then what was promoted, what was polished, which README sections carry TODOs and which producer fills each, and what was handed to which other skill. Close with the publish commands prepared for the user to run — never run by you.
 
 ## State & File Rules
 
