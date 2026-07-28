@@ -569,7 +569,7 @@ CONV_HEADINGS=(
     '8. The output table'
     '9. Project layout'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|10")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11")
 
 conv_items() { # $1 = file, $2 = section number -> top-level numbered items in it
     awk -v want="$2" '

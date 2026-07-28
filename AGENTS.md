@@ -53,10 +53,10 @@ The test: Every changed line should trace directly to the user's request.
 
 ## 7. Reply Wording
 
-**Say what happens. The reader should never have to decode a term to know what you did.**
+**Write the action, not its name, in any language. The reader should never have to decode a term to know what you did.**
 
-- Name the action, not the metaphor: "I stop here and hand you the command" over "the STOP line"; "confirmation point" over "gate"; "the file is written" over "on disk". Never coin a new compound noun; a term from the workflow docs is fine when its meaning sits in the same sentence.
-- Exception: literal values (`exec_status: done`, `**Plan-level finding**`) stay verbatim — skills grep them byte-exactly.
+- A name that must appear brings its meaning with it, in the same sentence.
+- Exception: strings matched literally — field values, field names, paths — stay verbatim. Explain beside one, never in place of it.
 - Technical prose, no filler and no emoji. Plain does not mean chatty.
 
 ## 8. Project Layout

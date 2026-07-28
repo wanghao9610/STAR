@@ -148,6 +148,7 @@ The tool-neutral half. **How** to ask — AskUserQuestion, Codex's structured us
     - **Anchor the question.** A question that depends on an earlier answer names it in one clause — "milestone axis → 4 units; now: which one owns the data leaf?". One line, carrying only the decisions this question actually rests on, never the whole history.
     - **Recap at boundaries, not between questions.** At each stage, step, or section end — where the user is already pausing — restate in 2–3 sentences what was decided, what it produced (the file written, the field set), and what it opens next. Fixed cost per boundary, however many questions the boundary took.
     - **Name the way back.** When a boundary closes something the user can still change, say how: the skill and argument that reopens it, and what reopening costs. A user who knows a decision is cheap to revisit stops trying to hold every decision in their head.
+11. **Write the action, not its name.** The reader should never have to decode a term to know what happened, so a name that must appear brings its meaning with it, in the same sentence. It governs the prose a run writes into files as much as chat, and stops at structure: headings, table columns, field names, and every literal a skill matches byte-exactly stay verbatim, with any explanation beside them rather than in place of them. Orthogonal to item 6 — that one picks the language, this one the wording inside it, so a Chinese reply does not translate technical terms, metric names, or paths to satisfy it.
 
 ## 8. The output table
 
