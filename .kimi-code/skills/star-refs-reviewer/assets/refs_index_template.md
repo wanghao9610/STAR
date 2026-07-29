@@ -14,7 +14,7 @@
 
 | Citekey | Note | Venue | Why it is core | Depth | Model |
 | --- | --- | --- | --- | --- | --- |
-| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <one clause> | full |
+| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <one clause> | full | <model id> |
 
 ## 3. Categories
 

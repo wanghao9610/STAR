@@ -13,7 +13,7 @@
 
 | Citekey | 笔记 | 会议/期刊 | 为什么是核心 | 精读深度 | Model |
 | --- | --- | --- | --- | --- | --- |
-| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <一句话> | full |
+| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <一句话> | full | <model id> |
 
 ## 3. 类别
 
