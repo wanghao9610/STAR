@@ -6,7 +6,7 @@ set -euo pipefail
 #######################################################################
 # Logging
 LOG_TIME="$(date "+%Y-%m-%d-%H-%M-%S")"
-LOG_FORMAT="[${LOG_TIME}] [INFO] [$0]"
+LOG_FORMAT="[${LOG_TIME}] [INFO] [$(basename "$0")]"
 
 log() {
     echo -e "${LOG_FORMAT} $*"
