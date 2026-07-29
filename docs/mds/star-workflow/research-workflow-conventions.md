@@ -160,7 +160,7 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 |---|---|---|---|
 | Adoption | `star-proj-adopt` | `metds/adopt.md` | `adopted:`, `backfilled:` |
 | Idea | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | `finalized:` |
-| Refs | `star-refs-reviewer` | `metds/refs/refs_index.md`, `<ABBREV>.md`, `reference.bib`, `related_work.md` | index presence |
+| Refs | `star-refs-reviewer` | `metds/refs/refs_index.md`, `<ABBREV>.md`, `reference.bib`, `related_work.md`, `<slug>_survey.md` | index presence |
 | Codebase | `star-code-architect` | `metds/codearc.md` | presence |
 | Env | `star-env-builder` | `wkdrs/env_<name>_<date>/ENV_REPORT.md`, `freeze.txt` | date in dir name |
 | Plan | `star-plan-coach`, `star-plan-decomposer`, `star-plan-reviser` | `metds/plans/<prefix>_<slug>_plan.md` | `status:`, `finalized:`, `updated:` |

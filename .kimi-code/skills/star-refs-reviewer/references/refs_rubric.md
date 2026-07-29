@@ -47,6 +47,19 @@ One paper each. The return:
 
 and nothing else: no frontmatter provenance, no `category`, no `read_on`, no §5. The main agent writes every file.
 
+## Survey collector contract
+
+What a read-only subagent returns when Step 10.4's reading fans out. One paper each. The return:
+
+- `facts` — `[{claim, where}]`: what the paper does, states, or reports, each tied to the section or table it came from.
+- `title` / `venue` / `year` — exactly as the paper's own page states them.
+- `links` — paper / code / project, or `none found`.
+- `depth` — what it actually read, in the note vocabulary (`method-and-results` / `abstract-and-intro`).
+- `depth_evidence` — `{sections_reached: [...], results_table: <the caption plus one row, verbatim>}`, or `none reachable`.
+- `failures` — `[{host, error, retries}]`.
+
+and nothing else: no branch assignment (the taxonomy is settled by the main agent against the whole pool), no drafted prose, no frontmatter fields. The main agent writes the file.
+
 ## reference.bib organization
 
 - **3–8 categories.** Fewer than 3 is not a classification; more than 8 fragments the field.
@@ -62,6 +75,18 @@ and nothing else: no frontmatter provenance, no `category`, no `read_on`, no §5
 - Needs-manual-check is present even when empty (say "none") — a missing section reads as "nothing failed".
 - Coined abbreviations (†) and preprint-only entries (‡) are marked.
 
+## The survey document (survey mode)
+
+`<slug>_survey.md` is graded on:
+
+- **The taxonomy is derived and declared.** 3–8 branches under one division axis stated in a sentence, the axis that was rejected named beside it; the category rules above apply unchanged. Start from the schemes of 1–3 existing surveys of the topic where they exist — adapt, never adopt wholesale. Two levels at most; every paper sits on exactly one branch, and a paper spanning branches meets the others in the comparison table, not twice in prose.
+- **Branches are synthesis, not lists.** Each branch section says what its papers share and where they diverge — never a paper-by-paper sequence of summaries.
+- **Tiers are the evidence ceiling.** Deep-tier papers (`method-and-results` or better) are the only comparison-table rows and the only sources of reproduced numbers; abstract-tier papers may be placed on a branch and characterized in a clause; record-tier papers are named from their records' facts, never characterized. The frontmatter's per-tier counts are honest counts.
+- **A table column earns its place** three ways at once: it discriminates (values actually differ across rows), it is fillable from fetched sources for every row (`—` where not), and it answers a choice the reader faces. A column that repeats the branch grouping, or holds free-text summaries, is prose in a cage.
+- **Every claim is grounded.** An inline `[@key]` on every non-obvious claim, resolvable in the annotated references; a number carries its dataset and metric; what no cached source supports is cut or marked as the survey's own inference.
+- **The count ledger is present**: found → deduplicated → screened → tiered, with what was excluded and why.
+- **It is honestly a survey.** Below ~30 papers, or with no deep tier, or organized around positioning one project rather than mapping a field, the document is a related-work note — that is `synthesize`'s artifact, and the run says so instead of padding.
+
 ## Chat digest
 
-Under ~400 words: the method source, notes written, entry count and categories with counts, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall.
+Under ~400 words: the method source, notes written, entry count and categories with counts, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall. A survey run's digest follows Step 10.8 instead.

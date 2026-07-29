@@ -329,6 +329,7 @@ metds/plans/0_open-vocab-det-seg_plan.md
 - 准备写论文，需要一份投稿时敢用的 `reference.bib`。
 - 想在确定实验规模前，先知道这个领域默认会拿哪些 baseline 和基准来比。
 - 有新论文出来，想分析它并并入已有的文献基础。
+- 想要一整个领域的地图——甚至可以在任何计划存在之前——而不是为某一个方法做定位。
 
 ### 怎么调用
 
@@ -340,9 +341,10 @@ $star-refs-reviewer 2103.00020             # 用 arXiv id、DOI 或 URL 追加�
 $star-refs-reviewer verify                 # 逐条重抓并与文件做 diff
 $star-refs-reviewer organize               # 离线重新分类现有 bib
 $star-refs-reviewer synthesize             # 把笔记合成为 metds/refs/related_work.md
+$star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<slug>_survey.md
 ```
 
-不带参数时，skill 先在 `metds/*.md` 找方法，找不到就回退到 `metds/plans/` 的根计划，再找不到就问你要一个 topic。`metds/refs/` 一旦存在，后续运行都是增量的：只补缺口，已核验的条目不动。
+不带参数时，skill 先在 `metds/*.md` 找方法，找不到就回退到 `metds/plans/` 的根计划，再找不到就问你要一个 topic。`metds/refs/` 一旦存在，后续运行都是增量的：只补缺口，已核验的条目不动。`survey` 之后的文本按同样的方式解析——计划名、自由文本，都没有就走同一条回退链。
 
 ### 它会做什么
 
@@ -354,6 +356,8 @@ $star-refs-reviewer synthesize             # 把笔记合成为 metds/refs/relat
 6. 按实际收上来的内容归纳 3–8 个类别，`reference.bib` 按类别分组写出，每条的来源登记进 index；
 7. 收尾前随机重抓 5 条，逐字段 diff。
 
+`survey` 模式用同一套检索机器喂一件不同的产物：池子不砍到 15 条而是留下来，分三层读（8–12 篇精读、15–25 篇读摘要、其余只凭记录），在一句话声明划分轴的分类体系下组织，写成一份独立的领域综述——其中每条论断都引用本轮抓取的来源。精读之前只问一次——检索画像、分类轴、分层清单——`involve=low` 会按推荐项代答，所以一次 survey 可以从头到尾无人值守。它不碰 `reference.bib` 和 `refs_index.md`；想收编它翻出的某篇，事后跑一次单篇追加即可。
+
 ### 主要输出
 
 ```text
@@ -361,6 +365,7 @@ metds/refs/<缩写>.md          # 每篇核心论文一份分析笔记（CLIP.md
 metds/refs/reference.bib      # ≥50 条，按类别分组，key 为 Year_Method_FirstAuthor
 metds/refs/refs_index.md      # 核心论文表、类别、出处登记、待人工核对清单
 metds/refs/related_work.md    # 由笔记合成的相关工作叙述（synthesize 模式）
+metds/refs/<slug>_survey.md   # 分层阅读写成的独立领域综述（survey 模式）
 ```
 
 每份笔记包含 TL;DR、问题、方法、实验结果，以及它存在的理由——「与本项目的关系」一节：共同点、差异点、可借鉴之处，以及它让你能立什么。
@@ -1185,7 +1190,7 @@ $star-code-release
 审批确认点在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——没就绪的树会停在就绪门槛上，来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
-- **跑到确认点会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停，直到 diff 被确认；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的确认点。
+- **跑到确认点会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停，直到 diff 被确认，其 `survey` 只问一个判断型问题（画像、分类轴、分层阅读清单），`involve=low` 会按推荐项代答——剩下会停的只有覆盖已有综述文件那一问；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的确认点。
 - **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与确认点就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些确认点要保护的审计链。
 
 参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一个确认点。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问它的裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`$star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`$star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。永远不会安静的是：红线、提交提议、删除与覆盖、对计划的同步回写、各个审批确认点、以及真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。`high` 反向拨动：skill 本会打包进一个确认点、或在确认点之间自行决定的裁量题，逐条单独问出。

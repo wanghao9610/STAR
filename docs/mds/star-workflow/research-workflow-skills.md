@@ -329,6 +329,7 @@ See the complete definition in [`star-plan-coach/SKILL.md`](../../../.claude/ski
 - You are heading toward a paper and need a `reference.bib` you can trust in a submission.
 - You want to know which baselines and benchmarks the field expects before sizing the experiments.
 - A new paper appeared and you want it analyzed and folded into the existing base.
+- You want a map of a whole field — possibly before any plan exists — rather than positioning for one method.
 
 ### How to invoke it
 
@@ -340,9 +341,10 @@ $star-refs-reviewer 2103.00020             # append one paper by arXiv id, DOI, 
 $star-refs-reviewer verify                 # re-fetch every entry and diff it against the file
 $star-refs-reviewer organize               # re-classify the existing bib, offline
 $star-refs-reviewer synthesize             # compile the notes into metds/refs/related_work.md
+$star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
 ```
 
-With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, and finally asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries are left alone.
+With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, and finally asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries are left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain.
 
 ### What it does
 
@@ -354,6 +356,8 @@ With no argument the skill looks for the method in `metds/*.md`, falls back to t
 6. Classifies everything into 3–8 categories derived from what was actually collected, writes `reference.bib` grouped by category, and logs every entry's source in the index;
 7. Re-fetches five entries at random and diffs them field by field before finishing.
 
+In `survey` mode the same search machinery feeds a different artifact: the pool is kept instead of cut to 15, read in three tiers (8–12 papers deeply, 15–25 at abstract level, the rest from their records), organized under a taxonomy whose division axis is declared in a sentence, and written as a standalone field survey in which every claim cites a source fetched during the run. One question comes before the reading — the profile, the taxonomy axis, and the tiered list — and `involve=low` answers it by its recommendation, so a survey can run unattended end to end. It touches neither `reference.bib` nor `refs_index.md`; promoting a paper it surfaced is one append run later.
+
 ### Main outputs
 
 ```text
@@ -361,6 +365,7 @@ metds/refs/<ABBREV>.md        # one analysis note per core paper (CLIP.md, DETR.
 metds/refs/reference.bib      # ≥50 entries, grouped by category, keys Year_Method_FirstAuthor
 metds/refs/refs_index.md      # core-paper table, categories, provenance, needs-manual-check
 metds/refs/related_work.md    # related-work narrative compiled from the notes (synthesize mode)
+metds/refs/<slug>_survey.md   # standalone field survey, read in tiers (survey mode)
 ```
 
 Each note carries a TL;DR, the problem, the method, the results, and — the reason it exists — a *Relation to This Project* section: shared ground, where it differs, what is borrowable, and what it lets you claim.
@@ -1185,7 +1190,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 The confirmation points do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
 - **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness check, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of overwriting.
-- **Runs until its confirmation point**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, and its `verify` stops on any mismatch until the diff is confirmed; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
+- **Runs until its confirmation point**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, its `verify` stops on any mismatch until the diff is confirmed, and its `survey` asks one judgment call (profile, taxonomy axis, tiered reading list) that `involve=low` takes on its recommendation — leaving only the overwrite of an existing survey file to stop for; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
 - **Needs you at the wheel**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and confirmation points are the design; scripting a "yes" past them defeats the audit trail they exist to protect.
 
 The involve level (conventions §7.7–7.8) moves these boundaries, never past a confirmation point. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill stops asking its judgment calls: it takes the option it would have marked recommended and logs the choice instead. Runs stretch further before needing you: `$star-plan-decomposer`'s axis and sub-plan-list confirmations go quiet, and `$star-plan-executor`, pointed at a parent, starts the first ready leaf itself. What never goes quiet: the STOP line, commit offers, deletions and overwrites, writing changes back into plans, the confirmation points, and genuinely open questions — `low` lengthens the unattended span, it does not make any skill fully unattended. `high` runs the other way: judgment calls a skill would batch into one confirmation point, or take on its own between confirmation points, are asked one at a time.

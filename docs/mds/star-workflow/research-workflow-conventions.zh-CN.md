@@ -160,7 +160,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 |---|---|---|---|
 | 接入 | `star-proj-adopt` | `metds/adopt.md` | `adopted:`、`backfilled:` |
 | 想法 | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | `finalized:` |
-| 文献 | `star-refs-reviewer` | `metds/refs/refs_index.md`、`<ABBREV>.md`、`reference.bib`、`related_work.md` | 索引是否存在 |
+| 文献 | `star-refs-reviewer` | `metds/refs/refs_index.md`、`<ABBREV>.md`、`reference.bib`、`related_work.md`、`<slug>_survey.md` | 索引是否存在 |
 | 代码库 | `star-code-architect` | `metds/codearc.md` | 是否存在 |
 | 环境 | `star-env-builder` | `wkdrs/env_<名称>_<日期>/ENV_REPORT.md`、`freeze.txt` | 目录名里的日期 |
 | 计划 | `star-plan-coach`、`star-plan-decomposer`、`star-plan-reviser` | `metds/plans/<前缀>_<slug>_plan.md` | `status:`、`finalized:`、`updated:` |

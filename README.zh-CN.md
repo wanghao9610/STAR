@@ -290,7 +290,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | `$star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env` 并用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西；待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
 | `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域（每篇论文都转录自抓取的记录）、六维打分，最后连同首个验证实验定稿选题 | `metds/ideas/<slug>_idea.md` |
 | `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
-| `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md` |
+| `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库；`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
 | `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
 | `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并做冒烟验证；`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
 | `$star-plan-decomposer` | 将总体计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
@@ -382,6 +382,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` 新增 `survey` 模式：检索一个话题，按声明过的三层去读（8–12 篇精读、15–25 篇读摘要、其余只凭记录），写出独立的领域综述 `metds/refs/<slug>_survey.md`——分类体系带着写明的划分轴，对比表只许精读层来填，每条论断都引用本轮抓取的来源，`reference.bib` 与 `refs_index.md` 一概不碰。精读前只问一次（画像、分类轴、分层清单），`involve=low` 按推荐项代答，一次综述可以从头到尾无人值守。已按四棵工具树双语移植，综述模板与评分规则随 skill 就位。
 - **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与研究工作流规约 §7.11：写出那件事，而不是它的名字。它在任何语种下都成立，且不止管聊天，也管运行写进文件的正文。十五个 skill 在四棵工具树上按这条规则审查一遍：原先的 gate 改为按它实际做的事命名——运行停下来问用户的确认点，或文档必须通过的判据——中文侧也去掉了英文侧早已换掉的自造词（收编、落盘、落地、台账等八个）。同一条规则又把它原先留作可选的那一类定了下来：只用来指向别处的字面量——`§4`、`C4`、run 名——每一条聊天回复里第一次出现时，都用括号带上几个字说明它指向什么，因为读者只看眼前这条消息，不会往回翻。
 - **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-27) — `$star-flow-status` 提速：计划树只扫描一次并缓存，`$star-expt-digest` 复用同一份扫描结果。新增 `STAR_LANG`，用于固定对话回复以及新生成工作流文档的语言；`execs/update.sh` 现在也会同步 `AGENTS.md`，并新增 `--force` 覆盖未提交改动与钩子注册配置。Claude Code 与 Codex 的溯源钩子改为在 skill 记录模型 id 的当刻才读取，会话中途换过的模型不再被写成会话开始时那个。
 - **[v0.1.0](https://github.com/wanghao9610/STAR/tree/v0.1.0)** (2026-07-24) — 第一个正式版本：面向 Codex、Claude、Cursor 和 Kimi 的十五个双语研究工作流 skill、model-id 溯源钩子、设定 skills 在决策前询问程度的 `INVOLVE=low|medium|high` 三档开关（默认 `medium`），以及支持钩子同步与 `--diff` 预览的更新脚本。
