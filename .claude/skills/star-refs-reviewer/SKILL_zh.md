@@ -7,7 +7,8 @@ description: >-
   已存在时增量续跑；传 PLAN_NAME 或自由文本 topic 限定检索范围；`verify` 逐条重抓并与文件做 diff；
   `organize` 离线重新分类现有 bib；`synthesize` 把已有笔记合成为相关工作叙述（metds/refs/related_work.md）；
   `survey` 检索一个话题、分层阅读、独立写出一份领域综述（metds/refs/<slug>_survey.md），不动 bib；
-  传 arXiv id、DOI 或论文 URL 追加单篇。bib 的每个字段都从本次
+  传 arXiv id、DOI 或论文 URL 追加单篇；`add` 一次追加多篇——id、DOI、URL、标题随意混用，
+  每个标题都先解析成抓取到的记录才开始读。bib 的每个字段都从本次
   运行抓回的记录原文转录（DBLP → Crossref → Semantic Scholar → arXiv，优先已发表版本），原始内容
   缓存到 wkdrs/，并在 metds/refs/refs_index.md 登记来源 URL——绝不凭记忆写入，抓不到权威记录的
   论文列入待人工核对清单而不是猜。当用户运行 /star-refs-reviewer，或想做文献综述 / 相关工作调研、
@@ -18,7 +19,7 @@ description: >-
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；`survey` 检索一个话题、分层阅读、独立写出一份领域综述（`metds/refs/<slug>_survey.md`）——其后的文本按 `PLAN_NAME` 或 `TOPIC` 的规则解析，没有就走无参的来源链；arXiv id、DOI 或论文 URL 追加单篇。
+调用方式：`/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | add PAPER [PAPER …] | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；`survey` 检索一个话题、分层阅读、独立写出一份领域综述（`metds/refs/<slug>_survey.md`）——其后的文本按 `PLAN_NAME` 或 `TOPIC` 的规则解析，没有就走无参的来源链；`add` 一次追加多篇，每篇是 arXiv id、DOI、URL 或标题；单个 arXiv id、DOI 或论文 URL 追加那一篇。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
 
@@ -46,7 +47,8 @@ description: >-
    - `organize` → **organize 模式**：只跑 Step 6，离线。
    - `synthesize` → **synthesize 模式**：只跑 Step 9，离线——要求 `metds/refs/` 已有笔记。
    - `survey`（其后可再跟文本）→ **survey 模式**：Step 0 照常解析来源后跑 Step 10。其后的文本按下面的计划名与 topic 规则解析；没有就走下面的无参来源链。
-   - arXiv id（`2103.00020`）、DOI 或论文 URL → **append 模式**：单篇走 Step 3、5、6。
+   - `add`（其后跟一篇或多篇）→ **append 模式**，整个清单一起收。其后的文本按换行和逗号切分；引号里的是标题；其余能解析为 arXiv id、DOI 或论文 URL 的 token 各算一篇；一段哪样都不是的，整段当一个标题。标题按 `references/source_policy_zh.md` 解析——恰好一条干净命中才继续；命中多条、或只是近似命中，属于要提问的歧义；查无此文进待人工核对清单。绝不猜。解析出的每篇走 Step 3、5、6——Step 6 在整批之后跑一次——已有笔记或条目的论文跳过并点名说明。
+   - arXiv id（`2103.00020`）、DOI 或论文 URL——单个，或整段全是这类 token → **append 模式**，规则同上面的 `add`。
    - 计划名（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划即方法来源。
    - 其他文本 → 该文本本身就是 topic。
    - 无参数 → 找方法：先 `metds/*.md` 方法笔记（排除 `metds/codearc.md`——它描述的是代码，不是方法）；否则 `metds/plans/` 下的根计划（§1 问题、§2 相关工作、§3 方法）；再否则 `metds/ideas/` 下 `finalized` 的 idea 文件（其 §5 选题陈述）；再否则请用户给 topic。说明命中的是哪个来源。
@@ -90,7 +92,7 @@ description: >-
 
 ### Step 8：聊天摘要
 
-≤400 字：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/star-plan-coach` §2（相关工作与定位）去磨定位；以后单加一篇是 `/star-refs-reviewer <arxiv-id>`；`/star-refs-reviewer verify` 重查整个 bib；`/star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
+≤400 字：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/star-plan-coach` §2（相关工作与定位）去磨定位；以后单加一篇是 `/star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/star-refs-reviewer add …`；`/star-refs-reviewer verify` 重查整个 bib；`/star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
 
 ### Step 9：合成 related_work.md（仅 synthesize 模式）
 
@@ -98,13 +100,13 @@ description: >-
 
 1. 通读整个基础：每篇笔记（`metds/refs/<缩写>.md`，尤其 §5 与本项目的关系）、`refs_index.md`、`reference.bib` 的类别块，以及 Step 0 的方法来源（根计划 §2/§3）作为定位框架。
 2. 按主题组织，跟随 bib 的类别——只在笔记内容支持时才合并或拆分。每主题一段：这批工作做了什么、对本方法而言做不到什么，每条论断都出自该论文自己的笔记，行内以 `[@citekey]` 引用。有笔记的论文，名字写成指向该笔记的链接——`**[<缩写>](<缩写>.md)** [@citekey]`——文件名从磁盘上真实存在的那份笔记抄来（`<缩写>.md`，Step 3 遇到重名时带 `_<年份>` 后缀），不要由 citekey 拼；`related_work.md` 与笔记同目录，光文件名就是完整路径。没有笔记的论文写纯文本——链接正好标出哪一句背后有一篇精读。最后一段写定位——它们都做不到什么——以方法来源的 §2 为依据。
-3. 笔记是唯一来源，其 `depth:` 是上限：刻画一篇论文只能依据它自己的笔记，且不得深于笔记承认的深度。没有笔记的 bib 条目可以在主题里被提到（只用其记录的事实：标题、会议、年份），但绝不刻画、也绝不加链接——它背后没有笔记。任何内容不得来自记忆。单薄到写不动的主题记为缺口，列出该补读的论文（逐篇 `/star-refs-reviewer <arxiv-id>`）——绝不注水成文。
+3. 笔记是唯一来源，其 `depth:` 是上限：刻画一篇论文只能依据它自己的笔记，且不得深于笔记承认的深度。没有笔记的 bib 条目可以在主题里被提到（只用其记录的事实：标题、会议、年份），但绝不刻画、也绝不加链接——它背后没有笔记。任何内容不得来自记忆。单薄到写不动的主题记为缺口，列出该补读的论文（逐篇 `/star-refs-reviewer <arxiv-id>`，或一次 `add` 收整个清单）——绝不注水成文。
 4. Frontmatter：`type: related_work`、`language`（按 Step 0.4 的规则）、`generated:`（真实日期）、`sources:`（读过的笔记与 index 及各自日期）。重跑时：带这份 frontmatter 的文件，先给出节级变更清单、经一次直接提问确认后才覆写；没有它的文件是人写的——说明其内容并询问，绝不凭 diff 直接覆写。
 5. 摘要 ≤400 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是在家族零编造规则下编译出的素材——语气、次序与最终引用格式属于写作工具。
 
 ### Step 10：综述一个领域（仅 survey 模式）
 
-写 `metds/refs/<slug>_survey.md`——一份独立的领域地图，分层阅读、按分类体系组织。它不需要已有笔记、不需要 bib、甚至不需要计划，也不写 `reference.bib` 和 `refs_index.md`：想把它翻出的某篇收进核验过的 bib，事后跑一次 `/star-refs-reviewer <arxiv-id>` 即可。`<slug>` 在来源是计划时取计划 slug，否则把话题压成 kebab-case（≤5 词）。
+写 `metds/refs/<slug>_survey.md`——一份独立的领域地图，分层阅读、按分类体系组织。它不需要已有笔记、不需要 bib、甚至不需要计划，也不写 `reference.bib` 和 `refs_index.md`：想把它翻出的某篇收进核验过的 bib，事后跑一次 `/star-refs-reviewer <arxiv-id>` 即可——整份补读清单则一次 `/star-refs-reviewer add …` 收下。`<slug>` 在来源是计划时取计划 slug，否则把话题压成 kebab-case（≤5 词）。
 
 1. **来源与画像。** Step 0 原样适用——检索前报画像、读增量基线、定语言。额外找 1–3 篇该话题已有的综述：它们的分类体系是分类轴的起点，按本轮实际收到的东西改造，绝不整套照搬。
 2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与契约、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
@@ -113,7 +115,7 @@ description: >-
 5. **只从池子里成文。** 每一节只用本轮抓回并缓存的材料起草（模板：`assets/survey_template_zh.md`，英文：`assets/survey_template.md`；评分：`references/refs_rubric_zh.md` 的综述一节）。正文点名的每篇论文都出现在带注引用表里，附记录 URL 与抓取日期；每条非显然论断带行内 `[@key]`——与 bib citekey 同为 `Year_Method_FirstAuthor` 形制、只在本文件内解析，日后该篇进 bib 时键保持不变；没有缓存来源的论断删掉或标注为本综述自己的推断；数字必须连同数据集与指标一起出现。对比表只收精读层的论文作行；缓存来源填不上的格写 `—`。
 6. **自查。** 随机重开 5 组"论断↔引用来源"对着缓存核对；来源在该范围内撑不住的论断改写或删除——改的是正文，绝不改引用。确认带注引用表的每条链接都指向本轮抓过的页面或记录。
 7. **Frontmatter 与覆写保护。** Frontmatter：`type: survey`、`topic`、`language`（按 Step 0.4 的规则）、`generated`（真实日期）、`sources`（读过方法来源时记它和它的 `updated`）、`papers`（各层计数）、以及 `model_id` / `model_trail`（规约 §8）。重跑撞上已有的 `<slug>_survey.md` 时逐字沿用 Step 9.4 的规则：生成文件先给节级变更清单、经一次直接提问才覆写；人写的文件绝不凭 diff 覆写。
-8. **摘要。** ≤400 字：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `/star-refs-reviewer <arxiv-id>`；定位交 `/star-plan-coach` §2（相关工作与定位）；项目需要笔记和核验 bib 时走完整流程。
+8. **摘要。** ≤400 字：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `/star-refs-reviewer <arxiv-id>`、或整单一次 `/star-refs-reviewer add …`；定位交 `/star-plan-coach` §2（相关工作与定位）；项目需要笔记和核验 bib 时走完整流程。
 
 ## 状态与文件规则
 
@@ -126,6 +128,6 @@ description: >-
 
 ## 对话纪律
 
-- 核心集确认是完整流程里唯一的强制提问——一次 AskUserQuestion，multiSelect，标出推荐。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；该模式在任何级别下仍必答的，是 Step 10.7 的覆写确认。AskUserQuestion 不可用（headless / 脚本化）时退化为纯文本，精读前必须拿到明确答复。
+- 核心集确认是完整流程里唯一的强制提问——一次 AskUserQuestion，multiSelect，标出推荐。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；该模式在任何级别下仍必答的，是 Step 10.7 的覆写确认。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。AskUserQuestion 不可用（headless / 脚本化）时退化为纯文本，精读前必须拿到明确答复。
 - 如实报数：抓到多少条、失败多少条、多少条待人工核对。缺口绝不往上凑；笔记绝不说得比 `depth:` 承认的更深。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。笔记、index 与综述跟随方法来源的 `language`（否则跟随对话语言）；技术名词、会议名以及 `reference.bib` 里的全部内容一律保留英文。

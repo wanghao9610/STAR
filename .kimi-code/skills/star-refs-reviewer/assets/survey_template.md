@@ -70,8 +70,8 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 11. Read Next
 
-<!-- Papers that deserve a full analysis note, each with one clause of why and its command:
-     `/skill:star-refs-reviewer <arxiv-id>`. -->
+<!-- Papers that deserve a full analysis note, each with one clause of why and its id or URL.
+     One paper is `/skill:star-refs-reviewer <arxiv-id>`; the whole list is one `/skill:star-refs-reviewer add …`. -->
 
 ## 12. Annotated References
 

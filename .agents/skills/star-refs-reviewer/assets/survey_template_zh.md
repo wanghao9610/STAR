@@ -69,8 +69,8 @@ model_trail:                    # 只追加：每次写入会话一条，绝不�
 
 ## 11. Read Next
 
-<!-- 值得建一篇完整分析笔记的论文，每篇一句话理由，附命令：
-     `$star-refs-reviewer <arxiv-id>`。 -->
+<!-- 值得建一篇完整分析笔记的论文，每篇一句话理由，附 id 或 URL。
+     单篇是 `$star-refs-reviewer <arxiv-id>`；整个清单一次 `$star-refs-reviewer add …`。 -->
 
 ## 12. Annotated References
 

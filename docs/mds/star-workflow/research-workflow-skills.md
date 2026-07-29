@@ -338,13 +338,14 @@ $star-refs-reviewer                        # read the method from metds/, run th
 $star-refs-reviewer open-vocab-det-seg     # scope the search to one plan
 $star-refs-reviewer open-vocabulary segmentation   # a free-text topic
 $star-refs-reviewer 2103.00020             # append one paper by arXiv id, DOI, or URL
+$star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # append several at once — ids, DOIs, URLs, titles mixed
 $star-refs-reviewer verify                 # re-fetch every entry and diff it against the file
 $star-refs-reviewer organize               # re-classify the existing bib, offline
 $star-refs-reviewer synthesize             # compile the notes into metds/refs/related_work.md
 $star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
 ```
 
-With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, and finally asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries are left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain.
+With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, and finally asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries are left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain. `add` splits its list on newlines and commas — quoted text is a title, and a title is resolved to a fetched record before anything is read: a clean single match proceeds, several candidates get asked about, an unfindable one goes to the manual-check list rather than a guess. A bare list of nothing but ids and URLs works without the keyword; a bare title without `add` still means a topic.
 
 ### What it does
 

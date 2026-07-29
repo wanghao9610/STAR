@@ -338,13 +338,14 @@ $star-refs-reviewer                        # 从 metds/ 读方法，跑完整流
 $star-refs-reviewer open-vocab-det-seg     # 把检索范围限定到某个计划
 $star-refs-reviewer 开放词汇分割             # 自由文本 topic
 $star-refs-reviewer 2103.00020             # 用 arXiv id、DOI 或 URL 追加单篇
+$star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # 一次追加多篇——id、DOI、URL、标题混用
 $star-refs-reviewer verify                 # 逐条重抓并与文件做 diff
 $star-refs-reviewer organize               # 离线重新分类现有 bib
 $star-refs-reviewer synthesize             # 把笔记合成为 metds/refs/related_work.md
 $star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<slug>_survey.md
 ```
 
-不带参数时，skill 先在 `metds/*.md` 找方法，找不到就回退到 `metds/plans/` 的根计划，再找不到就问你要一个 topic。`metds/refs/` 一旦存在，后续运行都是增量的：只补缺口，已核验的条目不动。`survey` 之后的文本按同样的方式解析——计划名、自由文本，都没有就走同一条回退链。
+不带参数时，skill 先在 `metds/*.md` 找方法，找不到就回退到 `metds/plans/` 的根计划，再找不到就问你要一个 topic。`metds/refs/` 一旦存在，后续运行都是增量的：只补缺口，已核验的条目不动。`survey` 之后的文本按同样的方式解析——计划名、自由文本，都没有就走同一条回退链。`add` 的清单按换行和逗号切分——引号里的是标题，而标题会先解析成抓取到的记录才开始读：恰好一条干净命中就继续，多条候选会问你，查不到的进待人工核对清单而不是猜一个。整段全是 id 和 URL 时不带 `add` 也一样进追加模式；不带 `add` 的裸标题仍然是 topic。
 
 ### 它会做什么
 

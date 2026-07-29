@@ -39,6 +39,10 @@ A record matches only when all three agree:
 
 One or two fields agreeing is not a match — near-duplicate titles across a workshop paper, its extension, and a survey are common. Ambiguous → do not guess: list the candidates with their URLs in Needs-manual-check.
 
+## Resolving a title
+
+`add` may name a paper by title alone, so the title is all there is to match on. Resolution uses the search endpoints above (DBLP search, Crossref `query.bibliographic`, Semantic Scholar search) and the matching rule's normalization: case- and punctuation-insensitive. The input resolves when exactly one paper's record title equals it — the full title, or the main title before a subtitle's colon. Several distinct papers matching (a workshop paper and its extension are the classic pair), or best hits that only nearly match → ask, one direct question listing each candidate's title, venue, year, and URL; found nowhere → Needs-manual-check. A resolved title is from then on just a paper: its record goes through the search order, the three-field matching rule, and published-over-preprint like any other.
+
 ## Published over preprint
 
 Prefer the published record whenever one exists; the arXiv id survives only if the fetched record already carries it. arXiv-only work is legitimate and included — marked `preprint` (‡) in the index, typed `@misc`.
