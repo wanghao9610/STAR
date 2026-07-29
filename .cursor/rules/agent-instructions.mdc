@@ -60,6 +60,7 @@ The test: Every changed line should trace directly to the user's request.
 
 - A name that must appear brings its meaning with it, in the same sentence.
 - Exception: strings matched literally — field values, field names, paths — stay verbatim. Explain beside one, never in place of it.
+- A pointer that says nothing on its own — `§4`, `C4`, `Step B1`, a run or plan name — stays verbatim and takes a few words of what it points at, in parentheses: `§4 (the experiments section)`. First use in every reply, not once per conversation; the reader does not scroll back. Where a label has no room, the line under it.
 - Technical prose, no filler and no emoji. Plain does not mean chatty.
 
 ## 8. Project Layout

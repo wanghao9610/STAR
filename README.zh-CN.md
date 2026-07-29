@@ -382,7 +382,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与研究工作流规约 §7.11：写出那件事，而不是它的名字。它在任何语种下都成立，且不止管聊天，也管运行写进文件的正文。十五个 skill 在四棵工具树上按这条规则审查一遍：原先的 gate 改为按它实际做的事命名——运行停下来问用户的确认点，或文档必须通过的判据——中文侧也去掉了英文侧早已换掉的自造词（收编、落盘、落地、台账等八个）。
+- **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与研究工作流规约 §7.11：写出那件事，而不是它的名字。它在任何语种下都成立，且不止管聊天，也管运行写进文件的正文。十五个 skill 在四棵工具树上按这条规则审查一遍：原先的 gate 改为按它实际做的事命名——运行停下来问用户的确认点，或文档必须通过的判据——中文侧也去掉了英文侧早已换掉的自造词（收编、落盘、落地、台账等八个）。同一条规则又把它原先留作可选的那一类定了下来：只用来指向别处的字面量——`§4`、`C4`、run 名——每一条聊天回复里第一次出现时，都用括号带上几个字说明它指向什么，因为读者只看眼前这条消息，不会往回翻。
 - **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-27) — `$star-flow-status` 提速：计划树只扫描一次并缓存，`$star-expt-digest` 复用同一份扫描结果。新增 `STAR_LANG`，用于固定对话回复以及新生成工作流文档的语言；`execs/update.sh` 现在也会同步 `AGENTS.md`，并新增 `--force` 覆盖未提交改动与钩子注册配置。Claude Code 与 Codex 的溯源钩子改为在 skill 记录模型 id 的当刻才读取，会话中途换过的模型不再被写成会话开始时那个。
 - **[v0.1.0](https://github.com/wanghao9610/STAR/tree/v0.1.0)** (2026-07-24) — 第一个正式版本：面向 Codex、Claude、Cursor 和 Kimi 的十五个双语研究工作流 skill、model-id 溯源钩子、设定 skills 在决策前询问程度的 `INVOLVE=low|medium|high` 三档开关（默认 `medium`），以及支持钩子同步与 `--diff` 预览的更新脚本。
 - **2026-07-15** — STAR 首个发布。
