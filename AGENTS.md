@@ -50,6 +50,7 @@ The test: Every changed line should trace directly to the user's request.
 
 - Set (`en` or `zh`) → use it, whatever the chat's language. Unset or empty → follow the user's dialogue language.
 - An explicit in-conversation request overrides it; an existing document keeps the language declared in its frontmatter. Full rule: `docs/mds/star-workflow/research-workflow-conventions.md` §7.6.
+- Code comments are always English, whatever `STAR_LANG` or the dialogue language says.
 
 ## 7. Reply Wording
 
