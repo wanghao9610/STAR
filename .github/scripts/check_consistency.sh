@@ -728,6 +728,93 @@ done
 
 (( guide_errors == 0 )) && note "skills guide covers every skill once, links and anchors resolve, conventions citations land"
 
+# 19. Opening-load invariants.
+#     Three passes built the skills' opening load (10dd4da, e5841a2, bfe6c03):
+#     one message per run — whole files through the harness's file-reading
+#     tool, Bash carrying only the .env probe and the scripts only Bash can
+#     run — and SKILL_zh.md kept as a human-readable edition, never a runtime
+#     load. Nothing above guards any of that: an edit could cat the
+#     conventions back into a Bash block (guaranteeing the >30 KB spill the
+#     shape exists to avoid), re-add the SKILL_zh runtime read, or drop the
+#     .env probe from one tree, and every check above would stay green. The
+#     literals pinned here — the probe line, the language-paragraph opening,
+#     the zh blockquote opening — are the strings the load discipline rides
+#     on; rewording any of them centrally means updating this check in the
+#     same commit.
+section "Opening-load invariants"
+open_errors=0
+PROBE_LINE="grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'"
+lang_seen="$(mktemp)"
+bq_seen="$(mktemp)"
+
+for root in "${SKILL_ROOTS[@]}"; do
+    while IFS= read -r skill; do
+        for f in SKILL.md SKILL_zh.md; do
+            path="${root}/${skill}/${f}"
+            [[ -f "${path}" ]] || continue   # check 3 owns missing files
+            n="$(grep -cF -- "${PROBE_LINE}" "${path}")"
+            if (( n != 1 )); then
+                fail "${path}: ${n} .env probe lines, expected exactly 1"
+                open_errors=1
+            fi
+            # Only the .agents fallback sentence may cat the conventions, and
+            # that sentence is marked by "accept the spill" / "接受落盘".
+            while IFS= read -r hit; do
+                [[ -n "${hit}" ]] || continue
+                printf '%s' "${hit}" | grep -q 'accept the spill\|接受落盘' && continue
+                fail "${path}:${hit%%:*}: cats the conventions inside Bash outside the marked fallback sentence"
+                open_errors=1
+            done < <(grep -n 'cat docs/mds/star-workflow/research-workflow-conventions' "${path}" 2>/dev/null)
+        done
+
+        en="${root}/${skill}/SKILL.md"
+        if [[ -f "${en}" ]]; then
+            n="$(grep -c "^Match the user's language\." "${en}")"
+            if (( n != 1 )); then
+                fail "${en}: ${n} language paragraphs, expected exactly 1"
+                open_errors=1
+            elif ! grep "^Match the user's language\." "${en}" | grep -qF 'not loaded at runtime'; then
+                fail "${en}: language paragraph no longer says SKILL_zh.md is not loaded at runtime"
+                open_errors=1
+            else
+                grep "^Match the user's language\." "${en}" >> "${lang_seen}"
+            fi
+        fi
+        zh="${root}/${skill}/SKILL_zh.md"
+        if [[ -f "${zh}" ]]; then
+            n="$(grep -c '^> 本文件是 `SKILL\.md` 的中文对照版' "${zh}")"
+            if (( n != 1 )); then
+                fail "${zh}: ${n} header blockquotes of the documentation-edition form, expected exactly 1"
+                open_errors=1
+            else
+                grep '^> 本文件是 `SKILL\.md` 的中文对照版' "${zh}" >> "${bq_seen}"
+            fi
+        fi
+    done < <(printf '%s\n' "${SKILLS}")
+done
+
+# Both passages are uniform across all sixty file pairs by design, so a
+# partial re-edit — one tree reworded, the rest left behind — shows up here.
+if (( $(sort -u "${lang_seen}" | wc -l) > 1 )); then
+    fail "the language paragraph differs across SKILL.md files; it is uniform by design:"
+    sort -u "${lang_seen}" | cut -c1-80 | sed 's/^/      /'
+    open_errors=1
+fi
+if (( $(sort -u "${bq_seen}" | wc -l) > 1 )); then
+    fail "the zh header blockquote differs across SKILL_zh.md files; it is uniform by design"
+    open_errors=1
+fi
+rm -f "${lang_seen}" "${bq_seen}"
+
+stale_reads="$(grep -rn 'in full before acting\|与读取本文件\|issue its read together' "${SKILL_ROOTS[@]}" || true)"
+if [[ -n "${stale_reads}" ]]; then
+    fail "SKILL_zh runtime-read phrasing has returned:"
+    printf '%s\n' "${stale_reads}" | sed 's/^/      /'
+    open_errors=1
+fi
+
+(( open_errors == 0 )) && note "opening loads hold: one probe line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

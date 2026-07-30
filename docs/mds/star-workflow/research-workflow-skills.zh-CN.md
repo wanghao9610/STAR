@@ -897,7 +897,7 @@ $star-flow-status 01
 - 子计划比父计划还旧、悬挂链接、无效依赖、孤儿 run 等失配；
 - 一行自审信息：统计形似报告、却不匹配任何已知产物模式的文件，好让某个产出方 skill 改了输出命名这件事被看见，而不是让对应的后续检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/` 与 `wkdrs/results/`）——不会创建或修改任何文件。因为它是整条流程里调用最频繁的一个，这些内容由一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）一次收齐，而不是逐文件读取；脚本只负责收集，用它输出的那些规则仍然留在 skill 里。
+这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/` 与 `wkdrs/results/`）——不会创建或修改任何文件。因为它是整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、以及一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，用它输出的那些规则仍然留在 skill 里。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.claude/skills/star-flow-status/SKILL_zh.md)。
 
