@@ -389,11 +389,11 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双落盘；拆开之后摘录必定完整送达，只有摘要还可能落盘。
 - **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改用共享的只读采集脚本读计划树，不再逐个打开计划。同一轮对话里的第二个 skill 可以复用仍能看到的开场装载，采集脚本的摘要除外。`star-plan-decomposer` 的三条拆分轴改名为阶段、组件、实验，各自以该层所放的单元命名。实验轴只在代码已能端到端跑起来时才被推荐，它这一层放的是实验组，每条主张再深一位数字。
 - **[v0.1.4](https://github.com/wanghao9610/STAR/tree/v0.1.4)** (2026-07-29) — 每个 skill 用一条消息完成开场装载，`SKILL_zh.md` 不再在运行时读取——它仍是供人阅读的完整镜像。其中两个 skill 只装载自己真正用到的规约章节。
-- **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` 新增 `survey` 模式，把独立的领域综述写入 `metds/refs/`；追加模式新增 `add` 形式，一次可提交多篇论文。
-- **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与规约 §7.11：写动作本身，不写它的名字。十五个 skill 全部按它审计过一遍。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` 新增 `survey` 模式，把独立的领域综述写入 `metds/refs/`；追加模式新增 `add` 形式，一次可提交多篇论文。
+- **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与规约 §7.11：写动作本身，不写它的名字。十五个 skill 全部按它审计过一遍。
 - **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-27) — `star-flow-status` 只扫描一次计划树，`star-expt-digest` 读同一份扫描结果。新增 `STAR_LANG` 用于固定回复与新生成文档的语言；`execs/update.sh` 增加 `AGENTS.md` 同步与 `--force`；溯源钩子改为在 skill 记录时读取模型 id。
 - **[v0.1.0](https://github.com/wanghao9610/STAR/tree/v0.1.0)** (2026-07-24) — 第一个正式版本：面向 Codex、Claude、Cursor 和 Kimi 的十五个双语研究工作流 skill、model-id 溯源钩子、设定 skills 在决策前询问程度的 `INVOLVE=low|medium|high` 三档开关（默认 `medium`），以及支持钩子同步与 `--diff` 预览的更新脚本。
 - **2026-07-15** — STAR 首个发布。
