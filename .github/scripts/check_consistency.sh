@@ -741,6 +741,13 @@ done
 #     the zh blockquote opening — are the strings the load discipline rides
 #     on; rewording any of them centrally means updating this check in the
 #     same commit.
+#
+#     Two skills carry conventions text in that Bash call on purpose:
+#     star-expt-digest and star-refs-reviewer load a bounded awk excerpt of
+#     the sections they act on (about 26-27 KB) instead of the whole file,
+#     which is what lets it ride in Bash at all. That is why the ban below is
+#     on `cat`-ing the *whole* conventions file — 35 KB, a guaranteed spill —
+#     rather than on Bash carrying any conventions text.
 section "Opening-load invariants"
 open_errors=0
 PROBE_LINE="grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'"

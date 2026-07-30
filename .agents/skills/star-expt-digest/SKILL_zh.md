@@ -19,14 +19,20 @@ description: >-
 
 调用方式：`$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息装齐本 skill 全部无条件的开场读取——也就是本文件后文回指的那次开场装载：规约文件与 `<本 skill 所在目录>/references/scope_spec_zh.md` 各以一次 `Read` 整份读入，外加同一条消息里的一次 Bash 调用（以项目根目录为工作目录），只做非 Bash 不可的两件事：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。摘要真正据以行事的部分——§0 词汇表（"上次覆盖到的日期"、方向性信号，以及本 skill 要汇报的 kill-criterion 与完成判据都在这里定义）、§3 `.env` 运行时、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——随下面这次开场装载到达。有四节不装载，每一节都是因为本 skill 自己的文件已在用到它的地方写清了所需内容：§1 git（本 skill 从不提交——见状态与文件规则，连要告诉用户的 `wkdrs/*.md` 例外也在那里）、§2 红线（本 skill 什么都不跑——核心原则 6 与 `references/digest_rubric_zh.md` 划定了边界，日志里"待用户"的命令只是照抄标题转述，从不由它判断）、§4 真实日期（Step 6，且扫描脚本本身就会打印当天日期）、§9 项目布局（状态与文件规则把写入范围列得比 §9 更严）。规约的前言同样不装载——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。哪次运行真需要其中某节，再整份读回。
+
+动手前，用一条消息装齐本 skill 全部无条件的开场读取——也就是本文件后文回指的那次开场装载：两次 Bash 调用（以项目根目录为工作目录），外加 `<本 skill 所在目录>/references/scope_spec_zh.md` 的一次 `Read`，三者同发。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|3|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
 bash <本 skill 所在目录>/scripts/scan.sh
 ```
 
-一条消息、三类结果：规约与 Step 0 据以解释参数的 spec 各自整份来自自己那次 `Read`，`.env` 探测与收集脚本的摘要来自那次 Bash 调用（它打印什么、为什么，见工作流一节）。别把这两份文档 `cat` 进命令里：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返——而光规约一份就已近 35 KB，何况扫描的摘要还要占用同一份 Bash 结果。`ledger` 模式去掉 spec 的那次 `Read`，扫描改跑 `bash <本 skill 所在目录>/scripts/scan.sh --trails`——Step 8 不解析时间窗，spec 在那里用不上；`--trails` 多打印什么、少打印什么，工作流一节写了。其余一律按需加载：`references/digest_rubric_zh.md` 到 Step 2–3 应用分层规则时再读，`assets/` 模板到 Step 6 或 Step 8 写文件时再读，扫描的第二次 `--bodies` 调用必须等 Step 1 点名窗口内的 run 之后——为什么不能提前，工作流一节也写了。
+一条消息、三份结果：`.env` 探测与规约各节来自第一次调用，收集脚本的摘要来自第二次（它打印什么、为什么，见工作流一节），Step 0 据以解释参数的 spec 来自它自己那次 `Read`。两次 Bash 调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返——而取出的规约摘录已约 26 KB（整份 34 KB），扫描摘要若挤进同一份结果还要再占一份。那行 `awk` 只打印上面点名的各节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。`ledger` 模式去掉 spec 的那次 `Read`，扫描改跑 `bash <本 skill 所在目录>/scripts/scan.sh --trails`——Step 8 不解析时间窗，spec 在那里用不上；`--trails` 多打印什么、少打印什么，工作流一节写了。其余一律按需加载：`references/digest_rubric_zh.md` 到 Step 2–3 应用分层规则时再读，`assets/` 模板到 Step 6 或 Step 8 写文件时再读，扫描的第二次 `--bodies` 调用必须等 Step 1 点名窗口内的 run 之后——为什么不能提前，工作流一节也写了。
 
 ## 角色
 
