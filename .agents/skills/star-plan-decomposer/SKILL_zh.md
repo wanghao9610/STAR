@@ -15,7 +15,14 @@ description: >-
 
 调用方式：`$star-plan-decomposer PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Bash 命令：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Bash 只做需要 shell 的事——一次小调用，以项目根目录为工作目录，完成本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——与那次读取同在一条消息发出，两者都不再各占一趟往返。
+**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Bash 命令：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Bash 只做需要 shell 的事——一次调用，以项目根目录为工作目录，带两行：
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+bash <本 skill 所在目录>/scripts/scan.sh --slim
+```
+
+与那次读取同在一条消息发出，谁也不再各占一趟往返。第一行是本次运行的 `.env` 查询。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`parent:`、`children:`、`depends_on`、`finalized:`、`exec_status`、`exec_runs`——它的 `## Sub-plans` 索引与占位符计数，外加每份运行日志的 frontmatter 和 `metds/`、`wkdrs/` 的一层目录清单。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -47,13 +54,13 @@ description: >-
 
 ### Step 0：定位目标计划
 
-1. 解析 `PLAN_NAME`：按 slug、数字前缀或完整文件名与 `metds/plans/*_plan.md` 匹配。
+1. 解析 `PLAN_NAME`：按 slug、数字前缀或完整文件名，与开场装载的摘要列出的计划匹配——不必自己再列一次目录，摘要就是那份清单。
 2. 若未给参数，或匹配有歧义，列出可选计划（前缀 + slug + 一句话标题），询问选择哪一个，并标出你推荐的一项。
 3. 完整读取选定的计划。
 
 ### Step 1：评估就绪度
 
-**先检查这份计划是否已经被拆解过。** 扫描 `metds/plans/`，找出 `parent:` 指向目标的文件——也就是前缀为目标前缀再加一位数字的文件。若已存在，说明拆解已经部分或完全完成，而 Step 2–4 会覆盖这些文件，其中可能带着手工修订、`## Revision History` 或执行状态。报告发现了什么（前缀、slug、`exec_status`，以及父计划的 `## Sub-plans` / `children:` 是否已经列出它们），并提供选项：
+**先检查这份计划是否已经被拆解过。** 摘要里带着每个计划的 `parent:`；从中找出 `parent:` 指向目标的文件——也就是前缀为目标前缀再加一位数字的文件。若已存在，说明拆解已经部分或完全完成，而 Step 2–4 会覆盖这些文件，其中可能带着手工修订、`## Revision History` 或执行状态。报告发现了什么（前缀、slug、`exec_status`，以及父计划的 `## Sub-plans` / `children:` 是否已经列出它们），并提供选项：
 
 - *仅修复父计划索引*（已有 children 看起来完整时推荐）——跳过 Step 2–4 直接进入 Step 5，索引从子计划文件自身推导。不向任何 children 写入。
 - *在它们之外追加新单元*——已有文件保持不动，新单元从下一个空闲序号开始编号，只对新单元跑 Step 2–4；Step 5 再把新旧合并。

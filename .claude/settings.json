@@ -4,7 +4,15 @@
       "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)",
       "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
       "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh)",
-      "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)"
+      "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)",
+      "Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh)",
+      "Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh:*)",
+      "Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh)",
+      "Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh:*)",
+      "Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh)",
+      "Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh:*)",
+      "Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh)",
+      "Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh:*)"
     ]
   },
   "hooks": {

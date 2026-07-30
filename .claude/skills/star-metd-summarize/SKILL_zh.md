@@ -24,7 +24,14 @@ description: >-
 
 调用方式：`/star-metd-summarize [OPT]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 Bash 调用：规约文件用单独的 `Read` 读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 Bash 才做得了的那件事——本次运行的 `.env` 查询，以项目根目录为工作目录的一次小调用：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，折进这条消息，就不另占一趟往返。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 Bash 调用：规约文件用单独的 `Read` 读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 Bash 才做得了的那两件事，以项目根目录为工作目录的一次调用：
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+bash <本 skill 所在目录>/scripts/scan.sh --slim
+```
+
+`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位；两行都折进这条消息，谁也不另占一趟往返。第二行是共享采集脚本，它的摘要就是步骤 1 的全部输入：每个计划的 frontmatter、它的 `## Sub-plans` 索引与占位符计数、每份运行日志的 frontmatter，以及 `metds/` 和 `wkdrs/` 的一层目录清单——这一步过去逐个计划读的那轮循环，现在合成一份结果。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样，再对它套用本文件的规则。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回列出 `metds/plans/*_plan.md` 并逐个读 frontmatter，并在回复里说明这次走了退路。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -53,7 +60,7 @@ description: >-
 
 ### Step 1：扫描计划树
 
-列出 `metds/plans/*_plan.md`；只读每个的 **frontmatter**——本步骤要记录的每个字段都在那里，计划正文是步骤 2 的输入，不进这一步。按 `parent:` 重建树——`parent:` 权威，缺失或有歧义时可以读该计划的 `## Sub-plans` 索引来定位它，数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
+每个计划的 **frontmatter** 已随开场装载的摘要到手——本步骤要记录的每个字段都在那里，计划正文是步骤 2 的输入，不进这一步，所以这一步不再打开任何计划文件。按 `parent:` 重建树——`parent:` 权威，缺失或有歧义时用该计划的 `## Sub-plans` 索引来定位它（摘要里同样带着），数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
 
 - **输出语言跟随计划**：取根计划的 `language:`；多根时取多数；打平时用对话语言。
 - **一套文档描述一个方法。** 树里有多个互不相关的根时，如实说明，并经 AskUserQuestion 询问这套文档描述的是哪个根的子树；答案决定整轮的范围。

@@ -17,7 +17,14 @@ description: >-
 
 调用方式：`/star-plan-executor PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次小的 Bash 调用，以项目根目录为工作目录：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Bash 调用，以项目根目录为工作目录，带两行：
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+bash <本 skill 所在目录>/scripts/scan.sh --slim
+```
+
+执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`children:` 用于判定是否叶子、`depends_on` 与兄弟叶子的 `exec_status` 用于依赖检查、`exec_runs` 用于续跑——外加每份运行日志的 frontmatter。目标子计划仍在 Step 0 整篇读入；摘要替掉的是逐个打开它的兄弟计划。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -40,7 +47,7 @@ description: >-
 
 ### Step 0：定位目标计划
 
-1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与 `metds/plans/*_plan.md` 匹配。
+1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与开场装载的摘要列出的计划匹配——摘要就是那份清单,不必再列一次目录。
 2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它——列出它的叶子(前缀 + slug + 一句话目标),让用户选执行哪个叶子(推荐依赖顺序中第一个就绪的叶子),或提议按依赖顺序一次一个地执行这些叶子。
 3. 若未给参数或匹配有歧义,列出可选计划并询问。
 4. 完整读取选定的子计划。
@@ -48,7 +55,7 @@ description: >-
 ### Step 1：就绪检查
 
 1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,告知用户拆解尚未完成,提供:*先回 `/star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
-2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的阻塞:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
+2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?摘要里已经带着每个兄弟的 frontmatter,从摘要读它们的状态,不要逐个打开。若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的阻塞:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
 
 ### Step 2：勘察代码库
 
