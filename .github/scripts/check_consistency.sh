@@ -1068,6 +1068,73 @@ if (( sel_errors == 0 )); then
     fi
 fi
 
+# 21. The reuse-an-earlier-load paragraph is present, uniform, and inside the load.
+#     A second skill in the same conversation is allowed to skip the parts of the
+#     opening load it can still see verbatim, which is the only thing that makes a
+#     multi-skill session cost one full load instead of N. The permission lives in
+#     one paragraph per manifest, and three ways of losing it are invisible above:
+#     dropping it from one tree (checks 1-3 compare file sets, not contents),
+#     rewording it in one tree so the trees disagree about what may be skipped, and
+#     moving it below the first ## heading, where it stops being part of the load
+#     the reader is deciding about. It carries no bare §n on purpose — check 20d
+#     reads every §n in this same block as a claim about which sections load.
+section "Reuse-an-earlier-load paragraph"
+reuse_errors=0
+reuse_en="$(mktemp)"
+reuse_zh="$(mktemp)"
+
+for root in "${SKILL_ROOTS[@]}"; do
+    while IFS= read -r skill; do
+        for f in SKILL.md SKILL_zh.md; do
+            path="${root}/${skill}/${f}"
+            [[ -f "${path}" ]] || continue   # check 3 owns missing files
+            if [[ "${f}" == SKILL_zh.md ]]; then
+                lead='^\*\*复用上一次装载。\*\*'
+                head='^\*\*通用规约。'
+                seen="${reuse_zh}"
+            else
+                lead='^\*\*Reusing an earlier load\.\*\*'
+                head='^\*\*Shared conventions\.'
+                seen="${reuse_en}"
+            fi
+
+            n="$(grep -cE "${lead}" "${path}")"
+            if (( n != 1 )); then
+                fail "${path}: ${n} reuse-an-earlier-load paragraphs, expected exactly 1"
+                reuse_errors=1
+                continue
+            fi
+            grep -E "${lead}" "${path}" >> "${seen}"
+
+            if grep -qE '§[0-9]+([^.0-9]|$)' <<< "$(grep -E "${lead}" "${path}")"; then
+                fail "${path}: the reuse paragraph cites a bare §n; check 20d reads those as load claims"
+                reuse_errors=1
+            fi
+
+            start="$(grep -nE "${head}" "${path}" | head -n 1 | cut -d: -f1)"
+            at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
+            next_h="$(awk -v s="${start:-0}" 'NR>s && /^## /{print NR; exit}' "${path}")"
+            if [[ -z "${start}" ]] || (( at < start )) || { [[ -n "${next_h}" ]] && (( at > next_h )); }; then
+                fail "${path}: the reuse paragraph sits outside the opening-load block"
+                reuse_errors=1
+            fi
+        done
+    done < <(printf '%s\n' "${SKILLS}")
+done
+
+for pair in "en:${reuse_en}" "zh:${reuse_zh}"; do
+    lang="${pair%%:*}"
+    file="${pair#*:}"
+    if (( $(sort -u "${file}" | wc -l) > 1 )); then
+        fail "the ${lang} reuse paragraph differs across manifests; it is uniform by design:"
+        sort -u "${file}" | cut -c1-80 | sed 's/^/      /'
+        reuse_errors=1
+    fi
+done
+rm -f "${reuse_en}" "${reuse_zh}"
+
+(( reuse_errors == 0 )) && note "every manifest carries the reuse paragraph, uniform per language, inside the opening-load block"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

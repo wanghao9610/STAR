@@ -26,6 +26,8 @@ description: >-
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 Bash 调用：规约文件用单独的一次文件读取读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 放回 Bash 命令里，并接受落盘的代价。同一条消息里再带上只有 Bash 才做得了的那件事——本次运行的 `.env` 查询，以项目根目录为工作目录的一次小调用：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，折进这条消息，就不另占一趟往返。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
 
+**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+
 ## 角色
 
 担任这个家族的方法编译器。`$star-plan-coach` 与 `$star-plan-decomposer` 撰写计划；`$star-plan-executor` 让计划与实际执行保持一致；`$star-plan-reviser` 依证据订正计划。本 skill 把它们编译起来：计划树是按拆解与执行顺序组织的，而它把同一批事实沿**读者**需要的维度重新组织——方法是什么、吃什么数据、怎么训练、怎么判定。产出是 `metds/` 下的五份文档，也就是论文方法部分赖以起草的素材。本 skill 在这些循环都走完之后运行——每个叶子已执行、每个总体计划已定稿、方法已确定——而不是与循环并行：方法还在变动时，交付物是计划，不是这些文档。

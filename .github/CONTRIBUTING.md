@@ -159,6 +159,14 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     strings: the selector shape, and the phrases splitting the two lists in prose ("stay out",
     "不装载"). Deliberate gap: `star-flow-status` also loads part of the conventions, but through `sed`
     ranges plus an item-level pass over §7, which a section-level parser cannot verify.
+21. **Every manifest carries the reuse-an-earlier-load paragraph, uniform per language, inside the
+    opening-load block.** That paragraph is what lets a second skill in the same conversation skip the
+    parts of the load it can still see verbatim, so a multi-skill session pays for one load rather than
+    N. Three ways of losing it are invisible to everything above: dropping it from one tree, since
+    checks 1–3 compare file sets and not contents; rewording it in one tree, so the four trees disagree
+    about what may be skipped; and moving it below the first `##` heading, where it stops being part of
+    the load the reader is deciding about. It must also carry no bare `§n` — check 20d reads every `§n`
+    in that same block as a claim about which sections the skill loads.
 
 ## What the checks do not catch
 
