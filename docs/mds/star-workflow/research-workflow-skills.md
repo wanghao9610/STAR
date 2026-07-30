@@ -318,6 +318,7 @@ The plan contains six research sections and their statuses. When all sections ar
 - One or two sentences about the research topic are enough to begin; you do not need a complete proposal first.
 - If you are unsure about an experiment or metric, say so. The skill will offer two or three concrete candidates.
 - Avoid decomposing the plan before its key sections are confirmed, or downstream sub-plans may contain many `[TBD]` items.
+- Arriving without `$star-idea-storm` and without recent reading? Run `$star-refs-reviewer survey <topic>` first, so §1's gap is written against a map of the field rather than from memory.
 
 See the complete definition in [`star-plan-coach/SKILL.md`](../../../.claude/skills/star-plan-coach/SKILL.md).
 
@@ -1027,7 +1028,7 @@ A project being adopted starts at `$star-proj-adopt` instead of Step 0 and conti
 $star-idea-storm reliable open-vocabulary perception, but I have not settled on a question
 ```
 
-The storm clarifies the seed and constraints, diverges into 3–5 candidate directions, scans the landscape for the kept ones (abstract-level, every paper from a fetched record), scores them on six dimensions, and frames the winner into `metds/ideas/open-vocab-perception_idea.md` with a topic statement and a first validation experiment. Already have a topic? Skip straight to Step 1 — or pass the finalized idea to the coach: `$star-plan-coach open-vocab-perception`.
+The storm clarifies the seed and constraints, diverges into 3–5 candidate directions, scans the landscape for the kept ones (abstract-level, every paper from a fetched record), scores them on six dimensions, and frames the winner into `metds/ideas/open-vocab-perception_idea.md` with a topic statement and a first validation experiment. Already have a topic? Skip straight to Step 1 — or pass the finalized idea to the coach: `$star-plan-coach open-vocab-perception`. A topic settled a while ago and not read against since is worth one `$star-refs-reviewer survey <topic>` before the coach: §1's gap is a claim about what the field cannot do, and §1 is also one of the sources the later literature pass builds its search profile from — written from memory, it bounds the very search meant to check it.
 
 ### Step 1: turn an idea into a plan — with the literature interleaved
 

@@ -318,6 +318,7 @@ metds/plans/0_open-vocab-det-seg_plan.md
 - 最初只需要提供一两句话的研究主题，不必先写完整 proposal。
 - 不确定实验或指标时可以直接说“不知道”，skill 会给出 2–3 个候选方案。
 - 关键章节尚未确认时不要急着拆解，否则下游子计划会出现较多 `【待定】`。
+- 没跑 `$star-idea-storm`、最近也没读过文献就直接进来的，先跑一次 `$star-refs-reviewer survey <topic>`，让 §1 的缺口对着领域地图写，而不是凭记忆写。
 
 完整定义见 [`star-plan-coach/SKILL_zh.md`](../../../.claude/skills/star-plan-coach/SKILL_zh.md)。
 
@@ -1027,7 +1028,7 @@ README 的第一行是一条 HTML 注释形式的溯源标记——不是 frontm
 $star-idea-storm 想做更可靠的开放词汇感知，但还没想好具体问题
 ```
 
-风暴会澄清种子与约束，发散出 3–5 个候选方向，对入围方向做领域扫描（摘要级，每篇论文都来自抓取的记录），按六个维度打分，最后把胜出方向定稿到 `metds/ideas/open-vocab-perception_idea.md`——带选题陈述和首个验证实验。已经有选题？直接从第一步开始——或者把定稿的 idea 交给 coach：`$star-plan-coach open-vocab-perception`。
+风暴会澄清种子与约束，发散出 3–5 个候选方向，对入围方向做领域扫描（摘要级，每篇论文都来自抓取的记录），按六个维度打分，最后把胜出方向定稿到 `metds/ideas/open-vocab-perception_idea.md`——带选题陈述和首个验证实验。已经有选题？直接从第一步开始——或者把定稿的 idea 交给 coach：`$star-plan-coach open-vocab-perception`。选题定下来有一阵、之后没再对着文献看过的，进 coach 之前值得先跑一次 `$star-refs-reviewer survey <topic>`：§1 的缺口是一句关于这个领域做不到什么的论断，而 §1 又是后续文献流程抽检索画像的来源之一——凭记忆写下的缺口，会框住那次本该检验它的检索。
 
 ### 第一步：把 idea 写成计划——文献穿插其中
 

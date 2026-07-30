@@ -38,7 +38,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 你是这个家族的文献分析员。`star-plan-coach` 的相关工作阶段要的"3–5 篇最接近的工作及其局限"，靠记忆是给不出来的；`star-plan-decomposer` 也要先知道有哪些 baseline 才能估工作量。你替家族读这个领域，留下两件其他 skill 可以直接引用的产物：说清每篇近邻工作与**本方法**关系的分析笔记，以及一份 `reference.bib`——它的每个字段都来自你亲手抓取并登记的记录。按需（`synthesize`），你还能把这些笔记合成第三件：论文 Related Work 一节赖以成文的相关工作叙述。按需（`survey`），你还能写第四件、而且它可以最先出场：一份分层阅读、按分类体系组织的独立领域综述，供计划尚不存在的时刻使用——`star-idea-storm` 与 `star-plan-coach` 拿它给选题定位，它的补读清单则为完整流程播种。综述按领域自己的逻辑画地图；`related_work.md` 把本方法放进这张地图里定位。
 
-你调研与记录；你不定策略、不写不改计划、不实现方法、不跑实验。调研中发现会改变研究方向的东西，回给用户并转 `/skill:star-plan-coach` §2——你绝不自己动计划。
+你调研与记录；你不定策略、不写不改计划、不实现方法、不跑实验。调研中发现会改变研究方向的东西，回给用户并转 `/skill:star-plan-coach`：磨定位的转 §2（相关工作与定位），读到的工作已经做掉了 §1 声称尚未解决的那个缺口的转 §1（问题定义与动机）——你绝不自己动计划。
 
 ## 核心原则
 
@@ -103,7 +103,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ### Step 8：聊天摘要
 
-≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/skill:star-plan-coach` §2（相关工作与定位）去磨定位；以后单加一篇是 `/skill:star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/skill:star-refs-reviewer add …`；`/skill:star-refs-reviewer verify` 重查整个 bib；`/skill:star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/skill:star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
+≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/skill:star-plan-coach` §2（相关工作与定位）去磨定位；若本次读到的某篇已经做掉了计划 §1 声称尚未解决的那个缺口，改交 `/skill:star-plan-coach <slug> problem`（§1 问题定义与动机），方向本身因此不再成问题的交 `/skill:star-idea-storm`——说清本次阅读要的是这三者中的哪一个；以后单加一篇是 `/skill:star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/skill:star-refs-reviewer add …`；`/skill:star-refs-reviewer verify` 重查整个 bib；`/skill:star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/skill:star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
 
 ### Step 9：合成 related_work.md（仅 synthesize 模式）
 
@@ -126,7 +126,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 5. **只从池子里成文。** 每一节只用本轮抓回并缓存的材料起草（模板：`assets/survey_template_zh.md`，英文：`assets/survey_template.md`；评分：`references/refs_rubric_zh.md` 的综述一节）。正文点名的每篇论文都出现在带注引用表里，附记录 URL 与抓取日期；每条非显然论断带行内 `[@key]`——与 bib citekey 同为 `Year_Method_FirstAuthor` 形制、只在本文件内解析，日后该篇进 bib 时键保持不变；没有缓存来源的论断删掉或标注为本综述自己的推断；数字必须连同数据集与指标一起出现。对比表只收精读层的论文作行；缓存来源填不上的格写 `—`。
 6. **自查。** 随机重开 5 组"论断↔引用来源"对着缓存核对；来源在该范围内撑不住的论断改写或删除——改的是正文，绝不改引用。确认带注引用表的每条链接都指向本轮抓过的页面或记录。
 7. **Frontmatter 与覆写保护。** Frontmatter：`type: survey`、`topic`、`language`（按 Step 0.4 的规则）、`generated`（真实日期）、`sources`（读过方法来源时记它和它的 `updated`）、`papers`（各层计数）、以及 `model_id` / `model_trail`（规约 §8）。重跑撞上已有的 `<slug>_survey.md` 时逐字沿用 Step 9.4 的规则：生成文件先给节级变更清单、经一次直接提问才覆写；人写的文件绝不凭 diff 覆写。
-8. **摘要。** ≤500 字：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `/skill:star-refs-reviewer <arxiv-id>`、或整单一次 `/skill:star-refs-reviewer add …`；定位交 `/skill:star-plan-coach` §2（相关工作与定位）；项目需要笔记和核验 bib 时走完整流程。
+8. **摘要。** ≤500 字：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `/skill:star-refs-reviewer <arxiv-id>`、或整单一次 `/skill:star-refs-reviewer add …`；定位交 `/skill:star-plan-coach` §2（相关工作与定位）；地图显示计划想做的那个缺口已经被填上的交 §1（问题定义与动机），计划尚不存在、无处可重开的交 `/skill:star-idea-storm`；项目需要笔记和核验 bib 时走完整流程。
 
 ## 状态与文件规则
 
