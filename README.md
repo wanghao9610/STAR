@@ -43,7 +43,7 @@ STAR is intentionally framework-agnostic: the research workflow defines only the
 - **A single experiment entrypoint** through `execs/run.sh`.
 - **A complete research lifecycle** through fifteen complementary skills for adopting an already-started project without disturbing it, converging a vague interest into a defensible research topic, drafting plans, surveying the related work into analysis notes and a verified bibliography, recursively decomposing them, bootstrapping the codebase from a reference implementation, building the runtime environment, executing leaf plans, reviewing code against conventions and plan promises, analyzing run results against what the plan expected, digesting progress over a period, revising plans against execution evidence, summarizing global status, compiling the finalized plans into method documents once every experiment is done, and preparing the repository for release.
 - **A traceable, resumable research process** that stores plans under `metds/plans/`, plan-execution intermediates under `tasks/`, and generated run artifacts under `wkdrs/` instead of relying on chat history for context.
-- **AI-friendly project guidance and research workflows** shared across Codex, Claude, Kimi, and Cursor, with support for both English and Chinese.
+- **AI-friendly project guidance and research workflows** shared across Codex, Claude, Kimi Code, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
 See [Research workflow](#research-workflow) for what each of the fifteen skills is responsible for, what it writes, and how to invoke it in your tool. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting.
@@ -74,11 +74,11 @@ STAR/
 ├── .agents/skills/         # Research workflow skills for Codex
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
-├── .kimi-code/skills/      # Research workflow skills for Kimi
+├── .kimi-code/skills/      # Research workflow skills for Kimi Code
 ├── .claude/hooks/          # Model-id provenance hook for Claude
 ├── .codex/hooks/           # Model-id provenance hook for Codex
 ├── .cursor/hooks/          # Model-id provenance hook for Cursor
-├── .kimi-code/hooks/       # Model-id provenance hook for Kimi (see Per-tool setup)
+├── .kimi-code/hooks/       # Model-id provenance hook for Kimi Code (see Per-tool setup)
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .github/                # STAR's own maintainer CI; delete it in your project
@@ -267,7 +267,7 @@ Elsewhere, approve it once when asked, or pre-approve it in the tool:
 |---|---|
 | Codex | its approval-policy / sandbox setting (global config, not per project) |
 | Cursor | its command allowlist, in the app's settings |
-| Kimi | your global `~/.kimi-code/config.toml` — Kimi does not read project-level config |
+| Kimi Code | your global `~/.kimi-code/config.toml` — Kimi Code does not read project-level config |
 
 The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
 
@@ -282,7 +282,7 @@ STAR includes fifteen complementary skills that turn a vague research interest i
 | Codex | `$star-<name>` | `$star-plan-coach open-vocabulary detection` |
 | Claude Code | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 | Cursor | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
-| Kimi | `/skill:star-<name>` | `/skill:star-plan-coach open-vocabulary detection` |
+| Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach open-vocabulary detection` |
 
 Every skill must be named explicitly. All four tools disable implicit invocation, so describing the task in prose does not start a skill.
 

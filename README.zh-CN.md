@@ -43,7 +43,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
 - **完整的研究生命周期**：通过十五个相互配合的 skill，引导不改动原有内容地接入已经开工的项目、从模糊兴趣收敛出研究选题、计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现搭建代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、按时间轴汇总阶段进展、以执行证据修订计划、全局状态汇总、在所有实验完成后把定稿计划编译成方法文档，以及把仓库整理到可发布状态。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
-- **面向 AI 协作的规范**：为 Codex、Claude、Kimi 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
+- **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
 十五个 skill 各自负责什么、产出什么，以及在你所用工具里怎么调用，见[研究工作流](#研究工作流)；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
@@ -74,11 +74,11 @@ star-ai-research/
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
-├── .kimi-code/skills/      # Kimi 使用的研究工作流技能
+├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
 ├── .claude/hooks/          # Claude 的 model-id 溯源钩子
 ├── .codex/hooks/           # Codex 的 model-id 溯源钩子
 ├── .cursor/hooks/          # Cursor 的 model-id 溯源钩子
-├── .kimi-code/hooks/       # Kimi 的 model-id 溯源钩子（见分工具配置）
+├── .kimi-code/hooks/       # Kimi Code 的 model-id 溯源钩子（见分工具配置）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .github/                # STAR 自身的维护 CI；用于你的项目时请删除
@@ -262,7 +262,7 @@ bash .kimi-code/hooks/install.sh
 |---|---|
 | Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
 | Cursor | 应用设置里的命令白名单 |
-| Kimi | 全局 `~/.kimi-code/config.toml`——Kimi 不读取项目级配置 |
+| Kimi Code | 全局 `~/.kimi-code/config.toml`——Kimi Code 不读取项目级配置 |
 
 该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。
 
@@ -277,7 +277,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | Codex | `$star-<name>` | `$star-plan-coach 开放词汇检测` |
 | Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
-| Kimi | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
+| Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 
 每个 skill 都必须显式指名。四套工具都禁用了隐式调用，仅用自然语言描述需求不会启动任何 skill。
 
