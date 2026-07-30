@@ -16,17 +16,17 @@
 
 ```
 metds/plans/
-  0_open-vocab-det-seg_plan.md        根            前缀 "0"    层级 1
-   ├ 00_mvp-3way-ablation_plan.md     "0" 的子 0    前缀 "00"   层级 2
-   ├ 01_core-method-pipeline_plan.md  "0" 的子 1    前缀 "01"   层级 2
-   │  ├ 010_desc-generation_plan.md   "01" 的子 0   前缀 "010"  层级 3
-   │  ├ 011_set-matching_plan.md      "01" 的子 1   前缀 "011"  层级 3
-   │  └ 012_det-seg-heads_plan.md     "01" 的子 2   前缀 "012"  层级 3
-   ├ 02_full-experiments_plan.md      "0" 的子 2    前缀 "02"   层级 2
-   └ 03_writing-submission_plan.md    "0" 的子 3    前缀 "03"   层级 2
+  0_open-vocab-det-seg_plan.md         根            前缀 "0"    层级 1
+   ├ 00_baseline-method-impl_plan.md   "0" 的子 0    前缀 "00"   层级 2
+   ├ 01_mvp-3way-verify_plan.md        "0" 的子 1    前缀 "01"   层级 2
+   ├ 02_core-method-pipeline_plan.md   "0" 的子 2    前缀 "02"   层级 2
+   │  ├ 020_desc-generation_plan.md    "02" 的子 0   前缀 "020"  层级 3
+   │  ├ 021_set-matching_plan.md       "02" 的子 1   前缀 "021"  层级 3
+   │  └ 022_det-seg-heads_plan.md      "02" 的子 2   前缀 "022"  层级 3
+   └ 03_full-experiments_plan.md       "0" 的子 3    前缀 "03"   层级 2
 ```
 
-文件在目录列表中天然有序（`0`、`00`、`01`、`010`、`011`、`012`、`02`、`03`），因此字典序已经反映了树结构。
+文件在目录列表中天然有序（`0`、`00`、`01`、`02`、`020`、`021`、`022`、`03`），因此字典序已经反映了树结构。
 
 ## 约束与边界情形
 
@@ -36,6 +36,6 @@ metds/plans/
 
 3. **前缀是提示；`parent:` 才权威。** `star-plan-coach` 会给每个新根分配最小空闲数字，但在此规则之前创建的项目可能存在两个都编号为 `0_` 的无关根计划（仅靠 slug 区分），它们的子计划也都以 `00_` 起始。所以数字前缀供人类排序与提示树结构，但**每份子计划 frontmatter 里的 `parent:` 字段才是真正的链接**。务必把 `parent:` 设为确切的父文件名，并在判断某子计划属于哪个父计划时依赖它（而非前缀）。
 
-4. **slug 与树结构无关。** `<slug>` 是该单元内容的简短、可读的英文名，与父计划的 slug 无关。`0_open-vocab-det-seg` 可以有子计划 `00_mvp-3way-ablation`。
+4. **slug 与树结构无关。** `<slug>` 是该单元内容的简短、可读的英文名，与父计划的 slug 无关。`0_open-vocab-det-seg` 可以有子计划 `01_mvp-3way-verify`。
 
 5. **补空位 / 重新编号。** 按确认后的顺序从 0 起密集分配序号。若用户之后删掉中间某个子计划，保留空位而不要重排（重排会破坏所有更深的前缀以及每处 `parent:`/`traces_to` 引用）。若要插入一个，给它下一个空闲序号，即使这样会让序号乱序；排序意图记录在父计划的 `## Sub-plans` 索引里，而非数字本身。

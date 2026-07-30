@@ -39,13 +39,13 @@ Show, per leaf line, its `depends_on` and (if executing) `k/n` steps. Example:
 
 ```
 0_open-vocab-det-seg            ◐  strategy 6/6 done, decomposed (4 children)
-├ 00_mvp-3way-ablation          ✔  exec done                        deps: —
-├ 01_core-method-pipeline       ◐  exec in-progress 2/5 steps        deps: 00
-│ ├ 010_desc-generation         ✔  exec done                        deps: —
-│ ├ 011_set-matching            ◐  exec in-progress 2/4             deps: 010
-│ └ 012_det-seg-heads           ○  exec pending                     deps: 010, 011
-├ 02_full-experiments           ⏸  awaiting user (1 STOP cmd)        deps: 01
-└ 03_writing-submission         ○  exec pending                     deps: 02
+├ 00_baseline-method-impl       ✔  exec done                        deps: —
+├ 01_mvp-3way-verify            ✔  exec done                        deps: 00
+├ 02_core-method-pipeline       ◐  exec in-progress 2/5 steps        deps: 01
+│ ├ 020_desc-generation         ✔  exec done                        deps: —
+│ ├ 021_set-matching            ◐  exec in-progress 2/4             deps: 020
+│ └ 022_det-seg-heads           ○  exec pending                     deps: 020, 021
+└ 03_full-experiments           ⏸  awaiting user (1 STOP cmd)        deps: 02
 ```
 
 The root above is `◐`, not `✔`, because its `finalized:` is unset — six `done` sections alone do not close a strategy node, the rubric still has to be run. A strategy node's status symbol reports **its own** state, never its subtree's: a finalized root over a half-executed subtree is still `✔`, and the summary counts are what tell you the subtree is unfinished.

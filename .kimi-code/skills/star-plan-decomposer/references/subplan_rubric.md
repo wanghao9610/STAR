@@ -16,7 +16,7 @@ Run this over each sub-plan you wrote. Rank failing items by importance and repo
 
 7. **Local risks are execution-level, not research-level** — §6 covers what could make *this step* fail or stall (with an early signal and a local fallback), and does not just restate the root's research risks.
 
-8. **The sub-plan is right-sized** — it owns one independently checkable chunk. Too big (no single done-criterion fits) → recommend recursing one level deeper. Too small (nothing to verify on its own) → recommend merging into a sibling.
+8. **The sub-plan is right-sized, and a peer of its siblings** — it owns one independently checkable chunk, of the same kind and comparable size as the units beside it. Too big (no single done-criterion fits) → recommend recursing one level deeper. Too small (nothing to verify on its own) → recommend merging into a sibling. One instance sitting beside the category that would contain it (a single ablation beside an "all ablations" unit) → recommend grouping the instances and recursing into the group (`references/decomposition_axes.md`, "One level, one kind").
 
 9. **Coverage without overlap** — taken together, the sibling sub-plans cover the scope they decompose — the root §3/§4/§6 material the parent node owns — and no piece is owned by two of them.
 

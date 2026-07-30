@@ -31,9 +31,9 @@ Appended at the end of the plan file (after `## Sub-plans` if present); the sect
 ```markdown
 ## Revision History
 
-### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/00_mvp-3way-ablation/REVIEW_2026-07-16.md)
+### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/01_mvp-3way-verify/REVIEW_2026-07-16.md)
 - §3 step 4: batch eval → streaming eval — the run OOMs at step 4 (evidence: EXEC_LOG.md step 4, blocked)
-- §5: mIoU threshold 85 → 80 — the MVP run reached 82.3 and the root's §4 margin analysis accepts 80 (evidence: wkdrs/00_mvp-3way-ablation/eval.json)
+- §5: mIoU threshold 85 → 80 — the MVP run reached 82.3 and the root's §4 margin analysis accepts 80 (evidence: wkdrs/01_mvp-3way-verify/eval.json)
 - exec_status: done → pending (done-criterion changed)
 ```
 

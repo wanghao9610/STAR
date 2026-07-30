@@ -76,13 +76,13 @@ If the target itself carries execution evidence (`exec_runs` non-empty, or `exec
 
 ### Step 2: Choose the decomposition axis
 
-Propose 2–3 axes in the conversation (one question, recommend the first). Details and how to pick: `references/decomposition_axes.md`. Each axis option states what it commits to, not just its name (conventions §7.3): the shape of the split, the dependency pattern it implies (linear chain / small DAG / mostly independent), and that changing the axis after Step 4 means re-running the split over files that may already carry hand edits.
+Propose 2–3 axes in the conversation (one question, recommend the first). Details and how to pick: `references/decomposition_axes.md`. Each axis option states what it commits to, not just its name (conventions §7.3): the shape of the split, the dependency pattern it implies (linear chain / small DAG / mostly independent), and that changing the axis after Step 4 means re-running the split over files that may already carry hand edits. The question that separates them is whether the system still has to be built: the claim axis has no slot for building work, so a plan whose code does not run yet splits by milestone or component, and the claim view returns one level down as the recursion of the experiment-heavy milestone.
 
 | Axis | Splits the plan by | Best when |
 |------|--------------------|-----------|
-| **Milestone / phase** (default) | the root's §6 timeline stages | milestones are already well-formed (usually true) |
-| **Component / module** | system parts of the method (root §3) | the method has clear separable modules |
-| **Claim → experiment** | each claim/experiment in root §4 | the contribution is empirical, many ablations |
+| **Milestone / phase** (default) | the root's §6 timeline stages | the system still has to be built, and the milestones are already well-formed (usually true) |
+| **Component / module** | system parts of the method (root §3) | the system still has to be built, and the method has clear separable modules that can progress in parallel |
+| **Claim → experiment** | root §4, as experiment groups (data readiness / baseline implementation / ablation experiments / main results) — claims recurse a level deeper | the code already runs end to end; the only open risk is whether each claim holds |
 
 Mixed decomposition is allowed but confirm it explicitly.
 
@@ -91,9 +91,10 @@ Mixed decomposition is allowed but confirm it explicitly.
 Open with the anchor (conventions §7.10): the axis just chosen and what it yields here — "milestone axis → 4 units, a linear chain". From the chosen axis, draft N units. For each: a short title, an English `slug`, a one-line objective, the root section/claim it traces to, **and which sibling(s) it depends on**. Show the list as normal text — including the dependency edges and the resulting execution order — and confirm in the conversation (*looks good* / *edit the list* / *change granularity*, with your recommendation marked).
 
 - **Give data its own leaf.** Where the root §4 names a dataset `datas/` does not yet hold, one unit is a data-readiness leaf: §3 acquires it, §4 places it under `datas/<name>/` **and names the verification script under `tasks/<plan-name>/`**, and §5's done-criterion is an integrity check — a manifest, a file count, a checksum — never "the download finished". The check's verdict and evidence are written into the run's `EXEC_LOG.md` like any other step check; bulky raw output — the manifest itself, a checksum list — goes in a run subdirectory or a non-`.md` file, never a free-named report `.md` at the top of `wkdrs/<run>/` — a name conventions §8 does not register. The acquisition command itself crosses the STOP line, so `star-plan-executor` hands it back rather than running it. Every leaf that consumes the dataset `depends_on` this one. Without it, execution stops at a missing input no plan owns.
+- **Siblings are peers.** Every unit at this level is the same kind of thing at a comparable size; an individual item never sits beside the category that would contain it (one ablation beside `12_ablation-experiments`) — group the instances and recurse into the group instead. Run that test over the drafted list before showing it; the worked example is in `references/decomposition_axes.md` ("One level, one kind").
 - **Enforce N ≤ 10.** If you believe more than 10 units are needed, do not append a second digit — instead group them, or recommend a two-level split (decompose into ≤10 now, then recurse into the heavy ones). Say so explicitly.
 - Assign prefixes per the naming rule: parent prefix + `0..N-1`.
-- **Derive dependencies from the axis** (`references/decomposition_axes.md`): milestone/phase → a linear chain (each depends on the previous); component/module → a small DAG (shared interfaces); claim→experiment → mostly independent (often all `[]`). Record each unit's upstream as a `depends_on` list of sibling prefixes. Keep it acyclic.
+- **Derive dependencies from the axis** (`references/decomposition_axes.md`): milestone/phase → a linear chain (each depends on the previous); component/module → a small DAG (shared interfaces); claim→experiment → a wide DAG of groups (the data-readiness leaf upstream of the rest), with the leaves inside one group mostly independent. Record each unit's upstream as a `depends_on` list of sibling prefixes. Keep it acyclic.
 
 ### Step 4: Draft each sub-plan
 

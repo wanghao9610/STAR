@@ -15,7 +15,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`00`), or a filename (`00_mvp-3way-ablation_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
+Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`01`), or a filename (`01_mvp-3way-verify_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with both of this skill's reference files in one message: three file reads — the conventions file, `<this skill's directory>/references/review_spec.md`, and `<this skill's directory>/references/revision_rules.md`, each whole file as its own read — plus one Bash call in the same message, with the project root as the working directory, carrying only:
 

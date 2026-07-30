@@ -97,8 +97,8 @@ skill 必须显式指名。四套工具都禁用了隐式调用——三套 mark
 | 形式 | 示例 | 适用场景 |
 | --- | --- | --- |
 | slug | `open-vocab-det-seg` | 名称唯一时最简洁 |
-| 数字前缀 | `00` | 计划树中前缀唯一时最快 |
-| 完整文件名 | `00_mvp-3way-ablation_plan.md` | 最明确，推荐用于同名或多根计划 |
+| 数字前缀 | `01` | 计划树中前缀唯一时最快 |
+| 完整文件名 | `01_mvp-3way-verify_plan.md` | 最明确，推荐用于同名或多根计划 |
 
 多个根计划目前都可能以 `0_` 开头，因此出现歧义时应使用 slug 或完整文件名。
 
@@ -533,11 +533,12 @@ skill 先检查父计划是否足够完整，然后依次确认两个决定：
 ```text
 metds/plans/
 ├── 0_open-vocab-det-seg_plan.md
-├── 00_mvp-3way-ablation_plan.md
-├── 01_core-method-pipeline_plan.md
-│   ├── 010_desc-generation_plan.md
-│   └── 011_set-matching_plan.md
-└── 02_full-experiments_plan.md
+├── 00_baseline-method-impl_plan.md
+├── 01_mvp-3way-verify_plan.md
+├── 02_core-method-pipeline_plan.md
+│   ├── 020_desc-generation_plan.md
+│   └── 021_set-matching_plan.md
+└── 03_full-experiments_plan.md
 ```
 
 上面的缩进表示逻辑树；文件在磁盘上仍位于同一目录。每深入一层，前缀追加一位数字。每个节点最多有 10 个直接子计划；任务更多时应分两层拆解。
@@ -570,9 +571,9 @@ $star-plan-decomposer 01
 ### 怎么调用
 
 ```text
-$star-plan-executor 00
-$star-plan-executor mvp-3way-ablation
-$star-plan-executor 00_mvp-3way-ablation_plan.md
+$star-plan-executor 01
+$star-plan-executor mvp-3way-verify
+$star-plan-executor 01_mvp-3way-verify_plan.md
 ```
 
 只有**叶子计划**可以执行。如果目标仍有 `children`，skill 会要求选择其中的叶子，或建议继续拆解。
@@ -616,7 +617,7 @@ skill 会准备好确切命令，写入执行日志的“待用户执行”区�
 默认 run 名为 `<prefix>_<slug>`：
 
 ```text
-wkdrs/00_mvp-3way-ablation/
+wkdrs/01_mvp-3way-verify/
 ├── EXEC_PLAN.md
 ├── EXEC_LOG.md
 └── ...                     # 本轮生成的其他产物
@@ -698,11 +699,11 @@ wkdrs/reviews/code_<范围>_<日期>.md       # 其他模式
 ### 怎么调用
 
 ```text
-$star-expt-analyst 00                             # 该计划的当前 run，经其 exec_runs 解析
-$star-expt-analyst mvp-3way-ablation
-$star-expt-analyst wkdrs/00_mvp-3way-ablation/    # 直接给 run 目录
+$star-expt-analyst 01                             # 该计划的当前 run，经其 exec_runs 解析
+$star-expt-analyst mvp-3way-verify
+$star-expt-analyst wkdrs/01_mvp-3way-verify/      # 直接给 run 目录
 $star-expt-analyst                                # 列出磁盘上的 run 让你挑
-$star-expt-analyst watch 00                       # 对可能仍在运行的 run 做健康检查
+$star-expt-analyst watch 01                       # 对可能仍在运行的 run 做健康检查
 ```
 
 计划参数支持常见的 slug / 数字前缀 / 文件名三种写法；`wkdrs/<run>/` 路径会反查回它的计划。`watch`（参数形式相同）只在聊天里做健康检查——日志健康与存活情况，不打判定、不写文件——适合红线交回的长训练还在跑的时候用。
@@ -825,8 +826,8 @@ digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它�
 ### 怎么调用
 
 ```text
-$star-plan-reviser 00
-$star-plan-reviser mvp-3way-ablation
+$star-plan-reviser 01
+$star-plan-reviser mvp-3way-verify
 $star-plan-reviser 0_open-vocab-det-seg_plan.md
 ```
 
@@ -1073,10 +1074,10 @@ $star-plan-decomposer open-vocab-det-seg
 确认按里程碑拆分后，可能得到：
 
 ```text
-00_mvp-3way-ablation_plan.md
-01_core-method-pipeline_plan.md
-02_full-experiments_plan.md
-03_scaling-and-robustness_plan.md
+00_baseline-method-impl_plan.md
+01_mvp-3way-verify_plan.md
+02_core-method-pipeline_plan.md
+03_full-experiments_plan.md
 ```
 
 放在第二、三步**之后**再拆，才能让每个叶子的 §2 点到 `${CODE_NAME}/` 下真实存在的模块和一个已经跑得起来的运行时，而不是靠猜的路径。先拆也能跑通——executor 会把你转回来——只是叶子会写得更含糊。
@@ -1087,17 +1088,17 @@ $star-plan-decomposer open-vocab-det-seg
 $star-flow-status open-vocab-det-seg
 ```
 
-如果报告推荐 `00_mvp-3way-ablation`，执行：
+如果报告推荐 `00_baseline-method-impl`，执行：
 
 ```text
-$star-plan-executor 00_mvp-3way-ablation_plan.md
+$star-plan-executor 00_baseline-method-impl_plan.md
 ```
 
 ### 第六步：在红线之后续跑
 
 如果日志中留下了一条需要你来跑的训练命令：
 
-1. 按 `wkdrs/00_mvp-3way-ablation/EXEC_LOG.md` 运行命令；
+1. 按 `wkdrs/00_baseline-method-impl/EXEC_LOG.md` 运行命令；
 2. 训练期间，`$star-expt-analyst watch 00` 只报日志健康，不打分；
 3. 确认产物写入日志指定位置；
 4. 再次调用 `$star-plan-executor 00`；
