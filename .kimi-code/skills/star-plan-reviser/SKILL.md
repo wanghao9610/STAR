@@ -64,7 +64,7 @@ A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it be
 
 Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_template_zh.md`; the report follows the plan's `language`), seven sections: ① intent recap ② what actually happened ③ completion scorecard (per §3 task plus the §5 done-criterion: `met` / `partial` / `unmet` / `unverifiable`, each with evidence) ④ divergences ⑤ blockers & leftovers ⑥ knock-on effects ⑦ revision candidates, each graded **local / structural / strategic**.
 
-Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a ≤400-word digest: verdict, top divergences, and the candidate list as one-liners.
+Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a ≤500-word digest: verdict, top divergences, and the candidate list as one-liners.
 
 ### Step 4: Revision Q&A (one candidate at a time)
 
@@ -89,7 +89,7 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ### Step 7: Report & handoff
 
-≤400 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `/skill:star-plan-decomposer <slug>` (structure changed / children stale), `/skill:star-plan-coach <slug>` (strategy pivot), `/skill:star-plan-executor <leaf>` (re-run a revised leaf), `/skill:star-code-reviewer <leaf>` (audit the implementation's code), `/skill:star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
+≤500 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `/skill:star-plan-decomposer <slug>` (structure changed / children stale), `/skill:star-plan-coach <slug>` (strategy pivot), `/skill:star-plan-executor <leaf>` (re-run a revised leaf), `/skill:star-code-reviewer <leaf>` (audit the implementation's code), `/skill:star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
 
 ## State & File Rules
 

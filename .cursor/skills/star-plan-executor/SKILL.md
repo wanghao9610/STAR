@@ -103,7 +103,7 @@ After all agent steps are `done`, verify the sub-plan's §5 done-criterion (reus
 
 ### Step 8: Report
 
-What was verified (with evidence), where artifacts live, which commands were handed back to the user, which amendments were synced into the sub-plan, and remaining risks. If Step 6 reported a plan-level finding (a root kill-criterion hit), state it and name the feedback path (`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`). After a completed run, recommend `/star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands were handed back at the STOP line, add that once their outputs exist, `/star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep it under ~400 words.
+What was verified (with evidence), where artifacts live, which commands were handed back to the user, which amendments were synced into the sub-plan, and remaining risks. If Step 6 reported a plan-level finding (a root kill-criterion hit), state it and name the feedback path (`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`). After a completed run, recommend `/star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands were handed back at the STOP line, add that once their outputs exist, `/star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep it under ~500 words.
 
 ## State & File Rules
 

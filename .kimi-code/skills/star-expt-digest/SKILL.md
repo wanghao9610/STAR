@@ -86,7 +86,7 @@ Fill `assets/digest_template.md` (Chinese: `assets/digest_template_zh.md`; the d
 
 ### Step 7: Digest & routing
 
-≤400 words, period first: the window and scope, how many runs were report-backed / provisional, the headline of what was learned, what moved since the previous digest, and the top gaps. Then the routing: an unanalyzed run → `/skill:star-expt-analyst <run dir>`; a stale results table → `/skill:star-expt-analyst aggregate`; an unexecuted or awaiting leaf → `/skill:star-plan-executor <slug>`; a refuted claim or a kill-criterion hit → `/skill:star-plan-reviser <slug>`; the current state of the tree → `/skill:star-flow-status`. End with the digest path, and one line saying it is a progress record whose numbers are quoted from reports, not verified here.
+≤500 words, period first: the window and scope, how many runs were report-backed / provisional, the headline of what was learned, what moved since the previous digest, and the top gaps. Then the routing: an unanalyzed run → `/skill:star-expt-analyst <run dir>`; a stale results table → `/skill:star-expt-analyst aggregate`; an unexecuted or awaiting leaf → `/skill:star-plan-executor <slug>`; a refuted claim or a kill-criterion hit → `/skill:star-plan-reviser <slug>`; the current state of the tree → `/skill:star-flow-status`. End with the digest path, and one line saying it is a progress record whose numbers are quoted from reports, not verified here.
 
 ### Step 8: Ledger (ledger mode only)
 

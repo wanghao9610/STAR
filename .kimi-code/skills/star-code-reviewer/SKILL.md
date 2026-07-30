@@ -83,7 +83,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 
 ### Step 6: Digest in chat
 
-≤400 words, verdict first: files reviewed, counts per severity, top ≤10 findings as one-liners (`file:line — issue`), the conformance verdict (plan mode), which static tools ran. End with the routing for findings outside what this skill may write (`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`), then offer the fix pass if mechanical findings exist — the user may also stop here; the persisted report is a complete deliverable on its own.
+≤500 words, verdict first: files reviewed, counts per severity, top ≤10 findings as one-liners (`file:line — issue`), the conformance verdict (plan mode), which static tools ran. End with the routing for findings outside what this skill may write (`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`), then offer the fix pass if mechanical findings exist — the user may also stop here; the persisted report is a complete deliverable on its own.
 
 ### Step 7: Optional fix pass (mechanical only)
 

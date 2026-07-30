@@ -92,7 +92,7 @@ description: >-
 
 ### Step 8：聊天摘要
 
-约 400 字以内：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `$star-plan-coach` §2（相关工作与定位）去磨定位；以后单加一篇是 `$star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `$star-refs-reviewer add …`；`$star-refs-reviewer verify` 重查整个 bib；`$star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`$star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
+约 500 字以内：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `$star-plan-coach` §2（相关工作与定位）去磨定位；以后单加一篇是 `$star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `$star-refs-reviewer add …`；`$star-refs-reviewer verify` 重查整个 bib；`$star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`$star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
 
 ### Step 9：合成 related_work.md（仅 synthesize 模式）
 
@@ -102,7 +102,7 @@ description: >-
 2. 按主题组织，跟随 bib 的类别——只在笔记内容支持时才合并或拆分。每主题一段：这批工作做了什么、对本方法而言做不到什么，每条论断都出自该论文自己的笔记，行内以 `[@citekey]` 引用。有笔记的论文，名字写成指向该笔记的链接——`**[<缩写>](<缩写>.md)** [@citekey]`——文件名从磁盘上真实存在的那份笔记抄来（`<缩写>.md`，Step 3 遇到重名时带 `_<年份>` 后缀），不要由 citekey 拼；`related_work.md` 与笔记同目录，光文件名就是完整路径。没有笔记的论文写纯文本——链接正好标出哪一句背后有一篇精读。最后一段写定位——它们都做不到什么——以方法来源的 §2 为依据。
 3. 笔记是唯一来源，其 `depth:` 是上限：刻画一篇论文只能依据它自己的笔记，且不得深于笔记承认的深度。没有笔记的 bib 条目可以在主题里被提到（只用其记录的事实：标题、会议、年份），但绝不刻画、也绝不加链接——它背后没有笔记。任何内容不得来自记忆。单薄到写不动的主题记为缺口，列出该补读的论文（逐篇 `$star-refs-reviewer <arxiv-id>`，或一次 `add` 收整个清单）——绝不注水成文。
 4. Frontmatter：`type: related_work`、`language`（按 Step 0.4 的规则）、`generated:`（真实日期）、`sources:`（读过的笔记与 index 及各自日期）。重跑时：带这份 frontmatter 的文件，先给出节级变更清单、经一次直接提问确认后才覆写；没有它的文件是人写的——说明其内容并询问，绝不凭 diff 直接覆写。
-5. 摘要 ≤400 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是在家族零编造规则下编译出的素材——语气、次序与最终引用格式属于写作工具。
+5. 摘要 ≤500 字：写了哪些主题、引用的 citekey 数 / 条目总数、笔记太薄的缺口与补读清单，以及边界：这是在家族零编造规则下编译出的素材——语气、次序与最终引用格式属于写作工具。
 
 ### Step 10：综述一个领域（仅 survey 模式）
 
@@ -115,7 +115,7 @@ description: >-
 5. **只从池子里成文。** 每一节只用本轮抓回并缓存的材料起草（模板：`assets/survey_template_zh.md`，英文：`assets/survey_template.md`；评分：`references/refs_rubric_zh.md` 的综述一节）。正文点名的每篇论文都出现在带注引用表里，附记录 URL 与抓取日期；每条非显然论断带行内 `[@key]`——与 bib citekey 同为 `Year_Method_FirstAuthor` 形制、只在本文件内解析，日后该篇进 bib 时键保持不变；没有缓存来源的论断删掉或标注为本综述自己的推断；数字必须连同数据集与指标一起出现。对比表只收精读层的论文作行；缓存来源填不上的格写 `—`。
 6. **自查。** 随机重开 5 组"论断↔引用来源"对着缓存核对；来源在该范围内撑不住的论断改写或删除——改的是正文，绝不改引用。确认带注引用表的每条链接都指向本轮抓过的页面或记录。
 7. **Frontmatter 与覆写保护。** Frontmatter：`type: survey`、`topic`、`language`（按 Step 0.4 的规则）、`generated`（真实日期）、`sources`（读过方法来源时记它和它的 `updated`）、`papers`（各层计数）、以及 `model_id` / `model_trail`（规约 §8）。重跑撞上已有的 `<slug>_survey.md` 时逐字沿用 Step 9.4 的规则：生成文件先给节级变更清单、经一次直接提问才覆写；人写的文件绝不凭 diff 覆写。
-8. **摘要。** 约 400 字以内：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `$star-refs-reviewer <arxiv-id>`、或整单一次 `$star-refs-reviewer add …`；定位交 `$star-plan-coach` §2（相关工作与定位）；项目需要笔记和核验 bib 时走完整流程。
+8. **摘要。** 约 500 字以内：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `$star-refs-reviewer <arxiv-id>`、或整单一次 `$star-refs-reviewer add …`；定位交 `$star-plan-coach` §2（相关工作与定位）；项目需要笔记和核验 bib 时走完整流程。
 
 ## 状态与文件规则
 

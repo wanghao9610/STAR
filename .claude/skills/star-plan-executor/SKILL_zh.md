@@ -97,7 +97,7 @@ description: >-
 
 ### Step 8：简报
 
-验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`)。run 完整跑完后,建议先用 `/star-code-reviewer <叶子>` 对照规约与子计划审一遍实现,再修订计划或继续推进。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 400 字以内。
+验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`)。run 完整跑完后,建议先用 `/star-code-reviewer <叶子>` 对照规约与子计划审一遍实现,再修订计划或继续推进。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
 
 ## 状态与文件规则
 

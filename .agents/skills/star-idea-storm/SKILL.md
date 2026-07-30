@@ -75,7 +75,7 @@ Check the draft against the rubric's topic-statement test (Part C); list failing
 
 ### Step 6: Digest & handoff
 
-≤400 words: the chosen topic and its one-sentence question; per scanned direction the paper count and depth (abstracts / abstracts+intros / skipped); the verdict line-up; what was **not** read — no full papers, no bibliography, that is the survey's job; and the routing — `$star-plan-coach <slug>` grows the topic into a research plan (it pre-drafts its Stage 1 from §5 and seeds its Stage 2 from §3); `$star-refs-reviewer <slug>` builds the deep, verified literature base (recommended before or at the coach's Stage 2); `$star-idea-storm <slug>` reopens this storm when evidence moves or a parked direction revives. Offer once to commit the idea file (State & File Rules).
+≤500 words: the chosen topic and its one-sentence question; per scanned direction the paper count and depth (abstracts / abstracts+intros / skipped); the verdict line-up; what was **not** read — no full papers, no bibliography, that is the survey's job; and the routing — `$star-plan-coach <slug>` grows the topic into a research plan (it pre-drafts its Stage 1 from §5 and seeds its Stage 2 from §3); `$star-refs-reviewer <slug>` builds the deep, verified literature base (recommended before or at the coach's Stage 2); `$star-idea-storm <slug>` reopens this storm when evidence moves or a parked direction revives. Offer once to commit the idea file (State & File Rules).
 
 ## State & File Rules
 

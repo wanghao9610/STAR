@@ -94,14 +94,14 @@ description: >-
 
 ### Step 7：摘要与转交
 
-以判定开头，控制在约 400 字以内：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `$star-plan-executor <slug>`；§5 已达标 → `$star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `$star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `$star-plan-reviser`（据证据修订）/ `$star-plan-coach`（重审方法与风险）/ `$star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `$star-code-reviewer <slug>`；import 报错或环境损坏 → `$star-env-builder`。结尾给报告路径。
+以判定开头，控制在约 500 字以内：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `$star-plan-executor <slug>`；§5 已达标 → `$star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `$star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `$star-plan-reviser`（据证据修订）/ `$star-plan-coach`（重审方法与风险）/ `$star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `$star-code-reviewer <slug>`；import 报错或环境损坏 → `$star-env-builder`。结尾给报告路径。
 
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
 按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把报告路径切分给收集器）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并走写入确认点：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
 
-简报 ≤400 字：汇总了 / 排除了 / 仍未测量的 run、关键指标表格，以及转交——缺报告的交 `$star-expt-analyst <slug>`，未执行的叶子交 `$star-plan-executor <slug>`。明说结果汇总表只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
+简报 ≤500 字：汇总了 / 排除了 / 仍未测量的 run、关键指标表格，以及转交——缺报告的交 `$star-expt-analyst <slug>`，未执行的叶子交 `$star-plan-executor <slug>`。明说结果汇总表只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
 
 ### Step 9：Watch（仅 watch 模式）
 

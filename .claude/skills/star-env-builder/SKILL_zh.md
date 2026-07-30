@@ -101,7 +101,7 @@ description: >-
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
 3. 本次生成的 requirements 文件（含冒烟诊断中补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
 4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向刚建好的环境（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
-5. 聊天汇报 ≤400 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-flow-status` 查看下一步。
+5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-flow-status` 查看下一步。
 
 
 ### Step 8：新增依赖（仅 add 模式）
@@ -114,7 +114,7 @@ description: >-
 4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在红线上：把确切命令备好，不要跑。
 5. 只对新增的包做冒烟测试（`references/smoke_test_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
 6. 把每个装好的包追加进它所属的 requirements 文件，保留该布局既有的顺序与锁定。在最新的 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` 追加一个 `## Added <日期>` 块（没有报告就新写一份）。提交：`star-env-builder: add <包名>`，只暂存 `${CODE_NAME}/requirements*`。
-7. 汇报 ≤400 字：装了什么、各 requirements 文件增加了什么、冒烟证据、blocked 或待用户处理的项。
+7. 汇报 ≤500 字：装了什么、各 requirements 文件增加了什么、冒烟证据、blocked 或待用户处理的项。
 
 ## 状态与文件规则
 

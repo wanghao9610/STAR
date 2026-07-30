@@ -86,7 +86,7 @@ For each target, in dependency order:
 
 ### Step 6: Report
 
-≤400 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `/skill:star-plan-coach`, execution detail to `/skill:star-plan-decomposer`, a value an executed run settled to `/skill:star-plan-executor`, plan text contradicting reality to `/skill:star-plan-reviser`, results to `/skill:star-expt-analyst`, citations to `/skill:star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-check override) says so in the report's first line.
+≤500 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `/skill:star-plan-coach`, execution detail to `/skill:star-plan-decomposer`, a value an executed run settled to `/skill:star-plan-executor`, plan text contradicting reality to `/skill:star-plan-reviser`, results to `/skill:star-expt-analyst`, citations to `/skill:star-refs-reviewer`. Never call a document paper-ready; it is compiled material, and its gaps are the reason it is not. A draft compile (readiness-check override) says so in the report's first line.
 
 ## State & File Rules
 

@@ -72,7 +72,7 @@ description: >-
 
 ### Step 6：Digest 与交棒
 
-≤400 字：选定的选题及其一句话问题；每个扫描过的方向的论文数与深度（abstracts / abstracts+intros / skipped）；每个方向的裁决；**没有**读什么——没读全文、没建文献库，那是调研的活；以及转交去向——`/skill:star-plan-coach <slug>` 把选题长成研究计划（它会从 §5 预填自己的 Stage 1、用 §3 起步自己的 Stage 2）；`/skill:star-refs-reviewer <slug>` 建立深度、可核验的文献库（建议在 coach 的 Stage 2 之前或之中跑）；`/skill:star-idea-storm <slug>` 在证据变化或搁置方向复活时重开这次风暴。并就 idea 文件提供一次提交提议（见状态与文件规则）。
+≤500 字：选定的选题及其一句话问题；每个扫描过的方向的论文数与深度（abstracts / abstracts+intros / skipped）；每个方向的裁决；**没有**读什么——没读全文、没建文献库，那是调研的活；以及转交去向——`/skill:star-plan-coach <slug>` 把选题长成研究计划（它会从 §5 预填自己的 Stage 1、用 §3 起步自己的 Stage 2）；`/skill:star-refs-reviewer <slug>` 建立深度、可核验的文献库（建议在 coach 的 Stage 2 之前或之中跑）；`/skill:star-idea-storm <slug>` 在证据变化或搁置方向复活时重开这次风暴。并就 idea 文件提供一次提交提议（见状态与文件规则）。
 
 ## 状态与文件规则
 

@@ -89,4 +89,4 @@ and nothing else: no branch assignment (the taxonomy is settled by the main agen
 
 ## Chat digest
 
-Under ~400 words: the method source, notes written, entry count and categories with counts, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall. A survey run's digest follows Step 10.8 instead.
+Under ~500 words: the method source, notes written, entry count and categories with counts, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall. A survey run's digest follows Step 10.8 instead.

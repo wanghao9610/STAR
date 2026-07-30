@@ -87,7 +87,7 @@ For each unfinished action:
 
 ### Step 6: Report
 
-Lead with the outcome. State what was verified and its evidence, where the `tasks/<plan-name>/` intermediate workspace and `wkdrs/<run>/` records/artifacts live, which commands await the user, which amendments were synced into the sub-plan, and any remaining risk. After a completed run, recommend `$star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands await the user at the STOP line, add that once their outputs exist, `$star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep the report under about 400 words.
+Lead with the outcome. State what was verified and its evidence, where the `tasks/<plan-name>/` intermediate workspace and `wkdrs/<run>/` records/artifacts live, which commands await the user, which amendments were synced into the sub-plan, and any remaining risk. After a completed run, recommend `$star-code-reviewer <leaf>` to audit the implementation against conventions and the sub-plan before revising or moving on. Where commands await the user at the STOP line, add that once their outputs exist, `$star-expt-analyst <leaf>` scores the results against the §5 done-criterion and says what they mean. Keep the report under about 500 words.
 
 ## State & File Rules
 

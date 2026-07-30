@@ -85,7 +85,7 @@ description: >-
 
 ### Step 6：报告
 
-以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。run 完成后，推荐 `$star-code-reviewer <leaf>` 在修订或进入下一项前，依据规约和子计划审计实现。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 400 词以内。
+以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。run 完成后，推荐 `$star-code-reviewer <leaf>` 在修订或进入下一项前，依据规约和子计划审计实现。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 500 词以内。
 
 ## 状态与文件规则
 

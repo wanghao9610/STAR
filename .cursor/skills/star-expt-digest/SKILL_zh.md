@@ -85,7 +85,7 @@ description: >-
 
 ### Step 7：摘要与转交
 
-≤400 字，先说周期：窗口与范围、有报告依据的 / 无报告、数字未核实的各多少个 run、核心结论（学到了什么）、相对上一份 digest 有什么变化、以及最主要的缺口。然后是转交：未分析的 run → `/star-expt-analyst <run dir>`；过期的结果汇总表 → `/star-expt-analyst aggregate`；未执行或待用户的叶子 → `/star-plan-executor <slug>`；被证伪的主张或 kill-criterion 命中 → `/star-plan-reviser <slug>`；当前树态 → `/star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
+≤500 字，先说周期：窗口与范围、有报告依据的 / 无报告、数字未核实的各多少个 run、核心结论（学到了什么）、相对上一份 digest 有什么变化、以及最主要的缺口。然后是转交：未分析的 run → `/star-expt-analyst <run dir>`；过期的结果汇总表 → `/star-expt-analyst aggregate`；未执行或待用户的叶子 → `/star-plan-executor <slug>`；被证伪的主张或 kill-criterion 命中 → `/star-plan-reviser <slug>`；当前树态 → `/star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
 
 ### Step 8：模型记录表（仅 ledger 模式）
 

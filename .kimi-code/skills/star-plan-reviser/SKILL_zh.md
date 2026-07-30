@@ -60,7 +60,7 @@ description: >-
 
 按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`；报告语言跟随计划的 `language`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 done-criterion：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 影响范围图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
 
-写入 `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤400 字摘要：结论、最重要的偏差、候选清单的一行版。
+写入 `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤500 字摘要：结论、最重要的偏差、候选清单的一行版。
 
 ### Step 4：修订问答（一次一条）
 
@@ -85,7 +85,7 @@ description: >-
 
 ### Step 7：汇报与交接
 
-≤400 字：证据基础（读了什么、核实了什么）、完成度结论、逐节写入的改动、跳过的候选、连带影响提醒。结尾给出下一步命令：`/skill:star-plan-decomposer <slug>`（结构变了 / children 过期）、`/skill:star-plan-coach <slug>`（总体方向转向）、`/skill:star-plan-executor <叶子>`（重跑修订后的叶子）、`/skill:star-code-reviewer <叶子>`（审计实现代码）、`/skill:star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有写入的修订，提出一次提交提议（见状态与文件规则）。
+≤500 字：证据基础（读了什么、核实了什么）、完成度结论、逐节写入的改动、跳过的候选、连带影响提醒。结尾给出下一步命令：`/skill:star-plan-decomposer <slug>`（结构变了 / children 过期）、`/skill:star-plan-coach <slug>`（总体方向转向）、`/skill:star-plan-executor <叶子>`（重跑修订后的叶子）、`/skill:star-code-reviewer <叶子>`（审计实现代码）、`/skill:star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有写入的修订，提出一次提交提议（见状态与文件规则）。
 
 ## 状态与文件规则
 

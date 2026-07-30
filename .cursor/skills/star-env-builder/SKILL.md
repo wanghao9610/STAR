@@ -103,7 +103,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added during smoke diagnosis) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
 4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at the environment just built (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
-5. Chat report ≤400 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `/star-plan-executor <leaf>` now has a runtime; `/star-flow-status` shows what to run next.
+5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `/star-plan-executor <leaf>` now has a runtime; `/star-flow-status` shows what to run next.
 
 
 ### Step 8: Add packages (add mode only)
@@ -116,7 +116,7 @@ The environment already exists; this mode installs into it and records what it i
 4. Install in the uv > pip > conda order (conda only under a conda backend and only for the whitelist). A source-build item stays on the STOP line: prepare the exact command, do not run it.
 5. Smoke-test only the new packages (`references/smoke_test_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
 6. Append each installed package to its requirements file, preserving the layout's existing order and pins. Append an `## Added <date>` block to the newest `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` (none exists → write a fresh report). Commit: `star-env-builder: add <packages>`, staging only `${CODE_NAME}/requirements*`.
-7. Report ≤400 words: what installed, what each requirements file gained, the smoke evidence, anything blocked or awaiting the user.
+7. Report ≤500 words: what installed, what each requirements file gained, the smoke evidence, anything blocked or awaiting the user.
 
 ## State & File Rules
 
