@@ -8,7 +8,7 @@
 
 **语言：** [English](README.md) | 简体中文
 
-STAR 为人工智能研究项目提供了一个轻量起点。它将源代码、数据集、模型权重、实验输出和方法记录分别放在约定好的目录中，并提供统一的实验入口，以及供研究者和 AI 编程助手共同遵循的项目规范。内置的研究工作流进一步串联“研究构想 → 计划 → 可执行子计划 → 实现与验证 → 状态追踪”，并将关键决策、任务依赖和验证记录写进项目文件，以便跨会话延续工作和审计研究过程。
+STAR 为人工智能研究项目提供了一个轻量起点。它把源代码、数据集、模型权重、实验输出和方法记录分别放在约定好的目录中，并给研究者和 AI 编程助手同一个实验入口、同一份项目规范。内置的研究工作流按“研究构想 → 计划 → 可执行子计划 → 实现与验证 → 状态追踪”依次推进，过程中把关键决策、任务依赖和验证记录写进项目文件，因此工作能跨会话接着做，过程也可事后追溯。
 
 STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验证记录，你仍可自行选择模型技术栈、依赖管理工具和实验跟踪平台。
 
@@ -41,7 +41,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的项目结构**：清晰组织代码、数据、权重、输出和研究记录。
 - **可迁移的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
-- **完整的研究生命周期**：通过十五个相互配合的 skill，引导不改动原有内容地接入已经开工的项目、从模糊兴趣收敛出研究选题、计划成稿、相关工作调研（分析笔记与可核验文献库）、递归拆解、从参考实现搭建代码库、运行环境构建、叶子计划执行、对照规范与计划的代码审查、对照预期的实验结果分析、按时间轴汇总阶段进展、以执行证据修订计划、全局状态汇总、在所有实验完成后把定稿计划编译成方法文档，以及把仓库整理到可发布状态。
+- **完整的研究生命周期**：十五个相互配合的 skill，按运行顺序依次是——不改动原有内容地接入已经开工的项目、收敛研究选题、写成计划、调研相关工作、递归拆解计划、搭建代码库、构建运行环境、执行叶子计划、审查代码、分析实验结果、汇总阶段进展、以执行证据修订计划、汇报全局状态、把定稿计划编译成方法文档、把仓库整理到可发布状态。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
 - **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
@@ -105,7 +105,7 @@ HTML 页面放在 `docs/htmls/`，按主题组织的 Markdown 文档放在 `docs
 | `htmls/` | HTMLs | 渲染后的 HTML 文档页面 |
 | `srcs/` | Static sources | 文档引用的图片及其他静态资源 |
 
-例如，执行 `metds/plans/00_demo_plan.md` 时会新建 `tasks/00_demo/`，用于存放该计划自有的工具脚本（完成判据要跑的校验或索引脚本）以及执行过程的中间文件；生成的实验产物仍放在相应的 `wkdrs/<运行名称>/` 目录中。
+例如，执行 `metds/plans/00_demo_plan.md` 时会新建 `tasks/00_demo/`。这个目录存放该计划自有的工具脚本——完成判据要跑的校验或索引脚本——以及执行过程的中间文件。生成的实验产物仍放在相应的 `wkdrs/<运行名称>/` 目录中。
 
 ## 快速开始
 
@@ -133,14 +133,14 @@ git commit -m "First commit."
 
 ### 1b. 或者：接入一个已经存在的项目
 
-如果项目已经开工——有真实代码、有能跑的环境、有几个月的提交、手里已经攥着结果——那就把骨架装进它，而不是把它搬进 STAR。在那个仓库的根目录下执行：
+如果项目已经开工——有真实代码、有能跑的环境、有几个月的提交、也已经拿到实验结果——那就把骨架装进它，而不是把它搬进 STAR。在那个仓库的根目录下执行：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
 bash /tmp/star-update.sh --adopt
 ```
 
-已经存在的东西一律不覆盖：每个已有文件都原样保留并列出。随后在该仓库里运行 `/star-proj-adopt`——它会勘察布局、写好 `.env`、用软链接连接你已有的数据 / 权重 / 输出目录而不搬动它们、包装你已有的启动命令，并记录下已经建成和已经跑过的东西。之后下面的第 2–4 步原样适用。
+已经存在的东西一律不覆盖：每个已有文件都原样保留并列出。随后在该仓库里运行 `/star-proj-adopt`。它会勘察布局、写好 `.env`，用软链接连接你已有的数据 / 权重 / 输出目录而不搬动它们，包装你已有的启动命令，并记录下已经建成和已经跑过的东西。之后下面的第 2–4 步原样适用。
 
 ### 2. 配置本地运行环境
 
@@ -170,9 +170,9 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-此外，可加上 `INVOLVE=low|medium|high` 设定 STAR skills 在决策前询问的程度——`low` 遇到需要判断的地方直接采用推荐项（并记录），`medium`（默认）按文档提问，`high` 逐步确认；红线、提交、删除等安全确认点在任何档位都会询问。若只想对单次运行生效，可在调用 skill 时附带同一参数——如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项，并把这次取值记录下来；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、提交、删除这类安全确认点在任何档位都会询问。若只想对单次运行生效，调用 skill 时附带同一参数即可，如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
-另一个可选键 `STAR_LANG=en|zh` 用来固定 agents 的对话回复以及新生成工作流文档（计划、报告）的语言——未设时跟随对话语言，对话中明确提出时以对话要求为准；已有文档保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
+另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
@@ -212,7 +212,7 @@ bash execs/run.sh
 bash execs/run.sh 00_exp --config config.yaml
 ```
 
-自带的 `00_exp.sh` 不做任何实际计算：它打印启动器解析出的解释器和六个导出路径，让全新检出的仓库有一条能跑出成功的命令，也便于确认 `.env` 配置无误。使用 STAR 创建项目时请将其替换为第一个实际实验。实验名称和输出目录应能区分不同任务、实验或重复运行；生成的文件应放在 `wkdrs/<运行名称>/` 下。
+自带的 `00_exp.sh` 不做任何实际计算。它打印启动器解析出的解释器和六个导出路径，让全新检出的仓库有一条能跑出成功的命令，也便于确认 `.env` 配置无误。使用 STAR 创建项目时请将其替换为第一个实际实验。实验名称和输出目录应能区分不同任务、实验或重复运行，生成的文件放在 `wkdrs/<运行名称>/` 下。
 
 ### 5. 启动研究工作流
 
@@ -239,13 +239,13 @@ bash execs/run.sh 00_exp --config config.yaml
 bash .kimi-code/hooks/install.sh
 ```
 
-它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`（幂等，先备份）。运行一次即覆盖所有 STAR 项目。使用其他 agent 可跳过——Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发，所以要在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目。Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好，用这三个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
-有六个 skill 在动手之前都要打开同一批计划、run 日志与报告——`star-flow-status`、`star-expt-digest`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser` 与 `star-metd-summarize`——因此各自用一个只读脚本一次收齐，即所用工具目录下各自的 `scripts/scan.sh`，而不是逐个打开文件。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
+有六个 skill 在动手之前都要打开同一批计划、run 日志与报告：`star-flow-status`、`star-expt-digest`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser` 与 `star-metd-summarize`。它们不逐个打开文件，而是各自用一个只读脚本一次收齐——所用工具目录下、各 skill 自己目录里的 `scripts/scan.sh`。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
 
-全新安装的 Claude Code 无需任何设置——`.claude/settings.json` 已附带只针对这六个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`（`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖），因此需要自己补上这些规则：
+全新安装的 Claude Code 无需任何设置：`.claude/settings.json` 已附带只针对这六个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`——`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖——因此需要自己补上这些规则：
 
 ```json
 "permissions": {
@@ -291,17 +291,17 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env` 并用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西；待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
-| `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域（每篇论文都转录自抓取的记录）、六维打分，最后连同首个验证实验定稿选题 | `metds/ideas/<slug>_idea.md` |
+| `$star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env`，用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西。待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
+| `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域、六维打分，最后连同首个验证实验定稿选题。点到的每篇论文都转录自抓取的记录 | `metds/ideas/<slug>_idea.md` |
 | `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
-| `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类、条条转录自抓取记录的文献库；`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
+| `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类的文献库，其中每一条都转录自抓取的记录。`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
 | `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
-| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并做冒烟验证；`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并做冒烟验证。`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
 | `$star-plan-decomposer` | 将总体计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
 | `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落实经批准的例行性修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
 | `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对该主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `wkdrs/results/results.md`（限定范围时为 `wkdrs/results/results_<slug>.md`） |
-| `$star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族；把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
+| `$star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族。把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
 | `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
 | `$star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
 | `$star-metd-summarize` | 在所有实验完成、计划定稿后，把计划树编译成可直接用于论文的方法文档，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
@@ -316,11 +316,11 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | **判断与写作**——研究方向、计划、相关工作如何定位本方法、结果意味着什么、方法表述 | `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser`、`$star-metd-summarize` | Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3 |
 | **搭建与执行**——代码库、运行环境、执行计划、代码审查、进展汇总、全局状态、发布准备 | `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status`、`$star-code-release` | Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3 |
 
-条件允许时，十五个工作流均使用能力最强的可用模型，通常能获得最佳的整体效果。
+条件允许时，十五个 skill 均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
 这些技能会将决策和进度保存在项目文件中，避免仅依赖聊天记录。研究工作流同时支持中文和英文。
 
-具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)；所有 skill 共享的规则——git、红线、`.env` 运行时、日期、委派与对话纪律——见[研究工作流 Skill 通用规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)。
+具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。所有 skill 共享的规则——git、红线、`.env` 运行时、日期、委派与对话纪律——见[研究工作流 Skill 通用规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)。
 
 ## 更新 STAR 的 skill 与工作流指南
 
@@ -337,7 +337,7 @@ bash execs/update.sh
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 
-钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖；若保留下来的配置没有注册 STAR 钩子，命令会打印提示。如果项目是在钩子纳入更新范围之前基于 STAR 创建的，请先手动刷新一次更新脚本本身（`execs/update.sh` 不会覆盖自己）：
+钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。如果项目是在钩子纳入更新范围之前基于 STAR 创建的，请先手动刷新一次更新脚本本身——`execs/update.sh` 不会覆盖自己：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
@@ -377,7 +377,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 说明数据集和预训练权重的获取方式，不要直接提交大文件。
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
-- 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接；两个页面之间的中英切换使用绝对链接（`/STAR/index_zh.html`），需要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
+- 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
 - 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.kimi-code/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。
 
 只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用：目录布局、`.env` 和 `execs/run.sh` 在完全不装任何 skill 的情况下也能工作，因此删掉全部工具目录同样是受支持的用法。
@@ -386,7 +386,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改用共享的只读采集脚本读计划树，不再逐个打开计划。同一轮对话里的第二个 skill 可以复用仍能看到的开场装载，采集脚本的摘要除外。`star-plan-decomposer` 的三条拆分轴改名为阶段、组件、实验，各自以该层所放的单元命名；实验轴放的是实验组、每条主张再深一位数字，只在代码已能端到端跑起来时才被推荐。
+- **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改用共享的只读采集脚本读计划树，不再逐个打开计划。同一轮对话里的第二个 skill 可以复用仍能看到的开场装载，采集脚本的摘要除外。`star-plan-decomposer` 的三条拆分轴改名为阶段、组件、实验，各自以该层所放的单元命名。实验轴只在代码已能端到端跑起来时才被推荐，它这一层放的是实验组，每条主张再深一位数字。`star-flow-status` 的开场装载拆成同时发出的两条命令——大小固定的规约摘录，和随项目历史增长的采集摘要——摘要大到无法完整返回时，不再把摘录一起拖下水。
 - **[v0.1.4](https://github.com/wanghao9610/STAR/tree/v0.1.4)** (2026-07-29) — 每个 skill 用一条消息完成开场装载，`SKILL_zh.md` 不再在运行时读取——它仍是供人阅读的完整镜像。其中两个 skill 只装载自己真正用到的规约章节。
 - **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` 新增 `survey` 模式，把独立的领域综述写入 `metds/refs/`；追加模式新增 `add` 形式，一次可提交多篇论文。
 - **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — 一条措辞规则，写在 `AGENTS.md` §7 与规约 §7.11：写动作本身，不写它的名字。十五个 skill 全部按它审计过一遍。
