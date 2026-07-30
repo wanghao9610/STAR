@@ -39,13 +39,13 @@
 
 ```
 0_open-vocab-det-seg            ◐  总体方向 6/6 done, 已拆解 (4 个子计划)
-├ 00_baseline-method-impl       ✔  exec done                        依赖: —
-├ 01_mvp-3way-verify            ✔  exec done                        依赖: 00
-├ 02_core-method-pipeline       ◐  exec 进行中 2/5 步               依赖: 01
+├ 00_baseline-impl              ✔  exec done                        依赖: —
+├ 01_mvp-verify                 ✔  exec done                        依赖: 00
+├ 02_core-pipeline              ◐  exec 进行中 2/5 步               依赖: 01
 │ ├ 020_desc-generation         ✔  exec done                        依赖: —
 │ ├ 021_set-matching            ◐  exec 进行中 2/4                  依赖: 020
 │ └ 022_det-seg-heads           ○  exec pending                     依赖: 020, 021
-└ 03_full-experiments           ⏸  待用户 (1 条 STOP 命令)          依赖: 02
+└ 03_final-rets                 ⏸  待用户 (1 条 STOP 命令)          依赖: 02
 ```
 
 上例中的根是 `◐` 而非 `✔`，因为它的 `finalized:` 未设——六节全 `done` 本身并不能关闭一个总体计划节点，评分表还得跑。总体计划节点的状态符号只报告**它自己**的状态，绝不报告其子树：一个已 finalized 的根即使下面的子树只执行了一半，仍然是 `✔`；子树没做完这件事由进度汇总来说。

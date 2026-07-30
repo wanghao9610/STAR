@@ -17,13 +17,13 @@ Every plan file is named `<prefix>_<slug>_plan.md`. The **prefix** is a string o
 ```
 metds/plans/
   0_open-vocab-det-seg_plan.md         root            prefix "0"    level 1
-   ├ 00_baseline-method-impl_plan.md   child 0 of "0"  prefix "00"   level 2
-   ├ 01_mvp-3way-verify_plan.md        child 1 of "0"  prefix "01"   level 2
-   ├ 02_core-method-pipeline_plan.md   child 2 of "0"  prefix "02"   level 2
+   ├ 00_baseline-impl_plan.md          child 0 of "0"  prefix "00"   level 2
+   ├ 01_mvp-verify_plan.md             child 1 of "0"  prefix "01"   level 2
+   ├ 02_core-pipeline_plan.md          child 2 of "0"  prefix "02"   level 2
    │  ├ 020_desc-generation_plan.md    child 0 of "02" prefix "020"  level 3
    │  ├ 021_set-matching_plan.md       child 1 of "02" prefix "021"  level 3
    │  └ 022_det-seg-heads_plan.md      child 2 of "02" prefix "022"  level 3
-   └ 03_full-experiments_plan.md       child 3 of "0"  prefix "03"   level 2
+   └ 03_final-rets_plan.md             child 3 of "0"  prefix "03"   level 2
 ```
 
 Files sort naturally in a directory listing (`0`, `00`, `01`, `02`, `020`, `021`, `022`, `03`), so lexical order already reflects the tree.
@@ -36,6 +36,6 @@ Files sort naturally in a directory listing (`0`, `00`, `01`, `02`, `020`, `021`
 
 3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` gives each new root the smallest free digit, but projects created before that rule may hold two unrelated roots both numbered `0_` (distinguished only by slug), whose children then both start `00_`, etc. The numeric prefix therefore orders and hints the tree for humans, but the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it (not the prefix) when reconstructing which sub-plan belongs to which parent.
 
-4. **Slugs are independent of the tree.** The `<slug>` is a short, human-readable English name for the unit's content and has nothing to do with the parent's slug. `0_open-vocab-det-seg` can have child `01_mvp-3way-verify`.
+4. **Slugs are independent of the tree.** The `<slug>` is a short, human-readable English name for the unit's content and has nothing to do with the parent's slug. `0_open-vocab-det-seg` can have child `01_mvp-verify`.
 
 5. **Filling gaps / re-indexing.** Assign indices densely from 0 in the confirmed order. If the user later deletes a middle sub-plan, leave the hole rather than renumbering (renumbering would break every deeper prefix and every `parent:`/`traces_to` reference). If they insert one, give it the next free index even if that puts it out of numeric order; ordering intent lives in the parent's `## Sub-plans` index, not the digits.

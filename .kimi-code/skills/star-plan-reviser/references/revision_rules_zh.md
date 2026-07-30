@@ -31,9 +31,9 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 ```markdown
 ## Revision History
 
-### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/01_mvp-3way-verify/REVIEW_2026-07-16.md)
+### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/01_mvp-verify/REVIEW_2026-07-16.md)
 - §3 step 4: batch eval → streaming eval——run 在 step 4 OOM（证据：EXEC_LOG.md step 4, blocked）
-- §5: mIoU 阈值 85 → 80——MVP run 达到 82.3，根计划 §4 的余量分析可接受 80（证据：wkdrs/01_mvp-3way-verify/eval.json）
+- §5: mIoU 阈值 85 → 80——MVP run 达到 82.3，根计划 §4 的余量分析可接受 80（证据：wkdrs/01_mvp-verify/eval.json）
 - exec_status: done → pending（done-criterion 已变化）
 ```
 

@@ -19,7 +19,7 @@
 **范围决定文件名，因为一份范围窄的结果汇总表悄悄替换掉更宽的那份，正是结果节丢行的原因。**
 
 - **所有计划树**（`aggregate`，不带计划名）→ `wkdrs/results/results.md`。项目结果汇总表。
-- **限定范围**（`aggregate PLAN_NAME`）→ `wkdrs/results/results_<slug>.md`，其中 `<slug>` 是被限定节点的 slug——`wkdrs/results/results_core-method-pipeline.md`。谁聚合哪棵子树，就有一份对应的文件。
+- **限定范围**（`aggregate PLAN_NAME`）→ `wkdrs/results/results_<slug>.md`，其中 `<slug>` 是被限定节点的 slug——`wkdrs/results/results_core-pipeline.md`。谁聚合哪棵子树，就有一份对应的文件。
 
 两者绝不互相写入对方的路径，任何方向都不行。限定范围的运行绝不能覆盖 `wkdrs/results/results.md`：它包含的 run 本来就少，用它替换项目结果汇总表会删掉子树以外的每一行，却留下一个看上去仍然完整的文件。`scope:` frontmatter 记录这份文件覆盖了什么；文件名才是防止它被冲掉的东西。
 

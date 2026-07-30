@@ -13,7 +13,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`$star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-3way-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。
+调用方式：`$star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次文件读取——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 Bash 调用（以项目根目录为工作目录），只带这一行：
 
