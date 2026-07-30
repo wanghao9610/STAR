@@ -41,7 +41,7 @@
 0_open-vocab-det-seg            ◐  总体方向 6/6 done, 已拆解 (4 个子计划)
 ├ 00_baseline-impl              ✔  exec done                        依赖: —
 ├ 01_mvp-verify                 ✔  exec done                        依赖: 00
-├ 02_core-pipeline              ◐  exec 进行中 2/5 步               依赖: 01
+├ 02_core-method                ◐  exec 进行中 2/5 步               依赖: 01
 │ ├ 020_desc-generation         ✔  exec done                        依赖: —
 │ ├ 021_set-matching            ◐  exec 进行中 2/4                  依赖: 020
 │ └ 022_det-seg-heads           ○  exec pending                     依赖: 020, 021

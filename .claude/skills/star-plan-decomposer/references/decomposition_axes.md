@@ -26,7 +26,7 @@ Split along the root's §6 timeline stages. Each milestone becomes one sub-plan.
 
 - **Use when** the root's milestones are already well-formed (they usually are — the coach front-loads the cheap ones, a baseline implementation and the smallest experiment that validates feasibility, and backs the rest out from the deadline).
 - **Gives** a temporally ordered chain of sub-plans; dependencies are mostly linear (each phase hands off to the next).
-- **Example** (`0_open-vocab-det-seg`): `00_baseline-impl` → `01_mvp-verify` → `02_core-pipeline` → `03_final-rets`.
+- **Example** (`0_open-vocab-det-seg`): `00_baseline-impl` → `01_mvp-verify` → `02_core-method` → `03_final-rets`.
 
 ### 2. Component / module
 
@@ -34,7 +34,7 @@ Split along the separable parts of the method in the root's §3. Each system mod
 
 - **Use when** the method decomposes into modules that can be built and tested somewhat independently.
 - **Gives** sub-plans that can run in parallel; dependencies form a small graph (shared interfaces), not a line.
-- **Example** (`02_core-pipeline`): `020_desc-generation` (LLM dynamic description generation), `021_set-matching` (multi-description set matching), `022_det-seg-heads` (shared detection + segmentation heads).
+- **Example** (`02_core-method`): `020_desc-generation` (LLM dynamic description generation), `021_set-matching` (multi-description set matching), `022_det-seg-heads` (shared detection + segmentation heads).
 
 ### 3. Experiment / evidence
 
@@ -42,7 +42,7 @@ Split along the root's §4. **A level lists experiment groups; the individual cl
 
 - **Use when** the contribution is mostly empirical, with several claims and ablations that each need their own harness.
 - **Gives** a handful of groups — data readiness, baseline implementation, ablation experiments, main results — each a body of work with its own done-criterion. Recursing a group yields one leaf per claim, so the paper's claims still map one-to-one onto leaves, a level below the group; auditing "every claim has an experiment" reads that level.
-- **Example** (`0_kv-cache-compress` — the root of a different project from the phase example above, so the prefix digits repeat across the two; the `parent:` frontmatter, never the digits, is what links a child to its parent): `00_data-prep` (LongBench and the PG-19 test split under `datas/`, done when an integrity check passes), `01_baseline-impl` (implement the compared methods), `02_ablation-expts`, `03_main-expts` (the headline runs, under the config the ablations settle — claim 3: more context at equal memory); recursing `02` gives `020_ablation-budget-alloc` (claim 1: a per-layer cache budget beats a uniform one) and `021_ablation-evict-policy` (claim 2: eviction by attention mass beats a recency window).
+- **Example** (`0_kv-cache-compress` — the root of a different project from the phase example above, so the prefix digits repeat across the two; the `parent:` frontmatter, never the digits, is what links a child to its parent): `00_data-prep` (LongBench and the PG-19 test split under `datas/`, done when an integrity check passes), `01_baseline-expts` (implement the compared methods and run their baseline numbers), `02_ablation-expts`, `03_main-expts` (the headline runs, under the config the ablations settle — claim 3: more context at equal memory); recursing `02` gives `020_ablation-budget-alloc` (claim 1: a per-layer cache budget beats a uniform one) and `021_ablation-evict-policy` (claim 2: eviction by attention mass beats a recency window).
 - **Not** one ablation beside `03_main-expts` — that is the mixed level "One level, one kind" rules out.
 
 ## How to choose
@@ -76,7 +76,7 @@ Mixing axes is allowed (confirm it explicitly). The common shape is **phase at t
 - **Worked example** (`0_open-vocab-det-seg`, mixed at level 2):
   - `00_baseline-impl` — from the **phase** axis (implement the compared method end to end before building on it); `depends_on: []`
   - `01_mvp-verify` — from the **evidence** axis (validate the core claim cheaply first), and a peer of the units beside it because it is a phase of work rather than one of `03`'s ablations: its §1 non-goals hand every ablation beyond this cheap three-way check to `03`; `depends_on: ["00"]`
-  - `02_core-pipeline` — from the **phase** axis (build the full method); `depends_on: ["01"]`
+  - `02_core-method` — from the **phase** axis (build the full method); `depends_on: ["01"]`
   - `03_final-rets` — from the **phase** axis (all remaining claims/ablations); `depends_on: ["02"]`
   - Then recurse `02` by **component** into `020/021/022` (see the component example above).
   - Execution order: `00 → 01 → 02 → 03`, with `02` expanding into its own component DAG.

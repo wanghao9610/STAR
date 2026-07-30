@@ -535,7 +535,7 @@ metds/plans/
 ├── 0_open-vocab-det-seg_plan.md
 ├── 00_baseline-impl_plan.md
 ├── 01_mvp-verify_plan.md
-├── 02_core-pipeline_plan.md
+├── 02_core-method_plan.md
 │   ├── 020_desc-generation_plan.md
 │   └── 021_set-matching_plan.md
 └── 03_final-rets_plan.md
@@ -762,7 +762,7 @@ $star-expt-digest                          # 自上一份 digest 以来——默
 $star-expt-digest 7d                       # 最近七天
 $star-expt-digest 2026-07-01               # 自该日期起
 $star-expt-digest 01                       # 计划家族：该节点、其祖先、其全部叶子
-$star-expt-digest core-pipeline
+$star-expt-digest core-method
 $star-expt-digest all                      # 全部历史；重建整个序列
 ```
 
@@ -1076,7 +1076,7 @@ $star-plan-decomposer open-vocab-det-seg
 ```text
 00_baseline-impl_plan.md
 01_mvp-verify_plan.md
-02_core-pipeline_plan.md
+02_core-method_plan.md
 03_final-rets_plan.md
 ```
 

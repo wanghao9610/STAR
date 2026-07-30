@@ -74,7 +74,7 @@ No previous digest → the section is omitted, and §1 says the series starts he
 
 Three to five sentences, and the hardest part of the file to get right. It answers *what did we learn in this period* using only report-backed evidence:
 
-- Lead with the finding, not the activity. "The 3-way ablation refutes the shared-head hypothesis at `01_core-method`" beats "three runs completed this week."
+- Lead with the finding, not the activity. "The 3-way ablation refutes the shared-head hypothesis at `02_core-method`" beats "three runs completed this week."
 - A negative result leads if it is the period's biggest fact. A kill-criterion hit always leads (`analysis_rubric.md`'s stance, carried here): it is the plan working.
 - Name what is still unmeasured, in one clause. A period that produced numbers for two of five claims should say which three are still open.
 - If every in-scope run is provisional, the headline says exactly that — *N runs completed, none analyzed yet* — and nothing about their numbers. That is the honest headline for the period, and it routes straight to `$star-expt-analyst`.

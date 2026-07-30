@@ -19,7 +19,7 @@ metds/plans/
   0_open-vocab-det-seg_plan.md         root            prefix "0"    level 1
    ├ 00_baseline-impl_plan.md          child 0 of "0"  prefix "00"   level 2
    ├ 01_mvp-verify_plan.md             child 1 of "0"  prefix "01"   level 2
-   ├ 02_core-pipeline_plan.md          child 2 of "0"  prefix "02"   level 2
+   ├ 02_core-method_plan.md            child 2 of "0"  prefix "02"   level 2
    │  ├ 020_desc-generation_plan.md    child 0 of "02" prefix "020"  level 3
    │  ├ 021_set-matching_plan.md       child 1 of "02" prefix "021"  level 3
    │  └ 022_det-seg-heads_plan.md      child 2 of "02" prefix "022"  level 3

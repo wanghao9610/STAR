@@ -19,7 +19,7 @@ metds/plans/
   0_open-vocab-det-seg_plan.md         根            前缀 "0"    层级 1
    ├ 00_baseline-impl_plan.md          "0" 的子 0    前缀 "00"   层级 2
    ├ 01_mvp-verify_plan.md             "0" 的子 1    前缀 "01"   层级 2
-   ├ 02_core-pipeline_plan.md          "0" 的子 2    前缀 "02"   层级 2
+   ├ 02_core-method_plan.md            "0" 的子 2    前缀 "02"   层级 2
    │  ├ 020_desc-generation_plan.md    "02" 的子 0   前缀 "020"  层级 3
    │  ├ 021_set-matching_plan.md       "02" 的子 1   前缀 "021"  层级 3
    │  └ 022_det-seg-heads_plan.md      "02" 的子 2   前缀 "022"  层级 3

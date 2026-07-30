@@ -535,7 +535,7 @@ metds/plans/
 ├── 0_open-vocab-det-seg_plan.md
 ├── 00_baseline-impl_plan.md
 ├── 01_mvp-verify_plan.md
-├── 02_core-pipeline_plan.md
+├── 02_core-method_plan.md
 │   ├── 020_desc-generation_plan.md
 │   └── 021_set-matching_plan.md
 └── 03_final-rets_plan.md
@@ -762,7 +762,7 @@ $star-expt-digest                          # since the previous digest — the d
 $star-expt-digest 7d                       # the last seven days
 $star-expt-digest 2026-07-01               # since that date
 $star-expt-digest 01                       # a plan family: the node, its ancestors, all its leaves
-$star-expt-digest core-pipeline
+$star-expt-digest core-method
 $star-expt-digest all                      # the whole history; re-seeds the series
 ```
 
@@ -1076,7 +1076,7 @@ After confirming milestone-based decomposition, the skill may produce:
 ```text
 00_baseline-impl_plan.md
 01_mvp-verify_plan.md
-02_core-pipeline_plan.md
+02_core-method_plan.md
 03_final-rets_plan.md
 ```
 
