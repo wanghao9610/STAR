@@ -17,18 +17,17 @@ description: >-
 
 # Research Idea Storm — from vague interest to a defensible topic
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call (the Shared-conventions paragraph's one Bash call below), switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/skill:star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Make that read the opening load call — one Bash call, with the project root as the working directory, that also brings in the question bank Stages 1, 2, and 4 draw on:
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Make that read part of the opening load — one message: the conventions file as its own `Read`, the question bank Stages 1, 2, and 4 draw on (`<this skill's directory>/references/question_bank.md`) as another `Read`, plus one Bash call in the same message, with the project root as the working directory, for the only line that needs a shell:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/question_bank.md
 ```
 
-Nothing else is front-loaded: `references/scan_policy.md` and `references/idea_rubric.md` are each read at the stage that uses them (Stages 3 and 4).
+Whole files go through `Read`, never `cat`-ed into the Bash command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is about 35 KB, past that limit on its own. Nothing else is front-loaded: `references/scan_policy.md` and `references/idea_rubric.md` are each read at the stage that uses them (Stages 3 and 4).
 
 ## Role
 
@@ -55,7 +54,7 @@ You are the family's ideation coach, one step upstream of `/skill:star-plan-coac
 
 ### Stage 1: Seed & constraints (`seed`)
 
-Establish what is really driving the interest and what the topic must fit inside: motivation and origin, constraints (compute, data, time to the deadline that matters, target venue or outcome), strengths and energy. Questions and "when stuck" strategies are in `references/question_bank.md` Stage 1 (Chinese dialogue: `references/question_bank_zh.md`), already in hand from the opening load call — 2–4 questions, then restate what you heard in 2–3 sentences and write §1. At every stage end: set that stage's `status` to `done` and the next to `in_progress`, update `updated` — this mechanic repeats for all five stages and is not restated below. Closing a stage also closes a boundary (conventions §7.10): 2–3 sentences on what the stage settled, what it wrote into the file, and what the next one opens — plus the way back, since `/skill:star-idea-storm <slug>` reopens a finished idea and parked directions are never deleted (Principle 6).
+Establish what is really driving the interest and what the topic must fit inside: motivation and origin, constraints (compute, data, time to the deadline that matters, target venue or outcome), strengths and energy. Questions and "when stuck" strategies are in `references/question_bank.md` Stage 1 (Chinese dialogue: `references/question_bank_zh.md`), already in hand from the opening load message — 2–4 questions, then restate what you heard in 2–3 sentences and write §1. At every stage end: set that stage's `status` to `done` and the next to `in_progress`, update `updated` — this mechanic repeats for all five stages and is not restated below. Closing a stage also closes a boundary (conventions §7.10): 2–3 sentences on what the stage settled, what it wrote into the file, and what the next one opens — plus the way back, since `/skill:star-idea-storm <slug>` reopens a finished idea and parked directions are never deleted (Principle 6).
 
 ### Stage 2: Diverge (`diverge`)
 

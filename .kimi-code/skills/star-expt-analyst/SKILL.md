@@ -12,15 +12,14 @@ description: >-
 
 # Research Experiment Analyst — results audit
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the Shared-conventions load call below, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]` — a plan name (slug / numeric prefix / filename) resolves through that plan's `exec_runs` to its current run directory; a `wkdrs/<run>/` path back-resolves to its plan; `aggregate` compiles every run's verified numbers into the cross-run results table `wkdrs/results/results.md`, or into `wkdrs/results/results_<slug>.md` when scoped to one subtree; no argument lists the runs on disk and asks which to analyze; `watch` gives a chat-only quick check of a run that may still be executing.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Issue the read as one Bash call; on the full-analysis path the analysis rubric Steps 2–5 follow joins the same call — aggregate and watch modes drop the rubric path and load their own references at the step that names them:
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load everything in one message, each file as its own `Read`: the conventions, and — on the full-analysis path — `<this skill's directory>/references/analysis_rubric.md`, the rubric Steps 2–5 follow; aggregate and watch modes drop the rubric read and load their own references at the step that names them. Keep the files out of the command: a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit — Bash is only for what only Bash can do, one small call sent in the same message:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/analysis_rubric.md
 ```
 
 ## Role
@@ -65,7 +64,7 @@ A missing §5 done-criterion is not a blocker for the analysis — it means the 
 
 ### Step 2: Inventory & completion (dimensions A, B)
 
-Follow `references/analysis_rubric.md` — the opening load call already printed it:
+Follow `references/analysis_rubric.md` — it arrived with the opening load:
 
 - **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (AGENTS.md §8).
 - **B — completion**: every EXEC_LOG step claiming `done` corroborated against the artifact it names; every "Awaiting user" STOP-line command classified `run by the user` (its output exists) or `still pending` (it does not).

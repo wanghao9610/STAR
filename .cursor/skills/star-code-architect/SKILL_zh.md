@@ -16,11 +16,11 @@ description: >-
 
 # Research Code Architect — 研究代码架构师
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载——以项目根目录为工作目录的一次 Bash 调用，`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`，与读取本文件的那次调用同一条消息发出（两种语言的装载集相同，互不等待）——也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。那条 `grep` 是这次运行的 `.env` 查询——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）——折进开场调用，两者就都不必各占一趟往返。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载，以一条消息发出：规约文件经它自己的 `Read` 读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——外加一次小的 Bash 调用（以项目根目录为工作目录），做这里唯一只有 Bash 才做得了的事，即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。两次调用一起发出仍只花一趟往返——而它们也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。
 
 ## 角色
 

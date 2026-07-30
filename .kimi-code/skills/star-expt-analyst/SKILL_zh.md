@@ -15,15 +15,14 @@ description: >-
 
 # Research Experiment Analyst — 结果审计
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某一棵子树时则编译进 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。这次读取用一次 Bash 调用完成；完整分析路径上，Step 2–5 遵循的评分表并入同一次调用——aggregate 与 watch 模式去掉评分表那个路径，各自的参考文件到点名它的步骤再装：
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `Read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——Bash 只做只有 Bash 能做的事，同一条消息里的一次小调用：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/analysis_rubric_zh.md
 ```
 
 ## 角色
@@ -68,7 +67,7 @@ cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所
 
 ### Step 2：清点与完成度（维度 A、B）
 
-依照 `references/analysis_rubric_zh.md`——开头那次装载调用已打印它：
+依照 `references/analysis_rubric_zh.md`——它已随开头那次装载到达：
 
 - **A——清点**：每个 §4 交付物记为 `present` / `missing` / `unexpected`，附轻量完整性检查（非空、可解析、大小合理）与布局符合度（AGENTS.md §8）。
 - **B——完成度**：EXEC_LOG 中每个自称 `done` 的步骤，用它写明的产物核实；每条 "Awaiting user" 红线命令归类为 `用户已跑`（其输出存在）或 `仍待跑`（不存在）。

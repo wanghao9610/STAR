@@ -20,20 +20,17 @@ description: >-
 
 # Research Env Builder — runtime environment bootstrap
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call in the Shared-conventions paragraph below, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-env-builder [ENV_NAME | add <package>…]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one Bash call, with the project root as the working directory, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8):
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own `Read` call, plus one Bash call in the same message, with the project root as the working directory, carrying exactly:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.md \
-    <this skill's directory>/references/installer_policy.md \
-    <this skill's directory>/references/smoke_test_spec.md
 ```
 
-One call, three files. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
+One message, four results — still one round trip. Keep the files out of the Bash command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. Bash carries only what only Bash can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
 
 ## Role
 
@@ -88,7 +85,7 @@ Present as normal text: backend + env name + python version; dependency source u
 
 ### Step 5: Install (uv > pip > conda)
 
-Policy, whitelist, and wheel-index matrix: `references/installer_policy.md` — printed by the opening call. Order: `conda.txt` (conda backend only) → `framework.txt` → `runtime.txt` → `optional.txt` (only if the approved plan included it) → editable project install (`--no-deps -e`) when packaging metadata exists.
+Policy, whitelist, and wheel-index matrix: `references/installer_policy.md` — arrived with the opening load. Order: `conda.txt` (conda backend only) → `framework.txt` → `runtime.txt` → `optional.txt` (only if the approved plan included it) → editable project install (`--no-deps -e`) when packaging metadata exists.
 
 - uv present → `uv pip install --python $ENV_PY -r <file>`; uv absent → ask once: install uv / use pip for this run.
 - Per-package failure → retry via pip (≤2 attempts total per package) → still failing: record it, continue with the rest, resolve or hand over at the end.
@@ -98,7 +95,7 @@ Policy, whitelist, and wheel-index matrix: `references/installer_policy.md` — 
 
 ### Step 6: Smoke test (three layers, run by the main agent)
 
-Spec and evidence format: `references/smoke_test_spec.md` — printed by the opening call.
+Spec and evidence format: `references/smoke_test_spec.md` — arrived with the opening load.
 
 - **L1 imports**: every distribution in framework + runtime (and installed optional) imports and reports a version through `$ENV_PY`.
 - **L2 framework**: `torch.cuda.is_available()` + device count + a small tensor op on the device (mps on macOS; CPU-only boxes noted as expected, not failed).

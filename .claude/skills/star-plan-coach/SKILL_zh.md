@@ -6,11 +6,11 @@ description: >-
 
 # Research Plan Coach — 研究计划引导
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——可带一个主题或 idea 起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则以那份定稿的 idea 文件为起点生成新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。可选的 `involve=low|medium|high` 写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。这一次读取就是开场装载的全部——问题库、模板、质检表各自到用到它们的步骤再读，不预先装载。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次读取作为一次 Bash 调用发出，以项目根目录为工作目录，并把这次运行的 `.env` 查询折在它前面：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7），两者都不再各占一趟往返。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。这一次读取就是开场装载的全部——问题库、模板、质检表各自到用到它们的步骤再读，不预先装载。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。用一条消息装载，而不是一次 Bash 调用：规约文件单独用一次 `Read` 读入——别把它 `cat` 进 Bash 命令里，因为 Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——同一条消息里再发一次小的 Bash 调用（以项目根目录为工作目录），做这里只有 Bash 能做的事，即本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。两者一起发出，开场装载仍只占一趟往返。
 
 ## 角色
 

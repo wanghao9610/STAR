@@ -14,18 +14,17 @@ description: >-
 
 # Research Project Adopt — 把做了一半的项目接入 STAR
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`$star-proj-adopt [survey | backfill]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。
 
-**通用规约。** 本 skill 无条件要遵循的内容，动手前以项目根目录为工作目录、用一次 Bash 调用装齐：
+**通用规约。** 本 skill 无条件要遵循的内容，动手前用一条消息装齐：`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 与 `<本 skill 所在目录>/references/adopt_spec_zh.md` 各自单独发一次文件读取读入，外加同一条消息里一次小的 Bash 调用（以项目根目录为工作目录）：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/adopt_spec_zh.md
 ```
 
-一次调用、两份文件。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次调用里：各自在用它写文件的那一步再读。
+一条消息、三份结果：两份完整文件各来自单独发出的文件读取，`.env` 探测来自 Bash——整个装载里唯一只有 Bash 能做的事。别把文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是“一条消息装齐”本来要省掉的那趟往返——而光规约文件一份就已超过这个上限。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/adopt_spec_zh.md` 放回命令的第二行，并接受落盘的代价。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次装载里：各自在用它写文件的那一步再读。
 
 ## 角色
 
@@ -45,7 +44,7 @@ cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所
 
 ## 工作流
 
-勘察配方、清单格式约定、软链与包装脚本规则见 `references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）——通用规约那次开场调用已把它打印出来；整体形状如下：
+勘察配方、清单格式约定、软链与包装脚本规则见 `references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）——通用规约那条开场消息已把它读进来；整体形状如下：
 
 ### 阶段 `survey`
 

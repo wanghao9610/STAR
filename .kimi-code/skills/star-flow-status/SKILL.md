@@ -15,7 +15,7 @@ description: >-
 
 # Research Flow Status — read-only overview
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with Step 1's load calls, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other) — as its own read, never `cat`-ed into the Bash command, for the reason Step 1 gives — and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/skill:star-flow-status [PLAN_NAME]` — with no argument, report the whole flow; with a slug / numeric prefix / filename, scope both the tree and the coverage checks to that plan's subtree. An `involve=<level>` token is stripped from the invocation before `PLAN_NAME` is resolved (conventions §7.7); it changes nothing else here — this skill asks no questions.
 

@@ -16,11 +16,11 @@ description: >-
 
 # Research Code Release — 收集、打磨、成文
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-code-release [gather | polish | readme | check]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这次阅读就是动手前要装载的全部——以项目根目录为工作目录，用一次 Bash 调用发出（`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`）；动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。那条 `grep` 是这次运行的 `.env` 查询——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）——折进开场调用，两者就都不必各占一趟往返。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这份文件就是动手前要装载的全部，用一条消息发出：规约整份走它自己的一次 `Read` 读入——绝不 `cat` 进 Bash 命令，因为 Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约本身就约 34 KB，已在这条线之外——同一条消息里再发一次小的 Bash 调用（以项目根目录为工作目录），做这里只有 Bash 能做的事，即本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；两者同发一条消息，谁都不必各占一趟往返。动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。
 
 ## 角色
 

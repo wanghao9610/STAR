@@ -17,18 +17,17 @@ description: >-
 
 # Research Project Adopt — bring an in-progress project into STAR
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the Shared-conventions opening load, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-proj-adopt [survey | backfill]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides the detection; re-running `survey` on an adopted project re-probes and updates the record rather than starting over.
 
-**Shared conventions.** Everything this skill follows unconditionally arrives in one Bash call, run before acting with the project root as the working directory:
+**Shared conventions.** Everything this skill follows unconditionally arrives in one message, issued before acting: one file read of `docs/mds/star-workflow/research-workflow-conventions.md`, one file read of `<this skill's directory>/references/adopt_spec.md`, and alongside them one small Bash call, run with the project root as the working directory:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/adopt_spec.md
 ```
 
-One call, two files. `research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the probe recipe, the inventory contract, and the symlink / wrapper rules. The `assets/` templates are not part of the call: each is read at the step that writes from it.
+One message, three results: the two whole files each from its own separate file read, and the `.env` probe from Bash — the one part of the load only Bash can do. Keep the files out of the command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is past that limit. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/adopt_spec.md` back as a second line of the command and accept the spill. `research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the probe recipe, the inventory contract, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
 
 ## Role
 
@@ -48,7 +47,7 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`$
 
 ## Workflow
 
-Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) for the probe recipe, the inventory contract, and the symlink / wrapper rules — the opening call under Shared conventions already printed it; the shape is:
+Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) for the probe recipe, the inventory contract, and the symlink / wrapper rules — the opening message under Shared conventions already loaded it; the shape is:
 
 ### Phase `survey`
 

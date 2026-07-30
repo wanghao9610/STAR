@@ -17,11 +17,11 @@ description: >-
 
 # Research Refs Reviewer
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | add PAPER [PAPER …] | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；`survey` 检索一个话题、分层阅读、独立写出一份领域综述（`metds/refs/<slug>_survey.md`）——其后的文本按 `PLAN_NAME` 或 `TOPIC` 的规则解析，没有就走无参的来源链；`add` 一次追加多篇，每篇是 arXiv id、DOI、URL 或标题；单个 arXiv id、DOI 或论文 URL 追加那一篇。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前以项目根目录为工作目录、用一次 Bash 调用装入它——`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`——这就是本 skill 的开场装载：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。开场装载只有规约这一份：其余资源——`references/source_policy_zh.md`、`references/refs_rubric_zh.md`、`assets/` 模板——各属于特定模式与步骤，工作流引到哪一步才读，不预先装载。那条 `grep` 是这次运行的 `.env` 查询——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）——折进开场调用，两者就都不必各占一趟往返。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前以项目根目录为工作目录、用一条消息装入它：规约文件用它自己的一次 `Read` 调用读进来——绝不 `cat` 进 Bash 命令，因为 Bash 结果一旦超过 30 KB 左右就会被落盘成文件、要再读一次才拿得回来，而整份规约本身就超过这个上限——同一条消息里再发一次小的 Bash 调用，做这里只有 Bash 做得了的事、即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；两者同发一条消息，谁都不必各占一趟往返。这次读取就是本 skill 的开场装载：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。开场装载只有规约这一份：其余资源——`references/source_policy_zh.md`、`references/refs_rubric_zh.md`、`assets/` 模板——各属于特定模式与步骤，工作流引到哪一步才读，不预先装载。
 
 ## 角色
 

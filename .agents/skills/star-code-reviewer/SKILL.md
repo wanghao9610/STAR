@@ -19,18 +19,17 @@ description: >-
 
 # Research Code Reviewer
 
-Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call under **Shared conventions**, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with this skill's rubric in one Bash call, with the project root as the working directory:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load everything in one message: one `Read` for the conventions file, one `Read` for `<this skill's directory>/references/review_rubric.md`, and alongside them one Bash call, with the project root as the working directory, carrying only:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/review_rubric.md
 ```
 
-One call, both inputs: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — and the six-dimension rubric with its finding contract, which Step 1's digest and Step 3's collection work from. Later steps use the rubric as loaded here — no separate read.
+One message, three results: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — the six-dimension rubric with its finding contract, which Step 1's digest and Step 3's collection work from, and the `.env` line only Bash can answer. Keep the two files out of the command: a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — the conventions file is past that limit on its own — while each `Read` result arrives whole on its own budget. Later steps use the rubric as loaded here — no separate read; the report template and Step 1's project-side reads load at their own steps, not here.
 
 ## Role
 

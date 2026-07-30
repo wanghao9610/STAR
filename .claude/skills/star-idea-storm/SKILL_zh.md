@@ -13,18 +13,17 @@ description: >-
 
 # Research Idea Storm — 从模糊兴趣到站得住的选题
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读做成开场那一次装载调用——以项目根目录为工作目录的一次 Bash 调用，连同 Stage 1、2、4 都要用的问题库一起装入：
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读放进开场那一条装载消息——规约文件单独一次 `Read`，Stage 1、2、4 都要用的问题库（`<本 skill 所在目录>/references/question_bank_zh.md`）再单独一次 `Read`，外加同一条消息里的一次 Bash 调用（以项目根目录为工作目录），只跑非 Bash 不可的那一行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/question_bank_zh.md
 ```
 
-其余一概不预装：`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
+整份文件走 `Read`，绝不 `cat` 进命令里：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返，而光规约文件就有约 34 KB，单它一份就已越过这个上限。其余一概不预装：`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
 
 ## 角色
 
@@ -51,7 +50,7 @@ cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所
 
 ### Stage 1：种子与约束（`seed`）
 
-弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`），开场装载调用已一并装入——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`/star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
+弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`），开场那条装载消息已一并装入——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`/star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
 
 ### Stage 2：发散（`diverge`）
 

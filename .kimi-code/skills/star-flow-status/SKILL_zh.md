@@ -11,7 +11,7 @@ description: >-
 
 # Research Flow Status — 只读总览
 
-> 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
+> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
 调用方式：`/skill:star-flow-status [PLAN_NAME]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树和覆盖检查一起收敛到该计划的子树。调用里出现 `involve=<level>` 记号时，先剥离它再解析 `PLAN_NAME`（规约 §7.7）；除此之外它在这里不改变任何行为——本 skill 不提问。
 
