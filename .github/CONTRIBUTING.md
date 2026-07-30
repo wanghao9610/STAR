@@ -140,6 +140,25 @@ do. Check 12 enforces the length; nothing enforces that judgement.
     heading. On skill coverage the two shapes differ — the guide owes one numbered section per skill
     and no more, the READMEs only have to name each skill, since there it is a table row. What a
     section *says* about a skill is checked by nobody.
+19. **The opening-load shape holds in every tree.** One `.env` probe line per file, no `cat` of the
+    whole conventions file inside a Bash block (only `.agents`' fallback sentence may, and it is marked
+    "accept the spill" / "接受落盘"), `SKILL_zh.md` never a runtime load, and the two passages that are
+    uniform across all sixty file pairs by design — the language paragraph and the `SKILL_zh.md` header
+    blockquote — still identical, so a partial re-edit shows up. The strings it pins are the probe line
+    and those two openings; rewording any of them centrally means updating the check in the same commit.
+20. **A skill that loads only part of the conventions says so accurately, and stays under the spill
+    line.** Two skills take an `awk` excerpt of the sections they act on rather than the whole file
+    (`star-expt-digest`, `star-refs-reviewer`). Per such file: the excerpt prints exactly the sections
+    its regex names, so a renumber upstream fails here; it reads its own language's conventions file;
+    it stays under `LOAD_EXCERPT_MAX` (28000 bytes), which is the only place that can be caught, since
+    `execs/update.sh` copies the conventions wholesale into downstream projects and the file can only
+    grow here; the prose's loaded list equals the regex's set and its stay-out list equals the
+    complement; and the size the prose quotes matches the size the selector produces. Citations of a
+    section a skill no longer loads must be pinned in `RESTATED_REGISTRY`, checked per tree and per
+    language in both directions, so both an unregistered citation and an orphaned row fail. Pinned
+    strings: the selector shape, and the phrases splitting the two lists in prose ("stay out",
+    "不装载"). Deliberate gap: `star-flow-status` also loads part of the conventions, but through `sed`
+    ranges plus an item-level pass over §7, which a section-level parser cannot verify.
 
 ## What the checks do not catch
 

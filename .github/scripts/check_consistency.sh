@@ -822,6 +822,252 @@ fi
 
 (( open_errors == 0 )) && note "opening loads hold: one probe line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform"
 
+# 20. The section-selective conventions load stays honest.
+#     Two skills load only the conventions sections they act on, as an awk
+#     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
+#     costs two invariants nothing else holds.
+#
+#     The excerpt has to stay under the Bash spill line, and it has ~3 KB of
+#     room. This is the only place that can be caught: `execs/update.sh` copies
+#     docs/mds/star-workflow wholesale into downstream projects, which are told
+#     not to edit it, so the file can only grow *here*. Without the size
+#     assertion below, growing §7 by 4 KB silently converts a one-message load
+#     into two round trips in every downstream run, with CI green.
+#
+#     And the section set now lives twice in each file: once in the awk regex,
+#     once in the prose that says what arrives and what does not. Those drift
+#     apart the way every other pair in this script has — a reader trusts the
+#     prose, a run gets the regex.
+#
+#     Pinned strings, in the same sense as check 19's: the canonical selector
+#     shape `awk '/^## /{k=/^## (a|b)\./} k'`, and the phrases that separate the
+#     loaded list from the excluded one in prose — "stay out" and "不装载".
+#     Rewording any of them centrally means updating this check in the same
+#     commit. Only bare §n counts in that prose; §n.m is a sub-item citation,
+#     which is how a stay-out reason may point at a section that IS loaded.
+#
+#     Known gap, deliberate: star-flow-status also loads part of the conventions,
+#     but through `sed` ranges plus an item-level pass over §7, so a section-level
+#     parser cannot verify it and it carries no canonical selector to find. Giving
+#     it this shape is a change to the most-run skill in the flow and belongs in
+#     its own commit.
+section "Selective conventions load"
+
+LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28000}
+
+# skill|file|section — a citation of a section the skill no longer loads, kept on
+# purpose because the sentence restates the rule and cites it only for provenance.
+# A `_zh` suffix is stripped before matching, so one row covers both languages.
+# Checked both ways, like check 15: a row whose citation is gone fails too.
+RESTATED_REGISTRY=(
+    "star-expt-digest|SKILL.md|1"
+    "star-expt-digest|SKILL.md|2"
+    "star-expt-digest|SKILL.md|4"
+    "star-expt-digest|references/digest_rubric.md|2"
+    "star-expt-digest|references/scope_spec.md|4"
+    "star-refs-reviewer|SKILL.md|1"
+)
+
+sel_errors=0
+sel_files=0
+registry_hit=()
+
+bare_sections() { # stdin -> one bare section number per line, sorted unique
+    grep -oE '§[0-9]+(\.[0-9]+)?' | grep -v '\.' | tr -d '§' | sort -nu
+}
+
+for root in "${SKILL_ROOTS[@]}"; do
+    while IFS= read -r skill; do
+        for f in SKILL.md SKILL_zh.md; do
+            path="${root}/${skill}/${f}"
+            [[ -f "${path}" ]] || continue
+
+            sel="$(grep -F "awk '/^## /{k=/^## (" "${path}" | head -n 1)"
+            [[ -n "${sel}" ]] || continue
+            sel_files=$(( sel_files + 1 ))
+
+            if [[ "${f}" == SKILL_zh.md ]]; then
+                conv="${CONV_ZH}"
+                lang=zh
+            else
+                conv="${CONV_EN}"
+                lang=en
+            fi
+
+            # 20a. the selector names a set, and applies it to its own language's file
+            want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
+            if [[ -z "${want}" ]]; then
+                fail "${path}: carries a section selector whose set cannot be parsed"
+                sel_errors=1
+                continue
+            fi
+            if ! grep -qF -- "${conv}" <<< "${sel}"; then
+                fail "${path}: its selector does not read ${conv}"
+                sel_errors=1
+            fi
+
+            # 20b. what it prints is exactly what it names — the renumber guard
+            excerpt="$(awk -v r="^## (${want})\\\\." '/^## /{k=($0~r)} k' "${conv}")"
+            if [[ -z "${excerpt}" ]]; then
+                fail "${path}: selector (${want}) prints nothing from ${conv}; the conventions may have been renumbered"
+                sel_errors=1
+                continue
+            fi
+            got="$(sed -nE 's/^## ([0-9]+)\..*/\1/p' <<< "${excerpt}" | sort -n | paste -sd'|' -)"
+            wsorted="$(tr '|' '\n' <<< "${want}" | sort -n | paste -sd'|' -)"
+            if [[ "${got}" != "${wsorted}" ]]; then
+                fail "${path}: selector names §${wsorted//|/, §} but prints §${got//|/, §}"
+                sel_errors=1
+            fi
+
+            # 20c. the excerpt stays clear of the Bash spill line
+            bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
+            if (( bytes > LOAD_EXCERPT_MAX )); then
+                fail "${path}: excerpt is ${bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will spill and cost the round trip the one-message load exists to avoid. Split the load across two Bash calls in the same message, or drop a section."
+                sel_errors=1
+            fi
+
+            # The load block: from its heading to the next ## section.
+            start="$(grep -nE '^\*\*Shared conventions\.|^\*\*通用规约。' "${path}" | head -n 1 | cut -d: -f1)"
+            if [[ -z "${start}" ]]; then
+                fail "${path}: has a section selector but no Shared-conventions block to describe it"
+                sel_errors=1
+                continue
+            fi
+            block="$(awk -v s="${start}" 'NR>=s{ if (NR>s && /^## /) exit; print }' "${path}")"
+            end="$(awk -v s="${start}" 'NR>s && /^## /{print NR-1; exit}' "${path}")"
+            [[ -n "${end}" ]] || end="$(wc -l < "${path}")"
+
+            # The loaded list and the stay-out list can share one line, so the split is
+            # on the phrase inside the flattened block, not on a line number. The block
+            # goes through a file, never `awk -v`, which would eat its backslashes.
+            flat="$(mktemp)"
+            tr '\n' ' ' <<< "${block}" > "${flat}"
+
+            # 20d. prose vs regex: what the block says arrives is the set, and what it
+            #      says stays out is the complement.
+            split_at="$(awk '{
+                best = 0
+                split("stay out|stays out|不装载", marks, "|")
+                for (i in marks) { p = index($0, marks[i]); if (p > 0 && (best == 0 || p < best)) best = p }
+                print best
+            }' "${flat}")"
+            if [[ "${split_at}" == "0" ]]; then
+                fail "${path}: the load block never says which sections stay out (pinned phrases: \"stay out\" / \"不装载\")"
+                sel_errors=1
+            else
+                claims_in="$(awk -v n="${split_at}" '{print substr($0, 1, n - 1)}' "${flat}" | bare_sections | paste -sd'|' -)"
+                claims_out="$(awk -v n="${split_at}" '{print substr($0, n)}' "${flat}" | bare_sections | paste -sd'|' -)"
+                if [[ "${claims_in}" != "${wsorted}" ]]; then
+                    fail "${path}: the block says §${claims_in//|/, §} arrives but the selector loads §${wsorted//|/, §}"
+                    sel_errors=1
+                fi
+                expect_out="$(for n in 0 1 2 3 4 5 6 7 8 9; do
+                                  grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${wsorted}")" || printf '%s\n' "${n}"
+                              done | paste -sd'|' -)"
+                if [[ "${claims_out}" != "${expect_out}" ]]; then
+                    fail "${path}: the block names §${claims_out//|/, §} as staying out; the sections it does not load are §${expect_out//|/, §}"
+                    sel_errors=1
+                fi
+            fi
+
+            # 20e. the size the prose quotes is the size the selector produces. This
+            #      caught two real errors when the shape was written: a stale figure,
+            #      and en/zh rounding that made one excerpt look smaller than its twin.
+            claimed_kb="$(awk '{
+                best = 0
+                split("excerpt|摘录", marks, "|")
+                for (i in marks) { p = index($0, marks[i]); if (p > 0 && (best == 0 || p < best)) best = p }
+                if (best > 0) print substr($0, best)
+            }' "${flat}" | grep -oE '[0-9]+ KB' | head -n 1 | grep -oE '[0-9]+')"
+            if [[ -z "${claimed_kb}" ]]; then
+                fail "${path}: the load block never states the excerpt's size, so nothing ties its prose to the ${bytes} bytes it loads"
+                sel_errors=1
+            else
+                measured_kb=$(( (bytes + 500) / 1000 ))
+                diff_kb=$(( claimed_kb > measured_kb ? claimed_kb - measured_kb : measured_kb - claimed_kb ))
+                if (( diff_kb > 1 )); then
+                    fail "${path}: the block says the excerpt is ${claimed_kb} KB; it is ${bytes} bytes (${measured_kb} KB)"
+                    sel_errors=1
+                fi
+            fi
+
+            # 20f. every conventions citation outside the block resolves inside the
+            #      loaded set, or is a pinned restatement.
+            while IFS= read -r hit; do
+                [[ -n "${hit}" ]] || continue
+                lineno="${hit%%:*}"
+                # inside the block itself 20d owns the citations; outside it they must resolve
+                (( lineno >= start && lineno <= end )) && continue
+                n="$(printf '%s' "${hit#*:}" | grep -oE '(conventions|规约) §[0-9]+' |
+                     grep -oE '[0-9]+' | head -n 1)"
+                [[ -n "${n}" ]] || continue
+                grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${wsorted}")" && continue
+                key="${skill}|${f/_zh.md/.md}|${n}"
+                if printf '%s\n' "${RESTATED_REGISTRY[@]}" | grep -qxF "${key}"; then
+                    registry_hit+=("${root}|${lang}|${key}")
+                else
+                    fail "${path}:${lineno}: cites conventions §${n}, which this skill no longer loads. Restate the rule and add '${key}' to RESTATED_REGISTRY, or put §${n} back in the selector."
+                    sel_errors=1
+                fi
+            done < <(grep -nE '(conventions|规约) §[0-9]+' "${path}" || true)
+
+            rm -f "${flat}"
+        done
+
+        # references/ carry citations too, and no selector of their own — they are
+        # checked against the skill's SKILL.md set.
+        en_manifest="${root}/${skill}/SKILL.md"
+        [[ -f "${en_manifest}" ]] || continue
+        sel="$(grep -F "awk '/^## /{k=/^## (" "${en_manifest}" | head -n 1)"
+        [[ -n "${sel}" ]] || continue
+        want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
+        while IFS= read -r ref; do
+            [[ -n "${ref}" ]] || continue
+            while IFS= read -r hit; do
+                [[ -n "${hit}" ]] || continue
+                n="$(printf '%s' "${hit#*:}" | grep -oE '(conventions|规约) §[0-9]+' |
+                     grep -oE '[0-9]+' | head -n 1)"
+                [[ -n "${n}" ]] || continue
+                grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${want}")" && continue
+                rel="${ref#"${root}/${skill}/"}"
+                [[ "${rel}" == *_zh.md ]] && reflang=zh || reflang=en
+                key="${skill}|${rel/_zh.md/.md}|${n}"
+                if printf '%s\n' "${RESTATED_REGISTRY[@]}" | grep -qxF "${key}"; then
+                    registry_hit+=("${root}|${reflang}|${key}")
+                else
+                    fail "${ref}:${hit%%:*}: cites conventions §${n}, which ${skill} no longer loads. Restate the rule and add '${key}' to RESTATED_REGISTRY, or put §${n} back in the selector."
+                    sel_errors=1
+                fi
+            done < <(grep -nE '(conventions|规约) §[0-9]+' "${ref}" || true)
+        done < <(find "${root}/${skill}/references" -type f -name '*.md' 2>/dev/null | sort)
+    done < <(printf '%s\n' "${SKILLS}")
+done
+
+# The other direction, per tree: a registry row whose citation is gone is as
+# misleading as an unregistered citation, and asking each tree separately also
+# catches the restatement dropped from one tree and left in the other three.
+for row in "${RESTATED_REGISTRY[@]}"; do
+    for root in "${SKILL_ROOTS[@]}"; do
+        skill_of_row="${row%%|*}"
+        [[ -d "${root}/${skill_of_row}" ]] || continue
+        for lang in en zh; do
+            if ! printf '%s\n' "${registry_hit[@]:-}" | grep -qxF "${root}|${lang}|${row}"; then
+                fail "RESTATED_REGISTRY row '${row}' matches no citation in the ${lang} files of ${root}; drop the row or restore the restatement there"
+                sel_errors=1
+            fi
+        done
+    done
+done
+
+if (( sel_errors == 0 )); then
+    if (( sel_files == 0 )); then
+        note "no skill loads the conventions selectively; nothing to check"
+    else
+        note "${sel_files} selective loads hold: sections printed match sections named, prose matches the selector, excerpts under ${LOAD_EXCERPT_MAX} bytes with their stated sizes, ${#RESTATED_REGISTRY[@]} restatements pinned"
+    fi
+fi
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
