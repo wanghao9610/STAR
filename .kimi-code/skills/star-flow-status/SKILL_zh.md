@@ -13,9 +13,9 @@ description: >-
 
 > 英文默认版见 `SKILL.md`。无后缀文件为英文；中文资源使用 `*_zh.md`。按用户语言对话；中文对话加载 `*_zh.md` 资源。若 `SKILL_zh.md` 与 `SKILL.md` 冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-flow-status [PLAN_NAME]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树和覆盖检查一起收敛到该计划的子树。
+调用方式：`/skill:star-flow-status [PLAN_NAME]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树和覆盖检查一起收敛到该计划的子树。调用里出现 `involve=<level>` 记号时，先剥离它再解析 `PLAN_NAME`（规约 §7.7）；除此之外它在这里不改变任何行为——本 skill 不提问。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。只读 skill 用得上的章节一次读完——§0 词汇表、§5 计划名解析、§7 对话纪律、§8 产物登记表、§9 项目布局：`sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p; /^## 7\./,$p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`。§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§6 委派管的是会提交、会运行、会写文件的 skill，本 skill 一样都不做。真需要其中某节时，再整份读。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。只读汇报者用得上的部分——§0 词汇表、§5 计划名解析（仅当有 `PLAN_NAME` 要解析时）、§7 的汇报规则（其引言与第 1、4、5、6、11 条；第 2–3、7–10 条的提问机制管的是会提问的 skill，本 skill 从不提问）、§9 项目布局——随 Step 1 那一次装载调用一起到达。§8（产物登记表）是覆盖检查对账的注册表，只引用、不装载：spec 已逐项复述这些检查要读的文件名与状态字段，而 §8 其余部分——`model_id` / `model_trail`——管的是生产者，本 skill 不是。§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§6 委派管的是会提交、会运行、会写文件的 skill，本 skill 一样都不做。真需要其中某节时，再整份读。
 
 ## 角色
 
@@ -32,12 +32,22 @@ description: >-
 
 ## 工作流
 
-具体规则遵循 `references/status_spec_zh.md`（英文对话读 `references/status_spec.md`）；骨架如下：
+具体规则遵循 `references/status_spec_zh.md`（英文对话读 `references/status_spec.md`）——Step 1 的调用会把它打印出来；骨架如下：
 
-**扫一次，然后只推理。** Step 1 用一次调用把本 skill 要读的东西全部收齐，Step 2–9 都基于这份摘要工作。不要再去打开摘要已覆盖的文件。只有两种情况值得二次读取：某段计划正文你需要原文引用而非计数；某个文件摘要只列出了它存在、没有打印其内容。本 skill 是整条流程里调用最频繁的一个，而"逐文件读一遍"正是拖慢它的唯一原因——摘要里已经有的东西，再读一遍什么也换不来。
+**扫一次，然后只推理。** Step 1 用一次调用把本 skill 要读的东西——规约章节、spec、文件摘要——全部收齐，Step 2–9 都基于这次返回工作。不要再去打开摘要已覆盖的文件。只有两种情况值得二次读取：某段计划正文你需要原文引用而非计数；某个文件摘要只列出了它存在、没有打印其内容。本 skill 是整条流程里调用最频繁的一个，而"逐文件读一遍"或把装载本身拆成多次调用，正是拖慢它的原因——那次调用里已经有的东西，再读一遍什么也换不来。
 
 ### Step 1：扫描
-以项目根目录为工作目录，运行一次收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh --slim`——它打印的每个路径都相对该根目录。它打印一份摘要：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数后的正文、以及其中出现过的日期；run 目录之外每个注册产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。这就是 Step 2–9 的全部输入。
+以项目根目录为工作目录，用一次 Bash 调用装齐全部输入：
+
+```bash
+sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11)print}' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+sed -n '/^## 9\./,$p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+cat <本 skill 所在目录>/references/status_spec_zh.md
+bash <本 skill 所在目录>/scripts/scan.sh --slim
+```
+
+一次调用、三类输出：规约摘录、spec、以及收集脚本的摘要。不带 `PLAN_NAME` 时去掉 `'/^## 5\./,/^## 6\./p'` 这段范围——§5 就是用来解析它的。那行 awk 按条号选取 §7（引言加第 1、4、5、6、11 条）；若它什么都没打印——下游同步的规约副本过旧、条号可能不同——就改用 `sed -n '/^## 7\./,/^## 8\./p'` 装整节。摘要打印的每个路径都相对项目根目录。摘要部分是：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数后的正文、以及其中出现过的日期；run 目录之外每个注册产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。加上 spec 与规约章节，这就是 Step 2–9 的全部输入。
 
 `--slim` 是项目有了历史之后还跑得起这一步的原因：它压缩的正是摘要里随历史增长、而非随计划树增长的那两部分，40 个 run 的项目上摘要少三分之一左右。超过六行的步骤表会变成表头行、`[tally] N data rows` 与每列的取值分布——`c3: done×7, blocked×1` 就是 Step 3 要的步骤计数，而写成 `N distinct` 的列是步骤名或日期，绝不会是状态列。六行及以内的表原样打印。未勾选的待办项与方向性信号从不被计数替代，所以待用户的叶子照样能看到它确切的命令。位于 run 目录内的产物不再打印 frontmatter——LISTING 里已经有它的文件名和文件名中的日期，而覆盖检查读的正是这些——被略过了多少个会打印出来。只有需要逐行读某个 run 的步骤时才去掉 `--slim`，并同时用 `--runs <该 run>` 收窄。
 

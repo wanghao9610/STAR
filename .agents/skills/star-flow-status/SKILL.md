@@ -14,11 +14,11 @@ description: >-
 
 # Research Flow Status — read-only overview
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with Step 1's load call, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `$star-flow-status [PLAN_NAME]` — with no argument, report the whole flow; with a slug / numeric prefix / filename, scope both the tree and the coverage checks to that plan's subtree.
+Invocation: `$star-flow-status [PLAN_NAME]` — with no argument, report the whole flow; with a slug / numeric prefix / filename, scope both the tree and the coverage checks to that plan's subtree. An `involve=<level>` token is stripped from the invocation before `PLAN_NAME` is resolved (conventions §7.7); it changes nothing else here — this skill asks no questions.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load the sections a read-only skill can act on — §0 vocabulary, §5 plan-name resolution, §7 dialogue, §8 the output table, §9 project layout — in one call: `sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p; /^## 7\./,$p' docs/mds/star-workflow/research-workflow-conventions.md`. §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates and §6 delegation govern skills that commit, run, or write; this one does none of that. Read the whole file if you ever need one of them.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a read-only reporter acts on — §0 vocabulary, §5 plan-name resolution (only when there is a `PLAN_NAME` to resolve), §7's reporting rules (its preamble and items 1, 4, 5, 6, 11; the question machinery in items 2–3 and 7–10 governs skills that ask, and this one never asks), §9 project layout — arrives through Step 1's single load call. §8 (the output table) is the registry the coverage checks audit against, cited but not loaded: the spec restates every filename and state field those checks read, and the rest of §8 — `model_id` / `model_trail` — governs producers, which this skill is not. §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates and §6 delegation govern skills that commit, run, or write; this one does none of that. Read the whole file if you ever need one of them.
 
 ## Role
 
@@ -35,12 +35,22 @@ You give the researcher a single, honest picture of where the whole flow stands 
 
 ## Workflow
 
-Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for the exact rules; the shape is:
+Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for the exact rules — Step 1's call prints it; the shape is:
 
-**One scan, then reason.** Step 1 collects everything this skill reads in a single call, and Steps 2–9 work from that digest. Do not re-open a file it already covered. Only two things earn a second read: a plan section you must quote rather than count, and a file the digest lists as present but whose contents it did not print. This is the most-run skill in the flow, and a per-file read loop is the one thing that makes it slow — it buys nothing the digest does not already hold.
+**One scan, then reason.** Step 1 collects everything this skill reads — the conventions sections, the spec, and the file digest — in a single call, and Steps 2–9 work from what it returned. Do not re-open a file it already covered. Only two things earn a second read: a plan section you must quote rather than count, and a file the digest lists as present but whose contents it did not print. This is the most-run skill in the flow, and extra round trips are what make it slow — a per-file read loop, or the load itself spread over separate calls; neither buys anything the one call does not already hold.
 
 ### Step 1: Scan
-Run the collector once: `bash <this skill's directory>/scripts/scan.sh --slim`, with the project root as the working directory — every path it prints is relative to that root. It prints one digest: every plan's frontmatter, its `## Sub-plans` index and its §3/§5 placeholder counts (`[TBD]` and `【待定】` together); every run log's frontmatter, its body counted per heading, and the dates it carries; the frontmatter of every registered artifact outside a run directory; and a depth-1 listing of `metds/` and `wkdrs/`. That is the whole input for Steps 2–9.
+Load everything in one Bash call, with the project root as the working directory:
+
+```bash
+sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.md
+awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11)print}' docs/mds/star-workflow/research-workflow-conventions.md
+sed -n '/^## 9\./,$p' docs/mds/star-workflow/research-workflow-conventions.md
+cat <this skill's directory>/references/status_spec.md
+bash <this skill's directory>/scripts/scan.sh --slim
+```
+
+One call, three kinds of output: the conventions excerpts, the spec, and the collector's digest. With no `PLAN_NAME` argument drop the `'/^## 5\./,/^## 6\./p'` range — §5 exists to resolve one. The awk selects §7 by item number (the preamble plus items 1, 4, 5, 6, 11); if it prints nothing — a stale synced copy of the conventions may number differently — load the whole section with `sed -n '/^## 7\./,/^## 8\./p'` instead. Every path the digest prints is relative to the project root. The digest part is: every plan's frontmatter, its `## Sub-plans` index and its §3/§5 placeholder counts (`[TBD]` and `【待定】` together); every run log's frontmatter, its body counted per heading, and the dates it carries; the frontmatter of every registered artifact outside a run directory; and a depth-1 listing of `metds/` and `wkdrs/`. Together with the spec and the conventions sections, that is the whole input for Steps 2–9.
 
 `--slim` is what keeps this affordable once a project has history: it collapses the two parts of the digest that grow with the history rather than with the plan tree, and on a 40-run project it cuts the digest by about a third. A step table of more than six rows arrives as its header row, `[tally] N data rows`, and a value histogram per column — read `c3: done×7, blocked×1` as the step counts Step 3 needs, and a column given as `N distinct` is a step name or a date, never a status. Six rows or fewer arrive unchanged. Un-ticked checkboxes and plan-level findings are never summarised, so an awaiting-user leaf still shows its exact command. An artifact inside a run directory prints no frontmatter, because LISTING already carries its name and the date in it — which is all the follow-up checks read — and the count of those left out is printed. Drop `--slim` only to read one run's steps line by line, and pair that with `--runs <that run>`.
 
