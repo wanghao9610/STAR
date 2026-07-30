@@ -26,6 +26,7 @@ Invocation: `$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with this skill's other unconditional opening reads in one Bash call — the opening load call that later text points back at — with the project root as the working directory:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md
 cat <this skill's directory>/references/scope_spec.md
 bash <this skill's directory>/scripts/scan.sh

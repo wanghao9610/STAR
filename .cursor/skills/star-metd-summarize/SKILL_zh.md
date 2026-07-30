@@ -24,7 +24,7 @@ description: >-
 
 调用方式：`/star-metd-summarize [OPT]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——以项目根目录为工作目录的一次 Bash 调用，`cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`，与读取本文件的那次调用同一条消息发出（两种语言的装载集相同，互不等待）——也是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——以项目根目录为工作目录的一次 Bash 调用，`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`，与读取本文件的那次调用同一条消息发出（两种语言的装载集相同，互不等待）——也是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。那条 `grep` 是这次运行的 `.env` 查询——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）——折进开场调用，两者就都不必各占一趟往返。
 
 ## 角色
 

@@ -23,6 +23,7 @@ Invocation: `/skill:star-env-builder [ENV_NAME | add <package>…]` — the cond
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one Bash call, with the project root as the working directory, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8):
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md \
     <this skill's directory>/references/installer_policy.md \
     <this skill's directory>/references/smoke_test_spec.md

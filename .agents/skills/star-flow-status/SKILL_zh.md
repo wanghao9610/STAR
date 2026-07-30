@@ -40,6 +40,7 @@ description: >-
 用一条消息装齐全部输入：一次 Bash 调用（以项目根目录为工作目录），外加同一条消息里单独读一次 spec：
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11)print}' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 sed -n '/^## 9\./,$p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md

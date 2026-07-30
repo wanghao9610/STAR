@@ -24,6 +24,7 @@ Invocation: `/star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for 
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Make that read the opening load call — one Bash call, with the project root as the working directory, that also brings in the question bank Stages 1, 2, and 4 draw on:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/question_bank.md
 ```
 

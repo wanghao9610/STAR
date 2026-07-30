@@ -22,6 +22,7 @@ Invocation: `/star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-v
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with both of this skill's reference files in one Bash call, with the project root as the working directory:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/review_spec.md <this skill's directory>/references/revision_rules.md
 ```
 

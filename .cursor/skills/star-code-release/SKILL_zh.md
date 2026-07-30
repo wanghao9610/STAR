@@ -20,7 +20,7 @@ description: >-
 
 调用方式：`/star-code-release [gather | polish | readme | check]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这次阅读就是动手前要装载的全部——以项目根目录为工作目录，用一次 Bash 调用发出（`cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`）；动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这次阅读就是动手前要装载的全部——以项目根目录为工作目录，用一次 Bash 调用发出（`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'; cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`）；动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。那条 `grep` 是这次运行的 `.env` 查询——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）——折进开场调用，两者就都不必各占一趟往返。
 
 ## 角色
 

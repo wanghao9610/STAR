@@ -25,6 +25,7 @@ description: >-
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，以项目根目录为工作目录，用一次 Bash 调用把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md \
     <本 skill 所在目录>/references/installer_policy_zh.md \
     <本 skill 所在目录>/references/smoke_test_spec_zh.md

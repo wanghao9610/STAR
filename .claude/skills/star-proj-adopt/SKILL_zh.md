@@ -21,6 +21,7 @@ description: >-
 **通用规约。** 本 skill 无条件要遵循的内容，动手前以项目根目录为工作目录、用一次 Bash 调用装齐：
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/adopt_spec_zh.md
 ```
 

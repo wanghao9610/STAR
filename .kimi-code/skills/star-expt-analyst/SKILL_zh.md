@@ -22,6 +22,7 @@ description: >-
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。这次读取用一次 Bash 调用完成；完整分析路径上，Step 2–5 遵循的评分表并入同一次调用——aggregate 与 watch 模式去掉评分表那个路径，各自的参考文件到点名它的步骤再装：
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/analysis_rubric_zh.md
 ```
 

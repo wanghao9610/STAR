@@ -43,6 +43,7 @@ Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for
 Load everything in one message — one Bash call, with the project root as the working directory, plus a read of the spec issued alongside it:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.md
 awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11)print}' docs/mds/star-workflow/research-workflow-conventions.md
 sed -n '/^## 9\./,$p' docs/mds/star-workflow/research-workflow-conventions.md

@@ -25,6 +25,7 @@ Invocation: `/star-proj-adopt [survey | backfill]` — no argument auto-selects:
 **Shared conventions.** Everything this skill follows unconditionally arrives in one Bash call, run before acting with the project root as the working directory:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/adopt_spec.md
 ```
 

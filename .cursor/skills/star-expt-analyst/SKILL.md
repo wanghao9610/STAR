@@ -30,6 +30,7 @@ Invocation: `/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | w
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Issue the read as one Bash call; on the full-analysis path the analysis rubric Steps 2–5 follow joins the same call — aggregate and watch modes drop the rubric path and load their own references at the step that names them:
 
 ```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/analysis_rubric.md
 ```
 
