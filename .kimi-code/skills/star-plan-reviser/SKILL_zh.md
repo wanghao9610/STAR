@@ -15,7 +15,13 @@ description: >-
 
 调用方式：`/skill:star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-3way-ablation_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，以项目根目录为工作目录，用一次 Bash 调用把它连同本 skill `references/` 下的两份文件一起装载：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/review_spec_zh.md <本 skill 所在目录>/references/revision_rules_zh.md
+```
+
+一次调用、三份文件：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——加上 `references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式）。这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这次调用到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这次调用里拿到——不要再打开一遍。`assets/` 下的报告模板不进这次调用：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
 
 ## 角色
 

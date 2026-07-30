@@ -13,11 +13,11 @@ description: >-
 
 # Research Plan Coach
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the Shared conventions load below, switched to the `.zh-CN` conventions file, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/skill:star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]` — pass a topic or idea to seed a new plan; an idea name (slug or filename against `metds/ideas/*_idea.md`) seeds the plan from that finalized idea file; a plan name with a section key (`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`) reopens just that section of a finished plan; no argument resumes an existing plan under `metds/plans/`. An optional `involve=low|medium|high` token may accompany any argument: it sets the `involve` level for this run (conventions §7.7), is not part of `TOPIC` or `PLAN_NAME`, and is stripped before resolution.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. This one read is the whole opening load — the question bank, templates, and rubric are each read at the step that uses them, not up front. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
 
 ## Role
 

@@ -18,7 +18,13 @@ description: >-
 
 调用方式：`/skill:star-proj-adopt [survey | backfill]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。
+**通用规约。** 本 skill 无条件要遵循的内容，动手前以项目根目录为工作目录、用一次 Bash 调用装齐：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/adopt_spec_zh.md
+```
+
+一次调用、两份文件。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次调用里：各自在用它写文件的那一步再读。
 
 ## 角色
 
@@ -38,7 +44,7 @@ description: >-
 
 ## 工作流
 
-勘察配方、清单格式约定、软链与包装脚本规则见 `references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）；整体形状如下：
+勘察配方、清单格式约定、软链与包装脚本规则见 `references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）——通用规约那次开场调用已把它打印出来；整体形状如下：
 
 ### 阶段 `survey`
 

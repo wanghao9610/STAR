@@ -20,11 +20,19 @@ description: >-
 
 # Research Env Builder — runtime environment bootstrap
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call in the Shared-conventions paragraph below, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-env-builder [ENV_NAME | add <package>…]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one Bash call, with the project root as the working directory, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8):
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.md \
+    <this skill's directory>/references/installer_policy.md \
+    <this skill's directory>/references/smoke_test_spec.md
+```
+
+One call, three files. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
 
 ## Role
 
@@ -79,7 +87,7 @@ Present as normal text: backend + env name + python version; dependency source u
 
 ### Step 5: Install (uv > pip > conda)
 
-Policy, whitelist, and wheel-index matrix: `references/installer_policy.md`. Order: `conda.txt` (conda backend only) → `framework.txt` → `runtime.txt` → `optional.txt` (only if the approved plan included it) → editable project install (`--no-deps -e`) when packaging metadata exists.
+Policy, whitelist, and wheel-index matrix: `references/installer_policy.md` — printed by the opening call. Order: `conda.txt` (conda backend only) → `framework.txt` → `runtime.txt` → `optional.txt` (only if the approved plan included it) → editable project install (`--no-deps -e`) when packaging metadata exists.
 
 - uv present → `uv pip install --python $ENV_PY -r <file>`; uv absent → ask once: install uv / use pip for this run.
 - Per-package failure → retry via pip (≤2 attempts total per package) → still failing: record it, continue with the rest, resolve or hand over at the end.
@@ -89,7 +97,7 @@ Policy, whitelist, and wheel-index matrix: `references/installer_policy.md`. Ord
 
 ### Step 6: Smoke test (three layers, run by the main agent)
 
-Spec and evidence format: `references/smoke_test_spec.md`.
+Spec and evidence format: `references/smoke_test_spec.md` — printed by the opening call.
 
 - **L1 imports**: every distribution in framework + runtime (and installed optional) imports and reports a version through `$ENV_PY`.
 - **L2 framework**: `torch.cuda.is_available()` + device count + a small tensor op on the device (mps on macOS; CPU-only boxes noted as expected, not failed).

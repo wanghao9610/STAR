@@ -17,7 +17,13 @@ description: >-
 
 调用方式：`$star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读做成开场那一次装载调用——以项目根目录为工作目录的一次 Bash 调用，连同 Stage 1、2、4 都要用的问题库一起装入：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/question_bank_zh.md
+```
+
+其余一概不预装：`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
 
 ## 角色
 
@@ -44,7 +50,7 @@ description: >-
 
 ### Stage 1：种子与约束（`seed`）
 
-弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`）——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`$star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
+弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`），开场装载调用已一并装入——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`$star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
 
 ### Stage 2：发散（`diverge`）
 

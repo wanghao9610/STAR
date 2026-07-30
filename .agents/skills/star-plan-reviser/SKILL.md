@@ -13,11 +13,17 @@ description: >-
 
 # Research Plan Reviser
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call in **Shared conventions** below, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `$star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`00`), or a filename (`00_mvp-3way-ablation_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with both of this skill's reference files in one Bash call, with the project root as the working directory:
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/review_spec.md <this skill's directory>/references/revision_rules.md
+```
+
+One call, three files: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — plus `references/review_spec.md` (evidence sources, collector contracts, the report's section definitions) and `references/revision_rules.md` (the authority table, the routing boundaries, the Revision History entry format). Both references govern the session from the first evidence step to the last edit, which is why they arrive here rather than mid-workflow; wherever later text cites either one, its content is already in hand from this call — do not re-open it. The report template under `assets/` stays out of the call: which variant to fill follows the plan's `language`, known only once Step 0 has resolved the target plan.
 
 ## Role
 

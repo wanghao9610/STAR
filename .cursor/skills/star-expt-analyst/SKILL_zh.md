@@ -19,7 +19,11 @@ description: >-
 
 调用方式：`/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某一棵子树时则编译进 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。这次读取用一次 Bash 调用完成；完整分析路径上，Step 2–5 遵循的评分表并入同一次调用——aggregate 与 watch 模式去掉评分表那个路径，各自的参考文件到点名它的步骤再装：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/analysis_rubric_zh.md
+```
 
 ## 角色
 
@@ -63,7 +67,7 @@ description: >-
 
 ### Step 2：清点与完成度（维度 A、B）
 
-依照 `references/analysis_rubric_zh.md`：
+依照 `references/analysis_rubric_zh.md`——开头那次装载调用已打印它：
 
 - **A——清点**：每个 §4 交付物记为 `present` / `missing` / `unexpected`，附轻量完整性检查（非空、可解析、大小合理）与布局符合度（AGENTS.md §8）。
 - **B——完成度**：EXEC_LOG 中每个自称 `done` 的步骤，用它写明的产物核实；每条 "Awaiting user" 红线命令归类为 `用户已跑`（其输出存在）或 `仍待跑`（不存在）。

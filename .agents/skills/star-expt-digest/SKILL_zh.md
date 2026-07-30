@@ -19,7 +19,15 @@ description: >-
 
 调用方式：`$star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，以项目根目录为工作目录，用一次 Bash 调用把它和本 skill 其余无条件的开场读取一并装齐——也就是本文件后文回指的那次开场装载调用：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+cat <本 skill 所在目录>/references/scope_spec_zh.md
+bash <本 skill 所在目录>/scripts/scan.sh
+```
+
+一次调用、三类输出：规约、Step 0 据以解释参数的 spec、以及收集脚本的摘要（它打印什么、为什么，见工作流一节）。`ledger` 模式把后两行换成 `bash <本 skill 所在目录>/scripts/scan.sh --trails`——Step 8 不解析时间窗，spec 在那里用不上；`--trails` 多打印什么、少打印什么，工作流一节写了。其余一律按需加载：`references/digest_rubric_zh.md` 到 Step 2–3 应用分层规则时再读，`assets/` 模板到 Step 6 或 Step 8 写文件时再读，扫描的第二次 `--bodies` 调用必须等 Step 1 点名窗口内的 run 之后——为什么不能提前，工作流一节也写了。
 
 ## 角色
 
@@ -40,9 +48,9 @@ description: >-
 
 ## 工作流
 
-**先扫一次，再扫窗口。** 在 Step 0 之前，以项目根目录为工作目录，运行收集脚本：`bash <本 skill 所在目录>/scripts/scan.sh`。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、方向性信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。该模式同时丢掉一次溯源阅读用不上的东西——子计划索引、占位符计数、逐 run 的日期行和 DIRS——但它从不给 trail 本身封顶：一份有缺口的记录表比一份长记录表更糟。
+**先扫一次，再扫窗口。** 收集脚本 `scripts/scan.sh` 随开场装载调用（通用规约段）一起运行——不要再单独跑一遍。它一次调用就打印出 Step 0、1、3、5 本来要逐个文件打开的内容——每份计划与每个注册产物的 frontmatter，每份 run 日志的 frontmatter 及其步骤表、待用户勾选项、方向性信号与其中出现的日期，以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单（文件名里的日期也在其中）。ledger 模式下开场调用改用 `scripts/scan.sh --trails`：Step 8 需要每一条 `model_trail`、每份计划的 `## Revision History`，以及没有 frontmatter 的文件其头部行里的 `model_id`——这些默认模式都不打印。该模式同时丢掉一次溯源阅读用不上的东西——子计划索引、占位符计数、逐 run 的日期行和 DIRS——但它从不给 trail 本身封顶：一份有缺口的记录表比一份长记录表更糟。
 
-脚本只收集，从不判断——它不认识时间窗、上次覆盖到的日期、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md` 里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。只有两种情况值得再读一次：必须逐字引用而不是计数的段落；以及扫描列出存在、但没有打印内容的文件——没有 frontmatter 的产物只被列出、从不被打印，因此从来不算被覆盖。
+脚本只收集，从不判断——它不认识时间窗、上次覆盖到的日期、分层，也不知道注册表期待哪些文件名，所有规则都留在本文件和 `references/scope_spec_zh.md`（开场装载调用已打印）里。把它打印的内容当作原始文件内容来读，不要再去打开它已覆盖的文件。只有两种情况值得再读一次：必须逐字引用而不是计数的段落；以及扫描列出存在、但没有打印内容的文件——没有 frontmatter 的产物只被列出、从不被打印，因此从来不算被覆盖。
 
 **Step 2 要的报告正文来自第二次调用，在 Step 1 点名了窗口内的 run 之后**：`--bodies 2,3,7 --runs <那些 run 目录>` 只为这些 run 补上每份报告的判定、完成判据记分卡和解读三节。第一次调用不要带 `--bodies`。时间窗到 Step 0 才确定、到 Step 1 才落到具体 run 上，所以在那之前加 `--bodies`，打印的是项目全部历史里的每一份报告——不论在不在窗口内，每个 run 约 180 行。所有 run 都落在窗口里的项目上这不花什么代价；而 `$star-expt-digest 7d` 打在一年的工作上，就是为了报一周而读完一年。分成两次调用，正是先确定窗口再读正文的代价，比上面两种错法都便宜。这三个编号是本 skill 的规则、写在 `references/digest_rubric_zh.md` 里，不是脚本的规则——脚本只打印交给它的那些编号小节，对里面是什么一无所知，所以报告改了编号，改的是评分表里的一行，脚本一个字都不用动。若脚本缺失或执行失败，退回逐文件读取，并在报告里说明这次走了退路。若无法解析出本 skill 自己的目录，仓库里任一份拷贝都可以——每份 `scripts/scan.sh` 逐字节相同，CI 会强制这一点：`bash "$(find . -path '*/skills/*/scripts/scan.sh' | head -1)"`。
 

@@ -20,7 +20,15 @@ description: >-
 
 调用方式：`$star-env-builder [ENV_NAME | add <包名>…]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，以项目根目录为工作目录，用一次 Bash 调用把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md \
+    <本 skill 所在目录>/references/installer_policy_zh.md \
+    <本 skill 所在目录>/references/smoke_test_spec_zh.md
+```
+
+一次调用、三份文件。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
 
 ## 角色
 
@@ -75,7 +83,7 @@ description: >-
 
 ### Step 5：安装（uv > pip > conda）
 
-策略、白名单与 wheel 源矩阵见 `references/installer_policy_zh.md`。顺序：`conda.txt`（仅 conda 后端）→ `framework.txt` → `runtime.txt` → `optional.txt`（仅当获批计划包含）→ 项目可编辑安装（`--no-deps -e`，有打包元数据时）。
+策略、白名单与 wheel 源矩阵见 `references/installer_policy_zh.md`——开头那次装载调用已打印。顺序：`conda.txt`（仅 conda 后端）→ `framework.txt` → `runtime.txt` → `optional.txt`（仅当获批计划包含）→ 项目可编辑安装（`--no-deps -e`，有打包元数据时）。
 
 - 有 uv → `uv pip install --python $ENV_PY -r <文件>`；无 uv → 问一次：装 uv / 本次改用 pip。
 - 单包失败 → 降级 pip 重试（每包总计 ≤2 次）→ 仍失败：记录后继续装其余，最后统一解决或移交。
@@ -85,7 +93,7 @@ description: >-
 
 ### Step 6：冒烟测试（三层，直接运行）
 
-规范与证据格式见 `references/smoke_test_spec_zh.md`。
+规范与证据格式见 `references/smoke_test_spec_zh.md`——开头那次装载调用已打印。
 
 - **L1 import**：framework + runtime（以及已安装的 optional）中每个发行包都能通过 `$ENV_PY` 导入并报出版本。
 - **L2 框架**：`torch.cuda.is_available()` + 设备数 + 在设备上做一次小张量运算（macOS 用 mps；纯 CPU 机器如实注明，不算失败）。

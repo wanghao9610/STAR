@@ -28,11 +28,11 @@ description: >-
 
 # Research Method Summarizer — plans → method documents
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the Shared-conventions opening load below, switched to the `.zh-CN` conventions file, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-metd-summarize [OPT]` — `OPT` is one of `overview` / `dataset` / `framework` / `training` / `evaluation`, each compiling `metds/<OPT>.md`; no argument compiles all five in dependency order (`dataset` → `framework` → `training` → `evaluation` → `overview`).
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load — one Bash call with the project root as the working directory, `cat docs/mds/star-workflow/research-workflow-conventions.md` — and it is this skill's only unconditional load: `references/extract_map.md` belongs to Steps 2–3, past Step 1's readiness check, the `assets/` templates to Step 4, and each is read where its step cites it, not front-loaded.
 
 ## Role
 

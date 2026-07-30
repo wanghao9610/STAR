@@ -18,7 +18,13 @@ description: >-
 
 调用方式：`/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。动手前以项目根目录为工作目录，用一次 Bash 调用把它和本 skill 的评分表一起装入：
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md <本 skill 所在目录>/references/review_rubric_zh.md
+```
+
+一次调用、两类输入：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——以及六维评分表连同其问题项格式约定，Step 1 组装评判依据摘要、Step 3 收集问题项用的都是它。后续步骤直接用这里装入的评分表，不再单独读。
 
 ## 角色
 
@@ -51,7 +57,7 @@ description: >-
 
 ### Step 1：载入评判依据
 
-读 AGENTS.md；若存在则读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的评判依据——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（AGENTS.md §3）。然后按 `references/review_rubric_zh.md` 组装**评判依据摘要**：Step 3 逐字发给每个收集器的就是这一块。
+读 AGENTS.md；若存在则读 `metds/codearc.md`（放置规则、命名约定、计划组件映射、§7 残留清单）；计划模式加读计划 §1–§6 与 `EXEC_PLAN.md` / `EXEC_LOG.md`。记下缺失的评判依据——没有 codearc.md 时，放置与命名检查退回 PEP 8 加周边代码的 upstream 风格（AGENTS.md §3）。然后按 `references/review_rubric_zh.md` 组装**评判依据摘要**（评分表已随开头**通用规约**段的那次装载调用到达，不再单独读）：Step 3 逐字发给每个收集器的就是这一块。
 
 ### Step 2：低开销静态证据
 

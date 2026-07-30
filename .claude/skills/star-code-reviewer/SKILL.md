@@ -19,11 +19,17 @@ description: >-
 
 # Research Code Reviewer — convention & conformance audit
 
-Match the user's language. For Chinese dialogue, read `SKILL_zh.md` in full before acting and follow it as the localized instructions; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Match the user's language. For Chinese dialogue, follow `SKILL_zh.md` as the localized instructions — issue its read together with the opening load call under **Shared conventions**, switched to the `_zh` / `.zh-CN` resources, in one message (the load set is identical in both languages, so neither waits on the other), and follow it from the moment it arrives; load other `*_zh.md` resources when referenced. Otherwise, follow this file and load unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with this skill's rubric in one Bash call, with the project root as the working directory:
+
+```bash
+cat docs/mds/star-workflow/research-workflow-conventions.md <this skill's directory>/references/review_rubric.md
+```
+
+One call, both inputs: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — and the six-dimension rubric with its finding contract, which Step 1's digest and Step 3's collection work from. Later steps use the rubric as loaded here — no separate read.
 
 ## Role
 
@@ -56,7 +62,7 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ### Step 1: Load the review rules
 
-Read CLAUDE.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 do-not-rename list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which review rules are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (CLAUDE.md §3). Then assemble the **review rule digest** defined in `references/review_rubric.md`: the one block Step 3 hands to every collector verbatim.
+Read CLAUDE.md; `metds/codearc.md` if present (placement rules, naming conventions, plan-component map, §7 do-not-rename list); in plan mode the plan §1–§6 plus `EXEC_PLAN.md` / `EXEC_LOG.md`. Record which review rules are absent — without codearc.md, placement and naming checks fall back to PEP 8 plus the upstream style of the surrounding code (CLAUDE.md §3). Then assemble the **review rule digest** defined in `references/review_rubric.md` (it arrived with the **Shared conventions** opening load — no separate read): the one block Step 3 hands to every collector verbatim.
 
 ### Step 2: Cheap static evidence
 
