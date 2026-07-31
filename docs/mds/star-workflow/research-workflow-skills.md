@@ -380,7 +380,7 @@ Google Scholar is deliberately not a source: it has no API, gates automated quer
 
 ### Practical guidance
 
-- Run it once the coach's method section is clear and before decomposition, so the sub-plans already know their baselines.
+- Two moments call for it: at the coach's §2 (related work and positioning), before that section is written — the break-out the coach recommends itself — and again once §3 (core method) is clear and before decomposition, where the search profile is richest and the sub-plans still need their baselines.
 - Prefer a reported shortfall to padding: 43 entries you can defend beat 50 you cannot.
 - The *Relation to This Project* section is what makes a note worth more than the paper's own abstract — read it before writing the plan's positioning.
 
