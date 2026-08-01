@@ -2,16 +2,18 @@
 name: star-proj-adopt
 disable-model-invocation: true
 description: >-
-  Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the existing
-  repository read-only (source layout, runtime, data / weights / output locations, launch entrypoints,
-  git history, prior runs), confirms the mapping with the user, then puts the mechanical setup in
-  place — writes .env, reaches large existing directories by symlink rather than moving them, wraps
-  existing launch
-  commands into execs/scpts/ — and records a work inventory of what is already built, already run, and
-  already concluded in metds/adopt.md, with the user's chosen historical runs recorded under wkdrs/. Use
-  when the user runs /skill:star-proj-adopt, wants to bring an existing / partially finished project into
-  STAR, asks how to onboard a repo that did not start from the template, or needs already-completed work
-  reflected in the plan tree. Bilingual (en/zh).
+  Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the
+  existing repository read-only (source layout, runtime, data / weights / output locations,
+  launch entrypoints, git history, prior runs), confirms the mapping with the user, then puts the
+  mechanical setup in place — writes .env, reaches large existing directories by symlink rather
+  than moving them, wraps existing launch commands into execs/scpts/ — and records a work inventory
+  of what is already built, already run, and already concluded in metds/adopt.md, with the
+  user's chosen historical runs recorded under wkdrs/. Phase `backfill` runs after the plan tree
+  exists: it matches that inventory to the leaves and, per leaf and only on the user's
+  confirmation, records exec_status / exec_runs so the tree reflects real progress instead of
+  reading as 0%. Use when the user runs /skill:star-proj-adopt, wants to bring an existing / partially
+  finished project into STAR, asks how to onboard a repo that did not start from the template,
+  or needs already-completed work reflected in the plan tree. Bilingual (en/zh).
 ---
 
 # Research Project Adopt — bring an in-progress project into STAR
@@ -56,11 +58,11 @@ Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) for t
 
 Detect, without writing anything: candidate source directories (top-level importable packages, the one the entrypoints import), the runtime actually in use (`conda env list`, a `.venv`, `which python`, an env name in existing scripts), where data / weights / outputs currently live, the launch entrypoints and how they are invoked, the existing tests, and the git history shape (first commit, commit count, active paths). Present the mapping as one compact block, marking every low-confidence line.
 
-Probing may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only subagent each, at most 3 in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Confirmation point 1 at all, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
+Probing may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `Agent` subagent (`subagent_type: explore`) each, at most 3 in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Confirmation point 1 at all, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
 
 #### Step S2: Confirmation point 1 — confirm the mapping
 
-Ask in the conversation, one question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
+Ask through AskUserQuestion, one question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
 
 #### Step S3: Put the mechanical setup in place
 
@@ -77,7 +79,7 @@ From git log, the entrypoints, the output directories, and the README, assemble 
 
 #### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
-List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once in the conversation (listed as text): which of these to record. For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
+List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via AskUserQuestion (multi_select): which of these to record. For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
 
 #### Step S6: Write the record & route
 
@@ -91,7 +93,7 @@ Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A sm
 
 #### Step B2: Confirmation point 3 — per-leaf confirmation
 
-The user confirms leaf by leaf in the conversation — list the proposed rows for confirmation when there are several, one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/skill:star-flow-status` will flag it as done-with-no-run, which is the honest state.
+The user confirms leaf by leaf via AskUserQuestion — multi_select over the proposed rows when there are several, one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/skill:star-flow-status` will flag it as done-with-no-run, which is the honest state.
 
 #### Step B3: Write, record, report
 
@@ -107,7 +109,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 
 ## Dialogue Discipline
 
-- All three confirmation points are asked in the conversation, one at a time. If it is unavailable (non-interactive `kimi -p`), fall back to plain text — still one at a time, and still requiring an explicit answer before any write past a confirmation point.
+- All three confirmation points go through AskUserQuestion, one question per call. If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text — still one at a time, and still requiring an explicit answer before any write past a confirmation point.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.
 - `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

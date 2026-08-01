@@ -2,16 +2,20 @@
 name: star-env-builder
 disable-model-invocation: true
 description: >-
-  Build and verify the project's Python runtime environment so plan execution has a working interpreter.
-  Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a
-  .venv under the project root. An existing environment is never deleted — after user confirmation it is
-  renamed to a dated backup (real run date) before rebuilding. Dependencies come from the first source
-  that has them: existing CODE_NAME/requirements* → packaging metadata (pyproject / setup.py /
-  environment.yml) → import scan of the code, with generated results written as requirements.txt plus a
-  requirements/ folder (framework|runtime|optional.txt; conda-only items in requirements/conda.txt).
-  Use when the user runs /skill:star-env-builder, wants the project's conda env or venv created or
-  rebuilt, needs dependencies resolved and installed, or wants the runtime environment verified.
-  Bilingual (en/zh).
+  Build and verify the project's Python runtime environment so plan execution has a working
+  interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default
+  CODE_NAME); otherwise a .venv under the project root. An existing environment is never
+  deleted — after user confirmation it is renamed to a dated backup (real run date) before
+  rebuilding. Dependencies come from the first source that has them: existing
+  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) →
+  import scan of the code, with generated results written as requirements.txt plus a
+  requirements/ folder (framework|runtime|optional.txt; conda-only items in
+  requirements/conda.txt). Installs in the order uv > pip > conda with CUDA-aware framework
+  wheel selection behind a single install-plan confirmation point, then smoke-tests in three layers
+  (imports → framework/GPU → project entrypoint) and writes ENV_REPORT.md plus a version
+  freeze under wkdrs/. Use when the user runs /skill:star-env-builder, wants the project's conda
+  env or venv created or rebuilt, needs dependencies resolved and installed, or wants the
+  runtime environment verified. Bilingual (en/zh).
 ---
 
 # Research Env Builder — runtime environment bootstrap
@@ -39,7 +43,7 @@ You **build the environment; you do not implement or refactor research code.** T
 ## Core Principles
 
 1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: it is the only one that may create, rename, or install into one.
-2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, in the conversation, one question per call, each with a recommendation.
+2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via AskUserQuestion, one question per call, each with a recommendation.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the install order is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed as a code asset once the build is verified.
@@ -79,7 +83,7 @@ Generated layout: `requirements.txt` holds only `-r requirements/framework.txt` 
 
 ### Step 4: Confirmation point — the user approves the install plan
 
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask in the conversation: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
+Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask via AskUserQuestion: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
 
 ### Step 5: Install (uv > pip > conda)
 
@@ -133,6 +137,6 @@ The environment already exists; this mode installs into it and records what it i
 
 ## Dialogue Discipline
 
-- The confirmation point and all situational questions are asked in the conversation — one at a time, each with a recommendation. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
+- The confirmation point and all situational questions go through AskUserQuestion — one question per call, each with a recommendation. If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

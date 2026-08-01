@@ -2,16 +2,19 @@
 name: star-code-reviewer
 disable-model-invocation: true
 description: >-
-  Review code against the project's written conventions and, when scoped to a plan, against what that
-  plan promised. With no argument it reviews all of ${CODE_NAME}/ (read from .env); a PLAN_NAME (slug /
-  numeric prefix / filename) reviews the files that plan touches plus plan conformance (§3 tasks, §4
-  deliverables, §5 done-criterion); an existing path reviews that path; `diff` or a git range reviews
-  only changed files. Gathers cheap static evidence through the .env conda env (never installs tools),
-  collects findings against a six-dimension rubric (docstrings, naming, simplicity, conventions,
-  correctness smells, conformance), re-verifies blocker/major findings before reporting, writes the
-  report under wkdrs/, then offers a per-item-approved fix pass for mechanical, behavior-preserving
-  issues only. Use when the user runs /skill:star-code-reviewer, or wants to review / audit code quality,
-  check coding conventions or docstrings, or verify a plan's implementation in code. Bilingual (en/zh).
+  Review code against the project's written conventions and, when scoped to a plan, against what
+  that plan promised. With no argument it reviews all of ${CODE_NAME}/ (read from .env); a
+  PLAN_NAME (slug / numeric prefix / filename) reviews the files that plan touches plus plan
+  conformance (§3 tasks implemented, §4 deliverables on disk, §5 done-criterion supported); an
+  existing path reviews that path; `diff` or a git range reviews only changed files. Gathers
+  cheap static evidence through the .env conda env (never installs tools), collects findings
+  against a six-dimension rubric (docstrings, naming, simplicity, STAR conventions, correctness
+  smells, plan conformance), re-verifies blocker/major findings before reporting, writes the
+  review report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
+  behavior-preserving issues only — feature gaps route to star-plan-executor, plan divergence
+  to star-plan-reviser, structural reorganization to star-code-architect. Use when the user
+  runs /skill:star-code-reviewer, or wants to review / audit code quality, check coding conventions
+  or docstrings, or verify a plan's implementation in code. Bilingual (en/zh).
 ---
 
 # Research Code Reviewer — convention & conformance audit
@@ -39,10 +42,10 @@ You review and polish; you do not implement features, revise plans, reorganize t
 ## Core Principles
 
 1. **Review rules are written down; every finding cites one.** The rules come from AGENTS.md (esp. §2 simplicity, §3 surgical changes, §8 layout, §9 runtime), from `metds/codearc.md` when it exists (placement rules, naming conventions, the do-not-rename list), and — in plan mode — from the plan's §2–§5. Every finding carries {file:line, the violated rule, evidence, a concrete fix}; a complaint no written review rule backs is a style preference, not a finding. Rubric: `references/review_rubric.md`.
-2. **Find wide, verify before reporting.** Collection may fan out to read-only subagents, but the main agent re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
+2. **Find wide, verify before reporting.** Collection may fan out to read-only `Agent` subagents (`subagent_type: explore`), but the main agent re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
 3. **Conformance is scored against disk, never against logs.** In plan mode, §3 tasks map to code as `implemented` / `partial` / `missing` with pointers, §4 deliverables are checked on disk, and the §5 done-criterion is checked for supporting machinery — EXEC_LOG's claims are corroborated against actual code, never trusted (the reviser's discipline, applied to code).
 4. **Static tools are evidence, not judges — and never installed.** `python -m compileall -q` always (zero dependencies); ruff/flake8 only if already present in the `.env` env. Tool output feeds findings; it does not replace reading the code. No usable env → the review degrades to reading-only, says so in the report, and recommends `/skill:star-env-builder`. Never modify the environment.
-5. **Fixes are mechanical, individually approved, behavior-preserving.** After the report, offer a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. Each item is approved in the conversation before it is applied — one finding (or one same-type batch) per question, recommendation marked — and re-verified after application. Never bundle-approve silently; never "improve" adjacent code (AGENTS.md §3).
+5. **Fixes are mechanical, individually approved, behavior-preserving.** After the report, offer a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. Each item is approved via AskUserQuestion before it is applied — one finding (or one same-type batch) per question, recommendation marked — and re-verified after application. Never bundle-approve silently; never "improve" adjacent code (AGENTS.md §3).
 6. **Read-only beyond the fix pass; the STOP line applies.** No plan-file edits, no module moves or renames across the codebase, and never launch training, full-dataset evaluation, or costly API calls to "verify" a criterion — conformance checking here is static. Names on codearc.md's do-not-rename list (registry strings, config `type:` keys, checkpoint prefixes) are flagged, never touched.
 
 ## Workflow
@@ -55,9 +58,9 @@ You review and polish; you do not implement features, revise plans, reorganize t
    - A plan name (slug / numeric prefix / filename against `metds/plans/*_plan.md`; a `metds/plans/` path counts) → **plan mode**.
    - An existing file or directory → **path mode**; a `wkdrs/<run>/` directory back-resolves to the plan whose `exec_runs` names it → plan mode.
    - No argument → all of `${CODE_NAME}/`.
-   - Nothing matches → list the nearest plan and path candidates and ask in the conversation.
+   - Nothing matches → list the nearest plan and path candidates and ask via AskUserQuestion.
 3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip.
-4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — it is grep and `wc`, and needs no environment — then say so and offer to narrow (one sub-package, or diff mode) in the conversation. An offer that asks the user to guess a sub-package is a worse offer.
+4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — it is grep and `wc`, and needs no environment — then say so and offer to narrow (one sub-package, or diff mode) via AskUserQuestion, naming from the screen where the evidence already is. An offer that asks the user to guess a sub-package is a worse offer.
 
 ### Step 1: Load the review rules
 
@@ -78,8 +81,8 @@ It is grep and `wc`, never a tree-wide linter run: a repo-wide `ruff check` is t
 ### Step 3: Collect findings
 
 - **Small scope** (≤ ~20 files — a diff-mode review usually is): the main agent reads every file and applies `references/review_rubric.md` directly.
-- **Larger scope**: partition by package/directory into read-only subagents, at most 3 in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
-- **plan mode adds dimension F** (main agent, not the read-only subagents — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
+- **Larger scope**: partition by package/directory into read-only `Agent` subagents (`subagent_type: explore`), at most 3 in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
+- **Plan mode adds dimension F** (main agent, not the read-only subagents — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
 
 ### Step 4: Verify
 
@@ -96,7 +99,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 ### Step 7: Optional fix pass (mechanical only)
 
 1. **Eligible**: missing or incomplete docstrings; renames whose references all live inside the reviewed scope; unused imports; dead code this project introduced (upstream-inherited dead code is reported, never deleted — AGENTS.md §3); comment fixes the rubric flagged. **Ineligible**: anything touching behavior, signatures used outside the scope, files outside the scope, or names on the do-not-rename list.
-2. Walk the eligible findings in report order in the conversation — *apply as proposed* / *apply adjusted* / *skip*, recommendation marked, one finding per question. More than 4 same-type findings (e.g. 12 missing docstrings) may be batched into one question: *apply all* / *select which* / *skip all*.
+2. Walk the eligible findings in report order via AskUserQuestion — *apply as proposed* / *apply adjusted* / *skip*, recommendation marked, one finding per question. More than 4 same-type findings (e.g. 12 missing docstrings) may be batched into one question: *apply all* / *select which (multi_select)* / *skip all*.
 3. Apply each approved fix; after each touched file re-run `compileall` on it (plus ruff when available), and for renames grep the old symbol across `${CODE_NAME}/` to prove no stale references remain. A failed re-check → revert that fix, mark it `reverted`, continue.
 4. Append the fix record to the report (`F<n> — applied / skipped / reverted`). If the working tree was clean at Step 0, ask one final question: commit the fixes (stage only the files this pass touched; message `star-code-reviewer: apply review fixes — <scope>`) or leave them uncommitted. With a dirty tree, leave them uncommitted and say so.
 5. Close with what was applied, skipped, and routed, plus the report path.
@@ -112,5 +115,5 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 
 ## Dialogue Discipline
 
-- All fix-pass approvals are asked in the conversation — one finding (or one same-type batch) per call. If it is unavailable (non-interactive `kimi -p`), fall back to plain text, still one at a time, and require an explicit approval before any write.
+- All fix-pass approvals go through AskUserQuestion — one finding (or one same-type batch) per call. If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text, still one at a time, and require an explicit approval before any write.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The report follows the plan's frontmatter `language` in plan mode (else the dialogue language); keep technical terms in English inside Chinese reports.

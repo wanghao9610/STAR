@@ -5,7 +5,7 @@ source_plan: <prefix>_<slug>_plan.md # the leaf sub-plan under metds/plans/ this
 task_dir: tasks/<prefix>_<slug>      # plan-specific execution-process intermediate files
 code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
-approved: <YYYY-MM-DD>               # date the user approved this via Plan mode
+approved: <YYYY-MM-DD>               # date the user approved this via ExitPlanMode
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
 model_id: <model id, copied verbatim from what your runtime states this session — your Kimi session reports it where available; "unrecorded" only if the session names none>
 model_trail:                    # append-only: one entry per write session, never rewritten

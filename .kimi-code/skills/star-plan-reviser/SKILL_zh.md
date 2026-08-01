@@ -35,8 +35,8 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线对你同样生效）。这是把项目的 Verification 规则（AGENTS.md §10）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 subagent**（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
-3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条在对话里采纳 / 调整 / 跳过，一次一条，标出你的推荐——绝不打包批准，绝不擅自动笔。
+2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: explore`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
+3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条经 AskUserQuestion 采纳 / 调整 / 跳过，一次一条，标出你的推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/skill:star-plan-decomposer`；研究问题或方法级转向转给 `/skill:star-plan-coach`。边界见 `references/revision_rules_zh.md`。
 6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `/skill:star-flow-status` 浮现。
@@ -46,7 +46,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ### Step 0：解析目标计划
 
 1. 用 `PLAN_NAME`（slug / 数字前缀 / 完整文件名）匹配开场装载的摘要列出的计划——摘要就是那份清单；完整读入解析到的计划。
-2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并在对话里询问——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
+2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并经 AskUserQuestion 询问——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
 3. 判定节点类型：**叶子**（审它自己的 run）vs **根/内部**（审总体计划章节 + children 汇总）。这决定 Step 1 的证据集合。
 
 ### Step 1：圈定证据
@@ -59,7 +59,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径，且 §2–§3 没有点名任何代码模块——由主 agent 自己读：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
 
-规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 subagent——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
+规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: explore`）——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 
@@ -73,7 +73,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 4：修订问答（一次一条）
 
-1. 按报告顺序走候选，每条一个问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；用户始终可自由作答、不限于选项。**structural** 或 **strategic** 候选的选项是：*转给 `/skill:star-plan-decomposer` 或 `/skill:star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
+1. 按报告顺序走候选，每条一次 AskUserQuestion：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；内置"Other"始终允许自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/skill:star-plan-decomposer` 或 `/skill:star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
 2. 走完清单后问一次：还有其他要改的吗？用户新增的项同样作为候选（证据记"user directive"）。
 3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；写出的报告就是交付物。
 
@@ -106,5 +106,5 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 对话纪律
 
-- 对话提问在非交互 `kimi -p` 下（无人应答）时退化为纯文本提问——仍然一次一条候选，仍然先获明确批准再写入。
+- AskUserQuestion 不可用（非交互 `kimi -p` 下，无人应答）时退化为纯文本提问——仍然一次一条候选，仍然先获明确批准再写入。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。计划正文与审查报告跟随计划 frontmatter 的 `language`；中文计划里技术名词保留英文。

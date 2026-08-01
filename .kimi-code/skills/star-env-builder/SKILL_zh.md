@@ -41,7 +41,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 ## 核心原则
 
 1. **`.env` 是唯一路径来源；从不 activate**（规约 §3）。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。环境归本 skill 所有：只有它可以创建、重命名环境或往里安装。
-2. **一个确认点，场景化追问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用对话提问问，每次只问一题，都带推荐项。
+2. **一个确认点，场景化追问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 AskUserQuestion 问，每次只问一题，都带推荐项。
 3. **只改名，绝不删除。**已有环境通过重命名为 `<名称>_<YYYYMMDD>` 备份——日期用运行时的 `date +%Y%m%d` 获取，绝不编造。本 skill 永不删除任何环境；过期备份由用户自行清理。
 4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装方式与失败处理：优先 uv，逐包降级 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
 5. **沿用已有的，只生成缺失的。**已有 requirements 布局按原样安装，绝不改写。生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后作为代码资产提交。
@@ -81,7 +81,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 4：确认点——用户批准安装计划
 
-以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后在对话里问：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
+以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后用 AskUserQuestion 问：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
 
 ### Step 5：安装（uv > pip > conda）
 
@@ -135,6 +135,6 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 对话纪律
 
-- 确认点与所有场景化问题都在对话里逐条问——每次只问一题，都带推荐项。在非交互 `kimi -p` 下（无人应答）回退为普通文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
+- 确认点与所有场景化问题都走 AskUserQuestion——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）回退为普通文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。

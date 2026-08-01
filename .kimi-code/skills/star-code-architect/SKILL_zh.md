@@ -35,7 +35,7 @@ description: >-
 2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
 3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
-5. **主 agent 编排与复核，subagent 执行。**勘察交给只读 subagent；迁移交给的 subagent 其写入仅限本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。格式约定见 `references/orchestration_spec_zh.md`。
+5. **主 agent 编排与复核，`Agent` subagent 执行。**勘察交给只读 `Agent` subagent（`subagent_type: explore`）；迁移交给 `Agent` subagent（`subagent_type: coder`），其写入仅限本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。格式约定见 `references/orchestration_spec_zh.md`。
 6. **单一规范，一小段指路说明。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划各组件对应的代码路径、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行的摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻的指路说明。规范内容绝不复制成多份。
 
 ## 工作流
@@ -43,8 +43,8 @@ description: >-
 ### Step 0：定向并选择分支
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用对话提问询问选哪份）。
-3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `/skill:star-proj-adopt` 转介进来的状态。否则在对话里问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
+2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用 AskUserQuestion 询问选哪份）。
+3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 负责整理既有代码，本就不需要计划，而这正是 `/skill:star-proj-adopt` 转介进来的状态。否则用 AskUserQuestion 问：*先跑 `/skill:star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划* 两个选项。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（搭建）**；已有真实代码 → **分支 B（整理）**；只有零散几个脚本 → 询问是围绕它们搭建还是整理现状。
 
@@ -64,7 +64,7 @@ description: >-
 
 #### Step A4：确认点 1——用户选定参考库
 
-用对话提问呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留兜底选项（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
+用 AskUserQuestion 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留兜底选项（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 
 #### Step A5：克隆到位
 
@@ -90,7 +90,7 @@ description: >-
 
 #### Step B1：勘察
 
-派发只读 subagent，一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——最多 3 个并行，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的可疑写法）。
+派发只读 `Agent` subagent（`subagent_type: explore`），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——最多 3 个并行，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的可疑写法）。
 
 ### 汇合：架构、迁移、规范
 
@@ -100,11 +100,11 @@ description: >-
 
 #### Step C2：确认点 2——用户批准
 
-以普通文本展示架构摘要与编号迁移表。随后在对话里确认：迁移项 ≤4 条时逐条列出勾选；更多时给 *全部批准* / *全部批准但排除（写出编号）* / *重新设计*。只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
+以普通文本展示架构摘要与编号迁移表。随后用 AskUserQuestion 确认：迁移项 ≤4 条时用 multi_select 逐条勾选；更多时给 *全部批准* / *全部批准但排除（在 Other 里写编号）* / *重新设计*。只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
 
 #### Step C3：执行迁移
 
-把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 subagent，格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
+把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: coder`），格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
 #### Step C4：写出规范
 
@@ -133,6 +133,6 @@ description: >-
 
 ## 对话纪律
 
-- 两个确认点与所有提问都在对话里逐条问——每次只问一题。在非交互 `kimi -p` 下（无人应答）回退为普通文本，仍一次一题，且任何跨确认点副作用都要先拿到明确的批准文字。
+- 两个确认点与所有提问都走 AskUserQuestion——每次调用只问一题。不可用时（无头/脚本化）回退为普通文本，仍一次一题，且任何跨确认点副作用都要先拿到明确的批准文字。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `metds/codearc.md` 正文语言跟随根计划的 `language`（无计划则用对话语言）；`UPSTREAM.md` 一律英文（事实元数据）；中文文档中专业术语保留英文。

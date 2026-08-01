@@ -39,8 +39,8 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 ## Core Principles
 
 1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies to you too). This applies the project's Verification rule (AGENTS.md §10) to the plan itself. Rules: `references/review_spec.md`.
-2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to parallel **read-only subagents** (execution log / artifacts / code state), each returning the structured collector contract in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
-3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped in the conversation, one candidate per call, with your recommendation marked — never bundle-approve, never edit unasked.
+2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to parallel **read-only `Agent` subagents** (`subagent_type: explore`) (execution log / artifacts / code state), each returning the structured collector contract in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
+3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped via AskUserQuestion, one candidate per call, with your recommendation marked — never bundle-approve, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
 5. **Stay inside the family's write discipline.** Never renumber prefixes; never touch `EXEC_PLAN.md` / `EXEC_LOG.md` (the executor's); structural re-shaping (add/remove sub-plans, redraw the dependency graph) routes to `/skill:star-plan-decomposer`; research-question or method pivots route to `/skill:star-plan-coach`. Boundaries: `references/revision_rules.md`.
 6. **Knock-on effects.** A revision can invalidate work built on the old text. Point out reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; let the bumped `updated` show staleness in `/skill:star-flow-status`.
@@ -50,7 +50,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 ### Step 0: Resolve the target plan
 
 1. Interpret `PLAN_NAME` (slug / numeric prefix / full filename) against the plans the opening load's digest lists — the digest is the listing; read the resolved plan in full.
-2. If no argument was given or the match is ambiguous, list candidates (prefix + slug + one-line state) and ask in the conversation — prefer nodes with execution evidence (`exec_runs` non-empty) or known drift.
+2. If no argument was given or the match is ambiguous, list candidates (prefix + slug + one-line state) and ask via AskUserQuestion — prefer nodes with execution evidence (`exec_runs` non-empty) or known drift.
 3. Classify the node: **leaf** (audit its own run) vs **root/internal** (audit strategy sections + a summary of the children). This sets the evidence set for Step 1.
 
 ### Step 1: Scope the evidence
@@ -63,7 +63,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 **Small evidence set** — one run, ≤ ~5 steps, ≤ ~3 deliverable paths, and no code modules named in §2–§3 — is read by the main agent itself: `EXEC_PLAN.md`, `EXEC_LOG.md`, and a stat per deliverable. Three collectors at that size is the case conventions §6.1 rules out.
 
-Larger than that: dispatch parallel read-only subagents per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
+Larger than that: dispatch parallel read-only `Agent` subagents (`subagent_type: explore`) per the collector contracts in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
 
 Cross-check disagreements in the main agent — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks yourself; never anything heavy.
 
@@ -77,7 +77,7 @@ Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If
 
 ### Step 4: Revision Q&A (one candidate at a time)
 
-1. Walk the candidates in report order, one question per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the user may answer freely outside the options. For **structural** or **strategic** candidates the options are *route to `/skill:star-plan-decomposer` or `/skill:star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running record as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without that record the user approves edit 9 with no view of edits 1–8.
+1. Walk the candidates in report order, one AskUserQuestion per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the built-in "Other" field lets the user answer freely. For **structural** or **strategic** candidates the options are *route to `/skill:star-plan-decomposer` or `/skill:star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running record as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without that record the user approves edit 9 with no view of edits 1–8.
 2. After the list, ask once whether anything else should change. User-added items become candidates too (evidence: "user directive").
 3. If nothing is adopted, skip to Step 7 — a pure review is a valid outcome; the persisted report is the deliverable.
 
@@ -110,5 +110,5 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ## Dialogue Discipline
 
-- In non-interactive `kimi -p` runs (no human to answer), fall back to plain-text questions — still one candidate at a time, still explicit approval before any write.
+- If AskUserQuestion is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain-text questions — still one candidate at a time, still explicit approval before any write.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The plan body and the review report follow the plan's frontmatter `language`; keep technical terms in English inside Chinese plans.

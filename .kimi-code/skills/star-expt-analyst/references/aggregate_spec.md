@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers. That is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is read by the main agent. Above that, partition the **report paths** across read-only subagents, at most 3 in parallel, each given its exact list and this return contract:
+A programme of ≤ ~6 reports is read by the main agent. Above that, partition the **report paths** across read-only `Agent` subagents (`subagent_type: explore`), at most 3 in parallel, each given its exact list and this return contract:
 
 ```yaml
 - run: <slug>

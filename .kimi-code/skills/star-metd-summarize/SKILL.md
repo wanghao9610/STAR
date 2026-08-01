@@ -5,14 +5,25 @@ description: >-
   Compile the research-plan tree under metds/plans/ into paper-ready method documents under metds/.
   Invoked as /skill:star-metd-summarize [OPT] where OPT is overview, dataset, framework, training, or
   evaluation; no argument compiles all five in dependency order (dataset → framework → training →
-  evaluation → overview, which links the other four and so compiles last). An end-of-flow skill:
-  the readiness check compiles only a finished tree — every top-level plan finalized and every leaf
-  exec_status done, i.e. all experiments finished and the method determined — and otherwise stops,
-  naming and routing the unfinished work; a draft compile is an explicit user choice, never the
-  default. Use when all experiments are finished and the plans are finalized and the user runs
-  /skill:star-metd-summarize, or wants to summarize / consolidate the finished research plans into a
-  method write-up, produce overview, dataset, framework, training or evaluation documentation, or
-  draft paper method material from the plans. Bilingual (en/zh).
+  evaluation → overview, which links the other four and so compiles last). Rebuilds the plan tree
+  from parent:, then extracts what each document needs through a written map (overview ← root §1
+  problem, §2 positioning, §3 idea, §6 milestones; dataset ← §4 data choices plus every leaf's §2
+  datas/ inputs and data-building steps; framework ← §3 route plus modeling leaves and their
+  ${CODE_NAME}/ paths; training ← §3 strategy, §4 budget, inits/ and hyperparameters; evaluation ←
+  §4 benchmarks, baselines, metrics and ablation design plus §5 kill-criteria), merges the passages
+  by what a reader needs — the method, its data, its training, its evaluation — instead of by
+  plan, resolves conflicts by preferring the leaf plan over its parent and the newer plan over
+  the older, marks content from unexecuted leaves as not yet verified, and turns uncovered
+  template sections into TODOs naming the plan section to fill. Plans are the only source — never
+  code, logs, wkdrs/ or chat; result numbers stay with star-expt-analyst. Writes only metds/<OPT>.md,
+  and overwrites an existing generated doc only after a section-level change list is approved. An
+  end-of-flow skill: the readiness check compiles only a finished tree — every top-level plan
+  finalized and every leaf exec_status done, i.e. all experiments finished and the method
+  determined — and otherwise stops, naming and routing the unfinished work; a draft compile is an
+  explicit user choice, never the default. Use when all experiments are finished and the plans are
+  finalized and the user runs /skill:star-metd-summarize, or wants to summarize / consolidate the
+  finished research plans into a method write-up, produce overview, dataset, framework, training or
+  evaluation documentation, or draft paper method material from the plans. Bilingual (en/zh).
 ---
 
 # Research Method Summarizer — plans → method documents
@@ -52,7 +63,7 @@ You compile and reorganize; you do not decide method, revise plans, read code, o
 ### Step 0: Resolve the targets
 
 1. Read `.env` and resolve `CODE_NAME` (conventions §3) — `framework.md` and `training.md` cite `${CODE_NAME}/` paths.
-2. Interpret the argument: one of the five OPTs → that document; no argument → all five in dependency order (`overview` last: it links the other four); anything else → name the five valid OPTs and ask in the conversation which was meant.
+2. Interpret the argument: one of the five OPTs → that document; no argument → all five in dependency order (`overview` last: it links the other four); anything else → name the five valid OPTs and ask via AskUserQuestion which was meant.
 3. **An empty plan tree is a valid answer.** No `metds/plans/*_plan.md` → say so and stop, routing to `/skill:star-plan-coach`. Never compile a method document from nothing.
 
 ### Step 1: Scan the plan tree
@@ -60,15 +71,15 @@ You compile and reorganize; you do not decide method, revise plans, read code, o
 Every plan's **frontmatter** arrived in the opening load's digest — every field this step records lives there, and plan bodies are Step 2's input, not this step's, so open no plan file here. Rebuild the tree from `parent:` — authoritative, and where it is missing or ambiguous that plan's `## Sub-plans` index, which the digest carries too, places the node; the numeric prefix only hints, since two unrelated roots can both be `0_` (`/skill:star-flow-status`'s rule). Record per node: root / internal / leaf, `updated`, `language`, the `status:` map, and on leaves `exec_status` and `traces_to`.
 
 - **Output language** follows the plans: the root's `language:`; with several roots, the majority; a tie takes the dialogue language.
-- **One document set describes one method.** If the tree has several unrelated roots, say so and ask in the conversation which root's subtree these documents describe; the answer scopes the whole run.
-- **Readiness check — compile only a determined method.** The tree in scope is ready only when every top-level plan carries `finalized:` and every leaf is `exec_status: done` — all experiments finished, the plans final. Anything less: compile nothing, list what is open (each leaf not `done` with its `exec_status`, each top-level plan missing `finalized:`), and route it — unexecuted or blocked leaves to `/skill:star-plan-executor`, an unfinalized top-level plan to `/skill:star-plan-coach`, the whole picture to `/skill:star-flow-status` — then stop. Past that check there is one path: the user, shown exactly what is unfinished, explicitly chooses in the conversation to compile a draft anyway — then every passage from an unfinished leaf carries the not-yet-verified mark (Step 3).
+- **One document set describes one method.** If the tree has several unrelated roots, say so and ask via AskUserQuestion which root's subtree these documents describe; the answer scopes the whole run.
+- **Readiness check — compile only a determined method.** The tree in scope is ready only when every top-level plan carries `finalized:` and every leaf is `exec_status: done` — all experiments finished, the plans final. Anything less: compile nothing, list what is open (each leaf not `done` with its `exec_status`, each top-level plan missing `finalized:`), and route it — unexecuted or blocked leaves to `/skill:star-plan-executor`, an unfinalized top-level plan to `/skill:star-plan-coach`, the whole picture to `/skill:star-flow-status` — then stop. Past that check there is one path: the user, shown exactly what is unfinished, explicitly chooses via AskUserQuestion to compile a draft anyway — then every passage from an unfinished leaf carries the not-yet-verified mark (Step 3).
 - **A plan whose relevant sections are still `pending`** contributes nothing but a gap — note it now, so the report can name it instead of silently thinning the document.
 
 ### Step 2: Extract
 
 Follow `references/extract_map.md`: for each target it names the plan sections that feed each document section, and how to tell which leaves are relevant — by what a leaf's §2 inputs, §3 steps, and §4 deliverables actually **name** (a `datas/` input, an `inits/` weight, a `${CODE_NAME}/` module, a benchmark), never by guessing from its title. A leaf may feed several documents. Carry every passage with its provenance `{plan file, §, updated, exec_status}` — Steps 3–5 need it for conflict resolution, the not-yet-verified marks, and the `sources:` frontmatter.
 
-**Scale**: Step 1 read frontmatter only, so this is the step that brings plan bodies into the run at all. A small tree (≤ ~15 plans) is read by the main agent. For a larger one, partition **by plan** into read-only subagents, at most 3 in parallel, each given the whole map, a disjoint set of whole plan files, and the extraction contract in `extract_map.md`. Every collector extracts for all five targets from the plans it holds, and labels each passage with the `target:` it feeds.
+**Scale**: Step 1 read frontmatter only, so this is the step that brings plan bodies into the run at all. A small tree (≤ ~15 plans) is read by the main agent. For a larger one, partition **by plan** into read-only `Agent` subagents (`subagent_type: explore`), at most 3 in parallel, each given the whole map, a disjoint set of whole plan files, and the extraction contract in `extract_map.md`. Every collector extracts for all five targets from the plans it holds, and labels each passage with the `target:` it feeds.
 
 Partitioning by document target instead is what this replaces, and it fails twice. A leaf commonly feeds several documents, so the file lists would overlap and the same plan would be read three or four times — and conventions §6.2 gives concurrent delegates disjoint file ownership without exception. Worse, deciding which leaf feeds which document is exactly the reading this step exists to delegate: `extract_map.md` settles it from a leaf's §2 inputs, §3 steps and §4 deliverables and forbids guessing from the title, and Step 1 no longer opens a plan body at all. There is no way to hand a collector an exact per-document file list without first doing its work.
 
@@ -89,7 +100,7 @@ Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep t
 For each target, in dependency order:
 
 - **Missing** → write it.
-- **Exists, generated by this skill** (`type:` + `generated:` present) → compare against the freshly compiled content. No substantive change → leave the file untouched and say so; do not churn the `generated` date. Substantive change → show the section-level change list (one line per section: added / rewritten / removed / unchanged, and what changed) and ask in the conversation to overwrite or skip — one question per document. When more than two documents differ, they may be batched into one question: which to overwrite.
+- **Exists, generated by this skill** (`type:` + `generated:` present) → compare against the freshly compiled content. No substantive change → leave the file untouched and say so; do not churn the `generated` date. Substantive change → show the section-level change list (one line per section: added / rewritten / removed / unchanged, and what changed) and ask via AskUserQuestion to overwrite or skip — one question per document. When more than two documents differ, they may be batched into one multi_select question: which to overwrite.
 - **Exists without that frontmatter** → hand-authored. Do not diff-and-overwrite: say what the file contains, what compiling would replace it with, and ask. Leaving it alone is a valid outcome; so is compiling to a path the user names.
 - **Stale check**: compare each existing doc's recorded `sources:` dates against those plans' current `updated`. A doc whose sources moved is stale — report it even for targets this run did not compile.
 
@@ -108,5 +119,5 @@ For each target, in dependency order:
 
 ## Dialogue Discipline
 
-- The five confirmation points are all asked in the conversation: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (non-interactive `kimi -p`), fall back to plain text and still require an explicit approval before overwriting any existing file — and never compile past the readiness check without one.
+- AskUserQuestion carries the five confirmation points: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text and still require an explicit approval before overwriting any existing file — and never compile past the readiness check without one.
 - Reply in the user's language; the documents follow the plans' `language` (Step 1), which may differ from the dialogue. Keep technical terms — metric names, module paths, dataset names — in English inside Chinese documents.

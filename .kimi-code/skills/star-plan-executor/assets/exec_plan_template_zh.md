@@ -5,7 +5,7 @@ source_plan: <prefix>_<slug>_plan.md # 本次执行的 metds/plans/ 下叶子子
 task_dir: tasks/<prefix>_<slug>      # 该计划执行过程的中间文件目录
 code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
-approved: <YYYY-MM-DD>               # 用户经 Plan 模式批准的日期
+approved: <YYYY-MM-DD>               # 用户经 ExitPlanMode 批准的日期
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
 model_id: <模型 id，照抄运行时本会话为你声明的那串——Kimi 会话有报告就照记；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目

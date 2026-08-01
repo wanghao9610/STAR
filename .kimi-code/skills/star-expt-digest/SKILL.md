@@ -2,16 +2,19 @@
 name: star-expt-digest
 disable-model-invocation: true
 description: >-
-  Summarize what the experiment programme has done lately, in date order. No argument resumes from the
-  previous digest's last covered date and covers everything since; a PLAN_NAME covers that node's whole family —
-  ancestors for claim context, every descendant for evidence — unbounded in time; `<N>d` or a date covers
-  a window; `all` covers the whole history from the beginning. Collects each in-scope run's newest EXPT_ANALYSIS report,
-  tabulates verdicts and headline metrics with their provenance, derives what moved since the previous
-  digest (new runs, changed verdicts, newly analyzed runs), gathers plan-level findings and kill-criteria
-  hits, notes which plans were created or revised in the period, and lists the gaps. Use when the user
-  runs /skill:star-expt-digest, or wants a weekly / periodic summary of experiment progress, what
-  happened since last time, what a plan family has produced so far, or material for a progress report.
-  Bilingual (en/zh).
+  Summarize what the experiment programme has done lately, in date order. No argument resumes
+  from the previous digest's last covered date and covers everything since; a PLAN_NAME covers that node's
+  whole family — ancestors for claim context, every descendant for evidence — unbounded in time;
+  `<N>d` or a date covers a window; `all` covers the whole history from the beginning. Collects
+  each in-scope run's newest EXPT_ANALYSIS report, tabulates verdicts and headline metrics with their provenance,
+  derives what moved since the previous digest (new runs, changed verdicts, newly analyzed runs),
+  gathers plan-level findings and kill-criteria hits, notes which plans were created or revised in the
+  period, and lists the gaps. A run with no analysis report is read raw for a provisional line only,
+  tagged unverified in its own table, never scored and never quoted as a result. Writes one dated
+  digest to wkdrs/digests/. Read-only otherwise: never edits plans, exec_status, logs, or the
+  results table, and never re-runs an experiment. Use when the user runs /skill:star-expt-digest, or
+  wants a weekly / periodic summary of experiment progress, what happened since last time, what a
+  plan family has produced so far, or material for a progress report. Bilingual (en/zh).
 ---
 
 # Research Experiment Digest — the periodic progress record
@@ -125,6 +128,6 @@ Roll every artifact's `model_trail` into one table — the cross-artifact view o
 
 ## Dialogue Discipline
 
-- Ask in the conversation only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). If it is unavailable (non-interactive `kimi -p`), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
+- Ask via AskUserQuestion only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
 - Never present a provisional number as a result in chat either. If the digest tagged it unverified, the reply says so too.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.

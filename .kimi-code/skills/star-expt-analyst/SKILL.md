@@ -2,12 +2,23 @@
 name: star-expt-analyst
 disable-model-invocation: true
 description: >-
-  Analyze what a plan's execution run actually produced and judge it against what the plan expected. A
-  PLAN_NAME (slug / numeric prefix / filename) resolves through the plan's exec_runs to its wkdrs/<run>/
-  directory; a wkdrs/<run>/ path back-resolves to its plan; no argument lists the runs on disk and asks.
-  Use when the user runs /skill:star-expt-analyst, or wants to analyze / interpret experiment results,
-  outputs or artifacts, check whether a run met its expectations or done-criteria, read training logs or
-  metrics, or find out what a finished run means for the plan. Read-only otherwise: never edits plans, exec_status, or EXEC_LOG; `watch` gives a chat-only quick check of a still-running run. Bilingual (en/zh).
+  Analyze what a plan's execution run actually produced and judge it against what the plan
+  expected. A PLAN_NAME (slug / numeric prefix / filename) resolves through the plan's exec_runs
+  to its wkdrs/<run>/ directory; a wkdrs/<run>/ path back-resolves to its plan; no argument lists
+  the runs on disk and asks. Inventories the §4 deliverables against disk, corroborates EXEC_LOG's
+  step claims with artifacts, scans training / eval logs for health signals (crashes, NaN, OOM,
+  divergence, overfitting), extracts the metrics the §5 done-criteria name and scores them against
+  those criteria plus root §4 metrics and stated baselines, interprets what the numbers mean for
+  the claim the plan traces to (root kill-criteria, signs of data leakage, single-seed limits), and
+  appends a lightweight comparison when sibling runs of the same plan exist. Renders curves only
+  when matplotlib is already installed (never installs anything), re-reads every cited number
+  before it enters the report, and writes the analysis under wkdrs/<run>/. Read-only otherwise:
+  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing
+  metric — that command goes back to the user; `watch` gives a chat-only quick check of a
+  possibly still-running run. Use when the user runs /skill:star-expt-analyst, or wants
+  to analyze / interpret experiment results, outputs or artifacts, check whether a run met its
+  expectations or done-criteria, read training logs or metrics, or find out what a finished run
+  means for the plan. Bilingual (en/zh).
 ---
 
 # Research Experiment Analyst — results audit
@@ -33,7 +44,7 @@ You read and interpret; you do not execute steps, fix code, revise plans, or fli
 ## Core Principles
 
 1. **Expectations are written down; every verdict cites one.** The review rules are the sub-plan's §5 done-criteria, its §4 deliverables, the root's §4 metrics and §5 kill-criteria, and any baseline the plan states. Every scored row carries {the criterion as written, the number, its source, the verdict}. Where the plan states no expectation, the row reads **no stated expectation** — never invent a threshold, and never retrofit one to the number you found. Rubric: `references/analysis_rubric.md`.
-2. **Read wide, verify every number before it enters the report.** Collection may fan out to read-only subagents, but the main agent re-opens the cited file at the cited line for every number and every blocker/major observation before the report keeps it; what does not hold up is downgraded or dropped. One wrong number costs the report its credibility — and a number in a report gets quoted into a paper.
+2. **Read wide, verify every number before it enters the report.** Collection may fan out to read-only `Agent` subagents (`subagent_type: explore`), but the main agent re-opens the cited file at the cited line for every number and every blocker/major observation before the report keeps it; what does not hold up is downgraded or dropped. One wrong number costs the report its credibility — and a number in a report gets quoted into a paper.
 3. **Disk is the evidence; EXEC_LOG is a claim to corroborate.** A step marked `done` is a claim until its artifact is found on disk and matches what it says; a metric quoted in the log is a claim until it is traced back to the file that produced it. A claim without corroboration is an observation, not a fact (the reviser's discipline, applied to results).
 4. **Light parsing only; tools are evidence, never installed.** Read files, grep logs, and run small parsing snippets through the `.env` conda env. pandas / matplotlib / tensorboard are used **only if already installed**; absent, the analysis degrades — text-only, no curves — and the report says so. Never install or upgrade anything (that is `/skill:star-env-builder`'s).
 5. **Interpret honestly; a negative result is a finding, not a failure.** Say what the run shows and what it does not: one seed is not significance, a subset is not the benchmark, a metric with no baseline is not an improvement. A result that hits a root kill-criterion is a **plan-level finding** — report it plainly and route it; that is the plan working, not the run failing. A result that looks too good gets the leakage check before it gets the celebration.
@@ -49,7 +60,7 @@ You read and interpret; you do not execute steps, fix code, revise plans, or fli
    - `watch`, optionally followed by a plan name or run path → **watch mode**: Step 9 only — a chat-only quick check of a possibly still-running run; no verdict, no report file.
    - A `wkdrs/<run>/` path → that run; back-resolve its plan via the run's `EXEC_LOG.md` frontmatter `source_plan`, or the plan whose `exec_runs` names it.
    - A plan name (slug / numeric prefix / filename against `metds/plans/*_plan.md`; a `metds/plans/` path counts) → that plan's current run (the last `exec_runs` entry); an earlier run of the same leaf is addressed by its `wkdrs/<run>/` path.
-   - No argument → list every `wkdrs/*/EXEC_LOG.md` with its run name, source plan, and log `status`, and ask in the conversation which to analyze.
+   - No argument → list every `wkdrs/*/EXEC_LOG.md` with its run name, source plan, and log `status`, and ask via AskUserQuestion which to analyze.
    - Nothing matches → list the nearest plan and run candidates and ask.
 3. **Nothing to analyze is a valid answer.** If the plan has no `exec_runs`, or the run directory does not exist or holds no artifacts, say so and stop — route to `/skill:star-plan-executor <slug>`. Never analyze a run that was never executed.
 4. **Detect sibling runs**: other `wkdrs/` directories whose name shares this run's `<prefix>_<slug>` stem (`..._v2`, a date suffix). List them; they feed the lightweight comparison at Step 5.
@@ -78,7 +89,7 @@ A run whose STOP-line commands were never executed is **incomplete**, and its §
 - **C — log health**: scan the run's logs for the fatal, numeric, and dynamics signals in the rubric. Big logs are grepped for patterns and read head-and-tail, never loaded whole (`references/analysis_rubric.md`, "Reading big logs").
 - **D — metrics**: for every metric the §5 criteria, the root §4, or a stated baseline names, extract the value from the most authoritative source available (results JSON/CSV > eval log summary > TB event file > last matching log line) and record which source it came from. Score each criterion `met` / `not met` / `unmeasurable`.
 - **Figures (best-effort)**: if matplotlib is already installed in the `.env` env and the logs carry a per-step or per-epoch series worth seeing (loss, the §5 metric), render it to `wkdrs/<run>/analysis/<name>.png` and save the script that made it beside it, so the figure is reproducible. Not installed, or no series → skip silently in chat, state the degradation in the report. Never install matplotlib to make a plot.
-- **Scale**: a small run (a handful of artifacts, no oversized log) is read by the main agent. For a large one — many log files, or logs too big to read whole — **dimension C** partitions by log file into read-only subagents, at most 3 in parallel, each given the rubric, the expectations digest, and its exact file list, returning the structured observation contract. **Dimension D stays with the main agent**: its source-authority ladder ranks sources against one another (results JSON > eval summary > TB event > last log line), so a collector holding one file cannot apply it, and the metric sources are small enough that delegating them saves nothing Step 4 does not spend again immediately. One exception: a metric whose only source is a line inside an oversized log already on a collector's list — that collector returns the metric row with its `source:`, and Step 4 confirms it like any other. These read-only subagents never write, never read outside their list, never grade the run's verdict.
+- **Scale**: a small run (a handful of artifacts, no oversized log) is read by the main agent. For a large one — many log files, or logs too big to read whole — **dimension C** partitions by log file into read-only `Agent` subagents (`subagent_type: explore`), at most 3 in parallel, each given the rubric, the expectations digest, and its exact file list, returning the structured observation contract. **Dimension D stays with the main agent**: its source-authority ladder ranks sources against one another (results JSON > eval summary > TB event > last log line), so a collector holding one file cannot apply it, and the metric sources are small enough that delegating them saves nothing Step 4 does not spend again immediately. One exception: a metric whose only source is a line inside an oversized log already on a collector's list — that collector returns the metric row with its `source:`, and Step 4 confirms it like any other. These read-only subagents never write, never read outside their list, never grade the run's verdict.
 
 ### Step 4: Verify
 
@@ -127,5 +138,5 @@ A quick check of a run that may still be executing — dimension C plus liveness
 
 ## Dialogue Discipline
 
-- Ask in the conversation only where the workflow calls for it (which run to analyze, an ambiguous match). If it is unavailable (non-interactive `kimi -p`), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own report, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, or a log.
+- Ask via AskUserQuestion only where the workflow calls for it (which run to analyze, an ambiguous match). If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own report, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, or a log.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The report follows the plan's frontmatter `language` (else the dialogue language); keep technical terms — metric names, log keys, file paths — in English inside Chinese reports.

@@ -2,16 +2,18 @@
 name: star-plan-executor
 disable-model-invocation: true
 description: >-
-  Execute a leaf execution sub-plan (produced by star-plan-decomposer, under metds/plans/) against the
-  project code. Orients in the codebase (${CODE_NAME}/, read from .env) to build a "current state vs
-  required" gap list, enters Plan mode to turn the sub-plan's task breakdown into a concrete executable
-  plan, waits for the user's approval, then dispatches one subagent per step to modify code and run light
-  validation — stopping before heavy experiments (long/multi-GPU training, costly API calls) and handing
-  those commands back to the user. Keeps intermediate files under tasks/<plan-name>/ and records
-  durable execution state plus artifacts under wkdrs/<run>/ so runs resume across sessions. Writes
-  user-confirmed deviations and values settled by execution back into the sub-plan and adds a Revision History
-  entry. Use when the user runs /skill:star-plan-executor, or wants to execute / implement / carry out /
-  run a sub-plan, turn an execution plan into code and results, or start doing the work a plan describes.
+  Execute a leaf execution sub-plan (produced by star-plan-decomposer and living under
+  metds/plans/) against the project code. Orients in the codebase (${CODE_NAME}/, read from
+  .env) to build a "current state vs required" gap list, enters plan mode to turn the sub-plan's
+  task breakdown into a concrete executable plan, waits for approval through ExitPlanMode, then dispatches
+  one subagent per step to modify code and run light validation — stopping before heavy
+  experiments (long/multi-GPU training, costly API calls) and handing those commands back to the
+  user. Keeps intermediate working files under tasks/<plan-name>/ and records durable execution
+  state plus generated artifacts under wkdrs/<run>/ so runs resume across sessions. Writes
+  user-confirmed deviations and values settled by execution back into the sub-plan and adds a Revision History entry, keeping the
+  plan file true to what was actually executed. Use when the
+  user runs /skill:star-plan-executor, or wants to execute / implement / carry out / run a sub-plan,
+  turn an execution plan into code and results, or start doing the work a plan describes.
   Bilingual (en/zh).
 ---
 
@@ -41,10 +43,10 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 ## Core Principles
 
 1. **Read before you write.** Always orient in `${CODE_NAME}/` first — read the modules/entrypoints the sub-plan's §2 names before planning any change. Produce a "current state vs §3 requirements" gap list. Never assume code exists; `code/` may be an empty codebase (only `.gitkeep`), in which case the plan scaffolds from scratch — or, better, bootstrap a reference codebase first with `/skill:star-code-architect`. Reference: `references/orient_checklist.md`.
-2. **Plan behind a confirmation point, execute behind an agent.** The detailed executable plan (EXEC_PLAN) is produced in **Plan mode** and approved before any side effect. Execution is delegated to **subagents, one per step / step-group** — the main agent orchestrates and verifies; it does not edit code or launch jobs itself. Reference: `references/agent_dispatch_spec.md`.
+2. **Plan behind a confirmation point, execute behind an agent.** The detailed executable plan (EXEC_PLAN) is produced in **plan mode** and approved via **`ExitPlanMode`** before any side effect. Execution is delegated to **subagents, one per step / step-group** — the main agent orchestrates and verifies; it does not edit code or launch jobs itself. Reference: `references/agent_dispatch_spec.md`.
 3. **Stop before heavy experiments.** Agents write code and run **light validation only** (smoke tests, small-scale / no-finetune checks like an MVP done-criterion). Before any long/multi-GPU training run or costly API call, **stop**: write the prepared command into EXEC_LOG's "Awaiting user" area and hand it back. Never launch expensive or irreversible jobs autonomously. Rules: `references/stop_line_rules.md`.
 4. **Files are the source of truth; checkpoint every step — and keep the sub-plan true.** Execution state lives in `wkdrs/<run>/` (`EXEC_PLAN.md` + `EXEC_LOG.md`); intermediate working files live in `tasks/<plan-name>/`. After each verified step, update the log. The sub-plan file gets a lightweight `exec_status` + `exec_runs` pointer — and, when execution provably diverges from it — or settles a value it left open that a method document will cite — a **user-confirmed write-back** of the affected §2–§5 content plus a `## Revision History` entry (`references/plan_sync_rules.md`), so the plan a user rereads later matches what was actually executed. Chats end; files do not.
-5. **Every step ends in a check; the run ends in the done-criterion.** Each step is verified narrowly before the next is dispatched; the whole run finishes on the sub-plan's §5 done-criterion. Reuse the project's verify and run helpers where useful. This is the project's Goal-Driven Execution (AGENTS.md §4) and Verification (§10), executed.
+5. **Every step ends in a check; the run ends in the done-criterion.** Each step is verified narrowly before the next is dispatched; the whole run finishes on the sub-plan's §5 done-criterion. Reuse the project's `/verify` and `/run` skills where useful. This is the project's Goal-Driven Execution (AGENTS.md §4) and Verification (§10), executed.
 6. **Use the project runtime and launch entry point.** All run commands go through `.env`'s `CONDA_HOME` / `PYTHON_HOME` — never system python, never hardcoded local paths (AGENTS.md §9) — invoked via the project's run entrypoint `execs/run.sh` where one exists. Create `tasks/<plan-name>/` for intermediate files needed while executing that plan; put reusable launch scripts (including prepared STOP-line commands) under `execs/scpts/<run>.sh`, generated outputs and durable execution records in `wkdrs/<run>/`, data in `datas/`, and weights in `inits/`. Do not put generated run artifacts in `tasks/`.
 
 ## Workflow
@@ -52,13 +54,13 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 ### Step 0: Resolve the target plan
 
 1. Interpret `PLAN_NAME` (slug / numeric prefix / full filename) against the plans the opening load's digest lists — the digest is the listing, so do not list the directory again.
-2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it — list its leaves (prefix + slug + one-line objective) and ask in the conversation which leaf to execute (recommend the first ready one in dependency order), or offer to execute the leaves in dependency order, one at a time.
+2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it — list its leaves (prefix + slug + one-line objective) and ask via AskUserQuestion which leaf to execute (recommend the first ready one in dependency order), or offer to execute the leaves in dependency order, one at a time.
 3. If no argument was given or the match is ambiguous, list available plans and ask.
 4. Read the resolved sub-plan in full.
 
 ### Step 1: Readiness check
 
-1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, tell the user decomposition is unfinished and offer in the conversation: *go back to `/skill:star-plan-decomposer` to flesh it out* (recommended) / *execute anyway (shallow, gaps stay `[TBD]`)*.
+1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, tell the user decomposition is unfinished and offer via AskUserQuestion: *go back to `/skill:star-plan-decomposer` to flesh it out* (recommended) / *execute anyway (shallow, gaps stay `[TBD]`)*.
 2. **Dependencies.** Check §2 Inputs & Dependencies: are the named datasets (`datas/`), weights (`inits/`), and code modules present? Are the upstream sibling leaves in the leaf's `depends_on` frontmatter list all marked `exec_status: done`? The digest already carries every sibling's frontmatter — read their state from it rather than opening each one. If a hard dependency is missing, **stop and report** — do not fabricate inputs. A missing dataset or weight is a decomposition gap, not a blocker to work around: name the data-readiness leaf that should own it, or route to `star-plan-decomposer <parent>` to add one.
 
 ### Step 2: Orient in the codebase
@@ -69,16 +71,16 @@ Follow `references/orient_checklist.md`:
 2. Map `${CODE_NAME}/`. If empty, declare **empty codebase**.
 3. For each §3 step, decide whether the code to do it **exists / needs modifying / needs creating** — this mapping is the **gap list**.
 
-### Step 3: Enter Plan mode → produce the executable plan
+### Step 3: Enter plan mode → produce the executable plan
 
-1. Enter Plan mode.
+1. `EnterPlanMode`.
 2. Refine §3 + the gap list into **EXEC_PLAN**: an ordered list of actions, each annotated `{files to touch / command to run (via conda) / artifact under wkdrs/<run>/ / the step's own check}`. Each action binds a verifiable check; the terminal action binds the §5 done-criterion.
 3. **Draw the STOP line explicitly** (`references/stop_line_rules.md`): mark which actions the agent executes vs which are "prepare command, hand to user" (heavy experiments).
 4. **Collect material divergences** from the sub-plan's §2–§5 into EXEC_PLAN's "Divergences from sub-plan" table, in delta form (ADDED / MODIFIED / REMOVED / ENRICHED — `references/plan_sync_rules.md`). A contradiction at the sub-plan's own granularity is a divergence; extra concreteness is not — except a value the plan left unstated that a method document will cite, which is an ENRICHED row naming that section.
 
-### Step 4: Confirmation point — the user approves (exit Plan mode)
+### Step 4: Confirmation point — the user approves (`ExitPlanMode`)
 
-1. Exit Plan mode, presenting EXEC_PLAN + expected side effects: files to be written, commands to be run, where the STOP line falls, rough cost/runtime — and the divergence table, stated as "approving this plan also syncs these back into the sub-plan". Ask at the same confirmation point whether to checkpoint each verified step as a git commit (recommended), naming any path that already carries uncommitted changes — those are never staged. Say what saying no costs: without per-step commits, every verified step stays uncommitted, so if a later step has to be restored, the only record of where each step started is the one this run keeps itself (`references/agent_dispatch_spec.md`).
+1. `ExitPlanMode` presenting EXEC_PLAN + expected side effects: files to be written, commands to be run, where the STOP line falls, rough cost/runtime — and the divergence table, stated as "approving this plan also syncs these back into the sub-plan". Ask at the same confirmation point whether to checkpoint each verified step as a git commit (recommended), naming any path that already carries uncommitted changes — those are never staged. Say what saying no costs: without per-step commits, every verified step stays uncommitted, so if a later step has to be restored, the only record of where each step started is the one this run keeps itself (`references/agent_dispatch_spec.md`).
 2. On approval, derive `<plan-name>` from the selected filename without `_plan.md` and create `tasks/<plan-name>/` for intermediate working files. Persist `wkdrs/<run>/EXEC_PLAN.md` from `assets/exec_plan_template.md` and initialize `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_template.md`. **Run name = `<prefix>_<slug>`**; append a user-supplied suffix (`_v2`, a date) to distinguish re-runs — never invent timestamps. **Append** the run to the sub-plan's `exec_runs` list rather than replacing it: the history is what lets `/skill:star-expt-analyst aggregate` see every run of this leaf instead of only the last. A plan still carrying a single `exec_run:` is migrated here to `exec_runs: [<that run>]` before the new entry is appended.
 3. **Sync divergences into the sub-plan.** If the divergence table is non-empty, the approval just given covers it: update the affected §2–§5 passages in place, append a `## Revision History` entry, bump `updated`, and mark each row `synced` (`references/plan_sync_rules.md`). The sub-plan now matches what is about to be executed.
 
@@ -86,7 +88,7 @@ Follow `references/orient_checklist.md`:
 
 For each step in EXEC_PLAN, in order:
 
-1. Dispatch a subagent with the contract in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
+1. Dispatch an `Agent` subagent (`subagent_type: coder`, or `explore` when the step is read-only orientation) with the contract in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
 2. When it returns, **the main agent re-runs the step's own check** to confirm (do not trust a self-reported pass without evidence). Pass → checkpoint to `EXEC_LOG.md`, update the sub-plan's lightweight status, and — when the confirmation point approved checkpointing — commit this step's files. Fail → the main agent's own re-run is the evidence: read the `file:line` the failure names, and open the agent's full diff only when deciding `blocked`, or when the failure looks like a sub-plan-granularity problem (item 4). Restore this step's files before retrying; bounded retry (≤2) with the failure fed back; still failing → mark the step `blocked`, settle what happens to its edits (`agent_dispatch_spec.md`), and stop with the log.
 3. **If the step is on the STOP line** (heavy experiment) → do **not** dispatch it to run; write the prepared command into EXEC_LOG's "Awaiting user" area and stop, handing it to the user.
 4. If a retry or blocker changes the approach at the sub-plan's granularity (a step added/dropped/replaced, a deliverable path or done-criterion shifted), record a delta row under EXEC_LOG's "Pending amendments" and continue — these sync at Step 6, not mid-run.
@@ -97,7 +99,7 @@ Keep the main agent's reply concise; details live in the log.
 
 After all agent steps are `done`, verify the sub-plan's §5 done-criterion (reuse `/verify`, `/run` where useful). Met → set the sub-plan's `exec_status: done`, then offer once to delete the plan's `tasks/<plan-name>/` **scratch** — promote anything still worth keeping into `wkdrs/<run>/` first, and record the choice in `EXEC_LOG.md`; keeping it is a fine answer. **The offer never covers the plan's own tool scripts** (conventions §9): list them by name as retained, and delete one only if the user names it themselves. Not met → follow the sub-plan's §6 local fallback, or report the gap. Then run `references/exec_rubric.md` and report failing items (≤5, ranked, each with a concrete fix).
 
-**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, present the batch via **one** question (*sync all / select which / skip*, recommendation marked) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a plan-level finding — route it back to the plan as described below, never sync it.
+**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, present the batch via **one** AskUserQuestion (*sync all / select which / skip*, recommendation marked) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a plan-level finding — route it back to the plan as described below, never sync it.
 
 **Route it back to the plan (plan-level finding).** If the result contradicts an assumption the parent plan depends on — i.e. it matches a root §5 **kill-criterion**, or an MVP done-criterion the plan called the "cheap early test" came back negative — this is a plan-level finding, not just a failed step. You do not edit the parent's §1–§6 (that stays with the coach/decomposer). Instead: record it in the run's `EXEC_LOG.md` "Notes / decisions" (which this skill owns), and in the Step 8 report **point it out explicitly** and recommend feeding it back via `/skill:star-plan-reviser <slug>` (audit the evidence and revise the plan under per-item approval), `/skill:star-plan-coach <slug>` (revisit risks/method), or `/skill:star-plan-decomposer <slug>` (re-scope the sub-plans). This closes the loop from execution back to strategy without violating write discipline.
 
@@ -124,7 +126,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 
 ## Dialogue Discipline
 
-- In non-interactive `kimi -p` runs (no human to answer), fall back: present EXEC_PLAN as plain text and require an explicit plain-text approval before any side effect — still stop for confirmation before executing, still stop before heavy experiments, still confirm in plain text before any change is written back into the sub-plan.
+- If AskUserQuestion or plan mode is unavailable (non-interactive `kimi -p`, no human to answer), fall back: present EXEC_PLAN as plain text and require an explicit plain-text approval before any side effect — still stop for confirmation before executing, still stop before heavy experiments, still confirm in plain text before any change is written back into the sub-plan.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - The sub-plan's body language follows its `language`; keep technical terms in English inside Chinese plans.
-- Involve (conventions §7.7). Always asked here: the Step 4 confirmation point (including its checkpoint-commit question), the STOP line (Step 5), amendment sync (Step 6 — it writes plan §2–§5), the scratch offer (it stops for confirmation before a deletion), and what becomes of a blocked step's edits (it stops for confirmation before a deletion too — `references/agent_dispatch_spec.md`). Set to `low`: Step 0's which-leaf choice (take the first ready leaf in dependency order; a no-argument or ambiguous invocation still asks, conventions §5.2) and Step 1's readiness fallback (take the recommendation: route back to the decomposer and stop). At `high`, confirm each step's dispatch (Step 5) before it goes to a subagent. Record the effective level and its source once in `EXEC_LOG.md`.
+- Involve (conventions §7.7). Always asked here: the ExitPlanMode confirmation point (Step 4, including its checkpoint-commit question), the STOP line (Step 5), amendment sync (Step 6 — it writes plan §2–§5), the scratch offer (it stops for confirmation before a deletion), and what becomes of a blocked step's edits (it stops for confirmation before a deletion too — `references/agent_dispatch_spec.md`). Set to `low`: Step 0's which-leaf choice (take the first ready leaf in dependency order; a no-argument or ambiguous invocation still asks, conventions §5.2) and Step 1's readiness fallback (take the recommendation: route back to the decomposer and stop). At `high`, confirm each step's dispatch (Step 5) before it goes to a subagent. Record the effective level and its source once in `EXEC_LOG.md`.

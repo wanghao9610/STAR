@@ -5,8 +5,8 @@ How the main agent coordinates subagents for this skill. Sibling contract: the e
 ## Roles
 
 - **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits checkpoints, rolls back failures.
-- **Surveyors** — read-only areas (`survey_spec.md`).
-- **Migrators** — one per migration group, write access limited to their group's files.
+- **Surveyors** — read-only `Agent` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
+- **Migrators** — `Agent` subagents (`subagent_type: coder`), one per migration group, write access limited to their group's files.
 
 ## Partitioning migrations
 

@@ -2,16 +2,23 @@
 name: star-refs-reviewer
 disable-model-invocation: true
 description: >-
-  Build an auditable related-work base for the project's method: 5–10 close papers read into per-paper
-  analysis notes, plus a classified reference.bib of ≥50 verified entries, all under metds/refs/. With no
-  argument it finds the method in metds/ and runs the full pass, resuming incrementally when metds/refs/
-  exists; a PLAN_NAME or free-text topic scopes the search; `verify` re-fetches and diffs every entry;
-  `organize` re-classifies the bib offline; `synthesize` compiles the notes into a related-work
-  narrative; `survey` reads a topic in tiers into a standalone field survey at metds/refs/<slug>_survey.md;
-  an arXiv id, DOI, or URL appends one paper, and `add` appends several in one call — ids, DOIs, URLs,
-  titles mixed, every title resolved to a fetched record. Use when the user runs
-  /skill:star-refs-reviewer, or wants a literature review / related-work survey, per-paper analyses, a
-  reference.bib collection, or the related work found and organized. Bilingual (en/zh).
+  Build an auditable related-work base for the project's method: 5–10 close papers read into
+  per-paper analysis notes, plus a classified reference.bib of ≥50 verified entries, all under
+  metds/refs/. With no argument it reads the method from metds/*.md (falling back to the root plan
+  under metds/plans/, then to a finalized idea file under metds/ideas/, then to a topic the user supplies) and runs the full pass, resuming
+  incrementally when metds/refs/ already exists; a PLAN_NAME or free-text topic scopes the search;
+  `verify` re-fetches every entry and diffs it against the file; `organize` re-classifies the
+  existing bib offline; `synthesize` compiles the existing notes into a related-work
+  narrative under metds/refs/; `survey` searches a topic, reads it in tiers, and writes a
+  standalone field survey to metds/refs/<slug>_survey.md, leaving the bib untouched; an arXiv
+  id, DOI, or paper URL appends one paper, and `add` appends several in one call — ids, DOIs,
+  URLs, and titles mixed freely, every title resolved to a fetched record before anything is read. Every bib field is
+  transcribed from a record fetched during the run (DBLP → Crossref → Semantic Scholar → arXiv,
+  published version preferred), cached under wkdrs/, and logged with its source URL in
+  metds/refs/refs_index.md — nothing is written from memory, and a paper with no fetchable record
+  is listed for manual check rather than guessed. Use when the user runs /skill:star-refs-reviewer, or
+  wants a literature review / related-work survey, per-paper analyses, a reference.bib or bibtex
+  collection, or to find and organize the work related to their method. Bilingual (en/zh).
 ---
 
 # Research Refs Reviewer — related-work base & verified bibliography
@@ -43,7 +50,7 @@ You survey and record; you do not set strategy, write or revise plans, implement
 
 1. **Zero fabrication; every field has a fetched origin.** A bib field is legal only if it appears in a record machine-fetched during this run — DBLP → Crossref → Semantic Scholar → arXiv, first match wins, published version preferred over preprint. Never write a field from memory, never "correct" what the record says, never infer a missing page range. A paper whose record cannot be fetched **does not enter `reference.bib`**; it goes to the Needs-manual-check list. The search order, endpoints, matching rule, and the closed list of permitted edits are in `references/source_policy.md`. Google Scholar is not fetchable (no API, CAPTCHA-gated, and its bibtex is itself machine-generated from the databases above) — never scrape it.
 2. **Every entry is re-checkable.** Cache each fetched payload under `wkdrs/refs_<date>/raw/` **before** using it, and log citekey → source, record URL, fetch date in `metds/refs/refs_index.md`. Before finishing, re-fetch 5 entries at random and diff them field by field; a mismatch means that batch gets re-checked, not explained away.
-3. **Confirm the shape, then read.** Reading is the expensive step: bring ~15 ranked candidates (title / venue / year / citations / one clause of why) to a single question listing them as text (5–10 recommended and marked) and read only what the user keeps. Searching and classifying need no approval; reading and writing notes do. In survey mode the same instinct covers the whole document's shape at once: one question carrying the profile, the taxonomy axis, and the tiered reading list (Step 10.3) — a judgment call `involve=low` takes on its recommendation, where the full pass's core-set question stays mandatory at every level.
+3. **Confirm the shape, then read.** Reading is the expensive step: bring ~15 ranked candidates (title / venue / year / citations / one clause of why) to a single AskUserQuestion (multi_select, 5–10 recommended and marked) and read only what the user keeps. Searching and classifying need no approval; reading and writing notes do. In survey mode the same instinct covers the whole document's shape at once: one question carrying the profile, the taxonomy axis, and the tiered reading list (Step 10.3) — a judgment call `involve=low` takes on its recommendation, where the full pass's core-set question stays mandatory at every level.
 4. **Close beats famous.** Core papers are chosen for direct overlap with this method and for positioning value — not citation count, not recency; every candidate carries a one-clause justification. The bar and the 3–8 category rules are in `references/refs_rubric.md`.
 5. **Write as you go; re-runs only fill gaps.** Each note is on disk the moment it is written; bib entries are appended per batch — never held in chat. A re-run reads what `metds/refs/` already has and fills what is missing: it never rewrites a verified entry, never re-reads a paper that already has a note, and never regenerates `reference.bib` from scratch.
 6. **Read-only outside the refs base.** Writes are confined to `metds/refs/**` and `wkdrs/refs_<date>/**`. Plans, method notes, code, and `.env` are read-only — what the survey reports there gets routed, not applied. Network use is metadata and paper text only, serialized and backed off per `references/source_policy.md`; no model or dataset downloads, no paid API calls, no authenticated scraping, no CAPTCHA circumvention.
@@ -74,13 +81,13 @@ Searching may fan out by query group, at most 3, each given 2–3 of the queries
 
 ### Step 2: Confirm the core set
 
-Rank candidates by the core-paper criteria in `references/refs_rubric.md` and present ~15 in one table, most relevant first. Ask via one question (the candidates listed as text, 5–10 marked as recommended) which to read deeply. The user may add papers of their own — fetch their records like any other.
+Rank candidates by the core-paper criteria in `references/refs_rubric.md` and present ~15 in one table, most relevant first. Ask via one AskUserQuestion (multi_select, 5–10 marked as recommended) which to read deeply. The user may add papers of their own — fetch their records like any other.
 
 ### Step 3: Read and write the notes
 
 Per confirmed paper: fetch the paper page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page), read at minimum the abstract, intro, method, and main results table, fill `assets/ref_analysis_template.md` (Chinese: `assets/ref_analysis_template_zh.md`), and **write it immediately** to `metds/refs/<ABBREV>.md`. `ABBREV` is the paper's own abbreviation (`CLIP.md`, `DETR.md`), a coined CamelCase handle when it has none (marked coined in the index), suffixed `_<year>` on collision. Set `depth:` to what you actually read, honestly.
 
-Reading may fan out to read-only subagents, at most 3 in parallel, one paper each, each returning the note collector contract in `references/refs_rubric.md` — not a filled template, which asks for fields only the writing session may set. Accept `depth: full` only where `depth_evidence` carries a real table caption and row; otherwise downgrade it. The main agent writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists. Each collector is given its own share of the per-host request budget written as a number, and returns `failures: [{host, error, retries}]`; the pages it fetches are cached under this run's own `raw/` prefix, one prefix per paper so no two collectors write to the same one (conventions §6.4). Steps 1 and 4 give their collectors the same three things — this step fetches from other hosts, not under other rules.
+Reading may fan out to read-only `Agent` subagents (`subagent_type: explore`), at most 3 in parallel, one paper each, each returning the note collector contract in `references/refs_rubric.md` — not a filled template, which asks for fields only the writing session may set. Accept `depth: full` only where `depth_evidence` carries a real table caption and row; otherwise downgrade it. The main agent writes the files and owns §5 (Relation to This Project) — that section needs the method context and is the reason the note exists. Each collector is given its own share of the per-host request budget written as a number, and returns `failures: [{host, error, retries}]`; the pages it fetches are cached under this run's own `raw/` prefix, one prefix per paper so no two collectors write to the same one (conventions §6.4). Steps 1 and 4 give their collectors the same three things — this step fetches from other hosts, not under other rules.
 
 ### Step 4: Expand to ≥50
 
@@ -138,6 +145,6 @@ Write `metds/refs/<slug>_survey.md` — a standalone map of a field, read in tie
 
 ## Dialogue Discipline
 
-- The core-set confirmation is the only mandatory question in the full pass — one question listing the candidates as text, recommendations marked. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; what stays mandatory there at every level is Step 10.7's overwrite question. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one question listing the candidates as text. In non-interactive `kimi -p` runs (no human to answer), fall back to plain text and require an explicit answer before reading.
+- The core-set confirmation is the only mandatory question in the full pass — one AskUserQuestion, multi_select, recommendations marked. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; what stays mandatory there at every level is Step 10.7's overwrite question. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one direct question with the candidates. If AskUserQuestion is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text and require an explicit answer before reading.
 - Report counts honestly: how many entries were fetched, how many failed, how many need manual checking. Never round a shortfall up; never present a note as deeper than its `depth:` admits.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. Notes, the index, and a survey follow the method source's `language` (else the dialogue language); keep technical terms, venue names, and everything inside `reference.bib` in English regardless.

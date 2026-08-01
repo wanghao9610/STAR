@@ -39,7 +39,7 @@
 
 ## 4. Plan Conformance Scorecard
 
-<!-- plan mode only; otherwise one line: "not a plan-scoped review". Score against disk, never
+<!-- Plan mode only; otherwise one line: "not a plan-scoped review". Score against disk, never
      against EXEC_LOG claims. -->
 
 | Item | Verdict | Evidence |
