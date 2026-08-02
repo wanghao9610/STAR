@@ -1,4 +1,11 @@
 inits/
 datas/
-wkdrs/
-.cache/
+
+wkdrs/**
+!wkdrs/**/
+!wkdrs/**/*.md
+
+.ruff_cache/
+.pytest_cache/
+**/__pycache__/
+**/.cache/
