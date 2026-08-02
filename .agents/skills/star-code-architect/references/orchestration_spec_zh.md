@@ -1,6 +1,6 @@
 # 编排规范
 
-本 skill 如何组织勘察与迁移工作。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。默认本地执行；仅当协作工具可用且委派确有帮助时，才委派有边界的分组或组。两个确认点、验证、提交与回滚始终由主 agent 负责。
+本 skill 如何组织勘察与迁移工作。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。默认本地执行；仅当协作工具可用且委派确有帮助时，才委派有边界的分组或组。委派时调用 `spawn_agent`：勘察分组使用 `agent_type: explorer`，迁移组使用 `agent_type: worker`。两个确认点、验证、提交与回滚始终由主 agent 负责。
 
 ## 角色
 

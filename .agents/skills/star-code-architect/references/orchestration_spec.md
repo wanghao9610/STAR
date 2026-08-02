@@ -1,6 +1,6 @@
 # Orchestration Spec
 
-How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Execute locally by default; delegate a bounded area or group only when collaboration tools are available and delegation materially helps. The main agent always owns the confirmation points, verification, commits, and rollback.
+How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Execute locally by default; delegate a bounded area or group only when collaboration tools are available and delegation materially helps. When delegating, call `spawn_agent` with `agent_type: explorer` for a survey area or `agent_type: worker` for a migration group. The main agent always owns the confirmation points, verification, commits, and rollback.
 
 ## Roles
 

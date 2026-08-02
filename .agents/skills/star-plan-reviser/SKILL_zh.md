@@ -35,7 +35,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线同样生效）。这是把项目的 Verification 规则（AGENTS.md §10）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **默认在本地收集；选择性委派。** 自行读取日志、工件和代码状态。仅当对多个 run 或工件集合进行有边界、相互独立、只读的检查确有帮助时才委派收集；受委派者必须遵守 `references/review_spec_zh.md` 的 collector 格式约定，绝不写入或提出修订。综合与判断留在主 agent 。
+2. **默认在本地收集；选择性委派。** 自行读取日志、工件和代码状态。仅当对多个 run 或工件集合进行有边界、相互独立、只读的检查确有帮助时才委派收集；满足条件时调用 `spawn_agent` 并使用 `agent_type: explorer`。受委派者必须遵守 `references/review_spec_zh.md` 的 collector 格式约定，绝不写入或提出修订。综合与判断留在主 agent 。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条以一次一问采纳 / 调整 / 跳过，标出推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `$star-plan-decomposer`；研究问题或方法级转向转给 `$star-plan-coach`。边界见 `references/revision_rules_zh.md`。
@@ -59,7 +59,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径，且 §2–§3 没有点名任何代码模块——由主 agent 自己读：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
 
-规模超过这个的：依据 `references/review_spec_zh.md` 中的 collector 格式约定收集：**日志证据**（步骤状态、声称的检查、"Awaiting user"命令、方向性信号）、**工件证据**（每个 §4 交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及在 §2–§3 写明代码时的**代码证据**（承诺模块是否存在，是否与日志声称的修改一致）。默认在本地收集；按核心原则 2 选择性委派。
+规模超过这个的：依据 `references/review_spec_zh.md` 中的 collector 格式约定收集：**日志证据**（步骤状态、声称的检查、"Awaiting user"命令、方向性信号）、**工件证据**（每个 §4 交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及在 §2–§3 写明代码时的**代码证据**（承诺模块是否存在，是否与日志声称的修改一致）。默认在本地收集；核心原则 2 允许委派时，对每个选中的证据集合调用 `spawn_agent` 并使用 `agent_type: explorer`。
 
 交叉核对分歧——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查照样复跑；重的一律不跑。
 

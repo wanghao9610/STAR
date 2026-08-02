@@ -1148,6 +1148,62 @@ rm -f "${reuse_en}" "${reuse_zh}"
 
 (( reuse_errors == 0 )) && note "every manifest carries the reuse paragraph, uniform per language, inside the opening-load block"
 
+# 22. Delegation tool names stay native to each harness.
+#     The Claude tree already marks every delegation-capable file with
+#     subagent_type. Codex has the same component surface, but calls spawn_agent
+#     with agent_type. Keep the selective/local-by-default policy in prose while
+#     making every actual dispatch site executable rather than tool-shaped prose.
+section "Harness-specific delegation vocabulary"
+delegation_errors=0
+codex_expected="$(mktemp)"
+codex_actual="$(mktemp)"
+
+grep -Rl --include='*.md' 'subagent_type:' .claude/skills \
+    | sed 's|^\.claude/skills/||' | sort > "${codex_expected}"
+grep -Rl --include='*.md' 'agent_type:' .agents/skills \
+    | sed 's|^\.agents/skills/||' | sort > "${codex_actual}"
+
+if ! diff -u "${codex_expected}" "${codex_actual}" >/dev/null; then
+    fail ".agents agent_type file set differs from Claude's delegation-capable file set:"
+    diff -u "${codex_expected}" "${codex_actual}" | sed 's/^/      /'
+    delegation_errors=1
+fi
+
+while IFS= read -r rel; do
+    [[ -n "${rel}" ]] || continue
+    path=".agents/skills/${rel}"
+    if ! grep -q 'spawn_agent' "${path}"; then
+        fail "${path}: names agent_type without spawn_agent"
+        delegation_errors=1
+    fi
+    invalid_types="$(grep -oE 'agent_type: [A-Za-z_-]+' "${path}" \
+        | grep -vE '^agent_type: (explorer|worker)$' || true)"
+    if [[ -n "${invalid_types}" ]]; then
+        fail "${path}: unsupported or unbounded Codex agent_type:"
+        printf '%s\n' "${invalid_types}" | sed 's/^/      /'
+        delegation_errors=1
+    fi
+done < "${codex_actual}"
+
+foreign_codex_type="$(grep -Rn --include='*.md' 'subagent_type:' .agents/skills || true)"
+if [[ -n "${foreign_codex_type}" ]]; then
+    fail ".agents contains foreign subagent_type vocabulary:"
+    printf '%s\n' "${foreign_codex_type}" | sed 's/^/      /'
+    delegation_errors=1
+fi
+
+foreign_spawn="$(grep -Rn --include='*.md' -E 'spawn_agent|(^|[^[:alnum:]_])agent_type:' \
+    .claude/skills .cursor/skills .kimi-code/skills || true)"
+if [[ -n "${foreign_spawn}" ]]; then
+    fail "non-Codex skill tree contains Codex delegation vocabulary:"
+    printf '%s\n' "${foreign_spawn}" | sed 's/^/      /'
+    delegation_errors=1
+fi
+
+codex_delegate_files="$(wc -l < "${codex_actual}" | tr -d ' ')"
+rm -f "${codex_expected}" "${codex_actual}"
+(( delegation_errors == 0 )) && note "${codex_delegate_files} Codex delegation files name spawn_agent with explorer/worker agent_type"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

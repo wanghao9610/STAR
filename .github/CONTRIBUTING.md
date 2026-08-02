@@ -48,7 +48,7 @@ mistaken for drift.
 
 | Tree | Tool | Invocation | Gate | Delegation | User questions |
 |---|---|---|---|---|---|
-| `.agents` | Codex | `$star-*` | `update_plan` | selective delegation, local by default | `request_user_input` |
+| `.agents` | Codex | `$star-*` | `update_plan` | `spawn_agent`, `agent_type: explorer` / `worker` (selective; local by default) | `request_user_input` |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore` / `generalPurpose` | `AskQuestion` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
@@ -57,11 +57,13 @@ Measured distribution, as a sanity check when you are unsure whether something i
 the question tool splits by name — `AskUserQuestion` in 32 `.claude` and 32 `.kimi-code` files,
 `AskQuestion` in 32 `.cursor` files, `request_user_input` in 18 `.agents` files; `SwitchMode` in 2
 `.cursor` files and 0 elsewhere, against `update_plan` in 4 `.agents` files; the subagent tool is
-`Agent` in 28 files each of `.claude` and `.kimi-code` and `Task` in 28 `.cursor` files, with
-`subagent_type` alongside it in all three and different values in each; the terminal tool is `Bash` in
-30 `.claude` files, `Shell` in 30 files each of `.cursor` and `.kimi-code`, and lowercase `shell` in
-`.agents`, which is how Codex writes it; the file reader is `Read` in 28 files each of `.claude` and
-`.cursor` and `ReadFile` in 28 `.kimi-code` files, while `.agents` names none — Codex has no
+`Agent` in 28 files each of `.claude` and `.kimi-code`, `Task` in 28 `.cursor` files, and
+`spawn_agent` in 30 `.agents` files: the corresponding 28 delegation-capable files carry `agent_type`,
+while the two `star-flow-status` manifests prohibit the call. The former three carry `subagent_type`.
+The terminal tool is `Bash` in 30 `.claude` files, `Shell` in 30 files each of `.cursor` and
+`.kimi-code`, and lowercase `shell` in `.agents`, which is how Codex writes it; the file reader is
+`Read` in 28 files each of `.claude` and `.cursor` and `ReadFile` in 28 `.kimi-code` files, while
+`.agents` names none — Codex has no
 file-reading tool, so those loads say "file read" and carry a marked fallback that `cat`s the files into
 the shell call and accepts the spill. A term concentrated in the trees whose harness actually has it is
 almost always correct.
@@ -74,12 +76,12 @@ registered names are `shell_command`, `apply_patch`, `update_plan`, `request_use
 (and Kimi also its `Read`), and `.agents` named `Bash`, `Read` and `ask_user_question`, the last of
 which Codex has never had.
 
-One completion is deliberately outstanding: **`.agents` describes delegation in prose and names no
-subagent tool.** Codex has `spawn_agent` with `agent_type` (`default` / `worker` / `explorer`) and
-enables subagents by default now, so the tool could be named — but "collect locally by default,
-delegate selectively" is a cost stance, not an omission, and OpenAI's own docs warn that subagent
-workflows spend more tokens than the single-agent equivalent. Naming the tool is a change to that
-stance and belongs in its own commit.
+Codex delegation names the real call without changing the cost stance: **collect locally by default,
+delegate selectively**, then call `spawn_agent` only after the bounded / independent / materially
+helpful test passes. Read-only collection uses `agent_type: explorer`; file-writing implementation uses
+`agent_type: worker`. The built-in `default` type is deliberately unused because every STAR delegation
+has one of those two explicit roles. OpenAI's warning that subagent workflows spend more tokens than
+the single-agent equivalent is why naming the tool does not make delegation the default.
 
 **A term appearing in the wrong tree is the actual defect.** Two real cases: 25 `.cursor` asset
 templates told users "Claude Code injects it at session start" (`e149ae0`), and `.kimi-code` names

@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Areas
 
-Work the areas sequentially by default; delegate a bounded area only when collaboration tools are available and it materially helps (no area writes a file another surveyor writes, so delegating up to 3 at once is safe here — it is not safe everywhere: delegates that fetch share one budget per host, conventions §6.9):
+Work the areas sequentially by default; delegate a bounded area only when collaboration tools are available and it materially helps, by calling `spawn_agent` with `agent_type: explorer` (no area writes a file another surveyor writes, so delegating up to 3 at once is safe here — it is not safe everywhere: delegates that fetch share one budget per host, conventions §6.9):
 
 | Area | Looks at | Key questions |
 |---|---|---|

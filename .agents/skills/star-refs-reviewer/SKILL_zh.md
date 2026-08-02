@@ -81,13 +81,13 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 逐篇：抓论文页（arXiv abs/HTML、ACL Anthology、CVF open access 或项目主页），至少读摘要、intro、方法和主结果表，填 `assets/ref_analysis_template_zh.md`（英文：`assets/ref_analysis_template.md`），**立刻写入** `metds/refs/<缩写>.md`。`<缩写>` 用论文自己的缩写（`CLIP.md`、`DETR.md`），没有就自拟一个紧凑的 CamelCase 名（在 index 里标注为自拟），冲突时加 `_<年份>` 后缀。`depth:` 如实写你真正读到的深度。
 
-精读默认在本地进行；只有当多篇已确认论文可以彼此独立、只读地处理时，才选择性委派——每个受托对象一篇，各自按 `references/refs_rubric_zh.md` 的笔记收集器返回格式返回——不是"填好的模板",模板里有些字段只有真正写文件的那次会话才能填。只有 `depth_evidence` 带着真实的表题和一行数据时才接受 `depth: full`,否则降级。文件由主 agent 写入，主 agent 也负责 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。每个收集器拿到按份数分给它的那份 host 请求配额（写成具体数字），并返回 `failures: [{host, error, retries}]`；它抓到的页面缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀，两个收集器绝不共用（规约 §6.4）。这三样和 Step 1、Step 4 给各自收集器的完全一样——这一步只是抓的 host 不同，规矩没有变。
+精读默认在本地进行；只有当多篇已确认论文可以彼此独立、只读地处理时，才选择性委派。对每篇选中的论文调用 `spawn_agent` 并使用 `agent_type: explorer`，每个子代理一篇，各自按 `references/refs_rubric_zh.md` 的笔记收集器返回格式返回——不是"填好的模板",模板里有些字段只有真正写文件的那次会话才能填。只有 `depth_evidence` 带着真实的表题和一行数据时才接受 `depth: full`,否则降级。文件由主 agent 写入，主 agent 也负责 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。每个收集器拿到按份数分给它的那份 host 请求配额（写成具体数字），并返回 `failures: [{host, error, retries}]`；它抓到的页面缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀，两个收集器绝不共用（规约 §6.4）。这三样和 Step 1、Step 4 给各自收集器的完全一样——这一步只是抓的 host 不同，规矩没有变。
 
 ### Step 4：扩展到 ≥50
 
 从核心集向外长：核心论文的参考文献表（Semantic Scholar `/references`）、引用它们的后续工作（`/citations`，按引用数从高到低）、核心论文自己的相关工作章节，以及针对池子薄弱子话题的补充检索。与已有 citekey 去重。已发表优先于预印本；只有在没有正式发表版时才留预印本。约 60 条候选即止。若不注水就到不了 50，**如实报真实数字**——评分表宁要 43 条实的，不要 50 条注水的。
 
-扩展默认在本地进行；选择性委派时按核心论文划分,**一个收集器一篇**,至多 3 个——即便委派,单个串行收集器仍是稳妥的选择,因为 `source_policy_zh.md` 里的请求预算是**按 host** 算的、不是按 agent 算的,三个并发收集器会把本 skill 承诺要礼貌相待的每个 host 的真实速率翻三倍。要用就引那份文件,不要在这里复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
+扩展默认在本地进行；选择性委派时按核心论文划分，**一个收集器一篇**，至多 3 个。委派时调用 `spawn_agent` 并使用 `agent_type: explorer`；即便委派，单个串行收集器仍是稳妥的选择，因为 `source_policy_zh.md` 里的请求预算是**按 host** 算的、不是按 agent 算的，三个并发收集器会把本 skill 承诺要礼貌相待的每个 host 的真实速率翻三倍。要用就引那份文件，不要在这里复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`，别的都不返回。它不抓任何文献记录，也不判定什么算核心论文；它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4），除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录，所以一个抄错的标题代价只是一次匹配失败，转入待人工核查。
 
 ### Step 5：抓取与转录
 
