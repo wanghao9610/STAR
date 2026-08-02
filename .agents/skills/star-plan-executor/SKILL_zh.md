@@ -16,14 +16,14 @@ description: >-
 
 调用方式：`$star-plan-executor PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-three-tier_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Bash 调用，以项目根目录为工作目录，带两行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的文件读取调用读入，绝不 `cat` 进 shell 命令——shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 shell 调用，以项目根目录为工作目录，带两行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`children:` 用于判定是否叶子、`depends_on` 与兄弟叶子的 `exec_status` 用于依赖检查、`exec_runs` 用于续跑——外加每份运行日志的 frontmatter。目标子计划仍在 Step 0 整篇读入；摘要替掉的是逐个打开它的兄弟计划。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。
+执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`children:` 用于判定是否叶子、`depends_on` 与兄弟叶子的 `exec_status` 用于依赖检查、`exec_runs` 用于续跑——外加每份运行日志的 frontmatter。目标子计划仍在 Step 0 整篇读入；摘要替掉的是逐个打开它的兄弟计划。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（以及上面点名的其他文件）放回那次 shell 调用，并接受落盘的代价。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -36,7 +36,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **先读后写。** 规划修改前，检查 `.env`、写明的输入、相关代码和实际运行界面。列出当前状态与所需状态的差距。遵循 `references/orient_checklist_zh.md`。
-2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、工件和范围受限检查。有 Codex progress-plan 机制时使用，并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
+2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、工件和范围受限检查。用 `update_plan` 跟踪它——一个 action 一个步骤，同时只保持一个 `in_progress`——并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
 3. **选择性委派。** 默认在本地执行。只有 collaboration 工具可用，且有边界、相互独立的工作确实能从委派中受益时才委派。绝不为每个琐碎顺序步骤创建一个 subagent。给每个受委派者 `references/agent_dispatch_spec_zh.md` 中那份范围很窄的格式约定；主 agent 始终负责集成和重新运行检查。那份文件里的树状态纪律——动作开始前它名下的文件在 git 里是干净的、重试前先恢复、以 `blocked` 收场的动作其改动去留要有明确决定——同样约束本地执行：两条路径上被放弃的改动是同一批改动。
 4. **在重型或不可逆工作前停止。** 长时间或多 GPU 训练、全数据集评估、高成本 API 调用、无边界任务、覆盖有价值工件都会跨越 STOP line。准备可复现命令并交给用户；不要启动。遵循 `references/stop_line_rules_zh.md`。
 5. **checkpoint 已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；此外，仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。

@@ -2,23 +2,16 @@
 name: star-refs-reviewer
 disable-model-invocation: true
 description: >-
-  Build an auditable related-work base for the project's method: 5–10 close papers read into
-  per-paper analysis notes, plus a classified reference.bib of ≥50 verified entries, all under
-  metds/refs/. With no argument it reads the method from metds/*.md (falling back to the root plan
-  under metds/plans/, then to a finalized idea file under metds/ideas/, then to a topic the user supplies) and runs the full pass, resuming
-  incrementally when metds/refs/ already exists; a PLAN_NAME or free-text topic scopes the search;
-  `verify` re-fetches every entry and diffs it against the file; `organize` re-classifies the
-  existing bib offline; `synthesize` compiles the existing notes into a related-work
-  narrative under metds/refs/; `survey` searches a topic, reads it in tiers, and writes a
-  standalone field survey to metds/refs/<slug>_survey.md, leaving the bib untouched; an arXiv
-  id, DOI, or paper URL appends one paper, and `add` appends several in one call — ids, DOIs,
-  URLs, and titles mixed freely, every title resolved to a fetched record before anything is read. Every bib field is
-  transcribed from a record fetched during the run (DBLP → Crossref → Semantic Scholar → arXiv,
-  published version preferred), cached under wkdrs/, and logged with its source URL in
-  metds/refs/refs_index.md — nothing is written from memory, and a paper with no fetchable record
-  is listed for manual check rather than guessed. Use when the user runs /star-refs-reviewer, or
-  wants a literature review / related-work survey, per-paper analyses, a reference.bib or bibtex
-  collection, or to find and organize the work related to their method. Bilingual (en/zh).
+  Build an auditable related-work base for the method: 5–10 close papers read into per-paper analysis
+  notes, plus a classified reference.bib of ≥50 verified entries, under metds/refs/. No argument finds the
+  method in metds/ and runs the full pass, resuming if metds/refs/ exists; a PLAN_NAME or topic scopes the
+  search; `verify` re-fetches and diffs every entry; `organize` re-classifies the bib offline;
+  `synthesize` compiles the notes into a related-work narrative; `survey` reads a topic in tiers into its
+  own survey file, leaving the bib untouched; an arXiv id, DOI, or URL appends one paper, `add` several.
+  Every bib field is transcribed from a record fetched during the run and logged with its source URL in
+  refs_index.md — nothing from memory, and a paper with no fetchable record is listed for manual check,
+  never guessed. Use when the user runs /star-refs-reviewer, or wants a literature review / related-work
+  survey, per-paper analyses, a reference.bib, or related work organized. Bilingual (en/zh).
 ---
 
 # Research Refs Reviewer — related-work base & verified bibliography

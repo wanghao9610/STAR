@@ -2,19 +2,16 @@
 name: star-expt-digest
 disable-model-invocation: true
 description: >-
-  Summarize what the experiment programme has done lately, in date order. No argument resumes
-  from the previous digest's last covered date and covers everything since; a PLAN_NAME covers that node's
-  whole family — ancestors for claim context, every descendant for evidence — unbounded in time;
-  `<N>d` or a date covers a window; `all` covers the whole history from the beginning. Collects
-  each in-scope run's newest EXPT_ANALYSIS report, tabulates verdicts and headline metrics with their provenance,
-  derives what moved since the previous digest (new runs, changed verdicts, newly analyzed runs),
-  gathers plan-level findings and kill-criteria hits, notes which plans were created or revised in the
-  period, and lists the gaps. A run with no analysis report is read raw for a provisional line only,
-  tagged unverified in its own table, never scored and never quoted as a result. Writes one dated
-  digest to wkdrs/digests/. Read-only otherwise: never edits plans, exec_status, logs, or the
-  results table, and never re-runs an experiment. Use when the user runs /skill:star-expt-digest, or
-  wants a weekly / periodic summary of experiment progress, what happened since last time, what a
-  plan family has produced so far, or material for a progress report. Bilingual (en/zh).
+  Summarize what the experiment programme has done lately, in date order. No argument resumes from the
+  previous digest; a PLAN_NAME covers that node's whole family — ancestors for context, every descendant
+  for evidence — unbounded in time; `<N>d` or a date covers a window; `all` covers everything. Collects
+  each in-scope run's newest EXPT_ANALYSIS report, tabulates verdicts and headline metrics with
+  provenance, derives what moved since the previous digest, gathers plan-level findings and kill-criteria
+  hits, notes plans created or revised, and lists gaps. A run with no analysis report is read raw for a
+  provisional, unverified line only — never scored, never quoted as a result. Writes one dated digest to
+  wkdrs/digests/. Read-only otherwise: never edits plans, exec_status, logs, or the results table, and
+  never re-runs an experiment. Use when the user runs /skill:star-expt-digest, or wants a periodic summary
+  of experiment progress, what happened since last time, or progress-report material. Bilingual (en/zh).
 ---
 
 # Research Experiment Digest — the periodic progress record
@@ -25,7 +22,7 @@ Invocation: `/skill:star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | le
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a digest acts on — §0 vocabulary (it defines the last covered date, plan-level findings, and the kill- and done-criteria this skill reports on), §3 `.env` runtime, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table — arrives through the opening load below. Four sections stay out, each because this skill's own files carry what it needs at the point of use: §1 git (it never commits — State & File Rules, with the `wkdrs/*.md` ignore nuance the user gets told about), §2 the STOP line (it runs nothing — Core Principle 6 and `references/digest_rubric.md` bound that, and an "Awaiting user" command is relayed from a log heading, never judged), §4 real dates (Step 6, and the scan prints the clock value itself), and §9 project layout (State & File Rules enumerate the write surface more strictly than §9 states it). The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
 
-Before acting, load this skill's unconditional opening reads in one message — the opening load that later text points back at: two Bash calls, with the project root as the working directory, plus a `Read` of `<this skill's directory>/references/scope_spec.md`, all sent together.
+Before acting, load this skill's unconditional opening reads in one message — the opening load that later text points back at: two Shell calls, with the project root as the working directory, plus a `ReadFile` of `<this skill's directory>/references/scope_spec.md`, all sent together.
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
@@ -36,7 +33,7 @@ awk '/^## /{k=/^## (0|3|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow
 bash <this skill's directory>/scripts/scan.sh
 ```
 
-One message, three results: the `.env` probe and the conventions sections from the first call, the collector's digest from the second (what it prints and why: the Workflow section), and the scope spec Step 0 interprets the argument by from its own `Read`. The two Bash calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the excerpt is about 26 KB, where the whole file is 35 KB, before the scan's digest would take its share of the same result. The `awk` prints the sections named above and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. In `ledger` mode drop the scope-spec `Read` and run `bash <this skill's directory>/scripts/scan.sh --trails` instead — Step 8 resolves no window, so the scope spec goes unused there; the Workflow section says what `--trails` adds and drops. Everything else stays lazy: `references/digest_rubric.md` when Steps 2–3 apply the tier rules, the `assets/` templates when Step 6 or Step 8 writes, and the scan's second `--bodies` call only after Step 1 has named the in-scope runs — the Workflow section says why it cannot come earlier.
+One message, three results: the `.env` probe and the conventions sections from the first call, the collector's digest from the second (what it prints and why: the Workflow section), and the scope spec Step 0 interprets the argument by from its own `ReadFile`. The two Shell calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the excerpt is about 26 KB, where the whole file is 35 KB, before the scan's digest would take its share of the same result. The `awk` prints the sections named above and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. In `ledger` mode drop the scope-spec `ReadFile` and run `bash <this skill's directory>/scripts/scan.sh --trails` instead — Step 8 resolves no window, so the scope spec goes unused there; the Workflow section says what `--trails` adds and drops. Everything else stays lazy: `references/digest_rubric.md` when Steps 2–3 apply the tier rules, the `assets/` templates when Step 6 or Step 8 writes, and the scan's second `--bodies` call only after Step 1 has named the in-scope runs — the Workflow section says why it cannot come earlier.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 

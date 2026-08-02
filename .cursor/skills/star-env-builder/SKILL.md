@@ -2,20 +2,17 @@
 name: star-env-builder
 disable-model-invocation: true
 description: >-
-  Build and verify the project's Python runtime environment so plan execution has a working
-  interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default
-  CODE_NAME); otherwise a .venv under the project root. An existing environment is never
-  deleted — after user confirmation it is renamed to a dated backup (real run date) before
-  rebuilding. Dependencies come from the first source that has them: existing
-  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) →
-  import scan of the code, with generated results written as requirements.txt plus a
-  requirements/ folder (framework|runtime|optional.txt; conda-only items in
-  requirements/conda.txt). Installs in the order uv > pip > conda with CUDA-aware framework
-  wheel selection behind a single install-plan confirmation point, then smoke-tests in three layers
-  (imports → framework/GPU → project entrypoint) and writes ENV_REPORT.md plus a version
-  freeze under wkdrs/. Use when the user runs /star-env-builder, wants the project's conda
-  env or venv created or rebuilt, needs dependencies resolved and installed, or wants the
-  runtime environment verified. Bilingual (en/zh).
+  Build and verify the project's Python runtime environment so plan execution has a working interpreter.
+  Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a
+  .venv in the root. An existing environment is never deleted — after confirmation it is renamed to a
+  dated backup before rebuilding. Dependencies come from the first source that has them: existing
+  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) → import scan of
+  the code, written out as requirements.txt plus a requirements/ folder (framework|runtime|optional.txt,
+  conda-only items in conda.txt). Installs in the order uv > pip > conda, CUDA-aware, behind one
+  install-plan confirmation, then smoke-tests imports, framework/GPU and the entrypoint and writes
+  ENV_REPORT.md under wkdrs/. Use when the user runs /star-env-builder, wants the conda env or venv
+  created or rebuilt, needs dependencies resolved and installed, or wants the environment verified.
+  Bilingual (en/zh).
 ---
 
 # Research Env Builder — runtime environment bootstrap

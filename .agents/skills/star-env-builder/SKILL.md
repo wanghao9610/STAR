@@ -1,20 +1,16 @@
 ---
 name: star-env-builder
 description: >-
-  Build and verify the project's Python runtime environment so plan execution has a working
-  interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default
-  CODE_NAME); otherwise a .venv under the project root. An existing environment is never
-  deleted — after user confirmation it is renamed to a dated backup (real run date) before
-  rebuilding. Dependencies come from the first source that has them: existing
-  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) →
-  import scan of the code, with generated results written as requirements.txt plus a
-  requirements/ folder (framework|runtime|optional.txt; conda-only items in
-  requirements/conda.txt). Installs in the order uv > pip > conda with CUDA-aware framework
-  wheel selection behind a single install-plan confirmation point, then smoke-tests in three layers
-  (imports → framework/GPU → project entrypoint) and writes ENV_REPORT.md plus a version
-  freeze under wkdrs/. Use when the user invokes $star-env-builder or asks Codex to create or rebuild
-  the project's conda env or venv, resolve and install dependencies, or verify the runtime
-  environment. Supports bilingual English/Chinese work.
+  Build and verify the project's Python runtime environment so plan execution has a working interpreter.
+  Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a
+  .venv in the root. An existing environment is never deleted — after confirmation it is renamed to a
+  dated backup before rebuilding. Dependencies come from the first source that has them:
+  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) → an import scan,
+  written out as requirements.txt plus a requirements/ folder (framework|runtime|optional.txt, conda-only
+  in conda.txt). Installs in the order uv > pip > conda, CUDA-aware, behind one install-plan confirmation,
+  then smoke-tests imports, framework/GPU and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use
+  when the user invokes $star-env-builder or asks Codex to create or rebuild the conda env or venv,
+  resolve and install dependencies, or verify the environment. Supports bilingual English/Chinese work.
 ---
 
 # Research Env Builder
@@ -23,13 +19,13 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `$star-env-builder [ENV_NAME | add <package>…]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own `Read` call, plus one Bash call in the same message, with the project root as the working directory, carrying exactly:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own file read call, plus one shell call in the same message, with the project root as the working directory, carrying exactly:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-One message, four results — still one round trip. Keep the files out of the Bash command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. Bash carries only what only Bash can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
+One message, four results — still one round trip. Keep the files out of the shell command: each tool result has its own size limit, and a shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. The shell carries only what only the shell can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md` — and the other files named above — back into the shell call and accept the spill.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -42,7 +38,7 @@ Build the environment; do not implement or refactor research code. The only writ
 ## Core Principles
 
 1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: it is the only one that may create, rename, or install into one.
-2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, one at a time through the `ask_user_question` tool, falling back to one concise plain-text question only in non-interactive `codex exec`, each with a recommendation; wait for an explicit answer before acting.
+2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, one at a time through the `request_user_input` tool, falling back to one concise plain-text question only in non-interactive `codex exec`, each with a recommendation; wait for an explicit answer before acting.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the install order is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed as a code asset once the build is verified.
@@ -82,7 +78,7 @@ Generated layout: `requirements.txt` holds only `-r requirements/framework.txt` 
 
 ### Step 4: Confirmation point — the user approves the install plan
 
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask as one question — the `ask_user_question` tool, with plain text only in non-interactive `codex exec`: *approve and build* / *adjust (say what)* / *abort* — and wait for an explicit answer. Uncertainties are settled here — never silently.
+Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask as one question — the `request_user_input` tool, with plain text only in non-interactive `codex exec`: *approve and build* / *adjust (say what)* / *abort* — and wait for an explicit answer. Uncertainties are settled here — never silently.
 
 ### Step 5: Install (uv > pip > conda)
 
@@ -136,6 +132,6 @@ The environment already exists; this mode installs into it and records what it i
 
 ## Dialogue Discipline
 
-- Ask one question at a time — the `ask_user_question` tool, with concise plain text only in non-interactive `codex exec` — each with a recommendation, and wait for an explicit answer; the install plan needs explicit approval before anything installs.
+- Ask one question at a time — the `request_user_input` tool, with concise plain text only in non-interactive `codex exec` — each with a recommendation, and wait for an explicit answer; the install plan needs explicit approval before anything installs.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

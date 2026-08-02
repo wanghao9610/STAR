@@ -2,23 +2,16 @@
 name: star-expt-analyst
 disable-model-invocation: true
 description: >-
-  Analyze what a plan's execution run actually produced and judge it against what the plan
-  expected. A PLAN_NAME (slug / numeric prefix / filename) resolves through the plan's exec_runs
-  to its wkdrs/<run>/ directory; a wkdrs/<run>/ path back-resolves to its plan; no argument lists
-  the runs on disk and asks. Inventories the §4 deliverables against disk, corroborates EXEC_LOG's
-  step claims with artifacts, scans training / eval logs for health signals (crashes, NaN, OOM,
-  divergence, overfitting), extracts the metrics the §5 done-criteria name and scores them against
-  those criteria plus root §4 metrics and stated baselines, interprets what the numbers mean for
-  the claim the plan traces to (root kill-criteria, signs of data leakage, single-seed limits), and
-  appends a lightweight comparison when sibling runs of the same plan exist. Renders curves only
-  when matplotlib is already installed (never installs anything), re-reads every cited number
-  before it enters the report, and writes the analysis under wkdrs/<run>/. Read-only otherwise:
-  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing
-  metric — that command goes back to the user; `watch` gives a chat-only quick check of a
-  possibly still-running run. Use when the user runs /skill:star-expt-analyst, or wants
-  to analyze / interpret experiment results, outputs or artifacts, check whether a run met its
-  expectations or done-criteria, read training logs or metrics, or find out what a finished run
-  means for the plan. Bilingual (en/zh).
+  Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
+  prefix / filename) resolves through exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to
+  its plan; no argument lists the runs and asks. Inventories the §4 deliverables on disk, corroborates
+  EXEC_LOG's claims with artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores
+  the §5 done-criteria metrics against those criteria and baselines, and writes the analysis under
+  wkdrs/<run>/. Installs nothing and re-reads every cited number before reporting it. Read-only otherwise:
+  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric —
+  that command goes to the user; `watch` is a chat-only check of a running run. Use when the user runs
+  /skill:star-expt-analyst, or wants experiment results or artifacts analyzed, a run checked against
+  done-criteria, training logs or metrics read, or what a run means for the plan. Bilingual (en/zh).
 ---
 
 # Research Experiment Analyst — results audit
@@ -27,7 +20,7 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]` — a plan name (slug / numeric prefix / filename) resolves through that plan's `exec_runs` to its current run directory; a `wkdrs/<run>/` path back-resolves to its plan; `aggregate` compiles every run's verified numbers into the cross-run results table `wkdrs/results/results.md`, or into `wkdrs/results/results_<slug>.md` when scoped to one subtree; no argument lists the runs on disk and asks which to analyze; `watch` gives a chat-only quick check of a run that may still be executing.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load everything in one message, each file as its own `Read`: the conventions, and — on the full-analysis path — `<this skill's directory>/references/analysis_rubric.md`, the rubric Steps 2–5 follow; aggregate and watch modes drop the rubric read and load their own references at the step that names them. Keep the files out of the command: a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit — Bash is only for what only Bash can do, one small call sent in the same message:
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load everything in one message, each file as its own `ReadFile`: the conventions, and — on the full-analysis path — `<this skill's directory>/references/analysis_rubric.md`, the rubric Steps 2–5 follow; aggregate and watch modes drop the rubric read and load their own references at the step that names them. Keep the files out of the command: a Shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit — Shell is only for what only Shell can do, one small call sent in the same message:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)

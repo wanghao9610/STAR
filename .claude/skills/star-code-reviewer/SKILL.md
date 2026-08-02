@@ -2,19 +2,17 @@
 name: star-code-reviewer
 disable-model-invocation: true
 description: >-
-  Review code against the project's written conventions and, when scoped to a plan, against what
-  that plan promised. With no argument it reviews all of ${CODE_NAME}/ (read from .env); a
-  PLAN_NAME (slug / numeric prefix / filename) reviews the files that plan touches plus plan
-  conformance (§3 tasks implemented, §4 deliverables on disk, §5 done-criterion supported); an
-  existing path reviews that path; `diff` or a git range reviews only changed files. Gathers
-  cheap static evidence through the .env conda env (never installs tools), collects findings
-  against a six-dimension rubric (docstrings, naming, simplicity, STAR conventions, correctness
-  smells, plan conformance), re-verifies blocker/major findings before reporting, writes the
-  review report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
-  behavior-preserving issues only — feature gaps route to star-plan-executor, plan divergence
-  to star-plan-reviser, structural reorganization to star-code-architect. Use when the user
-  runs /star-code-reviewer, or wants to review / audit code quality, check coding conventions
-  or docstrings, or verify a plan's implementation in code. Bilingual (en/zh).
+  Review code against the project's written conventions and, when scoped to a plan, against what the plan
+  promised. No argument reviews all of ${CODE_NAME}/ (from .env); a PLAN_NAME (slug / prefix / filename)
+  reviews the files that plan touches plus conformance (§3 tasks, §4 deliverables, §5 done-criterion); a
+  path reviews that path; `diff` or a git range reviews changed files. Gathers static evidence through the
+  .env conda env (installs no tools), scores findings on a six-dimension rubric (docstrings, naming,
+  simplicity, conventions, correctness, conformance), re-verifies blocker/major findings before reporting,
+  writes the report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
+  behavior-preserving issues only — feature gaps route to star-plan-executor, plan divergence to
+  star-plan-reviser, restructuring to star-code-architect. Use when the user runs /star-code-reviewer, or
+  wants code quality or docstrings reviewed, or a plan's implementation verified in code. Bilingual
+  (en/zh).
 ---
 
 # Research Code Reviewer — convention & conformance audit

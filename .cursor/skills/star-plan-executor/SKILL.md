@@ -2,19 +2,16 @@
 name: star-plan-executor
 disable-model-invocation: true
 description: >-
-  Execute a leaf execution sub-plan (produced by star-plan-decomposer and living under
-  metds/plans/) against the project code. Orients in the codebase (${CODE_NAME}/, read from
-  .env) to build a "current state vs required" gap list, switches to Cursor plan mode to turn
-  the sub-plan's task breakdown into a concrete executable plan, waits for the user's approval,
-  then dispatches one Task subagent per step to modify code and run light validation — stopping
-  before heavy experiments (long/multi-GPU training, costly API calls) and handing those
-  commands back to the user. Keeps intermediate working files under tasks/<plan-name>/ and
-  records durable execution state plus generated artifacts under wkdrs/<run>/ so runs resume across
-  sessions. Writes user-confirmed deviations and values settled by execution back into the sub-plan and adds a Revision History entry,
-  keeping the plan file true to what was actually executed.
-  Use when the user runs /star-plan-executor, or wants to execute / implement /
-  carry out / run a sub-plan, turn an execution plan into code and results, or start doing the
-  work a plan describes. Bilingual (en/zh).
+  Execute a leaf execution sub-plan (from star-plan-decomposer, under metds/plans/) against the project
+  code. Orients in the codebase (${CODE_NAME}/, from .env) to build a "current state vs required" gap
+  list, switches to plan mode to turn the sub-plan's task breakdown into a concrete executable plan, waits
+  for the user's approval, then dispatches one Task subagent per step to modify code and run light
+  validation — stopping before heavy experiments (long/multi-GPU training, costly API calls) and handing
+  those commands back to the user. Keeps intermediate files under tasks/<plan-name>/ and records execution
+  state plus artifacts under wkdrs/<run>/ so runs resume across sessions. Writes user-confirmed deviations
+  and values settled by execution back into the sub-plan and adds a Revision History entry. Use when the
+  user runs /star-plan-executor, or wants to execute / implement / carry out / run a sub-plan, turn an
+  execution plan into code and results, or start the work a plan describes. Bilingual (en/zh).
 ---
 
 # Research Plan Executor — plan executor

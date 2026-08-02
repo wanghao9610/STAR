@@ -2,22 +2,16 @@
 name: star-code-release
 disable-model-invocation: true
 description: >-
-  Prepare the research project for public release: consolidate scattered code into ${CODE_NAME}/
-  (read from .env), polish the files a reader will open, and compile the project's README.md. Sweeps
-  tasks/, wkdrs/ and the project root for code worth shipping, promotes only what passes a
-  three-part evidence test (the README cites it, an executed leaf's deliverable needs it, or it
-  reproduces a number in wkdrs/results/results.md), and places it by metds/codearc.md's placement rules —
-  never inventing a directory. Polishes only the files a reader will open (promoted files, entrypoints,
-  configs, the public API the README shows) with individually approved behavior-preserving edits.
-  Compiles README.md section by section from metds/overview.md, framework.md, dataset.md,
-  training.md, evaluation.md, results.md, codearc.md, UPSTREAM.md, requirements* and reference.bib
-  through a written map, where numbers come only from the results table and every printed command
-  is checked to exist. Ends with a blocking hygiene sweep — committed secrets, machine-local
-  absolute paths, internal hostnames, a license conflicting with the recorded upstream one — and
-  writes wkdrs/release/RELEASE_<date>.md. It prepares a release and never publishes one: no push,
-  no repo creation, no tag, no weight upload. Use when the user runs /star-code-release, wants to
-  open-source / release / publish the project, wants a README for the repository, or wants the
-  code scattered across tasks/ gathered into the codebase. Bilingual (en/zh).
+  Prepare the project for public release: consolidate scattered code into ${CODE_NAME}/ (from .env),
+  polish what a reader will open, and compile README.md. Sweeps tasks/, wkdrs/ and the root, promoting
+  only code passing a three-part evidence test (the README cites it, an executed leaf needs it, or it
+  reproduces a results.md number), placed by metds/codearc.md's rules — never inventing a directory.
+  Polish edits are individually approved and behavior-preserving. Compiles README.md from the metds/
+  method documents through a written map, taking numbers only from the results table and checking every
+  printed command exists. Ends with a blocking hygiene sweep (secrets, local paths, hostnames, license
+  conflicts) and a dated wkdrs/release/ report. It prepares a release and never publishes one: no push, no
+  repo creation, no tag, no weight upload. Use when the user runs /star-code-release, wants to open-source
+  / publish the project, wants a repository README, or wants tasks/ code gathered in. Bilingual (en/zh).
 ---
 
 # Research Code Release — consolidate, polish, document

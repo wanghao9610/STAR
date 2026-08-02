@@ -1,20 +1,17 @@
 ---
 name: star-code-reviewer
 description: >-
-  Review code against the project's written conventions and, when scoped to a plan, against what
-  that plan promised. With no argument it reviews all of ${CODE_NAME}/ (read from .env); a
-  PLAN_NAME (slug / numeric prefix / filename) reviews the files that plan touches plus plan
-  conformance (§3 tasks implemented, §4 deliverables on disk, §5 done-criterion supported); an
-  existing path reviews that path; `diff` or a git range reviews only changed files. Gathers
-  cheap static evidence through the .env conda env (never installs tools), collects findings
-  against a six-dimension rubric (docstrings, naming, simplicity, STAR conventions, correctness
-  smells, plan conformance), re-verifies blocker/major findings before reporting, writes the
-  review report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
-  behavior-preserving issues only — feature gaps route to star-plan-executor, plan divergence
-  to star-plan-reviser, structural reorganization to star-code-architect. Use when the user
-  invokes $star-code-reviewer or asks Codex to review / audit code quality, check coding
-  conventions or docstrings, or verify a plan's implementation in code. Supports bilingual
-  English/Chinese work.
+  Review code against the project's written conventions and, when scoped to a plan, what the plan
+  promised. No argument reviews all of ${CODE_NAME}/ (from .env); a PLAN_NAME (slug / prefix / filename)
+  reviews that plan's files plus conformance (§3 tasks, §4 deliverables, §5 done-criterion); a path
+  reviews that path; `diff` or a git range reviews changed files. Gathers static evidence through the .env
+  conda env (installs no tools), scores findings on a six-dimension rubric (docstrings, naming,
+  simplicity, conventions, correctness, conformance), re-verifies blocker/major findings before reporting,
+  writes the report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
+  behavior-preserving issues — feature gaps route to star-plan-executor, plan divergence to
+  star-plan-reviser, restructuring to star-code-architect. Use when the user invokes $star-code-reviewer
+  or asks Codex to review code quality or docstrings, or verify a plan's implementation in code. Supports
+  bilingual English/Chinese work.
 ---
 
 # Research Code Reviewer
@@ -23,13 +20,13 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `$star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load everything in one message: one `Read` for the conventions file, one `Read` for `<this skill's directory>/references/review_rubric.md`, and alongside them one Bash call, with the project root as the working directory, carrying only:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load everything in one message: one file read for the conventions file, one file read for `<this skill's directory>/references/review_rubric.md`, and alongside them one shell call, with the project root as the working directory, carrying only:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-One message, three results: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — the six-dimension rubric with its finding contract, which Step 1's digest and Step 3's collection work from, and the `.env` line only Bash can answer. Keep the two files out of the command: a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — the conventions file is past that limit on its own — while each `Read` result arrives whole on its own budget. Later steps use the rubric as loaded here — no separate read; the report template and Step 1's project-side reads load at their own steps, not here.
+One message, three results: the conventions — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout — the six-dimension rubric with its finding contract, which Step 1's digest and Step 3's collection work from, and the `.env` line only the shell can answer. Keep the two files out of the command: a shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back — the conventions file is past that limit on its own — while each file read arrives whole on its own budget. Later steps use the rubric as loaded here — no separate read; the report template and Step 1's project-side reads load at their own steps, not here. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md` — and the other files named above — back into the shell call and accept the spill.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 

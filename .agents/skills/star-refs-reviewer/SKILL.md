@@ -1,24 +1,16 @@
 ---
 name: star-refs-reviewer
 description: >-
-  Build an auditable related-work base for the project's method: 5–10 close papers read into
-  per-paper analysis notes, plus a classified reference.bib of ≥50 verified entries, all under
-  metds/refs/. With no argument it reads the method from metds/*.md (falling back to the root plan
-  under metds/plans/, then to a finalized idea file under metds/ideas/, then to a topic the user supplies) and runs the full pass, resuming
-  incrementally when metds/refs/ already exists; a PLAN_NAME or free-text topic scopes the search;
-  `verify` re-fetches every entry and diffs it against the file; `organize` re-classifies the
-  existing bib offline; `synthesize` compiles the existing notes into a related-work
-  narrative under metds/refs/; `survey` searches a topic, reads it in tiers, and writes a
-  standalone field survey to metds/refs/<slug>_survey.md, leaving the bib untouched; an arXiv
-  id, DOI, or paper URL appends one paper, and `add` appends several in one call — ids, DOIs,
-  URLs, and titles mixed freely, every title resolved to a fetched record before anything is read. Every bib field is
-  transcribed from a record fetched during the run (DBLP → Crossref → Semantic Scholar → arXiv,
-  published version preferred), cached under wkdrs/, and logged with its source URL in
-  metds/refs/refs_index.md — nothing is written from memory, and a paper with no fetchable record
-  is listed for manual check rather than guessed. Use when the user invokes $star-refs-reviewer or
-  asks Codex for a literature review / related-work survey, per-paper analyses, a reference.bib or
-  bibtex collection, or to find and organize the work related to their method. Supports bilingual
-  English/Chinese work.
+  Build an auditable related-work base for the method: 5–10 close papers read into analysis notes, plus a
+  classified reference.bib of ≥50 verified entries, under metds/refs/. No argument finds the method in
+  metds/ and runs the full pass, resuming if metds/refs/ exists; a PLAN_NAME or topic scopes the search;
+  `verify` re-fetches and diffs every entry; `organize` re-classifies the bib offline; `synthesize`
+  compiles the notes into a related-work narrative; `survey` reads a topic in tiers into its own survey
+  file, leaving the bib untouched; an arXiv id, DOI, or URL appends one paper, `add` several. Every bib
+  field is transcribed from a record fetched during the run and logged with its source URL — nothing from
+  memory, and a paper with no fetchable record is listed for manual check, never guessed. Use when the
+  user invokes $star-refs-reviewer or asks Codex for a literature review / related-work survey, per-paper
+  analyses, a reference.bib, or related work organized. Supports bilingual English/Chinese work.
 ---
 
 # Research Refs Reviewer
@@ -27,14 +19,14 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `$star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | add PAPER [PAPER …] | ARXIV_ID | URL]` — no argument reads the method from `metds/` and runs the full pass; a plan name (slug / numeric prefix / filename) or free-text topic scopes the search; `verify` re-fetches and diffs every existing entry; `organize` re-classifies the existing bib without touching the network; `synthesize` compiles the existing notes and the bib's categories into `metds/refs/related_work.md`; `survey` searches a topic, reads it in tiers, and writes a standalone field survey to `metds/refs/<slug>_survey.md` — its trailing text resolves like `PLAN_NAME` or `TOPIC`, and with none the no-argument source chain applies; `add` appends several papers in one call, each an arXiv id, DOI, URL, or title; an arXiv id, DOI, or paper URL alone appends that one paper.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a literature analyst acts on — §0 vocabulary, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table — is this skill's opening load, and arrives before acting in one Bash call with the project root as the working directory:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a literature analyst acts on — §0 vocabulary, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table — is this skill's opening load, and arrives before acting in one shell call with the project root as the working directory:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 
-`STAR_LANG` sets the reply language (§7.6), `INVOLVE` the question level (§7.7); the probe and the sections ride in one call, so neither costs a round trip of its own. The `awk` prints the sections named above and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. The excerpt is about 27 KB where the whole file is 35 KB, which is what lets it ride in Bash at all: a result past roughly 30 KB is spilled to a file that costs a second round trip to read back.
+`STAR_LANG` sets the reply language (§7.6), `INVOLVE` the question level (§7.7); the probe and the sections ride in one call, so neither costs a round trip of its own. The `awk` prints the sections named above and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. The excerpt is about 27 KB where the whole file is 35 KB, which is what lets it ride in the shell at all: a result past roughly 30 KB is spilled to a file that costs a second round trip to read back.
 
 Two sections stay out because this skill never performs what they govern: §1 git — it never commits, and the State & File Rules say so; and §2 the STOP line — it runs no heavy work, its whole network surface is bounded by Core Principle 6 and `references/source_policy.md`, and the confirmations §2 would trigger are anchored independently in §7.7's own deletion-and-overwrite category and in §3.5's install ban, both loaded. Two more stay out because what this skill needs from them is already in hand: §9 project layout, whose placement decisions the State & File Rules settle more strictly than §9 does, and the document's preamble, whose precedence rule this paragraph opens with. Read the whole file if a run ever needs one of them. The conventions excerpt is the whole opening load: every other resource here — `references/source_policy.md`, `references/refs_rubric.md`, the `assets/` templates — serves particular modes and steps, and is read where the Workflow cites it, never up front.
 

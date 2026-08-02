@@ -2,18 +2,16 @@
 name: star-proj-adopt
 disable-model-invocation: true
 description: >-
-  Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the
-  existing repository read-only (source layout, runtime, data / weights / output locations,
-  launch entrypoints, git history, prior runs), confirms the mapping with the user, then puts the
-  mechanical setup in place — writes .env, reaches large existing directories by symlink rather
-  than moving them, wraps existing launch commands into execs/scpts/ — and records a work inventory
-  of what is already built, already run, and already concluded in metds/adopt.md, with the
-  user's chosen historical runs recorded under wkdrs/. Phase `backfill` runs after the plan tree
-  exists: it matches that inventory to the leaves and, per leaf and only on the user's
-  confirmation, records exec_status / exec_runs so the tree reflects real progress instead of
-  reading as 0%. Use when the user runs /star-proj-adopt, wants to bring an existing / partially
-  finished project into STAR, asks how to onboard a repo that did not start from the template,
-  or needs already-completed work reflected in the plan tree. Bilingual (en/zh).
+  Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the repository
+  read-only (source layout, runtime, data / weights / output locations, entrypoints, git history, prior
+  runs), confirms the mapping, then puts the mechanical setup in place — writes .env, reaches large
+  existing directories by symlink instead of moving them, wraps existing launch commands into execs/scpts/
+  — and records a work inventory of what is already built, run, and concluded in metds/adopt.md, with the
+  user's chosen historical runs under wkdrs/. Phase `backfill` runs once the plan tree exists: it matches
+  that inventory to the leaves and, per leaf and only on the user's confirmation, records exec_status /
+  exec_runs so the tree shows real progress instead of 0%. Use when the user runs /star-proj-adopt, wants
+  to bring an existing / partially finished project into STAR, asks how to onboard a repo that did not
+  start from the template, or needs finished work reflected in the tree. Bilingual (en/zh).
 ---
 
 # Research Project Adopt — bring an in-progress project into STAR

@@ -1,28 +1,16 @@
 ---
 name: star-metd-summarize
 description: >-
-  Compile the research-plan tree under metds/plans/ into paper-ready method documents under metds/.
-  Invoked as $star-metd-summarize [OPT] where OPT is overview, dataset, framework, training, or
-  evaluation; no argument compiles all five in dependency order (dataset → framework → training →
-  evaluation → overview, which links the other four and so compiles last). Rebuilds the plan tree
-  from parent:, then extracts what each document needs through a written map (overview ← root §1
-  problem, §2 positioning, §3 idea, §6 milestones; dataset ← §4 data choices plus every leaf's §2
-  datas/ inputs and data-building steps; framework ← §3 route plus modeling leaves and their
-  ${CODE_NAME}/ paths; training ← §3 strategy, §4 budget, inits/ and hyperparameters; evaluation ←
-  §4 benchmarks, baselines, metrics and ablation design plus §5 kill-criteria), merges the passages
-  by what a reader needs — the method, its data, its training, its evaluation — instead of by
-  plan, resolves conflicts by preferring the leaf plan over its parent and the newer plan over
-  the older, marks content from unexecuted leaves as not yet verified, and turns uncovered
-  template sections into TODOs naming the plan section to fill. Plans are the only source — never
-  code, logs, wkdrs/ or chat; result numbers stay with star-expt-analyst. Writes only metds/<OPT>.md,
-  and overwrites an existing generated doc only after a section-level change list is approved. An
-  end-of-flow skill: the readiness check compiles only a finished tree — every top-level plan
-  finalized and every leaf exec_status done, i.e. all experiments finished and the method
-  determined — and otherwise stops, naming and routing the unfinished work; a draft compile is an
-  explicit user choice, never the default. Use when all experiments are finished and the plans are
-  finalized and the user invokes $star-metd-summarize or asks Codex to summarize / consolidate the
-  finished research plans into a method write-up, produce overview, dataset, framework, training or
-  evaluation documentation, or draft paper method material from the plans. Supports bilingual
+  Compile the plan tree under metds/plans/ into paper-ready method documents in metds/. Invoked as
+  $star-metd-summarize [OPT] — overview, dataset, framework, training, evaluation; no argument compiles
+  all five, overview last. Extracts what each document needs through a written map, merges passages by
+  what a reader needs, not by plan, marks unexecuted leaves' content unverified, and turns uncovered
+  sections into TODOs. Plans are the only source — never code, logs, wkdrs/ or chat; numbers stay with
+  star-expt-analyst. Writes only metds/<OPT>.md, overwriting an existing one only after an approved
+  section-level change list. Compiles only a finished tree — every top-level plan finalized, every leaf
+  exec_status done — otherwise it stops and routes the gaps; a draft compile is an explicit choice, never
+  the default. Use when the experiments are finished, the plans finalized, and the user invokes
+  $star-metd-summarize or asks Codex to consolidate the plans into a method write-up. Supports bilingual
   English/Chinese work.
 ---
 
@@ -32,7 +20,7 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `$star-metd-summarize [OPT]` — `OPT` is one of `overview` / `dataset` / `framework` / `training` / `evaluation`, each compiling `metds/<OPT>.md`; no argument compiles all five in dependency order (`dataset` → `framework` → `training` → `evaluation` → `overview`).
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load — one message, not one Bash call: the conventions file arrives as its own separate file read, never `cat`-ed into a Bash command — a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md` back into the Bash command and accept the spill. Alongside that read, the same message carries the two things only Bash can do here, in one call with the project root as the working directory:
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load — one message, not one shell call: the conventions file arrives as its own separate file read, never `cat`-ed into a shell command — a shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md` back into the shell command and accept the spill. Alongside that read, the same message carries the two things only the shell can do here, in one call with the project root as the working directory:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)

@@ -18,13 +18,13 @@ description: >-
 
 调用方式：`/skill:star-proj-adopt [survey | backfill]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。
 
-**通用规约。** 本 skill 无条件要遵循的内容，动手前用一条消息装齐：`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 与 `<本 skill 所在目录>/references/adopt_spec_zh.md` 各自单独发一次 `Read` 读入，外加同一条消息里一次小的 Bash 调用（以项目根目录为工作目录）：
+**通用规约。** 本 skill 无条件要遵循的内容，动手前用一条消息装齐：`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 与 `<本 skill 所在目录>/references/adopt_spec_zh.md` 各自单独发一次 `ReadFile` 读入，外加同一条消息里一次小的 Shell 调用（以项目根目录为工作目录）：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、三份结果：两份完整文件各来自单独发出的 `Read`，`.env` 探测来自 Bash——整个装载里唯一只有 Bash 能做的事。别把文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是“一条消息装齐”本来要省掉的那趟往返——而光规约文件一份就已超过这个上限。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次装载里：各自在用它写文件的那一步再读。
+一条消息、三份结果：两份完整文件各来自单独发出的 `ReadFile`，`.env` 探测来自 Shell——整个装载里唯一只有 Shell 能做的事。别把文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是“一条消息装齐”本来要省掉的那趟往返——而光规约文件一份就已超过这个上限。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次装载里：各自在用它写文件的那一步再读。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

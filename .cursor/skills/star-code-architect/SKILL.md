@@ -2,18 +2,16 @@
 name: star-code-architect
 disable-model-invocation: true
 description: >-
-  Bootstrap or reorganize the project codebase (${CODE_NAME}/, read from .env) so research
-  plans under metds/plans/ have a place for the code to live. When ${CODE_NAME}/ is missing or empty: read
-  the research plan for what to search for, find and score candidate reference implementations
-  on GitHub (plan fit, completeness, license, activity), let the user pick one, then clone
-  it, strip its git history, record provenance, and conservatively rebrand it to CODE_NAME.
-  When code already exists: survey it with read-only Task subagents instead. Both paths then
-  design a target architecture plus a migration table, execute only user-approved migrations
-  via orchestrated Task subagents with per-group verification and git checkpoints, and write
-  the architecture spec to metds/codearc.md with short cross-references in AGENTS.md and
-  .cursor/rules/. Use when the user runs /star-code-architect, wants a reference
-  implementation or starter codebase for a plan, wants to set up / scaffold ${CODE_NAME}/,
-  or wants to organize / refactor the existing codebase and record its architecture.
+  Bootstrap or reorganize the project codebase (${CODE_NAME}/, from .env) so research plans under
+  metds/plans/ have a place for the code to live. When ${CODE_NAME}/ is missing or empty: read the plan
+  for what to search for, find and score candidate reference implementations on GitHub (plan fit,
+  completeness, license, activity), let the user pick, then clone it, strip its git history, record
+  provenance, and conservatively rebrand it to CODE_NAME. When code already exists: survey it with
+  read-only Task subagents instead. Both paths then design a target architecture plus a migration table,
+  execute only user-approved migrations via Task subagents with per-group verification and git
+  checkpoints, and write the spec to metds/codearc.md, cross-referenced in AGENTS.md and .cursor/rules/.
+  Use when the user runs /star-code-architect, wants a reference implementation or starter codebase for a
+  plan, wants to set up / scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase.
   Bilingual (en/zh).
 ---
 

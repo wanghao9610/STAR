@@ -18,7 +18,7 @@ description: >-
 
 调用方式：`$star-code-architect [GITHUB_URL | PLAN_NAME]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载，以一条消息发出：规约文件经单独的一次文件读取读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——外加一次小的 Bash 调用（以项目根目录为工作目录），做这里唯一只有 Bash 才做得了的事，即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 放回那次 Bash 调用，并接受落盘的代价。两次调用一起发出仍只花一趟往返——而它们也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载，以一条消息发出：规约文件经单独的一次文件读取读入，绝不 `cat` 进 shell 命令——shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——外加一次小的 shell 调用（以项目根目录为工作目录），做这里唯一只有 shell 才做得了的事，即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 放回那次 shell 调用，并接受落盘的代价。两次调用一起发出仍只花一趟往返——而它们也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -31,7 +31,7 @@ description: >-
 ## 核心原则
 
 1. **计划驱动代码。**先读 `metds/plans/` 下的根计划：检索要素（分支 A）、勘察重点（分支 B）、目标架构都从计划推导。既无计划也无 URL 时，建议先跑 `$star-plan-coach`——或者直接收一个主题 / URL 继续。
-2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。每道确认点只问一个问题——使用 `ask_user_question` 工具，仅在非交互的 `codex exec` 下改用一个简洁的纯文本问题——等到明确答复再跨过。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
+2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。每道确认点只问一个问题——使用 `request_user_input` 工具，仅在非交互的 `codex exec` 下改用一个简洁的纯文本问题——等到明确答复再跨过。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
 3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
 5. **逐组验证，选择性委派。**默认在本地执行勘察与迁移；只有协作工具可用且委派确有帮助时，才把有边界、相互独立的关注点或迁移组委派出去，并给每个受托者 `references/orchestration_spec_zh.md` 中的窄格式约定——勘察受托者只读，迁移受托者只写本组自己的文件。无论是否委派：每组文件所有权互不相交，亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。
@@ -132,6 +132,6 @@ description: >-
 
 ## 对话纪律
 
-- 一次只问一个问题——使用 `ask_user_question` 工具，仅在非交互的 `codex exec` 下改用简洁纯文本——并等待答复。任何跨确认点的副作用都必须先得到明确批准。
+- 一次只问一个问题——使用 `request_user_input` 工具，仅在非交互的 `codex exec` 下改用简洁纯文本——并等待答复。任何跨确认点的副作用都必须先得到明确批准。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `metds/codearc.md` 正文语言跟随根计划的 `language`（无计划则用对话语言）；`UPSTREAM.md` 一律英文（事实元数据）；中文文档中专业术语保留英文。

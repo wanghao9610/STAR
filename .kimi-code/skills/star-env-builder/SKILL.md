@@ -2,20 +2,17 @@
 name: star-env-builder
 disable-model-invocation: true
 description: >-
-  Build and verify the project's Python runtime environment so plan execution has a working
-  interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default
-  CODE_NAME); otherwise a .venv under the project root. An existing environment is never
-  deleted — after user confirmation it is renamed to a dated backup (real run date) before
-  rebuilding. Dependencies come from the first source that has them: existing
-  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) →
-  import scan of the code, with generated results written as requirements.txt plus a
-  requirements/ folder (framework|runtime|optional.txt; conda-only items in
-  requirements/conda.txt). Installs in the order uv > pip > conda with CUDA-aware framework
-  wheel selection behind a single install-plan confirmation point, then smoke-tests in three layers
-  (imports → framework/GPU → project entrypoint) and writes ENV_REPORT.md plus a version
-  freeze under wkdrs/. Use when the user runs /skill:star-env-builder, wants the project's conda
-  env or venv created or rebuilt, needs dependencies resolved and installed, or wants the
-  runtime environment verified. Bilingual (en/zh).
+  Build and verify the project's Python runtime environment so plan execution has a working interpreter.
+  Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a
+  .venv in the root. An existing environment is never deleted — after confirmation it is renamed to a
+  dated backup before rebuilding. Dependencies come from the first source that has them: existing
+  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) → import scan of
+  the code, written out as requirements.txt plus a requirements/ folder (framework|runtime|optional.txt,
+  conda-only items in conda.txt). Installs in the order uv > pip > conda, CUDA-aware, behind one
+  install-plan confirmation, then smoke-tests imports, framework/GPU and the entrypoint and writes
+  ENV_REPORT.md under wkdrs/. Use when the user runs /skill:star-env-builder, wants the conda env or venv
+  created or rebuilt, needs dependencies resolved and installed, or wants the environment verified.
+  Bilingual (en/zh).
 ---
 
 # Research Env Builder — runtime environment bootstrap
@@ -24,13 +21,13 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-env-builder [ENV_NAME | add <package>…]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own `Read` call, plus one Bash call in the same message, with the project root as the working directory, carrying exactly:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own `ReadFile` call, plus one Shell call in the same message, with the project root as the working directory, carrying exactly:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-One message, four results — still one round trip. Keep the files out of the Bash command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. Bash carries only what only Bash can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
+One message, four results — still one round trip. Keep the files out of the Shell command: each tool result has its own size limit, and a Shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. Shell carries only what only Shell can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 

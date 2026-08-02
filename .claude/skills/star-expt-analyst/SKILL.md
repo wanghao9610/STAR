@@ -2,23 +2,16 @@
 name: star-expt-analyst
 disable-model-invocation: true
 description: >-
-  Analyze what a plan's execution run actually produced and judge it against what the plan
-  expected. A PLAN_NAME (slug / numeric prefix / filename) resolves through the plan's exec_runs
-  to its wkdrs/<run>/ directory; a wkdrs/<run>/ path back-resolves to its plan; no argument lists
-  the runs on disk and asks. Inventories the §4 deliverables against disk, corroborates EXEC_LOG's
-  step claims with artifacts, scans training / eval logs for health signals (crashes, NaN, OOM,
-  divergence, overfitting), extracts the metrics the §5 done-criteria name and scores them against
-  those criteria plus root §4 metrics and stated baselines, interprets what the numbers mean for
-  the claim the plan traces to (root kill-criteria, signs of data leakage, single-seed limits), and
-  appends a lightweight comparison when sibling runs of the same plan exist. Renders curves only
-  when matplotlib is already installed (never installs anything), re-reads every cited number
-  before it enters the report, and writes the analysis under wkdrs/<run>/. Read-only otherwise:
-  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing
-  metric — that command goes back to the user; `watch` gives a chat-only quick check of a
-  possibly still-running run. Use when the user runs /star-expt-analyst, or wants
-  to analyze / interpret experiment results, outputs or artifacts, check whether a run met its
-  expectations or done-criteria, read training logs or metrics, or find out what a finished run
-  means for the plan. Bilingual (en/zh).
+  Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
+  prefix / filename) resolves through exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to
+  its plan; no argument lists the runs and asks. Inventories the §4 deliverables on disk, corroborates
+  EXEC_LOG's claims with artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores
+  the §5 done-criteria metrics against those criteria and baselines, and writes the analysis under
+  wkdrs/<run>/. Installs nothing and re-reads every cited number before reporting it. Read-only otherwise:
+  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric —
+  that command goes to the user; `watch` is a chat-only check of a running run. Use when the user runs
+  /star-expt-analyst, or wants experiment results or artifacts analyzed, a run checked against
+  done-criteria, training logs or metrics read, or what a run means for the plan. Bilingual (en/zh).
 ---
 
 # Research Experiment Analyst — results audit

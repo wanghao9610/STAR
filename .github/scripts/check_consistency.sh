@@ -259,30 +259,43 @@ while IFS= read -r rel; do
 done < <(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | sed 's|^\./||' | sort)
 (( struct_errors == 0 )) && note "heading structure matches across the three trees (${struct_files} files)"
 
-# 12. Kimi frontmatter descriptions stay inside their length budget.
-#     Every .kimi-code description is at or under 1041 bytes while the other
-#     trees run to 1989, and the short ones end in complete sentences — they were
-#     condensed on purpose, not truncated. The budget was undocumented, so a
-#     later edit could silently exceed it. See .github/CONTRIBUTING.md.
+# 12. Frontmatter descriptions stay inside the SKILL.md spec limit, in every tree.
+#     The limit is 1024 *characters* and it is not one harness's quirk: the
+#     agentskills.io SKILL.md spec, Anthropic's Agent Skills docs and the Kimi
+#     CLI docs all state 1-1024 for `description`. This once read as a
+#     ".kimi-code budget" of 1050 bytes, reverse-engineered from that tree's data
+#     because it was the only tree that had ever been condensed — see
+#     .github/CONTRIBUTING.md. Two consequences of that guess, both fixed here:
+#       - characters, not bytes. These descriptions carry §, — and → , so bytes
+#         run up to 8 past characters and a byte check at 1024 rejects valid
+#         files. awk's length() is bytes on BWK awk, so the count goes through
+#         perl, as check 18's anchors already do.
+#       - the folded-block indicator is not part of the value. `description: >-`
+#         left ">-" in the measured text and inflated every folded file by 3.
 #     SKILL.md only: it is the registered manifest whose description the platform
 #     surfaces. SKILL_zh.md is loaded as a resource and runs past 1300 chars.
-section "Kimi description budget (<= ${KIMI_DESC_MAX:=1050} bytes)"
+#
+#     Not checked, because no repo state can hold it: a harness may truncate the
+#     listing well before the spec limit. Cursor cut three .agents descriptions
+#     at exactly 1536 characters mid-word, so a description over ~1500 loses its
+#     tail in the listing the agent matches against, silently.
+section "Description length (<= ${DESC_MAX:=1024} characters, SKILL.md spec)"
 desc_errors=0
 while IFS= read -r manifest; do
     len="$(awk '
         NR == 1 && /^---[ \t]*$/ { fm = 1; next }
         fm && /^---[ \t]*$/ { exit }
-        fm && /^description:/ { grab = 1; sub(/^description:[ \t]*/, ""); }
+        fm && /^description:/ { grab = 1; sub(/^description:[ \t]*/, ""); sub(/^[>|][-+]?[ \t]*$/, "") }
         fm && grab && /^[A-Za-z_-]+:/ && !/^description:/ { exit }
         grab { gsub(/^[ \t]+|[ \t]+$/, ""); if (length($0)) body = body (length(body) ? " " : "") $0 }
-        END { print length(body) }
-    ' "${manifest}")"
-    if (( len > KIMI_DESC_MAX )); then
-        fail "${manifest}: description is ${len} bytes, over the ${KIMI_DESC_MAX}-byte Kimi budget"
+        END { print body }
+    ' "${manifest}" | perl -CSD -Mutf8 -ne 'chomp; $n += length; END { print $n + 0 }')"
+    if (( len > DESC_MAX )); then
+        fail "${manifest}: description is ${len} characters, over the ${DESC_MAX}-character SKILL.md limit"
         desc_errors=1
     fi
-done < <(find .kimi-code/skills -name 'SKILL.md' | sort)
-(( desc_errors == 0 )) && note "all Kimi descriptions within ${KIMI_DESC_MAX} bytes"
+done < <(find "${SKILL_ROOTS[@]}" -name 'SKILL.md' | sort)
+(( desc_errors == 0 )) && note "all descriptions within ${DESC_MAX} characters in all four trees"
 
 # 13. Skill helper scripts are byte-identical across the four trees, and executable.
 #     The .md files are adapted per tree — invocation tokens, harness vocabulary —

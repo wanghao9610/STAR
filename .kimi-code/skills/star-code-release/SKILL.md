@@ -2,22 +2,17 @@
 name: star-code-release
 disable-model-invocation: true
 description: >-
-  Prepare the research project for public release: consolidate scattered code into ${CODE_NAME}/
-  (read from .env), polish the files a reader will open, and compile the project's README.md. Sweeps
-  tasks/, wkdrs/ and the project root for code worth shipping, promotes only what passes a
-  three-part evidence test (the README cites it, an executed leaf's deliverable needs it, or it
-  reproduces a number in wkdrs/results/results.md), and places it by metds/codearc.md's placement rules —
-  never inventing a directory. Polishes only the files a reader will open (promoted files, entrypoints,
-  configs, the public API the README shows) with individually approved behavior-preserving edits.
-  Compiles README.md section by section from metds/overview.md, framework.md, dataset.md,
-  training.md, evaluation.md, results.md, codearc.md, UPSTREAM.md, requirements* and reference.bib
-  through a written map, where numbers come only from the results table and every printed command
-  is checked to exist. Ends with a blocking hygiene sweep — committed secrets, machine-local
-  absolute paths, internal hostnames, a license conflicting with the recorded upstream one — and
-  writes wkdrs/release/RELEASE_<date>.md. It prepares a release and never publishes one: no push,
-  no repo creation, no tag, no weight upload. Use when the user runs /skill:star-code-release, wants to
-  open-source / release / publish the project, wants a README for the repository, or wants the
-  code scattered across tasks/ gathered into the codebase. Bilingual (en/zh).
+  Prepare the project for public release: consolidate scattered code into ${CODE_NAME}/ (from .env),
+  polish what a reader will open, and compile README.md. Sweeps tasks/, wkdrs/ and the root, promoting
+  only code passing a three-part evidence test (the README cites it, an executed leaf needs it, or it
+  reproduces a results.md number), placed by metds/codearc.md's rules — never inventing a directory.
+  Polish edits are individually approved and behavior-preserving. Compiles README.md from the metds/
+  method documents through a written map, taking numbers only from the results table and checking every
+  printed command exists. Ends with a blocking hygiene sweep (secrets, local paths, hostnames, license
+  conflicts) and a dated wkdrs/release/ report. It prepares a release and never publishes one: no push, no
+  repo creation, no tag, no weight upload. Use when the user runs /skill:star-code-release, wants to
+  open-source / publish the project, wants a repository README, or wants tasks/ code gathered in.
+  Bilingual (en/zh).
 ---
 
 # Research Code Release — consolidate, polish, document
@@ -26,7 +21,7 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-code-release [gather | polish | readme | check]` — no argument runs the full pass in order (gather → polish → readme → check); a phase name runs only that phase. `check` is read-only apart from its report.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. That file is the whole opening load, issued as one message: the conventions arrive as their own `Read` — never `cat`-ed into a Bash command, because a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions alone are about 35 KB, past that line — plus one small Bash call in the same message, with the project root as the working directory, for the one thing here only Bash can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)` — `STAR_LANG` sets the reply language (§7.6), `INVOLVE` the question level (§7.7); sent together, neither costs a round trip of its own. Nothing else is loaded unconditionally at the start, and the references under `references/` arrive with the phase that uses them, never front-loaded.
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. That file is the whole opening load, issued as one message: the conventions arrive as their own `ReadFile` — never `cat`-ed into a Shell command, because a Shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions alone are about 35 KB, past that line — plus one small Shell call in the same message, with the project root as the working directory, for the one thing here only Shell can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)` — `STAR_LANG` sets the reply language (§7.6), `INVOLVE` the question level (§7.7); sent together, neither costs a round trip of its own. Nothing else is loaded unconditionally at the start, and the references under `references/` arrive with the phase that uses them, never front-loaded.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 

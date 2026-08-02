@@ -6,7 +6,7 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 ## The shape of the problem
 
 The fifteen skills exist four times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/` and
-`.kimi-code/skills/` — 149 markdown files per tree, 596 in all, roughly 93% of the repository. They are
+`.kimi-code/skills/` — 151 markdown files per tree, 604 in all, roughly 93% of the repository. They are
 maintained by hand. There is no generator.
 
 So the cost of changing one shared rule is measured in files, not lines. Recent examples:
@@ -32,12 +32,12 @@ token and the `disable-model-invocation` line, each tree is about equally far fr
 
 | Tree | Byte-identical to `.claude` |
 |---|---|
-| `.agents` | 58 / 149 |
-| `.cursor` | 60 / 149 |
-| `.kimi-code` | 61 / 149 |
+| `.agents` | 54 / 151 |
+| `.cursor` | 59 / 151 |
+| `.kimi-code` | 65 / 151 |
 
 The reason is completeness, which is measurable: **`.claude` never has fewer headings than any other
-tree, in any of the 149 files.** Where trees diverge structurally, `.claude` is the superset. Porting
+tree, in any of the 151 files.** Where trees diverge structurally, `.claude` is the superset. Porting
 from the longest version means adapting text down, which is safer than reconstructing text that was
 dropped — the failure mode in "What the checks do not catch" below.
 
@@ -48,22 +48,51 @@ mistaken for drift.
 
 | Tree | Tool | Invocation | Gate | Delegation | User questions |
 |---|---|---|---|---|---|
-| `.agents` | Codex | `$star-*` | Codex progress-plan | selective delegation | structured user-input tool |
+| `.agents` | Codex | `$star-*` | `update_plan` | selective delegation, local by default | `request_user_input` |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore` / `generalPurpose` | `AskQuestion` |
-| `.kimi-code` | Kimi | `/skill:star-*` | Plan mode | — | plain text |
+| `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
 the question tool splits by name — `AskUserQuestion` in 32 `.claude` and 32 `.kimi-code` files,
-`AskQuestion` in 32 `.cursor` files, none in `.agents`; `SwitchMode` in 2 `.cursor` files and 0
-elsewhere; the terminal tool is `Bash` in 30 files each of `.agents`, `.claude` and `.kimi-code` and
-`Shell` in 30 `.cursor` files, with neither name crossing into the other's tree; `subagent_type` in 28
-files each of `.claude`, `.cursor` and `.kimi-code`, with different values, and 0 in `.agents`. A term
-concentrated in exactly one tree is almost always correct.
+`AskQuestion` in 32 `.cursor` files, `request_user_input` in 18 `.agents` files; `SwitchMode` in 2
+`.cursor` files and 0 elsewhere, against `update_plan` in 4 `.agents` files; the subagent tool is
+`Agent` in 28 files each of `.claude` and `.kimi-code` and `Task` in 28 `.cursor` files, with
+`subagent_type` alongside it in all three and different values in each; the terminal tool is `Bash` in
+30 `.claude` files, `Shell` in 30 files each of `.cursor` and `.kimi-code`, and lowercase `shell` in
+`.agents`, which is how Codex writes it; the file reader is `Read` in 28 files each of `.claude` and
+`.cursor` and `ReadFile` in 28 `.kimi-code` files, while `.agents` names none — Codex has no
+file-reading tool, so those loads say "file read" and carry a marked fallback that `cat`s the files into
+the shell call and accepts the spill. A term concentrated in the trees whose harness actually has it is
+almost always correct.
+
+Every one of those names was checked against its harness's own tool list, not against how the other
+trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the Kimi CLI built-in tools
+reference, and for Codex the tool handlers in `openai/codex` (`codex-rs/core/src/tools/`), where the
+registered names are `shell_command`, `apply_patch`, `update_plan`, `request_user_input` and
+`spawn_agent`. Three trees needed correcting: `.cursor` and `.kimi-code` had inherited Claude's `Bash`
+(and Kimi also its `Read`), and `.agents` named `Bash`, `Read` and `ask_user_question`, the last of
+which Codex has never had.
+
+One completion is deliberately outstanding: **`.agents` describes delegation in prose and names no
+subagent tool.** Codex has `spawn_agent` with `agent_type` (`default` / `worker` / `explorer`) and
+enables subagents by default now, so the tool could be named — but "collect locally by default,
+delegate selectively" is a cost stance, not an omission, and OpenAI's own docs warn that subagent
+workflows spend more tokens than the single-agent equivalent. Naming the tool is a change to that
+stance and belongs in its own commit.
 
 **A term appearing in the wrong tree is the actual defect.** Two real cases: 25 `.cursor` asset
 templates told users "Claude Code injects it at session start" (`e149ae0`), and `.kimi-code` names
 `CLAUDE.md` as the project rules document in 36 places where the others said `AGENTS.md` (`6f37f77`).
+
+**The names a port forgets to adapt are the ones no reviewer looks at twice.** `Bash` and `Read` were
+carried unchanged into `.cursor`, `.kimi-code` and `.agents` for as long as those trees existed, because
+a tool name that reads like an ordinary English word does not look like Claude vocabulary — unlike
+`AskUserQuestion`, which does. All three named a tool their harness has never had. `.agents` also named
+`ask_user_question`, which is worse than an unadapted name: it is harness-shaped, lowercase and
+plausible, so it reads as if someone had checked. Nobody had — Codex calls it `request_user_input`. When
+you port a tree, check every tool name against that harness's published tool list, not against how
+familiar or how plausible the name feels.
 
 **A capability the harness has since gained is the same defect, aged.** A tree ported while its harness
 lacked a mechanism keeps the workaround long after the mechanism arrives, and no check can see it —
@@ -78,28 +107,41 @@ Everything else — rules, thresholds, step semantics, write boundaries, rubrics
 
 `.agents` is a genuine adaptation, not a copy: its executor has 7 steps where the others have 9, and
 `stop_line_rules.md` is written as "what **Codex** runs". Its heading structure differs from `.claude`
-in 23 files, and those differences are not simple omissions — it restructures.
+in 10 files — six under `star-plan-executor`, four under `star-code-architect` — and those differences
+are not simple omissions: it restructures.
 
 It is therefore **exempt from the structural check**, and that exemption is a known hole: see below.
 
-## The Kimi description budget
+## The description length limit
 
-`.kimi-code` **`SKILL.md`** frontmatter descriptions are held to **1050 bytes** (the current maximum is 1041). The other three trees are not, and neither are the `SKILL_zh.md` files — `SKILL.md` is the registered manifest whose description the platform surfaces, while `SKILL_zh.md` is loaded as a resource and runs past 1300 characters.
+**`SKILL.md` frontmatter descriptions are capped at 1024 characters, in all four trees.** Not a
+per-harness budget: the [agentskills.io `SKILL.md` spec](https://agentskills.io/specification),
+Anthropic's Agent Skills docs and the Kimi CLI docs all state `description` is 1–1024. `SKILL.md`
+only — it is the registered manifest whose description the platform surfaces, while `SKILL_zh.md` is
+loaded as a resource and runs past 1300 characters.
 
-This is a real convention, not drift, and the evidence is in the shape of the data: every Kimi
-description is at or under 1041 bytes, every skill whose `.claude` description already fits is
-100–101% of it (untouched), and every skill whose `.claude` description is longer was **rewritten** to
-fit — each one still ends in a complete sentence and the `Bilingual (en/zh).` marker, which a hard
-truncation would have cut mid-word. Someone condensed these deliberately.
+This was long recorded here as a `.kimi-code`-only budget of 1050 **bytes**, because that tree was
+the only one anybody had condensed, and the number was reverse-engineered from its data (max 1041)
+rather than read from a spec. The guess was close enough to hide two measurement errors, both since
+fixed in check 12: awk's `length()` counts bytes, and these descriptions carry `§`, `—` and `→`, so
+bytes run up to 8 past characters; and `description: >-` left the folded-block indicator `>-` in the
+measured text, inflating every folded file by 3. `1024 + 3 + multibyte slack ≈ 1047` is why 1050
+passed for so long.
 
-The cost is that condensing loses things silently. Two clauses had gone missing from the English
-descriptions and were restored: `star-code-release`'s "prepares a release and never publishes one"
-and `star-expt-analyst`'s read-only guarantee and `watch` mode. Both fit inside the budget — those
-descriptions were at 890 and 593 bytes, well under the ceiling — so the loss bought nothing.
-Both Chinese descriptions had kept the clauses, which is what made the English gap visible.
+**A harness may truncate well before the spec limit, and nothing in the repo can catch it.** Cursor
+cut three `.agents` descriptions at exactly character 1536, mid-word, back when they ran to 2108, 1665
+and 1559 (`star-metd-summarize`, `star-refs-reviewer`, `star-expt-analyst`; all three are inside the
+limit now) — so the tail of a long description silently never reaches the listing the agent matches
+against. Both numbers matter: 1024 is what the spec allows, ~1500 is where a description starts losing
+its ending in practice.
 
-So when you shorten a description to fit: cut detail, never a guarantee about what the skill will not
-do. Check 12 enforces the length; nothing enforces that judgement.
+Condensing loses things silently, which is the real cost. Two clauses had gone missing from the
+English descriptions and were restored: `star-code-release`'s "prepares a release and never publishes
+one" and `star-expt-analyst`'s read-only guarantee and `watch` mode. Both fit inside the limit — those
+descriptions were at 890 and 593 characters — so the loss bought nothing. Both Chinese descriptions had
+kept the clauses, which is what made the English gap visible. **When you shorten a description to fit:
+cut detail, never a guarantee about what the skill will not do.** Check 12 enforces the length;
+nothing enforces that judgement.
 
 ## What the checks catch
 
@@ -115,10 +157,12 @@ do. Check 12 enforces the length; nothing enforces that judgement.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Provenance hooks exist, are executable, and are registered.
-11. **Heading structure matches across `.claude`, `.cursor` and `.kimi-code`** — 1152 headings per tree,
+11. **Heading structure matches across `.claude`, `.cursor` and `.kimi-code`** — 1200 headings per tree,
     compared after stripping parentheticals (both `(...)` and `（...）`) and inline code, so
     harness vocabulary inside a heading is allowed to differ. Currently exact, with no exception list.
-12. **Kimi `SKILL.md` descriptions stay within their length budget** — see above.
+12. **Every tree's `SKILL.md` descriptions stay within the 1024-character spec limit** — counted in
+    characters, with the folded-block indicator excluded. See above; a harness truncating earlier than
+    the spec is not checkable here.
 13. **Skill helper scripts are byte-identical across the four trees, and executable.** A script names no
     harness, so it has nothing to adapt; a copy that has drifted is a bug, not a variant.
 14. **`.agents` manifests carry the same `##` sections as `.claude`** — the set, not the sequence, since
@@ -193,9 +237,9 @@ Be honest with yourself about this list; it is where the real drift lives.
   not a guarantee.
 - **`docs/htmls/`.** The landing page is not compared against the READMEs or the workflow guide, and
   has drifted from both.
-- **Whether a shortened description still says the important thing.** Check 12 enforces the Kimi
-  length budget below, but nothing checks that what was cut to fit was expendable — see the budget
-  section.
+- **Whether a shortened description still says the important thing.** Check 12 enforces the length
+  limit, but nothing checks that what was cut to fit was expendable — see the description-length
+  section. Nor does anything catch a harness truncating a description that is inside the limit.
 - **Whether the skills guide still describes the skill correctly.** Check 18 proves a section exists
   for each skill and that its links resolve. Rewrite a skill's workflow and leave the guide's "What it
   does" list describing the old one, and every check stays green.
