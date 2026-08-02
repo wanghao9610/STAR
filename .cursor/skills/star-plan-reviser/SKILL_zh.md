@@ -15,14 +15,14 @@ description: >-
 
 调用方式：`/star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次 `Read`——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 Bash 调用（以项目根目录为工作目录），只带这一行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次 `Read`——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 Shell 调用（以项目根目录为工作目录），只带这一行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-一条消息、四份结果：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——加上 `references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式），各自来自单独的一次 `Read`，两行 Bash 来自那次 Bash 调用——整套输入里只有这两行非 Bash 不可：一行是 `.env` 查询，一行是共享采集脚本。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。别把这三份文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——规约全文一份就已超过这个上限，三份并成一个结果必然落盘，那正是"一条消息装齐"本来要省掉的那趟往返。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
+一条消息、四份结果：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——加上 `references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式），各自来自单独的一次 `Read`，两行 Shell 来自那次 Shell 调用——整套输入里只有这两行非 Shell 不可：一行是 `.env` 查询，一行是共享采集脚本。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。别把这三份文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——规约全文一份就已超过这个上限，三份并成一个结果必然落盘，那正是"一条消息装齐"本来要省掉的那趟往返。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -36,7 +36,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线对你同样生效）。这是把项目的 Verification 规则（AGENTS.md §10）应用到计划本身。规则见 `references/review_spec_zh.md`。
 2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 `Task` subagent**（`subagent_type: explore`）——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
-3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条以纯文本一次一问的方式采纳 / 调整 / 跳过，标出你的推荐——绝不打包批准，绝不擅自动笔。
+3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条经 AskQuestion 采纳 / 调整 / 跳过，一次一条，标出你的推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/star-plan-decomposer`；研究问题或方法级转向转给 `/star-plan-coach`。边界见 `references/revision_rules_zh.md`。
 6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `/star-flow-status` 浮现。
@@ -46,7 +46,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ### Step 0：解析目标计划
 
 1. 用 `PLAN_NAME`（slug / 数字前缀 / 完整文件名）匹配开场装载的摘要列出的计划——摘要就是那份清单；完整读入解析到的计划。
-2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并直接问一个问题——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
+2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并经 AskQuestion 询问——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
 3. 判定节点类型：**叶子**（审它自己的 run）vs **根/内部**（审总体计划章节 + children 汇总）。这决定 Step 1 的证据集合。
 
 ### Step 1：圈定证据
@@ -73,7 +73,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 4：修订问答（一次一条）
 
-1. 按报告顺序走候选，每条一个纯文本问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；用户始终可以自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/star-plan-decomposer` 或 `/star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。绝不把整张清单打包成一个问题。
+1. 按报告顺序走候选，每条一次 AskQuestion：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；内置"Other"始终允许自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/star-plan-decomposer` 或 `/star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
 2. 走完清单后问一次：还有其他要改的吗？用户新增的项同样作为候选（证据记"user directive"）。
 3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；写出的报告就是交付物。
 
@@ -106,5 +106,5 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 对话纪律
 
-- 以纯文本提问，一次一条候选；任何写入前必须先获得明确答复——headless / 脚本化运行也不例外。
+- AskQuestion 不可用（headless / 脚本化）时退化为纯文本提问——仍然一次一条候选，仍然先获明确批准再写入。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。计划正文与审查报告跟随计划 frontmatter 的 `language`；中文计划里技术名词保留英文。

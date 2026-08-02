@@ -22,13 +22,13 @@ description: >-
 
 调用方式：`/star-env-builder [ENV_NAME | add <包名>…]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `Read` 读入，外加同一条消息里的一次 Bash 调用（以项目根目录为工作目录），内容只有：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `Read` 读入，外加同一条消息里的一次 Shell 调用（以项目根目录为工作目录），内容只有：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 Bash 命令：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。Bash 只承担只有 Bash 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
+一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 Shell 命令：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。Shell 只承担只有 Shell 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -41,7 +41,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 ## 核心原则
 
 1. **`.env` 是唯一路径来源；从不 activate**（规约 §3）。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。环境归本 skill 所有：只有它可以创建、重命名环境或往里安装。
-2. **一个确认点，场景化追问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时以普通文本提问，一次一题，都带推荐项，收到明确答复再继续。
+2. **一个确认点，场景化追问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 AskQuestion 问，每次只问一题，都带推荐项。
 3. **只改名，绝不删除。**已有环境通过重命名为 `<名称>_<YYYYMMDD>` 备份——日期用运行时的 `date +%Y%m%d` 获取，绝不编造。本 skill 永不删除任何环境；过期备份由用户自行清理。
 4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装方式与失败处理：优先 uv，逐包降级 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
 5. **沿用已有的，只生成缺失的。**已有 requirements 布局按原样安装，绝不改写。生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后作为代码资产提交。
@@ -81,7 +81,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 4：确认点——用户批准安装计划
 
-以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后以普通文本问一句：*批准并构建* / *调整（说明哪里）* / *中止*——等到明确答复。所有不确定项在此处解决——绝不悄悄带过。
+以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后用 AskQuestion 问：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
 
 ### Step 5：安装（uv > pip > conda）
 
@@ -135,6 +135,6 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 对话纪律
 
-- 一次只用普通文本问一个问题，都带推荐项，等答复再继续（Cursor 没有结构化提问工具）；安装计划必须先收到明确的批准文字才能开始安装。
+- 确认点与所有场景化问题都走 AskQuestion——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）回退为普通文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。

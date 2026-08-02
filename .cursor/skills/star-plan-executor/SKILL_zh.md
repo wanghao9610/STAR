@@ -17,7 +17,7 @@ description: >-
 
 调用方式：`/star-plan-executor PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Bash 调用，以项目根目录为工作目录，带两行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Shell 命令——Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Shell 调用，以项目根目录为工作目录，带两行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
@@ -48,13 +48,13 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ### Step 0：定位目标计划
 
 1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与开场装载的摘要列出的计划匹配——摘要就是那份清单,不必再列一次目录。
-2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它——列出它的叶子(前缀 + slug + 一句话目标),让用户选执行哪个叶子(推荐依赖顺序中第一个就绪的叶子),或提议按依赖顺序一次一个地执行这些叶子。
+2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它——列出它的叶子(前缀 + slug + 一句话目标),用 AskQuestion 让用户选执行哪个叶子(推荐依赖顺序中第一个就绪的叶子),或提议按依赖顺序一次一个地执行这些叶子。
 3. 若未给参数或匹配有歧义,列出可选计划并询问。
 4. 完整读取选定的子计划。
 
 ### Step 1：就绪检查
 
-1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,告知用户拆解尚未完成,提供:*先回 `/star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
+1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,告知用户拆解尚未完成,用 AskQuestion 提供:*先回 `/star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
 2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?摘要里已经带着每个兄弟的 frontmatter,从摘要读它们的状态,不要逐个打开。若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的阻塞:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
 
 ### Step 2：勘察代码库
@@ -93,7 +93,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——还值得留的内容先挪进 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户自己指明才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
 
-**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,一次性呈现整批(*全部同步 / 逐条挑 / 不同步*,标出你推荐的一项),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是方向性信号——走下面的向上反馈,绝不同步。
+**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,用**一次** AskQuestion 呈现整批(*全部同步 / 逐条挑 / 不同步*,标出你推荐的一项),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是方向性信号——走下面的向上反馈,绝不同步。
 
 **向上反馈(方向性信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——这是总体层面的发现,而不只是某步失败。你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `/star-plan-reviser <slug>`(审计证据并在逐条批准下修订计划)、`/star-plan-coach <slug>`(重审风险/方法)或 `/star-plan-decomposer <slug>`(重新拆分子计划)。这样在不破坏写入纪律的前提下,把执行→总体方向的回路闭合。
 
@@ -120,7 +120,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 对话纪律
 
-- 若无法使用 plan 模式(`SwitchMode`)(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行,仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
+- 若当前环境无法使用 AskQuestion 或 plan 模式(`SwitchMode`)(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行,仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
 - 用户用什么语言就用什么语言对话;中文对话加载 `*_zh.md` 资源。
 - 子计划正文语言以其 `language` 为准;中文计划中专业术语保留英文。
 - 参与度档位(规约 §7.7)。本 skill 中不受档位影响:Step 4 审批确认点(含按步提交的确认)、红线(Step 5)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会(它把关一次删除)、以及 blocked 步骤那些改动的去留(它同样把关一次删除——`references/agent_dispatch_spec_zh.md`)。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退(取推荐项:送回 decomposer 并停下)。`high` 档:Step 5 每步派发 subagent 前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

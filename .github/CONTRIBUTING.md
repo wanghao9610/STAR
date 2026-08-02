@@ -50,17 +50,27 @@ mistaken for drift.
 |---|---|---|---|---|---|
 | `.agents` | Codex | `$star-*` | Codex progress-plan | selective delegation | structured user-input tool |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
-| `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore` / `generalPurpose` | plain text |
+| `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore` / `generalPurpose` | `AskQuestion` |
 | `.kimi-code` | Kimi | `/skill:star-*` | Plan mode | — | plain text |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
-`AskUserQuestion` appears in 32 `.claude` files and 0 elsewhere; `SwitchMode` in 2 `.cursor` files and 0
-elsewhere; `subagent_type` in 24 `.cursor` and 24 `.claude` files, with different values, and 0 in the
-other two. A term concentrated in exactly one tree is almost always correct.
+the question tool splits by name — `AskUserQuestion` in 32 `.claude` and 32 `.kimi-code` files,
+`AskQuestion` in 32 `.cursor` files, none in `.agents`; `SwitchMode` in 2 `.cursor` files and 0
+elsewhere; the terminal tool is `Bash` in 30 files each of `.agents`, `.claude` and `.kimi-code` and
+`Shell` in 30 `.cursor` files, with neither name crossing into the other's tree; `subagent_type` in 28
+files each of `.claude`, `.cursor` and `.kimi-code`, with different values, and 0 in `.agents`. A term
+concentrated in exactly one tree is almost always correct.
 
 **A term appearing in the wrong tree is the actual defect.** Two real cases: 25 `.cursor` asset
 templates told users "Claude Code injects it at session start" (`e149ae0`), and `.kimi-code` names
 `CLAUDE.md` as the project rules document in 36 places where the others said `AGENTS.md` (`6f37f77`).
+
+**A capability the harness has since gained is the same defect, aged.** A tree ported while its harness
+lacked a mechanism keeps the workaround long after the mechanism arrives, and no check can see it —
+the wording is self-consistent, and it is the platform that moved. `.cursor` carried the plain-text
+substitute for structured questions at all 132 of `.claude`'s `AskUserQuestion` sites, and said outright
+in 4 files that "Cursor has no structured question tool", which had stopped being true. When you port
+a workaround, name the capability it stands in for, so the next reader knows what to re-check.
 
 Everything else — rules, thresholds, step semantics, write boundaries, rubrics — must not differ.
 

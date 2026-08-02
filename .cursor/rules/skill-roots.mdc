@@ -11,11 +11,11 @@ Guidelines for loading skills from tool-specific roots without mixing incompatib
 
 **Use one authoritative copy per tool. Keep tool-specific instructions separate.**
 
-Cursor does not prioritize or de-duplicate skills. It discovers every `SKILL.md` under its scan roots and may list the same `name` more than once. This repo therefore assigns one owner per root:
+Cursor scans `.cursor/skills/` and `.agents/skills/` as native roots, plus `.claude/skills/` and `.codex/skills/` for compatibility. It surfaces one entry per skill `name`, so when the same skill exists in several roots only one copy is presented to the agent, and it is not necessarily the Cursor-owned one — in this repo all fifteen `star-*` skills are surfaced from `.agents/skills/`, the Codex-worded copies. Section 2 is what corrects that. This repo assigns one owner per root:
 
 | Root | Owner tool | Adaptation |
 |------|------------|------------|
-| `.cursor/skills/` | **Cursor** | `SwitchMode` plan gate, `Task` subagents, plain-text Q&A |
+| `.cursor/skills/` | **Cursor** | `SwitchMode` plan gate, `Task` subagents, `AskQuestion` |
 | `.agents/skills/` | **Codex** | `$skill` invoke, Codex progress-plan / selective delegation |
 | `.claude/skills/` | **Claude** | `/skill` invoke, AskUserQuestion, Enter/ExitPlanMode |
 
@@ -26,6 +26,7 @@ Do not treat these three trees as interchangeable. Keep tool-specific wording in
 **When duplicate skills exist, Cursor Agent must use the copy under `.cursor/skills/`.**
 
 - For `star-plan-*`, and any other skill that exists in multiple roots, read and follow `.cursor/skills/<name>/`.
+- This holds even when the surfaced entry points somewhere else: the path shown in the skill listing is where Cursor found a copy, not the copy to act on. Open `.cursor/skills/<name>/SKILL.md` yourself and follow that.
 - Ignore sibling copies under `.agents/skills/` and `.claude/skills/` unless the user explicitly asks to use Codex or Claude wording.
 - When linking hand-offs, keep `/star-plan-*` names, but still load instructions from `.cursor/skills/`.
 
@@ -34,7 +35,8 @@ Do not treat these three trees as interchangeable. Keep tool-specific wording in
 **Hide compatible third-party copies where possible. Prefer this rule when duplicates remain.**
 
 - Turn **off** Settings → Rules, Skills and Subagents → **Include third-party Plugins, Skills, and other configs** so `.claude/skills/` (compatibility) is not ingested.
-- `.agents/skills/` is a **native** Cursor root, not third-party, so that toggle does not hide it. Prefer `.cursor/skills/` via this rule when both appear.
+- `.agents/skills/` is a **native** Cursor root, not third-party, so that toggle does not hide it, and it is the root that currently wins discovery. No setting resolves this; section 2 does, by instruction.
+- A project that only ever runs Cursor can delete the roots it does not use, which removes the competition at the source. This repo keeps all four because it ships them.
 
 ---
 

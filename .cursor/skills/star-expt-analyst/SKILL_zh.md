@@ -19,7 +19,7 @@ description: >-
 
 调用方式：`/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某一棵子树时则编译进 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `Read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——Bash 只做只有 Bash 能做的事，同一条消息里的一次小调用：
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `Read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——Shell 只做只有 Shell 能做的事，同一条消息里的一次小调用：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
@@ -52,7 +52,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
    - `watch`，其后可跟计划名或 run 路径 → **watch 模式**：只走 Step 9——对可能仍在运行的 run 做只在聊天里的健康检查；不打判定、不写报告文件。
    - `wkdrs/<run>/` 路径 → 该 run；经 run 的 `EXEC_LOG.md` frontmatter `source_plan`，或 `exec_runs` 指向它的那个计划，反查回计划。
    - 计划名（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配；`metds/plans/` 路径也算）→ 该计划的当前 run（`exec_runs` 的最后一项）；同一叶子更早的 run 用它的 `wkdrs/<run>/` 路径来指定。
-   - 无参数 → 列出每个 `wkdrs/*/EXEC_LOG.md` 的 run 名、来源计划与日志 `status`，直接提一个问题询问分析哪个。
+   - 无参数 → 列出每个 `wkdrs/*/EXEC_LOG.md` 的 run 名、来源计划与日志 `status`，经 AskQuestion 询问分析哪个。
    - 都不匹配 → 列出最接近的计划与 run 候选并询问。
 3. **"没什么可分析"是一个合法答案。** 若计划没有 `exec_runs`，或 run 目录不存在、里面没有产物，如实说明并停止——转交给 `/star-plan-executor <slug>`。绝不分析一个从未被执行的 run。
 4. **检测兄弟 run**：`wkdrs/` 下其他与本 run 共享 `<prefix>_<slug>` 共同前缀的目录（`..._v2`、日期后缀）。列出它们；它们输入给 Step 5 的轻量对比。
@@ -130,5 +130,5 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 对话纪律
 
-- 仅在工作流要求处提问（分析哪个 run、匹配有歧义时），以纯文本一次一问；要求明确答复——headless / 脚本化运行也不例外。由于本 skill 除自己的报告外什么都不写，没有审批确认点——但同样地，绝不声称或暗示你改动了计划、状态或日志。
+- 仅在工作流要求处使用 AskQuestion（分析哪个 run、匹配有歧义时）。不可用（headless / 脚本化）时退化为纯文本并要求明确答复。由于本 skill 除自己的报告外什么都不写，没有审批确认点——但同样地，绝不声称或暗示你改动了计划、状态或日志。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。报告跟随计划 frontmatter 的 `language`（否则跟随对话语言）；中文报告里技术名词——指标名、日志键、文件路径——保留英文。

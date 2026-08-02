@@ -21,14 +21,14 @@ description: >-
 
 调用方式：`/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | add PAPER [PAPER …] | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；`survey` 检索一个话题、分层阅读、独立写出一份领域综述（`metds/refs/<slug>_survey.md`）——其后的文本按 `PLAN_NAME` 或 `TOPIC` 的规则解析，没有就走无参的来源链；`add` 一次追加多篇，每篇是 arXiv id、DOI、URL 或标题；单个 arXiv id、DOI 或论文 URL 追加那一篇。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。文献分析者真正据以行事的部分——§0 词汇表、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——就是本 skill 的开场装载，动手前以项目根目录为工作目录、用一次 Bash 调用取来：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。文献分析者真正据以行事的部分——§0 词汇表、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——就是本 skill 的开场装载，动手前以项目根目录为工作目录、用一次 Shell 调用取来：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；探测与各节同在一次调用里，谁都不必各占一趟往返。那行 `awk` 只打印上面点名的各节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。取出的摘录约 27 KB，而整份规约有 34 KB——正是这个差额让它能走 Bash：结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来。
+`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；探测与各节同在一次调用里，谁都不必各占一趟往返。那行 `awk` 只打印上面点名的各节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。取出的摘录约 27 KB，而整份规约有 34 KB——正是这个差额让它能走 Shell：结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来。
 
 有两节不装载，是因为本 skill 从不做它们管的事：§1 git——本 skill 从不提交，状态与文件规则已写明；§2 红线——本 skill 不跑重活，全部联网行为由核心原则 6 与 `references/source_policy_zh.md` 划定边界，而 §2 本会触发的那些确认另有归属，且都在装载范围内（§7.7 自己的"删除与覆盖"一类、§3.5 的禁装规定）。另有两处不装载，是因为本 skill 需要的部分已经在手：§9 项目布局——它要裁定的放置问题，状态与文件规则裁得比 §9 更严；以及规约的前言——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。哪次运行真需要其中某节，再整份读回。开场装载只有这份规约摘录：其余资源——`references/source_policy_zh.md`、`references/refs_rubric_zh.md`、`assets/` 模板——各属于特定模式与步骤，工作流引到哪一步才读，不预先装载。
 
@@ -44,7 +44,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 1. **零编造；每个字段都有抓取来源。** 一个 bib 字段合法的唯一条件是：它出现在本次运行中机器抓回的记录里——DBLP → Crossref → Semantic Scholar → arXiv，先命中者生效，已发表版本优先于预印本。绝不凭记忆写字段，绝不"顺手修正"记录里的内容，绝不推断补齐缺失的页码。抓不到记录的论文**不进 `reference.bib`**，进待人工核对清单。抓取的优先顺序、端点、匹配规则与允许改动的封闭清单见 `references/source_policy_zh.md`。Google Scholar 抓不了（没有 API、CAPTCHA 拦截，且它的 bibtex 本身就是从上述数据库机器生成的）——绝不爬它。
 2. **每条都可复查。** 每份抓回的原始内容**先**缓存到 `wkdrs/refs_<date>/raw/` 再使用，并在 `metds/refs/refs_index.md` 登记 citekey → 来源、记录 URL、抓取日期。收尾前随机重抓 5 条逐字段 diff；对不上意味着那一批要重查，而不是找理由解释过去。
-3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）用一个问题交给用户（可多选），其中 5–10 条标为推荐，只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下同一个直觉一次盖住整份文档的形状：一个问题带上检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
+3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）用一次 AskQuestion（allow_multiple，5–10 条标为推荐）交给用户，只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下同一个直觉一次盖住整份文档的形状：一个问题带上检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
 4. **近比有名重要。** 核心论文按与本方法的直接重叠度和定位价值挑选——不看引用数，不看新旧；每条候选都带一句话理由。标准与 3–8 类分类规则见 `references/refs_rubric_zh.md`。
 5. **边做边写；重跑只补缺口。** 每篇笔记写完立刻写入文件，bib 按批追加——绝不攒在聊天里。重跑先读 `metds/refs/` 里已有的东西再补缺：绝不重写已核验的条目，绝不重读已有笔记的论文，绝不把 `reference.bib` 推倒重生成。
 6. **refs 基础之外一律只读。** 写入范围限定在 `metds/refs/**` 与 `wkdrs/refs_<date>/**`。计划、方法笔记、代码、`.env` 只读——调研牵出的问题转交出去，不自己动手。联网只取元数据和论文正文，按 `references/source_policy_zh.md` 串行并退避；不下模型、不拉数据集、不调付费 API、不做需要登录的爬取、不绕验证码。
@@ -75,7 +75,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ### Step 2：确认核心集
 
-按 `references/refs_rubric_zh.md` 的核心论文标准排序，用一张表给出约 15 条（最相关在前），用一个纯文本问题确认精读哪些（可多选）；把你推荐的 5–10 条标出来。用户可以自己加论文——照常抓它们的记录。
+按 `references/refs_rubric_zh.md` 的核心论文标准排序，用一张表给出约 15 条（最相关在前），经一次 AskQuestion（allow_multiple，5–10 条标为推荐）确认精读哪些。用户可以自己加论文——照常抓它们的记录。
 
 ### Step 3：精读并写笔记
 
@@ -139,6 +139,6 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ## 对话纪律
 
-- 核心集确认是完整流程里唯一的强制提问——用纯文本问，标出推荐；任何论文开读前必须拿到明确答复，headless / 脚本化运行也一样。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；该模式在任何级别下仍必答的，是 Step 10.7 的覆写确认。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。
+- 核心集确认是完整流程里唯一的强制提问——一次 AskQuestion，allow_multiple，标出推荐。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；该模式在任何级别下仍必答的，是 Step 10.7 的覆写确认。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。AskQuestion 不可用（headless / 脚本化）时退化为纯文本，精读前必须拿到明确答复。
 - 如实报数：抓到多少条、失败多少条、多少条待人工核对。缺口绝不往上凑；笔记绝不说得比 `depth:` 承认的更深。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。笔记、index 与综述跟随方法来源的 `language`（否则跟随对话语言）；技术名词、会议名以及 `reference.bib` 里的全部内容一律保留英文。

@@ -22,13 +22,13 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/star-proj-adopt [survey | backfill]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides the detection; re-running `survey` on an adopted project re-probes and updates the record rather than starting over.
 
-**Shared conventions.** Everything this skill follows unconditionally arrives in one message, issued before acting: one `Read` of `docs/mds/star-workflow/research-workflow-conventions.md`, one `Read` of `<this skill's directory>/references/adopt_spec.md`, and alongside them one small Bash call, run with the project root as the working directory:
+**Shared conventions.** Everything this skill follows unconditionally arrives in one message, issued before acting: one `Read` of `docs/mds/star-workflow/research-workflow-conventions.md`, one `Read` of `<this skill's directory>/references/adopt_spec.md`, and alongside them one small Shell call, run with the project root as the working directory:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-One message, three results: the two whole files each from its own `Read`, and the `.env` probe from Bash — the one part of the load only Bash can do. Keep the files out of the command: each tool result has its own size limit, and a Bash result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is past that limit. `research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the probe recipe, the inventory contract, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
+One message, three results: the two whole files each from its own `Read`, and the `.env` probe from Shell — the one part of the load only Shell can do. Keep the files out of the command: each tool result has its own size limit, and a Shell result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is past that limit. `research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the probe recipe, the inventory contract, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
 
 **Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -62,7 +62,7 @@ Probing may fan out **by area** — source, runtime, data, weights, outputs, ent
 
 #### Step S2: Confirmation point 1 — confirm the mapping
 
-Ask as one plain-text question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
+Ask through AskQuestion, one question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
 
 #### Step S3: Put the mechanical setup in place
 
@@ -79,7 +79,7 @@ From git log, the entrypoints, the output directories, and the README, assemble 
 
 #### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
-List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once, in one plain-text question, which of these to record (the user may pick several). For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
+List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via AskQuestion (allow_multiple): which of these to record. For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
 
 #### Step S6: Write the record & route
 
@@ -93,7 +93,7 @@ Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A sm
 
 #### Step B2: Confirmation point 3 — per-leaf confirmation
 
-The user confirms leaf by leaf — one plain-text question listing the proposed rows when there are several (the user may confirm several), one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/star-flow-status` will flag it as done-with-no-run, which is the honest state.
+The user confirms leaf by leaf via AskQuestion — allow_multiple over the proposed rows when there are several, one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/star-flow-status` will flag it as done-with-no-run, which is the honest state.
 
 #### Step B3: Write, record, report
 
@@ -109,7 +109,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 
 ## Dialogue Discipline
 
-- Always ask only one question at a time; all three confirmation points wait for an explicit answer before any write past a confirmation point.
+- All three confirmation points go through AskQuestion, one question per call. If it is unavailable (headless / scripted), fall back to plain text — still one at a time, and still requiring an explicit answer before any write past a confirmation point.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.
 - `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

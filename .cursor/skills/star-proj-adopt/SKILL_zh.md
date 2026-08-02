@@ -18,13 +18,13 @@ description: >-
 
 调用方式：`/star-proj-adopt [survey | backfill]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。
 
-**通用规约。** 本 skill 无条件要遵循的内容，动手前用一条消息装齐：`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 与 `<本 skill 所在目录>/references/adopt_spec_zh.md` 各自单独发一次 `Read` 读入，外加同一条消息里一次小的 Bash 调用（以项目根目录为工作目录）：
+**通用规约。** 本 skill 无条件要遵循的内容，动手前用一条消息装齐：`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 与 `<本 skill 所在目录>/references/adopt_spec_zh.md` 各自单独发一次 `Read` 读入，外加同一条消息里一次小的 Shell 调用（以项目根目录为工作目录）：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、三份结果：两份完整文件各来自单独发出的 `Read`，`.env` 探测来自 Bash——整个装载里唯一只有 Bash 能做的事。别把文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是“一条消息装齐”本来要省掉的那趟往返——而光规约文件一份就已超过这个上限。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次装载里：各自在用它写文件的那一步再读。
+一条消息、三份结果：两份完整文件各来自单独发出的 `Read`，`.env` 探测来自 Shell——整个装载里唯一只有 Shell 能做的事。别把文件 `cat` 进命令里：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是“一条消息装齐”本来要省掉的那趟往返——而光规约文件一份就已超过这个上限。`research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，更严处以本文件为准。`references/adopt_spec_zh.md`（英文：`references/adopt_spec.md`）是下面工作流要遵循的 spec——勘察配方、清单格式约定、软链与包装脚本规则。`assets/` 下的模板不在这次装载里：各自在用它写文件的那一步再读。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -58,7 +58,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step S2：确认点 1——确认映射
 
-以单条纯文本提问，一次一问，只问勘察定不下来的：哪个目录是 `CODE_NAME`、哪个解释器是 `PYTHON_HOME`、哪些已有目录是数据 / 权重 / 输出根。选项取自勘察结果并标出推荐项。这个确认点关上之前，什么都不写。
+通过 AskQuestion 提问，一次一问，只问勘察定不下来的：哪个目录是 `CODE_NAME`、哪个解释器是 `PYTHON_HOME`、哪些已有目录是数据 / 权重 / 输出根。选项取自勘察结果并标出推荐项。这个确认点关上之前，什么都不写。
 
 #### Step S3：配置例行设置
 
@@ -75,7 +75,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step S5：确认点 2——把值得留存的历史 run 入账
 
-列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。用一条纯文本问题一次性询问：哪些要记录到 wkdrs/（可多选）。对每个被选中的 run，软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余的仅作为证据留在清单里，报告中说明有多少个没有入账。
+列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。通过 AskQuestion 一次性询问（allow_multiple）：哪些要记录到 wkdrs/。对每个被选中的 run，软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余的仅作为证据留在清单里，报告中说明有多少个没有入账。
 
 #### Step S6：写记录并交棒
 
@@ -89,7 +89,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step B2：确认点 3——逐 leaf 确认
 
-用户逐个确认——条目较多时用一条纯文本问题列出全部提议行（可多选），较少时一个一问。未获确认的 leaf 原样不动。用户标为 `done` 但没有入账 run 的 leaf 是允许的，并要记一笔：`/star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
+用户通过 AskQuestion 逐个确认——条目较多时对提议行做 allow_multiple，较少时一个一问。未获确认的 leaf 原样不动。用户标为 `done` 但没有入账 run 的 leaf 是允许的，并要记一笔：`/star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
 
 #### Step B3：写入、记录、汇报
 
@@ -105,7 +105,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 对话纪律
 
-- 始终一次只问一个问题；三个确认点在任何跨确认点写入之前都必须拿到明确答复。
+- 三个确认点全部通过 AskQuestion，每次调用只问一个问题。若该工具不可用（无人值守 / 脚本化运行），退回纯文本——仍然一次一问，且在任何跨确认点写入之前必须拿到明确答复。
 - 先说勘察发现了什么、以及什么没能定下来。把未知如实报成未知正是本 skill 的意义所在；一个自信而错误的 `CODE_NAME` 会让用户在下游每一个 skill 上付出代价。
 - 明确说出接入**没有**做什么：没有读代码架构、没有写研究计划、没有裁决任何结果。逐项点出各自归谁。
 - `metds/adopt.md` 的正文语言在创建时随对话语言确定，重跑时保持不变。中文文档里，路径、包名、commit SHA 与指标名保持英文。
