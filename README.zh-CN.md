@@ -386,12 +386,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 的官方工具清单与 `SKILL.md` 规范核对，而不是照别的树怎么写。Cursor 版恢复了结构化提问——Claude 用 `AskUserQuestion` 提问的每一处，Cursor 改用 `AskQuestion`；另有三棵树不再命名各自 harness 根本没有的工具：Claude 的 `Bash` 在 Cursor 与 Kimi 版对应 `Shell`，Kimi 版的读文件工具是 `ReadFile`，Codex 版则是 `shell`、`request_user_input` 与 `update_plan`。Codex 完全没有文件读取工具，所以它的装载如实说明这一点，并把文件 `cat` 进那次 shell 调用。四棵树的描述都收进规范的 1024 字符上限，执行这条检查的脚本也改为按字符而非字节计数。
 - **[v0.1.7](https://github.com/wanghao9610/STAR/tree/v0.1.7)** (2026-08-01) — Kimi 版的 skill 树恢复了移植时被改写成散文的机制——`AskUserQuestion` 结构化提问、经 `EnterPlanMode`/`ExitPlanMode` 的计划模式审批、`Agent` 子代理派发——子代理类型映射为 Kimi 的 `explore`/`coder`，`multiSelect` 改为 Kimi 的参数名 `multi_select`。合法适配保留：`/skill:` 调用语法、`AGENTS.md` 引用、Kimi 版 model-id 措辞和 `kimi -p` 回退句。
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双落盘；拆开之后摘录必定完整送达，只有摘要还可能落盘。
-- **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改用共享的只读采集脚本读计划树，不再逐个打开计划。同一轮对话里的第二个 skill 可以复用仍能看到的开场装载，采集脚本的摘要除外。`star-plan-decomposer` 的三条拆分轴改名为阶段、组件、实验，各自以该层所放的单元命名。实验轴只在代码已能端到端跑起来时才被推荐，它这一层放的是实验组，每条主张再深一位数字。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改用共享的只读采集脚本读计划树，不再逐个打开计划。同一轮对话里的第二个 skill 可以复用仍能看到的开场装载，采集脚本的摘要除外。`star-plan-decomposer` 的三条拆分轴改名为阶段、组件、实验，各自以该层所放的单元命名。实验轴只在代码已能端到端跑起来时才被推荐，它这一层放的是实验组，每条主张再深一位数字。
 - **[v0.1.4](https://github.com/wanghao9610/STAR/tree/v0.1.4)** (2026-07-29) — 每个 skill 用一条消息完成开场装载，`SKILL_zh.md` 不再在运行时读取——它仍是供人阅读的完整镜像。其中两个 skill 只装载自己真正用到的规约章节。
 
 - **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` 新增 `survey` 模式，把独立的领域综述写入 `metds/refs/`；追加模式新增 `add` 形式，一次可提交多篇论文。
