@@ -386,7 +386,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 的官方工具清单与 `SKILL.md` 规范核对，而不是照别的树怎么写。Cursor 版恢复了结构化提问——Claude 用 `AskUserQuestion` 提问的每一处，Cursor 改用 `AskQuestion`；另有三棵树不再命名各自 harness 根本没有的工具：Claude 的 `Bash` 在 Cursor 与 Kimi 版对应 `Shell`，Kimi 版的读文件工具是 `ReadFile`，Codex 版则是 `shell`、`request_user_input` 与 `update_plan`。Codex 完全没有文件读取工具，所以它的装载如实说明这一点，并把文件 `cat` 进那次 shell 调用。四棵树的描述都收进规范的 1024 字符上限，执行这条检查的脚本也改为按字符而非字节计数。
+- **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 的官方工具清单与 `SKILL.md` 规范核对，而不是照别的树怎么写。Cursor 版恢复了结构化提问——Claude 用 `AskUserQuestion` 提问的每一处，Cursor 改用 `AskQuestion`；另有三棵树不再命名各自 harness 根本没有的工具：Claude 的 `Bash` 在 Cursor 与 Kimi 版对应 `Shell`，Kimi 版的读文件工具是 `ReadFile`，Codex 版则是 `shell`、`request_user_input` 与 `update_plan`。Codex 完全没有文件读取工具，所以它的装载如实说明这一点，并把文件 `cat` 进那次 shell 调用。它的选择性委派也已写成可执行调用：有边界的只读工作使用 `spawn_agent` 与 `agent_type: explorer`，实现工作使用 `worker`；考虑到子代理流程消耗更多 token，默认仍在本地执行。四棵树的描述都收进规范的 1024 字符上限，检查脚本同时守住这条字符限制和各 harness 的委派词汇。
 - **[v0.1.7](https://github.com/wanghao9610/STAR/tree/v0.1.7)** (2026-08-01) — Kimi 版的 skill 树恢复了移植时被改写成散文的机制——`AskUserQuestion` 结构化提问、经 `EnterPlanMode`/`ExitPlanMode` 的计划模式审批、`Agent` 子代理派发——子代理类型映射为 Kimi 的 `explore`/`coder`，`multiSelect` 改为 Kimi 的参数名 `multi_select`。合法适配保留：`/skill:` 调用语法、`AGENTS.md` 引用、Kimi 版 model-id 措辞和 `kimi -p` 回退句。
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双落盘；拆开之后摘录必定完整送达，只有摘要还可能落盘。
 <details>
