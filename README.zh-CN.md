@@ -338,6 +338,7 @@ bash execs/update.sh
 - `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
+- `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 
@@ -390,7 +391,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — `star-plan-decomposer` 子计划清单确认里的"调整粒度"选项有了明确行为：它是一个方向，先问清是哪边。*调粗*合并同类或共享依赖的单元后重新展示清单——合并后若不足 3 个，skill 会说明这个父计划还不需要拆、问是否就此打住，而不是硬并成两个。*调细*绝不在本层加兄弟：更细的单元是深一位数字，本层清单照原样写完，被点名太粗的单元交给递归那一步，在同一次运行里直接拆下去，而不只是提出建议。两个方向都沿用已选定的轴。同一版本还让更新脚本的上游可配置：`execs/update.sh` 按环境变量、`.env`、内置默认值的顺序解析 `STAR_REPOSITORY`，于是长期跟随某个 fork 只需在 `.env` 里写一行，只覆盖单次命令则在命令前加一个变量即可。`.env.example` 已带上这个键，取值为公开默认地址。
+- **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — `star-plan-decomposer` 子计划清单确认里的"调整粒度"选项有了明确行为：它是一个方向，先问清是哪边。*调粗*合并同类或共享依赖的单元后重新展示清单——合并后若不足 3 个，skill 会说明这个父计划还不需要拆、问是否就此打住，而不是硬并成两个。*调细*绝不在本层加兄弟：更细的单元是深一位数字，本层清单照原样写完，被点名太粗的单元交给递归那一步，在同一次运行里直接拆下去，而不只是提出建议。两个方向都沿用已选定的轴。同一版本还让更新脚本的上游可配置：`execs/update.sh` 按环境变量、`.env`、内置默认值的顺序解析 `STAR_REPOSITORY`，于是长期跟随某个 fork 只需在 `.env` 里写一行，只覆盖单次命令则在命令前加一个变量即可。`.env.example` 已带上这个键，取值为公开默认地址。更新范围同时纳入 `execs/run.sh`：实验启动脚本后续的修复会像 skill 一样同步过来，而它启动的实验脚本（`execs/scpts/` 下）仍属项目自己，绝不会被动到。
 - **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — 代码审查挪到了红线命令之前。`star-plan-executor` 为重实验停下时，简报现在把 `star-code-reviewer` 写在交回的那条命令之上：bug 在算力烧掉之前被抓住，代价是一次审查；等算力烧完才被抓住，代价是算力加重跑。探索性叶子、命令本身便宜到足以充当自己的检验时，仍可跳过审查直接跑。回路也补上了——run 目录里 `CODE_REVIEW_<date>.md` 的 blocker/major 发现若没有在日志里记为已处理，就重开它们落在的步骤，审查结论不再掉进"再次调用时跳过 `done` 步"与待跑命令之间的缝里。`star-flow-status` 按同样的顺序给建议；审查评分表把只有那条尚未跑的命令才能产出的交付物记为 `pending` 而非缺失，于是在算力烧掉之前做审查，不再凭空产出一堆谁也处理不了的问题项。
 - **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 的官方工具清单与 `SKILL.md` 规范核对，而不是照别的树怎么写。Cursor 版恢复了结构化提问——Claude 用 `AskUserQuestion` 提问的每一处，Cursor 改用 `AskQuestion`；另有三棵树不再命名各自 harness 根本没有的工具：Claude 的 `Bash` 在 Cursor 与 Kimi 版对应 `Shell`，Kimi 版的读文件工具是 `ReadFile`，Codex 版则是 `shell`、`request_user_input` 与 `update_plan`。Codex 完全没有文件读取工具，所以它的装载如实说明这一点，并把文件 `cat` 进那次 shell 调用。它的选择性委派也已写成可执行调用：有边界的只读工作使用 `spawn_agent` 与 `agent_type: explorer`，实现工作使用 `worker`；考虑到子代理流程消耗更多 token，默认仍在本地执行。四棵树的描述都收进规范的 1024 字符上限，检查脚本同时守住这条字符限制和各 harness 的委派词汇。
 <details>
