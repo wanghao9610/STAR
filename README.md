@@ -12,7 +12,7 @@ STAR provides a lightweight starting point for artificial intelligence research 
 
 STAR is intentionally framework-agnostic: the research workflow defines only the process, file locations, and validation records, so you can still bring your own model stack, dependency manager, and experiment tracker.
 
-Once the research is ready to be written up, [STAGE](https://github.com/wanghao9610/STAGE) (*Systematic Toolchain for Authoring, Guiding, and Editing*) is the writing-side companion: STAR runs the research and produces the method documents, results, and digests; STAGE imports them as read-only, fingerprinted evidence and writes the paper on top, so every number in the manuscript traces back to the run that produced it. The pairing is optional — STAR does not depend on it.
+Once the research is ready to be written up, [STAGE](https://github.com/wanghao9610/STAGE) (*Systematic Toolchain for Authoring, Guiding, and Editing*, [documentation site](https://wanghao9610.github.io/STAGE/)) is the writing-side companion: STAR runs the research and produces the method documents, results, and digests; STAGE imports them as read-only, fingerprinted evidence and writes the paper on top, so every number in the manuscript traces back to the run that produced it. The pairing is optional — STAR does not depend on it.
 
 ## Contents
 
