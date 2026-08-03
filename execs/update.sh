@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STAR_REPOSITORY="${STAR_REPOSITORY:-https://github.com/wanghao9610/STAR.git}"
 STAR_REF="main"
 SKILL_NAME=""
 REF_SET=false
@@ -75,6 +74,9 @@ without changing anything.
 It runs against the current working directory, which must be a git repository root, and
 never overwrites a file that is already there: every existing path is left alone and
 reported. Run /star-proj-adopt afterwards to wire the project up.
+
+The upstream repository is STAR_REPOSITORY (environment first, then .env);
+default https://github.com/wanghao9610/STAR.git.
 
 Examples:
   bash execs/update.sh
@@ -204,6 +206,12 @@ if [[ "${ADOPT}" == false ]]; then
     [[ -f "${ROOT_DIR}/execs/run.sh" ]] || \
         fail "${ROOT_DIR} is not a STAR project (no execs/run.sh). This script updates the project it lives in: copy it to <project>/execs/update.sh and run it there, or pass --adopt to install STAR into the current directory."
 fi
+
+# Upstream resolution: environment wins, then .env, then the public default.
+if [[ -z "${STAR_REPOSITORY:-}" && -f "${ROOT_DIR}/.env" ]]; then
+    STAR_REPOSITORY="$(sed -n 's/^STAR_REPOSITORY=//p' "${ROOT_DIR}/.env" | tail -1)"
+fi
+STAR_REPOSITORY="${STAR_REPOSITORY:-https://github.com/wanghao9610/STAR.git}"
 
 command -v git >/dev/null 2>&1 || fail "git is required."
 command -v tar >/dev/null 2>&1 || fail "tar is required."

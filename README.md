@@ -179,6 +179,8 @@ Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask be
 
 A second optional key, `STAR_LANG=en|zh`, fixes one language for both the agents' replies and newly generated workflow documents (plans, reports). Left unset, both follow the conversation's language. An explicit request in the conversation wins either way, and existing documents keep the language declared in their frontmatter. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.6.
 
+A third, `STAR_REPOSITORY`, names the repository `execs/update.sh` pulls later skill and workflow guide releases from. It ships pointing at STAR itself; change it only to update from a fork. See [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides).
+
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
 ### 3. Add an experiment
@@ -341,6 +343,8 @@ By default, the command updates these paths from STAR's `main` branch:
 - `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.kimi-code/skills/`
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.kimi-code/hooks/`, and `.kimi-code/hooks.example.toml` — the model-id provenance hooks
 - `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
+
+The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 
 Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing, and never overwritten unless you pass `--force`. When a kept config does not register the STAR hook, the command prints a note. Projects created before hooks joined the update set should refresh the updater itself once, since `execs/update.sh` never overwrites itself:
 

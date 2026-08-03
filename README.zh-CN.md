@@ -174,6 +174,8 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
+还有一个键 `STAR_REPOSITORY`，指定 `execs/update.sh` 从哪个仓库拉取后续的 skill 与工作流文档版本。它出厂就指向 STAR 本身，只有改从 fork 更新时才需要改动。详见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。
+
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
 ### 3. 添加实验
@@ -336,6 +338,8 @@ bash execs/update.sh
 - `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
+
+拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 
 钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。如果项目是在钩子纳入更新范围之前基于 STAR 创建的，请先手动刷新一次更新脚本本身——`execs/update.sh` 不会覆盖自己：
 
