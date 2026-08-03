@@ -95,6 +95,7 @@ Open with the anchor (conventions §7.10): the axis just chosen and what it yiel
 - **Enforce N ≤ 10.** If you believe more than 10 units are needed, do not append a second digit — instead group them, or recommend a two-level split (decompose into ≤10 now, then recurse into the heavy ones). Say so explicitly.
 - Assign prefixes per the naming rule: parent prefix + `0..N-1`.
 - **Derive dependencies from the axis** (`references/decomposition_axes.md`): phase/milestone → a linear chain (each depends on the previous); component/module → a small DAG (shared interfaces); experiment/evidence → a wide DAG of groups (the data-readiness leaf upstream of the rest), with the leaves inside one group mostly independent. Record each unit's upstream as a `depends_on` list of sibling prefixes. Keep it acyclic.
+- **"Change granularity" is a direction, not an instruction — ask which one via AskUserQuestion, then act on it.** *Coarser*: merge units that share a category or a dependency until each is again one independently checkable chunk, reassign prefixes and dependencies, and show the list again; if that takes it below 3 units, say the parent did not need decomposing yet and ask whether to stop here or keep the list as it stands, rather than merging down to two (`references/decomposition_axes.md`, "Sizing each sub-plan"). *Finer*: **this level does not change** — a finer unit is one digit deeper, never one more peer, and adding siblings here would break "One level, one kind" and spend the 10-sibling cap on units that were never peers. Ask which unit(s) are too coarse, keep the list as drafted, and carry them to Step 6, which recurses into them in this run instead of only offering to. Either direction keeps the axis chosen in Step 2 — changing the axis is that question, not this one.
 
 ### Step 4: Draft each sub-plan
 
@@ -126,7 +127,7 @@ Also add/merge a `children:` list into the parent frontmatter. Do not rewrite th
 
 ### Step 6: Offer to recurse
 
-Tell the user any sub-plan can be decomposed further with `/star-plan-decomposer <that sub-plan's slug or prefix>`, producing the next digit of depth. Offer to do it now for any unit that is still too big to run.
+Tell the user any sub-plan can be decomposed further with `/star-plan-decomposer <that sub-plan's slug or prefix>`, producing the next digit of depth. Offer to do it now for any unit that is still too big to run. A unit named by the *finer* answer in Step 3 arrives here already decided — recurse into it rather than offering to.
 
 **Hand off downstream.** Once the leaves are concrete enough, the next step is to execute one with `/star-plan-executor <leaf slug or prefix>` — start with the first in the execution order (a leaf whose `depends_on` is empty or already `done`). If `${CODE_NAME}/` is still missing or empty, give the plan a place for the code to live first with `/star-code-architect`. `/star-flow-status` shows the whole tree and recommends what to run next.
 
