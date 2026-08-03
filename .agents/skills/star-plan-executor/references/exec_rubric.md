@@ -1,6 +1,6 @@
 # Execution Finalization Checklist
 
-Run before calling a run done (Step 6). Report failing items (≤5, ranked by importance) with the file/step and a concrete fix.
+Run before calling a run done (Step 5). Report failing items (≤5, ranked by importance) with the file/step and a concrete fix.
 
 1. **Done-criterion actually checked** — the sub-plan's §5 check was run and its evidence (test pass / metric vs threshold / output exists) is recorded in EXEC_LOG, not merely asserted.
 
