@@ -1,42 +1,67 @@
 #!/usr/bin/env bash
-# Register the STAR model_id hook in Kimi's GLOBAL config, idempotently.
+# Register STAR's Kimi hooks in Kimi's GLOBAL config, idempotently.
 #
-# Kimi has no project-level hook config, so the [[hooks]] entry must live in the
-# global config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
-# This is one-time-per-machine setup: because the command path is relative and
-# Kimi runs hooks from the project root, the single entry then covers every STAR
+# Two hooks: model_id provenance, and the project-memory index injected from
+# .star/memory/.
+#
+# Kimi has no project-level hook config, so the [[hooks]] entries must live in
+# the global config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
+# This is one-time-per-machine setup: because the command paths are relative and
+# Kimi runs hooks from the project root, those entries then cover every STAR
 # project with no per-project editing.
 #
-# Safe to re-run: it detects an existing registration and does nothing. It backs
-# the config up before its first modification, and appends a new [[hooks]] table
-# array (valid TOML) rather than rewriting anything.
+# Safe to re-run: each hook is registered only when it is not there already, so a
+# machine set up before the memory hook existed gains just that one. It backs the
+# config up before its first modification, and appends new [[hooks]] table arrays
+# (valid TOML) rather than rewriting anything.
 set -euo pipefail
 
 cfg="${KIMI_CODE_HOME:-$HOME/.kimi-code}/config.toml"
-hook_cmd=".kimi-code/hooks/star_model_id.sh"
+hooks=("star_model_id.sh|STAR model_id provenance hook"
+       "star_memory.sh|STAR project-memory hook")
 
-# Make sure this repo's hook script is executable.
+# Make sure this repo's hook scripts are executable.
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-[ -f "$here/star_model_id.sh" ] && chmod +x "$here/star_model_id.sh" 2>/dev/null || true
+for row in "${hooks[@]}"; do
+  script="${row%%|*}"
+  [ -f "$here/${script}" ] && chmod +x "$here/${script}" 2>/dev/null || true
+done
 
 mkdir -p "$(dirname "$cfg")"
 [ -f "$cfg" ] || : > "$cfg"
 
-if grep -q 'star_model_id\.sh' "$cfg" 2>/dev/null; then
-  echo "STAR model_id hook already registered in $cfg — nothing to do."
+backed_up=false
+added=0
+for row in "${hooks[@]}"; do
+  script="${row%%|*}"
+  label="${row#*|}"
+
+  if grep -qF "${script}" "$cfg" 2>/dev/null; then
+    echo "${label} already registered in $cfg — skipped."
+    continue
+  fi
+
+  if [ "$backed_up" = false ]; then
+    cp "$cfg" "$cfg.star-bak"
+    backed_up=true
+  fi
+
+  {
+    printf '\n# --- %s (added by .kimi-code/hooks/install.sh) ---\n' "${label}"
+    printf '[[hooks]]\n'
+    printf 'event = "UserPromptSubmit"\n'
+    printf 'command = ".kimi-code/hooks/%s"\n' "${script}"
+    printf 'timeout = 10\n'
+  } >> "$cfg"
+
+  echo "Registered ${label} in $cfg"
+  added=$(( added + 1 ))
+done
+
+if (( added == 0 )); then
+  echo "Nothing to do — both STAR hooks were already registered."
   exit 0
 fi
 
-cp "$cfg" "$cfg.star-bak"
-
-{
-  printf '\n# --- STAR model_id provenance hook (added by .kimi-code/hooks/install.sh) ---\n'
-  printf '[[hooks]]\n'
-  printf 'event = "UserPromptSubmit"\n'
-  printf 'command = "%s"\n' "$hook_cmd"
-  printf 'timeout = 10\n'
-} >> "$cfg"
-
-echo "Registered the STAR model_id hook in $cfg"
 echo "  backup written to $cfg.star-bak"
-echo "  it now runs in every STAR project — no per-project setup needed."
+echo "  they now run in every STAR project — no per-project setup needed."

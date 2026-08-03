@@ -117,7 +117,7 @@ description: >-
 
 #### Step C5：终验
 
-`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 在 CPU 上开销不大也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §10）。
+`python -m compileall -q ${CODE_NAME}` 必跑；环境可用时再做 import 扫描与上游快速测试子集；README 的最小 demo 在 CPU 上开销不大也跑。重型验证 → 准备好命令交给用户。如实报告验证了什么、没验证什么，附证据（AGENTS.md §11）。
 
 #### Step C6：汇报与交棒
 

@@ -84,7 +84,17 @@ Before running Python, tests, or dependency checks:
 - Run through that interpreter, not system Python. Conda is optional: when `CONDA_HOME` is empty, `PYTHON_HOME` is used directly, which is also how a plain venv is used.
 - Do not hardcode local paths.
 
-## 10. Verification
+## 10. Project Memory
+
+**What a session learns goes to `.star/memory/` in the project, not to your own memory store.**
+
+- Record a fact there only when no file in the project already owns it — a plan, a log, a report, or a reference entry is the better home. Memory holds the residue.
+- Offer, never assume: at most two offers per session, and write only after the user agrees. `INVOLVE=low` records unasked and says so.
+- A fact true only of this machine goes to `.star/memory/local/`, which git ignores.
+- Where a memory disagrees with a file in the repository, the file wins.
+- Types, file format, the index line the hooks parse, and how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
+
+## 11. Verification
 
 **Prove the change works before calling it done.**
 

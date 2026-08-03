@@ -18,7 +18,8 @@ SKILL_ROOTS=(
     ".kimi-code/skills"
 )
 
-# STAR-owned model-id provenance hook assets; overwritten on update like skills.
+# STAR-owned session hook assets — model-id provenance and the project-memory
+# index; overwritten on update like skills.
 HOOK_TREES=(
     ".claude/hooks"
     ".codex/hooks"
@@ -45,6 +46,16 @@ fail() {
     exit 1
 }
 
+# Names of the STAR hooks a kept registration config does not register. Empty
+# when it registers both. A config predating either hook keeps its own entries —
+# update never overwrites it — so this is what turns a silent gap into a line.
+missing_hooks() { # $1 = registration config path
+    local out=""
+    grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
+    grep -q 'star_memory\.sh' "$1" 2>/dev/null || out="${out:+${out}, }project memory"
+    printf '%s' "${out}"
+}
+
 usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
@@ -52,11 +63,11 @@ Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
        bash update.sh [ref] --adopt
 
 Overwrite STAR-managed agent instructions (AGENTS.md and the Cursor rule that copies it),
-skills, model-id provenance hooks, research workflow documentation, and the stock experiment
-launcher execs/run.sh with files from upstream. The default ref is main; a branch or tag may
-be supplied instead. By default all of them are updated, so local edits to AGENTS.md and to
-execs/run.sh are replaced along with everything else; the experiment scripts run.sh launches,
-under execs/scpts/, are the project's own and are never touched.
+skills, session hooks (model-id provenance, project memory), research workflow documentation,
+and the stock experiment launcher execs/run.sh with files from upstream. The default ref is
+main; a branch or tag may be supplied instead. By default all of them are updated, so local
+edits to AGENTS.md and to execs/run.sh are replaced along with everything else; the experiment
+scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
 Hook registration configs (.claude/settings.json, .codex/hooks.json, .cursor/hooks.json)
 are installed only when missing and never overwritten. Use --skill to update only
 the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
@@ -155,6 +166,7 @@ if [[ "${ADOPT}" == true ]]; then
     )
     ADOPT_FILES=(
         "AGENTS.md"
+        ".star/memory/MEMORY.md"
         ".env.example"
         ".gitignore"
         ".cursorignore"
@@ -358,9 +370,9 @@ if [[ "${ADOPT}" == false ]]; then
             elif [[ "${FORCE}" == true ]]; then
                 cp -p "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"
                 log "Overwrote ${cfg} (hook registration; --force), including any settings you added to it."
-            elif ! grep -q 'star_model_id\.sh' "${ROOT_DIR}/${cfg}" 2>/dev/null; then
-                log "NOTE: ${cfg} was kept and does not register the STAR model-id provenance hook."
-                log "      Merge the hook entry from upstream ${cfg} to enable provenance."
+            elif [[ -n "$(missing_hooks "${ROOT_DIR}/${cfg}")" ]]; then
+                log "NOTE: ${cfg} was kept and does not register the STAR $(missing_hooks "${ROOT_DIR}/${cfg}") hook."
+                log "      Merge the missing hook entry from upstream ${cfg} to enable it."
             fi
         done
     fi
@@ -439,21 +451,21 @@ if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     # that a carve-out rule needs: one combined grep would let a .gitignore
     # naming only datas/ silence the warning about inits/ and wkdrs/ too.
     unignored=()
-    for tree in datas inits wkdrs; do
+    for tree in datas inits wkdrs .star/memory/local; do
         grep -qE "^/?${tree}(/|/\*|/\*\*)?$" "${ROOT_DIR}/.gitignore" 2>/dev/null || \
             unignored+=("${tree}/")
     done
     if (( ${#unignored[@]} > 0 )); then
         log "NOTE: your .gitignore was kept and does not ignore ${unignored[*]}."
-        log "      Add them before committing, or a dataset or checkpoint tree may enter history."
+        log "      Add them before committing: a dataset, a checkpoint tree, or one machine's own notes may enter history."
     fi
 fi
 for cfg in "${HOOK_CONFIGS[@]}"; do
     if [[ ! -e "${ROOT_DIR}/${cfg}" ]]; then
         continue
-    elif ! grep -q 'star_model_id\.sh' "${ROOT_DIR}/${cfg}" 2>/dev/null; then
-        log "NOTE: your ${cfg} was kept and does not register the STAR model-id provenance hook."
-        log "      Merge the hook entry from upstream ${cfg} to enable provenance."
+    elif [[ -n "$(missing_hooks "${ROOT_DIR}/${cfg}")" ]]; then
+        log "NOTE: your ${cfg} was kept and does not register the STAR $(missing_hooks "${ROOT_DIR}/${cfg}") hook."
+        log "      Merge the missing hook entry from upstream ${cfg} to enable it."
     elif [[ "${cfg}" == ".codex/hooks.json" ]]; then
         # Registering it is not enough on Codex: a project hook runs only once the
         # project is trusted and the hook itself approved, and a new or changed hook

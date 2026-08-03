@@ -206,6 +206,7 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 | 某次 run 的产物、执行记录、报告 | `wkdrs/<run>/` |
 | 跨 run 的汇编产物 | `wkdrs/` 下的保留子树：`reviews/`、`results/`、`digests/`、`release/`、`env_*`、`ideas_*`、`refs_*`——不要拿这些当 run 名 |
 | 计划、笔记、方法文档 | `metds/` |
+| 先前会话学到、又没有别的文件认领的事实 | `.star/memory/`；只对本机成立的放 `.star/memory/local/`，git 忽略（`memory_spec.zh-CN.md`） |
 | 项目文档 | `docs/mds/<topic>/`、`docs/htmls/`、`docs/srcs/`（`docs/mds/star-workflow/` 由上游管理） |
 | 计划自有工具脚本、计划执行期草稿 | `tasks/<plan-name>/` |
 | 运行入口 | `execs/run.sh` |

@@ -27,10 +27,11 @@ Once the research is ready to be written up, [STAGE](https://github.com/wanghao9
   - [4. Run it](#4-run-it)
   - [5. Start the research workflow](#5-start-the-research-workflow)
 - [Per-tool setup (optional)](#per-tool-setup-optional)
-  - [Model-id provenance hooks](#model-id-provenance-hooks)
+  - [Session hooks](#session-hooks)
   - [Pre-approve the status collector](#pre-approve-the-status-collector)
 - [Research workflow](#research-workflow)
   - [Model selection](#model-selection)
+- [Project memory](#project-memory)
 - [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides)
 - [Project conventions](#project-conventions)
 - [Adapting STAR to a new project](#adapting-star-to-a-new-project)
@@ -45,6 +46,7 @@ Once the research is ready to be written up, [STAGE](https://github.com/wanghao9
 - **A single experiment entrypoint** through `execs/run.sh`.
 - **A complete research lifecycle** through fifteen complementary skills, in the order they run: adopt an already-started project without disturbing it, converge a vague interest into a research topic, draft the plan, survey the related work, decompose the plan into leaves, bootstrap the codebase, build the runtime environment, execute each leaf, review the code, analyze what a run produced, digest recent progress, revise plans against execution evidence, report global status, compile the finished plans into method documents, and prepare the repository for release.
 - **A traceable, resumable research process** that stores plans under `metds/plans/`, plan-execution intermediates under `tasks/`, and generated run artifacts under `wkdrs/` instead of relying on chat history for context.
+- **A memory the project owns**: what a session learns that no plan or report holds — an environment quirk, a standing preference, a dead end — is recorded under `.star/memory/` and put in front of the next session by a hook, in whichever tool you drive STAR with.
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, Kimi Code, and Cursor, with support for both English and Chinese.
 - **Safe defaults for large artifacts**: local data, weights, outputs, and environment settings are excluded from version control.
 
@@ -77,10 +79,11 @@ STAR/
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
 ├── .kimi-code/skills/      # Research workflow skills for Kimi Code
-├── .claude/hooks/          # Model-id provenance hook for Claude
-├── .codex/hooks/           # Model-id provenance hook for Codex
-├── .cursor/hooks/          # Model-id provenance hook for Cursor
-├── .kimi-code/hooks/       # Model-id provenance hook for Kimi Code (see Per-tool setup)
+├── .claude/hooks/          # Session hooks for Claude: model-id provenance, project memory
+├── .codex/hooks/           # Session hooks for Codex
+├── .cursor/hooks/          # Session hooks for Cursor
+├── .kimi-code/hooks/       # Session hooks for Kimi Code (see Per-tool setup)
+├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .vscode/                # Editor and debugging defaults
 ├── .github/                # STAR's own maintainer CI; delete it in your project
@@ -240,15 +243,17 @@ The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` 
 
 Neither is needed to get started. Do them when the tool you drive STAR with needs them.
 
-### Model-id provenance hooks
+### Session hooks
 
-If you drive STAR with **Kimi Code**, run this once per machine so skills record the real `model_id` instead of `unrecorded`:
+Two hooks run at the start of a session: one records the model id skills write into every artifact, the other puts the [project memory](#project-memory) index in front of the agent.
+
+If you drive STAR with **Kimi Code**, run this once per machine so both are registered, and skills record the real `model_id` instead of `unrecorded`:
 
 ```bash
 bash .kimi-code/hooks/install.sh
 ```
 
-It registers the provenance hook in your global `~/.kimi-code/config.toml`, backing that file up first; running it twice changes nothing, and one run covers every STAR project. Codex, Claude, and Cursor ship their hook already registered, so skip this step there. On Codex, though, registered is not yet running: a project hook fires only once the project is trusted and the hook approved. Run `/hooks` in the Codex CLI to approve it, and again whenever the hook changes. Until you do, `model_id` reads `unrecorded` in every report, and nothing points out the gap. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
+It registers them in your global `~/.kimi-code/config.toml`, backing that file up first; running it twice changes nothing, one run covers every STAR project, and a machine set up before the memory hook existed gains just that one. Codex, Claude, and Cursor ship both hooks already registered, so skip this step there. On Codex, though, registered is not yet running: a project hook fires only once the project is trusted and the hook approved. Run `/hooks` in the Codex CLI to approve them, and again whenever a hook changes. Until you do, `model_id` reads `unrecorded` in every report and no memory reaches the session, with nothing pointing out the gap. A project adopted before one of these hooks existed keeps its own registration file — `execs/update.sh` never overwrites it, and names the hook missing from it instead. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
 
 ### Pre-approve the status collector
 
@@ -331,6 +336,17 @@ These skills preserve decisions and progress in project files instead of relying
 
 See the [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance. The rules every skill shares — git, the STOP line, the `.env` runtime, dates, delegation, and dialogue discipline — are in the [Research Workflow Skill Conventions](docs/mds/star-workflow/research-workflow-conventions.md).
 
+## Project memory
+
+What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at the start of every session, in all four tools.
+
+Two rules keep it from becoming a second, competing source of truth:
+
+- **A fact is recorded there only when no file in the project already owns it.** Results belong to their run's `EXEC_LOG.md`, decisions about the research to their plan, papers to `metds/refs/`. Memory holds the residue.
+- **Where a memory disagrees with a file in the repository, the file wins**, and the memory is corrected or dropped.
+
+Facts that hold only on this machine go to `.star/memory/local/`, which git ignores the way it ignores `.env`. Nothing is recorded without your say-so: the agent offers, you decide — and `INVOLVE=low` in `.env` turns that into record-and-tell. The four kinds of memory, the file format, and how one is retired are in [Project Memory](docs/mds/star-workflow/memory_spec.md).
+
 ## Updating STAR skills and workflow guides
 
 After creating a project from STAR, you can sync later STAR skill and research workflow guide releases without changing project code, experiment configuration, or Git remotes:
@@ -398,12 +414,13 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Highlights by release, newest first. Each release is a git tag, so `bash execs/update.sh v0.1.0` pins an update to that version.
 
+- **[v0.1.12](https://github.com/wanghao9610/STAR/tree/v0.1.12)** (2026-08-03) — A project keeps its own memory. What a session learns that no plan, log, or report owns — an environment quirk learned by failing, a standing preference, a judgment that outlived the run that produced it, a dead end worth not repeating — is recorded under `.star/memory/`, one file per fact with a one-line index beside them, instead of inside whichever tool was driving. A second session hook, shipped for all four tools alongside the model-id one, puts that index in front of the agent at the start of every session; an `env` entry whose last confirmation is over 180 days old is marked stale where the session sees it, and the other three kinds are not aged, because a dead end stays dead and a flag that fires on healthy entries teaches the reader to skip it. `AGENTS.md` gains §10, which carries the whole write rule: record only what no file in the project already owns, offer rather than assume, and let the repository's own files win wherever a memory disagrees with them. It lands beside Project Layout and Project Runtime, so Verification moves from §10 to §11 and every citation of it across the four skill trees moves with it — a project with its own docs citing `AGENTS.md §10` should re-point them. Facts true only of one machine go to `.star/memory/local/`, git-ignored the way `.env` is. The format and the retirement rules are [`memory_spec.md`](docs/mds/star-workflow/memory_spec.md). No new skill: recall costs nothing beyond the hook, and recording is a file write that rule already governs. A project adopted before either hook existed keeps its own registration file, which the updater still never overwrites — it now names the hook missing from it rather than only the model-id one.
 - **[v0.1.11](https://github.com/wanghao9610/STAR/tree/v0.1.11)** (2026-08-03) — The project points at its writing-side companion, [STAGE](https://github.com/wanghao9610/STAGE). The landing page's subtitle read "Research, by design" — a phrase whose everyday sense is "this is deliberate, not a defect", and whose one informative word the badge directly above it already carried. It becomes "Every STAGE needs a STAR", the counterpart to the subtitle STAGE's own page carries. The Chinese page takes the same English line rather than a translation, because the wordplay does not survive one, which is how STAGE's Chinese page already treats its own. The closing call to action gains a "Pair it with STAGE" button and the footer a STAGE link, symmetric with the two links STAGE has always kept to STAR, all four pointing at the repositories. Both READMEs now open on the division of labor: STAR runs the research and produces the method documents, results, and digests; STAGE imports them as read-only, fingerprinted evidence and writes the paper on top, so a number in the manuscript traces back to the run that produced it. The pairing stays optional in both directions.
 - **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — The "change granularity" answer in `star-plan-decomposer`'s sub-plan-list confirmation gains defined behavior: it is a direction, asked first. *Coarser* merges units that share a category or a dependency and shows the list again — and when merging would leave fewer than 3, the skill says the parent did not need decomposing yet and asks whether to stop, rather than merging down to two. *Finer* never adds a sibling: a finer unit is one digit deeper, so the level stays as drafted and the units named as too coarse carry to the recursion step, which decomposes them in the same run instead of only offering to. Either direction keeps the axis already chosen. The same release makes the updater's upstream configurable: `execs/update.sh` resolves `STAR_REPOSITORY` from the environment, then `.env`, then its built-in default, so tracking a fork is one line in `.env` and overriding it for a single command is a variable in front of it. `.env.example` ships the key at the public default. The update set also gains `execs/run.sh`, so a project picks up later fixes to the experiment launcher the way it picks up skills; the experiment scripts under `execs/scpts/` remain the project's own and are never touched.
-- **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — The code review moves ahead of the STOP-line command. When `star-plan-executor` stops for a heavy run, its report now names `star-code-reviewer` above the command it hands back: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. An exploratory leaf whose cheap command is its own test may still skip it. The loop back closes as well — a `CODE_REVIEW_<date>.md` whose blocker or major findings the log does not record as settled reopens the steps they land in, so a review finding no longer falls into the gap between "skip `done` steps on re-invoke" and the awaiting command. `star-flow-status` recommends the review in the same order, and the review rubric scores a deliverable only the un-run command can produce as `pending` rather than absent, so reviewing before the compute stops manufacturing findings nobody can act on.
 <details>
 <summary>Earlier releases</summary>
 
+- **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — The code review moves ahead of the STOP-line command. When `star-plan-executor` stops for a heavy run, its report now names `star-code-reviewer` above the command it hands back: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. An exploratory leaf whose cheap command is its own test may still skip it. The loop back closes as well — a `CODE_REVIEW_<date>.md` whose blocker or major findings the log does not record as settled reopens the steps they land in, so a review finding no longer falls into the gap between "skip `done` steps on re-invoke" and the awaiting command. `star-flow-status` recommends the review in the same order, and the review rubric scores a deliverable only the un-run command can produce as `pending` rather than absent, so reviewing before the compute stops manufacturing findings nobody can act on.
 - **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — Every skill tree is checked against its own harness's published tool list and the `SKILL.md` spec, instead of against how the other trees are written. The Cursor tree regains structured questions — `AskQuestion` wherever Claude asks through `AskUserQuestion` — and three trees stop naming tools their harness has never had: `Shell` for Cursor and Kimi where Claude has `Bash`, `ReadFile` for Kimi, and `shell`, `request_user_input` and `update_plan` for Codex. Codex has no file-reading tool at all, so its loads say so and `cat` the files into the shell call. Its selective delegation is executable too: bounded read-only work calls `spawn_agent` with `agent_type: explorer`, implementation uses `worker`, and local execution remains the default because subagent workflows cost more tokens. Descriptions now fit the spec's 1024-character limit in all four trees, and the checks enforce both that character limit and each harness's delegation vocabulary.
 - **[v0.1.7](https://github.com/wanghao9610/STAR/tree/v0.1.7)** (2026-08-01) — The Kimi skill tree regains the mechanisms its port had flattened to prose — AskUserQuestion structured questions, plan-mode approval via `EnterPlanMode`/`ExitPlanMode`, and `Agent` subagent dispatch — with subagent types mapped to Kimi's `explore`/`coder` and `multiSelect` renamed to Kimi's `multi_select`. The legitimate adaptations stay: `/skill:` invocation, `AGENTS.md` references, Kimi model-id wording, and the `kimi -p` fallback.
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` splits its opening load into two commands sent together — the conventions excerpts, whose size is fixed, and the collector's digest, which grows with the project's history. The two shared one result-size limit, so on a project with history the pair overran it and both were spilled to a file; split, the excerpts always arrive and only the digest can still spill.

@@ -1,4 +1,5 @@
 .env
+.star/memory/local/
 
 inits/*
 !inits/.gitkeep

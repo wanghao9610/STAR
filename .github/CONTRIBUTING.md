@@ -158,7 +158,8 @@ nothing enforces that judgement.
 7. Invocation tokens are tree-appropriate — no `$star-*` in `.claude`, and so on.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
-10. Provenance hooks exist, are executable, and are registered.
+10. Both session hooks — model-id provenance and project memory — exist, are executable, and are
+    registered in all four harnesses' registration files.
 11. **Heading structure matches across `.claude`, `.cursor` and `.kimi-code`** — 1200 headings per tree,
     compared after stripping parentheticals (both `(...)` and `（...）`) and inline code, so
     harness vocabulary inside a heading is allowed to differ. Currently exact, with no exception list.

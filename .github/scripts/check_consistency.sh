@@ -192,18 +192,60 @@ else
     diff <(tail -n +3 AGENTS.md) <(tail -n +6 .cursor/rules/agent-instructions.mdc) | sed 's/^/      /'
 fi
 
-# 10. Model-id provenance hooks exist, are executable, and are registered.
-section "Provenance hooks"
+# 10. Session hooks exist, are executable, and are registered.
+#     Both STAR hooks — model-id provenance and the project-memory index — ship
+#     one copy per harness, and each harness registers them in its own file. A
+#     script added without its registration entry is the silent failure this
+#     catches: the hook is present, nothing runs it, and no report says so.
+section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
+         .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
+         .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
 for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .kimi-code/hooks.example.toml; do
-    [[ -f "${f}" ]] || { fail "${f} is missing"; hook_errors=1; }
+    if [[ ! -f "${f}" ]]; then
+        fail "${f} is missing"
+        hook_errors=1
+        continue
+    fi
+    for hook in star_model_id.sh star_memory.sh; do
+        grep -qF "${hook}" "${f}" || { fail "${f} does not register ${hook}"; hook_errors=1; }
+    done
 done
-(( hook_errors == 0 )) && note "hooks present, executable, and registered"
+grep -qF star_memory.sh .kimi-code/hooks/install.sh || \
+    { fail ".kimi-code/hooks/install.sh does not install star_memory.sh"; hook_errors=1; }
+#     The memory index's field separator — space, middle dot, space — is what all
+#     four memory hooks split on byte-exactly, and what the spec and the shipped
+#     index document. Reword it in one place and the hooks silently stop marking
+#     anything: same failure mode as check 15's registry, one file set earlier.
+for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
+         .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
+         docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md \
+         .star/memory/MEMORY.md; do
+    grep -qF ' · ' "${f}" 2>/dev/null || \
+        { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
+done
+#     The aging rule is quadruplicated the same way: every memory hook carries
+#     both date spellings of the 180-day cutoff (BSD and GNU) and gates the
+#     stale mark on the literal type `env`, and both specs state the same
+#     window. Change one copy and the others keep answering for a rule the
+#     store no longer follows.
+for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
+         .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh; do
+    { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
+        { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
+    grep -qF 'substr(f[1], 3) == "env"' "${f}" || \
+        { fail "${f} no longer gates the stale mark on the literal type env"; hook_errors=1; }
+done
+grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
+    { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
+grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
+    { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
+(( hook_errors == 0 )) && note "both hooks present, executable, registered in all four harnesses, and agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the three trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
@@ -486,7 +528,8 @@ AGENTS_SECTIONS=(
     "7|Reply Wording"
     "8|Project Layout"
     "9|Project Runtime"
-    "10|Verification"
+    "10|Project Memory"
+    "11|Verification"
 )
 
 # title|regex — every match must contain exactly one §n, and that n must be the

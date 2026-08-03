@@ -4,6 +4,9 @@
     "sessionStart": [
       {
         "command": "./.cursor/hooks/star_model_id.sh"
+      },
+      {
+        "command": "./.cursor/hooks/star_memory.sh"
       }
     ]
   }

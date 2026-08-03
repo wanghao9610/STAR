@@ -118,7 +118,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C5: Final verification
 
-`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §10).
+`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §11).
 
 #### Step C6: Report & hand off
 

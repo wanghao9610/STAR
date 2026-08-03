@@ -27,10 +27,11 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
   - [4. 运行实验](#4-运行实验)
   - [5. 启动研究工作流](#5-启动研究工作流)
 - [分工具配置（可选）](#分工具配置可选)
-  - [model-id 溯源钩子](#model-id-溯源钩子)
+  - [会话钩子](#会话钩子)
   - [为状态收集脚本预先授权](#为状态收集脚本预先授权)
 - [研究工作流](#研究工作流)
   - [模型选择建议](#模型选择建议)
+- [项目记忆](#项目记忆)
 - [更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)
 - [项目约定](#项目约定)
 - [将 STAR 用于新项目](#将-star-用于新项目)
@@ -45,6 +46,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
 - **完整的研究生命周期**：十五个相互配合的 skill，按运行顺序依次是——不改动原有内容地接入已经开工的项目、收敛研究选题、写成计划、调研相关工作、递归拆解计划、搭建代码库、构建运行环境、执行叶子计划、审查代码、分析实验结果、汇总阶段进展、以执行证据修订计划、汇报全局状态、把定稿计划编译成方法文档、把仓库整理到可发布状态。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
+- **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个工具驱动 STAR。
 - **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
@@ -77,10 +79,11 @@ star-ai-research/
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
-├── .claude/hooks/          # Claude 的 model-id 溯源钩子
-├── .codex/hooks/           # Codex 的 model-id 溯源钩子
-├── .cursor/hooks/          # Cursor 的 model-id 溯源钩子
-├── .kimi-code/hooks/       # Kimi Code 的 model-id 溯源钩子（见分工具配置）
+├── .claude/hooks/          # Claude 的会话钩子：model-id 溯源、项目记忆
+├── .codex/hooks/           # Codex 的会话钩子
+├── .cursor/hooks/          # Cursor 的会话钩子
+├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
+├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
 ├── .github/                # STAR 自身的维护 CI；用于你的项目时请删除
@@ -235,15 +238,17 @@ bash execs/run.sh 00_exp --config config.yaml
 
 两项都不影响开始使用；用到哪个工具，再做哪一项。
 
-### model-id 溯源钩子
+### 会话钩子
 
-如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，让各 skill 记录真实的 `model_id` 而不是 `unrecorded`：
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。
+
+如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，把两个钩子都注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
 ```bash
 bash .kimi-code/hooks/install.sh
 ```
 
-它会把溯源钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目。Codex、Claude 和 Cursor 各自的钩子随仓库一起注册好，用这三个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，而且没有任何地方会提示你。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+它会把两个钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目，而在记忆钩子出现之前就配好的机器，这次只补上缺的那一个。Codex、Claude 和 Cursor 的两个钩子都随仓库一起注册好，用这三个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
@@ -326,6 +331,17 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 
 具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。所有 skill 共享的规则——git、红线、`.env` 运行时、日期、委派与对话纪律——见[研究工作流 Skill 通用规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)。
 
+## 项目记忆
+
+一次会话学到、又没有任何计划、日志或报告认领的事实——某个 build 必须先 load 一个 module 才过、你的某项长期偏好、一个不值得再跑的实验——记在项目里的 `.star/memory/`，而不是你当时恰好在用的那个工具里。一事一文件，每条在 `.star/memory/MEMORY.md` 里占一行；会话钩子在每次会话开始时把这份索引送到 agent 面前，四个工具都是如此。
+
+两条规则让它不会变成与真相竞争的第二个源头：
+
+- **只有当项目里没有任何文件已经认领这条事实时，它才被记进去。** 结果属于那次运行的 `EXEC_LOG.md`，关于研究的决定属于它的计划，论文属于 `metds/refs/`。记忆装的是残余。
+- **记忆与仓库里的文件冲突时，以文件为准**，随后把这条记忆改正或删掉。
+
+只在这台机器上成立的事实放 `.star/memory/local/`，git 像忽略 `.env` 一样忽略它。任何东西都不会不打招呼就记下来：agent 提议，你来定——`.env` 里设 `INVOLVE=low` 则改为先记下再告诉你。四类记忆、文件格式，以及一条记忆怎么退场，见[项目记忆](docs/mds/star-workflow/memory_spec.zh-CN.md)。
+
 ## 更新 STAR 的 skill 与工作流指南
 
 基于 STAR 创建项目后，可以只同步 STAR 后续发布的 skill 与研究工作流指南，而不改动项目代码、实验配置或 Git remote：
@@ -393,12 +409,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.1.12](https://github.com/wanghao9610/STAR/tree/v0.1.12)** (2026-08-03) — 项目开始拥有自己的记忆。一次会话学到、又没有任何计划、日志或报告认领的事实——踩坑换来的环境怪癖、一项长期偏好、活得比产生它的那次运行更久的判断、一条不值得再走的死路——记在 `.star/memory/` 下，一事一文件，旁边配一份每条一行的索引，而不是记进当时驱动它的那个工具里。第二个会话钩子随四个工具一起发布，与 model-id 那个并列，在每次会话开始时把这份索引送到 agent 面前；最后确认距今超过 180 天的 `env` 条目，会在会话看到的内容里被标为陈旧，另外三类不按时间标记——死路一直是死路，而一个在健康条目上也会亮的标记只会教读者跳过它。`AGENTS.md` 新增 §10，写入规则全在那一节：只记项目里没有任何文件已经认领的事实，先提议而不是擅自决定，记忆与仓库文件冲突时以文件为准。它落在 Project Layout（项目布局）和 Project Runtime（项目运行时）旁边，因此 Verification（验证）从 §10 挪到 §11，四棵技能树里对它的引用一并跟着改——你自己的文档里若引用了 `AGENTS.md §10`，需要改指向。只对某一台机器成立的事实放 `.star/memory/local/`，像 `.env` 一样不入库。格式与退场规则见 [`memory_spec.zh-CN.md`](docs/mds/star-workflow/memory_spec.zh-CN.md)。没有新增 skill：召回除了钩子之外不花任何代价，写入则是一次文件写，那条规则已经管住了。在这两个钩子之前就接入的项目，保留的仍是它自己的注册文件，更新脚本照旧从不覆盖——现在它会点名缺的是哪一个钩子，而不再只认 model-id 那个。
 - **[v0.1.11](https://github.com/wanghao9610/STAR/tree/v0.1.11)** (2026-08-03) — 项目开始指向写作侧的伴侣仓库 [STAGE](https://github.com/wanghao9610/STAGE)。落地页副标题原为 "Research, by design"——这个说法的日常含义是"这是故意的，不是缺陷"，而其中唯一有信息量的那个词，紧挨在它上方的徽章里已经出现过。现改为 "Every STAGE needs a STAR"，与 STAGE 页面上那句正好对仗。中文页同样用这句英文而不翻译，因为双关翻不过来；STAGE 的中文页对自己那句也是这么处理的。结尾的行动区多一个"与 STAGE 配对"按钮，页脚多一个 STAGE 链接，与 STAGE 一直保留的两处指向 STAR 的链接对称，四处都指向仓库地址。两份 README 也在开头交代分工：STAR 推进研究，产出方法文档、实验结果和阶段小结；STAGE 把它们导入为只读的带指纹证据，在其上写出论文，因此稿件里的数字能追回到产生它的那次实验。双向都是可选配对。
 - **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — `star-plan-decomposer` 子计划清单确认里的"调整粒度"选项有了明确行为：它是一个方向，先问清是哪边。*调粗*合并同类或共享依赖的单元后重新展示清单——合并后若不足 3 个，skill 会说明这个父计划还不需要拆、问是否就此打住，而不是硬并成两个。*调细*绝不在本层加兄弟：更细的单元是深一位数字，本层清单照原样写完，被点名太粗的单元交给递归那一步，在同一次运行里直接拆下去，而不只是提出建议。两个方向都沿用已选定的轴。同一版本还让更新脚本的上游可配置：`execs/update.sh` 按环境变量、`.env`、内置默认值的顺序解析 `STAR_REPOSITORY`，于是长期跟随某个 fork 只需在 `.env` 里写一行，只覆盖单次命令则在命令前加一个变量即可。`.env.example` 已带上这个键，取值为公开默认地址。更新范围同时纳入 `execs/run.sh`：实验启动脚本后续的修复会像 skill 一样同步过来，而它启动的实验脚本（`execs/scpts/` 下）仍属项目自己，绝不会被动到。
-- **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — 代码审查挪到了红线命令之前。`star-plan-executor` 为重实验停下时，简报现在把 `star-code-reviewer` 写在交回的那条命令之上：bug 在算力烧掉之前被抓住，代价是一次审查；等算力烧完才被抓住，代价是算力加重跑。探索性叶子、命令本身便宜到足以充当自己的检验时，仍可跳过审查直接跑。回路也补上了——run 目录里 `CODE_REVIEW_<date>.md` 的 blocker/major 发现若没有在日志里记为已处理，就重开它们落在的步骤，审查结论不再掉进"再次调用时跳过 `done` 步"与待跑命令之间的缝里。`star-flow-status` 按同样的顺序给建议；审查评分表把只有那条尚未跑的命令才能产出的交付物记为 `pending` 而非缺失，于是在算力烧掉之前做审查，不再凭空产出一堆谁也处理不了的问题项。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — 代码审查挪到了红线命令之前。`star-plan-executor` 为重实验停下时，简报现在把 `star-code-reviewer` 写在交回的那条命令之上：bug 在算力烧掉之前被抓住，代价是一次审查；等算力烧完才被抓住，代价是算力加重跑。探索性叶子、命令本身便宜到足以充当自己的检验时，仍可跳过审查直接跑。回路也补上了——run 目录里 `CODE_REVIEW_<date>.md` 的 blocker/major 发现若没有在日志里记为已处理，就重开它们落在的步骤，审查结论不再掉进"再次调用时跳过 `done` 步"与待跑命令之间的缝里。`star-flow-status` 按同样的顺序给建议；审查评分表把只有那条尚未跑的命令才能产出的交付物记为 `pending` 而非缺失，于是在算力烧掉之前做审查，不再凭空产出一堆谁也处理不了的问题项。
 - **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 的官方工具清单与 `SKILL.md` 规范核对，而不是照别的树怎么写。Cursor 版恢复了结构化提问——Claude 用 `AskUserQuestion` 提问的每一处，Cursor 改用 `AskQuestion`；另有三棵树不再命名各自 harness 根本没有的工具：Claude 的 `Bash` 在 Cursor 与 Kimi 版对应 `Shell`，Kimi 版的读文件工具是 `ReadFile`，Codex 版则是 `shell`、`request_user_input` 与 `update_plan`。Codex 完全没有文件读取工具，所以它的装载如实说明这一点，并把文件 `cat` 进那次 shell 调用。它的选择性委派也已写成可执行调用：有边界的只读工作使用 `spawn_agent` 与 `agent_type: explorer`，实现工作使用 `worker`；考虑到子代理流程消耗更多 token，默认仍在本地执行。四棵树的描述都收进规范的 1024 字符上限，检查脚本同时守住这条字符限制和各 harness 的委派词汇。
 - **[v0.1.7](https://github.com/wanghao9610/STAR/tree/v0.1.7)** (2026-08-01) — Kimi 版的 skill 树恢复了移植时被改写成散文的机制——`AskUserQuestion` 结构化提问、经 `EnterPlanMode`/`ExitPlanMode` 的计划模式审批、`Agent` 子代理派发——子代理类型映射为 Kimi 的 `explore`/`coder`，`multiSelect` 改为 Kimi 的参数名 `multi_select`。合法适配保留：`/skill:` 调用语法、`AGENTS.md` 引用、Kimi 版 model-id 措辞和 `kimi -p` 回退句。
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双落盘；拆开之后摘录必定完整送达，只有摘要还可能落盘。

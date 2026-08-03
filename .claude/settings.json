@@ -23,6 +23,11 @@
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/star_model_id.sh",
             "statusMessage": "Recording session model id for STAR provenance"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/star_memory.sh",
+            "statusMessage": "Loading STAR project memory"
           }
         ]
       }
