@@ -102,11 +102,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - **唯一依据**:`wkdrs/<run>/EXEC_LOG.md`——每步 `pending`/`in_progress`/`done`/`blocked` + 产物路径 + 任何"待用户执行"命令。
 - 子计划 frontmatter 只带 `exec_status` + `exec_runs`(只追加,最新的在最后;最后一项是当前 run)。
 - re-invoke 时读 run 目录,跳过 `done` 步,从第一个未完成步续跑。若之前有红线命令待执行、现在其产出已存在,则从完成判据验证处续起。
+- **审查发现会重开步骤。** 若 run 目录里有 `CODE_REVIEW_<date>.md`,且它带的 blocker/major 发现没有在日志里记为已处理,re-invoke 时它们排在一切之前:把每条发现落在的步骤重开(状态回到 `in_progress`,备注里写上该发现的编号),一条发现跨多步时改为在 `EXEC_PLAN.md` 追加一个补救步骤;像 Step 4 确认计划那样整批确认一次;然后走 Step 5 的执行—验证循环。待跑的红线命令要等这之后才再次交回。用户决定不处理的发现,连同这个决定一起在日志里记为已处理,下次 re-invoke 就不再重开它。
 - 同步回写是幂等的:标了 `synced` 的行(EXEC_PLAN)和勾掉的行("待同步修正")绝不二次应用;未同步的待定行在 Step 6 再次提出。
 
 ### Step 8：简报
 
-验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`)。run 完整跑完后,建议先用 `/skill:star-code-reviewer <叶子>` 对照规约与子计划审一遍实现,再修订计划或继续推进。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/skill:star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
+验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`)。两种收尾都建议 `/skill:star-code-reviewer <叶子>` 对照规约与子计划审一遍实现:run 完整跑完后,在修订计划或继续推进之前审;有命令在红线交回给用户时,在用户跑它之前审——把这条审查命令写在待跑命令之上,因为 bug 等算力烧完才被抓住,代价是算力加重跑。说清审查通向哪里:确认的 blocker/major 经 `/skill:star-plan-executor <叶子>` 回来,它重开受影响的步骤、改完验证过,才把命令再交回。探索性叶子、命令本身很便宜时,可以跳过审查直接跑——把这条作为备选说出来,而不是替用户决定。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/skill:star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
 
 ## 状态与文件规则
 

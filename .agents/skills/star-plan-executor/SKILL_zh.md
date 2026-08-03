@@ -94,11 +94,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 6：报告
 
-以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。run 完成后，推荐 `$star-code-reviewer <leaf>` 在修订或进入下一项前，依据规约和子计划审计实现。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 500 词以内。
+以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。两种收尾都推荐 `$star-code-reviewer <leaf>` 依据规约和子计划审计实现：run 完成后，在修订或进入下一项前审；有 STOP line 命令等待用户时，在用户跑它之前审——把审查命令写在待跑命令之上，因为 bug 等算力烧完才被抓住，代价是算力加重跑。确认的 blocker/major 经 `$star-plan-executor <leaf>` 回来，它重开受影响的 action、改完并验证，才把命令再交回；探索性叶子、命令本身很便宜时可以跳过审查直接跑。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 500 词以内。
 
 ## 状态与文件规则
 
 - 把 `wkdrs/<run>/EXEC_LOG.md` 视为执行事实来源。再次调用时跳过 `done` action，从第一个未完成项恢复。回同步必须幂等：标为 `synced` 或已勾选的行绝不重复应用；未同步 pending 行在 finalize 时重新提出。
+- run 目录里的 `CODE_REVIEW_<date>.md`，若其 blocker/major 发现没有在日志里记为已处理，就排在一切之前重开工作：把每个受影响的 action 退回 `in_progress` 并在备注写上该发现的编号，一条发现跨多个 action 时改为在 `EXEC_PLAN.md` 追加一个补救 action；整批确认一次，执行并验证，之后才把待跑的 STOP line 命令交回。用户明确不处理的发现，连同这个决定记为已处理，下次调用不再重开它。
 - `tasks/<plan-name>/` 存放该计划自有的工具脚本（持久）与可丢弃草稿文件，本 skill 拥有草稿文件的生命周期：Step 3 创建，§5 满足后在 finalize 时只提议删除草稿文件，绝不删脚本（规约 §9）。生成工件与持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。
 - 可以自由编辑子计划 frontmatter 的 `exec_status`、`exec_runs`、`updated`；只有通过用户确认的回同步协议（`references/plan_sync_rules_zh.md`）才能编辑其 §2–§5，且始终原地更新并配对一个 `## Revision History` 条目。绝不重写 §1 或 §6，绝不触碰父计划——objective 或 strategy 级偏差转交 `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`。
 - Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件，且仅在 checkpoint 获批时（规约 §1）。

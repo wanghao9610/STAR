@@ -611,7 +611,7 @@ The skill does not automatically start:
 - Operations that may overwrite valuable artifacts;
 - Work whose duration or cost cannot be bounded.
 
-Instead, it prepares the exact command, records it under “Awaiting user” in the execution log, and stops. After you run the command, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
+Instead, it prepares the exact command, records it under “Awaiting user” in the execution log, and stops — recommending `$star-code-reviewer <leaf>` above that command: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. An exploratory leaf whose command is cheap may skip the review and run it. Blocker or major findings go back through `$star-plan-executor`, which reopens the affected steps, fixes and verifies them, and only then hands the command back. After you run the command, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
 
 ### Main outputs
 
