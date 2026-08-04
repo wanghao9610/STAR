@@ -297,7 +297,7 @@ STAR includes fifteen complementary skills that turn a vague research interest i
 | Cursor | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 | Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach open-vocabulary detection` |
 
-Every skill must be named explicitly. All four tools disable implicit invocation, so describing the task in prose does not start a skill.
+Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works.
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes" width="100%">

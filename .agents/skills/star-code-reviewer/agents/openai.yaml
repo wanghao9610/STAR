@@ -3,4 +3,4 @@ interface:
   short_description: "Audit code against conventions and plan promises"
   default_prompt: "Use $star-code-reviewer to review the codebase, a plan's code, a path, or a diff against project conventions."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

@@ -1,6 +1,5 @@
 ---
 name: star-expt-digest
-disable-model-invocation: true
 description: >-
   Summarize what the experiment programme has done lately, in date order. No argument resumes from the
   previous digest; a PLAN_NAME covers that node's whole family — ancestors for context, every descendant

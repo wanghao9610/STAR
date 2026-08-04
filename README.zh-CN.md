@@ -292,7 +292,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 
-每个 skill 都必须显式指名。四套工具都禁用了隐式调用，仅用自然语言描述需求不会启动任何 skill。
+七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环" width="100%">

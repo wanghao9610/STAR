@@ -1,6 +1,5 @@
 ---
 name: star-expt-analyst
-disable-model-invocation: true
 description: >-
   Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
   prefix / filename) resolves through exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to

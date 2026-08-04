@@ -77,27 +77,56 @@ while IFS= read -r skill; do
 done < <(printf '%s\n' "${SKILLS}")
 (( parity_errors == 0 )) && note "file sets match across all four trees"
 
-# 4. Implicit-invocation guards: Codex via agents/openai.yaml, the other three
-#    via disable-model-invocation frontmatter.
-section "User-invoked-only guards"
+# 4. Slash-only guards: the conventions roster (§10) marks that set with †, and
+#    the four trees enforce it — Codex via agents/openai.yaml, the other three
+#    via disable-model-invocation frontmatter. Checked both ways: a † whose
+#    guard is missing runs unrequested on exactly the harness that forgot it,
+#    and a guard carrying no † withholds a skill the roster says the agent may
+#    pick up. Both failures are silent in use, which is what this check is for.
+section "Slash-only guards match the conventions roster"
 guard_errors=0
+CONVENTIONS="docs/mds/star-workflow/research-workflow-conventions.md"
+SLASH_ONLY="$(sed -nE 's/^\| `(star-[a-z-]+)` † \|.*/\1/p' "${CONVENTIONS}" | sort)"
+if [[ -z "${SLASH_ONLY}" ]]; then
+    fail "${CONVENTIONS}: no skill marked † in the §10 roster; the slash-only set cannot be resolved"
+    guard_errors=1
+fi
 while IFS= read -r skill; do
+    want_guarded=false
+    grep -qxF "${skill}" <<< "${SLASH_ONLY}" && want_guarded=true
+
     manifest=".agents/skills/${skill}/agents/openai.yaml"
     if [[ ! -f "${manifest}" ]]; then
         fail "${manifest} is missing"
         guard_errors=1
-    elif ! grep -q 'allow_implicit_invocation: false' "${manifest}"; then
-        fail "${manifest}: allow_implicit_invocation: false not found"
-        guard_errors=1
+    else
+        policy="$(sed -nE 's/^[[:space:]]*allow_implicit_invocation:[[:space:]]*(true|false)[[:space:]]*$/\1/p' "${manifest}")"
+        if [[ -z "${policy}" ]]; then
+            fail "${manifest}: allow_implicit_invocation is absent or not literally true/false"
+            guard_errors=1
+        elif [[ "${want_guarded}" == true && "${policy}" != "false" ]]; then
+            fail "${manifest}: ${skill} is slash-only in the roster but allows implicit invocation"
+            guard_errors=1
+        elif [[ "${want_guarded}" == false && "${policy}" != "true" ]]; then
+            fail "${manifest}: ${skill} carries no † in the roster but forbids implicit invocation"
+            guard_errors=1
+        fi
     fi
+
     for root in .claude/skills .cursor/skills .kimi-code/skills; do
-        if ! frontmatter_has_line "${root}/${skill}/SKILL.md" "disable-model-invocation: true"; then
-            fail "${root}/${skill}/SKILL.md: disable-model-invocation: true not in frontmatter"
+        has=false
+        frontmatter_has_line "${root}/${skill}/SKILL.md" "disable-model-invocation: true" && has=true
+        if [[ "${want_guarded}" != "${has}" ]]; then
+            if [[ "${want_guarded}" == true ]]; then
+                fail "${root}/${skill}/SKILL.md: slash-only in the roster but no 'disable-model-invocation: true'"
+            else
+                fail "${root}/${skill}/SKILL.md: carries 'disable-model-invocation: true' but no † in the roster"
+            fi
             guard_errors=1
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "all skills are guarded against model auto-invocation"
+(( guard_errors == 0 )) && note "$(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all four trees"
 
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
@@ -624,8 +653,12 @@ CONV_HEADINGS=(
     '7. Dialogue'
     '8. The output table'
     '9. Project layout'
+    '10. The skill roster'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11" "10|5")
+# The highest section the pinned list carries. Check 18 bounds a §n citation
+# against it, so adding a section here is all it takes to make one citable.
+CONV_MAX_SECTION="${CONV_HEADINGS[$(( ${#CONV_HEADINGS[@]} - 1 ))]%%.*}"
 
 conv_items() { # $1 = file, $2 = section number -> top-level numbered items in it
     awk -v want="$2" '
@@ -745,7 +778,7 @@ for guide_row in "${GUIDES[@]}"; do
         c_sec="${cite%%.*}"
         c_item=""
         [[ "${cite}" == *.* ]] && c_item="${cite#*.}"
-        if (( c_sec > 9 )); then
+        if (( c_sec > CONV_MAX_SECTION )); then
             fail "${guide}: cites conventions §${cite}, which has no such section"
             guide_errors=1
             continue

@@ -216,3 +216,31 @@ Two rules the table alone does not carry:
 
 - **`execs/` root is closed.** It holds `run.sh` and `update.sh` and nothing else. A new `.sh` goes to `execs/scpts/`; anything that is not a launch script does not go to `execs/` at all.
 - **`tasks/<plan-name>/` holds two kinds of file, and only one is disposable.** A **plan-owned tool script** — the leaf's own verification, indexing, or data-prep tooling, the kind a §5 done-criterion actually runs — is durable: it is neither project code nor a launcher, it lives here for the life of the plan, and finalize never deletes it. Everything else is **scratch**, and belongs here only if losing it at finalize costs nothing. Generated artifacts are neither: an output worth citing, or a config that reproduces a run, goes to `wkdrs/<run>/`.
+
+## 10. The skill roster
+
+Fifteen skills, invoked as `/star-<name>` in Claude Code and Cursor, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code. What each one does in full is [research-workflow-skills.md](research-workflow-skills.md); what each one writes is §8.
+
+| Skill | Role |
+| --- | --- |
+| `star-proj-adopt` † | adopt an already-started project into the workflow |
+| `star-idea-storm` † | turn a vague interest into a defensible topic |
+| `star-plan-coach` † | write the top-level research plan |
+| `star-refs-reviewer` | build the related-work base and the bib |
+| `star-code-architect` † | bootstrap or reorganize the codebase |
+| `star-env-builder` | build and verify the Python runtime |
+| `star-plan-decomposer` † | split a plan into executable sub-plans |
+| `star-plan-executor` | execute one leaf sub-plan |
+| `star-code-reviewer` | review code against the conventions and the plan |
+| `star-expt-analyst` | score a run against its done-criteria |
+| `star-expt-digest` | summarize the programme's recent progress |
+| `star-plan-reviser` † | revise one plan against its execution evidence |
+| `star-flow-status` | read-only status and the one next action |
+| `star-metd-summarize` | compile the plans into method documents |
+| `star-code-release` † | prepare the repository for release |
+
+1. **The seven marked † are slash-only.** Run them only when the user names them: each sits on a decision that belongs to the researcher — which repository to adopt, what to study, what the plan says, how it splits, how it is revised, what the code is built on, what gets published — and a decision reached on an agent's own initiative is a decision nobody made. `star-code-architect` earns the mark twice over: which reference implementation the project starts from shapes everything built on top of it, and its trigger — no `metds/codearc.md` — fires about once in a project's life, so taking it unasked saves nobody anything. This table is the source of truth; the guards enforcing it are `disable-model-invocation: true` in the Claude, Cursor, and Kimi manifests and `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex, and CI checks all four against these markers in both directions — a † whose guard is missing, or a guard on a skill carrying no †, fails the build.
+2. **The other eight may be picked up by the agent** when the task plainly matches. Being picked up changes nothing about how that run then behaves: the STOP line (§2), every commit offer (§1.5), every deletion or overwrite, and every mandatory confirmation point (§7.7) hold exactly as they do when the user typed the name. The involve level is unaffected in both directions — it moves judgment calls, never confirmation points, and it never moves whether a skill may start itself.
+3. **An unresolved target is not picked up.** §5.2 already forbids guessing which plan was meant; a run nobody asked for extends that rule — where the leaf, the run directory, or the scope is not settled by the files themselves, name the candidates and ask instead of starting.
+4. **One skill per invocation, and one unit of work inside it.** One leaf, one run, one report — a run that quietly widens its scope is the failure this rule exists for, and it is worse in a run the user did not start, where there was no stated scope to widen from. The next unit is the next invocation.
+5. **A run the user did not start says so** — one line before it begins, naming what matched and which target it took, and one line in the decisions record (§7.8) when it ends, in that record's shape: `what matched → what ran → what it wrote`. "Don't start things yourself" is an instruction like any other, and holds for the rest of the session.

@@ -90,7 +90,7 @@ $star-code-release
 /skill:star-plan-coach 开放词汇检测与分割
 ```
 
-skill 必须显式指名。四套工具都禁用了隐式调用——三套 markdown 目录通过每份 `SKILL.md` 里的 `disable-model-invocation: true`，Codex 通过每份 `agents/openai.yaml` 里的 `allow_implicit_invocation: false`——因此用自然语言描述需求（“帮我把这份研究计划拆成可执行子计划”）不会启动该 skill。智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。
+七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、Kimi 三份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 

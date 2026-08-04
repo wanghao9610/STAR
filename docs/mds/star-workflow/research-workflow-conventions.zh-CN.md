@@ -216,3 +216,31 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 
 - **`execs/` 根目录是封闭的。** 它只放 `run.sh` 与 `update.sh`，不放别的。新增 `.sh` 进 `execs/scpts/`；不是启动脚本的东西根本不进 `execs/`。
 - **`tasks/<plan-name>/` 里有两类文件，只有一类可弃。** **计划自有的工具脚本**——该叶子自己的校验、索引、数据准备工具，也就是 §5 done-criterion 真正会去跑的那种——是持久的：它既不是项目代码也不是启动器，在计划存续期间就住这里，finalize 绝不删它。其余都是**草稿**，只有“在 finalize 时丢掉也不心疼”的才属于这里。生成产物两者都不是：值得引用的产出、能复现某次运行的配置，都进 `wkdrs/<run>/`。
+
+## 10. Skill 名册
+
+十五个 skill，在 Claude Code 与 Cursor 中写作 `/star-<name>`，在 Codex 中写作 `$star-<name>`，在 Kimi Code 中写作 `/skill:star-<name>`。每个具体做什么见 [research-workflow-skills.zh-CN.md](research-workflow-skills.zh-CN.md)；每个写什么见 §8。
+
+| Skill | 职责 |
+| --- | --- |
+| `star-proj-adopt` † | 把已经开工的项目接入工作流 |
+| `star-idea-storm` † | 把模糊的兴趣收敛成站得住的研究题目 |
+| `star-plan-coach` † | 写出顶层研究计划 |
+| `star-refs-reviewer` | 建立相关工作的证据底座与文献库 |
+| `star-code-architect` † | 搭起或重整代码库 |
+| `star-env-builder` | 构建并验证 Python 运行时 |
+| `star-plan-decomposer` † | 把计划拆成可执行子计划 |
+| `star-plan-executor` | 执行一个叶子子计划 |
+| `star-code-reviewer` | 拿规约与计划审查代码 |
+| `star-expt-analyst` | 用 done-criteria 给一次运行打分 |
+| `star-expt-digest` | 汇总这段时间的整体进展 |
+| `star-plan-reviser` † | 拿执行证据修订一份计划 |
+| `star-flow-status` | 只读的状态总览与唯一的下一步动作 |
+| `star-metd-summarize` | 把计划编译成方法文档 |
+| `star-code-release` † | 把仓库准备到可发布 |
+
+1. **标 † 的七个是 slash-only。** 只有用户点名时才跑：每一个都坐在一个属于研究者的决定上——接入哪个仓库、研究什么、计划怎么写、怎么拆、怎么改、代码建在谁的基础上、发布什么——而一个由 agent 自作主张走到的决定，等于没有人做过这个决定。`star-code-architect` 两头都占：项目从哪个参考实现起步，决定了在它之上建起来的一切；而它的触发条件——没有 `metds/codearc.md`——一个项目一辈子只成立一两次，自行拾起谁也省不下什么。这张表是事实来源；执行它的守卫是 Claude、Cursor、Kimi 三份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`，CI 会拿这四处与这里的标记双向比对——标了 † 却缺守卫、或没标 † 却带着守卫，都会让构建失败。
+2. **另外八个，任务明显匹配时 agent 可以自行拾起。** 被拾起不改变这次运行的任何行为：红线（§2）、每一次提交提议（§1.5）、每一个删除或覆盖、以及每一个必问确认点（§7.7），都与用户亲手点名时一模一样。参与度档位两个方向都不受影响——它拨动的是裁量题，从不拨动确认点，也从不拨动一个 skill 能不能自己启动。
+3. **目标没定下来就不拾起。** §5.2 本来就禁止去猜用户指的是哪个计划；没人点名的运行把这条往前延一步——当哪个叶子、哪个运行目录、多大范围没有被文件本身定死时，列出候选并发问，而不是直接开跑。
+4. **一次调用一个 skill，里面一个工作单元。** 一个叶子、一次运行、一份报告——运行中途悄悄扩大范围正是这条规则要防的事，而在用户没有发起的运行里更糟：根本没有一个被说出口的范围可供扩大。下一个单元是下一次调用。
+5. **不是用户发起的运行要自报家门**——开跑前一行，写明匹配上了什么、取了哪个目标；结束时在决策记录（§7.8）里留一行，用那份记录的形状：`匹配到什么 → 跑了什么 → 写了哪些文件`。"别自己开跑"和别的指令一样，在本次会话余下部分持续有效。
