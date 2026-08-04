@@ -152,7 +152,7 @@ nothing enforces that judgement.
 1. The four roots carry the same set of skill directories.
 2. Frontmatter `name:` matches the directory name.
 3. Per-skill file inventory is identical across trees (Codex `agents/` manifests aside).
-4. Every skill is guarded against implicit model invocation.
+4. Slash-only guards match the conventions §10 roster in both directions, and the roster itself lists exactly the skills that exist, with the same rows and † set in the zh edition.
 5. Every `.md` has its `_zh.md` twin.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no `$star-*` in `.claude`, and so on.

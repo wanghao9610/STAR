@@ -83,12 +83,43 @@ done < <(printf '%s\n' "${SKILLS}")
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
 #    pick up. Both failures are silent in use, which is what this check is for.
+#    The roster itself is held to the trees and to its own translation: it must
+#    list exactly the skills that exist — a † row for a skill that does not is
+#    never iterated by the per-skill loop, so without this it passed and was
+#    even counted — and the zh edition must carry the same rows and the same
+#    † set, because a zh project reads the zh conventions.
 section "Slash-only guards match the conventions roster"
 guard_errors=0
 CONVENTIONS="docs/mds/star-workflow/research-workflow-conventions.md"
-SLASH_ONLY="$(sed -nE 's/^\| `(star-[a-z-]+)` † \|.*/\1/p' "${CONVENTIONS}" | sort)"
+CONVENTIONS_ZH="docs/mds/star-workflow/research-workflow-conventions.zh-CN.md"
+# Rows are read from §10 only: §8's output table opens its rows with the same
+# backticked skill names, and a file-wide scan drags those in.
+roster_rows() { # $1 = conventions file, $2 = row regex -> matching §10 skill names, sorted
+    awk '/^## /{k=/^## 10\./} k' "$1" | sed -nE "$2" | sort
+}
+DAGGER_ROW='s/^\| `(star-[a-z-]+)` † \|.*/\1/p'
+ANY_ROW='s/^\| `(star-[a-z-]+)`( †)? \|.*/\1/p'
+SLASH_ONLY="$(roster_rows "${CONVENTIONS}" "${DAGGER_ROW}")"
 if [[ -z "${SLASH_ONLY}" ]]; then
     fail "${CONVENTIONS}: no skill marked † in the §10 roster; the slash-only set cannot be resolved"
+    guard_errors=1
+fi
+ROSTER_ALL="$(roster_rows "${CONVENTIONS}" "${ANY_ROW}")"
+if [[ "${ROSTER_ALL}" != "${SKILLS}" ]]; then
+    fail "${CONVENTIONS}: the §10 roster does not list exactly the skills the four trees carry:"
+    diff <(printf '%s\n' "${SKILLS}") <(printf '%s\n' "${ROSTER_ALL}") | sed 's/^/      /'
+    guard_errors=1
+fi
+ROSTER_ALL_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${ANY_ROW}")"
+if [[ "${ROSTER_ALL_ZH}" != "${ROSTER_ALL}" ]]; then
+    fail "${CONVENTIONS_ZH}: the zh §10 roster does not list the same skills as the en roster:"
+    diff <(printf '%s\n' "${ROSTER_ALL}") <(printf '%s\n' "${ROSTER_ALL_ZH}") | sed 's/^/      /'
+    guard_errors=1
+fi
+SLASH_ONLY_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${DAGGER_ROW}")"
+if [[ "${SLASH_ONLY_ZH}" != "${SLASH_ONLY}" ]]; then
+    fail "${CONVENTIONS_ZH}: the zh roster's † set differs from the en roster's:"
+    diff <(printf '%s\n' "${SLASH_ONLY}") <(printf '%s\n' "${SLASH_ONLY_ZH}") | sed 's/^/      /'
     guard_errors=1
 fi
 while IFS= read -r skill; do
@@ -126,7 +157,7 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "$(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all four trees"
+(( guard_errors == 0 )) && note "roster lists all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all four trees"
 
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
@@ -657,7 +688,8 @@ CONV_HEADINGS=(
 )
 CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11" "10|5")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
-# against it, so adding a section here is all it takes to make one citable.
+# against it, and check 20d derives the stay-out complement from it, so adding
+# a section here is all it takes to make one citable and load-accounted.
 CONV_MAX_SECTION="${CONV_HEADINGS[$(( ${#CONV_HEADINGS[@]} - 1 ))]%%.*}"
 
 conv_items() { # $1 = file, $2 = section number -> top-level numbered items in it
@@ -936,8 +968,8 @@ fi
 #     which is how a stay-out reason may point at a section that IS loaded.
 #
 #     Known gap, deliberate: star-flow-status also loads part of the conventions,
-#     but through `sed` ranges plus an item-level pass over §7, so a section-level
-#     parser cannot verify it and it carries no canonical selector to find. Giving
+#     but through `sed`/`awk` ranges plus an item-level pass over §7, so a section-
+#     level parser cannot verify it and it carries no canonical selector to find. Giving
 #     it this shape is a change to the most-run skill in the flow and belongs in
 #     its own commit.
 section "Selective conventions load"
@@ -952,9 +984,11 @@ RESTATED_REGISTRY=(
     "star-expt-digest|SKILL.md|1"
     "star-expt-digest|SKILL.md|2"
     "star-expt-digest|SKILL.md|4"
+    "star-expt-digest|SKILL.md|10"
     "star-expt-digest|references/digest_rubric.md|2"
     "star-expt-digest|references/scope_spec.md|4"
     "star-refs-reviewer|SKILL.md|1"
+    "star-refs-reviewer|SKILL.md|10"
 )
 
 sel_errors=0
@@ -1051,7 +1085,7 @@ for root in "${SKILL_ROOTS[@]}"; do
                     fail "${path}: the block says §${claims_in//|/, §} arrives but the selector loads §${wsorted//|/, §}"
                     sel_errors=1
                 fi
-                expect_out="$(for n in 0 1 2 3 4 5 6 7 8 9; do
+                expect_out="$(for (( n=0; n<=CONV_MAX_SECTION; n++ )); do
                                   grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${wsorted}")" || printf '%s\n' "${n}"
                               done | paste -sd'|' -)"
                 if [[ "${claims_out}" != "${expect_out}" ]]; then
