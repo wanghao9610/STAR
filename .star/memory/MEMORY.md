@@ -18,3 +18,5 @@ what belongs here, the file format, how a memory is retired:
 `docs/mds/star-workflow/memory_spec.md`.
 
 <!-- entries below -->
+
+- pref · global · 2026-08-04 · [readme-changelog-three-open](readme-changelog-three-open.md) — README 更新日志只展开最新三条，其余折进 `<details>` 块
