@@ -342,6 +342,7 @@ $star-refs-reviewer 2103.00020             # 用 arXiv id、DOI 或 URL 追加�
 $star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # 一次追加多篇——id、DOI、URL、标题混用
 $star-refs-reviewer verify                 # 逐条重抓并与文件做 diff
 $star-refs-reviewer organize               # 离线重新分类现有 bib
+$star-refs-reviewer score                  # 刷新引用与星标指标，重建影响力评分表
 $star-refs-reviewer synthesize             # 把笔记合成为 metds/refs/related_work.md
 $star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<slug>_survey.md
 ```
@@ -356,16 +357,17 @@ $star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<s
 4. 通过核心论文的参考文献表、引用它们的后续工作和补充检索把池子扩到 50 篇以上，已发表版本优先于预印本；
 5. 逐篇抓权威记录（DBLP → Crossref → Semantic Scholar → arXiv），原始内容缓存到 `wkdrs/refs_<date>/raw/`，然后转录；
 6. 按实际收上来的内容归纳 3–8 个类别，`reference.bib` 按类别分组写出，每条的来源登记进 index；
-7. 收尾前随机重抓 5 条，逐字段 diff。
+7. 给够得着的条目打影响力分——年均引用、发表档位、官方仓库的星标与活跃度，按固定权重合成 0–10 的分数，子指标连同抓取日期落在 index 里——近不近仍决定谁是核心，分数决定详略；
+8. 收尾前随机重抓 5 条，逐字段 diff。
 
-`survey` 模式用同一套检索机器喂一件不同的产物：池子不砍到 15 条而是留下来，分三层读（8–12 篇精读、15–25 篇读摘要、其余只凭记录），在一句话声明划分轴的分类体系下组织，写成一份独立的领域综述——其中每条论断都引用本轮抓取的来源。精读之前只问一次——检索画像、分类轴、分层清单——`involve=low` 会按推荐项代答，所以一次 survey 可以从头到尾无人值守。它不碰 `reference.bib` 和 `refs_index.md`；想收编它翻出的某篇，事后跑一次单篇追加即可。
+`survey` 模式用同一套检索机器喂一件不同的产物：池子不砍到 15 条而是留下来，分三层读（8–12 篇精读、15–25 篇读摘要、其余只凭记录——相关性与影响力分共同定层），在一句话声明划分轴的分类体系下组织，写成一份独立的领域综述——其中每条论断都引用本轮抓取的来源。精读之前只问一次——检索画像、分类轴、分层清单——`involve=low` 会按推荐项代答，所以一次 survey 可以从头到尾无人值守。它不碰 `reference.bib` 和 `refs_index.md`；想收编它翻出的某篇，事后跑一次单篇追加即可。
 
 ### 主要输出
 
 ```text
 metds/refs/<缩写>.md          # 每篇核心论文一份分析笔记（CLIP.md、DETR.md……）
 metds/refs/reference.bib      # ≥50 条，按类别分组，key 为 Year_Method_FirstAuthor
-metds/refs/refs_index.md      # 核心论文表、类别、出处登记、待人工核对清单
+metds/refs/refs_index.md      # 核心论文表、类别、出处登记、影响力评分、待人工核对清单
 metds/refs/related_work.md    # 由笔记合成的相关工作叙述（synthesize 模式）
 metds/refs/<slug>_survey.md   # 分层阅读写成的独立领域综述（survey 模式）
 ```
@@ -374,7 +376,7 @@ metds/refs/<slug>_survey.md   # 分层阅读写成的独立领域综述（survey
 
 ### 不编造的边界
 
-一个 bib 字段合法的唯一条件，是它出现在本次运行抓回的记录里。绝不凭记忆写、绝不「顺手修正」字段、绝不推断补齐缺失的页码；抓不到权威记录的论文列入待人工核对清单，而不是猜一个。每条的来源 URL 与抓取日期都落在 `refs_index.md`，所以任何字段日后都能复查——`$star-refs-reviewer verify` 做的正是这件事。
+一个 bib 字段合法的唯一条件，是它出现在本次运行抓回的记录里。绝不凭记忆写、绝不「顺手修正」字段、绝不推断补齐缺失的页码；抓不到权威记录的论文列入待人工核对清单，而不是猜一个。每条的来源 URL 与抓取日期都落在 `refs_index.md`，所以任何字段日后都能复查——`$star-refs-reviewer verify` 做的正是这件事。影响力分守同一条边界：年均引用、发表档位、仓库星标都是抓取来的、带日期的指标，由固定算式合成——绝无印象成分——指标漂了，`$star-refs-reviewer score` 重抓一遍。
 
 Google Scholar 是有意不作为来源的：它没有 API，自动查询会被 CAPTCHA 拦，而且它导出的 bibtex 本身就是机器生成的——常缺页码、用缩写会议名、优先给预印本而不是正式发表版。skill 转而从「Scholar 的 bibtex 正是由之生成」的那些数据库抓取，既能自动化，又更接近源头。你仍然可以自己去读 Scholar；skill 绝不爬它。
 
@@ -383,6 +385,7 @@ Google Scholar 是有意不作为来源的：它没有 API，自动查询会被 
 - 有两个时机：一是 coach 的 §2（相关工作与定位）、这一节写下之前——正是 coach 自己会建议的那次抽身；二是 §3（核心方法）理清之后、拆解之前，那时检索画像最全，子计划也正需要知道自己的 baseline。
 - 宁可如实报缺口，也不要注水：43 条你守得住的，胜过 50 条守不住的。
 - 「与本项目的关系」一节才是笔记比论文摘要更值钱的地方——写计划定位前先读它。
+- 影响力分定详略、不定去留：最接近的论文星标为零也是核心；相关工作行文先写审稿人预期的高分作。领域不是 CS/AI 时，改 skill 自带的 venue 档位表和分档常数。
 
 完整定义见 [`star-refs-reviewer/SKILL_zh.md`](../../../.claude/skills/star-refs-reviewer/SKILL_zh.md)。
 

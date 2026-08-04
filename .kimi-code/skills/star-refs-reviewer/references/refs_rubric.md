@@ -21,6 +21,24 @@ A paper earns a note by being **close**, not by being famous:
 
 Every candidate carries a one-clause justification. A candidate you cannot justify in one clause is not a core paper.
 
+## Impact score (0–10)
+
+The second axis beside closeness: how much attention the field has paid a work. It sets emphasis — what the candidate table surfaces, what related-work prose leads with, how survey tiers fill — and never decides what is core; survey tiering alone weighs it into selection. Every input is a metric fetched and cached during a run, logged in the index with its fetch date; the synthesis is the fixed arithmetic below and nothing else — no impression enters a score. No collector computes or fetches a component: the GitHub call and the arithmetic belong to the session that writes the file.
+
+**score = 0.40 × citation + 0.25 × venue + 0.35 × code**, one decimal, log-stepped bins per component:
+
+- **Citation** — cites per year, `c = citationCount ÷ (current year − publication year + 1)`, from the Semantic Scholar record already in hand: `c ≥ 1000 → 10`, `≥ 300 → 9`, `≥ 100 → 8`, `≥ 30 → 6`, `≥ 10 → 4`, `≥ 3 → 2`, else `1`. Lifetime counts favor old papers; the per-year rate is what lets a 2024 paper stand beside a 2017 one.
+- **Venue** — the tier table in `references/venue_tiers.md`, matched against the fetched record's venue field: flagship `10`, second tier `7`, other published `4`, preprint-only `2`.
+- **Code** — no official repo → `0`. An official repo — one the paper's own page names; a repo found anywhere else is logged `unofficial` and scores nothing — starts at `4`, plus stars `≥ 10k → +5`, `≥ 3k → +4`, `≥ 1k → +3`, `≥ 300 → +2`, else `+1`, plus `+1` if pushed within 12 months; capped at `10`.
+
+Three rules ride every score:
+
+- **Partial, never guessed.** A component with no fetched metric is dropped and the remaining weights renormalize; the total carries `*` (`6.4*`). Candidate-table scores are partial by construction — code signals arrive only with the paper pages.
+- **Dated, because metrics drift.** Every sub-signal carries its fetch date in the index; `score` mode re-fetches the metrics and rebuilds the table.
+- **`new` is a flag, not a verdict.** A paper ≤ 18 months old is marked `new` beside its score: its citation rate is not settled, and prose treats a low-scored `new` paper as unproven, not ignorable.
+
+The bins and weights are calibrated for CS/AI literature and live here precisely so a project in another field can retune them. The constants are editable; the no-impressions rule is not.
+
 ## Analysis notes
 
 Each note (`assets/ref_analysis_template.md`) is graded on:
@@ -72,6 +90,7 @@ and nothing else: no branch assignment (the taxonomy is settled by the main agen
 
 - The provenance table covers 100% of entries.
 - The category table's counts sum to the entry count.
+- The impact-score table covers every entry: sub-signals with their fetch dates, `*` on partial totals, `new` flags where they apply — and every total recomputes from its logged sub-signals.
 - Needs-manual-check is present even when empty (say "none") — a missing section reads as "nothing failed".
 - Coined abbreviations (†) and preprint-only entries (‡) are marked.
 
@@ -82,6 +101,7 @@ and nothing else: no branch assignment (the taxonomy is settled by the main agen
 - **The taxonomy is derived and declared.** 3–8 branches under one division axis stated in a sentence, the axis that was rejected named beside it; the category rules above apply unchanged. Start from the schemes of 1–3 existing surveys of the topic where they exist — adapt, never adopt wholesale. Two levels at most; every paper sits on exactly one branch, and a paper spanning branches meets the others in the comparison table, not twice in prose.
 - **Branches are synthesis, not lists.** Each branch section says what its papers share and where they diverge — never a paper-by-paper sequence of summaries.
 - **Tiers are the evidence ceiling.** Deep-tier papers (`method-and-results` or better) are the only comparison-table rows and the only sources of reproduced numbers; abstract-tier papers may be placed on a branch and characterized in a clause; record-tier papers are named from their records' facts, never characterized. The frontmatter's per-tier counts are honest counts.
+- **Scores are carried, not invented.** The annotated references show each paper's impact score where the run computed one (`—` otherwise); a comparison-table code cell carries the fetched stars with their repo. Same arithmetic, same partial rule as the Impact score section — a survey never scores what it did not fetch.
 - **A table column earns its place** three ways at once: it discriminates (values actually differ across rows), it is fillable from fetched sources for every row (`—` where not), and it answers a choice the reader faces. A column that repeats the branch grouping, or holds free-text summaries, is prose in a cage.
 - **Every claim is grounded.** An inline `[@key]` on every non-obvious claim, resolvable in the annotated references; a number carries its dataset and metric; what no cached source supports is cut or marked as the survey's own inference.
 - **The count ledger is present**: found → deduplicated → screened → tiered, with what was excluded and why.
@@ -89,4 +109,4 @@ and nothing else: no branch assignment (the taxonomy is settled by the main agen
 
 ## Chat digest
 
-Under ~500 words: the method source, notes written, entry count and categories with counts, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall. A survey run's digest follows Step 10.8 instead.
+Under ~500 words: the method source, notes written, entry count and categories with counts, the top of the score table, the self-audit result, what needs manual attention, and the next skill. Counts are honest — a shortfall is reported as a shortfall. A survey run's digest follows Step 10.8 instead.

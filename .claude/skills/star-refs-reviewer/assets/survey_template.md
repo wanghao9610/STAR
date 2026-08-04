@@ -49,7 +49,8 @@ model_trail:                    # append-only: one entry per write session, neve
 
 <!-- Deep-tier papers only, as rows. Columns that discriminate and are fillable for every row —
      typically: core mechanism, supervision / data requirement, benchmark with the headline number
-     (dataset + metric named together), code availability, year. `—` where no fetched source fills a cell. -->
+     (dataset + metric named together), code with its fetched stars (`openai/CLIP, 30.1k`, `—` when
+     none), year. `—` where no fetched source fills a cell. -->
 
 ## 7. Evolution & Trends
 
@@ -70,10 +71,12 @@ model_trail:                    # append-only: one entry per write session, neve
 
 ## 11. Read Next
 
-<!-- Papers that deserve a full analysis note, each with one clause of why and its id or URL.
+<!-- Papers that deserve a full analysis note, each with one clause of why and its id or URL —
+     ordered by relevance, impact score breaking ties.
      One paper is `/star-refs-reviewer <arxiv-id>`; the whole list is one `/star-refs-reviewer add …`. -->
 
 ## 12. Annotated References
 
 <!-- Every paper the survey names. One row each:
-     [@key] | title | venue | year | tier (deep / abstract / record) | record URL | fetched <YYYY-MM-DD> -->
+     [@key] | title | venue | year | tier (deep / abstract / record) | score (`—` where not computed)
+     | record URL | fetched <YYYY-MM-DD> -->

@@ -47,8 +47,8 @@ model_trail:                    # 只追加：一次写入会话一条，绝不�
 ## 6. Comparison
 
 <!-- 只收精读层（deep）的论文作行。列要能区分、且每行都填得上——通常是：核心机制、
-     监督/数据需求、基准与头条数字（数据集 + 指标一起写）、代码可得性、年份。
-     抓回的来源填不上的格写 `—`。 -->
+     监督/数据需求、基准与头条数字（数据集 + 指标一起写）、代码及其抓回的星标
+     （`openai/CLIP, 30.1k`，没有写 `—`）、年份。抓回的来源填不上的格写 `—`。 -->
 
 ## 7. Evolution & Trends
 
@@ -69,10 +69,12 @@ model_trail:                    # 只追加：一次写入会话一条，绝不�
 
 ## 11. Read Next
 
-<!-- 值得建一篇完整分析笔记的论文，每篇一句话理由，附 id 或 URL。
-     单篇是 `/star-refs-reviewer <arxiv-id>`；整个清单一次 `/star-refs-reviewer add …`。 -->
+<!-- 值得建一篇完整分析笔记的论文，每篇一句话理由，附 id 或 URL——按相关性排序，
+     同级按影响力分。单篇是 `/star-refs-reviewer <arxiv-id>`；整个清单一次
+     `/star-refs-reviewer add …`。 -->
 
 ## 12. Annotated References
 
 <!-- 综述点名的每一篇。一篇一行：
-     [@key] | 标题 | venue | 年份 | 层级（deep / abstract / record）| 记录 URL | fetched <YYYY-MM-DD> -->
+     [@key] | 标题 | venue | 年份 | 层级（deep / abstract / record）| 影响力分（没算的写 `—`）
+     | 记录 URL | fetched <YYYY-MM-DD> -->

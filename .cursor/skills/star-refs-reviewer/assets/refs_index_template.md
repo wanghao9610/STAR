@@ -12,9 +12,9 @@
 
 ## 2. Core Papers
 
-| Citekey | Note | Venue | Why it is core | Depth | Model |
-| --- | --- | --- | --- | --- | --- |
-| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <one clause> | full | <model id> |
+| Citekey | Note | Venue | Why it is core | Depth | Score | Model |
+| --- | --- | --- | --- | --- | --- | --- |
+| `<2021_CLIP_Radford>` | [CLIP.md](CLIP.md) | <ICML 2021> | <one clause> | full | <9.6> | <model id> |
 
 ## 3. Categories
 
@@ -32,20 +32,34 @@
 | --- | --- | --- | --- |
 | `<2021_CLIP_Radford>` | DBLP | <https://dblp.org/rec/conf/icml/...bib> | <YYYY-MM-DD> |
 
-## 5. Needs Manual Check
+## 5. Impact Scores
+
+<!-- One row per entry, the arithmetic and bins from references/refs_rubric.md (Impact score):
+     sub-signals with their fetch dates, then the weighted total. `*` marks a partial total (a
+     component unfetched, weights renormalized); `new` marks papers ≤18 months old. Stars only for
+     a repo the paper's own page names — an unofficial repo is noted here, never scored. Metrics
+     drift: the dates say how fresh, and /star-refs-reviewer score rebuilds this table. -->
+
+| Citekey | Cites/yr (fetched) | Venue tier | Stars (repo, fetched) | Score |
+| --- | --- | --- | --- | --- |
+| `<2021_CLIP_Radford>` | <6100 (YYYY-MM-DD)> | <10> | <30.1k (openai/CLIP, YYYY-MM-DD)> | <9.6> |
+
+## 6. Needs Manual Check
 
 <!-- Papers no authoritative record could be found for; ambiguous matches (list the candidates and
      their URLs); records whose fields look wrong but were transcribed anyway rather than silently
      corrected. Each with what to check and where. Write "none" when clean — never omit the
      section. -->
 
-## 6. Self-Audit
+## 7. Self-Audit
 
 <!-- Which entries were re-fetched and diffed (≥5, at random; all of them in verify mode), the
-     result, the parse / brace / uniqueness check, and any entry corrected as a consequence. -->
+     result, the parse / brace / uniqueness check, the 3 impact scores recomputed from their logged
+     sub-signals, and any entry corrected as a consequence. -->
 
-## 7. Next Actions
+## 8. Next Actions
 
 <!-- Gaps worth another pass (a thin category, a sub-topic not covered). Routing: sharpening the
      positioning → /star-plan-coach §2 Related Work & Positioning; one new paper later →
-     /star-refs-reviewer <arxiv-id>; re-checking the bib → /star-refs-reviewer verify. -->
+     /star-refs-reviewer <arxiv-id>; re-checking the bib → /star-refs-reviewer verify; refreshing
+     drifted citation and star metrics → /star-refs-reviewer score. -->

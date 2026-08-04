@@ -78,6 +78,16 @@ Not permitted: adding pages, editors, publishers, volumes, DOIs, or a year the r
 
 AI-conference templates (NeurIPS / CVPR / ICML / ICLR / ACL) render author, title, booktitle/journal, year, pages, volume, publisher. Keep those when the record has them; do not pad the rest.
 
+## Impact metrics — score inputs, never bib fields
+
+The impact score (`references/refs_rubric.md`, Impact score) is computed from three metrics. None enters `reference.bib`; they live in the index with their fetch dates.
+
+- **Citation counts** ride the Semantic Scholar calls already listed — `citationCount` is in the search, `/references`, and `/citations` field lists, so the full pass pays nothing extra. `score` mode refreshes the whole bib in one call: `POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`, up to 500 ids in the body (`{"ids": ["DOI:…", "ARXIV:…", …]}`), the ids taken from the provenance the index already holds. An entry the batch cannot resolve keeps its old value and date.
+- **Venue tier** is offline: the fetched record's venue field against `references/venue_tiers.md`.
+- **Stars and last push** — `https://api.github.com/repos/<owner>/<repo>` → `stargazers_count`, `pushed_at`. Cache the response as `<citekey>.github.json` before use. Unauthenticated GitHub allows **60 requests/hour** — the binding cap, still several times the ≤15 repos a run should need (core papers, survey deep tier); serialize ~1/s like every host. A 403/429 here usually *is* the hourly cap: back off once, then record the failure and mark the component unfetched — a partial score per the rubric, never a retry loop, never a number from memory.
+
+**Official repos only.** A repo qualifies only when the paper's own page names it: the arXiv abs page, the project page, or the paper's PDF/HTML itself. Discovery order: the paper page Step 3 reads anyway → the arXiv abs page → the paper's Hugging Face papers page (`https://huggingface.co/papers/<arxiv-id>`). Papers with Code shut down in July 2025 — do not fetch it. A repo surfaced any other way (code search, a citing repo's README) is logged `unofficial` in the index and never scored.
+
 ## Rate limits and failure
 
 - Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool). The budget belongs to the whole session against each host; it is not one budget per agent (conventions §6.9). A step that fans out splits it and writes each share as a number.

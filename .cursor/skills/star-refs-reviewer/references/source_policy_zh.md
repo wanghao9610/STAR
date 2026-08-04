@@ -78,6 +78,16 @@ citekey 是你唯一"创作"的字段。其余全部是转录。
 
 AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author、title、booktitle/journal、year、pages、volume、publisher。记录里有就留，其余不要凑。
 
+## 影响力指标——评分的输入，绝不是 bib 字段
+
+影响力分（`references/refs_rubric_zh.md`"影响力分"一节）由三类指标算出。它们一律不进 `reference.bib`；落在 index 里，带抓取日期。
+
+- **引用数**搭上面已列的 Semantic Scholar 调用顺路取得——检索、`/references`、`/citations` 的字段清单里都有 `citationCount`，完整流程不多花一次请求。`score` 模式一次调用刷新全库：`POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`，body 里最多 500 个 id（`{"ids": ["DOI:…", "ARXIV:…", …]}`），id 取自 index 已登记的 provenance。批量端点解析不了的条目保留旧值旧日期。
+- **发表档位**离线：抓回记录的 venue 字段对 `references/venue_tiers_zh.md` 查表。
+- **星标与最近提交** —— `https://api.github.com/repos/<owner>/<repo>` → `stargazers_count`、`pushed_at`。响应先缓存成 `<citekey>.github.json` 再用。无认证的 GitHub 限 **60 请求/小时**——这才是真正的约束，但仍比一次运行该用到的 ≤15 个仓库（核心论文、综述精读层）宽出数倍；照旧按 host 约 1 请求/秒串行。这里的 403/429 多半就**是**小时上限：退避一次，然后记录失败、把该分量标为未抓到——按评分表记残缺分，绝不循环重试，绝不凭记忆填数。
+
+**只认官方仓库。** 仓库合格的唯一条件是论文自己的页面挂出它：arXiv abs 页、项目主页，或论文 PDF/HTML 本身。发现顺序：Step 3 本来就要读的论文页 → arXiv abs 页 → 该论文的 Hugging Face papers 页（`https://huggingface.co/papers/<arxiv-id>`）。Papers with Code 已于 2025 年 7 月关停——不要再抓它。从其他途径冒出来的仓库（代码搜索、引用它的仓库的 README）在 index 里记 `unofficial`，绝不计分。
+
 ## 限速与失败
 
 - 按 host 串行：DBLP 与 Semantic Scholar 约 1 请求/秒，Crossref 约 3 请求/秒（带上 `mailto` 进它的 polite pool）。这份预算属于整个会话、按 host 算，不是每个 agent 各有一份（规约 §6.9）；分派出去的步骤要把它按份数分开，并把各自那份写成具体数字。

@@ -342,6 +342,7 @@ $star-refs-reviewer 2103.00020             # append one paper by arXiv id, DOI, 
 $star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # append several at once — ids, DOIs, URLs, titles mixed
 $star-refs-reviewer verify                 # re-fetch every entry and diff it against the file
 $star-refs-reviewer organize               # re-classify the existing bib, offline
+$star-refs-reviewer score                  # refresh citation/star metrics, rebuild the impact-score table
 $star-refs-reviewer synthesize             # compile the notes into metds/refs/related_work.md
 $star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
 ```
@@ -356,16 +357,17 @@ With no argument the skill looks for the method in `metds/*.md`, falls back to t
 4. Expands the pool past 50 through the core papers' reference lists, the work citing them, and gap-filling queries, preferring published versions over preprints;
 5. Fetches an authoritative record per paper (DBLP → Crossref → Semantic Scholar → arXiv), caches the raw payload under `wkdrs/refs_<date>/raw/`, and transcribes it;
 6. Classifies everything into 3–8 categories derived from what was actually collected, writes `reference.bib` grouped by category, and logs every entry's source in the index;
-7. Re-fetches five entries at random and diffs them field by field before finishing.
+7. Scores every entry it can reach — citations per year, venue tier, stars and freshness of the paper's own repo, composed by fixed weights into a 0–10 impact score whose sub-signals and fetch dates land in the index — closeness still decides what is core, the score decides emphasis;
+8. Re-fetches five entries at random and diffs them field by field before finishing.
 
-In `survey` mode the same search machinery feeds a different artifact: the pool is kept instead of cut to 15, read in three tiers (8–12 papers deeply, 15–25 at abstract level, the rest from their records), organized under a taxonomy whose division axis is declared in a sentence, and written as a standalone field survey in which every claim cites a source fetched during the run. One question comes before the reading — the profile, the taxonomy axis, and the tiered list — and `involve=low` answers it by its recommendation, so a survey can run unattended end to end. It touches neither `reference.bib` nor `refs_index.md`; promoting a paper it surfaced is one append run later.
+In `survey` mode the same search machinery feeds a different artifact: the pool is kept instead of cut to 15, read in three tiers (8–12 papers deeply, 15–25 at abstract level, the rest from their records — relevance and impact score tier them together), organized under a taxonomy whose division axis is declared in a sentence, and written as a standalone field survey in which every claim cites a source fetched during the run. One question comes before the reading — the profile, the taxonomy axis, and the tiered list — and `involve=low` answers it by its recommendation, so a survey can run unattended end to end. It touches neither `reference.bib` nor `refs_index.md`; promoting a paper it surfaced is one append run later.
 
 ### Main outputs
 
 ```text
 metds/refs/<ABBREV>.md        # one analysis note per core paper (CLIP.md, DETR.md, …)
 metds/refs/reference.bib      # ≥50 entries, grouped by category, keys Year_Method_FirstAuthor
-metds/refs/refs_index.md      # core-paper table, categories, provenance, needs-manual-check
+metds/refs/refs_index.md      # core-paper table, categories, provenance, impact scores, needs-manual-check
 metds/refs/related_work.md    # related-work narrative compiled from the notes (synthesize mode)
 metds/refs/<slug>_survey.md   # standalone field survey, read in tiers (survey mode)
 ```
@@ -374,7 +376,7 @@ Each note carries a TL;DR, the problem, the method, the results, and — the rea
 
 ### The fabrication boundary
 
-A bib field is legal only if it appears in a record fetched during the run. Nothing is written from memory, no field is "corrected", no missing page range is inferred, and a paper whose record cannot be fetched is listed for manual check rather than guessed. Every entry's source URL and fetch date go into `refs_index.md`, so any field can be re-checked later — which is exactly what `$star-refs-reviewer verify` does.
+A bib field is legal only if it appears in a record fetched during the run. Nothing is written from memory, no field is "corrected", no missing page range is inferred, and a paper whose record cannot be fetched is listed for manual check rather than guessed. Every entry's source URL and fetch date go into `refs_index.md`, so any field can be re-checked later — which is exactly what `$star-refs-reviewer verify` does. The impact scores obey the same boundary: citations per year, venue tier, and repo stars are fetched, dated metrics composed by fixed arithmetic — never impressions — and `$star-refs-reviewer score` re-fetches them once they drift.
 
 Google Scholar is deliberately not a source: it has no API, gates automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — often missing pages, abbreviating venues, and preferring the preprint over the published record. The skill fetches from the databases that bibtex is generated from instead, which is both automatable and closer to the source. Read Scholar yourself if you like; the skill never scrapes it.
 
@@ -383,6 +385,7 @@ Google Scholar is deliberately not a source: it has no API, gates automated quer
 - Two moments call for it: at the coach's §2 (related work and positioning), before that section is written — the break-out the coach recommends itself — and again once §3 (core method) is clear and before decomposition, where the search profile is richest and the sub-plans still need their baselines.
 - Prefer a reported shortfall to padding: 43 entries you can defend beat 50 you cannot.
 - The *Relation to This Project* section is what makes a note worth more than the paper's own abstract — read it before writing the plan's positioning.
+- The impact score sets emphasis, never membership: the closest paper stays core with zero stars, and related-work prose leads with the high scorers a reviewer will expect. Outside CS/AI, retune the venue tiers and bins shipped with the skill.
 
 See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.claude/skills/star-refs-reviewer/SKILL.md).
 
