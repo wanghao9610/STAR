@@ -363,7 +363,7 @@ By default, the command updates these paths from STAR's `main` branch:
 - `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
 - `execs/run.sh` — the stock experiment launcher; your own edits to it are replaced, while the experiment scripts it launches, under `execs/scpts/`, are yours and are never touched
 
-The agent instructions are yours. `AGENTS.md` and `.cursor/rules/agent-instructions.mdc`, which carries its body, are not in that list and are never overwritten — edit them for your project, and compare against upstream yourself when you want a later STAR revision of them.
+The agent instructions are the project's own: `AGENTS.md` and `.cursor/rules/agent-instructions.mdc`, which carries its body, are not in that list. They follow the same rule as the hook registration configs below — installed only when missing, and never overwritten unless you pass `--force`. A project that has written its own keeps them; one that has none gets upstream's.
 
 The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 

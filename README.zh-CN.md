@@ -358,7 +358,7 @@ bash execs/update.sh
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 
-agent 协作规范归项目自己所有。`AGENTS.md` 与抄录其正文的 `.cursor/rules/agent-instructions.mdc` 不在上面这份清单里，绝不会被覆盖——按项目需要改它们即可；想要 STAR 后续对它们的修订，自行与上游对比后合并。
+agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cursor/rules/agent-instructions.mdc` 不在上面这份清单里。它们遵循与下文钩子注册配置相同的规则——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。已经写了自己那一份的项目会原样保留；一份都没有的项目则从上游取得。
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 

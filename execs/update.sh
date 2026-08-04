@@ -36,6 +36,14 @@ HOOK_CONFIGS=(
     ".codex/hooks.json"
     ".cursor/hooks.json"
 )
+# The agent instructions, in both copies a project carries: agent-instructions.mdc
+# is the AGENTS.md body verbatim, so they belong to the project together. Handled
+# like the configs above — a project that has written its own keeps them, and one
+# that has none gets them from upstream.
+INSTRUCTION_FILES=(
+    "AGENTS.md"
+    ".cursor/rules/agent-instructions.mdc"
+)
 
 log() {
     printf '[STAR update] %s\n' "$*"
@@ -66,11 +74,11 @@ Overwrite STAR-managed skills, session hooks (model-id provenance, project memor
 workflow documentation, and the stock experiment launcher execs/run.sh with files from upstream.
 The default ref is main; a branch or tag may be supplied instead. By default all of them are
 updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
-scripts run.sh launches, under execs/scpts/, are the project's own and are never touched. So are
-the agent instructions: AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
-body, are never overwritten — compare them against upstream yourself when you want its changes.
-Hook registration configs (.claude/settings.json, .codex/hooks.json, .cursor/hooks.json)
-are installed only when missing and never overwritten. Use --skill to update only
+scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
+The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
+body) and the hook registration configs (.claude/settings.json, .codex/hooks.json,
+.cursor/hooks.json) are installed only when missing and never overwritten, so a project that
+has written its own keeps them and one that has none gets them. Use --skill to update only
 the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
 
 --diff previews an update without changing anything: it lists upstream files that are new
@@ -79,10 +87,10 @@ when everything already matches, 2 when an update would change files, and 1 on e
 script can tell "an update is available" from "the check itself failed".
 
 --force updates the same paths with both refusals lifted: uncommitted changes under them
-are overwritten instead of stopping the command, and the hook registration configs above are
-overwritten instead of kept. It widens nothing — the path list is unchanged, and a file
-upstream does not have is still left alone. Combined with --diff it previews that scope
-without changing anything.
+are overwritten instead of stopping the command, and the agent instructions and hook
+registration configs above are overwritten instead of kept. It widens nothing — the path list
+is unchanged, and a file upstream does not have is still left alone. Combined with --diff it
+previews that scope without changing anything.
 
 --adopt installs the STAR skeleton into an already-started project instead of updating one.
 It runs against the current working directory, which must be a git repository root, and
@@ -205,9 +213,8 @@ elif [[ -n "${SKILL_NAME}" ]]; then
 else
     SYNC_PATHS=(
         # Which skill root each tool owns. Only this one rule: the other,
-        # agent-instructions.mdc, is the AGENTS.md body verbatim, and both copies
-        # of the agent instructions are the project's own — a project edits them
-        # and an update leaves them alone.
+        # agent-instructions.mdc, is in INSTRUCTION_FILES above, installed when
+        # missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
@@ -302,6 +309,24 @@ if [[ "${ADOPT}" == false ]]; then
             fi
         done < <(cd "${ROOT_DIR}" && find "${SYNCED[@]}" -type f 2>/dev/null | sort)
 
+        # Agent instructions: installed when missing, never overwritten.
+        if [[ -z "${SKILL_NAME}" ]]; then
+            for doc in "${INSTRUCTION_FILES[@]}"; do
+                [[ -e "${SOURCE_DIR}/${doc}" ]] || continue
+                if [[ ! -e "${ROOT_DIR}/${doc}" && ! -L "${ROOT_DIR}/${doc}" ]]; then
+                    printf '  new      %s (agent instructions)\n' "${doc}"
+                    added=$(( added + 1 ))
+                elif ! cmp -s "${SOURCE_DIR}/${doc}" "${ROOT_DIR}/${doc}"; then
+                    if [[ "${FORCE}" == true ]]; then
+                        printf '  differs  %s (agent instructions; --force overwrites it)\n' "${doc}"
+                        changed=$(( changed + 1 ))
+                    else
+                        printf '  yours    %s (differs from upstream; update never overwrites it)\n' "${doc}"
+                    fi
+                fi
+            done
+        fi
+
         # Hook registration configs: installed when missing, never overwritten.
         if [[ -z "${SKILL_NAME}" ]]; then
             for cfg in "${HOOK_CONFIGS[@]}"; do
@@ -340,11 +365,11 @@ if [[ "${ADOPT}" == false ]]; then
     # only safety net, so refuse to run when it would not hold: uncommitted edits
     # under a synced path would be destroyed with no copy anywhere.
     if git -C "${ROOT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
-        # --force also overwrites the hook registration configs, so they belong in
-        # what gets reported as about to be lost.
+        # --force also overwrites the agent instructions and the hook registration
+        # configs, so they belong in what gets reported as about to be lost.
         DIRTY_PATHS=("${SYNCED[@]}")
         if [[ "${FORCE}" == true && -z "${SKILL_NAME}" ]]; then
-            DIRTY_PATHS+=("${HOOK_CONFIGS[@]}")
+            DIRTY_PATHS+=("${INSTRUCTION_FILES[@]}" "${HOOK_CONFIGS[@]}")
         fi
         DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)"
         if [[ -n "${DIRTY}" ]]; then
@@ -361,6 +386,20 @@ if [[ "${ADOPT}" == false ]]; then
 
     tar -C "${SOURCE_DIR}" -cf "${ARCHIVE_FILE}" "${SYNCED[@]}"
     tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
+
+    if [[ -z "${SKILL_NAME}" ]]; then
+        for doc in "${INSTRUCTION_FILES[@]}"; do
+            [[ -e "${SOURCE_DIR}/${doc}" ]] || continue
+            if [[ ! -e "${ROOT_DIR}/${doc}" && ! -L "${ROOT_DIR}/${doc}" ]]; then
+                mkdir -p "$(dirname -- "${ROOT_DIR}/${doc}")"
+                cp -p "${SOURCE_DIR}/${doc}" "${ROOT_DIR}/${doc}"
+                log "Installed ${doc} (agent instructions)"
+            elif [[ "${FORCE}" == true ]]; then
+                cp -p "${SOURCE_DIR}/${doc}" "${ROOT_DIR}/${doc}"
+                log "Overwrote ${doc} (agent instructions; --force), including any changes you made to it."
+            fi
+        done
+    fi
 
     if [[ -z "${SKILL_NAME}" ]]; then
         for cfg in "${HOOK_CONFIGS[@]}"; do
@@ -446,7 +485,7 @@ if [[ -e "${ROOT_DIR}/AGENTS.md" ]] && \
    ! cmp -s "${SOURCE_DIR}/AGENTS.md" "${ROOT_DIR}/AGENTS.md"; then
     log "NOTE: your AGENTS.md was kept, so STAR's project conventions are not in it."
     log "      Compare against ${STAR_REPOSITORY} AGENTS.md and merge what you want."
-    log "      No update will do it for you: AGENTS.md is yours and is never overwritten."
+    log "      An update keeps yours too — it installs AGENTS.md only when missing; --force replaces it."
 fi
 if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     # Checked per directory, and tolerant of the glob forms (datas/*, wkdrs/**)
