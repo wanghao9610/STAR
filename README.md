@@ -357,11 +357,13 @@ bash execs/update.sh
 
 By default, the command updates these paths from STAR's `main` branch:
 
-- `AGENTS.md` and `.cursor/rules/` — the shared agent instructions and the Cursor rule that copies their body; your own edits to them are replaced
+- `.cursor/rules/skill-roots.mdc` — which skill root each tool owns, and which copy Cursor must follow
 - `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.kimi-code/skills/`
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.kimi-code/hooks/`, and `.kimi-code/hooks.example.toml` — the model-id provenance hooks
 - `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
 - `execs/run.sh` — the stock experiment launcher; your own edits to it are replaced, while the experiment scripts it launches, under `execs/scpts/`, are yours and are never touched
+
+The agent instructions are yours. `AGENTS.md` and `.cursor/rules/agent-instructions.mdc`, which carries its body, are not in that list and are never overwritten — edit them for your project, and compare against upstream yourself when you want a later STAR revision of them.
 
 The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 

@@ -352,11 +352,13 @@ bash execs/update.sh
 
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
-- `AGENTS.md` 与 `.cursor/rules/`——共享的 agent 协作规范，以及抄录其正文的 Cursor 规则；你对它们的改动会被替换
+- `.cursor/rules/skill-roots.mdc`——各个 skill 根目录归哪个工具所有，以及 Cursor 该跟随哪一份副本
 - `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
+
+agent 协作规范归项目自己所有。`AGENTS.md` 与抄录其正文的 `.cursor/rules/agent-instructions.mdc` 不在上面这份清单里，绝不会被覆盖——按项目需要改它们即可；想要 STAR 后续对它们的修订，自行与上游对比后合并。
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 

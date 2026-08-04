@@ -62,12 +62,13 @@ Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
        bash execs/update.sh --diff [ref] [--skill NAME] [--force]
        bash update.sh [ref] --adopt
 
-Overwrite STAR-managed agent instructions (AGENTS.md and the Cursor rule that copies it),
-skills, session hooks (model-id provenance, project memory), research workflow documentation,
-and the stock experiment launcher execs/run.sh with files from upstream. The default ref is
-main; a branch or tag may be supplied instead. By default all of them are updated, so local
-edits to AGENTS.md and to execs/run.sh are replaced along with everything else; the experiment
-scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
+Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), research
+workflow documentation, and the stock experiment launcher execs/run.sh with files from upstream.
+The default ref is main; a branch or tag may be supplied instead. By default all of them are
+updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
+scripts run.sh launches, under execs/scpts/, are the project's own and are never touched. So are
+the agent instructions: AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
+body, are never overwritten — compare them against upstream yourself when you want its changes.
 Hook registration configs (.claude/settings.json, .codex/hooks.json, .cursor/hooks.json)
 are installed only when missing and never overwritten. Use --skill to update only
 the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
@@ -203,9 +204,11 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     fi
 else
     SYNC_PATHS=(
-        # The shared agent instructions and the Cursor rule that copies their body.
-        "AGENTS.md"
-        ".cursor/rules"
+        # Which skill root each tool owns. Only this one rule: the other,
+        # agent-instructions.mdc, is the AGENTS.md body verbatim, and both copies
+        # of the agent instructions are the project's own — a project edits them
+        # and an update leaves them alone.
+        ".cursor/rules/skill-roots.mdc"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
@@ -256,11 +259,10 @@ if [[ "${ADOPT}" == false ]]; then
         git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
-        # non-cone mode; the tar below still copies only SYNC_PATHS — execs brings
-        # execs/scpts/ along here, and none of it is copied out. AGENTS.md is
-        # absent on purpose: cone mode rejects a file argument here, and the clone
-        # above already checks out every root file. Should a checkout ever miss it,
-        # the SYNCED loop below stops with "Upstream ref is missing AGENTS.md".
+        # non-cone mode, so a single file in SYNC_PATHS arrives through its
+        # directory — .cursor covers .cursor/rules/skill-roots.mdc. The tar below
+        # still copies only SYNC_PATHS: execs brings execs/scpts/ along here, and
+        # none of it is copied out.
         git -C "${SOURCE_DIR}" sparse-checkout set \
             .agents .claude .codex .cursor .kimi-code docs/mds/star-workflow docs/srcs execs
     fi
@@ -444,7 +446,7 @@ if [[ -e "${ROOT_DIR}/AGENTS.md" ]] && \
    ! cmp -s "${SOURCE_DIR}/AGENTS.md" "${ROOT_DIR}/AGENTS.md"; then
     log "NOTE: your AGENTS.md was kept, so STAR's project conventions are not in it."
     log "      Compare against ${STAR_REPOSITORY} AGENTS.md and merge what you want."
-    log "      Adopt keeps it, but a later 'bash execs/update.sh' overwrites it."
+    log "      No update will do it for you: AGENTS.md is yours and is never overwritten."
 fi
 if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     # Checked per directory, and tolerant of the glob forms (datas/*, wkdrs/**)
