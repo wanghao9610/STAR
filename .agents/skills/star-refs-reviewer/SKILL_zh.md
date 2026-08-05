@@ -39,8 +39,8 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ## 核心原则
 
-1. **零编造；每个字段都有抓取来源。** 一个 bib 字段合法的唯一条件是：它出现在本次运行中机器抓回的记录里——DBLP → Crossref → Semantic Scholar → arXiv，先命中者生效，已发表版本优先于预印本。绝不凭记忆写字段，绝不"顺手修正"记录里的内容，绝不推断补齐缺失的页码。抓不到记录的论文**不进 `reference.bib`**，进待人工核对清单。抓取的优先顺序、端点、匹配规则与允许改动的封闭清单见 `references/source_policy_zh.md`。Google Scholar 抓不了（没有 API、CAPTCHA 拦截，且它的 bibtex 本身就是从上述数据库机器生成的）——绝不爬它。
-2. **每条都可复查。** 每份抓回的原始内容**先**缓存到 `wkdrs/refs_<date>/raw/` 再使用，并在 `metds/refs/refs_index.md` 登记 citekey → 来源、记录 URL、抓取日期。收尾前随机重抓 5 条逐字段 diff；对不上意味着那一批要重查，而不是找理由解释过去。
+1. **零编造；每个字段都有抓取来源。** 一个 bib 字段合法的唯一条件是：它出现在本次运行中机器抓回的记录里——DBLP → Crossref → Semantic Scholar → arXiv，先命中者生效，已发表版本优先于预印本。绝不凭记忆写字段，绝不"顺手修正"记录里的内容，绝不推断补齐缺失的页码。抓不到记录的论文**绝不成为一条条目**：它以注释行的形式写进 `reference.bib` 末尾的 `%% Needs manual check` 块——标题加试过什么，绝不是一条注释掉的条目——细节记进 index 的 §6。抓取的优先顺序、端点、匹配规则与允许改动的封闭清单见 `references/source_policy_zh.md`。Google Scholar 抓不了（没有 API、CAPTCHA 拦截，且它的 bibtex 本身就是从上述数据库机器生成的）——绝不爬它。
+2. **每条都可复查。** 每份抓回的原始内容**先**缓存到 `wkdrs/refs_<date>/raw/` 再使用，并在 `metds/refs/refs_index.md` 登记 citekey → 来源、记录 URL、抓取日期。同一份出处也写在条目正上方一行——`% src: <记录 URL> (fetched YYYY-MM-DD)`，手工加的条目写 `% src: user-supplied`——这样 bib 被复制进写作仓库时，出处跟着条目一起走；确切形式、以及这个文件里的注释为什么一个 `@` 都不能有，见 `references/source_policy_zh.md`。收尾前随机重抓 5 条逐字段 diff；对不上意味着那一批要重查，而不是找理由解释过去。
 3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）用一个直接问题交给用户——用户可以保留多个；推荐 5–10 条并标出——只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下同一个直觉一次盖住整份文档的形状：一个直接问题带上检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
 4. **近比有名重要；详略由分数定。** 核心论文按与本方法的直接重叠度和定位价值挑选——不看引用数，不看新旧；每条候选都带一句话理由。标准与 3–8 类分类规则见 `references/refs_rubric_zh.md`。在这个选择之外，每条条目另带一个**影响力分**——引用速度、发表档位、代码采用度的 0–10 加权合成，按评分表"影响力分"一节的固定算式、只从本轮抓取并注明日期的指标算出，绝无印象成分。分数决定下游的详略——候选表突出什么、相关工作行文先写什么——绝不决定什么算核心；唯 survey 模式把它计入遴选（Step 10.3）：领域地图本就该给地标性工作位置。
 5. **边做边写；重跑只补缺口。** 每篇笔记写完立刻写入文件，bib 按批追加——绝不攒在聊天里。重跑先读 `metds/refs/` 里已有的东西再补缺：绝不重写已核验的条目，绝不重读已有笔记的论文，绝不把 `reference.bib` 推倒重生成。
@@ -89,15 +89,15 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ### Step 5：抓取与转录
 
-逐篇：按 `references/source_policy_zh.md` 的优先顺序，把原始内容缓存到 `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`，确认记录匹配（标题**且**第一作者姓氏**且**年份 ±1——只有一个字段对上不算匹配），然后转录，只改 citekey 和封闭清单允许的规范化。每约 10 条追加进 `reference.bib`，同时在 index 的 provenance 表里逐行登记。抓不到、有歧义、重试后仍被限流 → 进待人工核对清单，绝不猜。
+逐篇：按 `references/source_policy_zh.md` 的优先顺序，把原始内容缓存到 `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>`，确认记录匹配（标题**且**第一作者姓氏**且**年份 ±1——只有一个字段对上不算匹配），然后转录，只改 citekey 和封闭清单允许的规范化。每约 10 条追加进 `reference.bib`，每条置于它自己的 `% src:` 行之下，同时在 index 的 provenance 表里逐行登记——两处的 URL 与日期是同一份。抓不到、有歧义、重试后仍被限流 → `%% Needs manual check` 块里一行、index §6 里一条，绝不猜。
 
 ### Step 6：分类并写 reference.bib
 
-从实际收集到的这批文献的语义里归纳 3–8 个类别——不是事先选好的分类体系——命名要具体，每条恰好归入一类；确实两头不靠的进最后一个 cross-cutting 块，占比封顶约 10%。`metds/refs/reference.bib` 按类别分组写出，每组头部用一个 `%%` 块注释写明类别名、条目数和一行范围说明；组内按年份升序、再按 citekey 排序。评分表够得着的条目都打上影响力分（`references/refs_rubric_zh.md`"影响力分"一节）：引用与发表两个分量覆盖全库，用的是本轮已抓取缓存的记录；代码分量只给论文自己页面挂出仓库的条目（Step 3 的核心论文、被读过的追加论文）——其余条目带残缺标记，绝不为凑分去探测，更不猜数。分数绝不写进 `reference.bib`——它是索引里的信号，不是 bib 字段。然后把 `assets/refs_index_template_zh.md`（英文：`assets/refs_index_template.md`）填成 `metds/refs/refs_index.md`，子指标与抓取日期落在其 §5（影响力评分）。
+从实际收集到的这批文献的语义里归纳 3–8 个类别——不是事先选好的分类体系——命名要具体，每条恰好归入一类；确实两头不靠的进最后一个 cross-cutting 块，占比封顶约 10%。`metds/refs/reference.bib` 按类别分组写出，每组头部用一个 `%%` 块注释写明类别名、条目数和一行范围说明；组内按年份升序、再按 citekey 排序，每条仍带着写它时那行 `% src:`——重新分组时注释跟着条目一起走；`%% Needs manual check` 块排在最后，所有类别块之后。评分表够得着的条目都打上影响力分（`references/refs_rubric_zh.md`"影响力分"一节）：引用与发表两个分量覆盖全库，用的是本轮已抓取缓存的记录；代码分量只给论文自己页面挂出仓库的条目（Step 3 的核心论文、被读过的追加论文）——其余条目带残缺标记，绝不为凑分去探测，更不猜数。分数绝不写进 `reference.bib`——它是索引里的信号，不是 bib 字段。然后把 `assets/refs_index_template_zh.md`（英文：`assets/refs_index_template.md`）填成 `metds/refs/refs_index.md`，子指标与抓取日期落在其 §5（影响力评分）。
 
 ### Step 7：自查
 
-随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `$star-env-builder` 的活）。再从 index §5 登记的子指标复算 3 条影响力分；有一条总分对不上，那张表就逐行重算。审计结果记入 index 的 §7。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
+随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空、每条条目都有一行 `% src:` 且其 URL 与日期与 index 那一行一致、`%% Needs manual check` 块里没有哪一篇已经变成了条目；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `$star-env-builder` 的活）。再从 index §5 登记的子指标复算 3 条影响力分；有一条总分对不上，那张表就逐行重算。审计结果记入 index 的 §7。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
 
 ### Step 8：聊天摘要
 
@@ -138,7 +138,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 ## 状态与文件规则
 
 - 写入范围限定在 `metds/refs/**`（笔记、`reference.bib`、`refs_index.md`、`related_work.md`、`<slug>_survey.md`）与运行缓存 `wkdrs/refs_<date>/raw/**`。绝不碰 `metds/plans/*`、`metds/*.md` 方法笔记、`metds/codearc.md`、`${CODE_NAME}/`、`.env`、`UPSTREAM.md`、`LICENSE` / `CITATION*`。
-- `reference.bib` 只追加与重组，绝不整体重新生成：已核验的条目逐字节保留，除非 `verify` 证明它错了。用户手工加的条目绝不删——重新归类，没有抓取记录时把 provenance 标为 `user-supplied`。
+- `reference.bib` 只追加与重组，绝不整体重新生成：已核验的条目逐字节保留，除非 `verify` 证明它错了。用户手工加的条目绝不删——重新归类，没有抓取记录时给它一行 `% src: user-supplied`。早于 `% src:` 行的旧条目，在下一次运行碰到这个文件时按它的 index 出处行补上——只从那一行抄，绝不另行拼凑；连 index 行也没有的，进待人工核对清单。
 - 一篇论文一份笔记。重跑跳过已有笔记的论文，除非用户要求刷新。
 - `related_work.md` 只编译、不发明：每条刻画都能追溯到对应论文的笔记（没有笔记的条目只能以其抓取记录的事实被提到）。有笔记的论文一律以指向该笔记的链接出现（`[<缩写>](<缩写>.md)`），没有笔记的写纯文本——链接等于宣称有一篇笔记，所以它必须真的打得开。带 `type:` + `generated:` frontmatter 的生成文件，须先批准节级变更清单才能覆写；人写的文件绝不凭 diff 覆写。`<slug>_survey.md` 在自己的深度上守同一套规矩：每条刻画都能追溯到本轮抓取的来源，记录层（record）的论文只被点名、绝不刻画，可否覆写也由同一条 frontmatter 规则判定。
 - 日期必须真实（规约 §4）：抓取日期就是实际抓取的那天。

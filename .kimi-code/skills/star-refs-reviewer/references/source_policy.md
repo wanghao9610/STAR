@@ -4,7 +4,7 @@ Every field in `reference.bib` traces to a record fetched during this run. This 
 
 ## The one hard rule
 
-A bib field is legal only if it appears in a machine-fetched record from a source below. Never write a field from model memory. Never "correct" a field the record got wrong. Never fill a missing field by inference — not the year, not the pages, not the publisher. A paper whose record cannot be fetched **does not enter `reference.bib`**; it goes to the index's Needs-manual-check list. An entry that is 90% transcribed and 10% remembered is a fabricated entry.
+A bib field is legal only if it appears in a machine-fetched record from a source below. Never write a field from model memory. Never "correct" a field the record got wrong. Never fill a missing field by inference — not the year, not the pages, not the publisher. A paper whose record cannot be fetched **never becomes an entry**; it is named as a comment line in the file's `%% Needs manual check` block and detailed in the index's Needs-manual-check section. An entry that is 90% transcribed and 10% remembered is a fabricated entry.
 
 Google Scholar is not a source here: it has no API, blocks automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — frequently missing pages, using abbreviated venue strings, and preferring the preprint over the published record. A human may read it; this skill never scrapes it. The databases below are what a Scholar bibtex is generated *from*, so they are both fetchable and closer to the source.
 
@@ -37,11 +37,11 @@ A record matches only when all three agree:
 - **first-author surname**;
 - **year** — ±1, to absorb the arXiv-to-proceedings gap.
 
-One or two fields agreeing is not a match — near-duplicate titles across a workshop paper, its extension, and a survey are common. Ambiguous → do not guess: list the candidates with their URLs in Needs-manual-check.
+One or two fields agreeing is not a match — near-duplicate titles across a workshop paper, its extension, and a survey are common. Ambiguous → do not guess: list the candidates with their URLs in the index's Needs-manual-check section, and name the paper in the bib's `%% Needs manual check` block.
 
 ## Resolving a title
 
-`add` may name a paper by title alone, so the title is all there is to match on. Resolution uses the search endpoints above (DBLP search, Crossref `query.bibliographic`, Semantic Scholar search) and the matching rule's normalization: case- and punctuation-insensitive. The input resolves when exactly one paper's record title equals it — the full title, or the main title before a subtitle's colon. Several distinct papers matching (a workshop paper and its extension are the classic pair), or best hits that only nearly match → ask, one direct question listing each candidate's title, venue, year, and URL; found nowhere → Needs-manual-check. A resolved title is from then on just a paper: its record goes through the search order, the three-field matching rule, and published-over-preprint like any other.
+`add` may name a paper by title alone, so the title is all there is to match on. Resolution uses the search endpoints above (DBLP search, Crossref `query.bibliographic`, Semantic Scholar search) and the matching rule's normalization: case- and punctuation-insensitive. The input resolves when exactly one paper's record title equals it — the full title, or the main title before a subtitle's colon. Several distinct papers matching (a workshop paper and its extension are the classic pair), or best hits that only nearly match → ask, one direct question listing each candidate's title, venue, year, and URL; found nowhere → the `%% Needs manual check` block and the index's Needs-manual-check section. A resolved title is from then on just a paper: its record goes through the search order, the three-field matching rule, and published-over-preprint like any other.
 
 ## Published over preprint
 
@@ -57,6 +57,31 @@ Prefer the published record whenever one exists; the arXiv id survives only if t
 - Collision → append a lowercase letter (`2021_CLIP_Radforda`). Keys are unique across the file.
 
 The citekey is the only field you author. Everything else is transcribed.
+
+## Provenance comment — `% src:`
+
+One line directly above each entry, carrying the same origin the index's Provenance table logs:
+
+- A fetched record: `% src: <record URL> (fetched YYYY-MM-DD)` — the URL and the date identical to that entry's index row.
+- An entry the user added by hand, with no fetched record: `% src: user-supplied`.
+
+Strip any `mailto` parameter from the URL before writing it, because no comment in this file may contain `@`. BibTeX scans for that character outside entries too, and reads `@article` inside a `%` line as the start of a new record, silently swallowing the entry beneath it — the bib parses, the key vanishes, and the failure surfaces as an undefined citation far from its cause. Name a type as "an article-type entry", never as the literal.
+
+The comment belongs to the entry, not to its place in the file: reclassifying moves the two together, and an entry copied out of here — the writing-side companion STAGE merges these byte for byte — arrives with its origin attached.
+
+## Needs-manual-check block — `%% Needs manual check`
+
+A paper with no fetchable authoritative record is not written as an entry; it is written as a comment line in this block. The block is last in the file, after every category block:
+
+```text
+%% Needs manual check — 2 papers, no authoritative record as of 2026-08-05
+% "Learning to Segment Everything with Less" — no matching record in DBLP / Crossref / Semantic Scholar / arXiv; see refs_index.md section 6
+% "Prompt Tuning for Dense Prediction" — three near-identical candidate titles, undecidable; candidates and URLs in refs_index.md section 6
+```
+
+One line per paper: the title, plus what was tried or what it is stuck on. Never a commented-out entry — a `%` line holding `@misc{` is exactly the character the section above warns about, and a commented-out entry is both the form most likely to be reached for and the most expensive one to write. Keep URLs out for the same reason; the detail lives in the index's §6 and the line points there.
+
+Once a record is fetched the paper becomes a real entry and its line leaves the block. It is never in both places.
 
 ## Normalization — the closed list
 
@@ -97,7 +122,8 @@ The impact score (`references/refs_rubric.md`, Impact score) is computed from th
 
 ## Self-audit before finishing
 
-1. Every citekey in `reference.bib` has a cached payload in the run dir **and** a provenance row in `refs_index.md`.
+1. Every citekey in `reference.bib` has a cached payload in the run dir **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date.
 2. Re-fetch 5 entries at random; diff field-by-field against the file. Any mismatch → correct the file to match the source, then re-check that entry's whole batch.
 3. Parse the file with `bibtexparser` through the `.env` conda env **if it is already installed** (never install it — that is `/skill:star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
 4. No entry has an empty required field; no key appears twice.
+5. No paper in the `%% Needs manual check` block also appears as an entry; no line in that block contains `@`.

@@ -355,8 +355,8 @@ With no argument the skill looks for the method in `metds/*.md`, falls back to t
 2. Runs 5–8 queries across web search and the Semantic Scholar / DBLP / arXiv endpoints, then brings about 15 ranked candidates to you and reads only the 5–10 you keep;
 3. Reads each confirmed paper (abstract, intro, method, and the main results table at minimum) into an analysis note, written to disk immediately;
 4. Expands the pool past 50 through the core papers' reference lists, the work citing them, and gap-filling queries, preferring published versions over preprints;
-5. Fetches an authoritative record per paper (DBLP → Crossref → Semantic Scholar → arXiv), caches the raw payload under `wkdrs/refs_<date>/raw/`, and transcribes it;
-6. Classifies everything into 3–8 categories derived from what was actually collected, writes `reference.bib` grouped by category, and logs every entry's source in the index;
+5. Fetches an authoritative record per paper (DBLP → Crossref → Semantic Scholar → arXiv), caches the raw payload under `wkdrs/refs_<date>/raw/`, and transcribes it — a paper with no fetchable record is named in the bib's `%% Needs manual check` block instead of guessed at;
+6. Classifies everything into 3–8 categories derived from what was actually collected, writes `reference.bib` grouped by category with a `% src:` provenance line above every entry, and logs every entry's source in the index;
 7. Scores every entry it can reach — citations per year, venue tier, stars and freshness of the paper's own repo, composed by fixed weights into a 0–10 impact score whose sub-signals and fetch dates land in the index — closeness still decides what is core, the score decides emphasis;
 8. Re-fetches five entries at random and diffs them field by field before finishing.
 
@@ -366,7 +366,7 @@ In `survey` mode the same search machinery feeds a different artifact: the pool 
 
 ```text
 metds/refs/<ABBREV>.md        # one analysis note per core paper (CLIP.md, DETR.md, …)
-metds/refs/reference.bib      # ≥50 entries, grouped by category, keys Year_Method_FirstAuthor
+metds/refs/reference.bib      # ≥50 entries, grouped by category, % src: per entry, keys Year_Method_FirstAuthor
 metds/refs/refs_index.md      # core-paper table, categories, provenance, impact scores, needs-manual-check
 metds/refs/related_work.md    # related-work narrative compiled from the notes (synthesize mode)
 metds/refs/<slug>_survey.md   # standalone field survey, read in tiers (survey mode)

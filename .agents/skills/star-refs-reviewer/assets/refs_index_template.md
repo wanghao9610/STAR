@@ -26,7 +26,8 @@
 ## 4. Provenance
 
 <!-- One row per reference.bib entry — 100% coverage, no exceptions. "Source" is the record the
-     fields were transcribed from. Mark coined abbreviations (†) and preprint-only entries (‡). -->
+     fields were transcribed from. Mark coined abbreviations (†) and preprint-only entries (‡).
+     The record URL and fetch date here are what that entry's `% src:` line in reference.bib says. -->
 
 | Citekey | Source | Record URL | Fetched |
 | --- | --- | --- | --- |
@@ -49,7 +50,8 @@
 <!-- Papers no authoritative record could be found for; ambiguous matches (list the candidates and
      their URLs); records whose fields look wrong but were transcribed anyway rather than silently
      corrected. Each with what to check and where. Write "none" when clean — never omit the
-     section. -->
+     section. This is the detailed side: reference.bib's `%% Needs manual check` block carries one
+     line per paper pointing here. -->
 
 ## 7. Self-Audit
 

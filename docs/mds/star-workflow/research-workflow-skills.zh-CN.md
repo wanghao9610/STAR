@@ -355,8 +355,8 @@ $star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<s
 2. 在网页搜索与 Semantic Scholar / DBLP / arXiv 端点上跑 5–8 组检索式，然后把约 15 条排好序的候选交给你，只精读你留下的 5–10 篇；
 3. 逐篇精读（至少摘要、intro、方法和主结果表）写成分析笔记，写完立刻写入文件；
 4. 通过核心论文的参考文献表、引用它们的后续工作和补充检索把池子扩到 50 篇以上，已发表版本优先于预印本；
-5. 逐篇抓权威记录（DBLP → Crossref → Semantic Scholar → arXiv），原始内容缓存到 `wkdrs/refs_<date>/raw/`，然后转录；
-6. 按实际收上来的内容归纳 3–8 个类别，`reference.bib` 按类别分组写出，每条的来源登记进 index；
+5. 逐篇抓权威记录（DBLP → Crossref → Semantic Scholar → arXiv），原始内容缓存到 `wkdrs/refs_<date>/raw/`，然后转录——抓不到记录的论文写进 bib 的 `%% Needs manual check` 块，而不是猜；
+6. 按实际收上来的内容归纳 3–8 个类别，`reference.bib` 按类别分组写出，每条条目上方带一行 `% src:` 出处注释，每条的来源登记进 index；
 7. 给够得着的条目打影响力分——年均引用、发表档位、官方仓库的星标与活跃度，按固定权重合成 0–10 的分数，子指标连同抓取日期落在 index 里——近不近仍决定谁是核心，分数决定详略；
 8. 收尾前随机重抓 5 条，逐字段 diff。
 
@@ -366,7 +366,7 @@ $star-refs-reviewer survey <topic>         # 把一个领域画成 metds/refs/<s
 
 ```text
 metds/refs/<缩写>.md          # 每篇核心论文一份分析笔记（CLIP.md、DETR.md……）
-metds/refs/reference.bib      # ≥50 条，按类别分组，key 为 Year_Method_FirstAuthor
+metds/refs/reference.bib      # ≥50 条，按类别分组，每条带 % src:，key 为 Year_Method_FirstAuthor
 metds/refs/refs_index.md      # 核心论文表、类别、出处登记、影响力评分、待人工核对清单
 metds/refs/related_work.md    # 由笔记合成的相关工作叙述（synthesize 模式）
 metds/refs/<slug>_survey.md   # 分层阅读写成的独立领域综述（survey 模式）
