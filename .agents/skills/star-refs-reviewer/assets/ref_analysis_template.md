@@ -34,13 +34,18 @@ model_trail:                    # append-only: one entry per write session, neve
 
 <!-- The core insight in one sentence, then the components or pipeline. Only the formulas the method depends on,
      symbols defined. Name the training data and the objective. Separate what is new here from what
-     is inherited from prior work. -->
+     is inherited from prior work. A claim about what the method requires or cannot do — the
+     kind a later paper positions itself against — names where the paper states it: a section,
+     a table, or a short quote. -->
 
 ## 4. Experiments & Results
 
 <!-- Benchmarks and splits, the comparison set, headline numbers as the paper reports them
      (metric + dataset + number), and the ablation that carries the argument. Do not compare across
-     incomparable settings. -->
+     incomparable settings. Write each headline number as one self-contained line, the number
+     travelling with its dataset, metric, and setting, so it survives being quoted without
+     this section around it — that is the form a writing repository's citation audit checks a
+     manuscript sentence against, and a number stranded from its setting backs nothing. -->
 
 ## 5. Relation to This Project ★
 
