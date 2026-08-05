@@ -55,12 +55,18 @@ fail() {
 }
 
 # Names of the STAR hooks a kept registration config does not register. Empty
-# when it registers both. A config predating either hook keeps its own entries —
-# update never overwrites it — so this is what turns a silent gap into a line.
+# when it registers every hook that applies to it. A config predating a hook
+# keeps its own entries — update never overwrites it — so this is what turns a
+# silent gap into a line.
 missing_hooks() { # $1 = registration config path
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
     grep -q 'star_memory\.sh' "$1" 2>/dev/null || out="${out:+${out}, }project memory"
+    # The involve gate answers a Claude permission prompt, so Claude's config is
+    # the only one it applies to.
+    if [[ "$1" == *"/.claude/settings.json" ]]; then
+        grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate"
+    fi
     printf '%s' "${out}"
 }
 
