@@ -3,13 +3,13 @@ name: star-expt-digest
 description: >-
   Summarize what the experiment programme has done lately, in date order. No argument resumes from the
   previous digest; a PLAN_NAME covers that node's whole family — ancestors for context, every descendant
-  for evidence — unbounded in time; `<N>d` or a date covers a window; `all` covers everything. Collects
-  each in-scope run's newest EXPT_ANALYSIS report, tabulates verdicts and headline metrics with
-  provenance, derives what moved since the previous digest, gathers plan-level findings and kill-criteria
-  hits, notes plans created or revised, and lists gaps. A run with no analysis report is read raw for a
-  provisional, unverified line only — never scored, never quoted as a result. Writes one dated digest to
-  wkdrs/digests/. Read-only otherwise: never edits plans, exec_status, logs, or the results table, and
-  never re-runs an experiment. Use when the user runs /star-expt-digest, or wants a periodic summary of
+  for evidence; `<N>d` or a date covers a window; `all` covers everything. Collects each in-scope run's
+  newest EXPT_ANALYSIS report, tabulates verdicts and headline metrics with provenance, derives what
+  moved since the last one, gathers plan-level findings and kill-criteria hits, notes plans created or
+  revised, and lists gaps. A run with no analysis report is read raw for a provisional line only — never
+  scored, never quoted as a result. Writes one dated digest to wkdrs/digests/. Read-only otherwise: never
+  edits plans, exec_status, logs, or the results table, and never re-runs an experiment. Use when the
+  user runs /star-expt-digest, when a run names it as the next action, or wants a periodic summary of
   experiment progress, what happened since last time, or progress-report material. Bilingual (en/zh).
 ---
 

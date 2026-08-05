@@ -1,17 +1,17 @@
 ---
 name: star-refs-reviewer
 description: >-
-  Build an auditable related-work base for the method: 5–10 close papers read into analysis notes, plus a
-  classified reference.bib of ≥50 verified entries. No argument finds the method in
-  metds/ and runs the full pass, resuming if metds/refs/ exists; a PLAN_NAME or topic scopes the search;
-  `verify` re-fetches and diffs every entry; `organize` re-classifies the bib offline; `synthesize`
-  compiles the notes into a related-work narrative; `survey` reads a topic in tiers into its own survey
-  file; `score` refreshes the impact scores; an arXiv id, DOI, or URL appends one paper, `add` several.
-  Every bib field is transcribed from a record fetched during the run and logged with its source URL —
-  nothing from memory, and a paper with no fetchable record is listed for manual check, never guessed.
-  Use when the user invokes $star-refs-reviewer or asks Codex for a literature review / related-work
-  survey, per-paper analyses, a reference.bib, or related work scored or organized. Supports bilingual
-  English/Chinese work.
+  Build an auditable related-work base: 5–10 close papers read into analysis notes, plus a classified
+  reference.bib of ≥50 verified entries. No argument finds the method in metds/ and runs the full pass,
+  resuming if metds/refs/ exists; a PLAN_NAME or topic scopes the search; `verify` re-fetches and diffs
+  every entry; `organize` re-classifies the bib; `synthesize` compiles the notes into a related-work
+  narrative; `survey` reads a topic in tiers into its own file; `score` refreshes the impact scores; an
+  arXiv id, DOI, or URL appends one paper, `add` several. Every bib field is transcribed from a record
+  fetched during the run and logged with its source URL — nothing from memory, and a paper with no
+  fetchable record is listed for manual check. Use when the user invokes $star-refs-reviewer, when a run
+  names it as the next action, or asks Codex for a literature review / related-work survey, per-paper
+  analyses, a reference.bib, or related work scored or organized. Supports bilingual English/Chinese
+  work.
 ---
 
 # Research Refs Reviewer

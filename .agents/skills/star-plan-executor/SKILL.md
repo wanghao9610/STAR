@@ -1,15 +1,15 @@
 ---
 name: star-plan-executor
 description: >-
-  Execute a leaf research sub-plan from metds/plans/ against the project code. Orient in the
-  codebase using .env, turn the sub-plan into a concrete checked execution plan, implement it with
-  surgical changes, run light validation, keep intermediate working files under a plan-specific
-  tasks directory, record progress under a run-specific wkdrs directory, and stop before
-  long or costly experiments by handing the exact command to the user. Writes user-confirmed
-  deviations and values settled by execution back into the sub-plan and adds a Revision History entry, keeping the plan file true to
-  what was actually executed. Use when the user invokes
-  $star-plan-executor or asks Codex to execute, implement, carry out, or run a research sub-plan.
-  Supports resume across sessions and bilingual English/Chinese work.
+  Execute a leaf research sub-plan from metds/plans/ against the project code. Orient in the codebase
+  using .env, turn the sub-plan into a concrete checked execution plan, implement it with surgical
+  changes, run light validation, keep intermediate working files under a plan-specific tasks directory,
+  record progress under a run-specific wkdrs directory, and stop before long or costly experiments by
+  handing the exact command to the user. Writes user-confirmed deviations and values settled by execution
+  back into the sub-plan and adds a Revision History entry, keeping the plan file true to what was
+  actually executed. Use when the user invokes $star-plan-executor, when a run names it as the next
+  action, or asks Codex to execute, implement, carry out, or run a research sub-plan. Supports resume
+  across sessions and bilingual English/Chinese work.
 ---
 
 # Research Plan Executor

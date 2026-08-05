@@ -1,17 +1,16 @@
 ---
 name: star-code-reviewer
 description: >-
-  Review code against the project's written conventions and, when scoped to a plan, what the plan
-  promised. No argument reviews all of ${CODE_NAME}/ (from .env); a PLAN_NAME (slug / prefix / filename)
-  reviews that plan's files plus conformance (§3 tasks, §4 deliverables, §5 done-criterion); a path
-  reviews that path; `diff` or a git range reviews changed files. Gathers static evidence through the .env
-  conda env (installs no tools), scores findings on a six-dimension rubric (docstrings, naming,
-  simplicity, conventions, correctness, conformance), re-verifies blocker/major findings before reporting,
-  writes the report under wkdrs/, then offers a per-item-approved fix pass for mechanical,
-  behavior-preserving issues — feature gaps route to star-plan-executor, plan divergence to
-  star-plan-reviser, restructuring to star-code-architect. Use when the user invokes $star-code-reviewer
-  or asks Codex to review code quality or docstrings, or verify a plan's implementation in code. Supports
-  bilingual English/Chinese work.
+  Review code against the project's conventions and, when scoped to a plan, what it promised. No argument
+  reviews all of ${CODE_NAME}/; a PLAN_NAME (slug / prefix / filename) reviews that plan's files plus
+  conformance (§3 tasks, §4 deliverables, §5 done-criterion); a path reviews that path; `diff` or a git
+  range reviews changed files. Gathers static evidence through the .env env (installs no tools), scores
+  findings on a six-dimension rubric (docstrings, naming, simplicity, conventions, correctness,
+  conformance), re-verifies blocker/major findings before reporting, writes the report under wkdrs/, then
+  offers a per-item-approved fix pass for mechanical, behavior-preserving issues — feature gaps route to
+  star-plan-executor, divergence to star-plan-reviser, restructuring to star-code-architect. Use when the
+  user invokes $star-code-reviewer, when a run names it as the next action, or asks Codex to review code
+  quality or docstrings, or verify a plan's implementation. Supports bilingual English/Chinese work.
 ---
 
 # Research Code Reviewer

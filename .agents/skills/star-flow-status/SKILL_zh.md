@@ -1,12 +1,10 @@
 ---
 name: star-flow-status
 description: >-
-  只读总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的
-  章节状态、children、depends_on 与 exec_status（并读 wkdrs/<run>/EXEC_LOG.md 获取步级进度），然后渲染
-  带状态的树、进度汇总、唯一的下一步动作，以及任何失配。同时检查周边阶段——想法、文献、代码审查、
-  实验分析、方法文档——找出已完成工作里缺失或过期的后续环节。绝不写任何文件。只要用户运行
-  $star-flow-status，或询问研究/计划的状态 / 总览 / 进度、接下来该做什么或执行什么、还欠着什么、某计划或
-  其子计划进展到哪、想看计划树时，都应使用本 skill。Bilingual（中/英）。
+  只读总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的 章节状态、children、depends_on 与
+  exec_status（并读 wkdrs/<run>/EXEC_LOG.md 获取步级进度），然后渲染 带状态的树、进度汇总、唯一的下一步动作，以及任何失配。同时检查周边阶段——想法、文献、代码审查、
+  实验分析、方法文档——找出已完成工作里缺失或过期的后续环节。绝不写任何文件。只要用户运行 $star-flow-status、一次运行点名它是下一步动作，或询问研究/计划的状态 / 总览 /
+  进度、接下来该做什么或执行什么、还欠着什么、某计划或 其子计划进展到哪、想看计划树时，都应使用本 skill。Bilingual（中/英）。
 ---
 
 # Research Flow Status — 只读总览

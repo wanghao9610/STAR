@@ -1,14 +1,12 @@
 ---
 name: star-plan-executor
 description: >-
-  执行 star-plan-decomposer 产出、存放在 metds/plans/ 下的某个叶子执行子计划。先从 .env 读取
-  ${CODE_NAME} 勘察代码库，建立"现状 vs 要求"缺口清单；切换到 Cursor plan 模式，把子计划的任务分解细化成一份
-  可执行 plan，经用户批准后，逐步用 Task 派 subagent（每步一个）去修改代码、跑轻量验证——在重实验
-  （长时/多卡训练、大开销 API 调用）前停下，把命令备好交回用户。执行过程的中间工作文件放到
-  tasks/<plan-name>/，持久执行状态及生成的 run 产物 记入 wkdrs/<run>/，支持跨 session 续跑。经用户确认的偏差、以及执行敲定的值会同步写回子计划并追加一条 Revision History 条目，让计划文件与实际
-  执行保持一致。只要用户运行 /star-plan-executor，或想执行 / 实现 / 跑通某个子计划、
-  把执行计划变成代码和结果、开始做计划描述的工作时，都应使用本 skill。Bilingual（中/英）——用户用英文
-  描述 "execute / implement / run a sub-plan" 时同样触发。
+  执行 star-plan-decomposer 产出、存放在 metds/plans/ 下的某个叶子执行子计划。先从 .env 读取 ${CODE_NAME} 勘察代码库，建立"现状 vs
+  要求"缺口清单；切换到 Cursor plan 模式，把子计划的任务分解细化成一份 可执行 plan，经用户批准后，逐步用 Task 派 subagent（每步一个）去修改代码、跑轻量验证——在重实验
+  （长时/多卡训练、大开销 API 调用）前停下，把命令备好交回用户。执行过程的中间工作文件放到 tasks/<plan-name>/，持久执行状态及生成的 run 产物 记入
+  wkdrs/<run>/，支持跨 session 续跑。经用户确认的偏差、以及执行敲定的值会同步写回子计划并追加一条 Revision History 条目，让计划文件与实际 执行保持一致。只要用户运行
+  /star-plan-executor、一次运行点名它是下一步动作，或想执行 / 实现 / 跑通某个子计划、 把执行计划变成代码和结果、开始做计划描述的工作时，都应使用本
+  skill。Bilingual（中/英）——用户用英文 描述 "execute / implement / run a sub-plan" 时同样触发。
 ---
 
 # Research Plan Executor — 计划执行器

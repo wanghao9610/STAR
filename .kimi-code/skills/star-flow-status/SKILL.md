@@ -3,13 +3,13 @@ name: star-flow-status
 description: >-
   Read-only overview of the whole research flow. Scans every metds/plans/*_plan.md, rebuilds the
   decomposition tree from parent/prefix, reads each node's section status, children, depends_on, and
-  exec_status (plus wkdrs/<run>/EXEC_LOG.md for step-level progress), then renders the tree with
-  status, progress counts, the single next action, and any staleness. Also checks the surrounding
-  stages — ideas, refs, code reviews, experiment analyses, method documents — for finished work whose
-  follow-up is missing or out of date. Never writes. Use when the user runs /skill:star-flow-status, or asks
-  for the status / overview / progress of their research or plans, what to work on or execute next,
-  what still needs doing, how far a plan or its sub-plans have gotten, or to see the plan tree.
-  Bilingual (en/zh).
+  exec_status (plus wkdrs/<run>/EXEC_LOG.md for step-level progress), then renders the tree with status,
+  progress counts, the single next action, and any staleness. Also checks the surrounding stages — ideas,
+  refs, code reviews, experiment analyses, method documents — for finished work whose follow-up is
+  missing or out of date. Never writes. Use when the user runs /skill:star-flow-status, when a run names
+  it as the next action, or asks for the status / overview / progress of their research or plans, what to
+  work on or execute next, what still needs doing, how far a plan or its sub-plans have gotten, or to see
+  the plan tree. Bilingual (en/zh).
 ---
 
 # Research Flow Status — read-only overview

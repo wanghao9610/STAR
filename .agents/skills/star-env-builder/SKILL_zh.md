@@ -1,17 +1,14 @@
 ---
 name: star-env-builder
 description: >-
-  构建并验证项目的 Python 运行环境，让计划执行有可用的解释器。读取 .env：CONDA_HOME 有效则用它创建
-  conda 环境 ENV_NAME（参数，缺省为 CODE_NAME）；否则在项目根创建 .venv。已存在的环境绝不删除——
-  经用户确认后重命名为带日期的备份（运行时真实日期）再重建。依赖按"先到先用"解析：已有的
-  CODE_NAME/requirements* → 打包元数据（pyproject / setup.py / environment.yml）→ 代码 import
-  扫描，生成结果写成 requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
-  requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道
-  安装计划确认点，按 uv > pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层
-  冒烟测试（import → 框架/GPU → 项目入口），把
-  ENV_REPORT.md 和版本快照写入 wkdrs/。只要用户调用 $star-env-builder，或要求 Codex 创建或重建
-  项目的 conda 环境或 venv、解析并安装依赖、或验证运行环境时，都应使用本 skill。支持中英文双语
-  工作。
+  构建并验证项目的 Python 运行环境，让计划执行有可用的解释器。读取 .env：CONDA_HOME 有效则用它创建 conda 环境 ENV_NAME（参数，缺省为
+  CODE_NAME）；否则在项目根创建 .venv。已存在的环境绝不删除—— 经用户确认后重命名为带日期的备份（运行时真实日期）再重建。依赖按"先到先用"解析：已有的
+  CODE_NAME/requirements* → 打包元数据（pyproject / setup.py / environment.yml）→ 代码 import 扫描，生成结果写成
+  requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
+  requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道 安装计划确认点，按 uv >
+  pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 冒烟测试（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本快照写入
+  wkdrs/。只要用户调用 $star-env-builder、一次运行点名它是下一步动作，或要求 Codex 创建或重建 项目的 conda 环境或 venv、解析并安装依赖、或验证运行环境时，都应使用本
+  skill。支持中英文双语 工作。
 ---
 
 # Research Env Builder

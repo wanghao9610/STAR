@@ -1,15 +1,12 @@
 ---
 name: star-code-reviewer
 description: >-
-  对照项目成文规范审查代码；限定到某个计划时，还对照该计划的承诺审查实现。不带参数审查 .env 中
-  ${CODE_NAME}/ 的全部代码；传 PLAN_NAME（slug / 数字前缀 / 文件名）审查该计划触及的文件并做符合度
-  检查（§3 任务是否实现、§4 交付物是否在磁盘上、§5 完成判据是否有支撑）；传已存在的路径审查该路径；传
-  `diff` 或 git range 只审改动过的文件。经 .env 的 conda 环境收集低开销静态证据（绝不安装工具），按
-  六维评分表（docstring、命名、简洁性、STAR 约定、正确性可疑写法、计划符合度）收集问题项，
-  blocker/major 级问题项复核后才写入报告，报告写入 wkdrs/，随后提供逐项批准的修复轮——只修
-  例行且不改行为的问题；功能缺口转给 star-plan-executor，计划偏差转给 star-plan-reviser，结构性
-  重组转给 star-code-architect。当用户调用 $star-code-reviewer，或要求 Codex 审查 / 审计代码质量、
-  检查编码规范或 docstring、核对某个计划的代码实现是否完备时使用。支持中英文双语工作。
+  对照项目成文规范审查代码；限定到某个计划时，还对照该计划的承诺审查实现。不带参数审查 .env 中 ${CODE_NAME}/ 的全部代码；传 PLAN_NAME（slug / 数字前缀 /
+  文件名）审查该计划触及的文件并做符合度 检查（§3 任务是否实现、§4 交付物是否在磁盘上、§5 完成判据是否有支撑）；传已存在的路径审查该路径；传 `diff` 或 git range
+  只审改动过的文件。经 .env 的 conda 环境收集低开销静态证据（绝不安装工具），按 六维评分表（docstring、命名、简洁性、STAR 约定、正确性可疑写法、计划符合度）收集问题项，
+  blocker/major 级问题项复核后才写入报告，报告写入 wkdrs/，随后提供逐项批准的修复轮——只修 例行且不改行为的问题；功能缺口转给 star-plan-executor，计划偏差转给
+  star-plan-reviser，结构性 重组转给 star-code-architect。当用户调用 $star-code-reviewer、一次运行点名它是下一步动作，或要求 Codex 审查 /
+  审计代码质量、 检查编码规范或 docstring、核对某个计划的代码实现是否完备时使用。支持中英文双语工作。
 ---
 
 # Research Code Reviewer

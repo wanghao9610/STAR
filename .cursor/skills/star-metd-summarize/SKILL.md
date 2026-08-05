@@ -1,16 +1,17 @@
 ---
 name: star-metd-summarize
 description: >-
-  Compile the research-plan tree under metds/plans/ into paper-ready method documents in metds/. Invoked
-  as /star-metd-summarize [OPT] — overview, dataset, framework, training, evaluation; no argument compiles
+  Compile the research-plan tree under metds/plans/ into paper-ready method documents. Invoked as
+  /star-metd-summarize [OPT] — overview, dataset, framework, training, evaluation; no argument compiles
   all five, overview last. Extracts what each document needs through a written map, merges passages by
   what a reader needs, not by plan, marks unexecuted leaves' content unverified, and turns uncovered
   sections into TODOs. Plans are the only source — never code, logs, wkdrs/ or chat; numbers stay with
-  star-expt-analyst. Writes only metds/<OPT>.md, overwriting an existing one only after an approved
-  section-level change list. Compiles only a finished tree — every top-level plan finalized, every leaf
-  exec_status done — otherwise it stops and routes the unfinished work; a draft compile is an explicit
-  choice, never the default. Use when the experiments are finished, the plans finalized, and the user runs
-  /star-metd-summarize or wants the plans consolidated into a method write-up. Bilingual (en/zh).
+  star-expt-analyst. Writes only metds/<OPT>.md, overwriting one only after an approved section-level
+  change list. Compiles only a finished tree — every top-level plan finalized, every leaf exec_status
+  done — otherwise it stops and routes the unfinished work; a draft compile is an explicit choice. Use
+  when the experiments are finished, the plans finalized, and the user runs /star-metd-summarize, when a
+  run names it as the next action or wants the plans consolidated into a method write-up. Bilingual
+  (en/zh).
 ---
 
 # Research Method Summarizer — plans → method documents

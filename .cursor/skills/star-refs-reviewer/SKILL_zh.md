@@ -1,18 +1,14 @@
 ---
 name: star-refs-reviewer
 description: >-
-  为项目的方法建立可审计的相关工作基础：精读 5–10 篇最相关工作写成逐篇分析笔记，外加一份分好类、
-  条条经过核验的 reference.bib（≥50 条），全部落在 metds/refs/ 下。不带参数时从 metds/*.md 方法
-  笔记读取方法（缺失则回退 metds/plans/ 的根计划，再回退 metds/ideas/ 下定稿的 idea 文件，再缺则请用户给 topic）并跑完整流程，metds/refs/
-  已存在时增量续跑；传 PLAN_NAME 或自由文本 topic 限定检索范围；`verify` 逐条重抓并与文件做 diff；
-  `organize` 离线重新分类现有 bib；`synthesize` 把已有笔记合成为相关工作叙述（metds/refs/related_work.md）；
-  `survey` 检索一个话题、分层阅读、独立写出一份领域综述（metds/refs/<slug>_survey.md），不动 bib；
-  `score` 重抓引用数与星标等指标、重建索引里的影响力评分表；
-  传 arXiv id、DOI 或论文 URL 追加单篇；`add` 一次追加多篇——id、DOI、URL、标题随意混用，
-  每个标题都先解析成抓取到的记录才开始读。bib 的每个字段都从本次
-  运行抓回的记录原文转录（DBLP → Crossref → Semantic Scholar → arXiv，优先已发表版本），原始内容
-  缓存到 wkdrs/，并在 metds/refs/refs_index.md 登记来源 URL——绝不凭记忆写入，抓不到权威记录的
-  论文列入待人工核对清单而不是猜。当用户运行 /star-refs-reviewer，或想做文献综述 / 相关工作调研、
+  为项目的方法建立可审计的相关工作基础：精读 5–10 篇最相关工作写成逐篇分析笔记，外加一份分好类、 条条经过核验的 reference.bib（≥50 条），全部落在 metds/refs/
+  下。不带参数时从 metds/*.md 方法 笔记读取方法（缺失则回退 metds/plans/ 的根计划，再回退 metds/ideas/ 下定稿的 idea 文件，再缺则请用户给
+  topic）并跑完整流程，metds/refs/ 已存在时增量续跑；传 PLAN_NAME 或自由文本 topic 限定检索范围；`verify` 逐条重抓并与文件做 diff； `organize`
+  离线重新分类现有 bib；`synthesize` 把已有笔记合成为相关工作叙述（metds/refs/related_work.md）； `survey`
+  检索一个话题、分层阅读、独立写出一份领域综述（metds/refs/<slug>_survey.md），不动 bib； `score` 重抓引用数与星标等指标、重建索引里的影响力评分表； 传 arXiv
+  id、DOI 或论文 URL 追加单篇；`add` 一次追加多篇——id、DOI、URL、标题随意混用， 每个标题都先解析成抓取到的记录才开始读。bib 的每个字段都从本次 运行抓回的记录原文转录（DBLP
+  → Crossref → Semantic Scholar → arXiv，优先已发表版本），原始内容 缓存到 wkdrs/，并在 metds/refs/refs_index.md 登记来源
+  URL——绝不凭记忆写入，抓不到权威记录的 论文列入待人工核对清单而不是猜。当用户运行 /star-refs-reviewer、一次运行点名它是下一步动作，或想做文献综述 / 相关工作调研、
   逐篇论文分析、收集 reference.bib 或 bibtex、为相关工作评分排序、查找并整理与自己方法相关的工作时使用。Bilingual（中/英）。
 ---
 

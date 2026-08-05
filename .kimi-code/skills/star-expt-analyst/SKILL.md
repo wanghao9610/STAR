@@ -2,15 +2,16 @@
 name: star-expt-analyst
 description: >-
   Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
-  prefix / filename) resolves through exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to
-  its plan; no argument lists the runs and asks. Inventories the §4 deliverables on disk, corroborates
-  EXEC_LOG's claims with artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores
-  the §5 done-criteria metrics against those criteria and baselines, and writes the analysis under
-  wkdrs/<run>/. Installs nothing and re-reads every cited number before reporting it. Read-only otherwise:
-  never edits plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric —
-  that command goes to the user; `watch` is a chat-only check of a running run. Use when the user runs
-  /skill:star-expt-analyst, or wants experiment results or artifacts analyzed, a run checked against
-  done-criteria, training logs or metrics read, or what a run means for the plan. Bilingual (en/zh).
+  prefix / filename) resolves via exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to its
+  plan; no argument lists the runs and asks. Inventories the §4 deliverables, checks EXEC_LOG's claims
+  against artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores the §5
+  done-criteria metrics against those criteria and baselines, writing the analysis under wkdrs/<run>/.
+  Installs nothing and re-reads every cited number before reporting. Read-only otherwise: never edits
+  plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric — that
+  command goes to the user; `watch` is a chat-only check. Use when the user runs
+  /skill:star-expt-analyst, when a run names it as the next action, or wants experiment results or
+  artifacts analyzed, a run checked against done-criteria, training logs or metrics read, or what a run
+  means for the plan. Bilingual (en/zh).
 ---
 
 # Research Experiment Analyst — results audit

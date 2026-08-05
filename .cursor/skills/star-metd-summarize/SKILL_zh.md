@@ -1,21 +1,17 @@
 ---
 name: star-metd-summarize
 description: >-
-  把 metds/plans/ 下的研究计划树凝练成 metds/ 下可直接用于论文的方法文档。调用方式
-  /star-metd-summarize [OPT]，OPT 为 overview、dataset、framework、training、evaluation 之一；不带
-  参数则按依赖顺序编译全部五个（dataset → framework → training → evaluation → overview，overview 要
-  链接其余四个，故最后编译）。按 parent: 重建计划树，再按写明的提取映射抽取各文档所需内容（overview ←
-  根计划 §1 问题、§2 定位、§3 核心思想、§6 里程碑；dataset ← §4 数据选择加每个叶子 §2 的 datas/ 输入
-  与数据构建步骤；framework ← §3 技术路线加建模类叶子及其 ${CODE_NAME}/ 路径；training ← §3 训练策略、
-  §4 计算预算、inits/ 与超参数；evaluation ← §4 benchmark、baseline、指标与消融设计，加 §5
-  kill-criteria），按读者需要的维度（方法、数据、训练、评测）而非计划的结构合并，冲突时叶子压父计划、新压旧，来自未执行叶子的内容
-  标注"尚未验证"，模板中无计划覆盖的小节转为 TODO 并写明该补进哪个计划的哪一节。计划是唯一信息源——不读
-  代码、日志、wkdrs/ 或对话记忆；结果数字归 star-expt-analyst。只写 metds/<OPT>.md，且覆盖已生成文档前
-  必须先给出分节变更清单并获批准。收尾型 skill：就绪门槛只编译已完成的树——每个总体计划已 finalized、
-  每个叶子 exec_status 为 done，即所有实验完成、方法已确定——否则停下，列出未完成的工作并转交；明知未
-  完成仍要编译草稿，必须由用户显式选择，绝非默认。当所有实验完成、计划定稿，用户运行 /star-metd-summarize，
-  或想把定稿的研究计划汇总 / 凝练成方法表述、产出 overview / dataset / framework / training /
-  evaluation 文档，或想从计划里起草论文方法部分素材时使用。Bilingual（中/英）。
+  把 metds/plans/ 下的研究计划树凝练成 metds/ 下可直接用于论文的方法文档。调用方式 /star-metd-summarize [OPT]，OPT 为
+  overview、dataset、framework、training、evaluation 之一；不带 参数则按依赖顺序编译全部五个（dataset → framework → training →
+  evaluation → overview，overview 要 链接其余四个，故最后编译）。按 parent: 重建计划树，再按写明的提取映射抽取各文档所需内容（overview ← 根计划 §1
+  问题、§2 定位、§3 核心思想、§6 里程碑；dataset ← §4 数据选择加每个叶子 §2 的 datas/ 输入 与数据构建步骤；framework ← §3 技术路线加建模类叶子及其
+  ${CODE_NAME}/ 路径；training ← §3 训练策略、 §4 计算预算、inits/ 与超参数；evaluation ← §4 benchmark、baseline、指标与消融设计，加
+  §5 kill-criteria），按读者需要的维度（方法、数据、训练、评测）而非计划的结构合并，冲突时叶子压父计划、新压旧，来自未执行叶子的内容 标注"尚未验证"，模板中无计划覆盖的小节转为 TODO
+  并写明该补进哪个计划的哪一节。计划是唯一信息源——不读 代码、日志、wkdrs/ 或对话记忆；结果数字归 star-expt-analyst。只写 metds/<OPT>.md，且覆盖已生成文档前
+  必须先给出分节变更清单并获批准。收尾型 skill：就绪门槛只编译已完成的树——每个总体计划已 finalized、 每个叶子 exec_status 为
+  done，即所有实验完成、方法已确定——否则停下，列出未完成的工作并转交；明知未 完成仍要编译草稿，必须由用户显式选择，绝非默认。当所有实验完成、计划定稿，用户运行
+  /star-metd-summarize、一次运行点名它是下一步动作， 或想把定稿的研究计划汇总 / 凝练成方法表述、产出 overview / dataset / framework / training
+  / evaluation 文档，或想从计划里起草论文方法部分素材时使用。Bilingual（中/英）。
 ---
 
 # Research Method Summarizer — 计划 → 方法文档

@@ -1,17 +1,17 @@
 ---
 name: star-env-builder
 description: >-
-  Build and verify the project's Python runtime environment so plan execution has a working interpreter.
-  Reads .env: a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a
-  .venv in the root. An existing environment is never deleted — after confirmation it is renamed to a
-  dated backup before rebuilding. Dependencies come from the first source that has them: existing
-  CODE_NAME/requirements* → packaging metadata (pyproject / setup.py / environment.yml) → import scan of
-  the code, written out as requirements.txt plus a requirements/ folder (framework|runtime|optional.txt,
-  conda-only items in conda.txt). Installs in the order uv > pip > conda, CUDA-aware, behind one
-  install-plan confirmation, then smoke-tests imports, framework/GPU and the entrypoint and writes
-  ENV_REPORT.md under wkdrs/. Use when the user runs /star-env-builder, wants the conda env or venv
-  created or rebuilt, needs dependencies resolved and installed, or wants the environment verified.
-  Bilingual (en/zh).
+  Build and verify the project's Python runtime so plan execution has a working interpreter. Reads .env:
+  a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a .venv in the
+  root. An existing environment is never deleted — after confirmation it is renamed to a dated backup
+  first. Dependencies come from the first source that has them: existing CODE_NAME/requirements* →
+  packaging metadata (pyproject / setup.py / environment.yml) → import scan of the code, written out as
+  requirements.txt plus a requirements/ folder (framework|runtime|optional.txt, conda-only in conda.txt).
+  Installs uv > pip > conda, CUDA-aware, behind one install-plan confirmation, then smoke-tests imports,
+  framework/GPU and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use when the user runs
+  /star-env-builder, when a run names it as the next action, wants the conda env or venv created or
+  rebuilt, needs dependencies resolved and installed, or wants the environment verified. Bilingual
+  (en/zh).
 ---
 
 # Research Env Builder — runtime environment bootstrap

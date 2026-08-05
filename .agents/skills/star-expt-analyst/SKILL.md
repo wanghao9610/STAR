@@ -2,15 +2,16 @@
 name: star-expt-analyst
 description: >-
   Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME resolves
-  through exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to its plan; no argument lists
-  the runs and asks. Inventories the §4 deliverables on disk, corroborates EXEC_LOG's claims with
-  artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores the §5 done-criteria
-  metrics against those criteria and baselines, and writes the analysis under wkdrs/<run>/. Installs
-  nothing and re-reads every cited number before reporting it. Read-only otherwise: never edits plans,
-  exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric — that command goes
-  to the user; `watch` is a chat-only check of a running run. Use when the user invokes $star-expt-analyst
+  via exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to its plan; no argument lists the
+  runs and asks. Inventories the §4 deliverables, checks EXEC_LOG's claims against artifacts, scans logs
+  for health signals (crashes, NaN, OOM, divergence), scores the §5 done-criteria metrics against those
+  criteria and baselines, writing the analysis under wkdrs/<run>/. Installs nothing and re-reads every
+  cited number before reporting. Read-only otherwise: never edits plans, exec_status, or EXEC_LOG, and
+  never re-runs an experiment to fill a missing metric — that command goes to the user; `watch` is a
+  chat-only check. Use when the user invokes $star-expt-analyst, when a run names it as the next action,
   or asks Codex to analyze experiment results or artifacts, check a run against done-criteria, read
-  training logs or metrics, or say what a run means for the plan. Supports bilingual English/Chinese work.
+  training logs or metrics, or say what a run means for the plan. Supports bilingual English/Chinese
+  work.
 ---
 
 # Research Experiment Analyst
