@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".codex/hooks/star_involve_gate.sh",
+            "statusMessage": "Checking INVOLVE before the approval prompt"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup|resume",

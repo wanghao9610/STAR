@@ -62,11 +62,13 @@ missing_hooks() { # $1 = registration config path
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
     grep -q 'star_memory\.sh' "$1" 2>/dev/null || out="${out:+${out}, }project memory"
-    # The involve gate answers a Claude permission prompt, so Claude's config is
-    # the only one it applies to.
-    if [[ "$1" == *"/.claude/settings.json" ]]; then
-        grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate"
-    fi
+    # The involve gate answers a permission prompt, so it applies to the configs
+    # whose harness lets a hook decide one — Cursor has no event that gates a
+    # file edit, and Kimi's only observes the prompt it fires beside.
+    case "$1" in
+        */.claude/settings.json|*/.codex/hooks.json)
+            grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
+    esac
     printf '%s' "${out}"
 }
 
