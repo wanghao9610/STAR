@@ -1193,11 +1193,11 @@ $star-code-release
 
 ### 哪些环节可以无人值守？
 
-审批确认点在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
+这是两个不同的问题，本节只回答第二个。**谁可以启动一个 skill**，看名册（[规约 §10](research-workflow-conventions.zh-CN.md)）：七个只能你点名，另外八个 agent 可以自行拾起——包括一次跑完的运行点名它是下一步动作的情形。**一次运行在需要你之前能走多远**，才是下面这份清单，而且两种启动方式毫无区别：agent 自己启动的 skill，会停在你亲手点名时它同样会停的地方。审批确认点在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——没就绪的树会停在就绪门槛上，来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
 - **跑到确认点会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停，直到 diff 被确认，其 `survey` 只问一个判断型问题（画像、分类轴、分层阅读清单），`involve=low` 会按推荐项代答——剩下会停的只有覆盖已有综述文件那一问；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的确认点。
-- **需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与确认点就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些确认点要保护的审计链。
+- **跑起来之后需要你在场**：`$star-idea-storm`、`$star-plan-coach`、`$star-plan-decomposer`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-plan-reviser`、`$star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与确认点就是设计本身；用脚本替它们答"是"，恰恰毁掉了这些确认点要保护的审计链。其中三个——环境构建、执行器、代码审查——agent 仍然可以自己启动：把一次运行开起来，和让它无人值守地跑完，是两回事。
 
 参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一个确认点。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问它的裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`$star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`$star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。永远不会安静的是：红线、提交提议、删除与覆盖、对计划的同步回写、各个审批确认点、以及真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。`high` 反向拨动：skill 本会打包进一个确认点、或在确认点之间自行决定的裁量题，逐条单独问出。
 
