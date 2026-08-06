@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".codex/hooks/star_commit_guard.sh",
+            "statusMessage": "Checking the git command against conventions §1"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "matcher": "apply_patch",

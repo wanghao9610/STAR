@@ -1,11 +1,12 @@
 # STAR hooks for Kimi Code — registration snippet.
 #
-# Two hooks: model_id provenance, and the project-memory index injected from
-# .star/memory/.
+# Three hooks: model_id provenance, the project-memory index injected from
+# .star/memory/, and the commit guard that declines the git commands the workflow
+# conventions §1 forbid.
 #
-# EASIEST: run `bash .kimi-code/hooks/install.sh` once — it writes both blocks
-# below into your global config for you (idempotent, backs up first). The manual
-# route below is the same thing by hand.
+# EASIEST: run `bash .kimi-code/hooks/install.sh` once — it writes all three
+# blocks below into your global config for you (idempotent, backs up first). The
+# manual route below is the same thing by hand.
 #
 # Kimi does not auto-load project-level config, so these cannot live in the repo
 # the way .claude/settings.json, .codex/hooks.json, and .cursor/hooks.json do.
@@ -21,8 +22,11 @@
 #
 # Why UserPromptSubmit rather than SessionStart: in Kimi, SessionStart is
 # fire-and-forget and cannot inject context, and its payload carries no model
-# id. UserPromptSubmit is the only context-appending event. Both hooks inject
-# once per session (keyed on session_id), so they do not repeat every turn.
+# id. UserPromptSubmit is the only context-appending event. Both of those hooks
+# inject once per session (keyed on session_id), so they do not repeat every
+# turn. The commit guard is the odd one out: it decides rather than injects, so
+# it runs on PreToolUse matching Bash — the event whose return value can still
+# stop a shell command — and it answers only for the git commands §1 forbids.
 #
 # Note: [[hooks]] accepts only event / matcher / command / timeout — any extra
 # field makes the whole config fail to load.
@@ -35,4 +39,10 @@ timeout = 10
 [[hooks]]
 event = "UserPromptSubmit"
 command = ".kimi-code/hooks/star_memory.sh"
+timeout = 10
+
+[[hooks]]
+event = "PreToolUse"
+matcher = "Bash"
+command = ".kimi-code/hooks/star_commit_guard.sh"
 timeout = 10

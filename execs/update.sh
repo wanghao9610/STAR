@@ -69,6 +69,10 @@ missing_hooks() { # $1 = registration config path
         */.claude/settings.json|*/.codex/hooks.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
+    # The commit guard declines a shell command before it runs, which every
+    # harness can express — Claude, Codex and Kimi on PreToolUse, Cursor on
+    # beforeShellExecution — so every config carries it.
+    grep -q 'star_commit_guard\.sh' "$1" 2>/dev/null || out="${out:+${out}, }commit guard"
     printf '%s' "${out}"
 }
 

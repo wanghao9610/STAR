@@ -1,6 +1,11 @@
 {
   "version": 1,
   "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./.cursor/hooks/star_commit_guard.sh"
+      }
+    ],
     "sessionStart": [
       {
         "command": "./.cursor/hooks/star_model_id.sh"

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Register STAR's Kimi hooks in Kimi's GLOBAL config, idempotently.
 #
-# Two hooks: model_id provenance, and the project-memory index injected from
-# .star/memory/.
+# Three hooks: model_id provenance, the project-memory index injected from
+# .star/memory/, and the commit guard that declines the git commands the workflow
+# conventions §1 forbid. The first two inject context on UserPromptSubmit; the
+# guard decides instead, so it registers on PreToolUse matching Bash.
 #
 # Kimi has no project-level hook config, so the [[hooks]] entries must live in
 # the global config at $KIMI_CODE_HOME/config.toml (default ~/.kimi-code/config.toml).
@@ -17,8 +19,10 @@
 set -euo pipefail
 
 cfg="${KIMI_CODE_HOME:-$HOME/.kimi-code}/config.toml"
-hooks=("star_model_id.sh|STAR model_id provenance hook"
-       "star_memory.sh|STAR project-memory hook")
+# script | label | event | matcher (empty matcher = every occurrence)
+hooks=("star_model_id.sh|STAR model_id provenance hook|UserPromptSubmit|"
+       "star_memory.sh|STAR project-memory hook|UserPromptSubmit|"
+       "star_commit_guard.sh|STAR commit guard|PreToolUse|Bash")
 
 # Make sure this repo's hook scripts are executable.
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -33,8 +37,7 @@ mkdir -p "$(dirname "$cfg")"
 backed_up=false
 added=0
 for row in "${hooks[@]}"; do
-  script="${row%%|*}"
-  label="${row#*|}"
+  IFS='|' read -r script label event matcher <<< "$row"
 
   if grep -qF "${script}" "$cfg" 2>/dev/null; then
     echo "${label} already registered in $cfg — skipped."
@@ -49,7 +52,8 @@ for row in "${hooks[@]}"; do
   {
     printf '\n# --- %s (added by .kimi-code/hooks/install.sh) ---\n' "${label}"
     printf '[[hooks]]\n'
-    printf 'event = "UserPromptSubmit"\n'
+    printf 'event = "%s"\n' "${event}"
+    if [ -n "${matcher}" ]; then printf 'matcher = "%s"\n' "${matcher}"; fi
     printf 'command = ".kimi-code/hooks/%s"\n' "${script}"
     printf 'timeout = 10\n'
   } >> "$cfg"
@@ -59,7 +63,7 @@ for row in "${hooks[@]}"; do
 done
 
 if (( added == 0 )); then
-  echo "Nothing to do — both STAR hooks were already registered."
+  echo "Nothing to do — all three STAR hooks were already registered."
   exit 0
 fi
 

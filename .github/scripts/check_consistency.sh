@@ -252,17 +252,20 @@ else
     diff <(tail -n +3 AGENTS.md) <(tail -n +6 .cursor/rules/agent-instructions.mdc) | sed 's/^/      /'
 fi
 
-# 10. Session hooks exist, are executable, and are registered.
-#     Both STAR hooks — model-id provenance and the project-memory index — ship
-#     one copy per harness, and each harness registers them in its own file. A
-#     script added without its registration entry is the silent failure this
-#     catches: the hook is present, nothing runs it, and no report says so.
+# 10. Hooks exist, are executable, and are registered.
+#     Three STAR hooks — model-id provenance, the project-memory index, and the
+#     commit guard — ship one copy per harness, and each harness registers them
+#     in its own file. A script added without its registration entry is the
+#     silent failure this catches: the hook is present, nothing runs it, and no
+#     report says so.
 section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
+         .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
+         .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
          .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
@@ -272,12 +275,31 @@ for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .kimi-code/h
         hook_errors=1
         continue
     fi
-    for hook in star_model_id.sh star_memory.sh; do
+    for hook in star_model_id.sh star_memory.sh star_commit_guard.sh; do
         grep -qF "${hook}" "${f}" || { fail "${f} does not register ${hook}"; hook_errors=1; }
     done
 done
-grep -qF star_memory.sh .kimi-code/hooks/install.sh || \
-    { fail ".kimi-code/hooks/install.sh does not install star_memory.sh"; hook_errors=1; }
+#     Kimi loads no project-level config, so its registration snippet is only a
+#     snippet: the installer is what actually writes it, and a hook it does not
+#     write reaches no Kimi user however correct the snippet beside it is.
+for hook in star_memory.sh star_commit_guard.sh; do
+    grep -qF "${hook}" .kimi-code/hooks/install.sh || \
+        { fail ".kimi-code/hooks/install.sh does not install ${hook}"; hook_errors=1; }
+done
+#     The guard is the one hook that decides rather than reports, and each harness
+#     spells the decision its own way — a copy carrying another harness's spelling
+#     parses, runs, and silently never blocks anything. Claude and Codex answer
+#     PreToolUse with permissionDecision, Kimi the same without the event name its
+#     documented shape omits, and Cursor blocks on permission plus exit 2.
+for f in .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh; do
+    grep -qF '"hookEventName":"PreToolUse","permissionDecision":"deny"' "${f}" || \
+        { fail "${f} no longer emits a PreToolUse deny decision"; hook_errors=1; }
+done
+grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/star_commit_guard.sh || \
+    { fail ".kimi-code/hooks/star_commit_guard.sh no longer emits Kimi's deny shape"; hook_errors=1; }
+{ grep -qF '"permission":"deny"' .cursor/hooks/star_commit_guard.sh && \
+  grep -qF 'exit 2' .cursor/hooks/star_commit_guard.sh; } || \
+    { fail ".cursor/hooks/star_commit_guard.sh lost its deny permission or its exit 2"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
 #     four memory hooks split on byte-exactly, and what the spec and the shipped
 #     index document. Reword it in one place and the hooks silently stop marking
@@ -305,7 +327,7 @@ grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
     { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
 grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
     { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
-(( hook_errors == 0 )) && note "both hooks present, executable, registered in all four harnesses, and agreed on the index separator and the 180-day aging rule"
+(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all four harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the three trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a

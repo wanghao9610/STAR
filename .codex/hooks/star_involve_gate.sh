@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # STAR PermissionRequest hook (Codex CLI) — skip the approval prompt for a file
 # edit while the project runs at INVOLVE=low (.env, workflow conventions §7.7).
-# Confirmation points are untouched: the STOP line, commit offers, deletions and
-# plan approval are questions a skill asks, not prompts a hook can answer.
+# Confirmation points are untouched: the STOP line, deletions and plan approval
+# are questions a skill asks, not prompts a hook can answer.
 #
 # Codex's counterpart to Claude's PreToolUse gate, written to Codex's own shapes.
 # PermissionRequest is the event that fires just before the CLI waits on the
