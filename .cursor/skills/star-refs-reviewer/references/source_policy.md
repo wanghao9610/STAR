@@ -113,6 +113,15 @@ The impact score (`references/refs_rubric.md`, Impact score) is computed from th
 
 **Official repos only.** A repo qualifies only when the paper's own page names it: the arXiv abs page, the project page, or the paper's PDF/HTML itself. Discovery order: the paper page Step 3 reads anyway → the arXiv abs page → the paper's Hugging Face papers page (`https://huggingface.co/papers/<arxiv-id>`). Papers with Code shut down in July 2025 — do not fetch it. A repo surfaced any other way (code search, a citing repo's README) is logged `unofficial` in the index and never scored.
 
+## Figures — the architecture figure a note carries
+
+A note may carry one image: the figure its own paper uses to show the method as a whole. Step 3 decides which figure that is, from the captions; this section fixes where it may come from and what happens to it after.
+
+- **One source.** The paper's arXiv HTML rendering, `https://arxiv.org/html/<arxiv-id>` — the page Step 3 already reads where it exists. arXiv renders roughly 2024 onward, and only where the submitted LaTeX converted, so many papers have none: that is a fact the note states, never a reason to look elsewhere. The PDF is not rendered here, and no image is ever taken from a project page, a repository README, a blog, or a search result.
+- **Fetched as bytes, kept as fetched.** Download the chosen figure's `<img>`, resolved against the page's own URL, to `metds/refs/figs/<ABBREV>_fig<N>.<ext>` — `<ABBREV>` the note's, `<N>` the paper's figure number, the extension the file's own. Never re-encode, crop, rescale, or merge two images into one. The file is its own cached payload: no second copy goes under `raw/`.
+- **Provenance travels with it.** The line under the image carries the figure number, the caption's first sentence verbatim, the image URL, and the fetch date — the same origin-beside-the-artifact rule the `% src:` line follows, and the reason a figure copied out of the note can still be traced. An image with no such line is a figure from nowhere: delete it rather than explain it.
+- **One more arXiv request.** The image is fetched right after the page it was chosen from, under the ~1 per 3 seconds arXiv asks for. A download that fails is recorded and the note goes out without the figure — never a retry loop, and never another paper's figure in its place.
+
 ## Rate limits and failure
 
 - Serialize per host: ~1 request/second to DBLP and Semantic Scholar, ~3/second to Crossref (add a `mailto` for its polite pool). The budget belongs to the whole session against each host; it is not one budget per agent (conventions §6.9). A step that fans out splits it and writes each share as a number.

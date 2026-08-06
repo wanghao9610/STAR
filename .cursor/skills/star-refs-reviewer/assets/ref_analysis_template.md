@@ -38,6 +38,13 @@ model_trail:                    # append-only: one entry per write session, neve
      kind a later paper positions itself against — names where the paper states it: a section,
      a table, or a short quote. -->
 
+<!-- Architecture figure, where the paper's arXiv HTML has one: the figure whose caption says it shows
+     this method as a whole. Fill the two lines below and keep them together. No such figure, or no
+     arXiv HTML rendering — delete both and say which of the two it was, in one line. -->
+
+![<Method> architecture](figs/<ABBREV>_fig<N>.png)
+*Figure <N>: <the caption's first sentence, verbatim>* — src: <image URL> (fetched YYYY-MM-DD)
+
 ## 4. Experiments & Results
 
 <!-- Benchmarks and splits, the comparison set, headline numbers as the paper reports them

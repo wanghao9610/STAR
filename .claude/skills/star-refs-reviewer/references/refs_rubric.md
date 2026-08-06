@@ -47,6 +47,7 @@ Each note (`assets/ref_analysis_template.md`) is graded on:
 - **The method is reconstructible.** A reader who has not opened the paper can say what it does and why it should work. Only the formulas the method depends on, symbols defined.
 - **Relation-to-this-project is the point.** Generic summaries are free on the internet; the note earns its place through §5 — shared ground, where it differs, what is borrowable, and what it lets this project claim. A §5 that would fit any project has failed.
 - **Honest about what was read.** Abstract, intro, method, and the main results table at minimum. If only the abstract and intro were reachable, `depth:` says so — a shallow note that admits it is useful, one that pretends is not. The writing-side companion STAGE copies this field verbatim when it seeds a note from here, so a shallow read stays labelled downstream instead of passing as one of its own.
+- **The figure is the paper's own, or absent.** At most one image: the figure whose caption says it shows the method as a whole, carried with its number, its caption's first sentence, its URL and its fetch date. "No architecture figure" and "arXiv has not rendered this paper" are both honest answers and are told apart; a results plot standing in for a missing architecture figure is neither.
 - **Claims are the paper's, not yours.** Report numbers as reported (metric + dataset + split), each as one self-contained line so it survives being quoted out of the note — STAGE audits manuscript sentences against exactly these lines, and a number stranded from its setting backs nothing. Never extrapolate, never compare across incomparable settings, mark anything uncertain `[unverified]`.
 
 ## Note collector contract
@@ -62,6 +63,7 @@ One paper each. The return:
 - `depth_evidence` — `{sections_reached: [...], results_table: <the caption plus one row, verbatim>}`, or `none reachable`.
 - `relation_material` — `[{claim, where}]`: raw material for §5, never §5 itself.
 - `cited_works` — what this paper's related-work section cites, harvested while the paper was already open.
+- `figure_candidates` — every figure on the paper's arXiv HTML page as `[{n, caption, image_url}]`, captions verbatim and trimmed past ~200 characters, or `no html rendering`. The collector chooses nothing and downloads nothing: which figure shows the method, and whether any does, is Step 3's call and the main agent's.
 
 and nothing else: no frontmatter provenance, no `category`, no `read_on`, no §5. The main agent writes every file.
 

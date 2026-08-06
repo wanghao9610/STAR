@@ -44,7 +44,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）用一次 AskQuestion（allow_multiple，5–10 条标为推荐）交给用户，只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下同一个直觉一次盖住整份文档的形状：一个问题带上检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
 4. **近比有名重要；详略由分数定。** 核心论文按与本方法的直接重叠度和定位价值挑选——不看引用数，不看新旧；每条候选都带一句话理由。标准与 3–8 类分类规则见 `references/refs_rubric_zh.md`。在这个选择之外，每条条目另带一个**影响力分**——引用速度、发表档位、代码采用度的 0–10 加权合成，按评分表"影响力分"一节的固定算式、只从本轮抓取并注明日期的指标算出，绝无印象成分。分数决定下游的详略——候选表突出什么、相关工作行文先写什么——绝不决定什么算核心；唯 survey 模式把它计入遴选（Step 10.3）：领域地图本就该给地标性工作位置。
 5. **边做边写；重跑只补缺口。** 每篇笔记写完立刻写入文件，bib 按批追加——绝不攒在聊天里。重跑先读 `metds/refs/` 里已有的东西再补缺：绝不重写已核验的条目，绝不重读已有笔记的论文，绝不把 `reference.bib` 推倒重生成。
-6. **refs 基础之外一律只读。** 写入范围限定在 `metds/refs/**` 与 `wkdrs/refs_<date>/**`。计划、方法笔记、代码、`.env` 只读——调研牵出的问题转交出去，不自己动手。联网只取元数据和论文正文，按 `references/source_policy_zh.md` 串行并退避；不下模型、不拉数据集、不调付费 API、不做需要登录的爬取、不绕验证码。
+6. **refs 基础之外一律只读。** 写入范围限定在 `metds/refs/**` 与 `wkdrs/refs_<date>/**`。计划、方法笔记、代码、`.env` 只读——调研牵出的问题转交出去，不自己动手。联网只取元数据、论文正文，以及论文自己的 arXiv HTML 页上那一张架构图（Step 3），按 `references/source_policy_zh.md` 串行并退避；不下模型、不拉数据集、不调付费 API、不做需要登录的爬取、不绕验证码。
 
 ## 工作流
 
@@ -79,6 +79,8 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 逐篇：抓论文页（arXiv abs/HTML、ACL Anthology、CVF open access 或项目主页），至少读摘要、intro、方法和主结果表，填 `assets/ref_analysis_template_zh.md`（英文：`assets/ref_analysis_template.md`），**立刻写入** `metds/refs/<缩写>.md`。`<缩写>` 用论文自己的缩写（`CLIP.md`、`DETR.md`），没有就自拟一个紧凑的 CamelCase 名（在 index 里标注为自拟），冲突时加 `_<年份>` 后缀。`depth:` 如实写你真正读到的深度。论文自己的页面挂出了仓库时——即笔记 `links.code` 记下的那个——顺手抓它的星标与最近提交日期：一个仓库一次 GitHub API 调用，按 `references/source_policy_zh.md` 的上限与缓存规则执行，把这篇的影响力分补齐。这次调用由主 agent 在写笔记时自己做，绝不交给收集器。不是论文自己页面给出的仓库一律记 `unofficial`——登记，不计分。
 
+**架构图。** arXiv 把这篇渲染成了 HTML 时（见 `references/source_policy_zh.md` 的"配图"一节），笔记 §3 可以带一张图：整体展示方法的那一张。是哪一张只由图注决定，绝不由编号决定——图注必须说这张画的是本文自己的方法，即它的架构、框架、流水线或总览；讲数据采集、讲定性样例、讲对比方法的图注，说的是另一张图。多张都合格 → 取方法一节最先引用的那张。一张都不合格，或论文根本没有 HTML 渲染版 → §3 用一句话说明是这两种情况中的哪一种，什么都不下载：理论、数据集、分析类论文常常本就没有这样一张图，把结果曲线塞进这个位置比空着更糟。一篇笔记只带一张图；选哪张、去抓它，都由主 agent 自己做，与上面那次 GitHub 调用一样。
+
 精读可以并行分派给只读 `Task` subagent（`subagent_type: explore`），至多 3 个并行，一个 subagent 一篇，各自按 `references/refs_rubric_zh.md` 的笔记收集器返回格式返回——不是"填好的模板",模板里有些字段只有真正写文件的那次会话才能填。只有 `depth_evidence` 带着真实的表题和一行数据时才接受 `depth: full`,否则降级。主 agent 负责写文件并亲自写 §5（与本项目的关系）——这一节需要方法上下文，也正是这篇笔记存在的理由。每个收集器拿到按份数分给它的那份 host 请求配额（写成具体数字），并返回 `failures: [{host, error, retries}]`；它抓到的页面缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀，两个收集器绝不共用（规约 §6.4）。这三样和 Step 1、Step 4 给各自收集器的完全一样——这一步只是抓的 host 不同，规矩没有变。
 
 ### Step 4：扩展到 ≥50
@@ -101,7 +103,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ### Step 8：聊天摘要
 
-≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件）、条目数与类别表、影响力评分的头部梯队——相关工作行文必须正面回应的那几篇，残缺分与 `new` 标记随行说明——自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/star-plan-coach` §2（相关工作与定位）去磨定位；若本次读到的某篇已经做掉了计划 §1 声称尚未解决的那个缺口，改交 `/star-plan-coach <slug> problem`（§1 问题定义与动机），方向本身因此不再成问题的交 `/star-idea-storm`——说清本次阅读要的是这三者中的哪一个；以后单加一篇是 `/star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/star-refs-reviewer add …`；`/star-refs-reviewer verify` 重查整个 bib；`/star-refs-reviewer score` 在引用与星标漂移后刷新指标；`/star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
+≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件，每篇标出它带的架构图，或标出为什么没有）、条目数与类别表、影响力评分的头部梯队——相关工作行文必须正面回应的那几篇，残缺分与 `new` 标记随行说明——自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/star-plan-coach` §2（相关工作与定位）去磨定位；若本次读到的某篇已经做掉了计划 §1 声称尚未解决的那个缺口，改交 `/star-plan-coach <slug> problem`（§1 问题定义与动机），方向本身因此不再成问题的交 `/star-idea-storm`——说清本次阅读要的是这三者中的哪一个；以后单加一篇是 `/star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/star-refs-reviewer add …`；`/star-refs-reviewer verify` 重查整个 bib；`/star-refs-reviewer score` 在引用与星标漂移后刷新指标；`/star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
 
 ### Step 9：合成 related_work.md（仅 synthesize 模式）
 
@@ -120,7 +122,7 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 1. **来源与画像。** Step 0 原样适用——检索前报画像、读增量基线、定语言。额外找 1–3 篇该话题已有的综述：它们的分类体系是分类轴的起点，按本轮实际收到的东西改造，绝不整套照搬。
 2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与契约、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
 3. **筛选分层。** 三个阅读层，按各自能支撑什么命名：**精读层（deep）**——8–12 篇，读到 `method-and-results` 或更深，只有它们能进对比表、能被转引数字；**泛读层（abstract）**——15–25 篇，读到 `abstract-and-intro`，够把一篇放上某支并用一句话刻画（摘要多半已在检索记录里——没有时才抓页面）；**记录层（record）**——其余，只凭记录的事实（标题、会议、年份）用于广度与趋势，绝不刻画、绝不进表。分层同时权衡相关性与影响力分——与完整流程不同，这里分数参与遴选：一支的最高分工作应落在精读层或泛读层，不该留在记录层；分层清单同时给出各篇的分数（读到论文页之前是残缺分）。然后是本模式唯一的判断型问题，一次问完：画像、分类轴（连同被舍弃的轴）、分层清单（精读层标为推荐）。`involve=low` 按推荐项直接采纳并记入决策记录（规约 §7.8）；这绝不放松完整流程——那里的核心集确认仍然必答。
-4. **阅读。** 精读层与泛读层可按 Step 3 的方式分派——至多 3 个、一篇一个收集器、host 预算按 `references/source_policy_zh.md` 拆成具体数字、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。待读不足 6 篇就不分派，主会话自己读。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。
+4. **阅读。** 精读层与泛读层可按 Step 3 的方式分派——至多 3 个、一篇一个收集器、host 预算按 `references/source_policy_zh.md` 拆成具体数字、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。待读不足 6 篇就不分派，主会话自己读。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不截图：架构图是 Step 3 的事，它属于一篇本模式并不写的笔记。
 5. **只从池子里成文。** 每一节只用本轮抓回并缓存的材料起草（模板：`assets/survey_template_zh.md`，英文：`assets/survey_template.md`；评分：`references/refs_rubric_zh.md` 的综述一节）。正文点名的每篇论文都出现在带注引用表里，附记录 URL 与抓取日期；每条非显然论断带行内 `[@key]`——与 bib citekey 同为 `Year_Method_FirstAuthor` 形制、只在本文件内解析，日后该篇进 bib 时键保持不变；没有缓存来源的论断删掉或标注为本综述自己的推断；数字必须连同数据集与指标一起出现。对比表只收精读层的论文作行；缓存来源填不上的格写 `—`。
 6. **自查。** 随机重开 5 组"论断↔引用来源"对着缓存核对；来源在该范围内撑不住的论断改写或删除——改的是正文，绝不改引用。确认带注引用表的每条链接都指向本轮抓过的页面或记录。
 7. **Frontmatter 与覆写保护。** Frontmatter：`type: survey`、`topic`、`language`（按 Step 0.4 的规则）、`generated`（真实日期）、`sources`（读过方法来源时记它和它的 `updated`）、`papers`（各层计数）、以及 `model_id` / `model_trail`（规约 §8）。重跑撞上已有的 `<slug>_survey.md` 时逐字沿用 Step 9.4 的规则：生成文件先给节级变更清单、经一次直接提问才覆写；人写的文件绝不凭 diff 覆写。
@@ -137,9 +139,9 @@ awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workfl
 
 ## 状态与文件规则
 
-- 写入范围限定在 `metds/refs/**`（笔记、`reference.bib`、`refs_index.md`、`related_work.md`、`<slug>_survey.md`）与运行缓存 `wkdrs/refs_<date>/raw/**`。绝不碰 `metds/plans/*`、`metds/*.md` 方法笔记、`metds/codearc.md`、`${CODE_NAME}/`、`.env`、`UPSTREAM.md`、`LICENSE` / `CITATION*`。
+- 写入范围限定在 `metds/refs/**`（笔记、笔记的架构图放在 `figs/`、`reference.bib`、`refs_index.md`、`related_work.md`、`<slug>_survey.md`）与运行缓存 `wkdrs/refs_<date>/raw/**`。绝不碰 `metds/plans/*`、`metds/*.md` 方法笔记、`metds/codearc.md`、`${CODE_NAME}/`、`.env`、`UPSTREAM.md`、`LICENSE` / `CITATION*`。
 - `reference.bib` 只追加与重组，绝不整体重新生成：已核验的条目逐字节保留，除非 `verify` 证明它错了。用户手工加的条目绝不删——重新归类，没有抓取记录时给它一行 `% src: user-supplied`。早于 `% src:` 行的旧条目，在下一次运行碰到这个文件时按它的 index 出处行补上——只从那一行抄，绝不另行拼凑；连 index 行也没有的，进待人工核对清单。
-- 一篇论文一份笔记。重跑跳过已有笔记的论文，除非用户要求刷新。
+- 一篇论文一份笔记。重跑跳过已有笔记的论文，除非用户要求刷新——图跟着笔记一起跳过。
 - `related_work.md` 只编译、不发明：每条刻画都能追溯到对应论文的笔记（没有笔记的条目只能以其抓取记录的事实被提到）。有笔记的论文一律以指向该笔记的链接出现（`[<缩写>](<缩写>.md)`），没有笔记的写纯文本——链接等于宣称有一篇笔记，所以它必须真的打得开。带 `type:` + `generated:` frontmatter 的生成文件，须先批准节级变更清单才能覆写；人写的文件绝不凭 diff 覆写。`<slug>_survey.md` 在自己的深度上守同一套规矩：每条刻画都能追溯到本轮抓取的来源，记录层（record）的论文只被点名、绝不刻画，可否覆写也由同一条 frontmatter 规则判定。
 - 日期必须真实（规约 §4）：抓取日期就是实际抓取的那天。
 - 本 skill 不设任何计划 frontmatter、不创建计划文件；审计线索就是 `refs_index.md` 加运行缓存。Git：只读；绝不提交（规约 §1）。
