@@ -20,7 +20,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`children:` 用于判定是否叶子、`depends_on` 与兄弟叶子的 `exec_status` 用于依赖检查、`exec_runs` 用于续跑——外加每份运行日志的 frontmatter。目标子计划仍在 Step 0 整篇读入；摘要替掉的是逐个打开它的兄弟计划。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（以及上面点名的其他文件）放回那次 shell 调用，并接受落盘的代价。
+执行器会提交、会运行、还会把偏差写回子计划，所以每一节都用得上（§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§11 执行分支），Step 0 之前不需要装载任何别的。本 skill 点名的各 `references/*.md` 属于步骤内材料——哪一步引用，就在哪一步装载，不要提前。那条 `grep` 只做 §7.6/§7.7 的查询——`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位——折进开场那条消息，两者就都不必各占一趟往返；完整的 `.env` 运行时（§3）仍在它自己的步骤（Step 2）解析。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`children:` 用于判定是否叶子、`depends_on` 与兄弟叶子的 `exec_status` 用于依赖检查、`exec_runs` 用于续跑——外加每份运行日志的 frontmatter。目标子计划仍在 Step 0 整篇读入；摘要替掉的是逐个打开它的兄弟计划。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。若本 harness 没有独立的文件读取工具，就把 `cat docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（以及上面点名的其他文件）放回那次 shell 调用，并接受落盘的代价。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -68,8 +68,9 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 把 §3 和 gap 列表细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。
 2. 明确标出 STOP line；已知时估算运行时间/成本。
 3. 把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入，以变更项形式（ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`）记入 EXEC_PLAN 的“与子计划的偏差”表。与子计划自身粒度相矛盾算偏差；“更具体”不算——除非那是计划未写明、而某份方法文档会引用的值，那要记为一条 ENRICHED 行并写明该章节。
-4. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。并说明不做的代价：没有逐 action 提交，每个已验证 action 都停在未提交状态，后面要恢复时，唯一能依据的就是本次运行自己记下的每个 action 起点（`references/agent_dispatch_spec_zh.md`）。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
-5. 为计划中间文件创建 `tasks/<plan-name>/`。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `$star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的 divergence 行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
+4. **定下分支这一行**（规约 §11）：EXEC_PLAN 里只要有 action 要修改 `${CODE_NAME}/` 下已存在的被跟踪文件，计划就带上 `branch: exec/<run>` 并推荐在它上面执行；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`，无论它叫什么。操作细节：`references/branch_rules_zh.md`。
+5. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。并说明不做的代价：没有逐 action 提交，每个已验证 action 都停在未提交状态，后面要恢复时，唯一能依据的就是本次运行自己记下的每个 action 起点（`references/agent_dispatch_spec_zh.md`）。若第 4 条定了 `branch: exec/<run>`，分支问题也在同一次暂停里问（规约 §11）：点明它从哪个基础分支分出，说明选它就同时选了逐 action 提交——只有提交才会被合并——以及唯一前置条件：当前 checkout 上没有正在运行的任务；不选则照旧在基础分支上执行。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
+6. 先建获批的分支：从记下的基础分支 `git switch -c exec/<run>`，让下面的一切都生在它上面（`references/branch_rules_zh.md`）。为计划中间文件创建 `tasks/<plan-name>/`。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `$star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的 divergence 行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
 
 ### Step 4：执行与验证
 
@@ -77,7 +78,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 1. 选择本地执行或选择性委派。委派时调用 `spawn_agent`，实现工作使用 `agent_type: worker`（只有只读勘察使用 `explorer`），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其窄范围范围受限检查。
-3. 在主 agent 中重跑或独立验证范围受限检查。通过后，checkpoint 证据和工件路径；若已批准 checkpoint，则提交该 action 的文件。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
+3. 在主 agent 中重跑或独立验证范围受限检查。通过后，checkpoint 证据和工件路径；若已批准 checkpoint，则提交该 action 的文件——在执行分支上，这次提交连同本 action 更新过的运行记录一起暂存，因为只有提交才会被合并（规约 §11.2）。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
 4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，不运行并停止。
 5. 若重试或 blocker 在子计划粒度改变了方法（新增/删除/替换步骤，交付物路径或完成判据变化），在 EXEC_LOG 的 `Pending amendments` 下记录变更项行并继续——这些在 finalize 时同步，而不是运行中同步。
 
@@ -91,19 +92,21 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 6：报告
 
-以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。两种收尾都推荐 `$star-code-reviewer <leaf>` 依据规约和子计划审计实现：run 完成后，在修订或进入下一项前审；有 STOP line 命令等待用户时，在用户跑它之前审——把审查命令写在待跑命令之上，因为 bug 等算力烧完才被抓住，代价是算力加重跑。这条审查属于那八个 agent 可以自己启动的 skill、目标就是这个叶子，所以它是这份报告发出后真正要跑的东西，而不是打印给用户去敲的命令；待跑命令照旧打印出来、归用户，连同审查发现一并交回。确认的 blocker/major 经 `$star-plan-executor <leaf>` 回来，它重开受影响的 action、改完并验证，才把命令再交回；探索性叶子、命令本身很便宜时可以跳过审查直接跑，这一条在审查启动之前就问。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 500 词以内。
+以结果开头。说明验证了什么及其证据，`tasks/<plan-name>/` 中间工作区和 `wkdrs/<run>/` 记录/工件的位置，哪些命令等待用户执行，哪些 amendment 已同步进子计划，以及剩余风险。两种收尾都推荐 `$star-code-reviewer <leaf>` 依据规约和子计划审计实现：run 完成后，在修订或进入下一项前审；有 STOP line 命令等待用户时，在用户跑它之前审——把审查命令写在待跑命令之上，因为 bug 等算力烧完才被抓住，代价是算力加重跑。这条审查属于那八个 agent 可以自己启动的 skill、目标就是这个叶子，所以它是这份报告发出后真正要跑的东西，而不是打印给用户去敲的命令；待跑命令照旧打印出来、归用户，连同审查发现一并交回。确认的 blocker/major 经 `$star-plan-executor <leaf>` 回来，它重开受影响的 action、改完并验证，才把命令再交回——在执行分支上，干净的审查也从这里走：再次调用本 skill 就抵达合并确认点（规约 §11）。只要存在分支，就点出这次 run 的分支名及其未合并状态。探索性叶子、命令本身很便宜时可以跳过审查直接跑，这一条在审查启动之前就问。若有 STOP line 命令等待用户，补充说明其输出产生后，`$star-expt-analyst <leaf>` 会根据 §5 完成判据给结果评分并解释其含义。报告控制在约 500 词以内。
 
 ## 状态与文件规则
 
 - 把 `wkdrs/<run>/EXEC_LOG.md` 视为执行事实来源。再次调用时跳过 `done` action，从第一个未完成项恢复。回同步必须幂等：标为 `synced` 或已勾选的行绝不重复应用；未同步 pending 行在 finalize 时重新提出。
+- **先找分支，再找 run 目录。** 存在与该 leaf 匹配的 `exec/<prefix>_<slug>*` 分支，就说明有一次 run 正在它上面进行——即便基础 checkout 显示该 leaf 未执行：基础分支是准据（规约 §11.3）。先确认工作区没有无关的未提交改动（有则列出并等用户处理），`git switch` 过去，按上一条从它的 `EXEC_LOG.md` 续跑。记录在案的 `branch:` 已不存在时，这是要上报的 blocker，绝不无声重建。
 - run 目录里的 `CODE_REVIEW_<date>.md`，若其 blocker/major 发现没有在日志里记为已处理，就排在一切之前重开工作：把每个受影响的 action 退回 `in_progress` 并在备注写上该发现的编号，一条发现跨多个 action 时改为在 `EXEC_PLAN.md` 追加一个补救 action；整批确认一次，执行并验证，之后才把待跑的 STOP line 命令交回。用户明确不处理的发现，连同这个决定记为已处理，下次调用不再重开它。
+- **在执行分支上，这轮工作终于合并确认点。** 每个 action 都 `done`、§5 完成判据成立、最新审查的 blocker/major 都已处理时，剩下的唯一动作就是合并（规约 §11.4）——任何参与度档位都要问。操作细节在 `references/branch_rules_zh.md`：默认 squash，基础分支前进过就先把它 merge 进来，合并后在基础分支上重跑该 leaf 的轻量检查，分支删不删另问一道——还有弃用路径：先把 `wkdrs/<run>/*.md` 与子计划里这次 run 的条目带回基础分支，才谈得上删除。
 - `tasks/<plan-name>/` 存放该计划自有的工具脚本（持久）与可丢弃草稿文件，本 skill 拥有草稿文件的生命周期：Step 3 创建，§5 满足后在 finalize 时只提议删除草稿文件，绝不删脚本（规约 §9）。生成工件与持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。
 - 可以自由编辑子计划 frontmatter 的 `exec_status`、`exec_runs`、`updated`；只有通过用户确认的回同步协议（`references/plan_sync_rules_zh.md`）才能编辑其 §2–§5，且始终原地更新并配对一个 `## Revision History` 条目。绝不重写 §1 或 §6，绝不触碰父计划——objective 或 strategy 级偏差转交 `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`。
-- Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件，且仅在 checkpoint 获批时（规约 §1）。
+- Git：每个已验证 action 一个 commit，只暂存该 action 触碰的文件——在执行分支上，连同本 action 更新过的运行记录——且仅在 checkpoint 获批时（规约 §1）。分支的创建、合并、弃用只发生在 §11 各自的确认点上（`references/branch_rules_zh.md`）；绝不 rebase 执行分支，记录未先带回基础分支的分支绝不删除。
 - 合法 action status：`pending` / `in_progress` / `done` / `blocked` / `skipped`。
 
 ## 对话纪律
 
 - 在非交互的 `codex exec` 中（`ask_user_question` 不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行，仍然重实验前停，在任何同步回写子计划前仍需纯文本确认。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
-- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交确认与 divergence 行确认（它回写计划 §2–§5）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的 checkpoint 提交与执行分支两问及 divergence 行确认（它回写计划 §2–§5）、合并确认点与分支的弃用或删除（规约 §11）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退（取推荐项：送回 decomposer 并停下）。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
