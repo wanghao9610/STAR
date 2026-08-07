@@ -19,4 +19,5 @@ what belongs here, the file format, how a memory is retired:
 
 <!-- entries below -->
 
+- pref · global · 2026-08-07 · [readme-changelog-entry-length](readme-changelog-entry-length.md) — README 更新日志每条发布最多三句话，越短越好
 - pref · global · 2026-08-04 · [readme-changelog-three-open](readme-changelog-three-open.md) — README 更新日志只展开最新三条，其余折进 `<details>` 块
