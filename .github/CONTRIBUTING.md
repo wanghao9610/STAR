@@ -80,12 +80,18 @@ needed neither correction — Kimi Code CLI's file tools are `Read`, `Write`, `E
 does need holds: the `Agent` tool takes `subagent_type`, whose built-in values are `coder` (default),
 `explore` and `plan`, and whose questions take `multi_select` where Claude writes `multiSelect`.
 
-`.cursor` is the tree with nothing to cite. [Cursor's docs](https://cursor.com/docs/agent/overview)
-publish capabilities rather than tool identifiers — "Read files", "Run shell commands", a page titled
-[Terminal](https://cursor.com/docs/agent/tools/terminal) — so its `Read` and `Shell` are descriptive
-names this repository chose, not names read off a list, and swapping them for the community-reported
-`read_file` and `run_terminal_cmd` would move the guess rather than end it. They stay as they are, and
-this paragraph is the reason, so the next pass does not "correct" them into a third spelling. What is
+`.cursor` used to be the tree with nothing to cite, and no longer is. The prose pages still publish
+capabilities rather than identifiers — "Read files", "Run shell commands", a page titled
+[Terminal](https://cursor.com/docs/agent/tools/terminal) — which is why `Read` and `Shell` began as
+descriptive names this repository chose rather than names read off a list. Two config surfaces now
+publish them: [hooks](https://cursor.com/docs/hooks) gives the `preToolUse` matcher values as
+"`Shell`, `Read`, `Write`, `Grep`, `Delete`, `Task`, and MCP tools using the `MCP:<tool_name>`
+format", and [permissions](https://cursor.com/docs/cli/reference/permissions) gives the tokens
+`Shell(...)`, `Read(...)`, `Write(...)`, `WebFetch(...)`, `Mcp(...)`. **The guess turned out to match
+the published names exactly**, so the two stay as they are — now because they are cited, not because
+re-guessing them would only move the guess. The community-reported `read_file` / `run_terminal_cmd`
+belong to neither surface; the SDK's own lowercase union (`"read"`, `"shell"`, `"task"`, …) is a third
+namespace and not the one these files write in. What is
 published there is the `Task` tool, in [Subagents](https://cursor.com/docs/subagents); `subagent_type`
 is not, appearing only in community bug reports. Note which word moved where: in Cursor's vocabulary
 `Bash` is the name of a subagent, not of its terminal.
@@ -151,6 +157,52 @@ are not simple omissions: it restructures.
 
 It is therefore **exempt from the structural check**, and that exemption is a known hole: see below.
 
+## Skill frontmatter does not port
+
+`.claude/skills/*/SKILL.md` carries `argument-hint` and `allowed-tools`. **No other tree does, and
+none should.** Each key was checked against its harness's own surface rather than against how
+plausible it looks there — the discipline the tool names get above, applied to frontmatter.
+
+| Tree | `argument-hint` | `allowed-tools` | Where tool pre-approval actually lives |
+|---|---|---|---|
+| `.claude` | supported | supported | the skill, scoped to the turn that invokes it |
+| `.cursor` | not a field | not a field | `.cursor/cli.json` `permissions.allow`, session-wide |
+| `.kimi-code` | not a field | not a field | `~/.kimi-code/config.toml` `[[permission.rules]]`, user-level |
+| `.agents` | authoring prose only | authoring prose only | nowhere per-skill — removed on purpose |
+
+**Cursor's frontmatter table is closed at five keys** — `name`, `description`, `paths`,
+`disable-model-invocation`, `metadata` (plus legacy `globs`, and `user-invocable`, documented only in
+the [CLI changelog](https://cursor.com/docs/cli/changelog)). Neither key appears anywhere in
+[its skills reference](https://cursor.com/docs/skills). Its permission tokens are a different
+vocabulary again — `Shell(...)`, `Read(...)`, `Write(...)`, `WebFetch(...)`, `Mcp(...)` in
+[`permissions`](https://cursor.com/docs/cli/reference/permissions) — so even the upstream spec's
+`allowed-tools: Bash(git:*)` example would name a tool Cursor does not have.
+
+**Kimi keeps unknown keys and ignores them**, so a ported `allowed-tools:` block is inert rather than
+an error — the worst failure mode, because nothing reports it. Its parser strips the frontmatter
+before the body is sent (`parser.ts`), so a key the runtime does not read never reaches the model
+either. Its own `arguments` field is not a hint: it declares positional substitutions for `$NAME`
+placeholders in the body, is absent from the `/` menu entry (`tui/commands/skills.ts` sends `name`,
+`aliases`, `description` and nothing else), and buys nothing for bodies like ours that carry no
+placeholders. The prose `Invocation:` line already in the body is what actually reaches the model.
+
+**Codex removed per-skill permissions on purpose.** `agents/openai.yaml` accepted a `permissions:`
+block for about six weeks in early 2026 (`5b6911cb`) and lost it again (`0bb152b0`, `b3e069e8`); the
+regression test `shell_zsh_fork_skill_scripts_ignore_declared_permissions` now asserts that declared
+skill permissions "should not widen script execution beyond the turn sandbox". Both keys survive in
+the shipped binary only inside the bundled skill-creator's authoring guide — one occurrence of
+`argument-hint`, two of `allowed-tools`, none in a runtime path. Worse, Codex's marketplace validator
+pins `allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}` and
+rejects anything else with "Unexpected key(s) in SKILL.md frontmatter", so adding `argument-hint`
+there would be inert at runtime *and* a validation failure on publish.
+
+**Anything a skill needs pre-approved in the other three trees is a project- or user-level config
+change, not a skill change** — and it is always broader in scope than the Claude equivalent, which
+lasts one turn. Do not port a turn-scoped grant into an always-on config without saying so.
+
+To re-check any of this without guessing: `codex debug prompt-input` renders Codex's model-visible
+input as JSON, which is also how the truncation below was measured.
+
 ## The description length limit
 
 **`SKILL.md` frontmatter descriptions are capped at 1024 characters, in all four trees.** Not a
@@ -173,6 +225,17 @@ and 1559 (`star-metd-summarize`, `star-refs-reviewer`, `star-expt-analyst`; all 
 limit now) — so the tail of a long description silently never reaches the listing the agent matches
 against. Both numbers matter: 1024 is what the spec allows, ~1500 is where a description starts losing
 its ending in practice.
+
+**Codex truncates far harder than either number, and it is measurable.** `codex debug prompt-input`
+renders the model-visible input; in it every skill — Codex's own bundled ones included — is one line
+of `name: <first ~100 characters of description> (file: <path>)`, cut mid-word with no ellipsis. The
+fifteen `.agents` descriptions run 566–1016 characters, so **about 10% of what is written reaches the
+model, and the "Use when the user runs `$star-*`, or wants …" trigger clause reaches it for none of
+the fifteen.** That clause is the entire mechanism by which a description earns an unprompted
+invocation, and on Codex it is dead weight. The full `SKILL.md` still loads once a skill is invoked,
+so this costs discovery, not execution — but discovery is what a description is for. Whether to
+front-load the triggers into the first ~100 characters of the `.agents` descriptions is an open
+question and its own commit; nothing here does it, and no check can see it.
 
 Condensing loses things silently, which is the real cost. Two clauses had gone missing from the
 English descriptions and were restored: `star-code-release`'s "prepares a release and never publishes
@@ -270,9 +333,9 @@ nothing enforces that judgement.
     `general-purpose` for Claude, `explore` alone for Cursor, `explore` / `coder` for
     Kimi — which check 22 had covered for Codex alone. It exists because the inverse of an unadapted
     name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
-    every check passed it. For `.cursor` the pinned names are this repository's own descriptive
-    choice, since Cursor publishes no identifiers to check against; the check freezes them so they
-    stop being re-guessed, and says so where it is defined.
+    every check passed it. `.cursor`'s two began as this repository's descriptive choice and are now
+    citable — Cursor's hooks and CLI-permissions pages publish `Shell` and `Read` — so all four trees
+    are pinned against a vendor list rather than against a guess.
 
 ## What the checks do not catch
 
@@ -302,13 +365,13 @@ Be honest with yourself about this list; it is where the real drift lives.
   byte-exact match to a scanner without adding its row, and the next person to reword the producer
   breaks it silently, exactly as before. When you teach a script to match on a new string, register it
   in the same commit.
-- **Whether a pinned tool name is the harness's or ours.** Check 23 pins four trees' tool vocabulary
-  against a table written here, and a table is only as good as the list behind it. Three trees have a
-  published list of tool identifiers; `.cursor` has none, so its `Read` and `Shell` are pinned as this
-  repository's own descriptive choice. What the check can prove is that a name has not drifted since
-  someone last looked, never that it was right when they looked — `generalPurpose` sat in that tree
-  after Cursor's built-in subagents had moved on, and a check written a day earlier would have pinned
-  it there.
+- **Whether a pinned tool name is still the harness's.** Check 23 pins four trees' tool vocabulary
+  against a table written here, and a table is only as good as the list behind it. All four names now
+  trace to a vendor's published list, but what the check can prove is that a name has not drifted
+  since someone last looked, never that it was right when they looked — `generalPurpose` sat in that
+  tree after Cursor's built-in subagents had moved on, and a check written a day earlier would have
+  pinned it there. Cursor's case cuts both ways: its identifiers went from unpublished to published
+  without anything here noticing, so a re-check can also *gain* a citation, not only lose one.
 
 ## Before you commit
 

@@ -1346,12 +1346,16 @@ rm -f "${codex_expected}" "${codex_actual}"
 #     names, onto ReadFile and Shell, which it has never had. Pinned here so
 #     neither direction rests on how plausible a name feels.
 #
-#     Three of the four names below come from a vendor's published list. Cursor's
-#     do not: its docs give capabilities ("Read files", "Run shell commands", a
-#     page titled Terminal) and no identifiers, so .cursor's Read and Shell are
-#     this repository's descriptive choice, frozen here rather than re-guessed
-#     into read_file / run_terminal_cmd, which are community-reported. What it
-#     does publish is explore, bash and browser as built-in subagents, so explore
+#     All four now come from a vendor's published list. Cursor's prose pages give
+#     capabilities rather than identifiers ("Read files", "Run shell commands", a
+#     page titled Terminal), which is why .cursor's Read and Shell began as this
+#     repository's descriptive choice; two config surfaces have since published
+#     the same two names — the hooks page lists Shell, Read, Write, Grep, Delete
+#     and Task as preToolUse matcher values, and the CLI permissions page gives
+#     the tokens Shell(...), Read(...), Write(...), WebFetch(...), Mcp(...). The
+#     guess matched, so nothing moves; the community-reported read_file /
+#     run_terminal_cmd belong to neither surface. What it also publishes is
+#     explore, bash and browser as built-in subagents, so explore
 #     is the only value .cursor may name: none of the other two is the
 #     file-writing migrator generalPurpose used to stand for, and that tree's
 #     writing delegates now carry no subagent_type at all. See
