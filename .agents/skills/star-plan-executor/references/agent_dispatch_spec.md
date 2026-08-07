@@ -1,6 +1,6 @@
 # Selective Delegation Contract
 
-Delegate only when Codex collaboration tools are available and the work is bounded, independent, and materially benefits from a separate context or parallel execution. When delegating, call `spawn_agent` with `agent_type: worker`; use `agent_type: explorer` only for a read-only orientation scope. Execute locally when a step is small, sequential, tightly coupled to current edits, or likely to cause overlapping file ownership. Do not create one subagent per trivial action.
+Delegate whenever Codex collaboration tools are available and the work is bounded, independent, and materially benefits from a separate context or parallel execution. When delegating, call `spawn_agent` with `agent_type: worker`; use `agent_type: explorer` only for a read-only orientation scope. Execute locally when a step is small, sequential, tightly coupled to current edits, or likely to cause overlapping file ownership. Do not create one subagent per trivial action.
 
 **A coherent scope** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate actions. A scope is delegated once, checked once, and written to EXEC_LOG as one row per member action carrying the scope id — a scope that did not return leaves every member row un-done, so a resume never reads a half-finished scope as finished. Split at any STOP-line boundary.
 

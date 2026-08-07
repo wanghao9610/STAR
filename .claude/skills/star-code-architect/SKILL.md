@@ -116,7 +116,7 @@ Count the clone's `.py` files first. Under the light-mode threshold: complete th
 
 #### Step B1: Survey
 
-Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — at most 3 in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
+Dispatch read-only `Agent` subagents (`subagent_type: Explore`), one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — run in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
 
 ### Converged: architecture, migration, specs
 
@@ -130,7 +130,7 @@ Show the architecture summary and the numbered migration table as normal text. T
 
 #### Step C3: Execute migrations
 
-Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run ≤3 in parallel, dependent groups serially. Dispatch one `Agent` subagent (`subagent_type: general-purpose`) per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
+Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run in parallel, dependent groups serially. Dispatch one `Agent` subagent (`subagent_type: general-purpose`) per group with the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
 
 #### Step C4: Write the specs
 

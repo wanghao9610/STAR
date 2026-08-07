@@ -90,7 +90,7 @@ description: >-
 
 #### Step B1：勘察
 
-派发只读 `Agent` subagent（`subagent_type: explore`），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——最多 3 个并行，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的可疑写法）。
+派发只读 `Agent` subagent（`subagent_type: explore`），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——并行派发，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的可疑写法）。
 
 ### 汇合：架构、迁移、规范
 
@@ -104,7 +104,7 @@ description: >-
 
 #### Step C3：执行迁移
 
-把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组最多 3 个并行，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: coder`），格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
+把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组并行派发，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: coder`），格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
 #### Step C4：写出规范
 

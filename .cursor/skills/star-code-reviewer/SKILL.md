@@ -77,8 +77,8 @@ It is grep and `wc`, never a tree-wide linter run: a repo-wide `ruff check` is t
 
 ### Step 3: Collect findings
 
-- **Small scope** (≤ ~20 files — a diff-mode review usually is): the main agent reads every file and applies `references/review_rubric.md` directly.
-- **Larger scope**: partition by package/directory into read-only `Task` subagents (`subagent_type: explore`), at most 3 in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
+- **Small scope** (≤ ~20 files — a diff-mode review usually is): the main agent can read every file and apply `references/review_rubric.md` directly.
+- **Larger scope**: partition by package/directory into read-only `Task` subagents (`subagent_type: explore`), run in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding contract in `review_rubric.md`. Read-only subagents never write, never review outside their file list, never grade the overall verdict.
 - **Plan mode adds dimension F** (main agent, not the read-only subagents — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
 
 ### Step 4: Verify

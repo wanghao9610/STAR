@@ -40,7 +40,7 @@
 
 ## 规模
 
-一次汇总涉及 ≤ ~6 份报告时由主 agent 直接读。多于这个数,就把**报告路径**切分给只读 `Agent` subagent（`subagent_type: Explore`）,至多 3 个并行,每个拿到确切清单和下面这份返回格式:
+一次汇总涉及 ≤ ~6 份报告时通常由主 agent 直接读更省事。多于这个数,就把**报告路径**切分给只读 `Agent` subagent（`subagent_type: Explore`）,并行派发,每个拿到确切清单和下面这份返回格式:
 
 ```yaml
 - run: <slug>

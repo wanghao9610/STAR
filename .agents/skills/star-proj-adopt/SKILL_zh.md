@@ -54,7 +54,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 在不写任何东西的前提下探测：候选源码目录（顶层可导入包、入口脚本导入的那个）、实际在用的运行时（`conda env list`、`.venv`、`which python`、已有脚本里的环境名）、数据 / 权重 / 输出当前在哪、启动入口及其调用方式、测试覆盖情况，以及 git 历史的形状（首次提交、提交数、活跃路径）。把映射浓缩成一整块呈现，置信度低的行逐条标出。
 
-默认在本地探测；只有多个勘察项确实能从独立收集中受益时才选择性委派。对选中的只读勘察项调用 `spawn_agent` 并使用 `agent_type: explorer`——源码、运行时、数据、权重、输出、启动入口——至多 3 个并行，每个的交办说明逐字写明："只读——不要跑这个项目的代码，不要 import 它的包，不要创建或修复任何环境；什么都不要写。"各自返回发现、证据路径、备选与未知项——**不返回置信标签**：`adopt_spec_zh.md` 里，是置信度决定了哪些行才够格走到确认点 1，所以 `certain` / `likely` / `unknown` 由主 agent 自己判。确认一条 `certain` 只需跑一条命令（`test -d`、查一下解释器版本），不必重读一遍，所以整个仓库的内容不会又涌回上下文。陌生仓库的开销就集中在这一步；下面的 S4 直接用这些勘察项收集到的证据，不再把它们的来源走第二遍。
+探测优先委派：多个勘察项确实能从独立收集中受益时就派出去。对选中的只读勘察项调用 `spawn_agent` 并使用 `agent_type: explorer`——源码、运行时、数据、权重、输出、启动入口——并行派发，每个的交办说明逐字写明："只读——不要跑这个项目的代码，不要 import 它的包，不要创建或修复任何环境；什么都不要写。"各自返回发现、证据路径、备选与未知项——**不返回置信标签**：`adopt_spec_zh.md` 里，是置信度决定了哪些行才够格走到确认点 1，所以 `certain` / `likely` / `unknown` 由主 agent 自己判。确认一条 `certain` 只需跑一条命令（`test -d`、查一下解释器版本），不必重读一遍，所以整个仓库的内容不会又涌回上下文。陌生仓库的开销就集中在这一步；下面的 S4 直接用这些勘察项收集到的证据，不再把它们的来源走第二遍。
 
 #### Step S2：确认点 1——确认映射
 
@@ -71,7 +71,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step S4：建立工作清单
 
-从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `$star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。默认在本地勘察；委派要有选择。S1 的各勘察项已经走过 git 历史、启动入口和输出目录：这一步就从它们返回的东西里汇总，只去打开没有任何一项覆盖到的部分。主 agent 负责合并，并独占全部判断，包括"两条提交加一个输出目录讲的是同一件事，就只算一行"这条规则。
+从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每一行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、以及证据路径。这是 `$star-plan-coach` 要读的种子；它是对仓库的描述，不是计划（原则 5）。勘察可以委派，派不派由主 agent 定。S1 的各勘察项已经走过 git 历史、启动入口和输出目录：这一步就从它们返回的东西里汇总，只去打开没有任何一项覆盖到的部分。主 agent 负责合并，并独占全部判断，包括"两条提交加一个输出目录讲的是同一件事，就只算一行"这条规则。
 
 #### Step S5：确认点 2——把值得留存的历史 run 入账
 
@@ -85,7 +85,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step B1：清单与 leaf 对账
 
-读 `metds/adopt.md` 和 `metds/plans/` 里的每个 leaf（规约 §5.4）。小树（≤ ~8 个 leaf）由主 agent 自己读。更大的：把 leaf 切成至多 3 份互不相交的只读收集，逐 leaf 返回 `{leaf, deliverable_paths, step_paths, done_criterion（原文照录）, exec_status, overlap, weak}`——匹配规则只用得到这些，用不着整份计划正文。主 agent 对每个它准备判为 `done` 的 leaf 重读完整 §5，并保留多对多那条规则和确认点。给出映射表：清单条目 → leaf → 它支持的状态（`done` / `in_progress`）→ 证据。两类错配都要如实报告——没有任何 leaf 覆盖的清单条目（计划树漏掉的工作），以及清单够不着的 leaf（真正的新工作，这是常态，不是问题）。
+读 `metds/adopt.md` 和 `metds/plans/` 里的每个 leaf（规约 §5.4）。小树（≤ ~8 个 leaf）通常由主 agent 自己读更省事。更大的：把 leaf 切成互不相交的只读收集，逐 leaf 返回 `{leaf, deliverable_paths, step_paths, done_criterion（原文照录）, exec_status, overlap, weak}`——匹配规则只用得到这些，用不着整份计划正文。主 agent 对每个它准备判为 `done` 的 leaf 重读完整 §5，并保留多对多那条规则和确认点。给出映射表：清单条目 → leaf → 它支持的状态（`done` / `in_progress`）→ 证据。两类错配都要如实报告——没有任何 leaf 覆盖的清单条目（计划树漏掉的工作），以及清单够不着的 leaf（真正的新工作，这是常态，不是问题）。
 
 #### Step B2：确认点 3——逐 leaf 确认
 

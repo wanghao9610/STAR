@@ -73,7 +73,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 ### Step 3：收集问题项
 
 - **小范围**（≤ 约 20 个文件——diff 模式的审查通常都是）：主 agent 逐个读文件，直接应用 `references/review_rubric_zh.md`。
-- **较大范围**：按包/目录切分给只读 `Agent` subagent（`subagent_type: Explore`），至多 3 个并行，每个拿到评分表、Step 1 构建的评判依据摘要（同一块内容，逐字发给所有人）和确切的文件清单，按 `review_rubric_zh.md` 规定的结构化问题项格式返回。收集器绝不写文件、绝不越出自己的清单、绝不给整体结论打分。
+- **较大范围**：按包/目录切分给只读 `Agent` subagent（`subagent_type: Explore`），并行派发，每个拿到评分表、Step 1 构建的评判依据摘要（同一块内容，逐字发给所有人）和确切的文件清单，按 `review_rubric_zh.md` 规定的结构化问题项格式返回。收集器绝不写文件、绝不越出自己的清单、绝不给整体结论打分。
 - **计划模式加维度 F**（主 agent 做，不交收集器——它需要计划上下文）：§3 任务到代码的映射、§4 交付物在磁盘上核对、§5 支撑检查、EXEC_LOG 与代码交叉核对。
 
 ### Step 4：核实

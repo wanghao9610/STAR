@@ -57,7 +57,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 2：收集证据（只读 Task subagent）
 
-**证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径，且 §2–§3 没有点名任何代码模块——由主 agent 自己读：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
+**证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径，且 §2–§3 没有点名任何代码模块——通常由主 agent 自己读更省事：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
 
 规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Task` subagent（`subagent_type: explore`）——通常是 **log reader**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**artifact inspector**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **code inspector**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 

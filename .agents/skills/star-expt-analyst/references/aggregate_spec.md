@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers. That is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is read by the main agent. Above that, selectively per the executor's Core Principle 2, partition the **report paths** and call `spawn_agent` with `agent_type: explorer` for each selected read-only partition, at most 3 in parallel, each given its exact list and this return contract:
+A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, selectively per the executor's Core Principle 3, partition the **report paths** and call `spawn_agent` with `agent_type: explorer` for each selected read-only partition, run in parallel, each given its exact list and this return contract:
 
 ```yaml
 - run: <slug>

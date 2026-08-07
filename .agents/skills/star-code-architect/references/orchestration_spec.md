@@ -1,6 +1,6 @@
 # Orchestration Spec
 
-How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Execute locally by default; delegate a bounded area or group only when collaboration tools are available and delegation materially helps. When delegating, call `spawn_agent` with `agent_type: explorer` for a survey area or `agent_type: worker` for a migration group. The main agent always owns the confirmation points, verification, commits, and rollback.
+How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Delegate a bounded area or group whenever collaboration tools are available and delegation materially helps; execute locally when they are not. When delegating, call `spawn_agent` with `agent_type: explorer` for a survey area or `agent_type: worker` for a migration group. The main agent always owns the confirmation points, verification, commits, and rollback.
 
 ## Roles
 
@@ -12,7 +12,7 @@ How this skill structures survey and migration work. Sibling contract: the execu
 
 1. Take only the items approved at confirmation point 2.
 2. Group items so that **file ownership is disjoint**: no file may belong to two groups. Compute it rather than assume it — per candidate item, `grep -rln "<the module's dotted import path>" ${CODE_NAME}`; the union of those hits plus the item's moved files **is** that item's ownership set, and intersecting sets merge into one group. Use the dotted path, not a bare module name: over-merging costs parallelism, never correctness. Import-fix sites are exactly what a migrator discovers after dispatch, which is why this cannot wait until then — without it two parallel migrators can edit one file and per-group `git restore` stops working.
-3. Order groups upstream-first along import chains. When delegation is available, independent groups may run concurrently, **at most 3 at a time**; otherwise execute them one by one.
+3. Order groups upstream-first along import chains. When delegation is available, independent groups may run concurrently; otherwise execute them one by one.
 4. Precondition per group: its paths are clean in git (nothing unstaged/uncommitted touching them).
 
 ## Work contract (per migration group, local or delegated)
