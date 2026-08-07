@@ -60,21 +60,25 @@ the question tool splits by name — `AskUserQuestion` in 32 `.claude` and 32 `.
 `Agent` in 28 files each of `.claude` and `.kimi-code`, `Task` in 28 `.cursor` files, and
 `spawn_agent` in 30 `.agents` files: the corresponding 28 delegation-capable files carry `agent_type`,
 while the two `star-flow-status` manifests prohibit the call. The former three carry `subagent_type`.
-The terminal tool is `Bash` in 30 `.claude` files, `Shell` in 30 files each of `.cursor` and
-`.kimi-code`, and lowercase `shell` in `.agents`, which is how Codex writes it; the file reader is
-`Read` in 28 files each of `.claude` and `.cursor` and `ReadFile` in 28 `.kimi-code` files, while
+The terminal tool is `Bash` in 30 files each of `.claude` and `.kimi-code`, `Shell` in 30 `.cursor`
+files, and lowercase `shell` in `.agents`, which is how Codex writes it; the file reader is
+`Read` in 28 files each of `.claude`, `.cursor` and `.kimi-code`, while
 `.agents` names none — Codex has no
 file-reading tool, so those loads say "file read" and carry a marked fallback that `cat`s the files into
 the shell call and accepts the spill. A term concentrated in the trees whose harness actually has it is
 almost always correct.
 
 Every one of those names was checked against its harness's own tool list, not against how the other
-trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the Kimi CLI built-in tools
-reference, and for Codex the tool handlers in `openai/codex` (`codex-rs/core/src/tools/`), where the
+trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the [Kimi Code CLI built-in tools
+reference](https://moonshotai.github.io/kimi-code/en/reference/tools.html), and for Codex the tool
+handlers in `openai/codex` (`codex-rs/core/src/tools/`), where the
 registered names are `shell_command`, `apply_patch`, `update_plan`, `request_user_input` and
-`spawn_agent`. Three trees needed correcting: `.cursor` and `.kimi-code` had inherited Claude's `Bash`
-(and Kimi also its `Read`), and `.agents` named `Bash`, `Read` and `ask_user_question`, the last of
-which Codex has never had.
+`spawn_agent`. Two trees needed correcting: `.cursor` had inherited Claude's `Bash`, and `.agents`
+named `Bash`, `Read` and `ask_user_question`, the last of which Codex has never had. `.kimi-code`
+needed neither correction — Kimi Code CLI's file tools are `Read`, `Write`, `Edit`, `Grep`, `Glob` and
+`ReadMediaFile`, and its terminal is `Bash`, the same names Claude publishes — and the delegation it
+does need holds: the `Agent` tool takes `subagent_type`, whose built-in values are `coder` (default),
+`explore` and `plan`, and whose questions take `multi_select` where Claude writes `multiSelect`.
 
 Codex delegation names the real call without changing the cost stance: **collect locally by default,
 delegate selectively**, then call `spawn_agent` only after the bounded / independent / materially
@@ -90,11 +94,23 @@ templates told users "Claude Code injects it at session start" (`e149ae0`), and 
 **The names a port forgets to adapt are the ones no reviewer looks at twice.** `Bash` and `Read` were
 carried unchanged into `.cursor`, `.kimi-code` and `.agents` for as long as those trees existed, because
 a tool name that reads like an ordinary English word does not look like Claude vocabulary — unlike
-`AskUserQuestion`, which does. All three named a tool their harness has never had. `.agents` also named
-`ask_user_question`, which is worse than an unadapted name: it is harness-shaped, lowercase and
+`AskUserQuestion`, which does. In `.cursor` and `.agents` that was the defect it looks like. `.agents`
+also named `ask_user_question`, which is worse than an unadapted name: it is harness-shaped, lowercase and
 plausible, so it reads as if someone had checked. Nobody had — Codex calls it `request_user_input`. When
 you port a tree, check every tool name against that harness's published tool list, not against how
 familiar or how plausible the name feels.
+
+**Renaming on that suspicion, unchecked, is the same defect inverted.** `.kimi-code` had `Bash` and
+`Read` because Kimi Code CLI calls them `Bash` and `Read`. v0.1.8 read them as unadapted Claude
+vocabulary and renamed them to `Shell` and `ReadFile` across 30 files — names that harness has never
+had — then wrote the rename into this file and into the change log as a name checked against Kimi's
+own list, which is why nothing questioned it for eleven releases. The contradiction was legible from
+v0.1.17 on, where `.kimi-code/hooks.example.toml` registers the commit guard against `PreToolUse`
+matching `Bash`, the name every manifest beside it had stopped using; nobody read the two together.
+A rename carries the same burden an inherited name does:
+cite the harness's published list, and where a name is only ever a citation away, pin it. Check 23 now
+holds the four trees' file reader, terminal and `subagent_type` values, so neither direction is a
+matter of memory.
 
 **A capability the harness has since gained is the same defect, aged.** A tree ported while its harness
 lacked a mechanism keeps the workaround long after the mechanism arrives, and no check can see it —
@@ -224,6 +240,16 @@ nothing enforces that judgement.
     about what may be skipped; and moving it below the first `##` heading, where it stops being part of
     the load the reader is deciding about. It must also carry no bare `§n` — check 20d reads every `§n`
     in that same block as a claim about which sections the skill loads.
+22. **Delegation calls stay native to each harness.** `.agents` names `spawn_agent` with
+    `agent_type: explorer` or `worker` in exactly the files `.claude` marks with `subagent_type`, and
+    neither vocabulary appears in the other's trees.
+23. **Each tree names only its own harness's file reader, terminal, and subagent types.** Claude Code
+    and Kimi Code publish `Read` and `Bash`; Cursor's terminal is `Shell`; Codex has no file reader and
+    writes its terminal lowercase. The `subagent_type` values are pinned per tree — `Explore` /
+    `general-purpose` for Claude, `explore` / `generalPurpose` for Cursor, `explore` / `coder` for
+    Kimi — which check 22 had covered for Codex alone. It exists because the inverse of an unadapted
+    name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
+    every check passed it.
 
 ## What the checks do not catch
 

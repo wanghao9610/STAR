@@ -19,13 +19,13 @@ description: >-
 
 调用方式：`/skill:star-env-builder [ENV_NAME | add <包名>…]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `ReadFile` 读入，外加同一条消息里的一次 Shell 调用（以项目根目录为工作目录），内容只有：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `Read` 读入，外加同一条消息里的一次 Bash 调用（以项目根目录为工作目录），内容只有：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 Shell 命令：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。Shell 只承担只有 Shell 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
+一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 Bash 命令：每份工具结果各有自己的大小上限，Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。Bash 只承担只有 Bash 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

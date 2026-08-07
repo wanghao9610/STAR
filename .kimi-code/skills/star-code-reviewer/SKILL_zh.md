@@ -15,13 +15,13 @@ description: >-
 
 调用方式：`/skill:star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。动手前用一条消息装齐全部输入：一次 `ReadFile` 读规约文件，一次 `ReadFile` 读 `<本 skill 所在目录>/references/review_rubric_zh.md`，外加同一条消息里一次 Shell 调用（以项目根目录为工作目录），只带这一行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。动手前用一条消息装齐全部输入：一次 `Read` 读规约文件，一次 `Read` 读 `<本 skill 所在目录>/references/review_rubric_zh.md`，外加同一条消息里一次 Bash 调用（以项目根目录为工作目录），只带这一行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、三份结果：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——六维评分表连同其问题项格式约定（Step 1 组装评判依据摘要、Step 3 收集问题项用的都是它），以及只有 Shell 能查的 `.env` 那一行。别把这两个文件 `cat` 进命令里：Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——单是规约文件就已越过这个上限——而每次 `ReadFile` 的结果各占自己的额度、整份直达。后续步骤直接用这里装入的评分表，不再单独读；报告模板与 Step 1 要读的项目侧文件各在其步骤装载，不在这里。
+一条消息、三份结果：规约——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局——六维评分表连同其问题项格式约定（Step 1 组装评判依据摘要、Step 3 收集问题项用的都是它），以及只有 Bash 能查的 `.env` 那一行。别把这两个文件 `cat` 进命令里：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——单是规约文件就已越过这个上限——而每次 `Read` 的结果各占自己的额度、整份直达。后续步骤直接用这里装入的评分表，不再单独读；报告模板与 Step 1 要读的项目侧文件各在其步骤装载，不在这里。
 
 **复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

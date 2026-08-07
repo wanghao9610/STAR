@@ -1336,6 +1336,55 @@ codex_delegate_files="$(wc -l < "${codex_actual}" | tr -d ' ')"
 rm -f "${codex_expected}" "${codex_actual}"
 (( delegation_errors == 0 )) && note "${codex_delegate_files} Codex delegation files name spawn_agent with explorer/worker agent_type"
 
+# 23. Every tree names only its own harness's tools.
+#     Check 22 covers the delegation call itself; this one covers the two names a
+#     port gets wrong most often — the file reader and the terminal — plus the
+#     subagent_type values, which check 22 validates for Codex alone. Both
+#     directions have happened: .cursor and .agents kept Claude's Bash unadapted,
+#     and .kimi-code was renamed off Read and Bash, which are Kimi Code CLI's own
+#     names, onto ReadFile and Shell, which it has never had. Pinned here so
+#     neither direction rests on how plausible a name feels.
+section "Harness tool vocabulary"
+vocab_errors=0
+
+check_vocab() { # $1 = skill root, $2 = expected-present ERE ('' = none), $3 = banned ERE
+    local root="$1" want="$2" banned="$3" hits
+    hits="$(grep -REn --include='*.md' "${banned}" "${root}" || true)"
+    if [[ -n "${hits}" ]]; then
+        fail "${root}: names a tool this harness does not have:"
+        printf '%s\n' "${hits}" | cut -c1-140 | head -5 | sed 's/^/      /'
+        vocab_errors=1
+    fi
+    if [[ -n "${want}" ]] && ! grep -REq --include='*.md' "${want}" "${root}"; then
+        fail "${root}: no file names its file reader (${want})"
+        vocab_errors=1
+    fi
+}
+
+# Claude Code and Kimi Code CLI both publish Read and Bash; Cursor's terminal is
+# Shell; Codex has no file-reading tool and writes its terminal lowercase.
+check_vocab .claude/skills    '`Read`' '\bShell\b|\bReadFile\b'
+check_vocab .kimi-code/skills '`Read`' '\bShell\b|\bReadFile\b'
+check_vocab .cursor/skills    '`Read`' '\bBash\b|\bReadFile\b'
+check_vocab .agents/skills    ''       '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+
+check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE alternation
+    local root="$1" allowed="$2" bad
+    bad="$(grep -REno --include='*.md' 'subagent_type: [A-Za-z_-]+' "${root}" \
+        | grep -vE "subagent_type: (${allowed})$" || true)"
+    if [[ -n "${bad}" ]]; then
+        fail "${root}: subagent_type outside this harness's published types (${allowed}):"
+        printf '%s\n' "${bad}" | sed 's/^/      /'
+        vocab_errors=1
+    fi
+}
+
+check_subagent_types .claude/skills    'Explore|general-purpose'
+check_subagent_types .cursor/skills    'explore|generalPurpose'
+check_subagent_types .kimi-code/skills 'explore|coder'
+
+(( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and subagent types"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

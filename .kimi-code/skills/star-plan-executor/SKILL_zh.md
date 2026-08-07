@@ -15,7 +15,7 @@ description: >-
 
 调用方式：`/skill:star-plan-executor PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `ReadFile` 调用读入，绝不 `cat` 进 Shell 命令——Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Shell 调用，以项目根目录为工作目录，带两行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Bash 调用，以项目根目录为工作目录，带两行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)

@@ -15,7 +15,7 @@ description: >-
 
 调用方式：`/skill:star-plan-decomposer PLAN_NAME`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `ReadFile` 读入，绝不 `cat` 进 Shell 命令：Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Shell 只做非它不可的事——一次调用，以项目根目录为工作目录，带两行：
+**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Bash 命令：Bash 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Bash 只做非它不可的事——一次调用，以项目根目录为工作目录，带两行：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
