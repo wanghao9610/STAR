@@ -80,6 +80,18 @@ needed neither correction — Kimi Code CLI's file tools are `Read`, `Write`, `E
 does need holds: the `Agent` tool takes `subagent_type`, whose built-in values are `coder` (default),
 `explore` and `plan`, and whose questions take `multi_select` where Claude writes `multiSelect`.
 
+`.cursor` is the tree with nothing to cite. [Cursor's docs](https://cursor.com/docs/agent/overview)
+publish capabilities rather than tool identifiers — "Read files", "Run shell commands", a page titled
+[Terminal](https://cursor.com/docs/agent/tools/terminal) — so its `Read` and `Shell` are descriptive
+names this repository chose, not names read off a list, and swapping them for the community-reported
+`read_file` and `run_terminal_cmd` would move the guess rather than end it. They stay as they are, and
+this paragraph is the reason, so the next pass does not "correct" them into a third spelling. What is
+published there is the `Task` tool, in [Subagents](https://cursor.com/docs/subagents); `subagent_type`
+is not, appearing only in community bug reports, and the built-in subagents are now **Explore**,
+**Bash** and **Browser**, which leaves this tree's `generalPurpose` unaccounted for — an open item, not
+renamed here, because none of the three built-ins is the file-writing migrator it stands for. Note
+which word moved where: in Cursor's vocabulary `Bash` is the name of a subagent, not of its terminal.
+
 Codex delegation names the real call without changing the cost stance: **collect locally by default,
 delegate selectively**, then call `spawn_agent` only after the bounded / independent / materially
 helpful test passes. Read-only collection uses `agent_type: explorer`; file-writing implementation uses
@@ -249,7 +261,9 @@ nothing enforces that judgement.
     `general-purpose` for Claude, `explore` / `generalPurpose` for Cursor, `explore` / `coder` for
     Kimi — which check 22 had covered for Codex alone. It exists because the inverse of an unadapted
     name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
-    every check passed it.
+    every check passed it. For `.cursor` the pinned names are this repository's own descriptive
+    choice, since Cursor publishes no identifiers to check against; the check freezes them so they
+    stop being re-guessed, and says so where it is defined.
 
 ## What the checks do not catch
 
@@ -279,6 +293,12 @@ Be honest with yourself about this list; it is where the real drift lives.
   byte-exact match to a scanner without adding its row, and the next person to reword the producer
   breaks it silently, exactly as before. When you teach a script to match on a new string, register it
   in the same commit.
+- **Whether a pinned tool name is the harness's or ours.** Check 23 pins four trees' tool vocabulary
+  against a table written here, and a table is only as good as the list behind it. Three trees have a
+  published list; `.cursor` has none, so its `Read` and `Shell` are pinned as this repository's own
+  descriptive choice, and its `subagent_type: generalPurpose` is pinned while Cursor's built-in
+  subagents have moved on to Explore, Bash and Browser. What the check can prove is that a name has
+  not drifted since someone last looked, never that it was right when they looked.
 
 ## Before you commit
 

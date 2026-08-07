@@ -1344,6 +1344,17 @@ rm -f "${codex_expected}" "${codex_actual}"
 #     and .kimi-code was renamed off Read and Bash, which are Kimi Code CLI's own
 #     names, onto ReadFile and Shell, which it has never had. Pinned here so
 #     neither direction rests on how plausible a name feels.
+#
+#     Three of the four names below come from a vendor's published list. Cursor's
+#     do not: its docs give capabilities ("Read files", "Run shell commands", a
+#     page titled Terminal) and no identifiers, so .cursor's Read and Shell are
+#     this repository's descriptive choice, frozen here rather than re-guessed
+#     into read_file / run_terminal_cmd, which are community-reported. Its
+#     subagent_type values are pinned as the tree currently writes them, and
+#     generalPurpose is known stale — Cursor's built-in subagents are now Explore,
+#     Bash and Browser, none of which is the file-writing migrator it stands for.
+#     Deciding what replaces it is an open item, not a check failure. See
+#     .github/CONTRIBUTING.md, "What must differ, and what must not".
 section "Harness tool vocabulary"
 vocab_errors=0
 
