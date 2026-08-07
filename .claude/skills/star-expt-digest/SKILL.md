@@ -1,5 +1,26 @@
 ---
 name: star-expt-digest
+context: fork
+background: false
+argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git branch --list:*)
+  - Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
+  - Edit(wkdrs/digests/**)
+  - Write(wkdrs/digests/**)
 description: >-
   Summarize what the experiment programme has done lately, in date order. No argument resumes from the
   previous digest; a PLAN_NAME covers that node's whole family — ancestors for context, every descendant

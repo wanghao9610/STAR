@@ -3,6 +3,23 @@ name: star-flow-status
 model: sonnet
 context: fork
 background: false
+argument-hint: "[PLAN_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git branch --list:*)
+  - Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
 description: >-
   Read-only overview of the whole research flow. Scans every metds/plans/*_plan.md, rebuilds the
   decomposition tree from parent/prefix, reads each node's section status, children, depends_on, and

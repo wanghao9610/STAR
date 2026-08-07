@@ -1,5 +1,27 @@
 ---
 name: star-env-builder
+argument-hint: "[ENV_NAME | add <package>…]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(nvidia-smi:*)
+  - Bash(nvcc:*)
+  - Bash(uv --version:*)
+  - Bash(uv venv:*)
+  - Bash(uv pip:*)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Build and verify the project's Python runtime so plan execution has a working interpreter. Reads .env:
   a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a .venv in the

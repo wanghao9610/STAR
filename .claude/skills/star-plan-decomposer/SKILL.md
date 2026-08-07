@@ -1,6 +1,27 @@
 ---
 name: star-plan-decomposer
 disable-model-invocation: true
+argument-hint: "[PLAN_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
+  - Edit(metds/plans/**)
+  - Write(metds/plans/**)
 description: >-
   Decompose an existing research plan (written by star-plan-coach and living under
   metds/plans/) into concrete, executable sub-plans. Reads the parent plan, picks a

@@ -1,6 +1,28 @@
 ---
 name: star-code-release
 disable-model-invocation: true
+argument-hint: "[gather | polish | readme | check]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(git mv:*)
+  - Edit(README.md)
+  - Edit(README.zh-CN.md)
+  - Edit(wkdrs/release/**)
+  - Write(wkdrs/release/**)
 description: >-
   Prepare the project for public release: consolidate scattered code into ${CODE_NAME}/ (from .env),
   polish what a reader will open, and compile README.md. Sweeps tasks/, wkdrs/ and the root, promoting

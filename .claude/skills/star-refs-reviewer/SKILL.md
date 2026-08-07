@@ -1,5 +1,31 @@
 ---
 name: star-refs-reviewer
+argument-hint: "[PLAN_NAME | TOPIC | ARXIV_ID | verify | organize | synthesize | survey | score | add PAPER…]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - WebSearch
+  - WebFetch(domain:api.semanticscholar.org)
+  - WebFetch(domain:arxiv.org)
+  - WebFetch(domain:export.arxiv.org)
+  - WebFetch(domain:dblp.org)
+  - WebFetch(domain:api.crossref.org)
+  - WebFetch(domain:doi.org)
+  - WebFetch(domain:api.github.com)
+  - WebFetch(domain:aclanthology.org)
+  - WebFetch(domain:openaccess.thecvf.com)
+  - Edit(metds/refs/**)
+  - Write(metds/refs/**)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Build an auditable related-work base: 5–10 close papers read into per-paper analysis notes, plus a
   classified reference.bib of ≥50 verified entries. No argument finds the method in metds/ and runs the

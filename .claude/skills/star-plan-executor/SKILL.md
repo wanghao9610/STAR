@@ -1,5 +1,35 @@
 ---
 name: star-plan-executor
+argument-hint: "[PLAN_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git branch --list:*)
+  - Bash(git switch:*)
+  - Bash(git restore:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
+  - Bash(bash execs/run.sh:*)
+  - Edit(metds/plans/**)
+  - Edit(tasks/**)
+  - Write(tasks/**)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Execute a leaf sub-plan (from star-plan-decomposer, under metds/plans/) against the project code.
   Orients in the codebase (${CODE_NAME}/, from .env) to build a "current vs required" gap list, enters

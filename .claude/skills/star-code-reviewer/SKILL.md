@@ -1,5 +1,24 @@
 ---
 name: star-code-reviewer
+argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Review code against the project's conventions and, when scoped to a plan, against what it promised. No
   argument reviews all of ${CODE_NAME}/; a PLAN_NAME (slug / prefix / filename) reviews the files that

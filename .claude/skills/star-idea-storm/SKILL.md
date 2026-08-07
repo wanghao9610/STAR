@@ -1,6 +1,30 @@
 ---
 name: star-idea-storm
 disable-model-invocation: true
+argument-hint: "[IDEA | IDEA_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - WebSearch
+  - WebFetch(domain:api.semanticscholar.org)
+  - WebFetch(domain:arxiv.org)
+  - WebFetch(domain:export.arxiv.org)
+  - WebFetch(domain:dblp.org)
+  - Edit(metds/ideas/**)
+  - Write(metds/ideas/**)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Coach a researcher from a vague interest to a defensible research topic through
   diverge–scan–converge: clarify the starting idea and its constraints, generate 3–5 genuinely

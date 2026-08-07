@@ -1,6 +1,31 @@
 ---
 name: star-code-architect
 disable-model-invocation: true
+argument-hint: "[GITHUB_URL | PLAN_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(git clone:*)
+  - Bash(gh search:*)
+  - Bash(gh api:*)
+  - WebSearch
+  - WebFetch(domain:github.com)
+  - WebFetch(domain:raw.githubusercontent.com)
+  - Edit(metds/codearc.md)
+  - Write(metds/codearc.md)
 description: >-
   Bootstrap or reorganize the project codebase (${CODE_NAME}/, from .env) so research plans under
   metds/plans/ have a place for the code to live. When ${CODE_NAME}/ is missing or empty: read the plan

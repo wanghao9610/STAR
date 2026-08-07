@@ -1,6 +1,34 @@
 ---
 name: star-proj-adopt
 disable-model-invocation: true
+argument-hint: "[survey | backfill]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(which:*)
+  - Bash(ln -s:*)
+  - Bash(bash execs/run.sh:*)
+  - Edit(metds/adopt.md)
+  - Write(metds/adopt.md)
+  - Edit(metds/plans/**)
+  - Write(metds/plans/**)
+  - Edit(execs/**)
+  - Write(execs/**)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the repository
   read-only (source layout, runtime, data / weights / output locations, entrypoints, git history, prior

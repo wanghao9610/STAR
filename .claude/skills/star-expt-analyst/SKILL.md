@@ -1,5 +1,19 @@
 ---
 name: star-expt-analyst
+argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
   prefix / filename) resolves via exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to its

@@ -1,6 +1,23 @@
 ---
 name: star-plan-coach
 disable-model-invocation: true
+argument-hint: "[TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Edit(metds/plans/**)
+  - Write(metds/plans/**)
 description: >-
   Coach CS researchers through writing a research plan by asking one question at a time, stage by stage
   (problem → related work → method → experiments → risks → milestones), writing each

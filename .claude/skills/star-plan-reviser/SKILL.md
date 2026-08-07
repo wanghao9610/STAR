@@ -1,6 +1,30 @@
 ---
 name: star-plan-reviser
 disable-model-invocation: true
+argument-hint: "[PLAN_NAME]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
+  - Edit(metds/plans/**)
+  - Edit(wkdrs/**)
+  - Write(wkdrs/**)
 description: >-
   Review one research plan (any node under metds/plans/) against its execution evidence, then
   revise it in place with per-item user approval. Dispatches read-only subagents to inspect

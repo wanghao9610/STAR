@@ -1,5 +1,31 @@
 ---
 name: star-metd-summarize
+argument-hint: "[overview | dataset | framework | training | evaluation]"
+allowed-tools:
+  - Bash(grep:*)
+  - Bash(echo:*)
+  - Bash(ls:*)
+  - Bash(find:*)
+  - Bash(wc:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(awk:*)
+  - Bash(sed -n:*)
+  - Bash(date:*)
+  - Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh:*)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
+  - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
+  - Edit(metds/overview.md)
+  - Write(metds/overview.md)
+  - Edit(metds/dataset.md)
+  - Write(metds/dataset.md)
+  - Edit(metds/framework.md)
+  - Write(metds/framework.md)
+  - Edit(metds/training.md)
+  - Write(metds/training.md)
+  - Edit(metds/evaluation.md)
+  - Write(metds/evaluation.md)
 description: >-
   Compile the research-plan tree under metds/plans/ into paper-ready method documents. Invoked as
   /star-metd-summarize [OPT] — overview, dataset, framework, training, evaluation; no argument compiles
