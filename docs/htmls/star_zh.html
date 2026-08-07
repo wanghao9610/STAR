@@ -761,12 +761,12 @@
       <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14); --card-c: #ff7eb6">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="11" rx="2"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.2"/><path d="M2.5 14v2"/><path d="M21.5 14v2"/><path d="M9.5 13.5v2"/><path d="M14.5 13.5v2"/></svg></div>
         <h3>原生支持 AI 智能体</h3>
-        <p>为 <strong>Codex</strong>、<strong>Claude</strong>、<strong>Kimi</strong> 和 <strong>Cursor</strong> 提供共享的指令与相同的 skill 集——中英文皆有。你的智能体遵循与你相同的约定；STAR 也不绑定具体框架：模型技术栈、依赖管理工具和实验跟踪平台都由你自行选择。</p>
+        <p>为 <strong>Codex</strong>、<strong>Claude</strong>、<strong>Kimi</strong> 和 <strong>Cursor</strong> 提供共享的指令与相同的 skill 集——中英文皆有。你的智能体遵循与你相同的约定，而 <code>.env</code> 里的两个旋钮定下条件：<code>INVOLVE</code> 决定一次运行在做决定前问你多少，<code>STAR_LANG</code> 决定它用哪种语言写。底层仍不绑定具体框架：模型技术栈、依赖管理工具和实验跟踪平台都由你自行选择。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14); --card-c: #f5a623">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 11.5l2 2 4-4"/></svg></div>
         <h3>适合大文件的安全默认配置</h3>
-        <p>本地数据、模型权重、生成的输出和环境配置默认不纳入版本控制。通过符号链接接入已有项目——不移动任何文件，不覆盖任何内容。</p>
+        <p>本地数据、模型权重、生成的输出和环境配置默认不纳入版本控制。通过符号链接接入已有项目——不移动任何文件，不覆盖任何内容。提交守卫会拦下代价高昂、难以撤销的操作：把全部改动一并暂存、改写历史，以及任何会把检查点写进历史的提交。</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14); --card-c: #8b93ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
@@ -853,7 +853,7 @@
           <h3>构建<small>搭起代码库及其所需的运行环境。</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-code-architect</code><p>从打分选出的参考实现奠基代码库，并记录架构。</p></div>
+          <div class="skill"><code>$star-code-architect</code><p>从打分选出的参考实现奠基代码库，或勘察并重组已有代码，并记录架构。</p></div>
           <div class="skill"><code>$star-env-builder</code><p>依据 <em>.env</em> 构建 conda 环境或 venv，解析依赖并做冒烟验证。</p></div>
           <div class="skill"><code>$star-plan-decomposer</code><p>把战略计划递归拆解为可验证、可执行的子计划。</p></div>
         </div>
@@ -866,7 +866,7 @@
         </div>
         <div class="skills">
           <div class="skill"><code>$star-plan-executor</code><p>实现并初步验证一个可执行的叶子计划，记录每次运行。</p></div>
-          <div class="skill"><code>$star-code-reviewer</code><p>对照项目规范和计划承诺的实现审查代码。</p></div>
+          <div class="skill"><code>$star-code-reviewer</code><p>对照项目规范和计划承诺的实现审查代码，再执行你逐条批准的修复。</p></div>
           <div class="skill"><code>$star-expt-analyst</code><p>对照计划的预期审计一次运行：产物、日志、指标及其含义。</p></div>
         </div>
       </div>
