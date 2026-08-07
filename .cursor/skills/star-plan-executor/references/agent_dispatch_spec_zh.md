@@ -1,6 +1,6 @@
 # Agent 派发格式约定（Cursor Task）
 
-EXEC_PLAN 里每个步骤(或每个连贯步骤组)用 `Task` 派一个 subagent。优先 `subagent_type: generalPurpose`;只读勘察可用 `explore`。主 agent 负责编排与验证;agent 只做这一步的改/跑。让 agent 只管一小块,以便失败可定位、上下文短。
+EXEC_PLAN 里每个步骤(或每个连贯步骤组)用 `Task` 派一个 subagent。要改文件或跑命令的步骤不设 `subagent_type`;只读勘察用 `subagent_type: explore`。主 agent 负责编排与验证;agent 只做这一步的改/跑。让 agent 只管一小块,以便失败可定位、上下文短。
 
 **连贯步骤组**指至多 3 个 EXEC_PLAN 动作:它们碰同一批文件、拆开就没有意义、共用同一个 check。除此之外都是各自独立的步骤。一个组只派发一次、只检查一次,写进 EXEC_LOG 时每个成员动作各占一行并带上组标识——没有返回的组,它的每一行都停在未完成,恢复时就不会把半途而废的组读成已完成。碰到红线边界要把组拆开。
 

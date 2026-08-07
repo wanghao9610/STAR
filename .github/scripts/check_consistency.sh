@@ -1349,11 +1349,11 @@ rm -f "${codex_expected}" "${codex_actual}"
 #     do not: its docs give capabilities ("Read files", "Run shell commands", a
 #     page titled Terminal) and no identifiers, so .cursor's Read and Shell are
 #     this repository's descriptive choice, frozen here rather than re-guessed
-#     into read_file / run_terminal_cmd, which are community-reported. Its
-#     subagent_type values are pinned as the tree currently writes them, and
-#     generalPurpose is known stale — Cursor's built-in subagents are now Explore,
-#     Bash and Browser, none of which is the file-writing migrator it stands for.
-#     Deciding what replaces it is an open item, not a check failure. See
+#     into read_file / run_terminal_cmd, which are community-reported. What it
+#     does publish is explore, bash and browser as built-in subagents, so explore
+#     is the only value .cursor may name: none of the other two is the
+#     file-writing migrator generalPurpose used to stand for, and that tree's
+#     writing delegates now carry no subagent_type at all. See
 #     .github/CONTRIBUTING.md, "What must differ, and what must not".
 section "Harness tool vocabulary"
 vocab_errors=0
@@ -1391,7 +1391,7 @@ check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE altern
 }
 
 check_subagent_types .claude/skills    'Explore|general-purpose'
-check_subagent_types .cursor/skills    'explore|generalPurpose'
+check_subagent_types .cursor/skills    'explore'
 check_subagent_types .kimi-code/skills 'explore|coder'
 
 (( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and subagent types"

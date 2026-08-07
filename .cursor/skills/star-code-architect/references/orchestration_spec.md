@@ -6,7 +6,7 @@ How the main agent coordinates `Task` subagents for this skill. Sibling contract
 
 - **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits checkpoints, rolls back failures.
 - **Surveyors** — read-only `Task` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
-- **Migrators** — `Task` subagents (`subagent_type: generalPurpose`), one per migration group, write access limited to their group's files.
+- **Migrators** — `Task` subagents with no `subagent_type` set (Cursor publishes no file-writing built-in), one per migration group, write access limited to their group's files.
 
 ## Partitioning migrations
 

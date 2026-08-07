@@ -80,7 +80,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 对 EXEC_PLAN 的每个步骤,依次:
 
-1. 按 `references/agent_dispatch_spec_zh.md` 的格式约定用 `Task` 派一个 subagent(`subagent_type: generalPurpose`;只读勘察可用 `explore`):本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
+1. 按 `references/agent_dispatch_spec_zh.md` 的格式约定用 `Task` 派一个 subagent(不设 `subagent_type`;只读勘察用 `subagent_type: explore`):本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
 2. agent 返回后,**主 agent 重跑绑定的 check** 确认(没有证据就不轻信自报的通过)。通过 → 记入 `EXEC_LOG.md`、更新子计划轻量状态,并在确认点批准了 checkpoint 时提交本步触碰的文件。失败 → 主 agent 自己那次重跑就是证据:读失败点名的 `file:line`;只有在要判 `blocked`、或失败看起来是子计划粒度的问题时(第 4 条),才展开 agent 的完整 diff。重试之前先恢复这一步名下的文件;有限重试(≤2)并把失败信息回传;仍失败 → 该步标 `blocked`,定下它那些改动怎么处理(`agent_dispatch_spec_zh.md`),带日志停下。
 3. **若该步在红线上**(重实验)→ **不**派它执行;把备好的命令写进 EXEC_LOG 的"待用户执行"区,停下交回用户。
 4. 若重试或 blocker 导致做法在子计划粒度上变了(步骤增/删/替换、产出路径或完成判据移位),在 EXEC_LOG 的"待同步修正"区记一行变更项后继续——这些留到 Step 6 同步,不在执行中途处理。

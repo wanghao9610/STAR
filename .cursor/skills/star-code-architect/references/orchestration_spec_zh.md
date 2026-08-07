@@ -6,7 +6,7 @@
 
 - **主 agent（架构师）**——制定方案、执行两个确认点、划分工作、亲自重跑检查、打提交检查点、回滚失败。
 - **勘察者**——只读 `Task` subagent（`subagent_type: explore`），一组一个（`survey_spec_zh.md`）。
-- **迁移者**——`Task` subagent（`subagent_type: generalPurpose`），每组一个，写权限仅限本组文件。
+- **迁移者**——不设 `subagent_type` 的 `Task` subagent（Cursor 没有公布会写文件的内置类型），每组一个，写权限仅限本组文件。
 
 ## 迁移分组
 

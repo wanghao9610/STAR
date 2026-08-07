@@ -50,7 +50,7 @@ mistaken for drift.
 |---|---|---|---|---|---|
 | `.agents` | Codex | `$star-*` | `update_plan` | `spawn_agent`, `agent_type: explorer` / `worker` (selective; local by default) | `request_user_input` |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
-| `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore` / `generalPurpose` | `AskQuestion` |
+| `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
@@ -87,10 +87,19 @@ names this repository chose, not names read off a list, and swapping them for th
 `read_file` and `run_terminal_cmd` would move the guess rather than end it. They stay as they are, and
 this paragraph is the reason, so the next pass does not "correct" them into a third spelling. What is
 published there is the `Task` tool, in [Subagents](https://cursor.com/docs/subagents); `subagent_type`
-is not, appearing only in community bug reports, and the built-in subagents are now **Explore**,
-**Bash** and **Browser**, which leaves this tree's `generalPurpose` unaccounted for — an open item, not
-renamed here, because none of the three built-ins is the file-writing migrator it stands for. Note
-which word moved where: in Cursor's vocabulary `Bash` is the name of a subagent, not of its terminal.
+is not, appearing only in community bug reports. Note which word moved where: in Cursor's vocabulary
+`Bash` is the name of a subagent, not of its terminal.
+
+Cursor publishes three built-in subagents — `explore`, `bash` and `browser` — so `explore` is the only
+type this tree may name, and it is the only one it does. Its ten file-writing dispatch sites carried
+`generalPurpose`, which the current docs do not list; none of the three built-ins is the file-writing
+migrator it stood for, so those sites now set no type at all and state the write surface the contract
+already gave them. Naming a custom subagent instead was the alternative: Cursor loads them from
+`.cursor/agents/*.md` (and, for compatibility, `.claude/agents/` and `.codex/agents/`, with `.cursor/`
+winning a name clash), where frontmatter `name` is the identifier the `Task` tool hints at and
+`readonly: true` withholds file edits and state-changing shell commands. That would make the read-only
+contract a mechanism rather than an instruction, at the cost of an artifact to maintain across four
+trees and a `.claude/agents/` directory that Cursor would also read. It stays available and unused.
 
 Codex delegation names the real call without changing the cost stance: **collect locally by default,
 delegate selectively**, then call `spawn_agent` only after the bounded / independent / materially
@@ -258,7 +267,7 @@ nothing enforces that judgement.
 23. **Each tree names only its own harness's file reader, terminal, and subagent types.** Claude Code
     and Kimi Code publish `Read` and `Bash`; Cursor's terminal is `Shell`; Codex has no file reader and
     writes its terminal lowercase. The `subagent_type` values are pinned per tree — `Explore` /
-    `general-purpose` for Claude, `explore` / `generalPurpose` for Cursor, `explore` / `coder` for
+    `general-purpose` for Claude, `explore` alone for Cursor, `explore` / `coder` for
     Kimi — which check 22 had covered for Codex alone. It exists because the inverse of an unadapted
     name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
     every check passed it. For `.cursor` the pinned names are this repository's own descriptive
@@ -295,10 +304,11 @@ Be honest with yourself about this list; it is where the real drift lives.
   in the same commit.
 - **Whether a pinned tool name is the harness's or ours.** Check 23 pins four trees' tool vocabulary
   against a table written here, and a table is only as good as the list behind it. Three trees have a
-  published list; `.cursor` has none, so its `Read` and `Shell` are pinned as this repository's own
-  descriptive choice, and its `subagent_type: generalPurpose` is pinned while Cursor's built-in
-  subagents have moved on to Explore, Bash and Browser. What the check can prove is that a name has
-  not drifted since someone last looked, never that it was right when they looked.
+  published list of tool identifiers; `.cursor` has none, so its `Read` and `Shell` are pinned as this
+  repository's own descriptive choice. What the check can prove is that a name has not drifted since
+  someone last looked, never that it was right when they looked — `generalPurpose` sat in that tree
+  after Cursor's built-in subagents had moved on, and a check written a day earlier would have pinned
+  it there.
 
 ## Before you commit
 
