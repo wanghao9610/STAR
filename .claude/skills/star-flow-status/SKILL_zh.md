@@ -1,5 +1,8 @@
 ---
 name: star-flow-status
+model: sonnet
+context: fork
+background: false
 description: >-
   只读总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的 章节状态、children、depends_on 与
   exec_status（并读 wkdrs/<run>/EXEC_LOG.md 获取步级进度），然后渲染 带状态的树、进度汇总、唯一的下一步动作，以及任何失配。同时检查周边阶段——想法、文献、代码审查、

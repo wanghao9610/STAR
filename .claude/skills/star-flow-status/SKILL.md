@@ -1,5 +1,8 @@
 ---
 name: star-flow-status
+model: sonnet
+context: fork
+background: false
 description: >-
   Read-only overview of the whole research flow. Scans every metds/plans/*_plan.md, rebuilds the
   decomposition tree from parent/prefix, reads each node's section status, children, depends_on, and
