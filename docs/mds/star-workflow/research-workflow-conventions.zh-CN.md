@@ -27,10 +27,11 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | 方向性信号 | 会改变计划本身、而不只是产出它的那个叶子的结果 | `star-plan-reviser` |
 | 上次覆盖到的日期 | 最新一份 digest 的 `covers.through`，下一份从这里往后接 | `star-expt-digest` |
 | 步骤自带的检查 | `EXEC_PLAN` 每一步绑定给自己的检查，过了它这一步才算做完 | `star-plan-executor` |
+| 执行分支 | 叶子的改动在合并确认点放行进基础分支之前所住的 `exec/<run>` 分支 | §11 |
 
 ## 1. Git
 
-**永不提交的 skill**——git 只读使用（`status` / `diff` / `log`）：`star-flow-status`、`star-refs-reviewer`、`star-expt-analyst`、`star-expt-digest`、`star-metd-summarize`。
+**永不提交的 skill**——git 只读使用（`status` / `diff` / `log`，读执行分支时另加 `branch --list` 与 `show`，§11）：`star-flow-status`、`star-refs-reviewer`、`star-expt-analyst`、`star-expt-digest`、`star-metd-summarize`。
 
 **可以提交的 skill**，及各自能 stage 的范围：
 
@@ -43,7 +44,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | `star-plan-reviser` | Step 7 有写入修订时提供一次 | 目标计划；父计划的 `## Sub-plans` 行变化时，连父计划一起 |
 | `star-code-architect` | 每完成一个阶段或验证完一个迁移组一次 | `${CODE_NAME}/` 及本 skill 拥有的规约文件 |
 | `star-env-builder` | 每次运行至多一次 | 仅 `${CODE_NAME}/requirements*` |
-| `star-plan-executor` | 每个已验证动作一次，且仅在确认点批准了 checkpoint 时 | 该动作触碰的文件 |
+| `star-plan-executor` | 每个已验证动作一次，且仅在确认点批准了 checkpoint 时；外加 §11 定义的执行分支操作——创建、合并、弃用——各在自己的确认点上 | 该动作触碰的文件；在执行分支上，连同这些动作更新过的运行记录（§11.2） |
 | `star-code-reviewer` | 修复轮之后可选的一次 | 仅修复轮触碰的文件 |
 | `star-code-release` | 每完成一个阶段一次（gather / polish / readme） | 仅该阶段的路径：被移入的文件，以及这次移动破坏的调用点、打磨轮触碰的文件、`README.md` |
 
@@ -51,12 +52,12 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 
 1. **只 stage 本次运行创建或编辑过的文件。** 绝不 `git add -A`，绝不 `git add .`。在科研仓库里，一次全量 add 会把 checkpoint、数据集和草稿一并卷进来。
 2. **提交信息前缀就是 skill 自己的名字**：`star-plan-executor: <run> step 2 — <摘要>`、`star-plan-coach: <slug> — <里程碑>`。一个 skill，在提交历史里占一个命名空间。
-3. **不推送、不改写历史**（`rebase`、`amend`、`reset --hard`）、**不切分支、不打 tag。** 分支和远端归用户。
+3. **不推送、不改写历史**（`rebase`、`amend`、`reset --hard`）、**不打 tag——也不切分支**，唯 §11 定义的执行分支除外：`star-plan-executor` 只在具名确认点上创建、合并或弃用它。分支和远端归用户。
 4. **运行开始时就已有未提交改动的路径，永不 stage。** 在提交提议里列出这些路径——`low` 档则列在收尾回复里——让用户先自行提交或 stash；skill 的提交绝不能捆进不是它做的工作。
 5. **绝不无声提交。** 提交提议是一道裁量题（§7.7），它推荐的答案就是提交：本地提交不发布任何东西，时机不对的一次提交，代价是一条 `git reset --soft`。`medium` 与 `high` 照问，拒绝始终正当；`low` 直接照推荐执行。两种情况下，收尾回复都要点出本次做过的每一个提交、它的提交信息和文件数——问的档位保住否决权，不问的档位保住事后审查。`low` 档没人过目文件清单，第 4 条独自扛起全部分量：运行开始时先快照一次 `git status`，其中已经脏的路径一律不 stage。
 6. **绝不强制 add 被忽略的路径。** `.env`、`datas/`、`inits/` 默认被 git 忽略，不进历史。`wkdrs/` **并非**整体被忽略：其下除 `*.md` 外都被忽略，因此工作流自己的报告——执行日志、分析、digest、审查、结果汇总表——是有意让它们能进版本库的，一次 run 的记录可以活得比产生它的机器更久。`tasks/` 则整体被跟踪：计划自有的工具脚本本就是持久的，旁边的草稿也小到不值得单开一条规则。
 
-**守卫。** 每套工具目录都带一个 `star_commit_guard.sh` 钩子，拒掉那些一旦破坏就代价高昂的命令：整批或强制 stage（`add -A`、`add .`、`add -u`、`add -f`、`commit -a`）、第 3 条点名的历史改写（`commit --amend`、`rebase`、`reset --hard`、`filter-branch`），以及暂存文件超过 10 MB 的提交——这是研究仓库唯一一件真正昂贵的错事，因为把一个 checkpoint 从历史里清出去，恰恰要用到那几条改写。`push` 是有意不在其中的：这里没有任何规则让 skill 更可能推送，而用户直接要求推送时就该推得动。守卫是压在文字规则底下的一层地板，永不取代它——它一次只读一行 shell，解不开引号；凡是读不确切的，一律沉默。被它拒掉的命令，归用户自己运行。
+**守卫。** 每套工具目录都带一个 `star_commit_guard.sh` 钩子，拒掉那些一旦破坏就代价高昂的命令：整批或强制 stage（`add -A`、`add .`、`add -u`、`add -f`、`commit -a`）、第 3 条点名的历史改写（`commit --amend`、`rebase`、`reset --hard`、`filter-branch`）、一键就能踩破 §11 的强制分支操作（`branch -D`/`-f`、`switch -C`/`-f`、`checkout -B`/`-f`），以及暂存文件超过 10 MB 的提交——这是研究仓库唯一一件真正昂贵的错事，因为把一个 checkpoint 从历史里清出去，恰恰要用到那几条改写。`push` 是有意不在其中的：这里没有任何规则让 skill 更可能推送，而用户直接要求推送时就该推得动。守卫是压在文字规则底下的一层地板，永不取代它——它一次只读一行 shell，解不开引号；凡是读不确切的，一律沉默。被它拒掉的命令，归用户自己运行。
 
 **为什么重要。** `star-plan-reviser` 告诉用户"旧版本存于 git"；只有当计划写手真的做出了那些提交，这句话才成立。
 
@@ -166,7 +167,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 | 代码库 | `star-code-architect` | `metds/codearc.md` | 是否存在 |
 | 环境 | `star-env-builder` | `wkdrs/env_<名称>_<日期>/ENV_REPORT.md`、`freeze.txt` | 目录名里的日期 |
 | 计划 | `star-plan-coach`、`star-plan-decomposer`、`star-plan-reviser` | `metds/plans/<前缀>_<slug>_plan.md` | `status:`、`finalized:`、`updated:` |
-| 运行 | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md` | 计划的 `exec_status:`、`exec_runs:` |
+| 运行 | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md` | 计划的 `exec_status:`、`exec_runs:`；日志的 `branch:` / `merged:`（§11） |
 | 代码审查 | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<日期>.md`，否则 `wkdrs/reviews/code_<范围>_<日期>.md` | 文件名里的日期 |
 | 计划复审 | `star-plan-reviser` | `wkdrs/<run>/REVIEW_<日期>.md`，否则 `wkdrs/reviews/<前缀>_<slug>_<日期>.md` | 文件名里的日期 |
 | 实验分析 | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`、`wkdrs/<run>/analysis/` | 文件名里的日期 |
@@ -247,3 +248,16 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 4. **一次调用一个 skill，里面一个工作单元。** 一个叶子、一次运行、一份报告——运行中途悄悄扩大范围正是这条规则要防的事，而在用户没有发起的运行里更糟：根本没有一个被说出口的范围可供扩大。下一个单元是下一次调用。
 5. **不是用户发起的运行要自报家门**——开跑前一行，写明匹配上了什么、取了哪个目标；结束时在决策记录（§7.8）里留一行，用那份记录的形状：`匹配到什么 → 跑了什么 → 写了哪些文件`。"别自己开跑"和别的指令一样，在本次会话余下部分持续有效。
 6. **点名了下一步动作，若落在那八个上，就去跑，而不是打印出来。** skill 收尾时都会点名接下来该做什么——状态 skill 唯一的下一步动作、审查把功能缺口转交出去、分析指出结果表已经过期——今天这些一律是递给读者的一条命令。当被点名的命令属于那八个、且目标已经定死时，就把它跑起来，而不是打印它：读者就是 agent 自己，打印一条命令给自己，等于转交给了没有人。那七个仍然打印命令，因为"由用户敲下去"本身就是它们存在的意义所在的那个决定。**一次收尾同时点名两类命令时，它们不是一个列表。** 一次运行收尾常常既点名一条跨红线的命令（§2），又点名那八个中的一个——最常见的一对，是把审查命令写在一条待跑的重命令之上。归属按命令算，不按这一整块算：跨红线的那条打印出来等用户，可拾起的那条就去跑；紧挨着一条只有用户能清掉的命令，并不会让它也变成那样一条。两条之间本来就有先后时，把排在前面的那条跑掉，才让这个先后真正成立——审查只是被打印在待跑命令之上，先后就交给了谁读得快，而 bug 等算力烧完才被抓住，代价是算力加重跑。skill 自己给出的跳过备选仍然是备选，在两条都还没动之前先问。两条限制，安全就靠它们。**拾起发生在这次运行结束之后，绝不在运行内部**：一个不许写、不许派发、不许越出自身范围的 skill，不会因为点名了后继者就获得这些权限，因此只读的汇报 skill 依旧只读，后继者要等它自己这一轮跑完才开始。以及**随后那次运行照样受第 3–5 条约束**，与任何一次拾起无异——目标没定死就发问而不是猜、一次一个工作单元、开跑前先说明自己在做什么。
+
+## 11. 执行分支
+
+§1.3"不切分支"的唯一例外。执行中会修改代码库既有文件的叶子，在自己的分支上跑：在这些改动挣到合并资格之前，基础分支始终保有一棵未被它们触碰的树。只有 `star-plan-executor` 会创建它——在其 Step 4 确认点上，绝不无声——且只为它自己的这次 run；操作细节在该 skill 的 `references/branch_rules.md` 里，本节是其余 skill 可以倚赖的契约。
+
+1. **推荐项由 gap list 决定。** EXEC_PLAN 里有动作要**修改** `${CODE_NAME}/` 下已存在的被跟踪文件 → 推荐开分支；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划，留在基础分支。改动量只是论据，绝不是判据。两个方向都由用户在确认点上定夺；选了分支就同时选了每步 checkpoint 提交——没有提交的分支没有东西可合并。
+2. **命名、起点、记录。** 分支名 `exec/<run>`，与 `wkdrs/<run>/` 目录同名成对；它从批准当时 checkout 所在的分支分出——绝不假定是 `main`——`EXEC_PLAN.md` / `EXEC_LOG.md` 的 frontmatter 记下 `branch:`、`base:`，此后再记 `merged:`。在分支上，每步的提交把这一步更新过的运行记录（日志行、子计划的状态）一并暂存，因为只有提交才会被合并。
+3. **基础分支始终是准据。** 合并之前，本次 run 写下的一切只存在于分支上，所以从基础分支看，这个叶子就是还没做完——这个读法是对的，不是缺口：`depends_on` 指着一个未合并兄弟的下游叶子保持受阻，把那个兄弟合并进来才是解锁。`star-flow-status` 会列出 `exec/*` 分支，让未合并的 run 读作待合并的贡献，而不是丢失的工作。
+4. **合并是必问确认点**（§7.7），任何参与度档位都要问。抵达条件：叶子 `exec_status: done`，且该 run 最新一份代码审查里没有悬而未决的 blocker/major——对带重实验的叶子，`done` 本就包含在分支 checkout 上跑出的实验产出。默认 squash 合并——基础分支保持线性、一个叶子一个提交，每步的经过仍在 `EXEC_LOG.md` 里；保留逐步提交是要摆出来的备选。合并后在基础分支上重跑该叶子的轻量检查（§2）；分支删不删另问一道——它是删除，和任何删除一样。
+5. **同步靠把基础分支 merge 进来，绝不 rebase。** 基础分支前进了，就把它 merge 进执行分支、复验之后再合并回去；§1.3 对改写历史的禁令在执行分支上同样生效。冲突让运行停下：列出冲突文件，把定夺交回用户——绝不无声地替人解冲突。
+6. **弃用之前，先抢救记录。** 删除一个未合并的分支之前，其 `wkdrs/<run>/*.md` 记录——连同子计划里这次 run 的条目、以及判它出局的结论——先提交到基础分支：负结果也是 `star-plan-reviser` 与 `star-expt-digest` 还要用的证据，删分支绝不能连证据一起删。删除本身任何档位都要问。
+
+对其余 skill 的要求很小。checkout 停在某个不属于自己目标的 `exec/*` 分支上时，要提交的 skill 先说明并提议切回去——在那里做下的无关提交会跟着那个叶子一起被合并。谁都不切一个还有东西在跑的 checkout：跑着的任务会中途重读被切换的文件。需要基础 checkout 在分支运行期间继续可用的用户，自己准备一个 `git worktree`、在里面调用 executor——skill 只作用于被调用时所在的 checkout，绝不创建或移除 worktree。
