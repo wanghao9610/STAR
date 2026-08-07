@@ -1,16 +1,16 @@
 ---
 name: star-code-architect
 description: >-
-  Give research plans under metds/plans/ a place for the code to live. If ${CODE_NAME}/ (from .env) is missing
-  or empty, read the plan for what to search for, find and score candidate reference
-  implementations on GitHub (plan fit, completeness, license, activity), let the user pick,
-  then clone, strip git history, record provenance, and conservatively rebrand to CODE_NAME.
-  If code already exists, survey it read-only instead. Both paths then design a target
-  architecture plus a migration table, execute only user-approved migrations with per-group
-  verification and git checkpoints, and write the spec to metds/codearc.md with short
-  cross-references in AGENTS.md and .cursor/rules/. Use when the user invokes $star-code-architect or
-  asks Codex to find a reference implementation, scaffold ${CODE_NAME}/, or organize and
-  refactor the existing codebase. Supports bilingual English/Chinese work.
+  Find a reference implementation, scaffold ${CODE_NAME}/, or reorganize the codebase — giving research
+  plans under metds/plans/ a place for the code to live. If ${CODE_NAME}/ (from .env) is missing or
+  empty, read the plan for what to search for, find and score candidate implementations on GitHub (plan
+  fit, completeness, license, activity), let the user pick, then clone, strip git history, record
+  provenance, and conservatively rebrand to CODE_NAME. If code already exists, survey it read-only
+  instead. Both paths then design a target architecture plus a migration table, execute only
+  user-approved migrations with per-group verification and git checkpoints, and write the spec to
+  metds/codearc.md with short cross-references in AGENTS.md and .cursor/rules/. Use when the user
+  invokes $star-code-architect or asks Codex to set up or refactor the project's code. Supports
+  bilingual English/Chinese work.
 ---
 
 # Research Code Architect

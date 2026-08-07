@@ -1,7 +1,7 @@
 ---
 name: star-metd-summarize
 description: >-
-  Compile the plan tree under metds/plans/ into paper-ready method documents. Invoked as
+  Compile the finished plans into paper-ready method documents for the write-up. Invoked as
   $star-metd-summarize [OPT] — overview, dataset, framework, training, evaluation; no argument compiles
   all five, overview last. Extracts what each document needs through a written map, merges passages by
   what a reader needs, not by plan, marks unexecuted leaves' content unverified, and turns uncovered
@@ -9,8 +9,7 @@ description: >-
   star-expt-analyst. Writes only metds/<OPT>.md, overwriting one only after an approved section-level
   change list. Compiles only a finished tree — every top-level plan finalized, every leaf exec_status
   done — otherwise it stops and routes the gaps; a draft compile is an explicit choice. Use when the
-  experiments are finished, the plans finalized, and the user invokes $star-metd-summarize, when a run
-  names it as the next action, or asks Codex to consolidate the plans into a write-up. Supports
+  experiments are finished, the plans finalized, and the user invokes $star-metd-summarize. Supports
   bilingual English/Chinese work.
 ---
 

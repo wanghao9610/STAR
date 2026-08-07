@@ -1,17 +1,16 @@
 ---
 name: star-idea-storm
 description: >-
-  Coach a researcher from a vague interest to a defensible research topic through
-  diverge–scan–converge: clarify the starting idea and its constraints, generate 3–5 genuinely
-  distinct candidate directions, ground the kept ones in an abstract-level literature
-  scan (every named paper transcribed from a record fetched during the run, source URL
-  logged — never from memory), score them on a six-dimension rubric with Pursue /
-  Refine / Park verdicts, then frame the winner into a topic statement with a first
-  validation experiment — written incrementally to metds/ideas/<slug>_idea.md with
-  cross-session resume. The finalized idea file is the starting point for $star-plan-coach. Use when the
-  user runs $star-idea-storm, wants to brainstorm / 头脑风暴 research directions, has
-  an interest area but no committed topic, asks "what should I research", or mentions
-  idea files under metds/ideas. Bilingual (en/zh).
+  Brainstorm research directions and converge on a topic — for "what should I research" and 头脑风暴.
+  Coaches from a vague interest to a defensible topic through diverge–scan–converge: clarify the
+  starting idea and its constraints, generate 3–5 genuinely distinct candidate directions, ground the
+  kept ones in an abstract-level literature scan (every named paper transcribed from a record fetched
+  during the run, source URL logged — never from memory), score them on a six-dimension rubric with
+  Pursue / Refine / Park verdicts, then frame the winner into a topic statement with a first validation
+  experiment — written incrementally to metds/ideas/<slug>_idea.md with cross-session resume. The
+  finalized idea file is the starting point for $star-plan-coach. Use when the user runs
+  $star-idea-storm, has an interest area but no committed topic, or mentions idea files under
+  metds/ideas. Bilingual (en/zh).
 ---
 
 # Research Idea Storm — from vague interest to a defensible topic

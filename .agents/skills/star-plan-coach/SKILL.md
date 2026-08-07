@@ -1,13 +1,12 @@
 ---
 name: star-plan-coach
 description: >-
-  Coach CS researchers through writing a research plan by asking one question at a time, stage by stage
-  (problem → related work → method → experiments → risks → milestones), writing each
-  finished section to metds/plans/ and supporting cross-session resume. Use whenever
-  the user wants to write or refine a research plan, proposal, or 开题报告; flesh out
-  a research idea; grow a finalized idea file under metds/ideas into a plan; mentions
-  plan files under metds/plans; or has an idea but is unsure how to proceed — even if
-  they never say the word "plan". Bilingual (en/zh).
+  Write or refine a research plan, proposal, or 开题报告 — one question at a time, stage by stage
+  (problem → related work → method → experiments → risks → milestones), writing each finished section
+  to metds/plans/ and supporting cross-session resume. Use whenever the user wants to flesh out a
+  research idea; grow a finalized idea file under metds/ideas into a plan; mentions plan files under
+  metds/plans; or has an idea but is unsure how to proceed — even if they never say the word "plan".
+  Bilingual (en/zh).
 ---
 
 # Research Plan Coach

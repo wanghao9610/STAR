@@ -1,15 +1,13 @@
 ---
 name: star-plan-decomposer
 description: >-
-  Decompose an existing research plan (written by star-plan-coach and living under
-  metds/plans/) into concrete, executable sub-plans. Reads the parent plan, picks a
-  decomposition axis (phase / component / evidence), then auto-drafts one
-  execution sub-plan per unit — objective, dependencies, task breakdown, deliverables,
-  and done-criteria — writing each to metds/plans/ under a numeric prefix that shows its place in the tree
-  and linking it back to the parent. A sub-plan can be decomposed again, to any depth. Use when
-  the user invokes $star-plan-decomposer, or wants to break down / flesh out the concrete
-  execution details of a plan, turn a plan's method or milestones into actionable tasks,
-  or split a plan into sub-plans. Bilingual (en/zh).
+  Break a research plan down into executable sub-plans with concrete, checkable steps — turning its
+  method or milestones into actionable tasks. Reads the parent plan (written by star-plan-coach and
+  living under metds/plans/), picks a decomposition axis (phase / component / evidence), then
+  auto-drafts one execution sub-plan per unit — objective, dependencies, task breakdown, deliverables,
+  and done-criteria — writing each to metds/plans/ under a numeric prefix that shows its place in the
+  tree and linking it back to the parent. A sub-plan can be decomposed again, to any depth. Use when
+  the user invokes $star-plan-decomposer, or wants to split a plan into sub-plans. Bilingual (en/zh).
 ---
 
 # Research Plan Analyse — plan decomposer

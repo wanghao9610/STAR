@@ -1,16 +1,16 @@
 ---
 name: star-code-release
 description: >-
-  Prepare the project for public release: consolidate scattered code into ${CODE_NAME}/, polish what a
-  reader will open, and compile README.md. Sweeps tasks/, wkdrs/ and the root, promoting only code passing
-  a three-part evidence test (the README cites it, an executed leaf needs it, or it reproduces a
-  results.md number), placed by metds/codearc.md's rules — never inventing a directory. Polish edits are
-  individually approved and behavior-preserving. Compiles README.md from the metds/ method documents
-  through a written map, taking numbers only from the results table and checking every printed command
-  exists. Ends with a blocking hygiene sweep (secrets, local paths, hostnames, license conflicts) and a
-  dated report. It prepares a release and never publishes one: no push, no repo creation, no tag, no
-  weight upload. Use when the user invokes $star-code-release or asks Codex to open-source / publish the
-  project, produce a repository README, or gather tasks/ code in. Supports bilingual English/Chinese work.
+  Open-source or publish the project: gather scattered code, polish it, compile README.md. Consolidates
+  into ${CODE_NAME}/, sweeping tasks/, wkdrs/ and the root, promoting only code passing a three-part
+  evidence test (the README cites it, an executed leaf needs it, or it reproduces a results.md number),
+  placed by metds/codearc.md's rules — never inventing a directory. Polish edits are individually
+  approved and behavior-preserving. Compiles README.md from the metds/ method documents through a
+  written map, taking numbers only from the results table and checking every printed command exists.
+  Ends with a blocking hygiene sweep (secrets, local paths, hostnames, license conflicts) and a dated
+  report. It prepares a release and never publishes one: no push, no repo creation, no tag, no weight
+  upload. Use when the user invokes $star-code-release or wants a repository README. Supports bilingual
+  English/Chinese work.
 ---
 
 # Research Code Release

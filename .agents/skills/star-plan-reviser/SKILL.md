@@ -1,14 +1,14 @@
 ---
 name: star-plan-reviser
 description: >-
-  Review one research plan from metds/plans/ against its execution evidence, then revise it in
-  place with per-item user approval. Read the wkdrs/<run>/ execution logs and artifacts (a summary of the children
-  for internal nodes), score completion claim-by-claim against files on disk, write a
-  seven-part review report to wkdrs/, go through revision candidates one question at a time, edit the
-  plan file directly, and append a Revision History entry — routing structural re-shaping to
-  star-plan-decomposer and strategy pivots to star-plan-coach. Use when the user invokes
-  $star-plan-reviser or asks Codex to review, audit, or revise a plan after (partial) execution,
-  or to fold execution results back into the plan. Supports bilingual English/Chinese work.
+  Audit a plan against what execution did, then revise it in place with per-item user approval —
+  folding execution results back into the plan. Reads one plan from metds/plans/ plus its
+  wkdrs/<run>/ execution logs and artifacts (a summary of the children for internal nodes), scores
+  completion claim-by-claim against files on disk, writes a seven-part review report to wkdrs/, goes
+  through revision candidates one question at a time, edits the plan file directly, and appends a
+  Revision History entry — routing structural re-shaping to star-plan-decomposer and strategy pivots to
+  star-plan-coach. Use when the user invokes $star-plan-reviser or wants a plan reviewed or audited
+  after (partial) execution. Supports bilingual English/Chinese work.
 ---
 
 # Research Plan Reviser

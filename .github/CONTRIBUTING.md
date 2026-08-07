@@ -233,9 +233,18 @@ fifteen `.agents` descriptions run 566–1016 characters, so **about 10% of what
 model, and the "Use when the user runs `$star-*`, or wants …" trigger clause reaches it for none of
 the fifteen.** That clause is the entire mechanism by which a description earns an unprompted
 invocation, and on Codex it is dead weight. The full `SKILL.md` still loads once a skill is invoked,
-so this costs discovery, not execution — but discovery is what a description is for. Whether to
-front-load the triggers into the first ~100 characters of the `.agents` descriptions is an open
-question and its own commit; nothing here does it, and no check can see it.
+so this costs discovery, not execution — but discovery is what a description is for.
+
+**The fifteen `.agents` descriptions are now written against that window**: each opens with a
+trigger-bearing clause in user language that completes inside the first ~90 characters, and the
+mechanism, the routing and the guarantees follow behind it. Re-check it the way it was found —
+`codex debug prompt-input` and read the `- <name>: …` lines — because **no check here can see it**.
+Two rules when editing one: the window is measured from the *start* of the description, so prepending
+anything pushes a trigger out of view; and a guarantee about what the skill will not do still may not
+be cut to make room (see above), it moves later in the string instead. This is the one tree where
+description order carries function rather than style. The Chinese twins are deliberately untouched:
+`SKILL_zh.md` is not a registered manifest, Codex never loads it, so it has no truncation window to
+be written against.
 
 Condensing loses things silently, which is the real cost. Two clauses had gone missing from the
 English descriptions and were restored: `star-code-release`'s "prepares a release and never publishes

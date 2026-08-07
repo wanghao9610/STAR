@@ -1,16 +1,16 @@
 ---
 name: star-env-builder
 description: >-
-  Build and verify the project's Python runtime so plan execution has a working interpreter. Reads .env:
-  a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a .venv in the
-  root. An existing environment is never deleted — after confirmation it is renamed to a dated backup
-  first. Dependencies come from the first source that has them: CODE_NAME/requirements* → packaging
-  metadata (pyproject / setup.py / environment.yml) → an import scan, written out as requirements.txt
-  plus a requirements/ folder (framework|runtime|optional.txt, conda-only in conda.txt). Installs uv >
-  pip > conda, CUDA-aware, behind one install-plan confirmation, then smoke-tests imports, framework/GPU
-  and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use when the user invokes $star-env-builder,
-  when a run names it as the next action, or asks Codex to create or rebuild the conda env or venv,
-  resolve and install dependencies, or verify the environment. Supports bilingual English/Chinese work.
+  Create or rebuild the conda env or venv, install dependencies, verify the environment — so plan
+  execution has a working interpreter. Reads .env: a valid CONDA_HOME creates conda env ENV_NAME
+  (argument, default CODE_NAME); otherwise a .venv in the root. An existing environment is never
+  deleted — after confirmation it is renamed to a dated backup first. Dependencies come from the first
+  source that has them: CODE_NAME/requirements* → packaging metadata (pyproject / setup.py /
+  environment.yml) → an import scan, written out as requirements.txt plus a requirements/ folder
+  (framework|runtime|optional.txt, conda-only in conda.txt). Installs uv > pip > conda, CUDA-aware,
+  behind one install-plan confirmation, then smoke-tests imports, framework/GPU and the entrypoint and
+  writes ENV_REPORT.md under wkdrs/. Use when the user invokes $star-env-builder or a run names it
+  next. Supports bilingual English/Chinese work.
 ---
 
 # Research Env Builder
