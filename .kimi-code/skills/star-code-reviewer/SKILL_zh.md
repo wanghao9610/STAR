@@ -51,7 +51,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
    - 已存在的文件或目录 → **路径模式**；`wkdrs/<run>/` 目录经 `exec_runs` 反查到对应计划 → 计划模式。
    - 无参数 → `${CODE_NAME}/` 全部。
    - 都不匹配 → 列出最接近的计划与路径候选，经 AskUserQuestion 询问。
-3. 计划模式的范围是三者并集：§2 写明的代码模块、§4 交付物中的代码路径、`wkdrs/<run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是问题项（维度 F），绝不静默跳过。
+3. 计划模式的范围是三者并集：§2 写明的代码模块、§4 交付物中的代码路径、`wkdrs/<run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是问题项（维度 F），绝不静默跳过。当该日志记录了执行分支（`branch:`——规约 §11）时，分支自己的 diff 是更精确的代码侧清单：把 `git diff --name-only <base>...HEAD` 列出的文件并入并集，并在报告的范围行里记下分支及其 head commit——合并确认点等着本次审查的结论。
 4. 收敛到可审源码：Python 文件走完整评分表；范围内的 shell / YAML / 配置文件只查维度 D（路径与运行时）；`datas/`、`inits/`、`wkdrs/` 产物与生成文件不在范围内。审查前报出最终文件数；超过约 50 个文件时，先跑 Step 2 的全树筛查——它只是 grep 和 `wc`，不需要环境——再说明情况，并经 AskUserQuestion 提议收窄（某个子包，或 diff 模式），同时用筛查结果指出证据已经在哪里。让用户去猜挑哪个子包，是更差的提议。
 
 ### Step 1：载入评判依据
@@ -102,7 +102,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类问题项转给 `/skill:star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
 - 绝不移动、重命名或删除文件与目录——结构性变更属于 `/skill:star-code-architect`。残留清单名称只标记，绝不改名。
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的红线同样适用）。
-- Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。
+- Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。在某次 run 的执行分支上，这次提交落在分支上、赶在它合并之前（规约 §11）；本 skill 仍然绝不切分支。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计线索就是报告文件，外加（若有）那次修复提交。
 
 ## 对话纪律

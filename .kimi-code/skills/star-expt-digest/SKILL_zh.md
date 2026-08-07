@@ -16,12 +16,13 @@ description: >-
 
 调用方式：`/skill:star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后的全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点的家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。摘要真正据以行事的部分——§0 词汇表（"上次覆盖到的日期"、方向性信号，以及本 skill 要汇报的 kill-criterion 与完成判据都在这里定义）、§3 `.env` 运行时、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——随下面这次开场装载到达。有五节不装载，每一节都是因为本 skill 自己的文件已在用到它的地方写清了所需内容：§1 git（本 skill 从不提交——见状态与文件规则，连要告诉用户的 `wkdrs/*.md` 例外也在那里）、§2 红线（本 skill 什么都不跑——核心原则 6 与 `references/digest_rubric_zh.md` 划定了边界，日志里"待用户"的命令只是照抄标题转述，从不由它判断）、§4 真实日期（Step 6，且扫描脚本本身就会打印当天日期）、§9 项目布局（状态与文件规则把写入范围列得比 §9 更严）、§10 skill 名册（这次运行能不能不经点名启动，在本文件打开之前就已定夺；这种运行随身的义务在对话纪律一节有复述）。规约的前言同样不装载——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。哪次运行真需要其中某节，再整份读回。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。摘要真正据以行事的部分——§0 词汇表（"上次覆盖到的日期"、方向性信号，以及本 skill 要汇报的 kill-criterion 与完成判据都在这里定义）、§3 `.env` 运行时、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——随下面这次开场装载到达。有六节不装载，每一节都是因为本 skill 自己的文件已在用到它的地方写清了所需内容：§1 git（本 skill 从不提交——见状态与文件规则，连要告诉用户的 `wkdrs/*.md` 例外也在那里）、§2 红线（本 skill 什么都不跑——核心原则 6 与 `references/digest_rubric_zh.md` 划定了边界，日志里"待用户"的命令只是照抄标题转述，从不由它判断）、§4 真实日期（Step 6，且扫描脚本本身就会打印当天日期）、§9 项目布局（状态与文件规则把写入范围列得比 §9 更严）、§10 skill 名册（这次运行能不能不经点名启动，在本文件打开之前就已定夺；这种运行随身的义务在对话纪律一节有复述），以及 §11 执行分支（未合并的分支在本 skill 里永远只是缺口清单里的一行：开场那次调用带回的清单承载它，digest 既不合并、也不弃用任何东西）。规约的前言同样不装载——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。哪次运行真需要其中某节，再整份读回。
 
 动手前，用一条消息装齐本 skill 全部无条件的开场读取——也就是本文件后文回指的那次开场装载：两次 Bash 调用（以项目根目录为工作目录），外加 `<本 skill 所在目录>/references/scope_spec_zh.md` 的一次 `Read`，三者同发。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+git branch --list 'exec/*' 2>/dev/null   # 带未合并 run 的执行分支——缺口与欠账那一行读的就是这份清单
 awk '/^## /{k=/^## (0|3|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
@@ -87,7 +88,7 @@ bash <本 skill 所在目录>/scripts/scan.sh
 ### Step 5：收集周边语境
 
 - **期内计划树变化**：`updated`（或 `finalized:`）落在窗内的计划——新建、修订、拆解、定稿。扫描结果里的计划 frontmatter 就是全部输入，不 diff 正文。
-- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选 STOP 命令的叶子；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
+- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选 STOP 命令的叶子；开场那次调用的清单显示仍未合并的执行分支——它们的记录在分支上、从当前 checkout 可能看不见，所以要点出分支名、转 `/skill:star-plan-executor <叶子>` 抵达它的合并确认点，并且绝不隔着分支边界引用结果；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
 
 ### Step 6：写 digest
 

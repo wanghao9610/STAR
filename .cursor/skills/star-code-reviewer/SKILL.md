@@ -56,7 +56,7 @@ You review and polish; you do not implement features, revise plans, reorganize t
    - An existing file or directory → **path mode**; a `wkdrs/<run>/` directory back-resolves to the plan whose `exec_runs` names it → plan mode.
    - No argument → all of `${CODE_NAME}/`.
    - Nothing matches → list the nearest plan and path candidates and ask via AskQuestion.
-3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip.
+3. Plan-mode scope is the union of: code modules named in §2, code paths among the §4 deliverables, and files `wkdrs/<run>/EXEC_LOG.md` records as changed. Name which source contributed which files; a §2/§4 path that does not exist is already a finding (dimension F), never a silent skip. When that log records an execution branch (`branch:` — conventions §11), the branch's own diff is the sharper code-side list: add the files of `git diff --name-only <base>...HEAD` to the union, and record the branch and its head commit in the report's scope line — the merge confirmation point waits on this review's verdict.
 4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — it is grep and `wc`, and needs no environment — then say so and offer to narrow (one sub-package, or diff mode) via AskQuestion, naming from the screen where the evidence already is. An offer that asks the user to guess a sub-package is a worse offer.
 
 ### Step 1: Load the review rules
@@ -107,7 +107,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 - The only code writes are individually approved fix-pass items inside the reviewed scope. Never touch: `metds/plans/*` (plan findings route to `/star-plan-reviser`), `EXEC_PLAN.md` / `EXEC_LOG.md`, `UPSTREAM.md`, `LICENSE` / `CITATION*`, `metds/codearc.md`, `.env`.
 - Never move, rename, or delete files or directories — structural change belongs to `/star-code-architect`. Names on the do-not-rename list are flagged, never renamed.
 - All commands run through `.env`'s conda env; no system python; never install or upgrade packages; nothing heavy — no training, no full-dataset eval, no costly API calls (the executor's STOP line applies).
-- Git: read-only, plus the single optional fix commit staging only fix-pass files (conventions §1).
+- Git: read-only, plus the single optional fix commit staging only fix-pass files (conventions §1). On a run's execution branch that commit lands on the branch, ahead of its merge (conventions §11); this skill still never switches branches.
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file plus the fix commit when one was made.
 
 ## Dialogue Discipline
