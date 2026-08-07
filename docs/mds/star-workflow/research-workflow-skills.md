@@ -598,9 +598,10 @@ If a hard dependency is missing, the skill reports the exact blocker rather than
 
 1. Reads the real code and builds a current-state-versus-plan gap list;
 2. Refines the sub-plan into an `EXEC_PLAN` whose steps bind files, commands, artifacts, and checks;
-3. Makes only the changes required for the current step;
-4. Runs the narrowest light validation and records evidence in the log;
-5. Sets the execution status to `done` after satisfying the sub-plan's done-criterion.
+3. Recommends an execution branch (`exec/<run>`, [conventions §11](research-workflow-conventions.md)) when the plan modifies existing code, approved with the plan itself — the base branch keeps working code until the reviewed changes merge back at an explicit confirmation point;
+4. Makes only the changes required for the current step;
+5. Runs the narrowest light validation and records evidence in the log;
+6. Sets the execution status to `done` after satisfying the sub-plan's done-criterion.
 
 Ordinary in-scope implementation and light validation proceed under the active tool's permission model. The skill stops for direction when a choice would materially change the task scope.
 
@@ -632,6 +633,8 @@ wkdrs/01_mvp-verify/
 - The plan file receives the lightweight `exec_status`, `exec_runs`, and `updated` fields — plus, after your confirmation, material deviations written back into its §2–§5 (see below).
 
 When the same plan is invoked again, the skill treats `EXEC_LOG.md` as the source of truth, skips completed steps, and resumes from the first unfinished action.
+
+When the run executed on an execution branch, everything above — the code, the run records, the plan's own status — lives on `exec/<run>` until the leaf is done and reviewed; invoking the plan again then reaches the merge confirmation point: a squash merge onto the base branch by default, conflicts named and handed to you, the branch's deletion asked separately. Discarding instead copies `wkdrs/<run>/*.md` back to the base branch first, so a negative result keeps its evidence, and `$star-flow-status` lists unmerged `exec/*` branches so none of this waits invisibly.
 
 ### Writing the changes back into the plan
 
@@ -685,7 +688,7 @@ The fix pass never changes behavior: no feature completion, no signature changes
 ### Practical guidance
 
 - Run it after a leaf completes, before `$star-plan-reviser` — the code audit gives the plan review harder evidence.
-- `diff` mode is the cheapest habit: review what you just wrote while it is still uncommitted.
+- `diff` mode is the cheapest habit: review what you just wrote while it is still uncommitted. A run that executed on an execution branch is reviewed as its branch diff against the base (conventions §11) — the merge confirmation point waits on the verdict.
 - A finding you disagree with can simply be skipped in the fix pass; the report keeps the record either way.
 
 See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.claude/skills/star-code-reviewer/SKILL.md).
