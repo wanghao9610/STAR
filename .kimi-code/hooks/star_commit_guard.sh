@@ -7,7 +7,10 @@
 #
 # Declined: blanket or forced staging (add -A / . / * / :/ / -u / -f, commit -a),
 # the history rewrites §1.3 names (commit --amend, rebase, reset --hard,
-# filter-branch, filter-repo), and a commit whose staged files exceed 10 MB — a
+# filter-branch, filter-repo), the forced branch operations §11 makes costly
+# (branch -D / -f, switch -C / -f / --discard-changes, checkout -B / -f — an
+# execution branch force-deleted before its records reach the base branch loses
+# them), and a commit whose staged files exceed 10 MB — a
 # checkpoint or a dataset in history is a research repository's one costly
 # mistake, since clearing it back out needs exactly those rewrites. `push` is
 # deliberately absent: no rule here makes a skill likelier to push, and a user
@@ -147,6 +150,52 @@ while IFS= read -r segment; do
             for ((j = i + 1; j < ${#tok[@]}; j++)); do
                 [[ "${tok[j]}" == --hard ]] && \
                     deny "STAR conventions §1.3: reset --hard discards uncommitted work, including anything the user had in the tree."
+            done
+            ;;
+        branch)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -D|--delete-force)
+                        deny "STAR conventions §11: a force-deleted branch takes its unmerged commits and run records with it. Merge or discard at the confirmation point first; a merged branch deletes with -d." ;;
+                    -f|--force)
+                        deny "STAR conventions §1.3: forcing a branch onto another commit rewrites where its history points. Create a new branch instead." ;;
+                    --*) ;;
+                    -*[Df]*)
+                        deny "STAR conventions §1.3 and §11: this flag cluster carries a forced branch delete or move. Merge or discard at the confirmation point first." ;;
+                esac
+            done
+            ;;
+        switch)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -C|--force-create)
+                        deny "STAR conventions §1.3: switch -C resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
+                    -f|--force|--discard-changes)
+                        deny "STAR conventions §1.3: a forced switch discards uncommitted work, including anything the user had in the tree." ;;
+                esac
+            done
+            ;;
+        checkout)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    --) break ;;
+                    -B)
+                        deny "STAR conventions §1.3: checkout -B resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
+                    -f|--force)
+                        deny "STAR conventions §1.3: a forced checkout discards uncommitted work, including anything the user had in the tree." ;;
+                esac
             done
             ;;
     esac
