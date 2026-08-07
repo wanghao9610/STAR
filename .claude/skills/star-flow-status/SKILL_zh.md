@@ -1,6 +1,7 @@
 ---
 name: star-flow-status
 model: sonnet
+effort: medium
 context: fork
 background: false
 description: >-
