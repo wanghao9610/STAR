@@ -134,7 +134,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` holds the consistency check STAR uses to keep its four skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
+`.github/` holds the consistency check STAR uses to keep its five skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should be included directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before running `git add .`.
 
@@ -342,7 +342,7 @@ See the [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflo
 
 ## Project memory
 
-What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at the start of every session, in all four tools.
+What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at the start of every session, in all five tools.
 
 Two rules keep it from becoming a second, competing source of truth:
 
@@ -381,7 +381,7 @@ The general form is `bash execs/update.sh [--diff] [ref] [--skill NAME] [--force
 
 - `--diff` previews an update without changing a file, and exits `2` when one is available, `0` when everything already matches, `1` on error — so a script can tell an available update from a failed check.
 - A `ref` pins the update to a tag or branch.
-- `--skill NAME` updates that one skill across all four tool directories, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the four upstream skill directories, stops the command without overwriting anything.
+- `--skill NAME` updates that one skill across all five tool directories, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the five upstream skill directories, stops the command without overwriting anything.
 - `--force` updates the same paths with both refusals lifted: uncommitted changes under them are overwritten instead of stopping the command, and the hook registration configs are overwritten instead of kept. It widens nothing — a file upstream does not have is still left alone, so your own skills and documents under those directories stay.
 
 `bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.
