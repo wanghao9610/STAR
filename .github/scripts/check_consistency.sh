@@ -707,9 +707,9 @@ CONV_HEADINGS=(
     '8. The output table'
     '9. Project layout'
     '10. The skill roster'
-    '11. Execution branches'
+    '11. Execution branches and worktrees'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11" "10|6" "11|6")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11" "10|6" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
 # against it, and check 20d derives the stay-out complement from it, so adding
 # a section here is all it takes to make one citable and load-accounted.
@@ -971,7 +971,7 @@ fi
 #     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
 #     costs two invariants nothing else holds.
 #
-#     The excerpt has to stay under the Bash spill line, and it has ~3 KB of
+#     The excerpt has to stay under the Bash spill line, and it has ~1.6 KB of
 #     room. This is the only place that can be caught: `execs/update.sh` copies
 #     docs/mds/star-workflow wholesale into downstream projects, which are told
 #     not to edit it, so the file can only grow *here*. Without the size
@@ -997,7 +997,7 @@ fi
 #     its own commit.
 section "Selective conventions load"
 
-LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28000}
+LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
 
 # skill|file|section — a citation of a section the skill no longer loads, kept on
 # purpose because the sentence restates the rule and cites it only for provenance.
