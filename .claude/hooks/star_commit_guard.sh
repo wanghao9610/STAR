@@ -196,6 +196,21 @@ while IFS= read -r segment; do
                 esac
             done
             ;;
+        worktree)
+            wt_remove=0
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    remove) wt_remove=1 ;;
+                    -f|--force)
+                        (( wt_remove )) && \
+                            deny "STAR conventions §11.9: a forced worktree removal deletes the tree's untracked artifacts. Move them to the main checkout first — a clean tree removes without --force." ;;
+                esac
+            done
+            ;;
     esac
 done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n')
 

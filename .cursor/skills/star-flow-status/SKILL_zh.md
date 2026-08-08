@@ -42,6 +42,7 @@ description: >-
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 git branch --list '[0-9]*_*' 2>/dev/null   # 执行分支——工作还不在基础分支上的 run
+git worktree list --porcelain 2>/dev/null   # worktree——被安置的 run 住在哪（规约 §11.7）
 sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11)print}' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 awk '/^## 9\./{k=1} /^## 11\./{k=0} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
@@ -53,7 +54,7 @@ awk '/^## 9\./{k=1} /^## 11\./{k=0} k' docs/mds/star-workflow/research-workflow-
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-一条消息、三份结果：规约摘录与收集脚本的摘要来自那两次 Shell 调用，spec（`<本 skill 所在目录>/references/status_spec_zh.md`）来自同一条消息里单独发出的 `Read`。同一条消息里发几次工具调用，彼此之间只算一趟往返，不是每次一趟；多花一趟的是再发一条消息。两条命令因此分开而不合并：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返。合并时规约摘录与摘要共用一个上限，项目一旦有了历史，两者相加就会越限，于是一起丢失；分开之后，规约摘录是固定大小、必定完整送达，只有随历史增长的摘要那一份还可能落盘。别把 spec `cat` 进任何一条命令里，理由相同：它自己又是一整份文件，大到足以把任何一份结果往落盘线上顶。不带 `PLAN_NAME` 时去掉 `'/^## 5\./,/^## 6\./p'` 这段范围——§5 就是用来解析它的。那行 awk 按条号选取 §7（引言加第 1、4、5、6、11 条）；若它什么都没打印——下游同步的规约副本过旧、条号可能不同——就改用 `sed -n '/^## 7\./,/^## 8\./p'` 装整节。最后那条 awk 打印 §9 与 §10，遇到 `## 11.` 标题即停：§11 执行分支是有意不装载的——上面那行 `git branch` 带回实时清单，执行分支该怎么读由 spec 复述——而追加在它之后的章节照样不会不声不响地搭车进来。摘要打印的每个路径都相对项目根目录。摘要部分是：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数后的正文、以及其中出现过的日期；run 目录之外每个注册产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。加上 spec 与规约章节，这就是 Step 2–9 的全部输入。
+一条消息、三份结果：规约摘录与收集脚本的摘要来自那两次 Shell 调用，spec（`<本 skill 所在目录>/references/status_spec_zh.md`）来自同一条消息里单独发出的 `Read`。同一条消息里发几次工具调用，彼此之间只算一趟往返，不是每次一趟；多花一趟的是再发一条消息。两条命令因此分开而不合并：每份工具结果各有自己的大小上限，Shell 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返。合并时规约摘录与摘要共用一个上限，项目一旦有了历史，两者相加就会越限，于是一起丢失；分开之后，规约摘录是固定大小、必定完整送达，只有随历史增长的摘要那一份还可能落盘。别把 spec `cat` 进任何一条命令里，理由相同：它自己又是一整份文件，大到足以把任何一份结果往落盘线上顶。不带 `PLAN_NAME` 时去掉 `'/^## 5\./,/^## 6\./p'` 这段范围——§5 就是用来解析它的。那行 awk 按条号选取 §7（引言加第 1、4、5、6、11 条）；若它什么都没打印——下游同步的规约副本过旧、条号可能不同——就改用 `sed -n '/^## 7\./,/^## 8\./p'` 装整节。最后那条 awk 打印 §9 与 §10，遇到 `## 11.` 标题即停：§11 执行分支是有意不装载的——上面那两行 `git branch` / `git worktree` 带回实时清单，执行分支连同它的 worktree 该怎么读由 spec 复述——而追加在它之后的章节照样不会不声不响地搭车进来。摘要打印的每个路径都相对项目根目录。摘要部分是：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数后的正文、以及其中出现过的日期；run 目录之外每个注册产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。加上 spec 与规约章节，这就是 Step 2–9 的全部输入。
 
 `--slim` 是项目有了历史之后还跑得起这一步的原因：它压缩的正是摘要里随历史增长、而非随计划树增长的那两部分，40 个 run 的项目上摘要少三分之一左右。超过六行的步骤表会变成表头行、`[tally] N data rows` 与每列的取值分布——`c3: done×7, blocked×1` 就是 Step 3 要的步骤计数，而写成 `N distinct` 的列是步骤名或日期，绝不会是状态列。六行及以内的表原样打印。未勾选的待办项与方向性信号从不被计数替代，所以待用户的叶子照样能看到它确切的命令。位于 run 目录内的产物不再打印 frontmatter——LISTING 里已经有它的文件名和文件名中的日期，而覆盖检查读的正是这些——被略过了多少个会打印出来。只有需要逐行读某个 run 的步骤时才去掉 `--slim`，并同时用 `--runs <该 run>` 收窄。
 
@@ -68,7 +69,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 3：读各节点状态
 - **总体计划节点**（根/内部）：coach 的 `status:` 映射——六节里有几节 `done` / `in_progress` / `pending` / `skipped`；是否设了 `finalized:`；是否已被拆解（有 `children:`）。
-- **叶子**：`exec_status`（缺失默认 `pending`）与 `exec_runs`（最后一项是当前 run；更早的是重跑，有的话值得提到）。摘要里带着每一份 `wkdrs/<run>/EXEC_LOG.md`；从当前 run 那一段取步级进度（步 done / 总数、有无 `blocked`、有无"待用户执行"STOP 命令、有无记录的**方向性信号**），并把它 frontmatter 里的 `branch:` / `merged:` 一并取来——未合并的执行分支怎么渲染、它的合并何时成为那条欠账，spec 里都写了。
+- **叶子**：`exec_status`（缺失默认 `pending`）与 `exec_runs`（最后一项是当前 run；更早的是重跑，有的话值得提到）。摘要里带着每一份 `wkdrs/<run>/EXEC_LOG.md`；从当前 run 那一段取步级进度（步 done / 总数、有无 `blocked`、有无"待用户执行"STOP 命令、有无记录的**方向性信号**），并把它 frontmatter 里的 `branch:` / `merged:` / `worktree:` 一并取来——未合并的执行分支与被安置的 run 怎么渲染、合并何时成为那条欠账，spec 里都写了。
 
 ### Step 4：渲染树
 每节点一行，按层级缩进，各带一个状态符号和简短状态（状态符号图例见 spec）。在叶子上显示 `depends_on`，并标出 blocked / 待用户 的叶子。
