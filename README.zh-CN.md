@@ -47,7 +47,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **完整的研究生命周期**：十五个相互配合的 skill，按运行顺序依次是——不改动原有内容地接入已经开工的项目、收敛研究选题、写成计划、调研相关工作、递归拆解计划、搭建代码库、构建运行环境、执行叶子计划、审查代码、分析实验结果、汇总阶段进展、以执行证据修订计划、汇报全局状态、把定稿计划编译成方法文档、把仓库整理到可发布状态。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
 - **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个工具驱动 STAR。
-- **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code 和 Cursor 提供一致的项目约束和研究工作流，并支持中文与英文。
+- **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code、Cursor 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
 十五个 skill 各自负责什么、产出什么，以及在你所用工具里怎么调用，见[研究工作流](#研究工作流)；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
@@ -79,10 +79,12 @@ star-ai-research/
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
+├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
 ├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
+├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .vscode/                # 编辑器与调试配置
@@ -240,7 +242,7 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude 和 Codex 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json` 和 `.codex/hooks.json` 里。Cursor 和 Kimi Code 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，而 Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗。四家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex 与 Kimi Code 把它挂在 `PreToolUse`（matcher 为 `Bash`）上，Cursor 挂在 `beforeShellExecution` 上——那是 Cursor 里裁决一条 shell 命令的地方。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor 和 Kimi Code 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，而 Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗。五家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution` 上——那是 Cursor 里裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：前三家是 `Bash`，Qwen Code 是 `run_shell_command`——它的 matcher 读的是工具标识符，不是界面上显示的名字。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
 如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，把两个钩子都注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
@@ -248,7 +250,7 @@ bash execs/run.sh 00_exp --config config.yaml
 bash .kimi-code/hooks/install.sh
 ```
 
-它会把两个钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目，而在记忆钩子出现之前就配好的机器，这次只补上缺的那一个。Codex、Claude 和 Cursor 的两个钩子都随仓库一起注册好，用这三个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+它会把两个钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目，而在记忆钩子出现之前就配好的机器，这次只补上缺的那一个。Codex、Claude、Cursor 和 Qwen Code 的两个钩子都随仓库一起注册好，用这四个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
@@ -276,6 +278,7 @@ bash .kimi-code/hooks/install.sh
 | Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
 | Cursor | 应用设置里的命令白名单 |
 | Kimi Code | 全局 `~/.kimi-code/config.toml`——Kimi Code 不读取项目级配置 |
+| Qwen Code | `.qwen/settings.json` 里的 `permissions.allow`，随仓库带好了扫描命令 |
 
 该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。
 
@@ -291,6 +294,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
+| Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
 七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。
 
@@ -353,8 +357,8 @@ bash execs/update.sh
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
 - `.cursor/rules/skill-roots.mdc`——各个 skill 根目录归哪个工具所有，以及 Cursor 该跟随哪一份副本
-- `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`
-- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
+- `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`、`.qwen/skills/`
+- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/`、`.qwen/hooks/` 以及 `.kimi-code/hooks.example.toml`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 
@@ -403,7 +407,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
-- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.kimi-code/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。
+- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.kimi-code/`、`.qwen/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。
 
 只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用：目录布局、`.env` 和 `execs/run.sh` 在完全不装任何 skill 的情况下也能工作，因此删掉全部工具目录同样是受支持的用法。
 
@@ -411,12 +415,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.1.25](https://github.com/wanghao9610/STAR/tree/v0.1.25)** (2026-08-08) — 第五棵 skill 树 `.qwen/` 把十五个 skill 带到 Qwen Code：调用写法与 Claude、Cursor 相同（`/star-*`），四个钩子全部注册在项目自己的 `.qwen/settings.json` 里——参与度闸门也在其中，这是它第三次落地，因为 Qwen Code 的 `PreToolUse` 能回 `permissionDecision: "allow"`。移植写的是 Qwen Code 的工具标识符（`run_shell_command`、`read_file`），而不是它同时公布的界面展示名——它自带的 skill 从不写展示名——check 23 现在逐棵树钉住这个选择。`allowed-tools` 是有意不带的：Qwen Code 的 `allowedTools` 给的是本次会话内的免确认放行而不是收紧权限，照搬过去只会放宽 skill 能做的事，而不是限制它。
 - **[v0.1.24](https://github.com/wanghao9610/STAR/tree/v0.1.24)** (2026-08-08) — run 可以住进 executor 自己创建的 `git worktree` 了：分支照旧隔离历史，树回答的是另一个正交的问题——checkout 正忙（HEAD 停在别的 run 的分支上、工作区有归属别人的未提交路径、交回用户的命令还没回收结果）——与分支在同一个审批确认点上定夺，进树的 run 一律带分支（规约 [§11.7–9](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)）。树建在 `../<根目录名>--wt/<run>`，链入 `.env`、`datas/`、`inits/`，路径以 `worktree:` 记进运行记录；合并在主 checkout 里 squash、什么都不用切，移除前先把非 md 产物挪出来——绝不带 `--force`，`star_commit_guard.sh` 现在直接拦下它。`star-flow-status` 在执行分支旁边列出 worktree，并标记被遗留的树。
 - **[v0.1.23](https://github.com/wanghao9610/STAR/tree/v0.1.23)** (2026-08-08) — `star-code-reviewer` 不再让写代码的那段对话自己收集问题项：本会话此前写出或改过范围内文件时，小范围收集也交给一个带全部文件清单、上下文全新的只读收集器，并在报告范围行记下这次委派。作者重读自己的代码，读到的是当初产生它的那套推理；较大范围本就经收集器收集，这次补上的是小范围（≤ 约 20 个文件，diff 审查的常态）这个缺口。
-- **[v0.1.22](https://github.com/wanghao9610/STAR/tree/v0.1.22)** (2026-08-08) — 执行分支改用 run 自己的名字 `<run>`，分支与 `wkdrs/<run>/` 直接同名、不必再剥前缀，各 skill 开场读取的那份分支清单也随之改成按 run 命名规则匹配的通配。另一条线上，`star-flow-status` 与 `star-expt-digest`——仓库里仅有的两个 `context: fork` skill——改从调用方式那一行的 `$ARGUMENTS` 占位符读参数：fork 看不到用户消息，harness 只能把参数追加在整份清单之后，`/star-flow-status 030` 因此稳定漏读、报出整棵树而非该计划的子树。不带参数时占位符在三条调用路径下都替换为空，不留字面量。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.1.22](https://github.com/wanghao9610/STAR/tree/v0.1.22)** (2026-08-08) — 执行分支改用 run 自己的名字 `<run>`，分支与 `wkdrs/<run>/` 直接同名、不必再剥前缀，各 skill 开场读取的那份分支清单也随之改成按 run 命名规则匹配的通配。另一条线上，`star-flow-status` 与 `star-expt-digest`——仓库里仅有的两个 `context: fork` skill——改从调用方式那一行的 `$ARGUMENTS` 占位符读参数：fork 看不到用户消息，harness 只能把参数追加在整份清单之后，`/star-flow-status 030` 因此稳定漏读、报出整棵树而非该计划的子树。不带参数时占位符在三条调用路径下都替换为空，不留字面量。
 - **[v0.1.21](https://github.com/wanghao9610/STAR/tree/v0.1.21)** (2026-08-07) — 委派不再是例外：[§6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把这个决定交给主 agent，取消「同时最多三个」的死上限，也不再把会改文件的委派限定给 `star-plan-executor` 与 `star-code-architect`，`star-flow-status` 则去掉了全套 skill 里唯一一条禁止派 subagent 的硬规定。保留下来的都是本来就与谨慎无关的东西——并发委派之间文件归属互不重叠、主 agent 亲自重跑每个检查并独占判断、只读委派什么都不写，以及抓取型 fan-out 真正的边界所在：按 host 的请求预算。另一条线上，Claude 清单新增 `argument-hint` 与只覆盖当前轮次的 `allowed-tools`，并在 skill 新建文件而非编辑文件的路径上于 `Edit` 之外补上 `Write`；`allowed-tools` 是免确认授权，从不构成限制。
 - **[v0.1.20](https://github.com/wanghao9610/STAR/tree/v0.1.20)** (2026-08-06) — 要修改既有代码的叶子可以在自己的分支上执行，改动挣到合并资格之前基础分支始终是准据：规约 [§11](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 让方案审批确认点推荐在 `exec/<run>` 上执行，选了分支就同时选了逐步 checkpoint 提交，因为只有提交才会被合并。合并之前 run 写下的一切只存在于分支上，从基础分支看这个叶子就是还没做完，于是下游叶子自动保持受阻、一行新检查都不用写；合并是必问确认点、默认 squash，弃用时先把运行记录提交到基础分支，好让死路也留下证据。executor 周边：`star-code-reviewer` 按 `<base>...HEAD` 的 diff 审分支上的 run，`star-expt-digest` 把未合并分支列进缺口，`star_commit_guard.sh` 新增判定臂，拦下一键就能踩破这一切的写法。
 - **[v0.1.19](https://github.com/wanghao9610/STAR/tree/v0.1.19)** (2026-08-06) — Kimi 树不再叫两个 Kimi Code CLI 根本没有的工具名：三十份清单把文件读取叫 `ReadFile`、把终端叫 `Shell`，而该 harness 公布的是 `Read` 与 `Bash`——和 Claude 用的是同两个词——所以改动的四十六行里有四十五行与 Claude 对应行逐字节相同。这次撤销的重命名来自 [v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)，那一版把 `.kimi-code` 按怀疑而不是按 Kimi 公布的清单一并扫了进去，这是同一个缺陷里更贵的那个方向：它留下一条「名字已经核对过」的记录，而核对过的名字没有人会再核对。新增的 check 23 逐棵树钉住各 harness 公布的文件读取工具、终端与 `subagent_type` 取值；`.cursor` 也重读了一遍并刻意没有改动，因为 Cursor 公布的是能力而不是工具标识符。

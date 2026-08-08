@@ -223,7 +223,7 @@ Two rules the table alone does not carry:
 
 ## 10. The skill roster
 
-Fifteen skills, invoked as `/star-<name>` in Claude Code and Cursor, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code. What each one does in full is [research-workflow-skills.md](research-workflow-skills.md); what each one writes is §8.
+Fifteen skills, invoked as `/star-<name>` in Claude Code, Cursor and Qwen Code, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code. What each one does in full is [research-workflow-skills.md](research-workflow-skills.md); what each one writes is §8.
 
 | Skill | Role |
 | --- | --- |

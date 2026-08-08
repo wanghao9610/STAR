@@ -91,7 +91,8 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 | Codex | `.codex/hooks/star_memory.sh` | `SessionStart` | 索引，装在 `additionalContext` 里 |
 | Cursor | `.cursor/hooks/star_memory.sh` | `sessionStart` | 索引，装在 `additional_context` 里 |
 | Kimi | `.kimi-code/hooks/star_memory.sh` | `UserPromptSubmit` | 索引，每次会话注入一次 |
+| Qwen Code | `.qwen/hooks/star_memory.sh` | `SessionStart` | 索引，装在 `additionalContext` 里 |
 
 每个钩子只打印那两份索引，别的什么都不打——共享的那份，以及 `local/` 那份（存在的话）。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而一个在健康条目上也会亮的标记，只会教读者跳过它。记忆库没有条目时它什么都不打印，所以什么都没记过的项目一分钱不花。
 
-钩子存在不等于已注册。Claude、Codex、Cursor 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件，`execs/update.sh` 从不覆盖它——它只会把这个缺口报出来，那一条由人手工补上。
+钩子存在不等于已注册。Claude、Codex、Cursor、Qwen Code 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。Qwen Code 的注册自带一个条件：项目级钩子只在被信任的目录里跑，而这一条只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件，`execs/update.sh` 从不覆盖它——它只会把这个缺口报出来，那一条由人手工补上。

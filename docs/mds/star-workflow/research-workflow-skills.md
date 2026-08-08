@@ -78,7 +78,7 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-In Claude and Cursor, use `/skill-name` instead:
+In Claude, Cursor and Qwen Code, use `/skill-name` instead:
 
 ```text
 /star-plan-coach open-vocabulary detection and segmentation
@@ -1224,7 +1224,7 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all four roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other three are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
+Every skill directory has the same shape in all five roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other four are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
 
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |
@@ -1232,6 +1232,7 @@ Every skill directory has the same shape in all four roots: `SKILL.md` is the en
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
+| Qwen Code | `.qwen/skills/` | `/star-*` |
 
 The fifteen skill directory names are:
 

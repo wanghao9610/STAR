@@ -78,7 +78,7 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-在 Claude 和 Cursor 中，对应写法是 `/skill-name`：
+在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`：
 
 ```text
 /star-plan-coach 开放词汇检测与分割
@@ -1224,7 +1224,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 每个工具都有一份适配过的权威 skill 副本。不要跨这些根目录混用工具特定的调用或控制说明：
 
-四个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例沿用 §1 的 Codex 写法，但“完整定义”链接指向 `.claude/skills/`——其他三套都由这一基准树移植而来。涉及工具机制的差异，请以上表中你所用工具自己的那份为准。
+五个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例沿用 §1 的 Codex 写法，但“完整定义”链接指向 `.claude/skills/`——其他四套都由这一基准树移植而来。涉及工具机制的差异，请以上表中你所用工具自己的那份为准。
 
 | 工具 | 权威目录 | 调用形式 |
 | --- | --- | --- |
@@ -1232,6 +1232,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
+| Qwen Code | `.qwen/skills/` | `/star-*` |
 
 十五个目录名分别是：
 

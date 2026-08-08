@@ -1,8 +1,9 @@
 # Project Memory — index
 
 What earlier sessions in this repository learned, one line per memory, newest
-first. The session hooks under `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`
-and `.kimi-code/hooks/` parse these lines byte-exactly, so the shape is fixed:
+first. The session hooks under `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`,
+`.kimi-code/hooks/` and `.qwen/hooks/` parse these lines byte-exactly, so the
+shape is fixed:
 
     - <type> · <scope> · <verified> · [<slug>](<slug>.md) — <one line>
     - env · machine:cluster-a · 2026-08-03 · [flash-attn-gcc11](flash-attn-gcc11.md) — builds only after `module load gcc/11`
