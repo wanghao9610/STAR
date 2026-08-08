@@ -5,7 +5,7 @@ task_dir: tasks/<prefix>_<slug>
 updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 involve: <level (source)>   # effective level, conventions §7.7 — e.g. low (invocation); medium when never set
-branch: <exec/<run> | none>   # execution branch (conventions §11); mirrors EXEC_PLAN
+branch: <run name | none>   # execution branch (conventions §11); mirrors EXEC_PLAN
 merged: <pending | YYYY-MM-DD @<short-sha> | discarded YYYY-MM-DD>   # set at the merge/discard confirmation point; omit the line when branch is none
 model_id: <model id, copied verbatim from what your runtime states this session — Cursor injects it at session start; "unrecorded" only if the session names none>
 model_trail:                    # append-only: one entry per write session, never rewritten

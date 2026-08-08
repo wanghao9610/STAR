@@ -46,7 +46,7 @@ Before acting, load this skill's unconditional opening reads in one message — 
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-git branch --list 'exec/*' 2>/dev/null   # execution branches with unmerged runs — the gaps line reads this listing
+git branch --list '[0-9]*_*' 2>/dev/null   # execution branches with unmerged runs — the gaps line reads this listing
 awk '/^## /{k=/^## (0|3|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 

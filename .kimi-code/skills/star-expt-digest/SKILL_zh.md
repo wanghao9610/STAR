@@ -22,7 +22,7 @@ description: >-
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-git branch --list 'exec/*' 2>/dev/null   # 带未合并 run 的执行分支——缺口与欠账那一行读的就是这份清单
+git branch --list '[0-9]*_*' 2>/dev/null   # 带未合并 run 的执行分支——缺口与欠账那一行读的就是这份清单
 awk '/^## /{k=/^## (0|3|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 

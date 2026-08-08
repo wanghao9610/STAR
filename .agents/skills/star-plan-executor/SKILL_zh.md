@@ -68,9 +68,9 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 把 §3 和 gap 列表细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。
 2. 明确标出 STOP line；已知时估算运行时间/成本。
 3. 把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入，以变更项形式（ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`）记入 EXEC_PLAN 的“与子计划的偏差”表。与子计划自身粒度相矛盾算偏差；“更具体”不算——除非那是计划未写明、而某份方法文档会引用的值，那要记为一条 ENRICHED 行并写明该章节。
-4. **定下分支这一行**（规约 §11）：EXEC_PLAN 里只要有 action 要修改 `${CODE_NAME}/` 下已存在的被跟踪文件，计划就带上 `branch: exec/<run>` 并推荐在它上面执行；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`，无论它叫什么。操作细节：`references/branch_rules_zh.md`。
-5. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。并说明不做的代价：没有逐 action 提交，每个已验证 action 都停在未提交状态，后面要恢复时，唯一能依据的就是本次运行自己记下的每个 action 起点（`references/agent_dispatch_spec_zh.md`）。若第 4 条定了 `branch: exec/<run>`，分支问题也在同一次暂停里问（规约 §11）：点明它从哪个基础分支分出，说明选它就同时选了逐 action 提交——只有提交才会被合并——以及唯一前置条件：当前 checkout 上没有正在运行的任务；不选则照旧在基础分支上执行。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
-6. 先建获批的分支：从记下的基础分支 `git switch -c exec/<run>`，让下面的一切都生在它上面（`references/branch_rules_zh.md`）。为计划中间文件创建 `tasks/<plan-name>/`。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `$star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的 divergence 行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
+4. **定下分支这一行**（规约 §11）：EXEC_PLAN 里只要有 action 要修改 `${CODE_NAME}/` 下已存在的被跟踪文件，计划就带上 `branch: <run>` 并推荐在它上面执行；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`，无论它叫什么。操作细节：`references/branch_rules_zh.md`。
+5. 在 commentary 中展示简洁计划和预期副作用，并只问一次是否将每个已验证 action checkpoint 为 git commit（推荐），同时列出任何已有未提交修改的路径——绝不暂存这些路径。并说明不做的代价：没有逐 action 提交，每个已验证 action 都停在未提交状态，后面要恢复时，唯一能依据的就是本次运行自己记下的每个 action 起点（`references/agent_dispatch_spec_zh.md`）。若第 4 条定了 `branch: <run>`，分支问题也在同一次暂停里问（规约 §11）：点明它从哪个基础分支分出，说明选它就同时选了逐 action 提交——只有提交才会被合并——以及唯一前置条件：当前 checkout 上没有正在运行的任务；不选则照旧在基础分支上执行。仅在存在实质范围选择、非空 divergence 表（执行前须与用户确认各行），或需要用户执行的 STOP-line action 时暂停。
+6. 先建获批的分支：从记下的基础分支 `git switch -c <run>`，让下面的一切都生在它上面（`references/branch_rules_zh.md`）。为计划中间文件创建 `tasks/<plan-name>/`。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `$star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的 divergence 行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
 
 ### Step 4：执行与验证
 
@@ -97,7 +97,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 状态与文件规则
 
 - 把 `wkdrs/<run>/EXEC_LOG.md` 视为执行事实来源。再次调用时跳过 `done` action，从第一个未完成项恢复。回同步必须幂等：标为 `synced` 或已勾选的行绝不重复应用；未同步 pending 行在 finalize 时重新提出。
-- **先找分支，再找 run 目录。** 存在与该 leaf 匹配的 `exec/<prefix>_<slug>*` 分支，就说明有一次 run 正在它上面进行——即便基础 checkout 显示该 leaf 未执行：基础分支是准据（规约 §11.3）。先确认工作区没有无关的未提交改动（有则列出并等用户处理），`git switch` 过去，按上一条从它的 `EXEC_LOG.md` 续跑。记录在案的 `branch:` 已不存在时，这是要上报的 blocker，绝不无声重建。
+- **先找分支，再找 run 目录。** 存在与该 leaf 匹配的 `<prefix>_<slug>*` 分支，就说明有一次 run 正在它上面进行——即便基础 checkout 显示该 leaf 未执行：基础分支是准据（规约 §11.3）。先确认工作区没有无关的未提交改动（有则列出并等用户处理），`git switch` 过去，按上一条从它的 `EXEC_LOG.md` 续跑。记录在案的 `branch:` 已不存在时，这是要上报的 blocker，绝不无声重建。
 - run 目录里的 `CODE_REVIEW_<date>.md`，若其 blocker/major 发现没有在日志里记为已处理，就排在一切之前重开工作：把每个受影响的 action 退回 `in_progress` 并在备注写上该发现的编号，一条发现跨多个 action 时改为在 `EXEC_PLAN.md` 追加一个补救 action；整批确认一次，执行并验证，之后才把待跑的 STOP line 命令交回。用户明确不处理的发现，连同这个决定记为已处理，下次调用不再重开它。
 - **在执行分支上，这轮工作终于合并确认点。** 每个 action 都 `done`、§5 完成判据成立、最新审查的 blocker/major 都已处理时，剩下的唯一动作就是合并（规约 §11.4）——任何参与度档位都要问。操作细节在 `references/branch_rules_zh.md`：默认 squash，基础分支前进过就先把它 merge 进来，合并后在基础分支上重跑该 leaf 的轻量检查，分支删不删另问一道——还有弃用路径：先把 `wkdrs/<run>/*.md` 与子计划里这次 run 的条目带回基础分支，才谈得上删除。
 - `tasks/<plan-name>/` 存放该计划自有的工具脚本（持久）与可丢弃草稿文件，本 skill 拥有草稿文件的生命周期：Step 3 创建，§5 满足后在 finalize 时只提议删除草稿文件，绝不删脚本（规约 §9）。生成工件与持久证据绝不放在那里；未经询问绝不删除，也绝不触碰其他计划的 `tasks/` 目录。

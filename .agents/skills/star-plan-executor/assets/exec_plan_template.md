@@ -6,7 +6,7 @@ task_dir: tasks/<prefix>_<slug>      # plan-specific execution-process intermedi
 code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
 started: <YYYY-MM-DD>                # date Codex started this authorized execution run
-branch: <exec/<run> | none>          # execution branch this run executes on (conventions §11); none = the base branch
+branch: <run name | none>          # execution branch this run executes on, named exactly as run: above (conventions §11); none = the base branch
 base: <branch@short-sha | —>         # what the branch forked from — the merge target; — when branch is none
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
