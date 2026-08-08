@@ -1,7 +1,7 @@
 ---
 name: star-idea-storm
 disable-model-invocation: true
-argument-hint: "[IDEA | IDEA_NAME]"
+argument-hint: "[IDEA | IDEA_NAME] [involve=high]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

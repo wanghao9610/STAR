@@ -1,7 +1,7 @@
 ---
 name: star-plan-coach
 disable-model-invocation: true
-argument-hint: "[TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]"
+argument-hint: "[TOPIC | IDEA_NAME | PLAN_NAME [SECTION]] [involve=high]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

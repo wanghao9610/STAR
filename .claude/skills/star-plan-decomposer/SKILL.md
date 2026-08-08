@@ -1,7 +1,7 @@
 ---
 name: star-plan-decomposer
 disable-model-invocation: true
-argument-hint: "[PLAN_NAME]"
+argument-hint: "[PLAN_NAME] [involve=high]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)
