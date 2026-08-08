@@ -16,6 +16,7 @@ SKILL_ROOTS=(
     ".claude/skills"
     ".cursor/skills"
     ".kimi-code/skills"
+    ".qwen/skills"
 )
 
 # STAR-owned session hook assets — model-id provenance and the project-memory
@@ -25,6 +26,7 @@ HOOK_TREES=(
     ".codex/hooks"
     ".cursor/hooks"
     ".kimi-code/hooks"
+    ".qwen/hooks"
 )
 HOOK_FILES=(
     ".kimi-code/hooks.example.toml"
@@ -35,6 +37,7 @@ HOOK_CONFIGS=(
     ".claude/settings.json"
     ".codex/hooks.json"
     ".cursor/hooks.json"
+    ".qwen/settings.json"
 )
 # The agent instructions, in both copies a project carries: agent-instructions.mdc
 # is the AGENTS.md body verbatim, so they belong to the project together. Handled
@@ -66,7 +69,7 @@ missing_hooks() { # $1 = registration config path
     # whose harness lets a hook decide one — Cursor has no event that gates a
     # file edit, and Kimi's only observes the prompt it fires beside.
     case "$1" in
-        */.claude/settings.json|*/.codex/hooks.json)
+        */.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
     # The commit guard declines a shell command before it runs, which every
@@ -89,9 +92,10 @@ updated, so local edits to execs/run.sh are replaced along with everything else;
 scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
 body) and the hook registration configs (.claude/settings.json, .codex/hooks.json,
-.cursor/hooks.json) are installed only when missing and never overwritten, so a project that
-has written its own keeps them and one that has none gets them. Use --skill to update only
-the named skill across the Codex, Claude, Cursor, and Kimi skill directories.
+.cursor/hooks.json, .qwen/settings.json) are installed only when missing and never overwritten,
+so a project that has written its own keeps them and one that has none gets them. Use --skill
+to update only the named skill across the Codex, Claude, Cursor, Kimi and Qwen Code skill
+directories.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -283,7 +287,7 @@ if [[ "${ADOPT}" == false ]]; then
         # still copies only SYNC_PATHS: execs brings execs/scpts/ along here, and
         # none of it is copied out.
         git -C "${SOURCE_DIR}" sparse-checkout set \
-            .agents .claude .codex .cursor .kimi-code docs/mds/star-workflow docs/srcs execs
+            .agents .claude .codex .cursor .kimi-code .qwen docs/mds/star-workflow docs/srcs execs
     fi
 
     SYNCED=()

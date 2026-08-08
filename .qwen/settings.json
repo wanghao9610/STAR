@@ -1,0 +1,60 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash .qwen/skills/star-flow-status/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-flow-status/scripts/scan.sh *)",
+      "Bash(bash .qwen/skills/star-expt-digest/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-expt-digest/scripts/scan.sh *)",
+      "Bash(bash .qwen/skills/star-plan-decomposer/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-plan-decomposer/scripts/scan.sh *)",
+      "Bash(bash .qwen/skills/star-plan-executor/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-plan-executor/scripts/scan.sh *)",
+      "Bash(bash .qwen/skills/star-plan-reviser/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-plan-reviser/scripts/scan.sh *)",
+      "Bash(bash .qwen/skills/star-metd-summarize/scripts/scan.sh)",
+      "Bash(bash .qwen/skills/star-metd-summarize/scripts/scan.sh *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "edit|write_file|notebook_edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR\"/.qwen/hooks/star_involve_gate.sh",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR\"/.qwen/hooks/star_commit_guard.sh",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR\"/.qwen/hooks/star_model_id.sh",
+            "statusMessage": "Recording session model id for STAR provenance",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR\"/.qwen/hooks/star_memory.sh",
+            "statusMessage": "Loading STAR project memory",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}
