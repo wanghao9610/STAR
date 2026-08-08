@@ -6,6 +6,7 @@ updated: <YYYY-MM-DD>
 status: in_progress   # in_progress / blocked / done
 involve: <档位 (来源)>   # 生效参与度档位，规约 §7.7——如 low (invocation)；从未设置时为 medium
 branch: <run 名 | none>   # 执行分支（规约 §11）；与 EXEC_PLAN 一致
+worktree: <绝对路径 | none>   # 安置本次 run 的工作树（规约 §11.7–9）；与 EXEC_PLAN 一致；none 时整行省略
 merged: <pending | YYYY-MM-DD @<短SHA> | discarded YYYY-MM-DD>   # 在合并/弃用确认点填写；branch 为 none 时整行省略
 model_id: <模型 id，照抄运行时本会话为你声明的那串——Kimi 会话有报告就照记；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目

@@ -8,6 +8,7 @@ created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # date the user approved this via ExitPlanMode
 branch: <run name | none>          # execution branch this run executes on, named exactly as run: above (conventions §11); none = the base branch
 base: <branch@short-sha | —>         # what the branch forked from — the merge target; — when branch is none
+worktree: <absolute path | none>     # the tree housing this run (conventions §11.7–9); none = the invoking checkout
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
 model_id: <model id, copied verbatim from what your runtime states this session — Claude Code injects it at session start; "unrecorded" only if the session names none>
 model_trail:                    # append-only: one entry per write session, never rewritten

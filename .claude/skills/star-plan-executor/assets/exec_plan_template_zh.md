@@ -8,6 +8,7 @@ created: <YYYY-MM-DD>
 approved: <YYYY-MM-DD>               # 用户经 ExitPlanMode 批准的日期
 branch: <run 名 | none>          # 本次执行所在的执行分支，名字与上面的 run: 完全相同（规约 §11）；none = 在基础分支上执行
 base: <分支名@短SHA | —>             # 分支从哪里分出——也是合并目标；branch 为 none 时写 —
+worktree: <绝对路径 | none>          # 安置本次 run 的工作树（规约 §11.7–9）；none = 在被调用的 checkout 里执行
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
 model_id: <模型 id，照抄运行时本会话为你声明的那串——Claude Code 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
 model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目

@@ -69,12 +69,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. 把 §3 + 缺口清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 conda) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。每个动作绑一个可验证 check;末尾动作绑 §5 完成判据。
 3. **显式画出红线**(`references/stop_line_rules_zh.md`):标出哪些动作 agent 执行、哪些是"备好命令交用户"(重实验)。
 4. **收集实质性偏差**:把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入,以变更项形式(ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`)记入 EXEC_PLAN 的"与子计划的偏差"表。与子计划自身粒度相矛盾算偏差;"更具体"不算——除非那是计划未写明、而某份方法文档会引用的值,那要记为一条 ENRICHED 行并写明该章节。
-5. **定下分支这一行**(规约 §11):EXEC_PLAN 里只要有动作要修改 `${CODE_NAME}/` 下已存在的被跟踪文件,计划就带上 `branch: <run>` 并推荐在它上面执行;只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`,无论它叫什么。操作细节:`references/branch_rules_zh.md`。
+5. **定下分支与 worktree 两行**(规约 §11):EXEC_PLAN 里只要有动作要修改 `${CODE_NAME}/` 下已存在的被跟踪文件,计划就带上 `branch: <run>` 并推荐在它上面执行;只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`,无论它叫什么。worktree 这一行答的是另一个问题——当前 checkout 此刻腾不腾得出来(§11.7):任一忙碌信号命中(HEAD 停在别的 run 的执行分支上;未提交改动的路径归属别的 run 的记录;有命令交回了用户、结果还没回收——可能有任务在跑,只问不测;或用户明说要并行)→ `worktree: ../<根目录名>--wt/<run>`,并连带把 `branch: none` 改成 `branch: <run>`——树里的提交要有自己的归宿(§11.8);无信号 → `worktree: none`。信号与操作细节:`references/branch_rules_zh.md`。
 
 ### Step 4：审批确认点（`ExitPlanMode`）
 
-1. `ExitPlanMode` 呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>`,分支问题也在同一个确认点上问(规约 §11):点明它从哪个基础分支分出,说明选它就同时选了逐步提交——只有提交才会被合并——以及唯一前置条件:当前 checkout 上没有正在运行的任务;不选则照旧在基础分支上执行。
-2. 批准后——先建获批的分支:从记下的基础分支 `git switch -c <run>`,让下面的一切都生在它上面(`references/branch_rules_zh.md`)——把选定计划文件名去掉 `_plan.md` 得到 `<plan-name>`,为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs` 列表,而不是替换它:正是这段历史让 `/skill:star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
+1. `ExitPlanMode` 呈现 EXEC_PLAN + 预计副作用:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否把每个通过验证的步骤做成 git checkpoint 提交(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:没有逐步提交,每个通过验证的步骤都停在未提交状态,后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>`,分支问题也在同一个确认点上问(规约 §11):点明它从哪个基础分支分出,说明选它就同时选了逐步提交——只有提交才会被合并——以及唯一前置条件:当前 checkout 上没有正在运行的任务;不选则照旧在基础分支上执行。若 Step 3 定了 `worktree: <path>`,树的问题也搭在同一个确认点上(§11.7):点明推荐它的那个忙碌信号、路径、要补的链(`.env`、`datas/`、`inits/`),以及整个 run——提交、记录、后续 skill——从此都住在那棵树里,当前 checkout 原地不动;不选则在这里执行,等 checkout 忙完。
+2. 批准后——先建获批的分支:从记下的基础分支 `git switch -c <run>`,让下面的一切都生在它上面——获批的是 worktree 时改为 `git worktree add <path> -b <run> <base>`:任何 checkout 都不切换,补上符号链接并对树里的 `.env` 重验一次解析,树的绝对路径以 `worktree:` 记进两份记录,下面的一切都发生在树里(`references/branch_rules_zh.md`)——把选定计划文件名去掉 `_plan.md` 得到 `<plan-name>`,为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs` 列表,而不是替换它:正是这段历史让 `/skill:star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
 3. **把偏差同步回子计划**。若偏差表非空,刚获得的批准已覆盖此事:原地更新受影响的 §2–§5 段落,追加一条 `## Revision History` 条目,更新 `updated`,并给每行标记 `synced`(`references/plan_sync_rules_zh.md`)。子计划从此与即将执行的内容一致。
 
 ### Step 5：执行—验证循环（每步一个 agent）
@@ -102,13 +102,14 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 子计划 frontmatter 只带 `exec_status` + `exec_runs`(只追加,最新的在最后;最后一项是当前 run)。
 - re-invoke 时读 run 目录,跳过 `done` 步,从第一个未完成步续跑。若之前有红线命令待执行、现在其产出已存在,则从完成判据验证处续起。
 - **先找分支,再找 run 目录。** 存在与该叶子匹配的 `<prefix>_<slug>*` 分支,就说明有一次 run 正在它上面进行——即便基础 checkout 显示该叶子未执行:基础分支是准据(规约 §11.3)。先确认工作区没有无关的未提交改动(有则列出并等用户处理),`git switch` 过去,按上一条从它的 `EXEC_LOG.md` 续跑。记录在案的 `branch:` 已不存在时,这是要上报的 blocker,绝不无声重建。
+- **记录里带 `worktree:` 的 run 住在那棵树里。** 先确认树还在(`git worktree list`),在树里续跑,绝不切换当前 checkout。记录在案的树从磁盘上消失,和分支消失是同一种 blocker:`git worktree prune` 清掉过期元数据,绝不无声重建。
 - **审查发现会重开步骤。** 若 run 目录里有 `CODE_REVIEW_<date>.md`,且它带的 blocker/major 发现没有在日志里记为已处理,re-invoke 时它们排在一切之前:把每条发现落在的步骤重开(状态回到 `in_progress`,备注里写上该发现的编号),一条发现跨多步时改为在 `EXEC_PLAN.md` 追加一个补救步骤;像 Step 4 确认计划那样整批确认一次;然后走 Step 5 的执行—验证循环。待跑的红线命令要等这之后才再次交回。用户决定不处理的发现,连同这个决定一起在日志里记为已处理,下次 re-invoke 就不再重开它。
-- **在执行分支上,这轮工作终于合并确认点。** 每一步都 `done`、§5 完成判据成立、最新审查的 blocker/major 都已处理时,剩下的唯一动作就是合并(规约 §11.4)——任何参与度档位都要问。操作细节在 `references/branch_rules_zh.md`:默认 squash,基础分支前进过就先把它 merge 进来,合并后在基础分支上重跑该叶子的轻量检查,分支删不删另问一道——还有弃用路径:先把 `wkdrs/<run>/*.md` 与子计划里这次 run 的条目带回基础分支,才谈得上删除。
+- **在执行分支上,这轮工作终于合并确认点。** 每一步都 `done`、§5 完成判据成立、最新审查的 blocker/major 都已处理时,剩下的唯一动作就是合并(规约 §11.4)——任何参与度档位都要问。操作细节在 `references/branch_rules_zh.md`:默认 squash,基础分支前进过就先把它 merge 进来,合并后在基础分支上重跑该叶子的轻量检查,分支删不删另问一道——还有弃用路径:先把 `wkdrs/<run>/*.md` 与子计划里这次 run 的条目带回基础分支,才谈得上删除。进了 worktree 的 run,squash 不用切换——主 checkout 本来就站在基础分支上——合并后再了结那棵树:先把非 md 产物挪回来,再 `git worktree remove` 且不带 `--force`,各问一道(§11.9)。
 - 同步回写是幂等的:标了 `synced` 的行(EXEC_PLAN)和勾掉的行("待同步修正")绝不二次应用;未同步的待定行在 Step 6 再次提出。
 
 ### Step 8：简报
 
-验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`)。两种收尾都建议 `/skill:star-code-reviewer <叶子>` 对照规约与子计划审一遍实现:run 完整跑完后,在修订计划或继续推进之前审;有命令在红线交回给用户时,在用户跑它之前审——把这条审查命令写在待跑命令之上,因为 bug 等算力烧完才被抓住,代价是算力加重跑。这条审查属于那八个 agent 可以自己启动的 skill、目标就是这个叶子,所以它是这份报告发出后真正要跑的东西,而不是打印给用户去敲的命令;待跑命令照旧打印出来、归用户,连同审查发现一并交回。说清审查通向哪里:确认的 blocker/major 经 `/skill:star-plan-executor <叶子>` 回来,它重开受影响的步骤、改完验证过,才把命令再交回——在执行分支上,干净的审查也从这里走:re-invoke 本 skill 就抵达合并确认点(规约 §11)。只要存在分支,就点出这次 run 的分支名及其未合并状态。探索性叶子、命令本身很便宜时,可以跳过审查直接跑——把这条作为备选说出来,而不是替用户决定,并且在审查启动之前就问。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/skill:star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
+验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/skill:star-plan-reviser` / `/skill:star-plan-coach` / `/skill:star-plan-decomposer`)。两种收尾都建议 `/skill:star-code-reviewer <叶子>` 对照规约与子计划审一遍实现:run 完整跑完后,在修订计划或继续推进之前审;有命令在红线交回给用户时,在用户跑它之前审——把这条审查命令写在待跑命令之上,因为 bug 等算力烧完才被抓住,代价是算力加重跑。这条审查属于那八个 agent 可以自己启动的 skill、目标就是这个叶子,所以它是这份报告发出后真正要跑的东西,而不是打印给用户去敲的命令;待跑命令照旧打印出来、归用户,连同审查发现一并交回。说清审查通向哪里:确认的 blocker/major 经 `/skill:star-plan-executor <叶子>` 回来,它重开受影响的步骤、改完验证过,才把命令再交回——在执行分支上,干净的审查也从这里走:re-invoke 本 skill 就抵达合并确认点(规约 §11)。只要存在分支,就点出这次 run 的分支名及其未合并状态;run 住在 worktree 里时,一并点出树的路径——后续 skill 都在那棵树里工作。探索性叶子、命令本身很便宜时,可以跳过审查直接跑——把这条作为备选说出来,而不是替用户决定,并且在审查启动之前就问。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/skill:star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
 
 ## 状态与文件规则
 
@@ -117,7 +118,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 绝不自主启动重型或不可逆任务(长时/多卡训练、全量评测、大开销 API);这些越过红线交给用户。
 - 所有运行命令走 `.env` 的 conda 环境;绝不用系统 python、绝不硬编码本地路径。
 - 子计划的 frontmatter(`exec_status`、`exec_runs`、`updated`)可自由编辑;它的 §2–§5 **只能**经用户确认的同步回写协议修改(`references/plan_sync_rules_zh.md`)——始终原地更新、始终配一条 `## Revision History` 条目。绝不改写 §1 或 §6、绝不碰父计划——目标级/总体计划级偏差走 `star-plan-coach` / `star-plan-decomposer`(向上反馈)。
-- Git:每个通过验证的步骤一次提交,只 stage 该步触碰的文件——在执行分支上,连同本步更新过的运行记录——且仅在审批确认点覆盖时提交;run 开始时就已带未提交改动的路径在确认点上列出(规约 §1)。分支的创建、合并、弃用只发生在 §11 各自的确认点上(`references/branch_rules_zh.md`);绝不 rebase 执行分支,记录未先带回基础分支的分支绝不删除。
+- Git:每个通过验证的步骤一次提交,只 stage 该步触碰的文件——在执行分支上,连同本步更新过的运行记录——且仅在审批确认点覆盖时提交;run 开始时就已带未提交改动的路径在确认点上列出(规约 §1)。分支的创建、合并、弃用只发生在 §11 各自的确认点上,worktree 的创建与移除同理(`references/branch_rules_zh.md`);绝不 rebase 执行分支,记录未先带回基础分支的分支绝不删除,非 md 产物未挪出的树绝不 `git worktree remove`——也绝不带 `--force`。
 - 步骤 `status` 合法值:`pending` / `in_progress` / `done` / `blocked` / `skipped`。
 
 ## 对话纪律
@@ -125,4 +126,4 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 若当前环境无法使用 AskUserQuestion 或 plan 模式(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在任何副作用前要求一次明确的纯文本批准——仍然先审批再执行,仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
 - 用户用什么语言就用什么语言对话;中文对话加载 `*_zh.md` 资源。
 - 子计划正文语言以其 `language` 为准;中文计划中专业术语保留英文。
-- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:ExitPlanMode 审批确认点(Step 4,含按步提交与执行分支两问)、红线(Step 5)、合并确认点与分支的弃用或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会(它把关一次删除)、以及 blocked 步骤那些改动的去留(它同样把关一次删除——`references/agent_dispatch_spec_zh.md`)。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退(取推荐项:送回 decomposer 并停下)。`high` 档:Step 5 每步派发 subagent 前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:ExitPlanMode 审批确认点(Step 4,含按步提交、执行分支与 worktree 三问)、红线(Step 5)、合并确认点与分支或 worktree 的弃用、移除或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会(它把关一次删除)、以及 blocked 步骤那些改动的去留(它同样把关一次删除——`references/agent_dispatch_spec_zh.md`)。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退(取推荐项:送回 decomposer 并停下)。`high` 档:Step 5 每步派发 subagent 前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
