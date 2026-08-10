@@ -102,4 +102,5 @@ Run every family in `references/release_checklist.md` over the tracked repositor
 ## Dialogue Discipline
 
 - All confirmation points go through `ask_user_question` — one question per call: the phase when the argument is unrecognized, the readiness decision when sources are mostly absent, Confirmation point 1 on the promotion table, each polish finding, each README section change, the STAR-README or hand-authored-README replacement, and the Chinese README offer. If it is unavailable (headless / scripted), fall back to plain text, still one at a time, and require an explicit approval before any write.
+- **Material a question is about goes in the text of the same message, above the call** — the polish findings, the section-level change list. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
 - Reply in the user's language. `README.md` is English regardless of the dialogue language; the release report follows the root plan's `language` (dialogue language if no plan); keep technical terms in English inside Chinese documents.

@@ -134,4 +134,5 @@ For each target, in dependency order:
 ## Dialogue Discipline
 
 - AskUserQuestion carries the five confirmation points: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (headless / scripted), fall back to plain text and still require an explicit approval before overwriting any existing file — and never compile past the readiness check without one.
+- **Material a question is about goes in the text of the same message, above the call** — the section-level change list. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
 - Reply in the user's language; the documents follow the plans' `language` (Step 1), which may differ from the dialogue. Keep technical terms — metric names, module paths, dataset names — in English inside Chinese documents.

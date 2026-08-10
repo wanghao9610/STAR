@@ -107,6 +107,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 ## Dialogue Discipline
 
 - Ask one question at a time — the `request_user_input` tool, with concise plain text only in non-interactive `codex exec` — and wait for the answer. All three confirmation points require an explicit answer before any write past a confirmation point.
+- **Material a question is about goes in the text of the same message, above the call** — the prior-run list, the proposed leaf rows. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.
 - `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

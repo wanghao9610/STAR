@@ -107,3 +107,4 @@ Lead with what was written, under about 500 words: per document — written / sk
 ## Dialogue Discipline
 
 - Ask one direct question at a time at the five confirmation points — the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require an explicit approval before overwriting any existing file, even in headless or scripted runs; never compile past the readiness check without one. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.
+- **Material a question is about goes in the text of the same message, above the call** — the section-level change list. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.

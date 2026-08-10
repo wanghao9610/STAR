@@ -76,6 +76,7 @@ When all sections are `done` (or `skipped`): Before listing anything, call `spaw
 ## Dialogue Discipline
 
 - Ask through the `request_user_input` tool; fall back to plain text only in non-interactive `codex exec`, where human-input tools are unavailable — still one coaching question at a time.
+- **Material a question is about goes in the text of the same message, above the call** — the rubric findings, a drafted section put up for confirmation. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
 - Do not judge the idea's merit, but do point out logic gaps, skipped premises, and unanswered questions — mild tone, sharp questions.
 - Reply in the user's language. Question bank, rubric, and templates ship as English default (no suffix) and Chinese `*_zh.md`; pick by dialogue language.
 - Plan body language follows frontmatter `language`: set at creation from the dialogue language; on resume keep the file's language even if chat language changes; rewrite and update `language` only when the user explicitly asks. In Chinese plans, keep technical terms in English.
