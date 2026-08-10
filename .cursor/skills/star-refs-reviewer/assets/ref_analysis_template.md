@@ -38,12 +38,21 @@ model_trail:                    # append-only: one entry per write session, neve
      kind a later paper positions itself against — names where the paper states it: a section,
      a table, or a short quote. -->
 
-<!-- Architecture figure, where the paper's arXiv HTML has one: the figure whose caption says it shows
-     this method as a whole. Fill the two lines below and keep them together. No such figure, or no
-     arXiv HTML rendering — delete both and say which of the two it was, in one line. -->
+<!-- Figures, where the paper's arXiv HTML has them: up to three across the whole note, each in the
+     section whose content it shows — the method figure here, a problem or setting figure in §2, a
+     results figure in §4. The three lines below are one figure; repeat them where a second earns its
+     place. No qualifying figure, or no arXiv HTML rendering — delete them and say which of the two
+     it was, in one line. -->
 
-![<Method> architecture](figs/<ABBREV>_fig<N>.png)
+![<Method> — <what this figure shows, 2–4 words>](figs/<ABBREV>_fig<N>.png)
 *Figure <N>: <the caption's first sentence, verbatim>* — src: <image URL> (fetched YYYY-MM-DD)
+
+<!-- 2–4 sentences: what the figure shows and how to read it — the parts and how they connect, the
+     axes and what moves along them, what to take from it. Written from the caption in full and the
+     passages citing this figure by number; anything neither states is [unverified]. Restating the
+     caption is not a description, and a figure that cannot be described is not kept. -->
+
+**What this figure shows**: <…>
 
 ## 4. Experiments & Results
 
@@ -52,7 +61,9 @@ model_trail:                    # append-only: one entry per write session, neve
      incomparable settings. Write each headline number as one self-contained line, the number
      travelling with its dataset, metric, and setting, so it survives being quoted without
      this section around it — that is the form a writing repository's citation audit checks a
-     manuscript sentence against, and a number stranded from its setting backs nothing. -->
+     manuscript sentence against, and a number stranded from its setting backs nothing.
+     A results figure belongs here under §3's rule and in §3's three-line form — kept only where it
+     carries what these numbers cannot. -->
 
 ## 5. Relation to This Project ★
 
