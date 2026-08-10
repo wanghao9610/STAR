@@ -519,7 +519,7 @@ If no argument is given or the match is ambiguous, the skill lists candidate pla
 The skill first checks whether the parent plan is ready, then confirms two decisions in order:
 
 1. **Decomposition axis:** phase/milestone, component/module, or experiment/evidence;
-2. **Sub-plan list:** the objective, granularity, dependencies, and execution order of each unit.
+2. **Sub-plan list:** one card per unit — objective, steps, deliverables, done-criterion — plus the dependencies and execution order, all shown in the reply before the question is put.
 
 After confirmation, the skill generates a sub-plan for every unit. Each sub-plan contains:
 
