@@ -62,7 +62,7 @@ description: >-
 ### Step 2 —— `polish`：对外发布的部分
 
 1. 解析对外发布的部分：Step 1 移入的文件，加上 README 会打印的入口、配置、`execs/scpts/*.sh`，加上它会展示的公共 API。报出文件数。范围之外的东西不读、不收问题项。
-2. 按 `references/gather_rubric_zh.md` 的"对外发布的部分打磨"一节收集问题项——codearc 符合度、README 提到之物的 docstring、搬移后的残留引用、调试输出、被注释掉的实验代码、脚本里的过期路径。对外发布的部分之外的问题项只记录待转交，绝不动手修。
+2. 按 `references/gather_rubric_zh.md` 的"对外发布的部分打磨"一节收集问题项——codearc 符合度、README 提到之物的 docstring、搬移后的残留引用、调试输出、被注释掉的实验代码、脚本里的过期路径。对外发布的部分之外的问题项只记录待转交，绝不动手修。逐条询问之前，先把发现落到正文——每条一行：`file:line`、是什么问题、怎么改。
 3. 按文件顺序经 AskUserQuestion 逐条走——*按提议修* / *调整后修* / *跳过*，标出推荐，一次一条问题项（或一批同类项）。每处批准的修改写入后对该文件重跑 `compileall`；复检失败就回滚该处并标 `reverted`。
 4. 有任何改动完成时提交本阶段：`star-code-release: polish release surface — <summary>`。
 
@@ -71,7 +71,7 @@ description: >-
 1. 从 `references/readme_map_zh.md` 选定小节集合：必备节始终出现（来源缺失时带一条写明产出方 skill 的 `TODO`），空则省略的节直接删掉而不是注水。
 2. 填 `assets/readme_template_zh.md`，按映射表的原样转录规则——数字连同 run 从结果汇总表原样抄，命令从解析过的脚本原样抄，图片路径只在文件存在时写。
 3. 处理 `README.md` 已有内容，三种情况：
-   - **带本 skill 的生成标记** → 给出分节变更清单，经 AskUserQuestion 逐节询问。当前文本与本 skill 上次生成结果不同的节即人工改过：默认**保留**，并说明这一点。
+   - **带本 skill 的生成标记** → 先给出分节变更清单——每节一行：保留 / 改写 / 新增 / 删除，以及变了什么——再经 AskUserQuestion 逐节询问。当前文本与本 skill 上次生成结果不同的节即人工改过：默认**保留**，并说明这一点。
    - **是 STAR 自己的模板 README**（它的图标、"Systematic Toolchain for AI Research" 标语、STAR 项目结构块）→ 说明它描述的是模板而不是这个项目，确认一次再替换。编译出的 README 保留 "Built with STAR" 页脚，署名不会因替换而丢失。
    - **其他人工撰写的 README** → 不做"比对即覆盖"。说明它现在有什么、编译会换成什么，然后询问。保持原样是有效结果；编译到用户指定的另一个路径也是。
 4. `README.md` 用英文。当根计划的 `language` 是 `zh` 时，经 AskUserQuestion 额外提供 `README.zh-CN.md`；两者都存在时各自带上互链的 `**Language:**` 行。中文 README 里，技术术语、指标名、数据集名和文件路径保持英文。

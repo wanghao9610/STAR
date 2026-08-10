@@ -75,7 +75,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step S5：确认点 2——把值得留存的历史 run 入账
 
-列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。通过 AskUserQuestion 一次性询问（multiSelect）：哪些要记录到 wkdrs/。对每个被选中的 run，软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余的仅作为证据留在清单里，报告中说明有多少个没有入账。
+列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。通过 AskUserQuestion 一次性对着编号问：哪些要记录到 wkdrs/——超过四个 run 就装不进选项（规约 §7.3），给成 *全部记录* / *记录其中几个（报编号）* / *都不记录*。对每个被选中的 run，软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余的仅作为证据留在清单里，报告中说明有多少个没有入账。
 
 #### Step S6：写记录并交棒
 
@@ -89,7 +89,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 #### Step B2：确认点 3——逐 leaf 确认
 
-用户通过 AskUserQuestion 逐个确认——条目较多时对提议行做 multiSelect，较少时一个一问。未获确认的 leaf 原样不动。用户标为 `done` 但没有入账 run 的 leaf 是允许的，并要记一笔：`/star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
+用户通过 AskUserQuestion 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。用户标为 `done` 但没有入账 run 的 leaf 是允许的，并要记一笔：`/star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
 
 #### Step B3：写入、记录、汇报
 

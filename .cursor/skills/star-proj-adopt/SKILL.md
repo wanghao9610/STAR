@@ -77,7 +77,7 @@ From git log, the entrypoints, the output directories, and the README, assemble 
 
 #### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
-List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via AskQuestion (allow_multiple): which of these to record. For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
+List the prior runs the probe found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via AskQuestion over the numbered list: which of these to record — more than four runs cannot be options (conventions §7.3), so offer *record all* / *record some (say the numbers)* / *record none*. For each chosen run, symlink it to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command if it is recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
 
 #### Step S6: Write the record & route
 
@@ -91,7 +91,7 @@ Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A sm
 
 #### Step B2: Confirmation point 3 — per-leaf confirmation
 
-The user confirms leaf by leaf via AskQuestion — allow_multiple over the proposed rows when there are several, one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/star-flow-status` will flag it as done-with-no-run, which is the honest state.
+The user confirms leaf by leaf via AskQuestion — one question over the numbered rows when there are several — *confirm all* / *confirm some (say the numbers)* / *confirm none* — and one question each when there are four or fewer. An unconfirmed leaf is left exactly as it is. A leaf the user marks `done` that has no recorded run is allowed, and is noted: `/star-flow-status` will flag it as done-with-no-run, which is the honest state.
 
 #### Step B3: Write, record, report
 

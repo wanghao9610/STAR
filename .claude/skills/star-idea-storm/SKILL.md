@@ -84,7 +84,7 @@ Establish what is really driving the interest and what the topic must fit inside
 
 ### Stage 2: Diverge (`diverge`)
 
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2 — each candidate carries a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one AskUserQuestion (multiSelect, recommendations marked): keep 2–4 for scanning. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2 — each candidate carries a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one AskUserQuestion (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 
 ### Stage 3: Landscape scan (`scan`)
 
@@ -104,7 +104,7 @@ Draft §5 from everything above, 150–400 words of structured prose:
 - the first validation experiment: the cheapest test of the riskiest assumption, about a week within §1's constraints, its kill-condition explicit;
 - known risks and open questions, addressed to the survey and the plan.
 
-Check the draft against the rubric's topic-statement test (Part C); list failing items (at most 5, ranked by importance) and fix them or let the user explicitly accept them. Show the draft, confirm via AskUserQuestion (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `/star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
+Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. An item the user never saw is not an item they accepted. Show the draft, confirm via AskUserQuestion (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `/star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
 
 ### Step 6: Digest & handoff
 

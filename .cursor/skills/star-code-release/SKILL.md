@@ -62,7 +62,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 ### Step 2 — `polish`: the files a reader will open
 
 1. Resolve which files those are: files promoted in Step 1, plus the entrypoints, configs, and `execs/scpts/*.sh` the README will print, plus the public API it will show. State the file count. Nothing outside them is read for findings.
-2. Collect findings against `references/gather_rubric.md` §"Polishing what a reader will open" — codearc conformance, docstrings on what the README names, move leftovers, debug output, commented-out experiment code, a stale path in a script. Findings outside those files are recorded for routing, never fixed.
+2. Collect findings against `references/gather_rubric.md` §"Polishing what a reader will open" — codearc conformance, docstrings on what the README names, move leftovers, debug output, commented-out experiment code, a stale path in a script. Findings outside those files are recorded for routing, never fixed. State the findings on the page before any of them is asked about — one line each: `file:line`, what it is, the fix.
 3. Walk them via AskQuestion in file order — *apply as proposed* / *apply adjusted* / *skip*, recommendation marked, one finding (or one same-type batch) per question. Apply each approved fix, then re-run `compileall` on the touched file; a failed re-check reverts that fix and marks it `reverted`.
 4. Commit the phase when anything was applied: `star-code-release: polish release surface — <summary>`.
 
@@ -71,7 +71,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 1. Choose the section set from `references/readme_map.md`: mandatory sections always appear (with a `TODO` naming the producer skill when their source is absent), omit-when-empty sections are dropped silently rather than padded.
 2. Fill `assets/readme_template.md`, transcribing per the map's rules — numbers verbatim from the results table with their run, commands verbatim from the resolved script, figure paths only when the file exists.
 3. Handle what is already at `README.md`, three cases:
-   - **Carries this skill's generated marker** → show the section-level change list and ask per section via AskQuestion. A section whose current text differs from what this skill last generated was hand-edited: default it to **keep**, and say so.
+   - **Carries this skill's generated marker** → show the section-level change list first — one line per section: kept / rewritten / added / removed, and what changed — then ask per section via AskQuestion. A section whose current text differs from what this skill last generated was hand-edited: default it to **keep**, and say so.
    - **Is STAR's own template README** (its icon, the "Systematic Toolchain for AI Research" tagline, the STAR project structure block) → say that it describes the template rather than the project, and confirm replacement once. The compiled README keeps the "Built with STAR" footer, so the attribution survives the replacement.
    - **Any other hand-authored README** → do not diff-and-overwrite. Say what it holds, what compiling would replace it with, and ask. Leaving it alone is a valid outcome; so is compiling to a path the user names.
 4. `README.md` is English. When the root plan's `language` is `zh`, offer `README.zh-CN.md` as well via AskQuestion; when both exist, each carries the `**Language:**` line linking the other. Keep technical terms, metric names, dataset names, and file paths in English inside the Chinese README.
