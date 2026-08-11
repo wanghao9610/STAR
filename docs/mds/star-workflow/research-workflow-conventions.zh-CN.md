@@ -18,7 +18,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | 完成判据 | 叶子的 §5：判定该 run 是否成功的二值测试 | 指南、各计划 §3 |
 | kill-criterion | 根计划的 §5：出现即表明这个方向该停的结果 | `star-plan-coach` |
 | `finalized:` | 六节全 `done` 时由 coach 设置；三个 skill 没有它就不往下走——`star-plan-decomposer`、`star-code-architect`、`star-metd-summarize` | §8 |
-| `exec_status:` | 叶子的执行状态；`done` / `skipped` / `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
+| `exec_status:` | 叶子的执行状态；`done` 与 `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
 | `dropped:` | 已被放弃的计划节点；只写在做决定的那个节点上，由整棵子树继承：不进任何计数、不进任何推荐，记录保留 | `status_spec_zh.md` |
 | `traces_to` | 这份子计划支撑根计划里的哪条主张 | `star-plan-decomposer` |
 | 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]` / `【待定】`，或已定稿却从未拆解 | `status_spec_zh.md` |

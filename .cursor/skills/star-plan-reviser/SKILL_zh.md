@@ -115,7 +115,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
 - Git：有写入修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划）——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
-- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。`dropped:` 是一行「日期 + 原因」，只写在本节点上——所有 skill 都按整棵子树继承来读它——设置与清除只走 `references/revision_rules_zh.md` 的丢弃规则。
+- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。`dropped:` 是一行「日期 + 原因」，只写在本节点上——所有 skill 都按整棵子树继承来读它——设置与清除只走 `references/revision_rules_zh.md` 的丢弃规则。
 
 ## 对话纪律
 

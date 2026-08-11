@@ -20,7 +20,7 @@
 
 - 总体计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`skipped`/`abandoned`）——`done`、`skipped`、`abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的确认点。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`abandoned`）——`done` 与 `abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的确认点。带着 `skipped` 的叶子——这个取值已经没有任何 skill 会写——同样读作终态，而这里是它唯一还被认得的地方。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它。
 - 任何节点，在 `star-plan-reviser` 丢弃它之后：`dropped: <YYYY-MM-DD> — <一句话原因>`——这个方向已经放弃。**它靠继承生效，绝不向下复制**：一个节点算作已丢弃，是因为它自己带这个字段**或它的任一祖先带**，所以这个决定只写一次，写在做出决定的那个节点上；日后在已丢弃节点下新增的子节点也一并算已丢弃。完整交代在该计划的 `## Revision History` 里；父计划保留它的 `children:` 条目与 `## Sub-plans` 索引行，并在那一行上加 `— dropped <date>` 标记。
 
 对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（红线）"清单、以及 Notes 里的任何"方向性信号"。加了 `--slim` 时，超过六行的表已经数好了——`[tally] 8 data rows | c3: done×7, blocked×1` 一行里就是这个计数和这个提醒，而写成 `N distinct` 的列装的是步骤名或日期，不会是状态。无论表怎么处理，未勾选的待办项与方向性信号都原样打印，所以红线规则和 Step 3 需要的东西不会被藏在计数后面。日志 frontmatter 的 `branch:` / `merged:` 随同一次读取一并带回（规约 §11）。
@@ -78,7 +78,7 @@
 
 1. **总体方向完整度** —— 各总体计划（来自 coach 的根/内部节点）里：`done` 的章节数 /（6 × 总体计划数）。注明哪些未 `finalized:`。
 2. **拆解覆盖度** —— 内部节点（已拆解）vs 被标 `⚠` 的粗糙叶子（定义见上文）。
-3. **执行进度** —— 叶子 `exec_status: done` / 总叶子数；以及所有有 run 的叶子的 EXEC_LOG 步 `done` / 总数之和。
+3. **执行进度** —— 叶子 `exec_status: done` / 总叶子数；以及所有有 run 的叶子的 EXEC_LOG 步 `done` / 总数之和。永远不会再跑的叶子不进分母，免得这个比值永久卡在 100% 以下：`abandoned` 和已丢弃的叶子一样退出分母，两者都在数字旁边点名（`已丢弃 2，abandoned 1`），保持看得见。
 
 ## 覆盖检查（已完成的工作还差什么）
 
@@ -89,21 +89,21 @@
 | 1 | 想法未立项 | 某 `metds/ideas/<slug>_idea.md` 带 `finalized:` **且** 没有同 slug 的根计划 **且** 没有任何根计划的 §1 正文提到该想法文件 | `/skill:star-plan-coach <slug>` |
 | 2 | 文献缺失 | 至少存在一份根计划 **且** `metds/refs/refs_index.md` 不存在 | `/skill:star-refs-reviewer` |
 | 3 | 缺代码审查 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `CODE_REVIEW_<date>.md` | `/skill:star-code-reviewer <叶子>` |
-| 4 | 代码审查过期 | 该 run 最新的 `CODE_REVIEW_<date>.md` 存在 **且** 其日期早于该 run `EXEC_LOG.md` 里最后一条带日期的记录 | `/skill:star-code-reviewer <叶子>` |
+| 4 | 代码审查过期 | 该 run 最新的 `CODE_REVIEW_<date>.md` 存在 **且** 其日期早于该 run `EXEC_LOG.md` 里最新的那个日期 | `/skill:star-code-reviewer <叶子>` |
 | 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `/skill:star-expt-analyst <叶子>` |
 | 6 | 结果汇总表过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且**没有覆盖该范围的现行结果汇总表——即 `wkdrs/results/results.md` 与（限定到 `PLAN_NAME` 时的）`wkdrs/results/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `/skill:star-expt-analyst aggregate` |
 | 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `/skill:star-metd-summarize` |
-| 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 每个总体计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
+| 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `abandoned`）**且** 每个总体计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `/skill:star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `/skill:star-proj-adopt backfill` |
 | 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `/skill:star-expt-digest` |
 | 11 | 缺代码库规范 | 存在 ≥1 个可执行叶子 **且** `metds/codearc.md` 不存在 | `/skill:star-code-architect` |
 | 12 | 缺运行环境 | 存在 ≥1 个可执行叶子 **且** 不存在任何 `wkdrs/env_*/ENV_REPORT.md` | `/skill:star-env-builder` |
-| 13 | 缺发布准备 | 每个叶子都处于终态（`done` / `skipped` / `abandoned`）**且** 已有带 `type:` + `generated:` 的 `metds/*.md` **且** `wkdrs/release/` 下没有 `RELEASE_<date>.md` | `/skill:star-code-release` |
+| 13 | 缺发布准备 | 每个叶子都处于终态（`done` / `abandoned`）**且** 已有带 `type:` + `generated:` 的 `metds/*.md` **且** `wkdrs/release/` 下没有 `RELEASE_<date>.md` | `/skill:star-code-release` |
 | 14 | 待合并 | 某叶子当前 run 记录了 `branch:` 而 `merged:` 仍是 `pending` **且** 该叶子在那个分支上 `exec_status: done` **且** 该 run 最新的 `CODE_REVIEW_<date>.md` 存在、没有其日志里悬而未决的 blocker/major 问题项 | `/skill:star-plan-executor <叶子>`（抵达合并确认点——规约 §11） |
 
-有五行特别容易做错：
+有六行特别容易做错：
 
-- **第 4 行需要日志里有日期，没有就沉默。** EXEC_LOG 的步骤表并不强制带日期列。日志里没有可比对的带日期条目时，第 4 行无法判定——那就什么都不报，绝不退回去拿文件 mtime 猜。真正要紧的那种情况（压根没有审查）已经由第 3 行覆盖。
+- **第 4 行读日志自己的日期，绝不读文件 mtime。** 扫描给每个 run 打的 `[dates seen]` 行会收集日志里的每一个日期——frontmatter 的 `updated:`、每条 `model_trail`、步骤表里的任何日期——其中最新的那个就是这个 run 最后一次动过的时间，而这正是审查日期该比对的东西。步骤表的日期列可有可无，这一行不依赖它。mtime 一概不看：它会因为一次 checkout 或一次备份而变动。
 - **第 7 行是精确对账，不是拿 mtime 猜。** `/skill:star-metd-summarize` 会逐个源计划记下"读取时该计划带的 `updated` 值"。拿那个记录值和计划当前的 `updated` 比——绝不用文件 mtime，它会因为无关的事情变动（一次 checkout、一次格式化）。
 - **第 8 行要等整棵树。** summarizer 编译的是已确定的方法——只要还有叶子未执行、或总体计划未定稿，它自身的就绪门槛就不会放行——所以覆盖检查只在每个叶子都 `done`、每个总体计划都带 `finalized:` 之后才推荐它，无论更早已经完成了多少叶子。
 - **第 10 行只对已经在记 digest 的项目触发。** 与第 2、7、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，一个从没跑过 `/skill:star-expt-digest` 的项目并不因此欠账。所以这一行问的是“已有的序列有没有落在分析报告后面”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不能当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对上次覆盖到的日期的定义一致。
@@ -116,7 +116,7 @@
 
 1. **待用户** —— 某个 `⏸` 叶子有未勾选的 STOP 命令。写明该命令；只有用户能清掉它，在那之前下面几层都不重要。只有一件事排在这条命令之前：该 run 目录里还没有 `CODE_REVIEW_<date>.md` 时，先推荐 `/skill:star-code-reviewer <叶子>`，把待跑命令紧挨着写在它下面——bug 在算力烧掉之前最便宜，而第 3 行覆盖不到这里，因为该叶子还不是 `done`。这两条归属不同：审查属于那八个 agent 可以自己启动的 skill，是接下来真正要跑的那条（见下）；待跑命令则打印出来，归用户。
 2. **已完成工作的欠账** —— 落在已完成之事上的覆盖检查触发项，按"欠账滚得多快"取：回填（第 9 行）→ 审查（第 3、4 行）→ 合并（第 14 行）→ 分析（第 5 行）→ 生成结果汇总表（第 6 行）→ 凝练方法（第 7、8 行）→ 文献（第 2 行）→ digest（第 10 行）。第 9 行排在最前，因为它是那种会把其余欠账一起藏起来的欠账：在被接入项目里已完成的叶子拿到 `exec_status: done` 之前，第 3、5 行根本无法在它们身上触发，而第 3 层还会兴高采烈地建议你去执行一个成果早已躺在磁盘上的叶子。合并（第 14 行）紧随审查之后：未合并的分支卡住每一个依赖它的叶子（规约 §11.3），也让自己的记录在基础 checkout 上看不见——这两笔代价都随着围绕它执行的每一个叶子越滚越大。除第 1 行外的每一条覆盖行都能在这一层被取到；第 1 行归第 4 层，因为"开一个新题目"不是欠账。digest 排在最末，也是这份清单上唯一一条推迟不付出代价的欠账：每份 digest 都由留在磁盘上的分析报告重新编译，而且无论隔多久，序列都不会出现缺口——所以迟写的 digest 不丢任何信息，而这份清单上其余每一行都会越拖越贵。文献虽然在流程里靠前，却排在倒数第二：缺综述的代价是写作时的定位，而未审代码的代价是压在它上面的每一个叶子——所以"去读文献"绝不该盖过"你刚跑完的那个 run 从没审过代码"。欠账优先于进度，因为它会滚：每多执行一个建立在未审代码之上的叶子、每多引用一次过期结果汇总表里的数字，将来要返工的面就更宽。而下一个叶子不会过期。
-3. **下一个可执行叶子** —— **执行顺序里最靠前**、且同时满足以下全部的叶子：`exec_status` 不是终态（`done` / `skipped` / `abandoned`）也不是 `blocked`；它自己没被丢弃、它的祖先也都没被丢弃；其 `depends_on` 里每个前缀都能解析到一个 `exec_status` 为 `done` 的兄弟；它不是 `⚠` 粗糙叶子（若是，改为建议先拆解它）；且没有现存的 执行分支与它匹配——这样的叶子是在那个分支上进行中的一次 run（归第 14 行或普通的续跑管），不能当新叶子开跑，理由那一句要写明这一点。"执行顺序" = 由 `depends_on` 得到的拓扑序，以前缀升序破平局，深度优先遍历（使某个已拆解节点自己的叶子排在它后面的兄弟之前）。输出 `→ 下一个: /skill:star-plan-executor <前缀或 slug>`。
+3. **下一个可执行叶子** —— **执行顺序里最靠前**、且同时满足以下全部的叶子：`exec_status` 不是终态（`done` / `abandoned`）也不是 `blocked`；它自己没被丢弃、它的祖先也都没被丢弃；其 `depends_on` 里每个前缀都能解析到一个 `exec_status` 为 `done` 的兄弟；它不是 `⚠` 粗糙叶子（若是，改为建议先拆解它）；且没有现存的 执行分支与它匹配——这样的叶子是在那个分支上进行中的一次 run（归第 14 行或普通的续跑管），不能当新叶子开跑，理由那一句要写明这一点。"执行顺序" = 由 `depends_on` 得到的拓扑序，以前缀升序破平局，深度优先遍历（使某个已拆解节点自己的叶子排在它后面的兄弟之前）。输出 `→ 下一个: /skill:star-plan-executor <前缀或 slug>`。
 4. **已定稿但未立项的想法** —— 即覆盖检查第 1 行。只有当树全部完成且不欠任何东西时才会走到这一层；而那时正是开下一个题目的时候。
 
 给一句话理由和命令。 点名的每一条命令各判各的，第 1 档那一对也不例外：落在那八个 agent 可以自己启动的 skill 上、且目标已经定死的那条，就是接下来要跑的东西，而不只是打印出来的东西——拾起发生在本次运行结束之后，本 skill 自己不启动任何东西（规约 §10）；而紧挨着它的那条 STOP 命令照旧打印出来，等用户。若各层都给不出候选，说清是以下哪一种：不欠任何东西且每个叶子都已了结——整项研究已经完成，转交给 `/skill:star-code-release`，或用 `/skill:star-idea-storm` 开下一个题目；某个未满足的依赖（写明）；需拆解的粗糙叶子；或 `metds/plans/` 为空（转交给 `/skill:star-plan-coach`；连想法也没有则 `/skill:star-idea-storm`）。范围内每个节点都已丢弃时，这本身就是答案：说明这个范围里没有活着的东西，若有最近的活着的范围就点出来。

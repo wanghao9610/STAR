@@ -18,7 +18,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | done-criterion | a leaf's §5: the binary test that decides whether its run succeeded | the guide, §3 of each plan |
 | kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
 | `finalized:` | set by the coach when all six sections are `done`; three skills wait on it — `star-plan-decomposer`, `star-code-architect`, `star-metd-summarize` | §8 |
-| `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
+| `exec_status:` | a leaf's execution state; `done` and `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
 | `dropped:` | a plan node given up on, written once where the decision was made and inherited by its whole subtree: outside every count and every recommendation, its record kept | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
 | too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
