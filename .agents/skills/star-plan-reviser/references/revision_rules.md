@@ -64,6 +64,8 @@ A direction given up on — a node the flow should stop counting, stop recommend
 | Undropping | clearing the field, a candidate like any other. Check first that no ancestor is dropped — inheritance would keep the node dark, and the cleared field would then read as a bug. |
 | What it does not settle | an unmerged execution branch, a live worktree, or an un-ticked STOP command under the dropped subtree. Name them in the final report: the records are rescued and the branch discarded through star-plan-executor (conventions §11.6), never here. |
 
+Two ways in, one rule. `<PLAN_NAME> drop` runs the drop mode (`SKILL.md`), which skips the audit because the decision is already made; a drop that surfaces during a full review is a Step 4 candidate. Both write exactly the three places above, and nothing else.
+
 `exec_status: abandoned` stays what it always was — one leaf's execution outcome. `dropped:` is about the node: it takes that node and everything under it out of the counts, the follow-up checks and the next action. A leaf can carry both, and the plan-level field is what the tree renders.
 
 ## Section status flips

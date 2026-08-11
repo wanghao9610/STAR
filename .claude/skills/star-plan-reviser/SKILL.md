@@ -1,7 +1,7 @@
 ---
 name: star-plan-reviser
 disable-model-invocation: true
-argument-hint: "[PLAN_NAME] [involve=high]"
+argument-hint: "[PLAN_NAME] [drop|undrop] [involve=high]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)
@@ -42,7 +42,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`01`), or a filename (`01_mvp-verify_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift.
+Invocation: `/star-plan-reviser PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`01`), or a filename (`01_mvp-verify_plan.md`). With no argument, list candidates and ask — prefer nodes with execution evidence or flagged drift. A second argument `drop` or `undrop` runs the drop mode — the Workflow's last section — instead of the review; the mode word is always second, because the first argument is always the plan name.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it together with both of this skill's reference files in one message: three `Read` calls — the conventions file, `<this skill's directory>/references/review_spec.md`, and `<this skill's directory>/references/revision_rules.md`, each whole file as its own call — plus one Bash call in the same message, with the project root as the working directory, carrying only:
 
@@ -124,6 +124,19 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 ### Step 7: Report & handoff
 
 ≤500 words: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `/star-plan-decomposer <slug>` (structure changed / children stale), `/star-plan-coach <slug>` (strategy pivot), `/star-plan-executor <leaf>` (re-run a revised leaf), `/star-code-reviewer <leaf>` (audit the implementation's code), `/star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
+
+### Drop mode (`PLAN_NAME drop` / `undrop`)
+
+A drop records a decision you have already made, so this mode does not audit the plan: Step 0 resolves the target as always, the four steps below replace Steps 1–6, and Step 7 reports as always. Nothing here writes a review report.
+
+1. **Read what goes dark**, from the opening digest alone — no collectors, no run bodies: every descendant of the target with its `exec_status`, the follow-ups their runs were owed (a review, an analysis), any unmerged `branch:`, live `worktree:` or un-ticked STOP command underneath, and any live leaf whose `depends_on` names the target or one of its descendants.
+2. **Show that list and ask once** — one line per descendant, one line per loose end — confirming the drop and its one-line reason in the same question. This is a mandatory confirmation point (conventions §7.7): asked at every involve level, `low` included, and never bundled with anything else. No reason, no drop.
+3. **Write the three places** `references/revision_rules.md` names — `dropped: <date> — <reason>` on the target, the `— dropped <date>` marker on the parent's `## Sub-plans` line, one `## Revision History` entry — and bump `updated`. No descendant is edited: they go dark by inheritance.
+4. **Report** what went dark and what the drop did not settle — dependency edges now pointing at a dropped node, and any branch, worktree or STOP command still on disk — then the commit offer, as Step 7.
+
+`undrop` is the same walk with the field cleared instead of written, and one check before the question: no ancestor may be dropped, or inheritance keeps the node dark and the cleared field reads as a bug. Its Revision History entry says why the direction is live again.
+
+A drop that comes up *during* a full review is not this mode — it is a Step 4 candidate, approved like any other, writing the same three places.
 
 ## State & File Rules
 

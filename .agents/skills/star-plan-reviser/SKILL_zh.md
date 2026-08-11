@@ -13,7 +13,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`$star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。
+调用方式：`$star-plan-reviser PLAN_NAME`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。第二个参数写 `drop` 或 `undrop` 时走丢弃模式——Workflow 的最后一节——而不是审查；模式词永远在第二位，因为第一个参数永远是计划名。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次文件读取——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 shell 调用（以项目根目录为工作目录），只带这一行：
 
@@ -95,6 +95,19 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ### Step 7：汇报与交接
 
 以结果开头，约 500 字以内：证据基础（读了什么、核实了什么）、完成度结论、逐节写入的改动、跳过的候选、连带影响提醒。结尾给出下一步命令：`$star-plan-decomposer <slug>`（结构变了 / children 过期）、`$star-plan-coach <slug>`（总体方向转向）、`$star-plan-executor <叶子>`（重跑修订后的叶子）、`$star-code-reviewer <叶子>`（审计实现代码）、`$star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有写入的修订，提出一次提交提议（见状态与文件规则）。
+
+### 丢弃模式（`PLAN_NAME drop` / `undrop`）
+
+丢弃记录的是你已经做出的决定，所以这个模式不审查计划：Step 0 照常解析目标，下面四步取代 Step 1–6，Step 7 照常汇报。这条路不写审查报告。
+
+1. **读出什么会变暗**，只用开场那次摘要——不派收集器，不读 run 正文：目标的每一个后代及其 `exec_status`、它们的 run 本来欠着的后续（代码审查、实验分析）、其下任何未合并的 `branch:`、现存的 `worktree:` 或未勾选的红线命令，以及任何 `depends_on` 指向该目标或其某个后代的、活着的叶子。
+2. **把这份清单摆出来，只问一次**——每个后代一行、每处未了结一行——在同一个问题里确认丢弃与那一句原因。这是强制确认点（规约 §7.7）：任何参与度档位都要问，`low` 也不例外，且绝不与别的东西打包。没有原因就不丢弃。
+3. **写 `references/revision_rules_zh.md` 点名的那三处**——目标上的 `dropped: <日期> — <原因>`、父计划 `## Sub-plans` 那一行的 `— dropped <日期>` 标记、一条 `## Revision History`——并更新 `updated`。不编辑任何后代：它们靠继承变暗。
+4. **汇报**什么变暗了、以及丢弃没有解决的事——现在指向已丢弃节点的依赖边，以及还留在磁盘上的分支、worktree 或红线命令——然后照 Step 7 提出提交提议。
+
+`undrop` 是同一条路，只是清除字段而不是写入，并在提问之前多一道检查：任何祖先都不得处于已丢弃状态，否则继承会让这个节点继续是暗的，而被清掉的字段反倒像个 bug。它的 Revision History 条目写明这个方向为什么重新活了过来。
+
+在一次完整审查**过程中**浮现的丢弃不走这个模式——它是 Step 4 的一条候选，像别的候选一样逐条批准，写的是同样那三处。
 
 ## 状态与文件规则
 

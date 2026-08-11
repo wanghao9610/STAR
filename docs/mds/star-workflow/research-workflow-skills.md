@@ -837,6 +837,8 @@ See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/sk
 $star-plan-reviser 01
 $star-plan-reviser mvp-verify
 $star-plan-reviser 0_open-vocab-det-seg_plan.md
+$star-plan-reviser 01 drop            # give this direction up, no review pass
+$star-plan-reviser 01 undrop          # take it back
 ```
 
 Any node works: a leaf is audited against its own run; a root or internal node is audited against the summary of its children and the plan-level findings recorded in descendants' logs.
@@ -858,7 +860,7 @@ One session revises one target file (plus the parent's index line when the targe
 
 ### Dropping a plan
 
-A direction you gave up on is marked, never deleted. The reviser writes `dropped: <date> — <one-line reason>` on that node, marks the parent's index line `— dropped <date>`, and records what ended the direction in the `## Revision History`. Every skill reads the field as inherited by the whole subtree, so one line takes that node and everything under it out of the counts, the follow-up checks and the next action: `$star-flow-status` renders them `⊗` and leaves them out of its three numbers, `$star-plan-executor` refuses to run them, `$star-plan-decomposer` refuses to split them, `$star-metd-summarize` compiles nothing from them. The files, their runs and their results stay exactly where they are — a direction that failed is evidence — and the parent keeps the link, so what was tried is still readable from it. Undropping is clearing the field. Two things a drop does not settle: a leaf still depending on the dropped node (its dependency can never be met, so the status report flags it for you to redraw), and an unmerged execution branch or live worktree underneath it, which are still on disk and still flagged.
+A direction you gave up on is marked, never deleted. `$star-plan-reviser <plan> drop` is the short path — it skips the audit, because a drop records a decision you have already made, and asks once, showing what goes dark before it writes. The reviser writes `dropped: <date> — <one-line reason>` on that node, marks the parent's index line `— dropped <date>`, and records what ended the direction in the `## Revision History`. Every skill reads the field as inherited by the whole subtree, so one line takes that node and everything under it out of the counts, the follow-up checks and the next action: `$star-flow-status` renders them `⊗` and leaves them out of its three numbers, `$star-plan-executor` refuses to run them, `$star-plan-decomposer` refuses to split them, `$star-metd-summarize` compiles nothing from them. The files, their runs and their results stay exactly where they are — a direction that failed is evidence — and the parent keeps the link, so what was tried is still readable from it. Undropping is clearing the field. Two things a drop does not settle: a leaf still depending on the dropped node (its dependency can never be met, so the status report flags it for you to redraw), and an unmerged execution branch or live worktree underneath it, which are still on disk and still flagged.
 
 ### Main outputs
 
