@@ -61,13 +61,14 @@ Show, per leaf line, its `depends_on`, (if executing) `k/n` steps, and — when 
 ├ 02_core-method                ◐  exec in-progress 2/5 steps        deps: 01
 │ ├ 020_desc-generation         ✔  exec done                        deps: —
 │ ├ 021_set-matching            ◐  exec in-progress 2/4             deps: 020
-│ └ 022_det-seg-heads           ○  exec pending                     deps: 020, 021
+│ ├ 022_det-seg-heads           ○  exec pending                     deps: 020, 021
+│ └ 023_contrastive-head        ✖  exec abandoned                   deps: 020
 ├ 03_final-rets                 ⏸  awaiting user (1 STOP cmd)        deps: 02
 └ 04_alt-matcher                ⊗  dropped 2026-08-11 — superseded by 02
   └ 040_hungarian-baseline      ⊗  dropped with 04 (exec done)      deps: —
 ```
 
-The root above is `◐`, not `✔`, because its `finalized:` is unset — six `done` sections alone do not close a strategy node, the rubric still has to be run. A strategy node's status symbol reports **its own** state, never its subtree's: a finalized root over a half-executed subtree is still `✔`, and the summary counts are what tell you the subtree is unfinished. `04` is the node the drop was written on; `040` carries no field of its own and reads dropped because its ancestor is — which is why the field is never copied downward.
+The root above is `◐`, not `✔`, because its `finalized:` is unset — six `done` sections alone do not close a strategy node, the rubric still has to be run. A strategy node's status symbol reports **its own** state, never its subtree's: a finalized root over a half-executed subtree is still `✔`, and the summary counts are what tell you the subtree is unfinished. `04` is the node the drop was written on; `040` carries no field of its own and reads dropped because its ancestor is — which is why the field is never copied downward. `023` is terminal for a different reason: it ran, its own kill-criterion closed it, and like the dropped pair it leaves the execution count's denominator rather than holding that ratio under 100% for good.
 
 Tree size does not change the rule. A project with sixty nodes prints sixty lines; what may shrink is the state text on a line — `◐ 2/5` is a complete line — never the set of lines. A subtree replaced by a sentence ("8 leaves, all done") loses which leaf is which, and two runs summarising the same subtree differently produce a report the reader cannot check against the files.
 
