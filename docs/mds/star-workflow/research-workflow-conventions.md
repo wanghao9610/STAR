@@ -19,6 +19,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
 | `finalized:` | set by the coach when all six sections are `done`; three skills wait on it — `star-plan-decomposer`, `star-code-architect`, `star-metd-summarize` | §8 |
 | `exec_status:` | a leaf's execution state; `done` / `skipped` / `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
+| `dropped:` | a plan node given up on, written once where the decision was made and inherited by its whole subtree: outside every count and every recommendation, its record kept | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
 | too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
 | backfill | `star-proj-adopt`'s second phase, recording work finished before any plan existed | §8 |
@@ -167,7 +168,7 @@ Every skill's durable output, in one table. `star-flow-status` reads this as the
 | Refs | `star-refs-reviewer` | `metds/refs/refs_index.md`, `<ABBREV>.md`, `reference.bib`, `related_work.md`, `<slug>_survey.md` | index presence |
 | Codebase | `star-code-architect` | `metds/codearc.md` | presence |
 | Env | `star-env-builder` | `wkdrs/env_<name>_<date>/ENV_REPORT.md`, `freeze.txt` | date in dir name |
-| Plan | `star-plan-coach`, `star-plan-decomposer`, `star-plan-reviser` | `metds/plans/<prefix>_<slug>_plan.md` | `status:`, `finalized:`, `updated:` |
+| Plan | `star-plan-coach`, `star-plan-decomposer`, `star-plan-reviser` | `metds/plans/<prefix>_<slug>_plan.md` | `status:`, `finalized:`, `updated:`, `dropped:` |
 | Run | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md` | plan `exec_status:`, `exec_runs:`; the log's `branch:` / `merged:` (§11) |
 | Code review | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md`, else `wkdrs/reviews/code_<scope>_<date>.md` | date in filename |
 | Plan review | `star-plan-reviser` | `wkdrs/<run>/REVIEW_<date>.md`, else `wkdrs/reviews/<prefix>_<slug>_<date>.md` | date in filename |

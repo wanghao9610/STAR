@@ -53,6 +53,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 要求具体的 §3 任务分解与 §5 完成判据。若大部分是 `[TBD]` / `【待定】`，报告缺失决定，询问是返回 `$star-plan-decomposer`（推荐），还是在明确记录剩余不确定性的前提下继续。
 2. 验证写明的数据集、权重、代码模块和每个 `depends_on` sibling——摘要里已经带着每个 sibling 的 frontmatter，从摘要读它们的状态，不要逐个打开。若硬依赖缺失或上游 sibling 未达到 `exec_status: done`，停止并报告准确 blocker。缺失数据集或权重是分解缺口，不能绕过：指明应负责它的 data-readiness leaf，或转回 `$star-plan-decomposer <parent>` 添加一个。
 3. 中间工作区为 `tasks/<plan-name>/`，其中 `<plan-name>` 是所选文件名去掉 `_plan.md`。若所选 leaf 已有 `exec_runs`，读取当前 run 的 `wkdrs/<run>/EXEC_LOG.md` 并恢复。否则 run 名使用 `<prefix>_<slug>`。若该 run 目录已存在但不是此 leaf 可恢复的 run，询问一个区分后缀；绝不自行编造。
+4. 拒绝执行带着 `dropped:` 的叶子、或祖先被丢弃的叶子：点名丢弃写在哪个节点上，然后停下。要重新启用它，先用 `$star-plan-reviser` 清掉那个字段——已丢弃的方向是用户已经否掉的方向，照跑不误只会把算力花在没有任何东西会去统计的工作上。
 
 ### Step 2：定位
 

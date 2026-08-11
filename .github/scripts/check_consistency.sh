@@ -979,7 +979,7 @@ fi
 #     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
 #     costs two invariants nothing else holds.
 #
-#     The excerpt has to stay under the Bash spill line, and it has ~1.6 KB of
+#     The excerpt has to stay under the Bash spill line, and it has ~1.2 KB of
 #     room. This is the only place that can be caught: `execs/update.sh` copies
 #     docs/mds/star-workflow wholesale into downstream projects, which are told
 #     not to edit it, so the file can only grow *here*. Without the size
@@ -1005,7 +1005,7 @@ fi
 #     its own commit.
 section "Selective conventions load"
 
-LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
+LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28800}
 
 # skill|file|section — a citation of a section the skill no longer loads, kept on
 # purpose because the sentence restates the rule and cites it only for provenance.

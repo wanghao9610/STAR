@@ -61,6 +61,8 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 ### Step 1: Assess readiness
 
+**A dropped node is not decomposed.** If the target carries `dropped:` — or any ancestor does — name the node the drop was written on and stop: splitting a direction that was given up writes files nothing will ever count. Reviving it starts with clearing that field through `star-plan-reviser`.
+
 **First, check whether this plan has already been decomposed.** The digest carries every plan's `parent:`; find the files whose `parent:` is the target — equivalently, whose prefix is the target's prefix plus one digit. If any exist, decomposition is already partial or complete, and Steps 2–4 would overwrite files that may carry hand edits, a `## Revision History`, or execution state. Report what was found (prefix, slug, `exec_status`, and whether the parent's `## Sub-plans` / `children:` already list them) and offer:
 
 - *Repair the parent index only* (recommended when the existing children look complete) — skip Steps 2–4 and go straight to Step 5, deriving the index from the child files themselves. Nothing is written to the children.
@@ -130,7 +132,7 @@ Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
 
 **Reached via the Step 1 repair branch?** Derive every field from the existing child files rather than from a Step 3 list: topological order and the `depends on:` annotations from their `depends_on`, the `→ §<n>` reference from their `traces_to`, the decomposition date from their own frontmatter (never invented). Each one-liner is *condensed* from that child's §1 objective, not copied — so show the drafted section for review before writing it.
 
-Also add/merge a `children:` list into the parent frontmatter. Do not rewrite the parent's existing body sections — the `## Sub-plans` index and `children:` are the only edits you make to the parent. Close the boundary (conventions §7.10): 2–3 sentences on the axis chosen, the N files written, and the execution order that follows — and the way back, since `$star-plan-decomposer <slug>` re-enters through Step 1's already-decomposed branch rather than overwriting, and a unit that is still too big to run can be refined with `$star-plan-decomposer <that unit's prefix>` (Step 6).
+Also add/merge a `children:` list into the parent frontmatter. Do not rewrite the parent's existing body sections — the `## Sub-plans` index and `children:` are the only edits you make to the parent. A dropped child keeps both, with `— dropped <date>` on its index line, and its number is never recycled: the next unit takes the next free index (conventions §5.6). Close the boundary (conventions §7.10): 2–3 sentences on the axis chosen, the N files written, and the execution order that follows — and the way back, since `$star-plan-decomposer <slug>` re-enters through Step 1's already-decomposed branch rather than overwriting, and a unit that is still too big to run can be refined with `$star-plan-decomposer <that unit's prefix>` (Step 6).
 
 ### Step 6: Offer to recurse
 

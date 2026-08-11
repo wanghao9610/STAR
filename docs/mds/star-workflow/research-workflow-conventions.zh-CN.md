@@ -19,6 +19,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill——`s
 | kill-criterion | 根计划的 §5：出现即表明这个方向该停的结果 | `star-plan-coach` |
 | `finalized:` | 六节全 `done` 时由 coach 设置；三个 skill 没有它就不往下走——`star-plan-decomposer`、`star-code-architect`、`star-metd-summarize` | §8 |
 | `exec_status:` | 叶子的执行状态；`done` / `skipped` / `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
+| `dropped:` | 已被放弃的计划节点；只写在做决定的那个节点上，由整棵子树继承：不进任何计数、不进任何推荐，记录保留 | `status_spec_zh.md` |
 | `traces_to` | 这份子计划支撑根计划里的哪条主张 | `star-plan-decomposer` |
 | 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]` / `【待定】`，或已定稿却从未拆解 | `status_spec_zh.md` |
 | backfill | `star-proj-adopt` 的第二阶段，记录在任何计划存在之前就完成的工作 | §8 |
@@ -167,7 +168,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 | 文献 | `star-refs-reviewer` | `metds/refs/refs_index.md`、`<ABBREV>.md`、`reference.bib`、`related_work.md`、`<slug>_survey.md` | 索引是否存在 |
 | 代码库 | `star-code-architect` | `metds/codearc.md` | 是否存在 |
 | 环境 | `star-env-builder` | `wkdrs/env_<名称>_<日期>/ENV_REPORT.md`、`freeze.txt` | 目录名里的日期 |
-| 计划 | `star-plan-coach`、`star-plan-decomposer`、`star-plan-reviser` | `metds/plans/<前缀>_<slug>_plan.md` | `status:`、`finalized:`、`updated:` |
+| 计划 | `star-plan-coach`、`star-plan-decomposer`、`star-plan-reviser` | `metds/plans/<前缀>_<slug>_plan.md` | `status:`、`finalized:`、`updated:`、`dropped:` |
 | 运行 | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md` | 计划的 `exec_status:`、`exec_runs:`；日志的 `branch:` / `merged:`（§11） |
 | 代码审查 | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<日期>.md`，否则 `wkdrs/reviews/code_<范围>_<日期>.md` | 文件名里的日期 |
 | 计划复审 | `star-plan-reviser` | `wkdrs/<run>/REVIEW_<日期>.md`，否则 `wkdrs/reviews/<前缀>_<slug>_<日期>.md` | 文件名里的日期 |

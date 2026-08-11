@@ -17,6 +17,8 @@ Interpret the argument, **first match wins**:
 
 **Plan mode is a family, not a subtree.** Given a node, the run set is every run of every **descendant leaf** — that is the evidence. Its **ancestors up to the root** are read too, but only for context: the root's §4 claim map and §5 kill-criteria are what make a leaf's number mean something, and the digest's headline is written against them. An ancestor contributes no runs of its own; internal nodes are not executable (conventions §5.4). This is what "including parent and sub-plan results" means in practice: the parent supplies the question, the descendants supply the answers.
 
+**A dropped node's runs stay in scope.** A direction given up (`dropped:`) took its evidence with it — those runs happened, and the result that ended the direction is often the most useful line in the digest. Report them with `(dropped <date>)` beside the plan name, never as work still pending, and list the drop itself among the plan-level changes.
+
 ## Dating a run
 
 A run's date decides whether it falls in the window. Take the **first available**:

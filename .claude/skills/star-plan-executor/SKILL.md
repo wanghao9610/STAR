@@ -92,6 +92,7 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 
 1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, tell the user decomposition is unfinished and offer via AskUserQuestion: *go back to `/star-plan-decomposer` to flesh it out* (recommended) / *execute anyway (shallow, gaps stay `[TBD]`)*.
 2. **Dependencies.** Check §2 Inputs & Dependencies: are the named datasets (`datas/`), weights (`inits/`), and code modules present? Are the upstream sibling leaves in the leaf's `depends_on` frontmatter list all marked `exec_status: done`? The digest already carries every sibling's frontmatter — read their state from it rather than opening each one. If a hard dependency is missing, **stop and report** — do not fabricate inputs. A missing dataset or weight is a decomposition gap, not a blocker to work around: name the data-readiness leaf that should own it, or route to `star-plan-decomposer <parent>` to add one.
+3. **Not dropped.** A leaf carrying `dropped:`, or with a dropped ancestor, is not executed: name the node the drop was written on and stop. Reviving it starts with clearing that field through `star-plan-reviser` — a dropped direction is one the user has already decided against, and running it anyway spends compute on work nothing will count.
 
 ### Step 2: Orient in the codebase
 

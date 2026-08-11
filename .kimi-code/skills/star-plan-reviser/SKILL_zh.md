@@ -6,7 +6,7 @@ description: >-
   打分，把七段式审查报告写入 wkdrs/，再以一次一问的方式走完修订候选，直接编辑计划文件并追加
   Revision History 条目——结构性重构转给 star-plan-decomposer，方向级转向转给 star-plan-coach。
   当用户运行 /skill:star-plan-reviser，或想在（部分）执行后审查 / 复盘 / 修订某个计划、核对计划实际做了
-  什么与承诺了什么、把执行结果写回进计划时使用。Bilingual（中/英）。
+  什么与承诺了什么、把执行结果写回进计划、或把某个计划连同其子树标记为已丢弃的方向时使用。Bilingual（中/英）。
 ---
 
 # Research Plan Reviser — 基于证据的审查与修订
@@ -84,7 +84,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 依据证据和用户的答复起草新的章节文本；给出简洁的改前 → 改后摘要；写入文件。遵循计划的 `language`；中文计划里技术名词保留英文。
 2. 让章节 `status` 映射保持诚实：引入 `[TBD]` / `【待定】` 的修改把该节翻回 `in_progress`；经确认的重写保持 `done`。
 
-最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且其 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法或里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 会读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
+最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且其 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法或里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 会读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；若某条采纳的候选丢弃了本节点，就在这里写入 `dropped:`、并在父计划索引行上加 `— dropped <date>` 标记，别的一概不动——子树靠继承跟上；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
 
 ### Step 6：一致性检查
 
@@ -99,10 +99,10 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 状态与文件规则
 
 - 审查报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`。
-- 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`——后两者仅作为用户批准的候选），以及当目标的一行目标变化时，父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
+- 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
 - Git：有写入修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划）——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
-- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。
+- 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。`dropped:` 是一行「日期 + 原因」，只写在本节点上——所有 skill 都按整棵子树继承来读它——设置与清除只走 `references/revision_rules_zh.md` 的丢弃规则。
 
 ## 对话纪律
 

@@ -18,7 +18,7 @@ How a candidate file is found, judged, placed, and verified, and what the polish
 A candidate is promoted only if it passes **at least one** part, and the passing evidence is recorded on its row:
 
 - **A. The README will cite it.** A section from `references/readme_map.md` prints its path or the command that runs it — a data-prep script §7 names, an eval entry point §11 prints, a demo §9 shows.
-- **B. An executed leaf needs it.** The file is named by a leaf's §4 deliverables or is the machinery its §5 done-criterion runs, and that leaf's `exec_status` is `done`. Evidence is the plan file and line.
+- **B. An executed leaf needs it.** The file is named by a leaf's §4 deliverables or is the machinery its §5 done-criterion runs, and that leaf's `exec_status` is `done` and neither it nor any ancestor of it is dropped. Evidence is the plan file and line.
 - **C. It reproduces a number in the results table.** Running it is how a row in `wkdrs/results/results.md` was produced — the config of a run the results table cites, the script that computed a reported metric. Evidence is the results-table row.
 
 Passing none → **keep in place**. Say so on the row and move on; that is the expected outcome for most of `tasks/`, and it is not a finding.

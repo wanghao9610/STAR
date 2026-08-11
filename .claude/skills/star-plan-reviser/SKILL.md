@@ -34,7 +34,8 @@ description: >-
   Revision History entry — routing structural re-shaping to star-plan-decomposer and strategy
   pivots to star-plan-coach. Use when the user runs /star-plan-reviser, or wants to review /
   audit / revise a plan after (partial) execution, check what a plan actually did versus what
-  it promised, or fold execution results back into the plan. Bilingual (en/zh).
+  it promised, fold execution results back into the plan, or drop a plan and its subtree
+  as a direction given up. Bilingual (en/zh).
 ---
 
 # Research Plan Reviser — evidence-based review & revision
@@ -112,7 +113,7 @@ For each adopted candidate, in file order:
 1. Draft the new section text from the evidence and the user's answer; show a concise before → after summary; write the file. Match the plan's `language`; keep technical terms in English inside Chinese plans.
 2. Keep the section-`status` map honest: an edit that introduces `[TBD]` / `【待定】` flips that section to `in_progress`; a confirmed rewrite stays `done`.
 
-After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks materially changed on a leaf whose `exec_status` is `done` or `blocked`, offer to reset it to `pending` (`exec_runs` keeps the history either way); if an adopted candidate changed a `finalized` plan's §1, §2, §3, or §6 — the problem, the positioning, the method, or the milestones — ask once whether to clear `finalized:` (a §4/§5 tactical edit such as tightening a kill-criterion leaves it), since `star-code-architect` reads that field to decide whether the plan can drive a search and re-finalizing is `star-plan-coach <slug> <section>`; then append the `## Revision History` entry per `references/revision_rules.md`.
+After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks materially changed on a leaf whose `exec_status` is `done` or `blocked`, offer to reset it to `pending` (`exec_runs` keeps the history either way); if an adopted candidate changed a `finalized` plan's §1, §2, §3, or §6 — the problem, the positioning, the method, or the milestones — ask once whether to clear `finalized:` (a §4/§5 tactical edit such as tightening a kill-criterion leaves it), since `star-code-architect` reads that field to decide whether the plan can drive a search and re-finalizing is `star-plan-coach <slug> <section>`; if an adopted candidate drops this node, write `dropped:` here and the `— dropped <date>` marker on the parent's index line, and nothing else — the subtree follows by inheritance; then append the `## Revision History` entry per `references/revision_rules.md`.
 
 ### Step 6: Consistency pass
 
@@ -127,10 +128,10 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 ## State & File Rules
 
 - Review reports live under `wkdrs/` (the plan's run dir, else `wkdrs/reviews/`); never under `metds/plans/`.
-- You may edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status` — the latter two only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed. Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
+- You may edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status`, `dropped:` — the last three only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed or its drop marker goes on. Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
 - Every write must trace to an individually approved candidate; `## Revision History` is append-only.
 - Git: when edits were applied, offer once at Step 7 to commit the target plan (plus the parent when its `## Sub-plans` line changed) — `star-plan-reviser: <slug> — <n> changes` (conventions §1). Core Principle 4's "older versions live in git" depends on these commits.
-- Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned` — same as the family. Setting `abandoned` is a revision candidate like any other: it needs the user's explicit approval, and the reason goes in the Revision History entry.
+- Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `skipped` / `abandoned` — same as the family. Setting `abandoned` is a revision candidate like any other: it needs the user's explicit approval, and the reason goes in the Revision History entry. `dropped:` is a date-plus-reason line written on this node alone — every skill reads it as inherited by the whole subtree — and it is set or cleared only through the drop rule in `references/revision_rules.md`.
 
 ## Dialogue Discipline
 

@@ -829,6 +829,7 @@ See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/sk
 - Execution recorded a plan-level finding or hit a kill-criterion, and the plan should absorb the result.
 - A plan drifted from reality — extra work happened, assumptions changed — and its text should catch up.
 - You want an evidence-backed completion assessment written down, not just chat impressions.
+- A direction is being given up, and the plan tree should stop counting it and stop recommending it.
 
 ### How to invoke it
 
@@ -854,6 +855,10 @@ Adopting nothing is a valid outcome: the persisted review report is a deliverabl
 ### The revision boundary
 
 One session revises one target file (plus the parent's index line when the target's objective changed). Structural changes — adding or removing sub-plans, redrawing the dependency graph — are routed to `$star-plan-decomposer`; research-question or method pivots are routed to `$star-plan-coach`. Prefixes are never renumbered, versioned copies are never created, and `EXEC_PLAN.md` / `EXEC_LOG.md` are never modified.
+
+### Dropping a plan
+
+A direction you gave up on is marked, never deleted. The reviser writes `dropped: <date> — <one-line reason>` on that node, marks the parent's index line `— dropped <date>`, and records what ended the direction in the `## Revision History`. Every skill reads the field as inherited by the whole subtree, so one line takes that node and everything under it out of the counts, the follow-up checks and the next action: `$star-flow-status` renders them `⊗` and leaves them out of its three numbers, `$star-plan-executor` refuses to run them, `$star-plan-decomposer` refuses to split them, `$star-metd-summarize` compiles nothing from them. The files, their runs and their results stay exactly where they are — a direction that failed is evidence — and the parent keeps the link, so what was tried is still readable from it. Undropping is clearing the field. Two things a drop does not settle: a leaf still depending on the dropped node (its dependency can never be met, so the status report flags it for you to redraw), and an unmerged execution branch or live worktree underneath it, which are still on disk and still flagged.
 
 ### Main outputs
 
