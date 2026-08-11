@@ -104,6 +104,8 @@ Multiple root plans may currently start with `0_`. If a match is ambiguous, use 
 
 Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `$star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Mandatory confirmation points — the STOP line, commits, deletions — always ask, at every level. Full rule: [conventions §7.7](research-workflow-conventions.md).
 
+Every skill also takes an optional description — free text after the argument, saying in your own words what this run is for: `$star-plan-reviser 01 this one is finished, 02 replaces it`. It is a lead, not a command: it can route a run down one of that skill's own paths and supply words the run then records — the example both drops the plan and becomes the reason written into it — and it never replaces a confirmation point, never settles an ambiguous plan name, and never authorizes anything on the STOP line. A run a description routed says which path it took before it writes, so a misreading costs one line rather than one wrong edit. Where a skill's first argument is already free text — `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer` — that argument is the description. Full rule: [conventions §7.12](research-workflow-conventions.md).
+
 ## 2. Before you start
 
 - Use these skills from the root of a STAR project.

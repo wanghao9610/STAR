@@ -19,7 +19,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-metd-summarize [OPT]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。
+调用方式：`/star-metd-summarize [OPT] [描述]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 `run_shell_command` 调用：规约文件用单独的 `read_file` 读入，绝不 `cat` 进 `run_shell_command` 命令——`run_shell_command` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 `run_shell_command` 才做得了的那两件事，以项目根目录为工作目录的一次调用：
 

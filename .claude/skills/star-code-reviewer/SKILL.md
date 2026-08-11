@@ -1,6 +1,6 @@
 ---
 name: star-code-reviewer
-argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE]"
+argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)
@@ -37,7 +37,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed.
+Invocation: `/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load everything in one message: one `Read` for the conventions file, one `Read` for `<this skill's directory>/references/review_rubric.md`, and alongside them one Bash call, with the project root as the working directory, carrying only:
 

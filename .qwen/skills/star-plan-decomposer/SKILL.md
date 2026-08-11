@@ -1,7 +1,7 @@
 ---
 name: star-plan-decomposer
 disable-model-invocation: true
-argument-hint: "[PLAN_NAME] [involve=high]"
+argument-hint: "[PLAN_NAME] [DESCRIPTION] [involve=high]"
 description: >-
   Decompose an existing research plan (written by star-plan-coach and living under
   metds/plans/) into concrete, executable sub-plans. Reads the parent plan, picks a
@@ -18,7 +18,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-plan-decomposer PLAN_NAME`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`). An optional `involve=low|medium|high` token may accompany `PLAN_NAME` (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is not part of `PLAN_NAME`, and is stripped before resolution.
+Invocation: `/star-plan-decomposer PLAN_NAME [DESCRIPTION]`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`). An optional `involve=low|medium|high` token may accompany `PLAN_NAME` (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is not part of `PLAN_NAME`, and is stripped before resolution. Anything after the plan name is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. It never settles the plan name itself: text that resolves to no plan leaves the target still to be asked for.
 
 **Shared conventions.** Load `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) in one message before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. That one message is the whole opening load — every `references/` and `assets/` file waits until the step that names it. The conventions file arrives through its own `read_file`, never `cat`-ed into a `run_shell_command` command: a `run_shell_command` result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file is past that limit on its own. `run_shell_command` appears in the message only for what needs a shell — one call, with the project root as the working directory, carrying two lines:
 

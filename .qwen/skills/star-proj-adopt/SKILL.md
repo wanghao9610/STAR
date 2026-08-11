@@ -1,7 +1,7 @@
 ---
 name: star-proj-adopt
 disable-model-invocation: true
-argument-hint: "[survey | backfill]"
+argument-hint: "[survey | backfill] [DESCRIPTION]"
 description: >-
   Adopt an already-started project into STAR without disturbing it. Phase `survey` probes the repository
   read-only (source layout, runtime, data / weights / output locations, entrypoints, git history, prior
@@ -19,7 +19,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-proj-adopt [survey | backfill]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides the detection; re-running `survey` on an adopted project re-probes and updates the record rather than starting over.
+Invocation: `/star-proj-adopt [survey | backfill] [DESCRIPTION]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides the detection; re-running `survey` on an adopted project re-probes and updates the record rather than starting over. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant.
 
 **Shared conventions.** Everything this skill follows unconditionally arrives in one message, issued before acting: one `read_file` of `docs/mds/star-workflow/research-workflow-conventions.md`, one `read_file` of `<this skill's directory>/references/adopt_spec.md`, and alongside them one small `run_shell_command` call, run with the project root as the working directory:
 

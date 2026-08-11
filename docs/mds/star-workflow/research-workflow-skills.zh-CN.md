@@ -104,6 +104,8 @@ $star-code-release
 
 任意 skill 调用还可以加上 `involve=low|medium|high` 这个写法，设定本次运行决策前问多少——如 `$star-plan-executor 00 involve=low`。`low` 在裁量题上取推荐项（并逐条记录），`high` 逐步确认；它覆盖 `.env` 里的 `INVOLVE`（仅限这一次运行），运行中也可对 skill 说“少问点”临时调整。红线、提交、删除等安全确认点在任何档位都会询问。完整规则见[规约 §7.7](research-workflow-conventions.zh-CN.md)。
 
+每个 skill 还都可以带一句描述——写在参数之后的自由文本，用你自己的话说明这次要做什么：`$star-plan-reviser 01 这条不做了，由 02 取代`。它是线索不是命令：可以把运行带上该 skill 自己的某一条路，也可以提供随后被记进产物的文字——上面这句既丢弃了那份计划，又成了写进它的理由——但它替代不了确认点，定不了有歧义的计划名，也授权不了红线上的任何动作。由描述定下路径的运行，会在动笔之前说明自己走的是哪条路，这样读错描述的代价是多一行说明，而不是改错一处。第一个参数本来就是自由文本的 skill——`$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`——那个参数就是描述。完整规则见[规约 §7.12](research-workflow-conventions.zh-CN.md)。
+
 ## 2. 开始前的准备
 
 - 在 STAR 项目根目录中使用这些 skill。
