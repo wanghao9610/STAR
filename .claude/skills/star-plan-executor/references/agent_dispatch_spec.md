@@ -1,6 +1,6 @@
 # Agent Dispatch Contract
 
-One `Agent` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: general-purpose`; use `Explore` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step. Keep agents narrow so failures localize and contexts stay short.
+One `Agent` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: general-purpose`; use `Explore` with `model: sonnet` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step. Keep agents narrow so failures localize and contexts stay short.
 
 **A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is dispatched once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not return leaves every member row un-done, so a resume never reads a half-finished group as finished. Split a group at any STOP-line boundary.
 

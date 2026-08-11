@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Areas
 
-One `Agent` subagent (`subagent_type: Explore`) per area, run in parallel (none of them writes a file another surveyor writes, so running them together is safe here — it is not safe everywhere: subagents that fetch share one budget per host, conventions §6.9):
+One `Agent` subagent (`subagent_type: Explore`, `model: sonnet`) per area, run in parallel (none of them writes a file another surveyor writes, so running them together is safe here — it is not safe everywhere: subagents that fetch share one budget per host, conventions §6.9):
 
 | Area | Looks at | Key questions |
 |---|---|---|
