@@ -39,7 +39,7 @@ Rebuild parent→child links from `parent:` (authoritative), not prefixes. Withi
 
 ## Status symbol legend (one per node)
 
-- `✔` done — strategy node `finalized:` set; leaf `exec_status: done`.
+- `✔` done — strategy node `finalized:` set; leaf `exec_status: done`. A leaf `exec_status: abandoned` renders `✔` too, since terminal is terminal, with its state text reading `exec abandoned` — that text is where the reader learns the direction was killed rather than finished, and the count line names it again (`1 abandoned`).
 - `◐` in progress — some sections `done`/`in_progress`, or all six `done` with `finalized:` unset (the rubric has not been run), or leaf `exec_status: in_progress` (show `k/n` steps if a log exists).
 - `○` pending — nothing started (`exec_status` absent/`pending`, or all sections `pending`).
 - `⊘` blocked — leaf `exec_status: blocked`, or a leaf whose `depends_on` is unmet.

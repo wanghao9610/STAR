@@ -39,7 +39,7 @@
 
 ## 状态符号图例（每节点一个）
 
-- `✔` 完成 —— 总体计划节点设了 `finalized:`；叶子 `exec_status: done`。
+- `✔` 完成 —— 总体计划节点设了 `finalized:`；叶子 `exec_status: done`。`exec_status: abandoned` 的叶子同样渲染 `✔`——终态就是终态——但状态文字写 `exec abandoned`：读者正是从这行文字知道这个方向是被判死的、不是做完的，进度汇总那一行还会再点它一次（`abandoned 1`）。
 - `◐` 进行中 —— 部分章节 `done`/`in_progress`，或六节全 `done` 但未设 `finalized:`（评分表还没跑），或叶子 `exec_status: in_progress`（有日志则显示 `k/n` 步）。
 - `○` 待办 —— 尚未开始（`exec_status` 缺失/`pending`，或全部章节 `pending`）。
 - `⊘` 受阻 —— 叶子 `exec_status: blocked`，或其 `depends_on` 未满足的叶子。
