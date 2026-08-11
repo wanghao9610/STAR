@@ -1,5 +1,7 @@
 ---
 name: star-expt-digest
+model: sonnet
+effort: medium
 context: fork
 background: false
 argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]"
