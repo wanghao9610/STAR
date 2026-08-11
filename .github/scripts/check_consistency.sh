@@ -717,7 +717,7 @@ CONV_HEADINGS=(
     '10. The skill roster'
     '11. Execution branches and worktrees'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|11" "10|6" "11|9")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|12" "10|6" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
 # against it, and check 20d derives the stay-out complement from it, so adding
 # a section here is all it takes to make one citable and load-accounted.
