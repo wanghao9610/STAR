@@ -1,5 +1,7 @@
 ---
 name: star-expt-digest
+model: sonnet
+effort: medium
 context: fork
 background: false
 description: >-
