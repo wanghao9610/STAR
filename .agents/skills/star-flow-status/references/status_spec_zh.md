@@ -19,7 +19,7 @@
 每个 `metds/plans/<prefix>_<slug>_plan.md` 的 frontmatter 可能带：
 
 - 总体计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。
-- 子计划（来自 decomposer）：`parent:`、`prefix:`、`level:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
+- 子计划（来自 decomposer）：`parent:`、`prefix:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
 - 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`abandoned`）——`done` 与 `abandoned` 都是**终态**：处于其中任一状态的叶子不再欠任何东西，也不会卡住下游的确认点。带着 `skipped` 的叶子——这个取值已经没有任何 skill 会写——同样读作终态，而这里是它唯一还被认得的地方。`abandoned` 记录的是被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让这个负结果留存下来；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现之前写的计划带的是单个 `exec_run:`；把它当作只有一项的列表来读——executor 下次写入时会迁移它。
 - 任何节点，在 `star-plan-reviser` 丢弃它之后：`dropped: <YYYY-MM-DD> — <一句话原因>`——这个方向已经放弃。**它靠继承生效，绝不向下复制**：一个节点算作已丢弃，是因为它自己带这个字段**或它的任一祖先带**，所以这个决定只写一次，写在做出决定的那个节点上；日后在已丢弃节点下新增的子节点也一并算已丢弃。完整交代在该计划的 `## Revision History` 里；父计划保留它的 `children:` 条目与 `## Sub-plans` 索引行，并在那一行上加 `— dropped <date>` 标记。
 

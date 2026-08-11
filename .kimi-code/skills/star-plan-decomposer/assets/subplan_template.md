@@ -4,7 +4,6 @@ slug: <slug>
 language: en
 prefix: "<prefix>"           # e.g. "00" — parent prefix + this unit's 0-based index
 parent: <parent-filename>    # e.g. 0_open-vocab-det-seg_plan.md (authoritative link)
-level: <n>                   # = length of prefix (root = 1)
 traces_to: "<root section/claim this executes, e.g. §6 milestone 1 (MVP); §4 claim 1>"
 depends_on: []               # sibling prefixes that must finish first, e.g. ["00", "01"]; [] = independent
 created: <YYYY-MM-DD>

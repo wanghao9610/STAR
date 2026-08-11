@@ -4,7 +4,6 @@ slug: <slug>
 language: zh
 prefix: "<prefix>"           # 例如 "00" —— 父前缀 + 本单元的 0 起始序号
 parent: <parent-filename>    # 例如 0_open-vocab-det-seg_plan.md（权威链接）
-level: <n>                   # = 前缀长度（根 = 1）
 traces_to: "<本子计划执行根计划的哪一节/哪条主张，例如 §6 里程碑 1（MVP）；§4 主张 1>"
 depends_on: []               # 必须先完成的兄弟前缀，例如 ["00", "01"]；[] = 无依赖，可独立开工
 created: <YYYY-MM-DD>
