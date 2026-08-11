@@ -68,20 +68,20 @@ One message, three results: the conventions excerpts and the collector's digest 
 
 The script gathers, it never judges — it knows nothing about status symbols, coverage rows, the priority order, or which filenames the registry expects, so every rule stays in this file and in `references/status_spec.md`. Read what it prints as raw file content, exactly as if you had opened each file yourself. If it is missing or fails, fall back to reading the files directly, and say in your reply that the scan fell back. If you cannot resolve this skill's own directory, any copy in the repository will do — every `scripts/scan.sh` is byte-identical and CI enforces that: `bash "$(find . -path '*/skills/*/scripts/scan.sh' | head -1)"`.
 
-If `PLAN_NAME` was given, resolve it and keep only that subtree. The scan is always project-wide: scoping a subtree needs every plan's `parent:` first.
+If `PLAN_NAME` was given, resolve it and keep only the resolved node and its descendants — every step below reports that subtree and nothing else. The scan is always project-wide: scoping a subtree needs every plan's `parent:` first, so a plan outside the subtree is read to resolve the tree and then dropped, never rendered. The resolution rules, including what an ambiguous name does here where there is no question to fall back on, are in the spec's Scope section.
 
 ### Step 2: Build the tree
-Link children to parents via `parent:`. Order siblings by `depends_on` (topological), falling back to prefix order. Mark each node **root / internal / leaf** (leaf = empty or absent `children:`).
+Link children to parents via `parent:` over **every** plan the scan returned — resolving a parent needs all of them. Order siblings by `depends_on` (topological), falling back to prefix order. Mark each node **root / internal / leaf** (leaf = empty or absent `children:`). Then, if `PLAN_NAME` was given, drop everything outside the resolved node's subtree: Steps 4–7 see only what is left.
 
 ### Step 3: Read per-node state
 - **Strategy nodes** (root/internal): the coach `status:` map — how many of the six sections are `done` / `in_progress` / `pending` / `skipped`; whether `finalized:` is set; whether it has been decomposed (`children:` present).
 - **Leaves**: `exec_status` (default `pending` if absent) and `exec_runs` (the last entry is the current run; earlier ones are re-runs worth naming when there are any). The digest carries every `wkdrs/<run>/EXEC_LOG.md`; take step-level progress from the current run's block (steps done / total, any `blocked`, any "Awaiting user" STOP-line commands, any recorded **Plan-level finding**), and its frontmatter's `branch:` / `merged:` / `worktree:` with it — the spec says how an unmerged execution branch and a housed run render and when the merge becomes the outstanding follow-up.
 
 ### Step 4: Render the tree
-One line per node, indented by level, each with a status symbol and a short state (see the spec for the status symbol legend). Show `depends_on` on leaves and flag blocked / awaiting-user leaves.
+One line per node — **every node in scope, no exceptions** — indented by level, each with a status symbol and a short state (see the spec for the status symbol legend). Show `depends_on` on leaves and flag blocked / awaiting-user leaves. A large tree shortens the state text on a line, never drops the line: collapsing a subtree into a sentence is the one thing this step must not do, because Step 5's counts are already the short version and the tree is the only place the reader sees which node is which.
 
 ### Step 5: Summary counts
-Report three numbers: strategy completeness (sections done across top-level plans), decomposition coverage (leaves vs nodes still too big to run), and execution progress (leaves `done` / total, and steps done / total from logs).
+Report three numbers **over the scope**: strategy completeness (sections done across the top-level plans in scope), decomposition coverage (leaves vs nodes still too big to run), and execution progress (leaves `done` / total, and steps done / total from logs). When a `PLAN_NAME` narrowed the run, say so in one clause, so the numbers are not read as the project's.
 
 ### Step 6: Follow-up checks
 Walk the coverage table in the spec over the scoped artifacts, using the digest's listing for presence and filename dates and its artifact frontmatter for state fields — idea not planned, refs missing, code review missing or stale, experiment analysis missing, results table stale, method documents missing or stale. Report only the triggered rows, one line each, naming the skill that closes it. Omit the whole section when nothing fires.
@@ -97,6 +97,6 @@ Over the digest's listing, count report-shaped files matching no pattern in the 
 
 ## Output & Dialogue Discipline
 
-- Order: tree → summary counts → follow-up checks → the single next action → drift flags → unrecognized-files line. Omit the coverage, drift, and unrecognized-files sections when they are empty. Keep the whole reply under ~500 words; use a compact tree, not prose per node.
+- Order: tree → summary counts → follow-up checks → the single next action → drift flags → unrecognized-files line. Omit the coverage, drift, and unrecognized-files sections when they are empty. There is no word budget: how long this report runs is set by the tree it has to show, and sixty nodes in scope means sixty lines. Shape is what bounds it instead — one line per node, one clause per count, one line per triggered check, one command and one reason for the next action, one line per drift flag. Prose between the sections is what to cut; a line the reader needs is not.
 - Reply in the user's language; the tree/labels follow the chat language even though plan and report bodies may be `zh`.
 - Since you write nothing, there is no confirmation point — but for the same reason, never state or imply that you changed anything.

@@ -888,7 +888,7 @@ Inspect the whole flow:
 $star-flow-status
 ```
 
-Inspect one plan subtree:
+Inspect one plan subtree — the tree, the three counts, the follow-up checks and the next action all narrow to it:
 
 ```text
 $star-flow-status open-vocab-det-seg
@@ -897,7 +897,7 @@ $star-flow-status 01
 
 ### What it reports
 
-- A plan tree annotated with status;
+- A plan tree annotated with status — every node in scope on its own line, whatever the tree's size;
 - Top-level plan section completeness, decomposition coverage, and leaf execution progress;
 - Each leaf's dependencies, logged step progress, blockers, or commands awaiting the user;
 - Follow-up checks: finished work whose follow-up is missing or out of date — a done leaf with no code review or no experiment analysis, a reviewed run whose log has since moved on, a results table or method document older than what it was compiled from, a digest series that has fallen behind the analysis reports, a finalized idea that never became a plan. Only the triggered checks are printed; work still in progress has no outstanding follow-up and stays silent;

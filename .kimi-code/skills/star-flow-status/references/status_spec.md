@@ -4,6 +4,16 @@ Everything here is derived by reading files. Write nothing.
 
 The plan tree has ordering semantics, so it gets a graph walk. The follow-up checks are thin by design — presence and freshness only. The priority order picks the one recommendation across both; the unrecognized-files line is the check that catches a renamed output.
 
+## Scope — what a `PLAN_NAME` narrows
+
+Resolution follows conventions §5, with one difference: this skill never asks, so §5.2's question has to be settled on the page.
+
+- A numeric prefix matches the digits before the first `_` **exactly**: `1` resolves `1_<slug>_plan.md` and never `10_…`. Two roots that share a slug are separated by exactly this, so a prefix matching one file resolves even where the slug alone would not.
+- An argument matching **more than one** plan file renders every match, each under its own root line, and the reply's first line names the ambiguity and gives the unambiguous command per match.
+- An argument matching **none** renders no tree: list the nearest candidates (prefix + slug + one-line state) and stop there.
+
+Once resolved, the scope governs the whole reply: the tree renders that subtree only, the three summary counts are computed over it, the coverage rows check only its artifacts, and the next action is picked within it. Plans outside it are read — `parent:` does not resolve without them — and then dropped. Two things stay project-wide and say so where they are defined: the unrecognized-files line, and a drift flag that has to name a parent outside the subtree.
+
 ## What to read per file
 
 Each `metds/plans/<prefix>_<slug>_plan.md` frontmatter may carry:
@@ -52,7 +62,11 @@ Show, per leaf line, its `depends_on`, (if executing) `k/n` steps, and — when 
 
 The root above is `◐`, not `✔`, because its `finalized:` is unset — six `done` sections alone do not close a strategy node, the rubric still has to be run. A strategy node's status symbol reports **its own** state, never its subtree's: a finalized root over a half-executed subtree is still `✔`, and the summary counts are what tell you the subtree is unfinished.
 
+Tree size does not change the rule. A project with sixty nodes prints sixty lines; what may shrink is the state text on a line — `◐ 2/5` is a complete line — never the set of lines. A subtree replaced by a sentence ("8 leaves, all done") loses which leaf is which, and two runs summarising the same subtree differently produce a report the reader cannot check against the files.
+
 ## Summary counts (three numbers)
+
+All three are computed over the scope whenever a `PLAN_NAME` narrowed the run (see Scope above), never over the project.
 
 1. **Strategy completeness** — across top-level plans (root/internal that came from the coach): sections `done` / (6 × number of top-level plans). Note any not `finalized:`.
 2. **Decomposition coverage** — internal nodes (decomposed) vs leaves flagged `⚠` too big to run (as defined above).
