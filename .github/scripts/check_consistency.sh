@@ -979,8 +979,10 @@ fi
 #     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
 #     costs two invariants nothing else holds.
 #
-#     The excerpt has to stay under the Bash spill line, and it has ~1.2 KB of
-#     room. This is the only place that can be caught: `execs/update.sh` copies
+#     Each call's excerpt has to stay under the Bash spill line, which is why a
+#     load may be split across several calls in one message: the budget below is
+#     per call, while the prose, the citations and the quoted size are checked
+#     against the union of them. This is the only place that can be caught: `execs/update.sh` copies
 #     docs/mds/star-workflow wholesale into downstream projects, which are told
 #     not to edit it, so the file can only grow *here*. Without the size
 #     assertion below, growing §7 by 4 KB silently converts a one-message load
@@ -1005,7 +1007,7 @@ fi
 #     its own commit.
 section "Selective conventions load"
 
-LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28800}
+LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
 
 # skill|file|section — a citation of a section the skill no longer loads, kept on
 # purpose because the sentence restates the rule and cites it only for provenance.
@@ -1036,8 +1038,13 @@ for root in "${SKILL_ROOTS[@]}"; do
             path="${root}/${skill}/${f}"
             [[ -f "${path}" ]] || continue
 
-            sel="$(grep -F "awk '/^## /{k=/^## (" "${path}" | head -n 1)"
-            [[ -n "${sel}" ]] || continue
+            # No mapfile: this script has to run under the bash 3.2 a macOS
+            # checkout still ships, where that builtin does not exist.
+            sels=()
+            while IFS= read -r sel_line; do
+                [[ -n "${sel_line}" ]] && sels+=( "${sel_line}" )
+            done < <(grep -F "awk '/^## /{k=/^## (" "${path}")
+            (( ${#sels[@]} > 0 )) || continue
             sel_files=$(( sel_files + 1 ))
 
             if [[ "${f}" == SKILL_zh.md ]]; then
@@ -1048,38 +1055,53 @@ for root in "${SKILL_ROOTS[@]}"; do
                 lang=en
             fi
 
-            # 20a. the selector names a set, and applies it to its own language's file
-            want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
-            if [[ -z "${want}" ]]; then
-                fail "${path}: carries a section selector whose set cannot be parsed"
-                sel_errors=1
-                continue
-            fi
-            if ! grep -qF -- "${conv}" <<< "${sel}"; then
-                fail "${path}: its selector does not read ${conv}"
-                sel_errors=1
-            fi
+            # A load may be split across several calls in one message, since the
+            # spill line is per tool result: each selector is sized on its own,
+            # while the prose, the citations and the quoted size read the union.
+            wants=()
+            bytes=0
+            sel_broken=0
+            for sel in "${sels[@]}"; do
+                # 20a. the selector names a set, and applies it to its own language's file
+                want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
+                if [[ -z "${want}" ]]; then
+                    fail "${path}: carries a section selector whose set cannot be parsed"
+                    sel_errors=1
+                    sel_broken=1
+                    continue
+                fi
+                if ! grep -qF -- "${conv}" <<< "${sel}"; then
+                    fail "${path}: its selector does not read ${conv}"
+                    sel_errors=1
+                fi
 
-            # 20b. what it prints is exactly what it names — the renumber guard
-            excerpt="$(awk -v r="^## (${want})\\\\." '/^## /{k=($0~r)} k' "${conv}")"
-            if [[ -z "${excerpt}" ]]; then
-                fail "${path}: selector (${want}) prints nothing from ${conv}; the conventions may have been renumbered"
-                sel_errors=1
-                continue
-            fi
-            got="$(sed -nE 's/^## ([0-9]+)\..*/\1/p' <<< "${excerpt}" | sort -n | paste -sd'|' -)"
-            wsorted="$(tr '|' '\n' <<< "${want}" | sort -n | paste -sd'|' -)"
-            if [[ "${got}" != "${wsorted}" ]]; then
-                fail "${path}: selector names §${wsorted//|/, §} but prints §${got//|/, §}"
-                sel_errors=1
-            fi
+                # 20b. what it prints is exactly what it names — the renumber guard
+                excerpt="$(awk -v r="^## (${want})\\\\." '/^## /{k=($0~r)} k' "${conv}")"
+                if [[ -z "${excerpt}" ]]; then
+                    fail "${path}: selector (${want}) prints nothing from ${conv}; the conventions may have been renumbered"
+                    sel_errors=1
+                    sel_broken=1
+                    continue
+                fi
+                got="$(sed -nE 's/^## ([0-9]+)\..*/\1/p' <<< "${excerpt}" | sort -n | paste -sd'|' -)"
+                one_sorted="$(tr '|' '\n' <<< "${want}" | sort -n | paste -sd'|' -)"
+                if [[ "${got}" != "${one_sorted}" ]]; then
+                    fail "${path}: selector names §${one_sorted//|/, §} but prints §${got//|/, §}"
+                    sel_errors=1
+                fi
 
-            # 20c. the excerpt stays clear of the Bash spill line
-            bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
-            if (( bytes > LOAD_EXCERPT_MAX )); then
-                fail "${path}: excerpt is ${bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will spill and cost the round trip the one-message load exists to avoid. Split the load across two Bash calls in the same message, or drop a section."
-                sel_errors=1
-            fi
+                # 20c. every call stays clear of the Bash spill line on its own
+                one_bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
+                if (( one_bytes > LOAD_EXCERPT_MAX )); then
+                    fail "${path}: the (${want}) excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will spill and cost the round trip the one-message load exists to avoid. Move a section to another call in the same message, or drop one."
+                    sel_errors=1
+                fi
+
+                wants+=( "${want}" )
+                bytes=$(( bytes + one_bytes ))
+            done
+            (( sel_broken == 0 )) || continue
+            wsorted="$(printf '%s\n' "${wants[@]}" | tr '|' '\n' | sort -n | paste -sd'|' -)"
 
             # The load block: from its heading to the next ## section.
             start="$(grep -nE '^\*\*Shared conventions\.|^\*\*通用规约。' "${path}" | head -n 1 | cut -d: -f1)"
@@ -1173,9 +1195,12 @@ for root in "${SKILL_ROOTS[@]}"; do
         # checked against the skill's SKILL.md set.
         en_manifest="${root}/${skill}/SKILL.md"
         [[ -f "${en_manifest}" ]] || continue
-        sel="$(grep -F "awk '/^## /{k=/^## (" "${en_manifest}" | head -n 1)"
-        [[ -n "${sel}" ]] || continue
-        want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
+        want=""
+        while IFS= read -r sel_line; do
+            one="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel_line}")"
+            [[ -n "${one}" ]] && want="${want}${want:+|}${one}"
+        done < <(grep -F "awk '/^## /{k=/^## (" "${en_manifest}")
+        [[ -n "${want}" ]] || continue
         while IFS= read -r ref; do
             [[ -n "${ref}" ]] || continue
             while IFS= read -r hit; do

@@ -18,14 +18,18 @@ description: >-
 
 调用方式：`/skill:star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | score | add PAPER [PAPER …] | ARXIV_ID | URL]`——不带参数从 `metds/` 读方法并跑完整流程；计划名（slug / 数字前缀 / 文件名）或自由文本 topic 限定检索范围；`verify` 逐条重抓并 diff；`organize` 不联网、只重新分类现有 bib；`synthesize` 把已有笔记与 bib 分类合成为 `metds/refs/related_work.md`；`survey` 检索一个话题、分层阅读、独立写出一份领域综述（`metds/refs/<slug>_survey.md`）——其后的文本按 `PLAN_NAME` 或 `TOPIC` 的规则解析，没有就走无参的来源链；`score` 重抓每条条目的引用与仓库指标、重建索引的影响力评分表，其余一概不动；`add` 一次追加多篇，每篇是 arXiv id、DOI、URL 或标题；单个 arXiv id、DOI 或论文 URL 追加那一篇。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。文献分析者真正据以行事的部分——§0 词汇表、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——就是本 skill 的开场装载，动手前以项目根目录为工作目录、用一次 Bash 调用取来：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。文献分析者真正据以行事的部分——§0 词汇表、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——就是本 skill 的开场装载，动手前以项目根目录为工作目录、用同一条消息里的两次 Bash 调用取来：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
-awk '/^## /{k=/^## (0|3|4|5|6|7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+awk '/^## /{k=/^## (0|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；探测与各节同在一次调用里，谁都不必各占一趟往返。那行 `awk` 只打印上面点名的各节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。取出的摘录约 28 KB，而整份规约自己就会落盘——正是这个差额让它能走 Bash：结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来。
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；探测与前半各节同在第一次调用里；同一条消息里的多次调用之间只算一趟往返，不是各占一趟。每行 `awk` 只打印它上面点名的那几节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。规约摘录合计约 28 KB，分成两次调用而不是一次，因为每份工具结果各有自己的落盘线：结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来；七节挤在一次调用里，已经近到 §7 多一段就会越线。
 
 有两节不装载，是因为本 skill 从不做它们管的事：§1 git——本 skill 从不提交，状态与文件规则已写明；§2 红线——本 skill 不跑重活，全部联网行为由核心原则 6 与 `references/source_policy_zh.md` 划定边界，而 §2 本会触发的那些确认另有归属，且都在装载范围内（§7.7 自己的"删除与覆盖"一类、§3.5 的禁装规定）。另有两处不装载，是因为本 skill 需要的部分已经在手：§9 项目布局——它要裁定的放置问题，状态与文件规则裁得比 §9 更严；以及规约的前言——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。还有 §10 skill 名册不装载——这次运行能不能不经点名启动，在本文件打开之前就已定夺，这种运行随身的义务在对话纪律一节有复述。§11 执行分支随 §1 一同不装载：开分支属于会写项目代码的 skill，而本 skill 根本从不提交。哪次运行真需要其中某节，再整份读回。开场装载只有这份规约摘录：其余资源——`references/source_policy_zh.md`、`references/refs_rubric_zh.md`、`assets/` 模板——各属于特定模式与步骤，工作流引到哪一步才读，不预先装载。
 
