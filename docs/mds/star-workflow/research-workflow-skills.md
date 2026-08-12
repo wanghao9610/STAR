@@ -590,11 +590,14 @@ The skill first verifies that:
 
 - Section 3 contains concrete tasks;
 - Section 5 defines a runnable done-criterion;
+- The leaf is still one unit of work — one done-criterion, one kind of work, and at most one crossing of the STOP line;
 - Every upstream plan in `depends_on` is complete;
 - Required data, weights, and code modules exist;
 - The project paths and Conda environment in `.env` are usable (if the environment is missing, `$star-env-builder` builds it).
 
 If a hard dependency is missing, the skill reports the exact blocker rather than fabricating an input or skipping the dependency.
+
+A leaf can pass every other check and still be too big to run as one unit — the plan may have been split weeks ago, or written by hand. When it is, the skill shows a preview of how that leaf would divide (2–5 units, each with a one-line objective and the done-criterion it would own) and recommends splitting it first with `$star-plan-decomposer <leaf>`, carrying the sketch along as the description. The preview writes nothing: the decomposer still chooses its own axis and confirms its own list. Executing as it stands stays an option, with its cost stated — every STOP-line crossing stops and resumes the whole run, one blocked step holds up everything behind it, and a failure re-runs the whole leaf. A run being resumed is never asked, because splitting mid-run would leave its records hanging off a node no executor revisits.
 
 ### What it does
 
