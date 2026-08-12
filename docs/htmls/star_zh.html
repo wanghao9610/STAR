@@ -43,6 +43,14 @@
   }
   ::selection { background: rgba(255, 216, 107, 0.25); }
   a { color: inherit; text-decoration: none; }
+  a.inline-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--line-hi);
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+  a.inline-link:hover { color: var(--gold); text-decoration-color: var(--gold); }
   img { max-width: 100%; }
 
   /* ---------- starfield canvas ---------- */
@@ -708,12 +716,12 @@
   <div class="aurora aurora-b" aria-hidden="true"></div>
   <span class="hero-badge">Systematic Toolchain for AI Research</span>
   <h1>STAR</h1>
-  <p class="hero-sub">Every STAGE needs a STAR</p>
+  <p class="hero-sub">Every <a class="inline-link" href="https://wanghao9610.github.io/STAGE/index_zh.html" hreflang="zh-CN" target="_blank" rel="noopener">STAGE</a> needs a STAR</p>
   <p class="hero-desc">
     一个可复用的项目基础，面向<strong>可复现、结构良好的 AI 研究</strong>——
     一套可预期的目录布局、一个统一的实验入口，以及一条由十五个 skill 组成的工作流，
     把一个模糊的想法一路带到一个可发布的仓库，每个决策都有档可查。
-    到了要写成论文的时候，<strong>STAGE</strong> 把这些结果作为带指纹的证据接过去，在其上写出论文。
+    到了要写成论文的时候，<strong><a class="inline-link" href="https://wanghao9610.github.io/STAGE/index_zh.html" hreflang="zh-CN" target="_blank" rel="noopener">STAGE</a></strong> 把这些结果作为带指纹的证据接过去，在其上写出论文。
   </p>
   <div class="hero-ctas">
     <a class="btn btn-primary" href="#quickstart">✦ 开始使用</a>

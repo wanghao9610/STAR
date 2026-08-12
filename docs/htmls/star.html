@@ -43,6 +43,14 @@
   }
   ::selection { background: rgba(255, 216, 107, 0.25); }
   a { color: inherit; text-decoration: none; }
+  a.inline-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--line-hi);
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+  a.inline-link:hover { color: var(--gold); text-decoration-color: var(--gold); }
   img { max-width: 100%; }
 
   /* ---------- starfield canvas ---------- */
@@ -708,12 +716,12 @@
   <div class="aurora aurora-b" aria-hidden="true"></div>
   <span class="hero-badge">Systematic Toolchain for AI Research</span>
   <h1>STAR</h1>
-  <p class="hero-sub">Every STAGE needs a STAR</p>
+  <p class="hero-sub">Every <a class="inline-link" href="https://wanghao9610.github.io/STAGE/" target="_blank" rel="noopener">STAGE</a> needs a STAR</p>
   <p class="hero-desc">
     A reusable foundation for <strong>reproducible, well-structured AI research</strong> —
     one predictable layout, one experiment entrypoint, and a fifteen-skill workflow that
     carries a vague idea all the way to a released repository, with every decision on file.
-    When the results are ready to write up, <strong>STAGE</strong> picks them up as
+    When the results are ready to write up, <strong><a class="inline-link" href="https://wanghao9610.github.io/STAGE/" target="_blank" rel="noopener">STAGE</a></strong> picks them up as
     fingerprinted evidence and writes the paper on top.
   </p>
   <div class="hero-ctas">
