@@ -1,6 +1,6 @@
 ---
 name: star-plan-decomposer
-argument-hint: "[PLAN_NAME] [involve=high]"
+argument-hint: "[PLAN_NAME] [描述] [involve=high]"
 description: >-
   把 star-plan-coach 写好、存放在 metds/plans/ 下的研究计划拆解为可执行的子计划。读取父计划，
   选定拆分轴（阶段 / 组件模块 / 证据），再为每个执行单元自动起草一份执行子计划——目标、依赖、

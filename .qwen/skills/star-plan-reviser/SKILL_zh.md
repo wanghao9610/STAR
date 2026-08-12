@@ -1,6 +1,6 @@
 ---
 name: star-plan-reviser
-argument-hint: "[PLAN_NAME] [involve=high]"
+argument-hint: "[PLAN_NAME] [描述] [involve=high]"
 description: >-
   以执行证据为依据，审查 metds/plans/ 下的任一计划节点，并在用户逐条批准下就地修订它。派出只读
   subagent 检查 wkdrs/<run>/ 的执行日志与产物（内部节点则汇总 children），逐条对照磁盘文件给完成度
@@ -14,7 +14,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-plan-reviser PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。表达放弃这个方向的描述——比如「这条不做了，由 02 取代」——走丢弃那条路（Workflow 的最后一节）而不是审查，它的原话就是写进计划的理由；要求把已丢弃的节点收回来的描述则清除那个字段。没有关键词：两者都没提的描述跑的是审查，不给描述也一样。
+调用方式：`/star-plan-reviser PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。表达放弃这个方向的描述——比如「这条不做了，由 02 取代」——走丢弃那条路（Workflow 的最后一节）而不是审查，它的原话就是写进计划的理由；要求把已丢弃的节点收回来的描述则清除那个字段。没有关键词：两者都没提的描述跑的是审查，不给描述也一样。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次 `read_file`——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 `run_shell_command` 调用（以项目根目录为工作目录），只带这一行：
 

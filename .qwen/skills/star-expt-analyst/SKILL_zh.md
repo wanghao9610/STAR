@@ -1,6 +1,6 @@
 ---
 name: star-expt-analyst
-argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch]"
+argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [描述]"
 description: >-
   分析某个计划的执行 run 到底产出了什么，并对照计划的预期给出判定。传 PLAN_NAME（slug / 数字前缀 / 文件名）经该计划的 exec_runs 解析到 wkdrs/<run>/ 目录；传
   wkdrs/<run>/ 路径反查回其计划；不带参数 则列出磁盘上的 run 并询问。对照磁盘清点 §4 交付物，用产物核实 EXEC_LOG 的步骤声明，扫描训练/评测

@@ -1,6 +1,6 @@
 ---
 name: star-expt-digest
-argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger]"
+argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [描述]"
 description: >-
   按时间顺序总结实验进展：最近都做了什么、学到了什么。不带参数则从上一份 digest 的上次覆盖到的日期续接，覆盖此后 的全部；传 PLAN_NAME
   则覆盖该节点的整个家族——祖先提供主张语境、全部后代叶子提供证据，不设时间 界；传 `<N>d` 或日期则覆盖一个时间窗；`all` 则从头重建整个序列。收集范围内每个 run 最新的

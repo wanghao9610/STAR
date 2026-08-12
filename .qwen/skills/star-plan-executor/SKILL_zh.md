@@ -1,6 +1,6 @@
 ---
 name: star-plan-executor
-argument-hint: "[PLAN_NAME] [involve=low]"
+argument-hint: "[PLAN_NAME] [描述] [involve=low]"
 description: >-
   执行 star-plan-decomposer 产出、存放在 metds/plans/ 下的某个叶子执行子计划。先从 .env 读取 ${CODE_NAME} 勘察代码库，建立"现状 vs
   要求"缺口清单；进入 plan 模式，把子计划的任务分解细化成一份 可执行 plan，经 exit_plan_mode 审批后，逐步派 subagent（每步一个）去修改代码、跑轻量验证——在重实验

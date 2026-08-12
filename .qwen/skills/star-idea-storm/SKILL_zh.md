@@ -16,7 +16,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。
+调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `IDEA` 或 `IDEA_NAME`，解析前先剥离。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读放进开场那一条装载消息——规约文件单独一次 `read_file`，Stage 1、2、4 都要用的问题库（`<本 skill 所在目录>/references/question_bank_zh.md`）再单独一次 `read_file`，外加同一条消息里的一次 `run_shell_command` 调用（以项目根目录为工作目录），只跑非 `run_shell_command` 不可的那一行：
 
