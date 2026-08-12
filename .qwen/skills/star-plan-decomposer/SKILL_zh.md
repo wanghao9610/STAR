@@ -14,7 +14,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-plan-decomposer PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于 `PLAN_NAME`，解析前先剥离。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。
+调用方式：`/star-plan-decomposer PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于 `PLAN_NAME` 也不属于描述，两者解析之前先剥离。
 
 **通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `read_file` 读入，绝不 `cat` 进 `run_shell_command` 命令：`run_shell_command` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 `run_shell_command` 只做需要 shell 的事——一次调用，以项目根目录为工作目录，带两行：
 
