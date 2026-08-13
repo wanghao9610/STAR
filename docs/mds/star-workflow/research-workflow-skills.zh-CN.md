@@ -78,19 +78,19 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`（Kimi 与 Pi 写作 `/skill:skill-name`）：
+在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`（DSH、Kimi 与 Pi 写作 `/skill:skill-name`）：
 
 ```text
 /star-plan-coach 开放词汇检测与分割
 ```
 
-在 Kimi 中，写法是 `/skill:skill-name`：
+在 DSH、Kimi 与 Pi 中，写法是 `/skill:skill-name`：
 
 ```text
 /skill:star-plan-coach 开放词汇检测与分割
 ```
 
-七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、Kimi、Pi、Qwen Code 五份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
+七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
@@ -1243,6 +1243,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Codex | `.agents/skills/` | `$star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
+| DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 | Pi | `.pi/skills/` | `/skill:star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |

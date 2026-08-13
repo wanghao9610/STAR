@@ -5,9 +5,9 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 
 ## The shape of the problem
 
-The fifteen skills exist six times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 155 markdown files per tree, 930 in all,
-roughly 92% of the repository. They are maintained by hand. There is no generator.
+The fifteen skills exist seven times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
+`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 155 markdown files per
+tree, 1085 in all, roughly 92% of the repository. They are maintained by hand. There is no generator.
 
 So the cost of changing one shared rule is measured in files, not lines. Recent examples:
 
@@ -17,7 +17,7 @@ So the cost of changing one shared rule is measured in files, not lines. Recent 
 | `1289ac4` | 26 | advertise the `involve=` token |
 | `e9d6d28` | 34 | carry the QA thread across a long question series |
 
-**Before editing six trees, check whether the rule belongs in
+**Before editing seven trees, check whether the rule belongs in
 `docs/mds/star-workflow/research-workflow-conventions.md` instead.** Consistency check 6 proves every
 `SKILL.md` defers to that document, so a rule stated there reaches all fifteen skills in two files
 (English and Chinese). `877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
@@ -34,6 +34,7 @@ token and the `disable-model-invocation` line, each tree is about equally far fr
 |---|---|
 | `.agents` | 56 / 155 |
 | `.cursor` | 63 / 155 |
+| `.dsh` | ported from `.kimi-code`, then adapted; see the next section |
 | `.kimi-code` | 66 / 155 |
 | `.pi` | ported from `.cursor`, then adapted; see the next section |
 | `.qwen` | 64 / 155 |
@@ -53,6 +54,7 @@ mistaken for drift.
 | `.agents` | Codex | `$star-*` | `update_plan` | `spawn_agent`, `agent_type: explorer` / `worker` (selective; local by default) | `request_user_input` |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
+| `.dsh` | DSH | `/skill:star-*` | `exit_plan_mode` only — the human turns plan mode on | `subagent`, no type parameter at all | `ask_user_question` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
 | `.pi` | Pi | `/skill:star-*` | none — the skill holds the gate itself | none — conventions §6.1 local fill | none — plain text |
 | `.qwen` | Qwen Code | `/star-*` | `enter_plan_mode` / `exit_plan_mode` | `agent`, `subagent_type: Explore` / `general-purpose` | `ask_user_question` |

@@ -47,7 +47,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **完整的研究生命周期**：十五个相互配合的 skill，按运行顺序依次是——不改动原有内容地接入已经开工的项目、收敛研究选题、写成计划、调研相关工作、递归拆解计划、搭建代码库、构建运行环境、执行叶子计划、审查代码、分析实验结果、汇总阶段进展、以执行证据修订计划、汇报全局状态、把定稿计划编译成方法文档、把仓库整理到可发布状态。
 - **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
 - **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个工具驱动 STAR。
-- **面向 AI 协作的规范**：为 Codex、Claude、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
+- **面向 AI 协作的规范**：为 Codex、Claude、DSH、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
 十五个 skill 各自负责什么、产出什么，以及在你所用工具里怎么调用，见[研究工作流](#研究工作流)；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
@@ -78,12 +78,14 @@ star-ai-research/
 ├── .agents/skills/         # Codex 使用的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
+├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
+├── .dsh/hooks/             # DSH 的会话钩子，登记在 .dsh/hooks.json（见分工具配置）
 ├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
 ├── .pi/hooks/              # Pi 的会话钩子，由 .pi/extensions/star-hooks.ts 接线
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
@@ -180,7 +182,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项，并把这次取值记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的那些问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、提交、删除这类安全确认点在任何档位都会询问。若只想对单次运行生效，调用 skill 时附带同一参数即可，如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项，并把这次取值记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的那些问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、提交、删除这类安全确认点在任何档位都会询问。若只想对单次运行生效，调用 skill 时附带同一参数即可，如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
@@ -245,15 +247,16 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、Kimi Code 和 Pi 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，而 Pi 根本不提供权限弹窗，也就没有什么要它回答。六家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution` 上，Pi 挂在它的 `tool_call` 事件上——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：前三家是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、DSH、Kimi Code 和 Pi 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，但原因是它自己的：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何 harness 上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution` 上，Pi 挂在它的 `tool_call` 事件上——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
-如果你用 **Kimi Code** 驱动 STAR，每台机器运行一次下面的命令，把两个钩子都注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
+如果你用 **Kimi Code** 或 **DSH** 驱动 STAR，每台机器运行一次对应的安装脚本，把钩子注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
 ```bash
-bash .kimi-code/hooks/install.sh
+bash .kimi-code/hooks/install.sh   # Kimi Code
+bash .dsh/hooks/install.sh         # DSH
 ```
 
-它会把两个钩子注册到你的全局 `~/.kimi-code/config.toml`，注册前先备份该文件；重复运行不会有额外影响，运行一次即覆盖所有 STAR 项目，而在记忆钩子出现之前就配好的机器，这次只补上缺的那一个。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+两者各自写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`——写之前先备份该文件；任一重复运行都不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，而它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对结果。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它，`model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
@@ -280,6 +283,7 @@ bash .kimi-code/hooks/install.sh
 |---|---|
 | Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
 | Cursor | 应用设置里的命令白名单 |
+| DSH | 全局 `$DSH_HOME/cordis.patch.yml`——DSH 不从项目里读取任何插件配置 |
 | Kimi Code | 全局 `~/.kimi-code/config.toml`——Kimi Code 不读取项目级配置 |
 | Pi | 无需预批：Pi 不提供权限弹窗；要限制这条命令，请用沙箱 |
 | Qwen Code | `.qwen/settings.json` 里的 `permissions.allow`，随仓库带好了扫描命令 |
@@ -297,6 +301,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | Codex | `$star-<name>` | `$star-plan-coach 开放词汇检测` |
 | Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
+| DSH | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 | Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 | Pi | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
@@ -362,8 +367,8 @@ bash execs/update.sh
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
 - `.cursor/rules/skill-roots.mdc`——各个 skill 根目录归哪个工具所有，以及 Cursor 该跟随哪一份副本
-- `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
-- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.kimi-code/hooks/`、`.pi/hooks/`、`.qwen/hooks/`，以及注册它们的两个文件（注册不是自动的那两家）`.kimi-code/hooks.example.toml` 与 `.pi/extensions/star-hooks.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
+- `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
+- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 
@@ -412,7 +417,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
-- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.kimi-code/`、`.pi/`、`.qwen/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 Pi 时这一步不只是可选：Pi 除了 `.pi/skills/` 还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突，否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来。
+- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——Pi 那边否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来，DSH 那边则由发现顺序自动定胜负，结果是对的，但你看不见。
 
 只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用：目录布局、`.env` 和 `execs/run.sh` 在完全不装任何 skill 的情况下也能工作，因此删掉全部工具目录同样是受支持的用法。
 
@@ -420,12 +425,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.1.45](https://github.com/wanghao9610/STAR/tree/v0.1.45)**（2026-08-13）—— 第七棵技能树 `.dsh/` 把十五个 skill 带到 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)：它发现 `.dsh/skills/` 的优先级高于 `.agents/skills/`，调用写作 `/skill:star-*`。有三处只能重做、改名不管用：每条 description 都重写到 500 字符以内，因为 DSH 的目录会在那里静默截断，而切掉的正是末尾那句触发语；DSH 没有 agent 类型参数、没有进入 plan 模式的工具、工具名全小写，所以 `subagent_type`、`EnterPlanMode` 与 `Bash` 是被替换掉而不是换个写法；钩子经 DSH 的 Claude Code 桥从 `.dsh/hooks.json` 读取，由 `.dsh/hooks/install.sh` 每台机器注册一次。参与度闸门是有意缺席的——那座桥认 `deny` 与 `ask`，但从不对 `allow` 预先放行——而 `model_id` 从会话日志里恢复，需要 PATH 上有 `zstd`。
 - **[v0.1.44](https://github.com/wanghao9610/STAR/tree/v0.1.44)**（2026-08-13）—— 第六棵技能树 `.pi/` 把十五个 skill 带到 [Pi](https://github.com/earendil-works/pi)：调用写作 `/skill:star-*`，工具名用 Pi 自己的小写内置名（`read`、`bash`、`edit`、`write`、`grep`、`find`、`ls`），三个钩子由一个 Pi 自动发现的 TypeScript 扩展接线——没有注册文件要合并，`model_id` 也不会过期：扩展在每次提问前读当前模型，`/model` 一换就再注入一行。Pi 不提供子代理、计划模式和权限弹窗，所以这是第一棵把这三样替换掉而不是改个名的树：提问一律纯文本，执行器自己守住「批准前不产生副作用」那道关，每一处派发都落回规约 §6.1 的本地履行。参与度闸门有意缺席——它是用来回答权限弹窗的，而这里没有弹窗；`.pi/APPEND_SYSTEM.md` 则解决该按哪份副本执行的问题，因为 Pi 也会读 `.agents/skills/`。
 - **[v0.1.43](https://github.com/wanghao9610/STAR/tree/v0.1.43)** (2026-08-12) — 新的 `model_trail` 或 `## Revision History` 条目该落在哪一端，此前从没写出来过：规约 [§8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 只说只追加，位置全靠暗示，于是 Claude Code 的会话把最新一条写在最后，Cursor 的会话把它顶到最上面。现在写明：新条目一律加在列表末尾、排在所有旧条目之下，不论在哪个运行时——三处写入者真正会读到的地方都补上了：§8、每份产物模板里 `model_trail` 那行注释，以及管着 Revision History 条目的那两个文件。整体重生成的视图不动，各自保持原有次序：这份更新日志、`MODEL_LEDGER.md` 和 `MEMORY.md` 索引都是最新在前。
-- **[v0.1.42](https://github.com/wanghao9610/STAR/tree/v0.1.42)** (2026-08-12) — `star-plan-executor` 不再以"推荐审查"收尾：报告那一步只留报告要说的话，新增一步在同一轮里直接把 `star-code-reviewer` 对着这个叶子启动——规约 [§10.6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 本来要的就是这个。唯一那个很窄的跳过备选（探索性叶子、交回的命令很便宜）仍然问一次，`low` 档取推荐项即启动审查。§10.6 也补上了"运行结束之后"是哪一刻：报告发出的同一轮，而不是等用户下一次开口。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.1.42](https://github.com/wanghao9610/STAR/tree/v0.1.42)** (2026-08-12) — `star-plan-executor` 不再以"推荐审查"收尾：报告那一步只留报告要说的话，新增一步在同一轮里直接把 `star-code-reviewer` 对着这个叶子启动——规约 [§10.6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 本来要的就是这个。唯一那个很窄的跳过备选（探索性叶子、交回的命令很便宜）仍然问一次，`low` 档取推荐项即启动审查。§10.6 也补上了"运行结束之后"是哪一刻：报告发出的同一轮，而不是等用户下一次开口。
 - **[v0.1.41](https://github.com/wanghao9610/STAR/tree/v0.1.41)** (2026-08-12) — 哪些 skill 会提参与度档位此前是随机的：十二个会写文件的现在都在调用说明里提一句、排在描述之后，只读的报告型都不提——`star-flow-status` 除外，它按条装载规约 §7、偏偏不含剥离这个记号的那一条，于是保留一句机械说明，否则没有别处会说。`.claude` 与 `.qwen` 的参数提示按常用档位标注：三个改计划的标 `involve=high`，五个搭代码或执行的标 `involve=low`，其余跟 `.env` 里的 `INVOLVE`。`.qwen` 的中文提示同时补上了 v0.1.37–38 加描述时漏掉的那一格。
 - **[v0.1.40](https://github.com/wanghao9610/STAR/tree/v0.1.40)** (2026-08-12) — `star-plan-executor` 与 `star-plan-decomposer` 的调用说明改按规约 [§7.12](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 写的次序出场——计划名、描述、`involve=`——不再把档位排在它要从中剥离的那段文字之前。那一句本身也随之写明：这个写法既不属于计划名也不属于描述，两者解析之前先剥离；解析没有变化，它本来就与位置无关。
 - **[v0.1.39](https://github.com/wanghao9610/STAR/tree/v0.1.39)** (2026-08-11) — `star-plan-executor` 现在会在开工前判断这个叶子是否还是一个工作单元，依据都在计划自己的正文里：不止一条彼此独立的完成判据、不止一次越过 STOP line、取数据与建代码跑实验混在一起，以及步骤超过 12 条、产物横跨互不相关的产物族这一对只在同时命中时才算数的弱信号。命中时先展示这个叶子会怎么分——2–5 个单元，每个带上它会拥有的那条完成判据，是草图而不是文件——并推荐 `star-plan-decomposer <叶子>`，把草图作为描述一并带过去；照原样执行仍是一个选项，代价会一并说明。恢复中的 run 不会被问，而画完的 `EXEC_PLAN` 会在审批确认点给同一个问题第二次读数，不额外花一趟往返。

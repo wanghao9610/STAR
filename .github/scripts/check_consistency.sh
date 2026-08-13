@@ -11,7 +11,7 @@ set -uo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "${ROOT_DIR}"
 
-SKILL_ROOTS=(.agents/skills .claude/skills .cursor/skills .kimi-code/skills .pi/skills .qwen/skills)
+SKILL_ROOTS=(.agents/skills .claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
 FAILURES=0
 
 fail() { printf 'FAIL  %s\n' "$*"; FAILURES=$(( FAILURES + 1 )); }
@@ -209,9 +209,12 @@ while IFS= read -r skill; do
         check_absent "${root}" "\$${skill}"
         check_absent "${root}" "skill:${skill}"
     done
-    check_absent .kimi-code/skills "\$${skill}"
-    # Bare /star-* is foreign in the Kimi tree; /skill:star-* does not contain it.
-    check_absent .kimi-code/skills "/${skill}"
+    # DSH and Kimi share one token, /skill:star-*, so they share these two rows.
+    for root in .dsh/skills .kimi-code/skills; do
+        check_absent "${root}" "\$${skill}"
+        # Bare /star-* is foreign in both; /skill:star-* does not contain it.
+        check_absent "${root}" "/${skill}"
+    done
 done < <(printf '%s\n' "${SKILLS}")
 
 # The rewrite that retokenizes a ported skill targets "/star-*", and the one
@@ -262,21 +265,28 @@ section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
-         .pi/hooks/star_model_id.sh .qwen/hooks/star_model_id.sh \
+         .dsh/hooks/star_model_id.sh .pi/hooks/star_model_id.sh \
+         .qwen/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh \
+         .dsh/hooks/star_memory.sh .pi/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
          .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
-         .pi/hooks/star_commit_guard.sh .qwen/hooks/star_commit_guard.sh \
-         .kimi-code/hooks/install.sh; do
+         .dsh/hooks/star_commit_guard.sh .pi/hooks/star_commit_guard.sh \
+         .qwen/hooks/star_commit_guard.sh \
+         .dsh/hooks/install.sh .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
 #     Pi has no command-hook table: its registration is a TypeScript extension
 #     it discovers by itself, so .pi/extensions/star-hooks.ts is what has to name
 #     all three, and there is nothing for a project to merge after an update.
-for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .kimi-code/hooks.example.toml \
-         .pi/extensions/star-hooks.ts .qwen/settings.json; do
+#     DSH has a table but no place in a project to declare it: .dsh/hooks.json is
+#     STAR's own file, and the row that points DSH at it lives in the machine's
+#     $DSH_HOME — .dsh/cordis.patch.yml is the reference copy of that row and
+#     .dsh/hooks/install.sh is what writes it.
+for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
+         .kimi-code/hooks.example.toml .pi/extensions/star-hooks.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
         fail "${f} is missing"
         hook_errors=1
@@ -293,6 +303,17 @@ for hook in star_memory.sh star_commit_guard.sh; do
     grep -qF "${hook}" .kimi-code/hooks/install.sh || \
         { fail ".kimi-code/hooks/install.sh does not install ${hook}"; hook_errors=1; }
 done
+#     DSH's installer writes one row instead of three: the row loads the bridge,
+#     and the bridge reads .dsh/hooks.json for the hooks themselves. So what has
+#     to agree here is the bridge package name and the path it is pointed at —
+#     rename either without the other and the hooks reach no DSH user, with the
+#     bridge logging a warning nobody reads.
+for literal in '@deepseek-ai/dsh-hooks-claude-code' './.dsh/hooks.json'; do
+    for f in .dsh/hooks/install.sh .dsh/cordis.patch.yml; do
+        grep -qF -- "${literal}" "${f}" || \
+            { fail "${f} no longer names ${literal}"; hook_errors=1; }
+    done
+done
 #     The guard is the one hook that decides rather than reports, and each harness
 #     spells the decision its own way — a copy carrying another harness's spelling
 #     parses, runs, and silently never blocks anything. Claude and Codex answer
@@ -300,7 +321,7 @@ done
 #     the event name its documented shape omits, and Cursor blocks on permission
 #     plus exit 2.
 for f in .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
-         .qwen/hooks/star_commit_guard.sh; do
+         .dsh/hooks/star_commit_guard.sh .qwen/hooks/star_commit_guard.sh; do
     grep -qF '"hookEventName":"PreToolUse","permissionDecision":"deny"' "${f}" || \
         { fail "${f} no longer emits a PreToolUse deny decision"; hook_errors=1; }
 done
@@ -317,13 +338,21 @@ grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/st
     { fail ".pi/hooks/star_commit_guard.sh lost its non-zero refusal or its reason line"; hook_errors=1; }
 grep -qF 'block: true' .pi/extensions/star-hooks.ts || \
     { fail ".pi/extensions/star-hooks.ts no longer blocks a declined bash call"; hook_errors=1; }
+#     DSH speaks that same Claude dialect through its bridge, so the deny shape
+#     above covers its guard. What is DSH's alone is the matcher: the bridge tests
+#     a plain [A-Za-z0-9_|]+ pattern literally against the tool name, and DSH's
+#     shell tool is lowercase `bash`. The other trees' "Bash" would parse, load,
+#     and match nothing — no error anywhere, just a guard that never fires.
+grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
+    { fail ".dsh/hooks.json no longer matches DSH's lowercase bash tool"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
 #     five memory hooks split on byte-exactly, and what the spec and the shipped
 #     index document. Reword it in one place and the hooks silently stop marking
 #     anything: same failure mode as check 15's registry, one file set earlier.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh \
+         .dsh/hooks/star_memory.sh .pi/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh \
          docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md \
          .star/memory/MEMORY.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
@@ -346,7 +375,7 @@ grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
     { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
 grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
     { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
-(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all six harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
+(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the five trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
@@ -361,8 +390,8 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
 #     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
 #     executor against the others' 9), and its headings differ in 23 files. That is a
 #     known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
-section "Heading structure (.claude / .cursor / .kimi-code / .pi / .qwen)"
-STRUCT_ROOTS=(.claude/skills .cursor/skills .kimi-code/skills .pi/skills .qwen/skills)
+section "Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)"
+STRUCT_ROOTS=(.claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
 
 norm_headings() { # $1 = file; prints one normalized heading per line
     awk '
@@ -440,6 +469,29 @@ while IFS= read -r manifest; do
 done < <(find "${SKILL_ROOTS[@]}" -name 'SKILL.md' | sort)
 (( desc_errors == 0 )) && note "all descriptions within ${DESC_MAX} characters in all ${#SKILL_ROOTS[@]} trees"
 
+#     DSH is stricter than the spec and silent about it. Its model-facing catalog
+#     renders `description` through catalogDescriptionMaxLength, default 500, and
+#     over that it keeps the first 497 characters and appends "..." — no warning,
+#     no log line. STAR descriptions end with the "Use when ..." clause that does
+#     the routing, so truncation removes exactly the part the model matches on.
+#     Hence a second, tighter bound for that tree alone.
+section "Description length in .dsh (<= ${DSH_DESC_MAX:=500}, DSH catalog bound)"
+dsh_desc_errors=0
+while IFS= read -r manifest; do
+    len="$(awk '
+        NR == 1 && /^---[ \t]*$/ { fm = 1; next }
+        fm && /^---[ \t]*$/ { exit }
+        fm && /^description:/ { grab = 1; sub(/^description:[ \t]*/, ""); sub(/^[>|][-+]?[ \t]*$/, "") }
+        fm && grab && /^[A-Za-z_-]+:/ && !/^description:/ { exit }
+        grab { gsub(/^[ \t]+|[ \t]+$/, ""); if (length($0)) body = body (length(body) ? " " : "") $0 }
+        END { print body }
+    ' "${manifest}" | perl -CSD -Mutf8 -ne 'chomp; $n += length; END { print $n + 0 }')"
+    if (( len > DSH_DESC_MAX )); then
+        fail "${manifest}: description is ${len} characters; DSH truncates its catalog at ${DSH_DESC_MAX}, cutting the trailing trigger clause"
+        dsh_desc_errors=1
+    fi
+done < <(find .dsh/skills -name 'SKILL.md' | sort)
+(( dsh_desc_errors == 0 )) && note "every .dsh description survives DSH's ${DSH_DESC_MAX}-character catalog intact"
 
 # 13. Skill helper scripts are byte-identical across the five trees, and executable.
 #     The .md files are adapted per tree — invocation tokens, harness vocabulary —
@@ -1440,6 +1492,9 @@ check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Re
 # Pi publishes its built-ins lowercase — read, bash, edit, write, grep, find, ls
 # — so the capitalized spellings of the other five trees are all foreign here.
 check_vocab .pi/skills        '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+# DSH publishes its tools lowercase too — bash, read, write, edit, glob, grep —
+# so the capitalized spellings are foreign here for the same reason as in Pi.
+check_vocab .dsh/skills       '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 
 check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE alternation
     local root="$1" allowed="$2" bad
@@ -1462,6 +1517,16 @@ pi_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .p
 if [[ -n "${pi_types}" ]]; then
     fail ".pi/skills: names a delegation type, and Pi ships no sub-agents:"
     printf '%s\n' "${pi_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
+    vocab_errors=1
+fi
+# DSH does ship sub-agents, but its `subagent` tool takes only a description, a
+# prompt, and run_in_background — there is no type parameter to name. A ported
+# `subagent_type: explore` is therefore an argument the tool rejects, so the key
+# may not appear here either, in any spelling.
+dsh_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .dsh/skills || true)"
+if [[ -n "${dsh_types}" ]]; then
+    fail ".dsh/skills: names a delegation type, and DSH's subagent tool takes none:"
+    printf '%s\n' "${dsh_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
     vocab_errors=1
 fi
 

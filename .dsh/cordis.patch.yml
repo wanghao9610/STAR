@@ -1,0 +1,50 @@
+# STAR's DeepSeek Harness composition patch — the row that makes .dsh/hooks.json
+# run. It is the reference copy: .dsh/hooks/install.sh appends this row to the
+# machine's own $DSH_HOME/cordis.patch.yml, which every profile applies, so the
+# hooks cover every STAR project on the machine with no per-project setup. Keep
+# it if you prefer to wire DSH by hand — `dsh --profile <name> --patch
+# .dsh/cordis.patch.yml` applies exactly this, for one launch.
+#
+# WHY A HOME-LEVEL ROW AND A PROJECT-LEVEL FILE. DSH composes plugins from
+# $DSH_HOME (bundle patches, then the profile's cordis.patch.yml, then
+# $DSH_HOME/cordis.patch.yml, then --patch overlays); it reads no plugin
+# configuration out of a project. But the bridge's `configPath` is resolved once
+# at load against the process's launch cwd, and dsh takes the invoking directory
+# as the workspace — so a relative `./.dsh/hooks.json` in the home-level patch
+# resolves inside whichever project you started dsh in. In a project that has no
+# .dsh/hooks.json the bridge logs a warning and registers nothing, which is the
+# behavior a machine-wide row needs.
+#
+# WHAT IT WIRES. Three hooks, one copy per harness tree, the same three
+# everywhere: model-id provenance and the project-memory index on SessionStart,
+# and the commit guard on PreToolUse, declining the git commands the workflow
+# conventions §1 forbid.
+#
+# WHAT IT DELIBERATELY DOES NOT WIRE: the involve gate. That hook exists to
+# answer the permission prompt before a file edit while .env reads INVOLVE=low,
+# and DSH raises no such prompt to answer. Its default workspace-write sandbox
+# lets an edit inside the project run without asking; the only approval a file
+# operation raises is a one-shot escalation for a write OUTSIDE the workspace,
+# and the gate passes on every path outside the project root anyway — on every
+# harness, deliberately. Two independent reasons, then: nothing to answer, and
+# a bridge that honors `deny` and `ask` from PreToolUse but never pre-approves
+# on `allow`. INVOLVE still governs what the skills themselves ask, which is
+# most of what the level does.
+#
+# BEFORE THIS WORKS the bridge package has to be in the profile — it is not a
+# dsh dependency, so no profile carries it until you add it:
+#
+#     dsh plugin --profile <name> add @deepseek-ai/dsh-hooks-claude-code
+#
+# CHECK IT with `dsh --profile <name> --dump-config`, which prints the composed
+# tree, this row included, without booting it.
+
+- insert:
+    # The Claude Code dialect, not the Codex one: STAR's hooks speak
+    # hookSpecificOutput JSON on stdout, which is what this bridge decodes.
+    # Only the events DSH's bridge implements are used — SessionStart and
+    # PreToolUse are both in its supported set.
+    - id: star-hooks
+      name: '@deepseek-ai/dsh-hooks-claude-code'
+      config:
+        configPath: ./.dsh/hooks.json

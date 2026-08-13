@@ -78,19 +78,19 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-In Claude, Cursor and Qwen Code, use `/skill-name` instead (Kimi and Pi write `/skill:skill-name`):
+In Claude, Cursor and Qwen Code, use `/skill-name` instead (DSH, Kimi and Pi write `/skill:skill-name`):
 
 ```text
 /star-plan-coach open-vocabulary detection and segmentation
 ```
 
-In Kimi, use `/skill:skill-name`:
+In DSH, Kimi and Pi, use `/skill:skill-name`:
 
 ```text
 /skill:star-plan-coach open-vocabulary detection and segmentation
 ```
 
-Seven skills — `$star-proj-adopt`, `$star-idea-storm`, `$star-plan-coach`, `$star-code-architect`, `$star-plan-decomposer`, `$star-plan-reviser`, `$star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
+Seven skills — `$star-proj-adopt`, `$star-idea-storm`, `$star-plan-coach`, `$star-code-architect`, `$star-plan-decomposer`, `$star-plan-reviser`, `$star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, DSH, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
 
 When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
@@ -1243,6 +1243,7 @@ Every skill directory has the same shape in all six roots: `SKILL.md` is the ent
 | Codex | `.agents/skills/` | `$star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
+| DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 | Pi | `.pi/skills/` | `/skill:star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |

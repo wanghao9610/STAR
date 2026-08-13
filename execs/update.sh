@@ -15,6 +15,7 @@ SKILL_ROOTS=(
     ".agents/skills"
     ".claude/skills"
     ".cursor/skills"
+    ".dsh/skills"
     ".kimi-code/skills"
     ".pi/skills"
     ".qwen/skills"
@@ -26,11 +27,18 @@ HOOK_TREES=(
     ".claude/hooks"
     ".codex/hooks"
     ".cursor/hooks"
+    ".dsh/hooks"
     ".kimi-code/hooks"
     ".pi/hooks"
     ".qwen/hooks"
 )
 HOOK_FILES=(
+    # DSH reads its hook table through the Claude Code bridge, and the row that
+    # loads that bridge lives in the machine's own $DSH_HOME. Both files here are
+    # STAR's alone — the table and the reference copy of that row — so neither
+    # holds project settings to preserve, and both are overwritten on update.
+    ".dsh/hooks.json"
+    ".dsh/cordis.patch.yml"
     ".kimi-code/hooks.example.toml"
     # Pi's registration is code, not config: it holds no project settings to
     # preserve, so it is overwritten on update like the hook scripts it wires.
@@ -67,10 +75,12 @@ fail() {
 # keeps its own entries — update never overwrites it — so this is what turns a
 # silent gap into a line.
 #
-# Pi has no row here on purpose. It registers hooks in code
-# (.pi/extensions/star-hooks.ts, in HOOK_FILES above), which an update always
-# replaces, so no kept file can fall behind — and it carries no involve gate,
-# since that hook answers a permission prompt and Pi ships none.
+# Pi and DSH have no row here on purpose. Pi registers hooks in code
+# (.pi/extensions/star-hooks.ts) and DSH in a STAR-owned table (.dsh/hooks.json),
+# both in HOOK_FILES above, which an update always replaces — so no kept file can
+# fall behind. Neither carries an involve gate: that hook answers the permission
+# prompt before a file edit, and neither raises one — Pi ships no prompts at all,
+# and DSH's default workspace-write sandbox lets an in-project edit run unasked.
 missing_hooks() { # $1 = registration config path
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
@@ -104,8 +114,8 @@ The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, whic
 body) and the hook registration configs (.claude/settings.json, .codex/hooks.json,
 .cursor/hooks.json, .qwen/settings.json) are installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
-to update only the named skill across the Codex, Claude, Cursor, Kimi, Pi and Qwen Code skill
-directories.
+to update only the named skill across the Codex, Claude, Cursor, DSH, Kimi, Pi and Qwen Code
+skill directories.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -300,7 +310,7 @@ if [[ "${ADOPT}" == false ]]; then
         # still copies only SYNC_PATHS: execs brings execs/scpts/ along here, and
         # none of it is copied out.
         git -C "${SOURCE_DIR}" sparse-checkout set \
-            .agents .claude .codex .cursor .kimi-code .pi .qwen docs/mds/star-workflow docs/srcs execs
+            .agents .claude .codex .cursor .dsh .kimi-code .pi .qwen docs/mds/star-workflow docs/srcs execs
     fi
 
     SYNCED=()

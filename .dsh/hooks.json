@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".dsh/hooks/star_model_id.sh"
+          },
+          {
+            "type": "command",
+            "command": ".dsh/hooks/star_memory.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".dsh/hooks/star_commit_guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
