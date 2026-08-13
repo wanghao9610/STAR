@@ -205,6 +205,7 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
+        ".pi/themes"
         ".cursor/rules"
         "docs/mds/star-workflow"
         "docs/srcs"
@@ -255,6 +256,9 @@ else
         # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
         ".pi/APPEND_SYSTEM.md"
+        # Pi TUI themes. Cosmetic and inert: nothing selects one, so they change
+        # nothing until a user picks it in /settings or with --use-theme.
+        ".pi/themes"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
