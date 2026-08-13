@@ -11,6 +11,12 @@ wkdrs/**
 !wkdrs/**/*.md
 !wkdrs/.gitkeep
 
+# Pi installs project-scoped packages and may keep sessions here; the skills,
+# hooks and extension beside them are the project's and stay tracked.
+.pi/npm/
+.pi/git/
+.pi/sessions/
+
 .ruff_cache/
 .pytest_cache/
 **/__pycache__/

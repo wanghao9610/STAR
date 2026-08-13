@@ -11,7 +11,7 @@ set -uo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "${ROOT_DIR}"
 
-SKILL_ROOTS=(.agents/skills .claude/skills .cursor/skills .kimi-code/skills .qwen/skills)
+SKILL_ROOTS=(.agents/skills .claude/skills .cursor/skills .kimi-code/skills .pi/skills .qwen/skills)
 FAILURES=0
 
 fail() { printf 'FAIL  %s\n' "$*"; FAILURES=$(( FAILURES + 1 )); }
@@ -38,7 +38,7 @@ else
             diff <(printf '%s\n' "${SKILLS}") <(list_skills "${root}") | sed 's/^/      /'
         fi
     done
-    note "$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills, same set in all five roots"
+    note "$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills, same set in all ${#SKILL_ROOTS[@]} roots"
 fi
 
 # 2. Frontmatter name matches the directory name in every tree.
@@ -75,7 +75,7 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( parity_errors == 0 )) && note "file sets match across all five trees"
+(( parity_errors == 0 )) && note "file sets match across all ${#SKILL_ROOTS[@]} trees"
 
 # 4. Slash-only guards: the conventions roster (§10) marks that set with †, and
 #    the five trees enforce it — Codex via agents/openai.yaml, the other four
@@ -157,7 +157,7 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "roster lists all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all five trees"
+(( guard_errors == 0 )) && note "roster lists all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
@@ -262,18 +262,21 @@ section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
-         .qwen/hooks/star_model_id.sh \
+         .pi/hooks/star_model_id.sh .qwen/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh \
+         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
          .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
-         .qwen/hooks/star_commit_guard.sh \
+         .pi/hooks/star_commit_guard.sh .qwen/hooks/star_commit_guard.sh \
          .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
+#     Pi has no command-hook table: its registration is a TypeScript extension
+#     it discovers by itself, so .pi/extensions/star-hooks.ts is what has to name
+#     all three, and there is nothing for a project to merge after an update.
 for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .kimi-code/hooks.example.toml \
-         .qwen/settings.json; do
+         .pi/extensions/star-hooks.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
         fail "${f} is missing"
         hook_errors=1
@@ -306,13 +309,21 @@ grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/st
 { grep -qF '"permission":"deny"' .cursor/hooks/star_commit_guard.sh && \
   grep -qF 'exit 2' .cursor/hooks/star_commit_guard.sh; } || \
     { fail ".cursor/hooks/star_commit_guard.sh lost its deny permission or its exit 2"; hook_errors=1; }
+#     Pi's guard is the odd one out and deliberately carries no JSON at all: the
+#     extension reads the reason off stdout and the refusal off a non-zero exit,
+#     so those two are what pin it, along with the extension's use of the pair.
+{ grep -qF 'exit 1' .pi/hooks/star_commit_guard.sh && \
+  grep -qF 'declined by .pi/hooks/star_commit_guard.sh' .pi/hooks/star_commit_guard.sh; } || \
+    { fail ".pi/hooks/star_commit_guard.sh lost its non-zero refusal or its reason line"; hook_errors=1; }
+grep -qF 'block: true' .pi/extensions/star-hooks.ts || \
+    { fail ".pi/extensions/star-hooks.ts no longer blocks a declined bash call"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
 #     five memory hooks split on byte-exactly, and what the spec and the shipped
 #     index document. Reword it in one place and the hooks silently stop marking
 #     anything: same failure mode as check 15's registry, one file set earlier.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh \
+         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh \
          docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md \
          .star/memory/MEMORY.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
@@ -325,7 +336,7 @@ done
 #     store no longer follows.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh; do
+         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh; do
     { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
         { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
     grep -qF 'substr(f[1], 3) == "env"' "${f}" || \
@@ -335,9 +346,9 @@ grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
     { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
 grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
     { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
-(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all five harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
+(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all six harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
-# 11. Heading structure matches across the four trees that share it.
+# 11. Heading structure matches across the five trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
 #     section could be dropped from one tree, or reordered, and every check passed.
 #     This compares the heading sequence of each file.
@@ -350,8 +361,8 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
 #     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
 #     executor against the others' 9), and its headings differ in 23 files. That is a
 #     known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
-section "Heading structure (.claude / .cursor / .kimi-code / .qwen)"
-STRUCT_ROOTS=(.claude/skills .cursor/skills .kimi-code/skills .qwen/skills)
+section "Heading structure (.claude / .cursor / .kimi-code / .pi / .qwen)"
+STRUCT_ROOTS=(.claude/skills .cursor/skills .kimi-code/skills .pi/skills .qwen/skills)
 
 norm_headings() { # $1 = file; prints one normalized heading per line
     awk '
@@ -389,7 +400,7 @@ while IFS= read -r rel; do
         fi
     done
 done < <(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | sed 's|^\./||' | sort)
-(( struct_errors == 0 )) && note "heading structure matches across the four trees (${struct_files} files)"
+(( struct_errors == 0 )) && note "heading structure matches across the ${#STRUCT_ROOTS[@]} trees (${struct_files} files)"
 
 # 12. Frontmatter descriptions stay inside the SKILL.md spec limit, in every tree.
 #     The limit is 1024 *characters* and it is not one harness's quirk: the
@@ -427,7 +438,8 @@ while IFS= read -r manifest; do
         desc_errors=1
     fi
 done < <(find "${SKILL_ROOTS[@]}" -name 'SKILL.md' | sort)
-(( desc_errors == 0 )) && note "all descriptions within ${DESC_MAX} characters in all five trees"
+(( desc_errors == 0 )) && note "all descriptions within ${DESC_MAX} characters in all ${#SKILL_ROOTS[@]} trees"
+
 
 # 13. Skill helper scripts are byte-identical across the five trees, and executable.
 #     The .md files are adapted per tree — invocation tokens, harness vocabulary —
@@ -467,7 +479,7 @@ while IFS= read -r base; do
     done < <(find "${SKILL_ROOTS[@]}" -type f -name "${base}" | sort)
 done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | sort -u)
 
-(( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all five trees"
+(( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all ${#SKILL_ROOTS[@]} trees"
 
 # 14. Top-level section parity between .agents and .claude manifests.
 #     Check 11 excludes .agents on purpose: it is an adapted variant, not a copy,
@@ -590,7 +602,7 @@ for row in "${LITERAL_REGISTRY[@]}"; do
     done
 done
 
-(( literal_errors == 0 )) && note "${#SHARED_SCRIPTS[@]} shared scripts parse; ${#LITERAL_REGISTRY[@]} grepped literals still produced in all five trees"
+(( literal_errors == 0 )) && note "${#SHARED_SCRIPTS[@]} shared scripts parse; ${#LITERAL_REGISTRY[@]} grepped literals still produced in all ${#SKILL_ROOTS[@]} trees"
 
 # 16. Numbered citations of AGENTS.md sections still name the section they claim.
 #     Around 130 places cite AGENTS.md by number, so renumbering one section
@@ -1425,6 +1437,9 @@ check_vocab .kimi-code/skills '`Read`'      '\bShell\b|\bReadFile\b'
 check_vocab .cursor/skills    '`Read`'      '\bBash\b|\bReadFile\b'
 check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+# Pi publishes its built-ins lowercase — read, bash, edit, write, grep, find, ls
+# — so the capitalized spellings of the other five trees are all foreign here.
+check_vocab .pi/skills        '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 
 check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE alternation
     local root="$1" allowed="$2" bad
@@ -1441,6 +1456,14 @@ check_subagent_types .claude/skills    'Explore|general-purpose'
 check_subagent_types .cursor/skills    'explore'
 check_subagent_types .kimi-code/skills 'explore|coder'
 check_subagent_types .qwen/skills      'Explore|general-purpose|fork'
+# Pi ships no sub-agents at all, so the question is not which values are allowed
+# but whether the key appears — it may not, in any spelling.
+pi_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .pi/skills || true)"
+if [[ -n "${pi_types}" ]]; then
+    fail ".pi/skills: names a delegation type, and Pi ships no sub-agents:"
+    printf '%s\n' "${pi_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
+    vocab_errors=1
+fi
 
 (( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and subagent types"
 

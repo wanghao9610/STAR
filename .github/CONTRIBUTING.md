@@ -5,9 +5,9 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 
 ## The shape of the problem
 
-The fifteen skills exist five times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.kimi-code/skills/` and `.qwen/skills/` — 155 markdown files per tree, 775 in all, roughly 92% of the
-repository. They are maintained by hand. There is no generator.
+The fifteen skills exist six times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
+`.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 155 markdown files per tree, 930 in all,
+roughly 92% of the repository. They are maintained by hand. There is no generator.
 
 So the cost of changing one shared rule is measured in files, not lines. Recent examples:
 
@@ -17,7 +17,7 @@ So the cost of changing one shared rule is measured in files, not lines. Recent 
 | `1289ac4` | 26 | advertise the `involve=` token |
 | `e9d6d28` | 34 | carry the QA thread across a long question series |
 
-**Before editing five trees, check whether the rule belongs in
+**Before editing six trees, check whether the rule belongs in
 `docs/mds/star-workflow/research-workflow-conventions.md` instead.** Consistency check 6 proves every
 `SKILL.md` defers to that document, so a rule stated there reaches all fifteen skills in two files
 (English and Chinese). `877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
@@ -35,6 +35,7 @@ token and the `disable-model-invocation` line, each tree is about equally far fr
 | `.agents` | 56 / 155 |
 | `.cursor` | 63 / 155 |
 | `.kimi-code` | 66 / 155 |
+| `.pi` | ported from `.cursor`, then adapted; see the next section |
 | `.qwen` | 64 / 155 |
 
 The reason is completeness, which is measurable: **`.claude` never has fewer headings than any other
@@ -53,6 +54,7 @@ mistaken for drift.
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
+| `.pi` | Pi | `/skill:star-*` | none — the skill holds the gate itself | none — conventions §6.1 local fill | none — plain text |
 | `.qwen` | Qwen Code | `/star-*` | `enter_plan_mode` / `exit_plan_mode` | `agent`, `subagent_type: Explore` / `general-purpose` | `ask_user_question` |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
@@ -127,7 +129,7 @@ already gave them. Naming a custom subagent instead was the alternative: Cursor 
 `.cursor/agents/*.md` (and, for compatibility, `.claude/agents/` and `.codex/agents/`, with `.cursor/`
 winning a name clash), where frontmatter `name` is the identifier the `Task` tool hints at and
 `readonly: true` withholds file edits and state-changing shell commands. That would make the read-only
-contract a mechanism rather than an instruction, at the cost of an artifact to maintain across five
+contract a mechanism rather than an instruction, at the cost of an artifact to maintain across six
 trees and a `.claude/agents/` directory that Cursor would also read. It stays available and unused.
 
 Codex delegation names the real call without changing the cost stance: **collect locally by default,
@@ -159,7 +161,7 @@ v0.1.17 on, where `.kimi-code/hooks.example.toml` registers the commit guard aga
 matching `Bash`, the name every manifest beside it had stopped using; nobody read the two together.
 A rename carries the same burden an inherited name does:
 cite the harness's published list, and where a name is only ever a citation away, pin it. Check 23 now
-holds the five trees' file reader, terminal and `subagent_type` values, so neither direction is a
+holds the six trees' file reader, terminal and `subagent_type` values, so neither direction is a
 matter of memory.
 
 **A capability the harness has since gained is the same defect, aged.** A tree ported while its harness
@@ -170,6 +172,37 @@ in 4 files that "Cursor has no structured question tool", which had stopped bein
 a workaround, name the capability it stands in for, so the next reader knows what to re-check.
 
 Everything else — rules, thresholds, step semantics, write boundaries, rubrics — must not differ.
+
+## `.pi` is the tree with three mechanisms missing
+
+Pi's built-in tools are `read`, `bash`, `edit`, `write`, `grep`, `find`, `ls` — lowercase, and that is
+how this tree writes them. What matters more is what its own docs say it **intentionally does not
+include**: sub-agents, plan mode, permission popups, MCP, to-dos, background bash. Three of those are
+mechanisms the other five trees lean on, and each has a settled substitute here:
+
+| Mechanism | Other trees | `.pi` |
+|---|---|---|
+| Structured questions | `AskUserQuestion` / `AskQuestion` / `request_user_input` / `ask_user_question` | plain text, one question per message. Not a fallback — conventions §7's preamble already lists plain text as one of the three ways to ask. Every "if the tool is unavailable, fall back to…" bullet is rewritten as the primary path, because there is nothing to fall back from. |
+| Plan approval | `EnterPlanMode` / `ExitPlanMode` / `SwitchMode` / `update_plan` | the executor's Step 3 *is* the mode: it says out loud that nothing is written or run until Step 4's approval, and holds itself to it. |
+| Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | conventions §6.1's own clause for a host with no delegation — the contract stands, written out, and the main agent fills it locally, in the same order and against the same return format. A dispatch site becomes a "collection pass"; concurrency questions (§6.9's per-host budget split, disjoint ownership between concurrent delegates) collapse to "one at a time, and say so". |
+
+Three consequences worth knowing before you edit it:
+
+- **The involve gate is deliberately absent.** That hook exists to answer the permission prompt before
+  a file edit, and Pi ships no permission prompts at all. `.pi/hooks/` carries three scripts, not four,
+  and `execs/update.sh`'s `missing_hooks()` has no Pi row.
+- **Registration is code.** `.pi/extensions/star-hooks.ts` plays the part `.claude/settings.json` plays
+  elsewhere, and Pi discovers it by itself once the project is trusted. It is in `HOOK_FILES`, not
+  `HOOK_CONFIGS`: it holds no project settings, so an update replaces it rather than keeping it.
+  The commit guard is the one hook whose shape genuinely differs — it prints the reason on stdout and
+  refuses with a non-zero exit, and the extension turns that pair into Pi's `{ block: true, reason }`.
+- **Pi discovers `.agents/skills/` too**, and on a name collision keeps whichever copy it finds first.
+  `.pi/APPEND_SYSTEM.md` is what corrects that — Pi's always-on channel, the same job
+  `.cursor/rules/skill-roots.mdc` does for Cursor. A project running only Pi can delete `.agents/`.
+
+Pi ships a sub-agent *example* extension (`examples/extensions/subagent/`) and a plan-mode one. Neither
+is built in, and STAR does not install them; if a project adds them, the `.pi` tree still reads
+correctly, because §6.1's local fill is a floor rather than a prohibition.
 
 ## `.agents` is a declared variant
 
@@ -182,7 +215,7 @@ It is therefore **exempt from the structural check**, and that exemption is a kn
 
 ## Skill frontmatter does not port
 
-`.claude/skills/*/SKILL.md` carries `argument-hint` and `allowed-tools`. **Of the other four trees only
+`.claude/skills/*/SKILL.md` carries `argument-hint` and `allowed-tools`. **Of the other five trees only
 `.qwen` carries `argument-hint`; none carries `allowed-tools`, and none should.** Each key was checked
 against its harness's own surface rather than against how plausible it looks there — the discipline the
 tool names get above, applied to frontmatter.
@@ -194,6 +227,7 @@ tool names get above, applied to frontmatter.
 | `.kimi-code` | not a field | not a field | `~/.kimi-code/config.toml` `[[permission.rules]]`, user-level |
 | `.qwen` | supported, and carried | read as `allowedTools`, deliberately not ported | `.qwen/settings.json` `permissions.allow`, project-level |
 | `.agents` | authoring prose only | authoring prose only | nowhere per-skill — removed on purpose |
+| `.pi` | not a skill field (it is a prompt-template one) | read, experimental, deliberately not ported | nowhere — Pi ships no permission prompts to pre-approve |
 
 **Cursor's frontmatter table is closed at five keys** — `name`, `description`, `paths`,
 `disable-model-invocation`, `metadata` (plus legacy `globs`, and `user-invocable`, documented only in
@@ -231,7 +265,7 @@ Claude's blocks across would have granted auto-approval where they were written 
 Pre-approval for this tree lives in `.qwen/settings.json` `permissions.allow` instead — project-level,
 shipped with the six `scan.sh` commands.
 
-**Anything a skill needs pre-approved in the other four trees is a project- or user-level config
+**Anything a skill needs pre-approved in the other five trees is a project- or user-level config
 change, not a skill change** — and it is always broader in scope than the Claude equivalent, which
 lasts one turn. Do not port a turn-scoped grant into an always-on config without saying so.
 
@@ -240,7 +274,7 @@ input as JSON, which is also how the truncation below was measured.
 
 ## The description length limit
 
-**`SKILL.md` frontmatter descriptions are capped at 1024 characters, in all five trees.** Not a
+**`SKILL.md` frontmatter descriptions are capped at 1024 characters, in all six trees.** Not a
 per-harness budget: the [agentskills.io `SKILL.md` spec](https://agentskills.io/specification),
 Anthropic's Agent Skills docs and the Kimi CLI docs all state `description` is 1–1024. `SKILL.md`
 only — it is the registered manifest whose description the platform surfaces, while `SKILL_zh.md` is
@@ -293,30 +327,30 @@ nothing enforces that judgement.
 
 `.github/scripts/check_consistency.sh`, run by `.github/workflows/consistency.yml` on push and PR:
 
-1. The five roots carry the same set of skill directories.
+1. The six roots carry the same set of skill directories.
 2. Frontmatter `name:` matches the directory name.
 3. Per-skill file inventory is identical across trees (Codex `agents/` manifests aside).
-4. Slash-only guards match the conventions §10 roster in both directions, in all five trees, and the roster itself lists exactly the skills that exist, with the same rows and † set in the zh edition.
+4. Slash-only guards match the conventions §10 roster in both directions, in all six trees, and the roster itself lists exactly the skills that exist, with the same rows and † set in the zh edition.
 5. Every `.md` has its `_zh.md` twin.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no `$star-*` in `.claude`, `.cursor` or `.qwen`, and so on.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are
-    registered in all five harnesses' registration files.
-11. **Heading structure matches across `.claude`, `.cursor`, `.kimi-code` and `.qwen`** — 1236
+    registered in all six harnesses' registration files.
+11. **Heading structure matches across `.claude`, `.cursor`, `.kimi-code`, `.pi` and `.qwen`** — 1236
     headings per tree, compared after stripping parentheticals (both `(...)` and `（...）`) and
     inline code, so harness vocabulary inside a heading is allowed to differ. Currently exact, with
     no exception list.
 12. **Every tree's `SKILL.md` descriptions stay within the 1024-character spec limit** — counted in
     characters, with the folded-block indicator excluded. See above; a harness truncating earlier than
     the spec is not checkable here.
-13. **Skill helper scripts are byte-identical across the five trees, and executable.** A script names no
+13. **Skill helper scripts are byte-identical across the six trees, and executable.** A script names no
     harness, so it has nothing to adapt; a copy that has drifted is a bug, not a variant.
 14. **`.agents` manifests carry the same `##` sections as `.claude`** — the set, not the sequence, since
     check 11 exempts `.agents` and content had already been lost through that gap.
 15. **Shared scripts parse, and the strings they match byte-exactly still have a producer.** Check 13
-    compares the five copies against each other, so a break introduced into all five at once — which is
+    compares the six copies against each other, so a break introduced into all six at once — which is
     how these files are normally edited — passes it. This one runs `bash -n` on each copy, and holds a
     registry of the strings a scanner matches on against the templates that must still write them.
     `【待定】` is why it exists: `star-plan-decomposer` wrote it into every Chinese sub-plan, `scan.sh`
@@ -345,7 +379,7 @@ nothing enforces that judgement.
 19. **The opening-load shape holds in every tree.** One `.env` probe line per file, no `cat` of the
     whole conventions file inside a Bash block (only `.agents`' fallback sentence may, and it is marked
     "accept the spill" / "接受落盘"), `SKILL_zh.md` never a runtime load, and the two passages that are
-    uniform across all seventy-five file pairs by design — the language paragraph and the
+    uniform across all ninety file pairs by design — the language paragraph and the
     `SKILL_zh.md` header blockquote — still identical, so a partial re-edit shows up. The strings it
     pins are the probe line and those two openings; rewording any of them centrally means updating
     the check in the same commit.
@@ -366,14 +400,15 @@ nothing enforces that judgement.
     opening-load block.** That paragraph is what lets a second skill in the same conversation skip the
     parts of the load it can still see verbatim, so a multi-skill session pays for one load rather than
     N. Three ways of losing it are invisible to everything above: dropping it from one tree, since
-    checks 1–3 compare file sets and not contents; rewording it in one tree, so the five trees disagree
+    checks 1–3 compare file sets and not contents; rewording it in one tree, so the six trees disagree
     about what may be skipped; and moving it below the first `##` heading, where it stops being part of
     the load the reader is deciding about. It must also carry no bare `§n` — check 20d reads every `§n`
     in that same block as a claim about which sections the skill loads.
 22. **Delegation calls stay native to each harness.** `.agents` names `spawn_agent` with
     `agent_type: explorer` or `worker` in exactly the files `.claude` marks with `subagent_type`, and
-    neither vocabulary appears in any of the other four trees.
-23. **Each tree names only its own harness's file reader, terminal, and subagent types.** Claude Code
+    neither vocabulary appears in any of the other five trees.
+23. **Each tree names only its own harness's file reader, terminal, and subagent types.** Pi's are
+    lowercase (`read`, `bash`) and it may name no `subagent_type` at all. Claude Code
     and Kimi Code publish `Read` and `Bash`; Cursor's terminal is `Shell`; Qwen Code's are the
     snake_case identifiers `read_file` and `run_shell_command`, with its display labels `ReadFile` and
     `Shell` banned there alongside Claude's names; Codex has no file reader and
@@ -383,7 +418,7 @@ nothing enforces that judgement.
     alone. It exists because the inverse of an unadapted
     name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
     every check passed it. `.cursor`'s two began as this repository's descriptive choice and are now
-    citable — Cursor's hooks and CLI-permissions pages publish `Shell` and `Read` — so all five trees
+    citable — Cursor's hooks and CLI-permissions pages publish `Shell` and `Read` — so all six trees
     are pinned against a vendor list rather than against a guess.
 
 ## What the checks do not catch
@@ -414,8 +449,8 @@ Be honest with yourself about this list; it is where the real drift lives.
   byte-exact match to a scanner without adding its row, and the next person to reword the producer
   breaks it silently, exactly as before. When you teach a script to match on a new string, register it
   in the same commit.
-- **Whether a pinned tool name is still the harness's.** Check 23 pins five trees' tool vocabulary
-  against a table written here, and a table is only as good as the list behind it. All five now
+- **Whether a pinned tool name is still the harness's.** Check 23 pins six trees' tool vocabulary
+  against a table written here, and a table is only as good as the list behind it. All six now
   trace to a vendor's published list, but what the check can prove is that a name has not drifted
   since someone last looked, never that it was right when they looked — `generalPurpose` sat in that
   tree after Cursor's built-in subagents had moved on, and a check written a day earlier would have

@@ -1,0 +1,140 @@
+---
+name: star-code-architect
+disable-model-invocation: true
+description: >-
+  Bootstrap or reorganize the project codebase (${CODE_NAME}/, from .env) so research plans under
+  metds/plans/ have a place for the code to live. When ${CODE_NAME}/ is missing or empty: read the plan
+  for what to search for, find and score candidate reference implementations on GitHub (plan fit,
+  completeness, license, activity), let the user pick, then clone it, strip its git history, record
+  provenance, and conservatively rebrand it to CODE_NAME. When code already exists: survey it with
+  a read-only survey instead. Both paths then design a target architecture plus a migration table,
+  execute only user-approved migrations one group at a time with per-group verification and git
+  checkpoints, and write the spec to metds/codearc.md, cross-referenced in AGENTS.md.
+  Use when the user runs /skill:star-code-architect, wants a reference implementation or starter codebase for a
+  plan, wants to set up / scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase.
+  Bilingual (en/zh).
+---
+
+# Research Code Architect — codebase bootstrap & organization
+
+Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+
+Invocation: `/skill:star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
+
+**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load, issued as one message: the conventions file through its own `read`, never `cat`-ed into a `bash` command — a `bash` result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit — plus one small `bash` call, with the project root as the working directory, for the one thing here only `bash` can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`. Sent together, the two calls still cost one round trip — and they are this skill's only unconditional load: every file under `references/` and `assets/` belongs to one branch or step and is read where that step cites it, not front-loaded.
+
+**Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+
+## Role
+
+You give the research plan a place for the code to live. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the top-level plan and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) that tells every later agent where code belongs.
+
+You **architect; you do not implement research features.** Feature work belongs to `star-plan-executor` against its sub-plans. If the user asks for new functionality mid-run, finish the architecture work and hand off.
+
+## Core Principles
+
+1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/skill:star-plan-coach` first — or take a topic / URL directly and proceed without one.
+2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
+3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
+4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
+5. **The main agent orchestrates, verifies, and does the work itself.** Pi ships no sub-agents, so conventions §6.1 governs every step below that says *dispatch*: the step keeps its contract, and the main agent fills it locally, in the same order and against the same return format. Surveys are read-only passes, one area at a time; migrations run one group at a time, each writing only its own group's files. Both keep disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), commits a git checkpoint per verified group, retries ≤2, and rolls back what still fails. Contract: `references/orchestration_spec.md`.
+6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it). That summary is the always-on pointer here and the only one: Pi loads `AGENTS.md` as a context file at startup, so there is no second always-on channel to keep in step. Never fork the spec's content into multiple files.
+
+## Workflow
+
+### Step 0: Orient & choose the branch
+
+1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
+2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which).
+3. If there is no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/skill:star-proj-adopt` routes in from. Otherwise ask: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
+4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
+5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (bootstrap)**. Real code present → **Branch B (organize)**. Only a handful of stray scripts → ask whether to bootstrap around them or organize what exists.
+
+### Branch A: Bootstrap from a reference implementation
+
+#### Step A1: Build the search profile
+
+Extract from the plan: task domain, method keywords, framework and version constraints, baselines named in §2/§4, dataset and tooling needs. Show the profile as a short block before searching. Recipe: `references/repo_rubric.md`.
+
+#### Step A2: Search & shortlist
+
+Prefer `gh search repos` / `gh api` (structured stars / license / pushed_at), plus web search for official implementations of the baselines the plan names. Shortlist 5–10; skip archived repos, demo-only repos, and awesome-lists; prefer the origin repo over forks. If `gh` is unavailable or unauthenticated, fall back to web search. If nothing viable turns up, say so honestly and offer: refine the profile / start from a minimal from-scratch skeleton.
+
+#### Step A3: Score the shortlist
+
+Score each candidate with the rubric (`references/repo_rubric.md`): plan fit 30, completeness 20, license 15, activity 15, code quality 10, environment match 10. Shallow-read each README (and setup files if needed) — do not clone yet.
+
+#### Step A4: Confirmation point 1 — the user picks the repo
+
+Present the top 3–5, one option per candidate: one-line why-it-fits, license, stars, last update, main risk, the highest-scoring one first and marked as recommended. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
+
+#### Step A5: Put the clone in place
+
+1. Shallow-clone to a temporary directory; record URL, commit SHA, commit date, and license.
+2. If the implementation is a subdirectory of a monorepo, confirm the sub-path with the user and take only it.
+3. Remove `.git`; move the content into `${CODE_NAME}/`; keep upstream `LICENSE` and `CITATION*` files in place.
+4. Write `${CODE_NAME}/UPSTREAM.md` from `assets/upstream_template.md`.
+5. Commit the import (stage only `${CODE_NAME}/`): `star-code-architect: import <repo> @ <short-sha>`.
+
+#### Step A6: Conservative rebrand
+
+Follow `references/rebrand_checklist.md`: top-level package directory, all imports, packaging metadata (`setup.py` / `pyproject.toml` name, packages, console entry points), README title and install snippets. After each rename: grep the old name to verify the count dropped as expected, then `python -m compileall -q ${CODE_NAME}` (needs no dependencies). Names on the do-not-touch list (registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/wandb project names) go into the **do-not-rename table** for `codearc.md` §7. Commit: `star-code-architect: rebrand to <CODE_NAME>`.
+
+#### Step A7: Runtime smoke (STOP-line aware)
+
+If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan confirmation point.
+
+#### Step A8: Survey the clone
+
+Count the clone's `.py` files first. Under the light-mode threshold: complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and for small repos the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for both the architecture and the migration table.
+
+### Branch B: Organize the existing codebase
+
+#### Step B1: Survey
+
+Survey one topic at a time — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — each pass read-only and each returning the structured report in `references/survey_spec.md` (conventions §6.1: with no host delegation the main agent fills each pass itself, in that order and against that return format). Merge them into the **repo map**: module inventory, dependency direction, ranked smells (only smells that would motivate a migration item).
+
+### Converged: architecture, migration, specs
+
+#### Step C1: Design the target architecture
+
+From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. A row goes in only after the main agent has re-opened the location the smell cites and confirmed it still holds (`references/survey_spec.md`); the reason column carries that `path:line`. Keep it minimal.
+
+#### Step C2: Confirmation point 2 — the user approves
+
+Show the architecture summary and the numbered migration table as normal text. Then ask: with ≤4 migration items, ask over the numbered items and let the user reply with the numbers to approve; with more, offer *approve all* / *approve all except (name the numbers)* / *redesign*. Wait for the explicit answer; only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
+
+#### Step C3: Execute migrations
+
+Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); dependent groups run in dependency order, and with no host delegation the independent ones run in sequence too. Work one group at a time under the contract: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: roll the group's paths back via git, mark the items `blocked` in the migration record, continue with other groups.
+
+#### Step C4: Write the specs
+
+1. `metds/codearc.md` from `assets/codearch_template.md`, all sections filled; body language follows the root plan's `language` (dialogue language if no plan).
+2. `AGENTS.md`: append or update a `## Code Architecture` section — ≤10 lines: one-line purpose, 3–5 placement bullets, and "read `metds/codearc.md` before writing code". Edit `AGENTS.md` only; never create a separate `CLAUDE.md`.
+3. Nothing else. Pi reads `AGENTS.md` at startup, so item 2 is already the always-on pointer; do not write a second copy of the summary anywhere.
+
+When these already exist, update in place — never append duplicates.
+
+#### Step C5: Final verification
+
+`python -m compileall -q ${CODE_NAME}` always; import sweep and a fast subset of upstream tests when the env is usable; the README's minimal demo if it is CPU-cheap. Heavy validation → prepared commands handed to the user. Report what was verified and what was not, with evidence (AGENTS.md §11).
+
+#### Step C6: Report & hand off
+
+≤500 words: repo chosen (with license note), what ended up where, renames done + how many names were left unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/skill:star-plan-executor <leaf>` now has a place for the code to live; `/skill:star-flow-status` shows where each plan step stands.
+
+## State & File Rules
+
+- Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, and the `## Code Architecture` section of `AGENTS.md`. Never touch `metds/plans/*`.
+- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Confirmation point 1 and recorded in `codearc.md` §5.
+- Git: one commit per finished phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
+- The audit trail is the git checkpoints plus `codearc.md` §6 (migration record); this skill creates no `wkdrs/` run directory — it produces code and specs, not experiment artifacts.
+- STOP line: environment builds with CUDA compilation, downloads over ~1 GB, full test suites, any training — prepare the command and hand it to the user; never launch autonomously.
+- The do-not-rename list lives in `codearc.md` §7; later renames go through `star-plan-executor` steps or a re-run of this skill, each individually verified.
+
+## Dialogue Discipline
+
+- Both confirmation points and all questions are plain text — one question per message. Pi ships no structured question tool, so plain text is the mechanism rather than a fallback: still one question at a time, and an explicit approval message is required before any side effect past a confirmation point.
+- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
+- `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

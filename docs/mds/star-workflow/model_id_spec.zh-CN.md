@@ -12,9 +12,10 @@
 | Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 rollout 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
 | Cursor | `.cursor/hooks/star_model_id.sh` | `SessionStart` | id | 会话开始时 |
 | Kimi | `.kimi-code/hooks/star_model_id.sh` | `UserPromptSubmit` | `~/.kimi-code/config.toml` 里的 `default_model` | 取自配置，从来不是会话 |
+| Pi | `.pi/hooks/star_model_id.sh` | `before_agent_start`，由 `.pi/extensions/star-hooks.ts` 接线 | id | 就在要用它的那一问之前；模型每换一次再读一次 |
 | Qwen Code | `.qwen/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 transcript 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
 
-要紧的差别在最后一列。写入当刻读到的值不可能过期；Cursor 与 Kimi 那两行则可能，因为会话中途换模型不会改变它们读的任何东西——这正是 `research-workflow-conventions.zh-CN.md` §8 提醒的那种滞后，如今只剩这两行还有。Claude Code 还会在系统提示里写明模型。钩子文件在，不等于已注册——各运行时的注册方式不同（`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json`，以及需手动配置的 `.kimi-code/hooks.example.toml`），所以一个项目可能有脚本却什么都没注入。Qwen Code 在这之上还多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。
+要紧的差别在最后一列。写入当刻读到的值不可能过期；Cursor 与 Kimi 那两行则可能，因为会话中途换模型不会改变它们读的任何东西——这正是 `research-workflow-conventions.zh-CN.md` §8 提醒的那种滞后，如今只剩这两行还有。Pi 在另一个极端，连恢复命令都不需要：它的扩展 API 把当前模型对象（`ctx.model`）交给每个处理器，`/model` 或 `Ctrl+P` 一换就触发 `model_select`，所以那行写的就是即将开跑的那个模型，且每换一次就会再来一行新的——你最后拿到的那行，就是正在写的那个。Claude Code 还会在系统提示里写明模型。钩子文件在，不等于已注册——各运行时的注册方式不同（`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json`，以及需手动配置的 `.kimi-code/hooks.example.toml`），所以一个项目可能有脚本却什么都没注入。Pi 的注册是代码而不是配置——扩展会被自动发现，但要等项目获得信任之后（`/trust`，或 `defaultProjectTrust`）；未获信任的项目不加载任何项目级扩展，也就什么都不注入。Qwen Code 在这之上还多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。
 
 ## Claude Code、Codex 与 Qwen Code：为什么 id 要在写入当刻才读
 

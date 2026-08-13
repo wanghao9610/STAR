@@ -16,6 +16,7 @@ SKILL_ROOTS=(
     ".claude/skills"
     ".cursor/skills"
     ".kimi-code/skills"
+    ".pi/skills"
     ".qwen/skills"
 )
 
@@ -26,10 +27,14 @@ HOOK_TREES=(
     ".codex/hooks"
     ".cursor/hooks"
     ".kimi-code/hooks"
+    ".pi/hooks"
     ".qwen/hooks"
 )
 HOOK_FILES=(
     ".kimi-code/hooks.example.toml"
+    # Pi's registration is code, not config: it holds no project settings to
+    # preserve, so it is overwritten on update like the hook scripts it wires.
+    ".pi/extensions/star-hooks.ts"
 )
 # Hook registration configs a project may have extended with its own settings;
 # installed only when missing, never overwritten.
@@ -61,6 +66,11 @@ fail() {
 # when it registers every hook that applies to it. A config predating a hook
 # keeps its own entries — update never overwrites it — so this is what turns a
 # silent gap into a line.
+#
+# Pi has no row here on purpose. It registers hooks in code
+# (.pi/extensions/star-hooks.ts, in HOOK_FILES above), which an update always
+# replaces, so no kept file can fall behind — and it carries no involve gate,
+# since that hook answers a permission prompt and Pi ships none.
 missing_hooks() { # $1 = registration config path
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
@@ -94,7 +104,7 @@ The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, whic
 body) and the hook registration configs (.claude/settings.json, .codex/hooks.json,
 .cursor/hooks.json, .qwen/settings.json) are installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
-to update only the named skill across the Codex, Claude, Cursor, Kimi and Qwen Code skill
+to update only the named skill across the Codex, Claude, Cursor, Kimi, Pi and Qwen Code skill
 directories.
 
 --diff previews an update without changing anything: it lists upstream files that are new
@@ -191,6 +201,7 @@ if [[ "${ADOPT}" == true ]]; then
     )
     ADOPT_FILES=(
         "AGENTS.md"
+        ".pi/APPEND_SYSTEM.md"
         ".star/memory/MEMORY.md"
         ".env.example"
         ".gitignore"
@@ -228,10 +239,12 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     fi
 else
     SYNC_PATHS=(
-        # Which skill root each tool owns. Only this one rule: the other,
-        # agent-instructions.mdc, is in INSTRUCTION_FILES above, installed when
-        # missing rather than overwritten.
+        # Which skill root each tool owns, for the two hosts that discover more
+        # than one and need telling which copy to act on. Only these: the other
+        # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
+        # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
+        ".pi/APPEND_SYSTEM.md"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
@@ -287,7 +300,7 @@ if [[ "${ADOPT}" == false ]]; then
         # still copies only SYNC_PATHS: execs brings execs/scpts/ along here, and
         # none of it is copied out.
         git -C "${SOURCE_DIR}" sparse-checkout set \
-            .agents .claude .codex .cursor .kimi-code .qwen docs/mds/star-workflow docs/srcs execs
+            .agents .claude .codex .cursor .kimi-code .pi .qwen docs/mds/star-workflow docs/srcs execs
     fi
 
     SYNCED=()

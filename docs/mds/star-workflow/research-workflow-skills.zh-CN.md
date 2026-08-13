@@ -78,7 +78,7 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`：
+在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`（Kimi 与 Pi 写作 `/skill:skill-name`）：
 
 ```text
 /star-plan-coach 开放词汇检测与分割
@@ -90,7 +90,7 @@ $star-code-release
 /skill:star-plan-coach 开放词汇检测与分割
 ```
 
-七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、Kimi 三份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
+七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、Kimi、Pi、Qwen Code 五份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
@@ -1236,7 +1236,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 每个工具都有一份适配过的权威 skill 副本。不要跨这些根目录混用工具特定的调用或控制说明：
 
-五个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例沿用 §1 的 Codex 写法，但“完整定义”链接指向 `.claude/skills/`——其他四套都由这一基准树移植而来。涉及工具机制的差异，请以上表中你所用工具自己的那份为准。
+六个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例沿用 §1 的 Codex 写法，但“完整定义”链接指向 `.claude/skills/`——其他五套都由这一基准树移植而来。涉及工具机制的差异，请以上表中你所用工具自己的那份为准。
 
 | 工具 | 权威目录 | 调用形式 |
 | --- | --- | --- |
@@ -1244,6 +1244,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
+| Pi | `.pi/skills/` | `/skill:star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |
 
 十五个目录名分别是：

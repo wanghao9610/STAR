@@ -78,7 +78,7 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-In Claude, Cursor and Qwen Code, use `/skill-name` instead:
+In Claude, Cursor and Qwen Code, use `/skill-name` instead (Kimi and Pi write `/skill:skill-name`):
 
 ```text
 /star-plan-coach open-vocabulary detection and segmentation
@@ -90,7 +90,7 @@ In Kimi, use `/skill:skill-name`:
 /skill:star-plan-coach open-vocabulary detection and segmentation
 ```
 
-Seven skills — `$star-proj-adopt`, `$star-idea-storm`, `$star-plan-coach`, `$star-code-architect`, `$star-plan-decomposer`, `$star-plan-reviser`, `$star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, and Kimi manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
+Seven skills — `$star-proj-adopt`, `$star-idea-storm`, `$star-plan-coach`, `$star-code-architect`, `$star-plan-decomposer`, `$star-plan-reviser`, `$star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
 
 When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
@@ -1236,7 +1236,7 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all five roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other four are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
+Every skill directory has the same shape in all six roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other five are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
 
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |
@@ -1244,6 +1244,7 @@ Every skill directory has the same shape in all five roots: `SKILL.md` is the en
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
+| Pi | `.pi/skills/` | `/skill:star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |
 
 The fifteen skill directory names are:
