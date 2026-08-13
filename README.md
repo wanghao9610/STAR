@@ -90,6 +90,9 @@ STAR/
 ├── .pi/extensions/         # Pi session hooks: three scripts wired by star-hooks/index.ts
 ├── .qwen/hooks/            # Hooks for Qwen Code: model-id provenance, project memory, involve gate
 ├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
+├── .claude/commands/       # Claude Code slash command: /star, routing a request to a skill
+├── .cursor/commands/       # The same /star command for Cursor
+├── .qwen/commands/         # The same /star command for Qwen Code
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .pi/prompts/            # Pi slash commands: /star-<name> per skill, /star to route
 ├── .pi/settings.json       # Pi project settings: keeps skill discovery off .agents/skills

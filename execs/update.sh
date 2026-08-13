@@ -237,6 +237,9 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
+        ".claude/commands"
+        ".cursor/commands"
+        ".qwen/commands"
         ".pi/prompts"
         ".cursor/rules"
         "docs/mds/star-workflow"
@@ -288,6 +291,14 @@ else
         # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
         ".pi/APPEND_SYSTEM.md"
+        # /star, which routes a described request to a skill, in the three hosts
+        # that read commands from project files. One command each and no more:
+        # all three already expose every skill as /star-<name>, so unlike Pi
+        # there is nothing per-skill left to supply. Kimi, DSH and Codex have no
+        # such directory — their commands are built in or registered in code.
+        ".claude/commands"
+        ".cursor/commands"
+        ".qwen/commands"
         # Pi prompt templates: /star-<name> for each skill, plus /star routing a
         # request to one. They carry the argument hints a Pi skill cannot, since
         # argument-hint is a prompt-template field there and not a skill field.

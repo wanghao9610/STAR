@@ -90,6 +90,9 @@ star-ai-research/
 ├── .pi/extensions/         # Pi 的会话钩子：三个脚本，由 star-hooks/index.ts 接线
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
+├── .claude/commands/       # Claude Code 的斜杠命令 /star：把描述出来的需求分流到某个技能
+├── .cursor/commands/       # 同一个 /star 命令，Cursor 版
+├── .qwen/commands/         # 同一个 /star 命令，Qwen Code 版
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star
 ├── .pi/settings.json       # Pi 的项目设置：让技能发现不扫 .agents/skills
