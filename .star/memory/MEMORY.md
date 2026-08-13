@@ -20,5 +20,6 @@ what belongs here, the file format, how a memory is retired:
 
 <!-- entries below -->
 
+- insight · global · 2026-08-13 · [harness-file-defined-commands](harness-file-defined-commands.md) — 只有 Claude、Cursor、Qwen Code、Pi 从项目文件读斜杠命令；Kimi、DSH、Codex 没有这个机制，DSH 的命令还产生不了模型消息
 - pref · global · 2026-08-07 · [readme-changelog-entry-length](readme-changelog-entry-length.md) — README 更新日志每条发布最多三句话，越短越好
 - pref · global · 2026-08-04 · [readme-changelog-three-open](readme-changelog-three-open.md) — README 更新日志只展开最新三条，其余折进 `<details>` 块
