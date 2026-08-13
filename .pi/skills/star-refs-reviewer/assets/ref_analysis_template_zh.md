@@ -17,7 +17,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 # <方法缩写> —— <一句话：它是什么>
 
-<!-- 由 /skill:star-refs-reviewer 写出。下面每条说法都来自论文本身；不确定的标 [unverified]。
+<!-- 由 /star-refs-reviewer 写出。下面每条说法都来自论文本身；不确定的标 [unverified]。
      没内容的小节压成一行——绝不注水。 -->
 
 ## 1. TL;DR

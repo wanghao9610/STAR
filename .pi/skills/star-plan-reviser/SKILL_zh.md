@@ -5,7 +5,7 @@ description: >-
   只读收集遍检查 wkdrs/<run>/ 的执行日志与产物（内部节点则汇总 children），逐条对照磁盘文件给
   完成度打分，把七段式审查报告写入 wkdrs/，再以一次一问的方式走完修订候选，直接编辑计划文件并追加
   Revision History 条目——结构性重构转给 star-plan-decomposer，方向级转向转给 star-plan-coach。
-  当用户运行 /skill:star-plan-reviser，或想在（部分）执行后审查 / 复盘 / 修订某个计划、核对计划实际做了
+  当用户运行 /star-plan-reviser，或想在（部分）执行后审查 / 复盘 / 修订某个计划、核对计划实际做了
   什么与承诺了什么、把执行结果写回进计划、或把某个计划连同其子树标记为已丢弃的方向时使用。Bilingual（中/英）。
 ---
 
@@ -13,7 +13,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-plan-reviser PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。表达放弃这个方向的描述——比如「这条不做了，由 02 取代」——走丢弃那条路（Workflow 的最后一节）而不是审查，它的原话就是写进计划的理由；要求把已丢弃的节点收回来的描述则清除那个字段。没有关键词：两者都没提的描述跑的是审查，不给描述也一样。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`/star-plan-reviser PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`01`）或文件名（`01_mvp-verify_plan.md`）。不带参数则列出候选并询问——优先推荐有执行证据或已被标记失配的节点。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。表达放弃这个方向的描述——比如「这条不做了，由 02 取代」——走丢弃那条路（Workflow 的最后一节）而不是审查，它的原话就是写进计划的理由；要求把已丢弃的节点收回来的描述则清除那个字段。没有关键词：两者都没提的描述跑的是审查，不给描述也一样。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。动手前，用一条消息把它连同本 skill `references/` 下的两份文件一起装齐：三次 `read`——规约全文、`<本 skill 所在目录>/references/review_spec_zh.md`、`<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次——外加同一条消息里一次 `bash` 调用（以项目根目录为工作目录），只带这一行：
 
@@ -38,8 +38,8 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. **收集靠分散，判断在主 agent 。** 证据收集拆成**只读收集遍**，一次一遍——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。每条单独提问采纳 / 调整 / 跳过，一次一条，标出你的推荐——绝不打包批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
-5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/skill:star-plan-decomposer`；研究问题或方法级转向转给 `/skill:star-plan-coach`。边界见 `references/revision_rules_zh.md`。
-6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `/skill:star-flow-status` 浮现。
+5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `/star-plan-decomposer`；研究问题或方法级转向转给 `/star-plan-coach`。边界见 `references/revision_rules_zh.md`。
+6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `/star-flow-status` 浮现。
 
 ## 工作流
 
@@ -73,7 +73,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 4：修订问答（一次一条）
 
-1. 按报告顺序走候选，每条一个问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；每次都说明用户可以自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/skill:star-plan-decomposer` 或 `/skill:star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
+1. 按报告顺序走候选，每条一个问题：*照建议采纳* / *采纳但要改* / *跳过*——标出推荐；每次都说明用户可以自由作答。**structural** 或 **strategic** 候选的选项是：*转给 `/star-plan-decomposer` 或 `/star-plan-coach`*（推荐）vs *仍在本文件做范围受限的文本修订*。边走边记流水账（规约 §7.8）——每条候选一落定就写一行，`候选 → 采纳 / 调整 / 跳过 → 文件里改了什么`——若下一条候选与已定的某条相互牵连，用半句话点明承接之处（§7.10）。逐条批准是整套工作流里最长的一串问题；没有这本流水账，用户是在看不见第 1–8 条改动的情况下批准第 9 条。
 2. 走完清单后问一次：还有其他要改的吗？用户新增的项同样作为候选（证据记"user directive"）。
 3. 一条都未采纳 → 跳到 Step 7——纯审查也是合法结局；写出的报告就是交付物。
 
@@ -89,12 +89,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ### Step 6：一致性检查
 
 - 若计划标题或一行目标变了，同步父计划 `## Sub-plans` 里对应那行——这是目标文件之外唯一允许的编辑。
-- 复核 `children:` 条目与 `depends_on` 前缀仍能解析；悬空引用**标记**出来交给 `/skill:star-plan-decomposer`——不要悄悄修复。（编辑目标自己的 `depends_on` 列表可以作为已批准候选进行；跨兄弟重画依赖边不行。）
+- 复核 `children:` 条目与 `depends_on` 前缀仍能解析；悬空引用**标记**出来交给 `/star-plan-decomposer`——不要悄悄修复。（编辑目标自己的 `depends_on` 列表可以作为已批准候选进行；跨兄弟重画依赖边不行。）
 - 若目标是父节点、且修订触及 children 赖以派生的内容，指明受影响的 children 并建议重新拆解。
 
 ### Step 7：汇报与交接
 
-≤500 字：证据基础（读了什么、核实了什么）、完成度结论、逐节写入的改动、跳过的候选、连带影响提醒。结尾给出下一步命令：`/skill:star-plan-decomposer <slug>`（结构变了 / children 过期）、`/skill:star-plan-coach <slug>`（总体方向转向）、`/skill:star-plan-executor <叶子>`（重跑修订后的叶子）、`/skill:star-code-reviewer <叶子>`（审计实现代码）、`/skill:star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有写入的修订，提出一次提交提议（见状态与文件规则）。
+≤500 字：证据基础（读了什么、核实了什么）、完成度结论、逐节写入的改动、跳过的候选、连带影响提醒。结尾给出下一步命令：`/star-plan-decomposer <slug>`（结构变了 / children 过期）、`/star-plan-coach <slug>`（总体方向转向）、`/star-plan-executor <叶子>`（重跑修订后的叶子）、`/star-code-reviewer <叶子>`（审计实现代码）、`/star-flow-status`（看全树）。若什么都没改，坦白说明——报告文件仍在。若有写入的修订，提出一次提交提议（见状态与文件规则）。
 
 ### 丢弃一份计划，以及把它收回来
 

@@ -1,6 +1,6 @@
 # 审查报告 — <prefix>_<slug>（<YYYY-MM-DD>）
 
-<!-- 由 /skill:star-plan-reviser 生成（model_id: <模型 id，照抄运行时为本会话声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded">）。目标：metds/plans/<file>；节点类型：leaf | internal | root；
+<!-- 由 /star-plan-reviser 生成（model_id: <模型 id，照抄运行时为本会话声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded">）。目标：metds/plans/<file>；节点类型：leaf | internal | root；
      exec_runs：<run 目录列表，最新的在最后，或 none>。每条结论都要引证据（路径[:行号]、命令输出、或 frontmatter 字段）。
      无话可说的节收敛成一行——绝不注水。 -->
 
@@ -43,8 +43,8 @@
 
 ## 7. 修订候选
 
-<!-- 编号。影响范围：local（本文件）/ structural（树形结构 → /skill:star-plan-decomposer）/
-     strategic（方向 → /skill:star-plan-coach）。每条候选由用户逐一裁决；
+<!-- 编号。影响范围：local（本文件）/ structural（树形结构 → /star-plan-decomposer）/
+     strategic（方向 → /star-plan-coach）。每条候选由用户逐一裁决；
      被采纳的改动落在计划文件及其 Revision History 里，不落在这里。 -->
 
 1. [<local|structural|strategic>] §<n> — <改什么>

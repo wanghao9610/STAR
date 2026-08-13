@@ -29,7 +29,9 @@ HOOK_TREES=(
     ".cursor/hooks"
     ".dsh/hooks"
     ".kimi-code/hooks"
-    ".pi/hooks"
+    # Pi keeps its scripts beside the extension that runs them: .pi/hooks/ is
+    # the old name for the extensions directory, and Pi warns whenever it exists.
+    ".pi/extensions/star-hooks"
     ".qwen/hooks"
 )
 HOOK_FILES=(
@@ -40,9 +42,6 @@ HOOK_FILES=(
     ".dsh/hooks.json"
     ".dsh/cordis.patch.yml"
     ".kimi-code/hooks.example.toml"
-    # Pi's registration is code, not config: it holds no project settings to
-    # preserve, so it is overwritten on update like the hook scripts it wires.
-    ".pi/extensions/star-hooks.ts"
 )
 # Hook registration configs a project may have extended with its own settings;
 # installed only when missing, never overwritten.
@@ -51,6 +50,19 @@ HOOK_CONFIGS=(
     ".codex/hooks.json"
     ".cursor/hooks.json"
     ".qwen/settings.json"
+)
+# Project config that is not a hook registration, installed on the same terms.
+# .pi/settings.json keeps Pi's skill discovery off .agents/skills: Pi scans both
+# roots, and while .pi/skills always wins the name collision — it is loaded first
+# — the loser is still reported on every start. Excluding it silences that and
+# leaves the Codex tree alone, since Codex reads .agents/skills itself.
+PROJECT_CONFIGS=(
+    ".pi/settings.json"
+)
+# Everything installed when missing and never overwritten, whichever kind it is.
+INSTALL_CONFIGS=(
+    "${HOOK_CONFIGS[@]}"
+    "${PROJECT_CONFIGS[@]}"
 )
 # The agent instructions, in both copies a project carries: agent-instructions.mdc
 # is the AGENTS.md body verbatim, so they belong to the project together. Handled
@@ -76,12 +88,31 @@ fail() {
 # silent gap into a line.
 #
 # Pi and DSH have no row here on purpose. Pi registers hooks in code
-# (.pi/extensions/star-hooks.ts) and DSH in a STAR-owned table (.dsh/hooks.json),
+# (.pi/extensions/star-hooks/index.ts) and DSH in a STAR-owned table (.dsh/hooks.json),
 # both in HOOK_FILES above, which an update always replaces — so no kept file can
 # fall behind. Neither carries an involve gate: that hook answers the permission
 # prompt before a file edit, and neither raises one — Pi ships no prompts at all,
 # and DSH's default workspace-write sandbox lets an in-project edit run unasked.
+# How a log line should name an installed config, so a project config is not
+# announced as a hook registration.
+config_kind() { # $1 = config path (relative or absolute)
+    local entry
+    for entry in "${HOOK_CONFIGS[@]}"; do
+        [[ "$1" == "${entry}" || "$1" == *"/${entry}" ]] && { printf 'hook registration'; return 0; }
+    done
+    printf 'project config'
+}
+
 missing_hooks() { # $1 = registration config path
+    # Only a hook registration config can be missing a hook. A project config
+    # installed beside them registers none, and asking would report all three as
+    # absent from a file that was never meant to carry them.
+    local entry is_hook_config=false
+    for entry in "${HOOK_CONFIGS[@]}"; do
+        [[ "$1" == *"/${entry}" ]] && is_hook_config=true
+    done
+    [[ "${is_hook_config}" == true ]] || return 0
+
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
     grep -q 'star_memory\.sh' "$1" 2>/dev/null || out="${out:+${out}, }project memory"
@@ -111,8 +142,9 @@ The default ref is main; a branch or tag may be supplied instead. By default all
 updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
 scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
-body) and the hook registration configs (.claude/settings.json, .codex/hooks.json,
-.cursor/hooks.json, .qwen/settings.json) are installed only when missing and never overwritten,
+body), the hook registration configs (.claude/settings.json, .codex/hooks.json,
+.cursor/hooks.json, .qwen/settings.json) and the project config .pi/settings.json are
+installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the Codex, Claude, Cursor, DSH, Kimi, Pi and Qwen Code
 skill directories.
@@ -205,7 +237,7 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
-        ".pi/themes"
+        ".pi/prompts"
         ".cursor/rules"
         "docs/mds/star-workflow"
         "docs/srcs"
@@ -221,7 +253,7 @@ if [[ "${ADOPT}" == true ]]; then
         "execs/update.sh"
         "execs/scpts/00_exp.sh"
         "${HOOK_FILES[@]}"
-        "${HOOK_CONFIGS[@]}"
+        "${INSTALL_CONFIGS[@]}"
     )
     # Layout directories the workflow expects to exist.
     ADOPT_DIRS=(
@@ -256,9 +288,10 @@ else
         # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
         ".pi/APPEND_SYSTEM.md"
-        # Pi TUI themes. Cosmetic and inert: nothing selects one, so they change
-        # nothing until a user picks it in /settings or with --use-theme.
-        ".pi/themes"
+        # Pi prompt templates: /star-<name> for each skill, plus /star routing a
+        # request to one. They carry the argument hints a Pi skill cannot, since
+        # argument-hint is a prompt-template field there and not a skill field.
+        ".pi/prompts"
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
@@ -372,14 +405,14 @@ if [[ "${ADOPT}" == false ]]; then
 
         # Hook registration configs: installed when missing, never overwritten.
         if [[ -z "${SKILL_NAME}" ]]; then
-            for cfg in "${HOOK_CONFIGS[@]}"; do
+            for cfg in "${INSTALL_CONFIGS[@]}"; do
                 [[ -e "${SOURCE_DIR}/${cfg}" ]] || continue
                 if [[ ! -e "${ROOT_DIR}/${cfg}" && ! -L "${ROOT_DIR}/${cfg}" ]]; then
-                    printf '  new      %s (hook registration)\n' "${cfg}"
+                    printf '  new      %s (%s)\n' "${cfg}" "$(config_kind "${cfg}")"
                     added=$(( added + 1 ))
                 elif ! cmp -s "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"; then
                     if [[ "${FORCE}" == true ]]; then
-                        printf '  differs  %s (hook registration; --force overwrites it)\n' "${cfg}"
+                        printf '  differs  %s (%s; --force overwrites it)\n' "${cfg}" "$(config_kind "${cfg}")"
                         changed=$(( changed + 1 ))
                     else
                         printf '  config   %s (differs from upstream; update never overwrites it)\n' "${cfg}"
@@ -412,7 +445,7 @@ if [[ "${ADOPT}" == false ]]; then
         # configs, so they belong in what gets reported as about to be lost.
         DIRTY_PATHS=("${SYNCED[@]}")
         if [[ "${FORCE}" == true && -z "${SKILL_NAME}" ]]; then
-            DIRTY_PATHS+=("${INSTRUCTION_FILES[@]}" "${HOOK_CONFIGS[@]}")
+            DIRTY_PATHS+=("${INSTRUCTION_FILES[@]}" "${INSTALL_CONFIGS[@]}")
         fi
         DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)"
         if [[ -n "${DIRTY}" ]]; then
@@ -445,15 +478,15 @@ if [[ "${ADOPT}" == false ]]; then
     fi
 
     if [[ -z "${SKILL_NAME}" ]]; then
-        for cfg in "${HOOK_CONFIGS[@]}"; do
+        for cfg in "${INSTALL_CONFIGS[@]}"; do
             [[ -e "${SOURCE_DIR}/${cfg}" ]] || continue
             if [[ ! -e "${ROOT_DIR}/${cfg}" && ! -L "${ROOT_DIR}/${cfg}" ]]; then
                 mkdir -p "$(dirname -- "${ROOT_DIR}/${cfg}")"
                 cp -p "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"
-                log "Installed ${cfg} (hook registration)"
+                log "Installed ${cfg} ($(config_kind "${cfg}"))"
             elif [[ "${FORCE}" == true ]]; then
                 cp -p "${SOURCE_DIR}/${cfg}" "${ROOT_DIR}/${cfg}"
-                log "Overwrote ${cfg} (hook registration; --force), including any settings you added to it."
+                log "Overwrote ${cfg} ($(config_kind "${cfg}"); --force), including any settings you added to it."
             elif [[ -n "$(missing_hooks "${ROOT_DIR}/${cfg}")" ]]; then
                 log "NOTE: ${cfg} was kept and does not register the STAR $(missing_hooks "${ROOT_DIR}/${cfg}") hook."
                 log "      Merge the missing hook entry from upstream ${cfg} to enable it."
@@ -544,7 +577,7 @@ if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
         log "      Add them before committing: a dataset, a checkpoint tree, or one machine's own notes may enter history."
     fi
 fi
-for cfg in "${HOOK_CONFIGS[@]}"; do
+for cfg in "${INSTALL_CONFIGS[@]}"; do
     if [[ ! -e "${ROOT_DIR}/${cfg}" ]]; then
         continue
     elif [[ -n "$(missing_hooks "${ROOT_DIR}/${cfg}")" ]]; then

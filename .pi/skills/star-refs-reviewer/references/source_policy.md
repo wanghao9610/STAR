@@ -134,6 +134,6 @@ A note may carry up to three images: the figures its own paper uses to show what
 
 1. Every citekey in `reference.bib` has a cached payload in the run dir **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date.
 2. Re-fetch 5 entries at random; diff field-by-field against the file. Any mismatch → correct the file to match the source, then re-check that entry's whole batch.
-3. Parse the file with `bibtexparser` through the `.env` conda env **if it is already installed** (never install it — that is `/skill:star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
+3. Parse the file with `bibtexparser` through the `.env` conda env **if it is already installed** (never install it — that is `/star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
 4. No entry has an empty required field; no key appears twice.
 5. No paper in the `%% Needs manual check` block also appears as an entry; no line in that block contains `@`.

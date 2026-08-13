@@ -14,7 +14,7 @@ sources:
 
 # Results
 
-<!-- Written by /skill:star-expt-analyst aggregate. Every number below was re-opened at its source before
+<!-- Written by /star-expt-analyst aggregate. Every number below was re-opened at its source before
      it entered (references/aggregate_spec.md), and carries where it came from. The protocol these
      numbers were measured under is metds/evaluation.md — this file is scores only. Treat it as
      generated: to change a number, fix or re-run the run and recompile, never edit it here. -->
@@ -64,7 +64,7 @@ sources:
 
 | Run | Verdict | Why excluded | Next step |
 |---|---|---|---|
-| `<prefix>_<slug>` | invalid | <…> | `/skill:star-expt-analyst <slug>` |
+| `<prefix>_<slug>` | invalid | <…> | `/star-expt-analyst <slug>` |
 
 ## 6. Not Yet Measured
 
@@ -72,4 +72,4 @@ sources:
      produce it, and its state (never executed / STOP-line command still awaiting the user). This is
      the gap list a results section is still missing. Write "None" if the design is fully covered. -->
 
-- <claim / benchmark> — `<prefix>_<slug>_plan.md`; <state> → `/skill:star-plan-executor <slug>`
+- <claim / benchmark> — `<prefix>_<slug>_plan.md`; <state> → `/star-plan-executor <slug>`

@@ -17,7 +17,7 @@
 # who asks for one directly should get it.
 #
 # Wired to Pi's tool_call event, narrowed to the bash tool, in
-# .pi/extensions/star-hooks.ts. One of six copies — Claude, Codex, Kimi Code and
+# .pi/extensions/star-hooks/index.ts. One of six copies — Claude, Codex, Kimi Code and
 # Qwen Code carry the same guard on their own PreToolUse, Cursor on
 # beforeShellExecution — differing only in how each harness names the command on
 # the way in and the decision on the way out. This one is also the guard's whole
@@ -33,12 +33,15 @@
 set -uo pipefail
 
 # Every harness registers this script by its own path inside the project, so the
-# project root is two levels up from the script itself — no environment variable
-# and no payload field, which differ per harness.
-root="$(cd -- "$(dirname -- "$0")/../.." 2>/dev/null && pwd -P)" || exit 0
+# project root is derived from the script itself — no environment variable and no
+# payload field, which differ per harness. Three levels here, not the other trees'
+# two: Pi reserves .pi/hooks/ as the old name for extensions and warns when it
+# exists, so these scripts live beside the extension that runs them, one directory
+# deeper (.pi/extensions/star-hooks/).
+root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
 
 # The shell command, passed as the one argument. Pi has no command-hook protocol
-# to parse a payload out of: .pi/extensions/star-hooks.ts reads the bash tool's
+# to parse a payload out of: .pi/extensions/star-hooks/index.ts reads the bash tool's
 # own input object and hands the command straight over.
 cmd="${1:-}"
 case "${cmd}" in
@@ -49,7 +52,7 @@ esac
 # The reason goes out on stdout and the refusal is the exit status, so this copy
 # needs no encoder — the extension is what turns the pair into Pi's block result.
 deny() { # $1 = one-line reason
-    printf '%s (declined by .pi/hooks/star_commit_guard.sh — hand it to the user to run)\n' "$1"
+    printf '%s (declined by .pi/extensions/star-hooks/star_commit_guard.sh — hand it to the user to run)\n' "$1"
     exit 1
 }
 

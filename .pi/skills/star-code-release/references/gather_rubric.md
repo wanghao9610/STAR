@@ -32,7 +32,7 @@ Two disqualifiers override a pass:
 
 1. The destination comes from `metds/codearc.md` §2 placement rules, matched on what the file *is* — a data-pipeline script, a model component, a config, a tool, a test.
 2. Where §2 has no rule for this kind of file, check §4's plan-component map for the component it implements.
-3. Still unresolved → the row's action is `route`, not a guessed path. Creating a directory `codearc.md` does not name is `/skill:star-code-architect`'s decision, and a release run that invents `${CODE_NAME}/utils/` has quietly amended the architecture spec without a confirmation point.
+3. Still unresolved → the row's action is `route`, not a guessed path. Creating a directory `codearc.md` does not name is `/star-code-architect`'s decision, and a release run that invents `${CODE_NAME}/utils/` has quietly amended the architecture spec without a confirmation point.
 4. No `codearc.md` at all → every row is `route`, and the whole gather phase reports that the architecture spec is the blocker. Compiling the README can still proceed.
 
 ## Duplicate detection
@@ -58,7 +58,7 @@ One entry per candidate, in sweep order:
   risk: <one line — importers to fix, a config path that changes, nothing>
 ```
 
-`plan_referenced` is not a veto; it is a consequence the user approves with open eyes. Plan text is not this skill's to edit, so every such row lands in the report's routing block for `/skill:star-plan-reviser`.
+`plan_referenced` is not a veto; it is a consequence the user approves with open eyes. Plan text is not this skill's to edit, so every such row lands in the report's routing block for `/star-plan-reviser`.
 
 ## Verification per row
 
@@ -72,7 +72,7 @@ A row that fails after the fix attempt is reverted (`git checkout` for tracked p
 
 ## Polishing what a reader will open
 
-Applies to: the files promoted this run, the entrypoints / configs / `execs/scpts/*.sh` the README prints, and the public API the README shows. Nothing else — the six-dimension audit of `${CODE_NAME}/` belongs to `/skill:star-code-reviewer`, and a finding outside these files is recorded for routing rather than fixed.
+Applies to: the files promoted this run, the entrypoints / configs / `execs/scpts/*.sh` the README prints, and the public API the README shows. Nothing else — the six-dimension audit of `${CODE_NAME}/` belongs to `/star-code-reviewer`, and a finding outside these files is recorded for routing rather than fixed.
 
 What counts as a finding here:
 

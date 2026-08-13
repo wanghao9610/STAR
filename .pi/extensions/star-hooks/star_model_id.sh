@@ -4,7 +4,7 @@
 #
 # Pi is the one runtime where this value cannot go stale. Its extension API hands
 # the live model object to every handler (ctx.model) and fires model_select
-# whenever /model or Ctrl+P changes it, so .pi/extensions/star-hooks.ts reads the
+# whenever /model or Ctrl+P changes it, so .pi/extensions/star-hooks/index.ts reads the
 # id at the prompt that will use it and prints a fresh line after every switch.
 # The other five trees have to work around a field that rides on session start
 # alone: Claude Code, Codex and Qwen Code inject a command that reads the session

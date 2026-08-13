@@ -3,9 +3,11 @@
 // Pi's extension point is TypeScript, not a command-hook table, so this file
 // plays the part .claude/settings.json, .codex/hooks.json, .cursor/hooks.json and
 // .qwen/settings.json play in the other trees: it is the registration, and the
-// three scripts under .pi/hooks/ are the logic, one copy per tree as everywhere
-// else. Pi discovers .pi/extensions/*.ts by itself once the project is trusted,
-// so there is nothing to register by hand and nothing to merge after an update.
+// three scripts beside this file are the logic, one copy per tree as everywhere
+// else. They sit here rather than in .pi/hooks/ because Pi reserves that name for
+// the old extensions directory and warns whenever it exists. Pi discovers
+// .pi/extensions/*/index.ts by itself once the project is trusted, so there is
+// nothing to register by hand and nothing to merge after an update.
 //
 // What it wires:
 //   - model-id provenance and the project-memory index, injected as one message
@@ -28,7 +30,7 @@ export default function (pi: ExtensionAPI) {
     let pending = true;
     let injectedModel = "";
 
-    const hook = (cwd: string, name: string) => join(cwd, CONFIG_DIR_NAME, "hooks", name);
+    const hook = (cwd: string, name: string) => join(cwd, CONFIG_DIR_NAME, "extensions", "star-hooks", name);
 
     // A hook that prints nothing has nothing to say — an empty memory store, or a
     // copy this project does not carry. A hook that cannot be run at all is not

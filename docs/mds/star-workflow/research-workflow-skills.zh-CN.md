@@ -78,13 +78,13 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-在 Claude、Cursor 和 Qwen Code 中，对应写法是 `/skill-name`（DSH、Kimi 与 Pi 写作 `/skill:skill-name`）：
+在 Claude、Cursor、Pi 和 Qwen Code 中，对应写法是 `/skill-name`（DSH 与 Kimi 写作 `/skill:skill-name`）：
 
 ```text
 /star-plan-coach 开放词汇检测与分割
 ```
 
-在 DSH、Kimi 与 Pi 中，写法是 `/skill:skill-name`：
+在 DSH 与 Kimi 中，写法是 `/skill:skill-name`：
 
 ```text
 /skill:star-plan-coach 开放词汇检测与分割
@@ -1245,7 +1245,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 | Cursor | `.cursor/skills/` | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
-| Pi | `.pi/skills/` | `/skill:star-*` |
+| Pi | `.pi/skills/` | `/star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |
 
 十五个目录名分别是：

@@ -14,14 +14,17 @@
 #
 # Pi has no command-hook protocol — its extension point is TypeScript — so this
 # copy takes no payload and prints the context as plain text. Wrapping it into a
-# message the model sees is .pi/extensions/star-hooks.ts's job, which is also why
+# message the model sees is .pi/extensions/star-hooks/index.ts's job, which is also why
 # there is no JSON encoder here: the four other trees encode because the runtime
 # reads their stdout as JSON, and Pi's reads it as text.
 
 # Every harness registers this script by its own path inside the project, so the
-# project root is two levels up from the script itself — no environment variable
-# and no payload field, which differ per harness.
-root="$(cd -- "$(dirname -- "$0")/../.." 2>/dev/null && pwd -P)" || exit 0
+# project root is derived from the script itself — no environment variable and no
+# payload field, which differ per harness. Three levels here, not the other trees'
+# two: Pi reserves .pi/hooks/ as the old name for extensions and warns when it
+# exists, so these scripts live beside the extension that runs them, one directory
+# deeper (.pi/extensions/star-hooks/).
+root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
 
 # An `env` memory is a fact about a machine, and machines change under it; six
 # months is where "recorded" stops implying "still true". The other three types

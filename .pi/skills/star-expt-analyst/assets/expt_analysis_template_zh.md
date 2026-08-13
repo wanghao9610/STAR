@@ -10,7 +10,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 # 实验分析 — <run>（<YYYY-MM-DD>）
 
-<!-- 由 /skill:star-expt-analyst 写入。对这个 run 的产出做只读审计，对照计划的预期打分。这里的每个数字
+<!-- 由 /star-expt-analyst 写入。对这个 run 的产出做只读审计，对照计划的预期打分。这里的每个数字
      在写下之前都按来源重开核实过。没什么可说的章节压成一行——绝不注水。 -->
 
 ## 1. 范围与证据基础
@@ -82,8 +82,8 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 ## 8. 建议与转交
 
 <!-- 一个未决项一个归属；本 skill 除这份报告外什么都不写。步骤未完成或红线命令仍待跑 →
-     /skill:star-plan-executor <slug>；§5 已达标、待 finalize → /skill:star-plan-executor <slug>（exec_status 归它）；
-     计划文本已不属实 → /skill:star-plan-reviser <slug>；命中 kill-criterion 或主张被推翻 →
-     /skill:star-plan-reviser / /skill:star-plan-coach / /skill:star-plan-decomposer；日志指向的代码缺陷 →
-     /skill:star-code-reviewer <slug>；环境损坏 → /skill:star-env-builder。需要新 run 才能拿到的指标：给出确切的、
+     /star-plan-executor <slug>；§5 已达标、待 finalize → /star-plan-executor <slug>（exec_status 归它）；
+     计划文本已不属实 → /star-plan-reviser <slug>；命中 kill-criterion 或主张被推翻 →
+     /star-plan-reviser / /star-plan-coach / /star-plan-decomposer；日志指向的代码缺陷 →
+     /star-code-reviewer <slug>；环境损坏 → /star-env-builder。需要新 run 才能拿到的指标：给出确切的、
      可直接粘贴的命令，绝不在这里执行。 -->

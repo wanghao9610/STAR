@@ -17,7 +17,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 # <Method> — <one line: what it is>
 
-<!-- Written by /skill:star-refs-reviewer. Every claim below comes from the paper; mark anything uncertain
+<!-- Written by /star-refs-reviewer. Every claim below comes from the paper; mark anything uncertain
      [unverified]. Sections with nothing to say collapse to one line — never pad. -->
 
 ## 1. TL;DR

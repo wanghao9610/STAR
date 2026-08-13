@@ -7,7 +7,7 @@ description: >-
   requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
   requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道 安装计划确认点，按 uv >
   pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 冒烟测试（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本快照写入
-  wkdrs/。只要用户运行 /skill:star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
+  wkdrs/。只要用户运行 /star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
   Bilingual (中/英) — also trigger in English whenever the user wants the project's conda env or venv
   created or rebuilt, needs dependencies resolved and installed, or wants the runtime environment
   verified.
@@ -17,7 +17,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名，不是描述。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`/star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名，不是描述。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `read` 读入，外加同一条消息里的一次 `bash` 调用（以项目根目录为工作目录），内容只有：
 
@@ -51,7 +51,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. `ENV_NAME` := 参数，否则 `CODE_NAME`。若参数是 `add <包名>…`，则进入 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的那个环境——不创建、不改名、不重建。
 3. 探测并记录（供安装计划与报告使用）：平台 + 架构；`nvidia-smi`（驱动支持的 CUDA 上限）；`nvcc --version` / `CUDA_HOME`（本机 toolkit，常缺失）；`$CONDA_HOME/bin/conda --version`；`uv --version`。
-4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/skill:star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
+4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
 
 ### Step 1：选择后端（确定性）
 
@@ -106,14 +106,14 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
 3. 本次生成的 requirements 文件（含冒烟诊断中补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
 4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向刚建好的环境（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
-5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/skill:star-plan-executor <leaf>` 现在有运行时了；`/skill:star-flow-status` 查看下一步。
+5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-flow-status` 查看下一步。
 
 
 ### Step 8：新增依赖（仅 add 模式）
 
 环境已经存在；本模式只往里装，并记录装了什么。它不创建、不改名、不重建——环境坏了是一次完整 run 的事（Step 2 的*原地验证修复*）。
 
-1. 按原则 1 从 `.env` 解析 `ENV_PY`。没有可用解释器 → 如实说明并建议跑一次完整的 `/skill:star-env-builder`；什么都不装。
+1. 按原则 1 从 `.env` 解析 `ENV_PY`。没有可用解释器 → 如实说明并建议跑一次完整的 `/star-env-builder`；什么都不装。
 2. 按 `references/installer_policy_zh.md` 给每个包归类——framework / runtime / optional / conda 专属——并说明各自会落进哪个 requirements 文件。
 3. **确认点**（原则 2——确认点之前不装任何东西）：呈现这些包、它们的类别、将要使用的版本与索引源、下载量大时给出估计、以及任何 CUDA 耦合；询问*批准并安装* / *调整* / *中止*。
 4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在红线上：把确切命令备好，不要跑。

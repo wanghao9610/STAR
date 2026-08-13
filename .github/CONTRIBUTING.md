@@ -56,7 +56,7 @@ mistaken for drift.
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
 | `.dsh` | DSH | `/skill:star-*` | `exit_plan_mode` only — the human turns plan mode on | `subagent`, no type parameter at all | `ask_user_question` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
-| `.pi` | Pi | `/skill:star-*` | none — the skill holds the gate itself | none — conventions §6.1 local fill | none — plain text |
+| `.pi` | Pi | `/star-*` | none — the skill holds the gate itself | none — conventions §6.1 local fill | none — plain text |
 | `.qwen` | Qwen Code | `/star-*` | `enter_plan_mode` / `exit_plan_mode` | `agent`, `subagent_type: Explore` / `general-purpose` | `ask_user_question` |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
@@ -191,9 +191,9 @@ mechanisms the other five trees lean on, and each has a settled substitute here:
 Three consequences worth knowing before you edit it:
 
 - **The involve gate is deliberately absent.** That hook exists to answer the permission prompt before
-  a file edit, and Pi ships no permission prompts at all. `.pi/hooks/` carries three scripts, not four,
+  a file edit, and Pi ships no permission prompts at all. `.pi/extensions/star-hooks/` carries three scripts, not four,
   and `execs/update.sh`'s `missing_hooks()` has no Pi row.
-- **Registration is code.** `.pi/extensions/star-hooks.ts` plays the part `.claude/settings.json` plays
+- **Registration is code, and the scripts sit beside it.** `.pi/extensions/star-hooks/index.ts` plays the part `.claude/settings.json` plays
   elsewhere, and Pi discovers it by itself once the project is trusted. It is in `HOOK_FILES`, not
   `HOOK_CONFIGS`: it holds no project settings, so an update replaces it rather than keeping it.
   The commit guard is the one hook whose shape genuinely differs — it prints the reason on stdout and

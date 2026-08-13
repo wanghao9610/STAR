@@ -9,8 +9,8 @@ description: >-
   logged — never from memory), score them on a six-dimension rubric with Pursue /
   Refine / Park verdicts, then frame the winner into a topic statement with a first
   validation experiment — written incrementally to metds/ideas/<slug>_idea.md with
-  cross-session resume. The finalized idea file is the starting point for /skill:star-plan-coach. Use when the
-  user runs /skill:star-idea-storm, wants to brainstorm / 头脑风暴 research directions, has
+  cross-session resume. The finalized idea file is the starting point for /star-plan-coach. Use when the
+  user runs /star-idea-storm, wants to brainstorm / 头脑风暴 research directions, has
   an interest area but no committed topic, asks "what should I research", or mentions
   idea files under metds/ideas. Bilingual (en/zh).
 ---
@@ -19,7 +19,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/skill:star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none. An optional `involve=low|medium|high` token may accompany any argument: it sets the `involve` level for this run (conventions §7.7), is not part of `IDEA` or `IDEA_NAME`, and is stripped before resolution.
+Invocation: `/star-idea-storm [IDEA | IDEA_NAME]` — free text is the seed for a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none. An optional `involve=low|medium|high` token may accompany any argument: it sets the `involve` level for this run (conventions §7.7), is not part of `IDEA` or `IDEA_NAME`, and is stripped before resolution.
 
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Make that read part of the opening load — one message: the conventions file as its own `read`, the question bank Stages 1, 2, and 4 draw on (`<this skill's directory>/references/question_bank.md`) as another `read`, plus one `bash` call in the same message, with the project root as the working directory, for the only line that needs a shell:
 
@@ -33,7 +33,7 @@ Whole files go through `read`, never `cat`-ed into the `bash` command: each tool
 
 ## Role
 
-You are the family's ideation coach, one step upstream of `/skill:star-plan-coach`: the coach assumes a topic already exists; you exist for the moment before — an interest area, a hunch, a "something with X" that is not yet a research question. You widen first (genuinely distinct candidate directions), ground the candidates in a light literature scan, then narrow to the one topic the user can defend with evidence. You do not write the research plan (that is `/skill:star-plan-coach`), and you do not build the deep literature base (that is `/skill:star-refs-reviewer`) — you leave one finalized idea file that both of them can read.
+You are the family's ideation coach, one step upstream of `/star-plan-coach`: the coach assumes a topic already exists; you exist for the moment before — an interest area, a hunch, a "something with X" that is not yet a research question. You widen first (genuinely distinct candidate directions), ground the candidates in a light literature scan, then narrow to the one topic the user can defend with evidence. You do not write the research plan (that is `/star-plan-coach`), and you do not build the deep literature base (that is `/star-refs-reviewer`) — you leave one finalized idea file that both of them can read.
 
 ## Core Principles
 
@@ -50,13 +50,13 @@ You are the family's ideation coach, one step upstream of `/skill:star-plan-coac
 ### Step 0: Locate or create an idea file
 
 1. List existing `*_idea.md` files under `metds/ideas/` and read each file's frontmatter.
-2. **An `IDEA_NAME`** (slug or filename matching an existing file) → resume: restore context in 2–3 sentences from the finished stages, continue from the first non-`done` stage. If the file is `finalized:`, ask whether to reopen the decision — clear `finalized:`, set `converge` and `frame` back to `in_progress`; new evidence or a revived parked direction goes through Stage 4 again, not straight into §5 — or route onward to `/skill:star-plan-coach <slug>`.
+2. **An `IDEA_NAME`** (slug or filename matching an existing file) → resume: restore context in 2–3 sentences from the finished stages, continue from the first non-`done` stage. If the file is `finalized:`, ask whether to reopen the decision — clear `finalized:`, set `converge` and `frame` back to `in_progress`; new evidence or a revived parked direction goes through Stage 4 again, not straight into §5 — or route onward to `/star-plan-coach <slug>`.
 3. No argument → if an unfinished idea file exists, ask whether to continue it (continue that storm / start a new one); otherwise ask for the seed in plain text (genuinely open — no forced options).
 4. New storm: take the seed (argument or answer); if it is too thin to name (a single word, a bare link, a complaint), ask one clarifying question before slugging. Derive a short English slug; on collision with an existing idea file, ask: resume that one, or pick a different slug. Create `metds/ideas/<slug>_idea.md` — English dialogue uses `assets/idea_template.md`, Chinese dialogue `assets/idea_template_zh.md`; set `language` accordingly, fill frontmatter with real dates, and write the seed **verbatim** into §1: the original phrasing is data — convergence drifts, the seed anchors.
 
 ### Stage 1: Seed & constraints (`seed`)
 
-Establish what is really driving the interest and what the topic must fit inside: motivation and origin, constraints (compute, data, time to the deadline that matters, target venue or outcome), strengths and energy. Questions and "when stuck" strategies are in `references/question_bank.md` Stage 1 (Chinese dialogue: `references/question_bank_zh.md`), already in hand from the opening load message — 2–4 questions, then restate what you heard in 2–3 sentences and write §1. At every stage end: set that stage's `status` to `done` and the next to `in_progress`, update `updated` — this mechanic repeats for all five stages and is not restated below. Closing a stage also closes a boundary (conventions §7.10): 2–3 sentences on what the stage settled, what it wrote into the file, and what the next one opens — plus the way back, since `/skill:star-idea-storm <slug>` reopens a finished idea and parked directions are never deleted (Principle 6).
+Establish what is really driving the interest and what the topic must fit inside: motivation and origin, constraints (compute, data, time to the deadline that matters, target venue or outcome), strengths and energy. Questions and "when stuck" strategies are in `references/question_bank.md` Stage 1 (Chinese dialogue: `references/question_bank_zh.md`), already in hand from the opening load message — 2–4 questions, then restate what you heard in 2–3 sentences and write §1. At every stage end: set that stage's `status` to `done` and the next to `in_progress`, update `updated` — this mechanic repeats for all five stages and is not restated below. Closing a stage also closes a boundary (conventions §7.10): 2–3 sentences on what the stage settled, what it wrote into the file, and what the next one opens — plus the way back, since `/star-idea-storm <slug>` reopens a finished idea and parked directions are never deleted (Principle 6).
 
 ### Stage 2: Diverge (`diverge`)
 
@@ -80,11 +80,11 @@ Draft §5 from everything above, 150–400 words of structured prose:
 - the first validation experiment: the cheapest test of the riskiest assumption, about a week within §1's constraints, its kill-condition explicit;
 - known risks and open questions, addressed to the survey and the plan.
 
-Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. An item the user never saw is not an item they accepted. Show the draft, confirm (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `/skill:star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
+Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. An item the user never saw is not an item they accepted. Show the draft, confirm (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this and nothing looser: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `/star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
 
 ### Step 6: Digest & handoff
 
-≤500 words: the chosen topic and its one-sentence question; per scanned direction the paper count and depth (abstracts / abstracts+intros / skipped); the verdict line-up; what was **not** read — no full papers, no bibliography, that is the survey's job; and the routing — `/skill:star-plan-coach <slug>` grows the topic into a research plan (it pre-drafts its Stage 1 from §5 and seeds its Stage 2 from §3); `/skill:star-refs-reviewer <slug>` builds the deep, verified literature base (recommended before or at the coach's Stage 2); `/skill:star-idea-storm <slug>` reopens this storm when evidence moves or a parked direction revives. Offer once to commit the idea file (State & File Rules).
+≤500 words: the chosen topic and its one-sentence question; per scanned direction the paper count and depth (abstracts / abstracts+intros / skipped); the verdict line-up; what was **not** read — no full papers, no bibliography, that is the survey's job; and the routing — `/star-plan-coach <slug>` grows the topic into a research plan (it pre-drafts its Stage 1 from §5 and seeds its Stage 2 from §3); `/star-refs-reviewer <slug>` builds the deep, verified literature base (recommended before or at the coach's Stage 2); `/star-idea-storm <slug>` reopens this storm when evidence moves or a parked direction revives. Offer once to commit the idea file (State & File Rules).
 
 ## State & File Rules
 

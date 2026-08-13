@@ -10,7 +10,7 @@ description: >-
   a read-only survey instead. Both paths then design a target architecture plus a migration table,
   execute only user-approved migrations one group at a time with per-group verification and git
   checkpoints, and write the spec to metds/codearc.md, cross-referenced in AGENTS.md.
-  Use when the user runs /skill:star-code-architect, wants a reference implementation or starter codebase for a
+  Use when the user runs /star-code-architect, wants a reference implementation or starter codebase for a
   plan, wants to set up / scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase.
   Bilingual (en/zh).
 ---
@@ -19,7 +19,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/skill:star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
+Invocation: `/star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
 
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load, issued as one message: the conventions file through its own `read`, never `cat`-ed into a `bash` command — a `bash` result past roughly 30 KB is spilled to a file that costs a second round trip to read back, and the conventions file alone is past that limit — plus one small `bash` call, with the project root as the working directory, for the one thing here only `bash` can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`. Sent together, the two calls still cost one round trip — and they are this skill's only unconditional load: every file under `references/` and `assets/` belongs to one branch or step and is read where that step cites it, not front-loaded.
 
@@ -33,7 +33,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 ## Core Principles
 
-1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/skill:star-plan-coach` first — or take a topic / URL directly and proceed without one.
+1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/star-plan-coach` first — or take a topic / URL directly and proceed without one.
 2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
 4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
@@ -46,7 +46,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which).
-3. If there is no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/skill:star-proj-adopt` routes in from. Otherwise ask: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
+3. If there is no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/star-proj-adopt` routes in from. Otherwise ask: *run `/star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
 5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (bootstrap)**. Real code present → **Branch B (organize)**. Only a handful of stray scripts → ask whether to bootstrap around them or organize what exists.
 
@@ -82,7 +82,7 @@ Follow `references/rebrand_checklist.md`: top-level package directory, all impor
 
 #### Step A7: Runtime smoke (STOP-line aware)
 
-If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan confirmation point.
+If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and smoke verification under its own install-plan confirmation point.
 
 #### Step A8: Survey the clone
 
@@ -122,7 +122,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C6: Report & hand off
 
-≤500 words: repo chosen (with license note), what ended up where, renames done + how many names were left unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/skill:star-plan-executor <leaf>` now has a place for the code to live; `/skill:star-flow-status` shows where each plan step stands.
+≤500 words: repo chosen (with license note), what ended up where, renames done + how many names were left unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a place for the code to live; `/star-flow-status` shows where each plan step stands.
 
 ## State & File Rules
 

@@ -10,7 +10,7 @@ description: >-
   codearc.md、UPSTREAM.md、requirements* 与 reference.bib：数字只来自结果汇总表，凡打印的命令都先
   验证其存在。最后跑一遍发布前检查（不通过就不能发布）——提交进仓库的密钥凭据、机器本地绝对路径、内网主机名、与已记录的
   上游许可证冲突的 LICENSE——并写出 wkdrs/release/RELEASE_<date>.md。它只做发布准备，绝不代为发布：
-  不 push、不建仓库、不打 tag、不上传权重。当用户运行 /skill:star-code-release，想开源 / 发布项目、想要
+  不 push、不建仓库、不打 tag、不上传权重。当用户运行 /star-code-release，想开源 / 发布项目、想要
   一份仓库 README，或想把散在 tasks/ 的代码收集进代码库时使用。Bilingual（中/英）。
 ---
 
@@ -18,7 +18,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-code-release [gather | polish | readme | check] [描述]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`/star-code-release [gather | polish | readme | check] [描述]`——不带参数按顺序跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这份文件就是动手前要装载的全部，用一条消息发出：规约整份走它自己的一次 `read` 读入——绝不 `cat` 进 `bash` 命令，因为 `bash` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约本身就已在这条线之外——同一条消息里再发一次小的 `bash` 调用（以项目根目录为工作目录），做这里只有 `bash` 能做的事，即本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；两者同发一条消息，谁都不必各占一趟往返。动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。
 
@@ -28,14 +28,14 @@ description: >-
 
 你是这个家族的最后一公里。上游所有 skill 都在为项目自己的记忆而写——计划、执行记录、分析报告、方法文档、结果汇总表。你为一个把仓库 clone 下来的陌生人而写：代码收集到 `metds/codearc.md` 指定的位置，对外发布的部分读起来清楚，README 由项目实际拥有的东西编译而成。别的 skill 让工作**可审计**，你让它**可读**。
 
-你收集、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。发布过程中越出写边界的问题一律转交：尚不存在的放置规则交 `/skill:star-code-architect`，宽范围的代码质量问题交 `/skill:star-code-reviewer`，缺失的方法文档交 `/skill:star-metd-summarize`，缺失或过期的结果汇总表交 `/skill:star-expt-analyst aggregate`，缺失的文献条目交 `/skill:star-refs-reviewer`，环境不可用交 `/skill:star-env-builder`，因移动而过期的计划文本交 `/skill:star-plan-reviser`。
+你收集、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。发布过程中越出写边界的问题一律转交：尚不存在的放置规则交 `/star-code-architect`，宽范围的代码质量问题交 `/star-code-reviewer`，缺失的方法文档交 `/star-metd-summarize`，缺失或过期的结果汇总表交 `/star-expt-analyst aggregate`，缺失的文献条目交 `/star-refs-reviewer`，环境不可用交 `/star-env-builder`，因移动而过期的计划文本交 `/star-plan-reviser`。
 
 ## 核心原则
 
 1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，它同时规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造——而公开 README 里的编造是代价最高的那种。
 2. **数字只来自结果汇总表；命令只来自磁盘。** README 里每个数字都从 `wkdrs/results/results.md` 连同其背后的 run 一起抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 自己就写明它不是引用数字的来源），更不来自记忆。README 打印的每条命令都先解析：脚本文件存在、配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级说法是主张："state-of-the-art"、"outperforms X"、"best" 只在结果汇总表自己的结论支撑时才出现。
-3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/skill:star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
-4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/skill:star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
+3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是把整个仓库收拾一遍的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
+4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
 5. **发布前检查项是阻断性的，且在宣布"就绪"之前就查。** 提交进仓库的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。带着未清的阻断项收尾的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **你做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，且是用户的决定——你把仓库准备好，把命令交回去。红线原样适用：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里没有的数字就留成 TODO。
 
@@ -92,9 +92,9 @@ description: >-
 - 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有产出方；发布运行动手改自己的输入，就不算编译了。绝不写结果汇总表 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
 - 什么都不删。被移入的文件是从原处移走的；没移入的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
-- 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未写明的目录——那是 `/skill:star-code-architect` 的。
+- 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未写明的目录——那是 `/star-code-architect` 的。
 - 绝不发布：不 `git push`、不改 remote 或分支、不打 tag、不 `gh repo create` / `gh release`、不把权重或数据上传到任何主机。准备好的命令写进报告。
-- 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `/skill:star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
+- 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `/star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
 - Git：每个完成的阶段一次提交，只 stage 该阶段的路径（规约 §1）；Step 0 时就已 dirty 的路径绝不 stage。
 - 本 skill 不设置任何计划 frontmatter，也不创建 run 目录；它的审计线索是 `wkdrs/release/RELEASE_<date>.md`、README 的溯源标记，以及各阶段的提交。
 

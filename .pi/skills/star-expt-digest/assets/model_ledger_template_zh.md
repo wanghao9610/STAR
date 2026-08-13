@@ -11,7 +11,7 @@ artifacts_without_trail: <n>
 
 # Model Ledger
 
-<!-- 由 /skill:star-expt-digest ledger 写入。本文件是把磁盘上每份已注册产物的 model_trail 汇总而成的**生成物**，
+<!-- 由 /star-expt-digest ledger 写入。本文件是把磁盘上每份已注册产物的 model_trail 汇总而成的**生成物**，
      从不手工维护，在这里改它不产生任何效果。要修正某一行，去改它来源产物里的 trail，然后重新生成。
      每个值都抄自某条 trail，这里不做任何推断。trail 是自报的（规约 §8），本模型记录表因此继承同一限制：
      它报告的是各运行时的自述，而非经核实的出处。 -->

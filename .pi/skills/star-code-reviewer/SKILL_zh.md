@@ -5,7 +5,7 @@ description: >-
   文件名）审查该计划触及的文件并做符合度 检查（§3 任务是否实现、§4 交付物是否在磁盘上、§5 完成判据是否有支撑）；传已存在的路径审查该路径；传 `diff` 或 git range
   只审改动过的文件。经 .env 的 conda 环境收集低开销静态证据（绝不安装工具），按 六维评分表（docstring、命名、简洁性、STAR 约定、正确性可疑写法、计划符合度）收集问题项，
   blocker/major 级问题项复核后才写入报告，报告写入 wkdrs/，随后提供逐项批准的修复轮——只修 例行且不改行为的问题；功能缺口转给 star-plan-executor，计划偏差转给
-  star-plan-reviser，结构性 重组转给 star-code-architect。当用户运行 /skill:star-code-reviewer、一次运行点名它是下一步动作，或想审查 /
+  star-plan-reviser，结构性 重组转给 star-code-architect。当用户运行 /star-code-reviewer、一次运行点名它是下一步动作，或想审查 /
   审计代码质量、检查编码 规范或 docstring、核对某个计划的代码实现是否完备时使用。Bilingual（中/英）。
 ---
 
@@ -13,7 +13,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [描述]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [描述]`——不带参数审查 `${CODE_NAME}/` 全部；计划名（slug / 数字前缀 / 文件名）审查该计划触及的代码并做符合度检查；已存在的文件或目录审查该路径；`diff` 审查未提交改动，git range（`HEAD~3..`、`main..feature`）审查该范围改动的文件。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。动手前用一条消息装齐全部输入：一次 `read` 读规约文件，一次 `read` 读 `<本 skill 所在目录>/references/review_rubric_zh.md`，外加同一条消息里一次 `bash` 调用（以项目根目录为工作目录），只带这一行：
 
@@ -29,14 +29,14 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**；`star-code-release` 负责发布前的最后一遍清扫——确定去处、密钥、机器本地路径——并且默认本轮代码审查已经做过。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份写进文件的、证据支撑的审查报告；可选地，加上逐项批准的例行修复。
 
-你审查与润色；你不实现功能、不修订计划、不重组代码库、不跑实验。审查发现越过写边界的问题一律转交：功能缺口交 `/skill:star-plan-executor`，计划文本偏差交 `/skill:star-plan-reviser`，结构性重组交 `/skill:star-code-architect`，环境不可用交 `/skill:star-env-builder`。
+你审查与润色；你不实现功能、不修订计划、不重组代码库、不跑实验。审查发现越过写边界的问题一律转交：功能缺口交 `/star-plan-executor`，计划文本偏差交 `/star-plan-reviser`，结构性重组交 `/star-code-architect`，环境不可用交 `/star-env-builder`。
 
 ## 核心原则
 
 1. **评判依据是成文的；每条问题项都要引用。** 规则来自 AGENTS.md（尤其 §2 简洁、§3 外科手术式修改、§8 布局、§9 运行时）、`metds/codearc.md`（若存在：放置规则、命名约定、改名残留），以及计划模式下计划的 §2–§5。每条问题项携带 {file:line、违反的规则、证据、具体修法}；没有成文评判依据支撑的抱怨是风格偏好，不是问题项。评分表见 `references/review_rubric_zh.md`。
 2. **广收集，先核实再报告。** 收集一律交给只读收集遍——一个没参与过这份代码的上下文——但每条要进报告的 blocker/major 问题项，主 agent 都要重读被引用的代码确认；站不住的降级或丢弃。评价一份 review 看的是问题项的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
 3. **符合度对照磁盘打分，绝不对照日志。** 计划模式下，§3 任务映射为 `implemented` / `partial` / `missing` 并给出对应位置，§4 交付物查磁盘，§5 完成判据查支撑机制——EXEC_LOG 的声明要对照实际代码核实，绝不采信（reviser 的纪律，应用到代码上）。
-4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出是问题项的输入，不替代读代码。环境不可用 → 审查降级为纯阅读，报告里写明，并建议 `/skill:star-env-builder`。绝不改动环境。
+4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出是问题项的输入，不替代读代码。环境不可用 → 审查降级为纯阅读，报告里写明，并建议 `/star-env-builder`。绝不改动环境。
 5. **修复是例行的、逐项批准的、不改行为的。** 报告之后提供修复轮，只覆盖 docstring、作用域内改名、unused imports、本项目引入的死代码。每项先单独提问批准再写入——一次一条问题项（或一批同类项），标出推荐——写入后复检。绝不打包默批；绝不顺手"改进"相邻代码（AGENTS.md §3）。
 6. **修复轮之外一律只读；红线适用。** 不改计划文件，不跨代码库移动或重命名模块，绝不为"验证"完成判据而启动训练、全量评测或高成本 API 调用——这里的符合度检查是静态的。codearc.md 改名残留清单上的名称（registry 字符串、config `type:` 键、checkpoint 前缀）只标记，绝不动。
 
@@ -60,7 +60,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 2：低开销静态证据
 
-经 `.env` 的 conda 环境：对范围运行 `python -m compileall -q`，必跑。若该环境已装 ruff（优先）或 flake8，对范围运行并把输出留作证据输入。绝不安装或升级任何东西（那是 `/skill:star-env-builder` 的）。环境不可用 → 跳过工具，报告中标记**纯阅读审查**，建议 `/skill:star-env-builder`。
+经 `.env` 的 conda 环境：对范围运行 `python -m compileall -q`，必跑。若该环境已装 ruff（优先）或 flake8，对范围运行并把输出留作证据输入。绝不安装或升级任何东西（那是 `/star-env-builder` 的）。环境不可用 → 跳过工具，报告中标记**纯阅读审查**，建议 `/star-env-builder`。
 
 **全树筛查**,无论本次审查范围是什么、环境好不好用,都对整个 `${CODE_NAME}/` 跑一遍——它只用到 grep 和 `wc`,环境坏了照样能跑,而跑不动工具的那一轮审查,恰恰最需要它。评分表里有两类"永远是 blocker"的问题,范围一收窄就再也看不见了,而收窄恰恰是常态:
 
@@ -87,7 +87,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 6：聊天摘要
 
-≤500 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`），然后若有例行问题项，提议修复轮——用户也可以就此打住；写出的报告本身就是完整交付物。
+≤500 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`），然后若有例行问题项，提议修复轮——用户也可以就此打住；写出的报告本身就是完整交付物。
 
 ### Step 7：可选修复轮（仅例行项）
 
@@ -100,8 +100,8 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 ## 状态与文件规则
 
 - 报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`，绝不放进 `${CODE_NAME}/`。
-- 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类问题项转给 `/skill:star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
-- 绝不移动、重命名或删除文件与目录——结构性变更属于 `/skill:star-code-architect`。残留清单名称只标记，绝不改名。
+- 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类问题项转给 `/star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
+- 绝不移动、重命名或删除文件与目录——结构性变更属于 `/star-code-architect`。残留清单名称只标记，绝不改名。
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的红线同样适用）。
 - Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。在某次 run 的执行分支上，这次提交落在分支上、赶在它合并之前（规约 §11）；本 skill 仍然绝不切分支。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计线索就是报告文件，外加（若有）那次修复提交。

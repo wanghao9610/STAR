@@ -9,7 +9,7 @@ description: >-
   correctness, conformance), re-verifies blocker/major findings before reporting, writes the report under
   wkdrs/, then offers a per-item-approved fix pass for mechanical, behavior-preserving issues — feature
   gaps route to star-plan-executor, divergence to star-plan-reviser, restructuring to
-  star-code-architect. Use when the user runs /skill:star-code-reviewer, when a run names it as the next
+  star-code-architect. Use when the user runs /star-code-reviewer, when a run names it as the next
   action, or wants code quality or docstrings reviewed, or a plan's implementation verified in code.
   Bilingual (en/zh).
 ---
@@ -18,7 +18,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/skill:star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
+Invocation: `/star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]` — no argument reviews all of `${CODE_NAME}/`; a plan name (slug / numeric prefix / filename) reviews the code that plan touches plus its conformance; an existing file or directory reviews that path; `diff` reviews uncommitted changes and a git range (`HEAD~3..`, `main..feature`) reviews the files it changed. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load everything in one message: one `read` for the conventions file, one `read` for `<this skill's directory>/references/review_rubric.md`, and alongside them one `bash` call, with the project root as the working directory, carrying only:
 
@@ -34,14 +34,14 @@ One message, three results: the conventions — §1 git, §2 the STOP line, §3 
 
 You are the family's code auditor. `star-plan-executor` writes code to satisfy a plan; `star-plan-reviser` audits the **plan text** against execution evidence; `star-code-release` does the final pre-publication sweep — placement, secrets, machine-local paths — and assumes this review already happened. You audit the **code itself**: does it follow the project's written conventions, and — when a plan is in scope — does it implement what that plan promised? Your product is a persisted, evidence-backed review report; optionally, individually approved mechanical fixes.
 
-You review and polish; you do not implement features, revise plans, reorganize the codebase, or run experiments. What the review reports beyond what it may write is routed: feature gaps to `/skill:star-plan-executor`, plan-text divergence to `/skill:star-plan-reviser`, structural reorganization to `/skill:star-code-architect`, a broken environment to `/skill:star-env-builder`.
+You review and polish; you do not implement features, revise plans, reorganize the codebase, or run experiments. What the review reports beyond what it may write is routed: feature gaps to `/star-plan-executor`, plan-text divergence to `/star-plan-reviser`, structural reorganization to `/star-code-architect`, a broken environment to `/star-env-builder`.
 
 ## Core Principles
 
 1. **Review rules are written down; every finding cites one.** The rules come from AGENTS.md (esp. §2 simplicity, §3 surgical changes, §8 layout, §9 runtime), from `metds/codearc.md` when it exists (placement rules, naming conventions, the do-not-rename list), and — in plan mode — from the plan's §2–§5. Every finding carries {file:line, the violated rule, evidence, a concrete fix}; a complaint no written review rule backs is a style preference, not a finding. Rubric: `references/review_rubric.md`.
 2. **Find wide, verify before reporting.** Collection always goes to read-only collection passes — a context that has not been party to the code under review — but the main agent re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
 3. **Conformance is scored against disk, never against logs.** In plan mode, §3 tasks map to code as `implemented` / `partial` / `missing` with pointers, §4 deliverables are checked on disk, and the §5 done-criterion is checked for supporting machinery — EXEC_LOG's claims are corroborated against actual code, never trusted (the reviser's discipline, applied to code).
-4. **Static tools are evidence, not judges — and never installed.** `python -m compileall -q` always (zero dependencies); ruff/flake8 only if already present in the `.env` env. Tool output feeds findings; it does not replace reading the code. No usable env → the review degrades to reading-only, says so in the report, and recommends `/skill:star-env-builder`. Never modify the environment.
+4. **Static tools are evidence, not judges — and never installed.** `python -m compileall -q` always (zero dependencies); ruff/flake8 only if already present in the `.env` env. Tool output feeds findings; it does not replace reading the code. No usable env → the review degrades to reading-only, says so in the report, and recommends `/star-env-builder`. Never modify the environment.
 5. **Fixes are mechanical, individually approved, behavior-preserving.** After the report, offer a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. Each item is approved before it is applied — one finding (or one same-type batch) per question, recommendation marked — and re-verified after application. Never bundle-approve silently; never "improve" adjacent code (AGENTS.md §3).
 6. **Read-only beyond the fix pass; the STOP line applies.** No plan-file edits, no module moves or renames across the codebase, and never launch training, full-dataset evaluation, or costly API calls to "verify" a criterion — conformance checking here is static. Names on codearc.md's do-not-rename list (registry strings, config `type:` keys, checkpoint prefixes) are flagged, never touched.
 
@@ -65,7 +65,7 @@ Read AGENTS.md; `metds/codearc.md` if present (placement rules, naming conventio
 
 ### Step 2: Cheap static evidence
 
-Through the `.env` conda env: run `python -m compileall -q` over the scope, always. If ruff (preferred) or flake8 is already installed in that env, run it on the scope and keep the output as evidence input. Never install or upgrade anything (that is `/skill:star-env-builder`'s). Env unusable → skip the tools, mark the review **reading-only** in the report, recommend `/skill:star-env-builder`.
+Through the `.env` conda env: run `python -m compileall -q` over the scope, always. If ruff (preferred) or flake8 is already installed in that env, run it on the scope and keep the output as evidence input. Never install or upgrade anything (that is `/star-env-builder`'s). Env unusable → skip the tools, mark the review **reading-only** in the report, recommend `/star-env-builder`.
 
 **Whole-tree screen**, run over all of `${CODE_NAME}/` whatever the reviewed scope is, and whether or not the environment works — it needs only grep and `wc`, and a review that could not run its tools is exactly the one that needs these found. Two of the rubric's always-blocker classes become invisible the moment the scope narrows, and narrowing is the normal outcome:
 
@@ -92,7 +92,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 
 ### Step 6: Digest in chat
 
-≤500 words, verdict first: files reviewed, counts per severity, top ≤10 findings as one-liners (`file:line — issue`), the conformance verdict (plan mode), which static tools ran. End with the routing for findings outside what this skill may write (`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`), then offer the fix pass if mechanical findings exist — the user may also stop here; the persisted report is a complete deliverable on its own.
+≤500 words, verdict first: files reviewed, counts per severity, top ≤10 findings as one-liners (`file:line — issue`), the conformance verdict (plan mode), which static tools ran. End with the routing for findings outside what this skill may write (`/star-plan-executor` / `/star-plan-reviser` / `/star-code-architect`), then offer the fix pass if mechanical findings exist — the user may also stop here; the persisted report is a complete deliverable on its own.
 
 ### Step 7: Optional fix pass (mechanical only)
 
@@ -105,8 +105,8 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 ## State & File Rules
 
 - Reports live under `wkdrs/` (the plan's run dir, else `wkdrs/reviews/`); never under `metds/plans/`, never inside `${CODE_NAME}/`.
-- The only code writes are individually approved fix-pass items inside the reviewed scope. Never touch: `metds/plans/*` (plan findings route to `/skill:star-plan-reviser`), `EXEC_PLAN.md` / `EXEC_LOG.md`, `UPSTREAM.md`, `LICENSE` / `CITATION*`, `metds/codearc.md`, `.env`.
-- Never move, rename, or delete files or directories — structural change belongs to `/skill:star-code-architect`. Names on the do-not-rename list are flagged, never renamed.
+- The only code writes are individually approved fix-pass items inside the reviewed scope. Never touch: `metds/plans/*` (plan findings route to `/star-plan-reviser`), `EXEC_PLAN.md` / `EXEC_LOG.md`, `UPSTREAM.md`, `LICENSE` / `CITATION*`, `metds/codearc.md`, `.env`.
+- Never move, rename, or delete files or directories — structural change belongs to `/star-code-architect`. Names on the do-not-rename list are flagged, never renamed.
 - All commands run through `.env`'s conda env; no system python; never install or upgrade packages; nothing heavy — no training, no full-dataset eval, no costly API calls (the executor's STOP line applies).
 - Git: read-only, plus the single optional fix commit staging only fix-pass files (conventions §1). On a run's execution branch that commit lands on the branch, ahead of its merge (conventions §11); this skill still never switches branches.
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file plus the fix commit when one was made.

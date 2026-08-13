@@ -68,7 +68,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 ## 7. 回填记录
 
-<!-- 由 `/skill:star-proj-adopt backfill` 追加，每次运行一个带日期的块。每行：leaf、写入的字段、值，以及支持
+<!-- 由 `/star-proj-adopt backfill` 追加，每次运行一个带日期的块。每行：leaf、写入的字段、值，以及支持
      它的清单 id。用户否掉的 leaf 记为"已否决"——那是一个值得留存的决定，不是一处空白。 -->
 
 ### <YYYY-MM-DD>

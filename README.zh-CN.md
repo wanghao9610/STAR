@@ -87,12 +87,13 @@ star-ai-research/
 ├── .cursor/hooks/          # Cursor 的会话钩子
 ├── .dsh/hooks/             # DSH 的会话钩子，登记在 .dsh/hooks.json（见分工具配置）
 ├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
-├── .pi/hooks/              # Pi 的会话钩子，由 .pi/extensions/star-hooks.ts 接线
+├── .pi/extensions/         # Pi 的会话钩子：三个脚本，由 star-hooks/index.ts 接线
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
+├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star
+├── .pi/settings.json       # Pi 的项目设置：让技能发现不扫 .agents/skills
 ├── .pi/APPEND_SYSTEM.md    # Pi 常驻的项目规则：该按哪个技能根目录执行
-├── .pi/themes/             # Pi 的可选 TUI 主题；不选就不生效
 ├── .vscode/                # 编辑器与调试配置
 ├── .github/                # STAR 自身的维护 CI；用于你的项目时请删除
 ├── .env.example            # 本地运行环境配置示例
@@ -257,7 +258,7 @@ bash .kimi-code/hooks/install.sh   # Kimi Code
 bash .dsh/hooks/install.sh         # DSH
 ```
 
-两者各自写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`——写之前先备份该文件；任一重复运行都不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 另外在 `.pi/themes/` 下带了两套可选 TUI 主题 `claude-dark` 与 `claude-light`，观感接近 Claude Code；没有任何地方会自动选中它们，用 `/settings` 或 `pi --use-theme claude-dark` 自行挑选。它既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，而它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对结果。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它，`model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+两者各自写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`——写之前先备份该文件；任一重复运行都不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，而它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对结果。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它，`model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
@@ -304,7 +305,7 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | DSH | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
 | Kimi Code | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
-| Pi | `/skill:star-<name>` | `/skill:star-plan-coach 开放词汇检测` |
+| Pi | `/star-<名>` | `/star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
 七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。
@@ -369,7 +370,7 @@ bash execs/update.sh
 
 - `.cursor/rules/skill-roots.mdc`——各个 skill 根目录归哪个工具所有，以及 Cursor 该跟随哪一份副本
 - `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
-- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
+- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 

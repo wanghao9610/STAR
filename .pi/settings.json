@@ -1,0 +1,6 @@
+{
+	"skills": [
+		"!**/.agents/skills/**"
+	],
+	"enableSkillCommands": false
+}

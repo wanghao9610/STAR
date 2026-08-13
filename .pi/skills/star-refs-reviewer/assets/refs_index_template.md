@@ -1,6 +1,6 @@
 # Reference Index — <topic> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-refs-reviewer (model_id: <model id, copied verbatim from what your runtime states this session — Pi injects it before the first turn and again whenever the model changes; "unrecorded" only if the session names none>). This file is the audit trail for reference.bib: every entry's
+<!-- Written by /star-refs-reviewer (model_id: <model id, copied verbatim from what your runtime states this session — Pi injects it before the first turn and again whenever the model changes; "unrecorded" only if the session names none>). This file is the audit trail for reference.bib: every entry's
      origin is recorded here, so any field in the bib can be re-checked against the record it came
      from. An entry with no row here is not allowed to exist. -->
 
@@ -39,7 +39,7 @@
      sub-signals with their fetch dates, then the weighted total. `*` marks a partial total (a
      component unfetched, weights renormalized); `new` marks papers ≤18 months old. Stars only for
      a repo the paper's own page names — an unofficial repo is noted here, never scored. Metrics
-     drift: the dates say how fresh, and /skill:star-refs-reviewer score rebuilds this table. -->
+     drift: the dates say how fresh, and /star-refs-reviewer score rebuilds this table. -->
 
 | Citekey | Cites/yr (fetched) | Venue tier | Stars (repo, fetched) | Score |
 | --- | --- | --- | --- | --- |
@@ -62,6 +62,6 @@
 ## 8. Next Actions
 
 <!-- Gaps worth another pass (a thin category, a sub-topic not covered). Routing: sharpening the
-     positioning → /skill:star-plan-coach §2 Related Work & Positioning; one new paper later →
-     /skill:star-refs-reviewer <arxiv-id>; re-checking the bib → /skill:star-refs-reviewer verify; refreshing
-     drifted citation and star metrics → /skill:star-refs-reviewer score. -->
+     positioning → /star-plan-coach §2 Related Work & Positioning; one new paper later →
+     /star-refs-reviewer <arxiv-id>; re-checking the bib → /star-refs-reviewer verify; refreshing
+     drifted citation and star metrics → /star-refs-reviewer score. -->

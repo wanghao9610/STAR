@@ -25,7 +25,7 @@
 | 根目录存在 `LICENSE` | 阻断 | 由用户选择 license；写明下面 §5 记录的约束并询问。绝不替用户选 |
 | 它与 `metds/codearc.md` §5 记录的上游许可证兼容 | 冲突时阻断 | 精确报出冲突——"上游是 GPL-3.0，根 LICENSE 是 MIT"——然后到此为止。解决许可证冲突是法律决定，不是 skill 的 |
 | `${CODE_NAME}/` 下上游的 `LICENSE` / `CITATION*` 仍在原处 | 被删则阻断 | 从 git 历史恢复 |
-| 代码库基于某个仓库搭建时存在 `${CODE_NAME}/UPSTREAM.md` | major | 由 `/skill:star-code-architect` 记录来源 |
+| 代码库基于某个仓库搭建时存在 `${CODE_NAME}/UPSTREAM.md` | major | 由 `/star-code-architect` 记录来源 |
 | README 的 Acknowledgement 写明了上游仓库与核心论文 | major | 从 `UPSTREAM.md` 和 `metds/refs/refs_index.md` 编译 |
 | 拷进来但没有署名的第三方代码 | major | 写明文件及其出处（若还能追溯）；否则标出来交给用户 |
 

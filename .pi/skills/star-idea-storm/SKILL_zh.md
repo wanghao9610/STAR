@@ -5,7 +5,7 @@ description: >-
   彼此真正不同的候选方向，对入围方向做摘要级文献扫描（文件中出现的每篇论文都转录自本次运行抓取的记录并
   登记来源 URL——绝不凭记忆写），按六维评分表打分并给出 Pursue / Refine / 搁置裁决，最后把胜出方向
   写成带首个验证实验的选题陈述——增量写入 metds/ideas/<slug>_idea.md，支持跨会话续写。定稿的 idea 文件
-  可直接输入给 /skill:star-plan-coach。只要用户运行 /skill:star-idea-storm、想头脑风暴 / brainstorm 研究方向、有兴趣
+  可直接输入给 /star-plan-coach。只要用户运行 /star-idea-storm、想头脑风暴 / brainstorm 研究方向、有兴趣
   领域但还没定选题、问"我该研究什么"，或提到 metds/ideas 下的 idea 文件，都应使用本 skill。Bilingual
   (中/英) — also trigger in English whenever the user wants to brainstorm research directions, has an
   interest area but no committed topic, or mentions idea files under metds/ideas.
@@ -15,7 +15,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `IDEA` 或 `IDEA_NAME`，解析前先剥离。
+调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作为新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `IDEA` 或 `IDEA_NAME`，解析前先剥离。
 
 **通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读放进开场那一条装载消息——规约文件单独一次 `read`，Stage 1、2、4 都要用的问题库（`<本 skill 所在目录>/references/question_bank_zh.md`）再单独一次 `read`，外加同一条消息里的一次 `bash` 调用（以项目根目录为工作目录），只跑非 `bash` 不可的那一行：
 
@@ -29,7 +29,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 角色
 
-你是这个家族的选题引导者，位于 `/skill:star-plan-coach` 上游一步：coach 假设选题已经存在，你负责更早的那个时刻——一个兴趣领域、一个直觉、一句"想做点 X 相关的"，还不成其为研究问题。先放宽（彼此真正不同的候选方向），再用轻量文献扫描给候选托底，最后收窄到一个用户能拿证据辩护的选题。你不写研究计划（那是 `/skill:star-plan-coach` 的），也不建深度文献库（那是 `/skill:star-refs-reviewer` 的）——你留下一份定稿的 idea 文件，供它们俩阅读。
+你是这个家族的选题引导者，位于 `/star-plan-coach` 上游一步：coach 假设选题已经存在，你负责更早的那个时刻——一个兴趣领域、一个直觉、一句"想做点 X 相关的"，还不成其为研究问题。先放宽（彼此真正不同的候选方向），再用轻量文献扫描给候选托底，最后收窄到一个用户能拿证据辩护的选题。你不写研究计划（那是 `/star-plan-coach` 的），也不建深度文献库（那是 `/star-refs-reviewer` 的）——你留下一份定稿的 idea 文件，供它们俩阅读。
 
 ## 核心原则
 
@@ -46,13 +46,13 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 ### Step 0：定位或新建 idea 文件
 
 1. 列出 `metds/ideas/` 下现有的 `*_idea.md`，读取各文件的 frontmatter。
-2. **带 `IDEA_NAME`**（slug 或文件名命中现有文件）→ 续写：用 2–3 句从已完成阶段恢复上下文，从第一个非 `done` 阶段继续。若文件已 `finalized:`，询问是重开决策——清除 `finalized:`，把 `converge` 与 `frame` 退回 `in_progress`；新证据或复活的搁置方向要重新走一遍 Stage 4，不能直接改 §5——还是转去 `/skill:star-plan-coach <slug>`。
+2. **带 `IDEA_NAME`**（slug 或文件名命中现有文件）→ 续写：用 2–3 句从已完成阶段恢复上下文，从第一个非 `done` 阶段继续。若文件已 `finalized:`，询问是重开决策——清除 `finalized:`，把 `converge` 与 `frame` 退回 `in_progress`；新证据或复活的搁置方向要重新走一遍 Stage 4，不能直接改 §5——还是转去 `/star-plan-coach <slug>`。
 3. 不带参数 → 若存在未完成的 idea 文件，确认是否继续（选项如：继续那次风暴 / 新开一次）；否则用普通文本问种子（真正的开放题——不硬给选项）。
 4. 新开风暴：拿到种子（参数或回答）；若薄到没法起名（一个词、一条裸链接、一句抱怨），先问一个澄清问题再起 slug。生成简短英文 slug；与现有 idea 文件撞名时询问：续写那份，还是换个 slug。创建 `metds/ideas/<slug>_idea.md`——英文对话用 `assets/idea_template.md`，中文对话用 `assets/idea_template_zh.md`；相应设置 `language`，用真实日期填好 frontmatter，并把种子**原话**写进 §1：原始表述本身就是数据——收敛会漂移，种子是锚。
 
 ### Stage 1：种子与约束（`seed`）
 
-弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`），开场那条装载消息已一并装入——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`/skill:star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
+弄清兴趣背后真正的驱动力，以及选题必须落在其中的边界：动机与来历、约束（算力、数据、离要紧截止还有多久、目标 venue 或产出形态）、强项与热情所在。问题与"卡住时"策略见 `references/question_bank.md` Stage 1（中文对话读 `references/question_bank_zh.md`），开场那条装载消息已一并装入——2–4 个问题，然后用 2–3 句复述你听到的，写入 §1。每个阶段结束时：把该阶段 `status` 改为 `done`、下一阶段改为 `in_progress`，更新 `updated`——这套动作五个阶段都一样，下文不再重复。收尾一个阶段同时也是收束一个边界（规约 §7.10）：用 2–3 句讲清本阶段定下了什么、往文件里写了什么、下一阶段将打开什么——并点明退路：`/star-idea-storm <slug>` 可以重开一份已完成的 idea，被搁置的方向也从不删除（原则 6）。
 
 ### Stage 2：发散（`diverge`）
 
@@ -76,11 +76,11 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - 首个验证实验：对最危险假设的最便宜检验，在 §1 约束内约一周可跑完，kill-condition 写明白；
 - 已知风险与待解问题，留给文献调研和研究计划去追。
 
-按评分表的选题陈述关卡（Part C）检查草稿；把不达标项落到正文——最多 5 条，按重要性排序，每条一行：没过哪一关、缺了什么、怎么改——再逐条修掉，或由用户明确接受。用户没见过的条目，不算用户接受过的条目。展示草稿，确认（选项如："写入文件" / "需要修改"）；确认后写入 §5，并在 frontmatter 加 `finalized: <日期>`——重开过的文件替换旧日期。`finalized:` 的含义就是这个，没有更宽松的解释：五个阶段全部 `done`（或 `skipped` 并标注）、关卡跑过并给出了答复、陈述经用户确认。它是 `/skill:star-plan-coach` 判断能否信任这份文件作种子的信号；除此之外没有任何东西会设上它，重开 Stage 4 或 5 则清除它。
+按评分表的选题陈述关卡（Part C）检查草稿；把不达标项落到正文——最多 5 条，按重要性排序，每条一行：没过哪一关、缺了什么、怎么改——再逐条修掉，或由用户明确接受。用户没见过的条目，不算用户接受过的条目。展示草稿，确认（选项如："写入文件" / "需要修改"）；确认后写入 §5，并在 frontmatter 加 `finalized: <日期>`——重开过的文件替换旧日期。`finalized:` 的含义就是这个，没有更宽松的解释：五个阶段全部 `done`（或 `skipped` 并标注）、关卡跑过并给出了答复、陈述经用户确认。它是 `/star-plan-coach` 判断能否信任这份文件作种子的信号；除此之外没有任何东西会设上它，重开 Stage 4 或 5 则清除它。
 
 ### Step 6：Digest 与交棒
 
-≤500 字：选定的选题及其一句话问题；每个扫描过的方向的论文数与深度（abstracts / abstracts+intros / skipped）；每个方向的裁决；**没有**读什么——没读全文、没建文献库，那是调研的活；以及转交去向——`/skill:star-plan-coach <slug>` 把选题长成研究计划（它会从 §5 预填自己的 Stage 1、用 §3 起步自己的 Stage 2）；`/skill:star-refs-reviewer <slug>` 建立深度、可核验的文献库（建议在 coach 的 Stage 2 之前或之中跑）；`/skill:star-idea-storm <slug>` 在证据变化或搁置方向复活时重开这次风暴。并就 idea 文件提供一次提交提议（见状态与文件规则）。
+≤500 字：选定的选题及其一句话问题；每个扫描过的方向的论文数与深度（abstracts / abstracts+intros / skipped）；每个方向的裁决；**没有**读什么——没读全文、没建文献库，那是调研的活；以及转交去向——`/star-plan-coach <slug>` 把选题长成研究计划（它会从 §5 预填自己的 Stage 1、用 §3 起步自己的 Stage 2）；`/star-refs-reviewer <slug>` 建立深度、可核验的文献库（建议在 coach 的 Stage 2 之前或之中跑）；`/star-idea-storm <slug>` 在证据变化或搁置方向复活时重开这次风暴。并就 idea 文件提供一次提交提议（见状态与文件规则）。
 
 ## 状态与文件规则
 

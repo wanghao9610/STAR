@@ -1,4 +1,4 @@
-<!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <模型 id，照抄运行时本会话为你声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded"> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by /star-code-release on <YYYY-MM-DD> · model_id: <模型 id，照抄运行时本会话为你声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded"> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- 本模板用于 README.zh-CN.md；README.md 始终为英文，见 readme_template.md。
      小节类型见 references/readme_map_zh.md：(M) 始终出现，来源缺失时带 TODO；
@@ -45,7 +45,7 @@
 <!-- (M §3) 取自 metds/overview.md：问题、缺口、核心想法，按此顺序。三到六句。
      这一节和下一节是多数读者真正会读的部分——之后的一切都是写给已经决定试一试的读者的。 -->
 
-<TODO：从 metds/overview.md 编译——运行 /skill:star-metd-summarize overview>
+<TODO：从 metds/overview.md 编译——运行 /star-metd-summarize overview>
 
 ## ✨ 亮点
 

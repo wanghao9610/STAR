@@ -226,7 +226,7 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 
 ## 10. Skill 名册
 
-十五个 skill，在 Claude Code、Cursor 与 Qwen Code 中写作 `/star-<name>`，在 Codex 中写作 `$star-<name>`，在 Kimi Code、DSH 与 Pi 中写作 `/skill:star-<name>`。每个具体做什么见 [research-workflow-skills.zh-CN.md](research-workflow-skills.zh-CN.md)；每个写什么见 §8。
+十五个 skill，在 Claude Code、Cursor、Pi 与 Qwen Code 中写作 `/star-<name>`，在 Codex 中写作 `$star-<name>`，在 Kimi Code 与 DSH 中写作 `/skill:star-<name>`。每个具体做什么见 [research-workflow-skills.zh-CN.md](research-workflow-skills.zh-CN.md)；每个写什么见 §8。
 
 | Skill | 职责 |
 | --- | --- |

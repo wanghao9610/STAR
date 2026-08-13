@@ -190,7 +190,10 @@ done
 (( conv_errors == 0 )) && note "every SKILL.md references the conventions document"
 
 # 7. Invocation tokens are tree-appropriate: $star-* in .agents, /star-* in
-#    .claude, .cursor and .qwen, /skill:star-* in .kimi-code.
+#    .claude, .cursor, .pi and .qwen, /skill:star-* in .dsh and .kimi-code.
+#    .pi reaches /star-* the long way round: Pi has no per-skill slash command of
+#    that shape, so .pi/prompts/ supplies one per skill and .pi/settings.json
+#    turns off the /skill: commands that would otherwise duplicate them.
 section "Invocation-token hygiene"
 token_errors=0
 check_absent() { # $1 = tree, $2 = literal token
@@ -205,7 +208,7 @@ check_absent() { # $1 = tree, $2 = literal token
 while IFS= read -r skill; do
     check_absent .agents/skills "/${skill}"
     check_absent .agents/skills "skill:${skill}"
-    for root in .claude/skills .cursor/skills .qwen/skills; do
+    for root in .claude/skills .cursor/skills .pi/skills .qwen/skills; do
         check_absent "${root}" "\$${skill}"
         check_absent "${root}" "skill:${skill}"
     done
@@ -265,28 +268,28 @@ section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
-         .dsh/hooks/star_model_id.sh .pi/hooks/star_model_id.sh \
+         .dsh/hooks/star_model_id.sh .pi/extensions/star-hooks/star_model_id.sh \
          .qwen/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .dsh/hooks/star_memory.sh .pi/hooks/star_memory.sh \
+         .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
          .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
-         .dsh/hooks/star_commit_guard.sh .pi/hooks/star_commit_guard.sh \
+         .dsh/hooks/star_commit_guard.sh .pi/extensions/star-hooks/star_commit_guard.sh \
          .qwen/hooks/star_commit_guard.sh \
          .dsh/hooks/install.sh .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
 #     Pi has no command-hook table: its registration is a TypeScript extension
-#     it discovers by itself, so .pi/extensions/star-hooks.ts is what has to name
+#     it discovers by itself, so .pi/extensions/star-hooks/index.ts is what has to name
 #     all three, and there is nothing for a project to merge after an update.
 #     DSH has a table but no place in a project to declare it: .dsh/hooks.json is
 #     STAR's own file, and the row that points DSH at it lives in the machine's
 #     $DSH_HOME — .dsh/cordis.patch.yml is the reference copy of that row and
 #     .dsh/hooks/install.sh is what writes it.
 for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
-         .kimi-code/hooks.example.toml .pi/extensions/star-hooks.ts .qwen/settings.json; do
+         .kimi-code/hooks.example.toml .pi/extensions/star-hooks/index.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
         fail "${f} is missing"
         hook_errors=1
@@ -333,11 +336,11 @@ grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/st
 #     Pi's guard is the odd one out and deliberately carries no JSON at all: the
 #     extension reads the reason off stdout and the refusal off a non-zero exit,
 #     so those two are what pin it, along with the extension's use of the pair.
-{ grep -qF 'exit 1' .pi/hooks/star_commit_guard.sh && \
-  grep -qF 'declined by .pi/hooks/star_commit_guard.sh' .pi/hooks/star_commit_guard.sh; } || \
-    { fail ".pi/hooks/star_commit_guard.sh lost its non-zero refusal or its reason line"; hook_errors=1; }
-grep -qF 'block: true' .pi/extensions/star-hooks.ts || \
-    { fail ".pi/extensions/star-hooks.ts no longer blocks a declined bash call"; hook_errors=1; }
+{ grep -qF 'exit 1' .pi/extensions/star-hooks/star_commit_guard.sh && \
+  grep -qF 'declined by .pi/extensions/star-hooks/star_commit_guard.sh' .pi/extensions/star-hooks/star_commit_guard.sh; } || \
+    { fail ".pi/extensions/star-hooks/star_commit_guard.sh lost its non-zero refusal or its reason line"; hook_errors=1; }
+grep -qF 'block: true' .pi/extensions/star-hooks/index.ts || \
+    { fail ".pi/extensions/star-hooks/index.ts no longer blocks a declined bash call"; hook_errors=1; }
 #     DSH speaks that same Claude dialect through its bridge, so the deny shape
 #     above covers its guard. What is DSH's alone is the matcher: the bridge tests
 #     a plain [A-Za-z0-9_|]+ pattern literally against the tool name, and DSH's
@@ -351,7 +354,7 @@ grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
 #     anything: same failure mode as check 15's registry, one file set earlier.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .dsh/hooks/star_memory.sh .pi/hooks/star_memory.sh \
+         .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh \
          docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md \
          .star/memory/MEMORY.md; do
@@ -365,7 +368,7 @@ done
 #     store no longer follows.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
-         .pi/hooks/star_memory.sh .qwen/hooks/star_memory.sh; do
+         .pi/extensions/star-hooks/star_memory.sh .qwen/hooks/star_memory.sh; do
     { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
         { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
     grep -qF 'substr(f[1], 3) == "env"' "${f}" || \

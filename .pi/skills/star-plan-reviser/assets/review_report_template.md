@@ -1,6 +1,6 @@
 # Review — <prefix>_<slug> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-plan-reviser (model_id: <model id, copied verbatim from what your runtime states this session — Pi injects it before the first turn and again whenever the model changes; "unrecorded" only if the session names none>). Target: metds/plans/<file>; node type: leaf | internal | root;
+<!-- Written by /star-plan-reviser (model_id: <model id, copied verbatim from what your runtime states this session — Pi injects it before the first turn and again whenever the model changes; "unrecorded" only if the session names none>). Target: metds/plans/<file>; node type: leaf | internal | root;
      exec_runs: <run dirs, newest last, or none>. Every claim cites evidence (path[:line], command output, or a
      frontmatter field). Sections with nothing to say collapse to one line — never pad. -->
 
@@ -43,8 +43,8 @@ Overall: <n>/<m> tasks met; done-criterion: <verdict>.
 
 ## 7. Revision Candidates
 
-<!-- Numbered. How far the change reaches: local (this file) / structural (tree shape → /skill:star-plan-decomposer) /
-     strategic (direction → /skill:star-plan-coach). Each candidate is decided by the user, one at a time;
+<!-- Numbered. How far the change reaches: local (this file) / structural (tree shape → /star-plan-decomposer) /
+     strategic (direction → /star-plan-coach). Each candidate is decided by the user, one at a time;
      adopted changes are written into the plan file and its Revision History, not here. -->
 
 1. [<local|structural|strategic>] §<n> — <what to change>

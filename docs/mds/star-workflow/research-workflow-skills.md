@@ -78,13 +78,13 @@ $star-metd-summarize framework
 $star-code-release
 ```
 
-In Claude, Cursor and Qwen Code, use `/skill-name` instead (DSH, Kimi and Pi write `/skill:skill-name`):
+In Claude, Cursor, Pi and Qwen Code, use `/skill-name` instead (DSH and Kimi write `/skill:skill-name`):
 
 ```text
 /star-plan-coach open-vocabulary detection and segmentation
 ```
 
-In DSH, Kimi and Pi, use `/skill:skill-name`:
+In DSH and Kimi, use `/skill:skill-name`:
 
 ```text
 /skill:star-plan-coach open-vocabulary detection and segmentation
@@ -1245,7 +1245,7 @@ Every skill directory has the same shape in all six roots: `SKILL.md` is the ent
 | Cursor | `.cursor/skills/` | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
-| Pi | `.pi/skills/` | `/skill:star-*` |
+| Pi | `.pi/skills/` | `/star-*` |
 | Qwen Code | `.qwen/skills/` | `/star-*` |
 
 The fifteen skill directory names are:

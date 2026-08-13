@@ -100,6 +100,6 @@ State proposed per matched leaf:
 | `built` | `in_progress` |
 | `abandoned` | no proposal — report it and let the user decide |
 
-`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `/skill:star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
+`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `/star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
 
 Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree, which is information, not an error to smooth over.

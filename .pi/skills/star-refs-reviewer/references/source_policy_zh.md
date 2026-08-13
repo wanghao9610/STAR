@@ -134,6 +134,6 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 
 1. `reference.bib` 里的每个 citekey 都在运行缓存里有原始内容，**且**在 `refs_index.md` 里有 provenance 行，**且**条目正上方那行 `% src:` 与该行是同一个 URL、同一个日期。
 2. 随机重抓 5 条；与文件逐字段 diff。有出入 → 把文件改成与来源一致，然后重查该条所在的整批。
-3. `.env` 的 conda 环境里**已装** `bibtexparser` 时用它解析（绝不安装——那是 `/skill:star-env-builder` 的活）；否则例行检查花括号配平与 key 唯一性。
+3. `.env` 的 conda 环境里**已装** `bibtexparser` 时用它解析（绝不安装——那是 `/star-env-builder` 的活）；否则例行检查花括号配平与 key 唯一性。
 4. 没有条目的必填字段为空；没有 key 出现两次。
 5. `%% Needs manual check` 块里的论文没有一篇在文件里另有条目；块里没有任何一行含 `@`。
