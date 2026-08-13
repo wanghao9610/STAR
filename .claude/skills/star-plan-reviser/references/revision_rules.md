@@ -16,7 +16,7 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | never — runs belong to the executor; reviews are written *next to* logs, not into them |
 | numeric prefixes / filenames | never — no renumbering, no renaming, no `_v2` forks, no deletion |
 | sibling or child plan bodies | never in this session — run the reviser on that file separately, or route to star-plan-decomposer |
-| `## Revision History` (target) | append-only — never rewrite past entries |
+| `## Revision History` (target) | append-only — a new entry goes below the last one; never rewrite past entries |
 
 ## Routing, not editing
 
@@ -27,7 +27,7 @@ A bounded text edit of a strategy section is still local and allowed: tightening
 
 ## Revision History format
 
-Appended at the end of the plan file (after `## Sub-plans` if present); the section is created on the first revision:
+Appended at the end of the plan file (after `## Sub-plans` if present); the section is created on the first revision, and each new entry is appended below the previous one:
 
 ```markdown
 ## Revision History

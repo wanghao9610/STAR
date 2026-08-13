@@ -16,7 +16,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | 绝不——run 属于 executor；审查报告写在日志*旁边*，不写进日志 |
 | 数字前缀 / 文件名 | 绝不——不重编号、不改名、不分叉 `_v2`、不删除 |
 | 兄弟或子计划的正文 | 本次会话绝不——对那个文件单独运行 reviser，或转给 star-plan-decomposer |
-| 目标的 `## Revision History` | 只追加——绝不改写既有条目 |
+| 目标的 `## Revision History` | 只追加——新条目加在最后一条之下；绝不改写既有条目 |
 
 ## 该转交的不要编辑
 
@@ -27,7 +27,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 
 ## Revision History 格式
 
-追加在计划文件末尾（若有 `## Sub-plans` 则在其后）；首次修订时创建该节：
+追加在计划文件末尾（若有 `## Sub-plans` 则在其后）；首次修订时创建该节，此后每条新条目都接在上一条之下：
 
 ```markdown
 ## Revision History

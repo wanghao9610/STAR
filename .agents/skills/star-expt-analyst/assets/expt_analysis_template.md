@@ -4,7 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 analyzed: <YYYY-MM-DD>
 verdict: <met | partially met | not met | inconclusive | invalid>
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none>
-model_trail:                    # append-only: one entry per write session, never rewritten
+model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 

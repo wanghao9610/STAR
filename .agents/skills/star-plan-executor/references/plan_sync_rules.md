@@ -52,7 +52,7 @@ For each confirmed row:
 
 1. **Re-read the sub-plan first.** If its §2–§5 changed since the run started (user edit, re-decomposition), report the conflict — do not overwrite blindly.
 2. **Update the affected §2–§5 passages in place** to the confirmed content; the body must read as current truth, not as a patch.
-3. **Append a `## Revision History` entry** — the same append-only section `star-plan-reviser` writes (create it at the end of the file if absent; never rewrite past entries). One `###` block per sync event, format-compatible with the reviser's:
+3. **Append a `## Revision History` entry** — the same append-only section `star-plan-reviser` writes (create it at the end of the file if absent; each new block goes below the previous one; never rewrite past entries). One `###` block per sync event, format-compatible with the reviser's:
 
    ```markdown
    ## Revision History

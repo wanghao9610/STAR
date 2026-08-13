@@ -9,7 +9,7 @@ covers:
   through: <YYYY-MM-DD>
 previous: <EXPT_DIGEST_<YYYY-MM-DD>.md or "—">
 model_id: <model id, copied verbatim from what your runtime states this session — Qwen Code injects it at session start; "unrecorded" only if the session names none>
-model_trail:                    # append-only: one entry per write session, never rewritten
+model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 sources:
   - run: <prefix>_<slug>

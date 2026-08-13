@@ -4,7 +4,7 @@ source_plan: <prefix>_<slug>_plan.md
 analyzed: <YYYY-MM-DD>
 verdict: <met | partially met | not met | inconclusive | invalid>
 model_id: <模型 id，照抄运行时本会话为你声明的那串——Cursor 在会话开始注入；仅当本会话未声明任何模型才写 "unrecorded">
-model_trail:                    # 只追加：每次写入会话一条，绝不改写既有条目
+model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---
 
