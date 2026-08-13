@@ -189,6 +189,13 @@ mechanisms the other five trees lean on. Rather than substitute for them, `.pi` 
 | Plan approval | `EnterPlanMode` / `ExitPlanMode` / `SwitchMode` / `update_plan` | `/star-plan` exists but is the **user's** switch: the extension registers a command and a flag, no tool. So the executor's Step 3 is still the mode it imposes on itself — it says out loud that nothing is written or run until Step 4's approval, and holds itself to it. |
 | Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | `star_subagent`, dispatching to the roster in `.pi/agents/`: `star-collector` (read-only, §6.4), `star-implementer` (one step under a contract, §6.5), `star-auditor` (blind second read, §6.7). Its scope parameter defaults to `project` so it reaches that roster; upstream defaults to the user's own. |
 
+**The two separators are not a slip.** `star_subagent` and `star_questionnaire` are tool names, and
+every tool name in all seven trees is snake or camel — `ask_user_question`, `spawn_agent`,
+`update_plan`, `AskUserQuestion` — as is every multi-word tool in pi's own examples
+(`structured_output`, `reload_runtime`, `tool_search`). `star-collector`, `/star-plan` and
+`star-code-architect` are things a person types or a file is named, and those are kebab throughout.
+Unifying them would make one side the only exception in the repository.
+
 Four consequences worth knowing before you edit it:
 
 - **All of it is gated on project trust.** Untrusted, `.pi/extensions/` does not load and none of those
