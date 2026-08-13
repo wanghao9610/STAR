@@ -56,7 +56,7 @@ mistaken for drift.
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
 | `.dsh` | DSH | `/skill:star-*` | `exit_plan_mode` only — the human turns plan mode on | `subagent`, no type parameter at all | `ask_user_question` |
 | `.kimi-code` | Kimi | `/skill:star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: explore` / `coder` | `AskUserQuestion` |
-| `.pi` | Pi | `/star-*` | none — the skill holds the gate itself | none — conventions §6.1 local fill | none — plain text |
+| `.pi` | Pi | `/star-*` | `/star-plan` is the user's switch, so the skill holds the gate itself | `star_subagent`, `agent:` naming a `.pi/agents/` entry | `star_questionnaire` |
 | `.qwen` | Qwen Code | `/star-*` | `enter_plan_mode` / `exit_plan_mode` | `agent`, `subagent_type: Explore` / `general-purpose` | `ask_user_question` |
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
@@ -175,23 +175,35 @@ a workaround, name the capability it stands in for, so the next reader knows wha
 
 Everything else — rules, thresholds, step semantics, write boundaries, rubrics — must not differ.
 
-## `.pi` is the tree with three mechanisms missing
+## `.pi` is the tree that ships its own mechanisms
 
 Pi's built-in tools are `read`, `bash`, `edit`, `write`, `grep`, `find`, `ls` — lowercase, and that is
 how this tree writes them. What matters more is what its own docs say it **intentionally does not
 include**: sub-agents, plan mode, permission popups, MCP, to-dos, background bash. Three of those are
-mechanisms the other five trees lean on, and each has a settled substitute here:
+mechanisms the other five trees lean on. Rather than substitute for them, `.pi` vendors them from
+**pi's own `examples/extensions`** (MIT), under `.pi/extensions/`:
 
 | Mechanism | Other trees | `.pi` |
 |---|---|---|
-| Structured questions | `AskUserQuestion` / `AskQuestion` / `request_user_input` / `ask_user_question` | plain text, one question per message. Not a fallback — conventions §7's preamble already lists plain text as one of the three ways to ask. Every "if the tool is unavailable, fall back to…" bullet is rewritten as the primary path, because there is nothing to fall back from. |
-| Plan approval | `EnterPlanMode` / `ExitPlanMode` / `SwitchMode` / `update_plan` | the executor's Step 3 *is* the mode: it says out loud that nothing is written or run until Step 4's approval, and holds itself to it. |
-| Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | conventions §6.1's own clause for a host with no delegation — the contract stands, written out, and the main agent fills it locally, in the same order and against the same return format. A dispatch site becomes a "collection pass"; concurrency questions (§6.9's per-host budget split, disjoint ownership between concurrent delegates) collapse to "one at a time, and say so". |
+| Structured questions | `AskUserQuestion` / `AskQuestion` / `request_user_input` / `ask_user_question` | `star_questionnaire` — one question per call, 2–4 options with the recommendation marked. Headless it returns `UI not available`, which is a stop, not a cue to ask in plain text instead. |
+| Plan approval | `EnterPlanMode` / `ExitPlanMode` / `SwitchMode` / `update_plan` | `/star-plan` exists but is the **user's** switch: the extension registers a command and a flag, no tool. So the executor's Step 3 is still the mode it imposes on itself — it says out loud that nothing is written or run until Step 4's approval, and holds itself to it. |
+| Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | `star_subagent`, dispatching to the roster in `.pi/agents/`: `star-collector` (read-only, §6.4), `star-implementer` (one step under a contract, §6.5), `star-auditor` (blind second read, §6.7). Its scope parameter defaults to `project` so it reaches that roster; upstream defaults to the user's own. |
 
-Three consequences worth knowing before you edit it:
+Four consequences worth knowing before you edit it:
 
-- **The involve gate is deliberately absent.** That hook exists to answer the permission prompt before
-  a file edit, and Pi ships no permission prompts at all. `.pi/extensions/star-hooks/` carries three scripts, not four,
+- **All of it is gated on project trust.** Untrusted, `.pi/extensions/` does not load and none of those
+  tools exists. A skill that names one then falls back to what STAR does on a host without it —
+  conventions §6.1's local fill, and plain text for a question. That fallback is stated once, in
+  `.pi/APPEND_SYSTEM.md`, rather than in every skill that names a tool.
+- **Every vendored name is prefixed, and that is not cosmetic.** pi **refuses to start** — `exit 1`,
+  no session at all — when two extensions claim one tool name, flag, or command. These same examples
+  are commonly installed user-level, so an unprefixed copy in the repo would brick pi for anyone who
+  has them. The prefix covers the status and widget slots, session entries and the injected context
+  marker too: an unprefixed marker lets a user-level copy filter out this copy's messages, silently.
+  Nothing in `.pi/settings.json` can undo a collision — its `extensions` array only adds paths.
+- **The involve gate is still absent.** That hook exists to answer the permission prompt before a file
+  edit. The vendored confirm covers `rm -rf`, `sudo` and `chmod 777` — dangerous bash, not edits — so
+  there is still nothing for it to answer. `.pi/extensions/star-hooks/` carries three scripts, not four,
   and `execs/update.sh`'s `missing_hooks()` has no Pi row.
 - **Registration is code, and the scripts sit beside it.** `.pi/extensions/star-hooks/index.ts` plays the part `.claude/settings.json` plays
   elsewhere, and Pi discovers it by itself once the project is trusted. It is in `HOOK_FILES`, not
@@ -229,7 +241,7 @@ tool names get above, applied to frontmatter.
 | `.kimi-code` | not a field | not a field | `~/.kimi-code/config.toml` `[[permission.rules]]`, user-level |
 | `.qwen` | supported, and carried | read as `allowedTools`, deliberately not ported | `.qwen/settings.json` `permissions.allow`, project-level |
 | `.agents` | authoring prose only | authoring prose only | nowhere per-skill — removed on purpose |
-| `.pi` | not a skill field (it is a prompt-template one) | read, experimental, deliberately not ported | nowhere — Pi ships no permission prompts to pre-approve |
+| `.pi` | not a skill field (it is a prompt-template one) | read, experimental, deliberately not ported | nowhere — Pi has no permission system; the vendored confirm covers three bash patterns, not edits |
 
 **Cursor's frontmatter table is closed at five keys** — `name`, `description`, `paths`,
 `disable-model-invocation`, `metadata` (plus legacy `globs`, and `user-invocable`, documented only in

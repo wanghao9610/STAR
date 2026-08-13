@@ -87,13 +87,14 @@ star-ai-research/
 ├── .cursor/hooks/          # Cursor 的会话钩子
 ├── .dsh/hooks/             # DSH 的会话钩子，登记在 .dsh/hooks.json（见分工具配置）
 ├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
-├── .pi/extensions/         # Pi 的会话钩子：三个脚本，由 star-hooks/index.ts 接线
+├── .pi/extensions/         # Pi 的扩展：STAR 的会话钩子，外加子代理、计划模式、结构化提问
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
 ├── .claude/commands/       # Claude Code 的斜杠命令 /star：把描述出来的需求分流到某个技能
 ├── .cursor/commands/       # 同一个 /star 命令，Cursor 版
 ├── .qwen/commands/         # 同一个 /star 命令，Qwen Code 版
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
+├── .pi/agents/             # star_subagent 的派发花名册：收集者、执行者、复核者
 ├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star
 ├── .pi/settings.json       # Pi 的项目设置：让技能发现不扫 .agents/skills
 ├── .pi/APPEND_SYSTEM.md    # Pi 常驻的项目规则：该按哪个技能根目录执行
@@ -261,7 +262,7 @@ bash .kimi-code/hooks/install.sh   # Kimi Code
 bash .dsh/hooks/install.sh         # DSH
 ```
 
-两者各自写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`——写之前先备份该文件；任一重复运行都不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，而它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对结果。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它，`model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
+两者各自写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`——写之前先备份该文件；任一重复运行都不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入它，或者把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问，或运行 `/trust`，或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，`.pi/extensions/` 带来的子代理、计划模式和结构化提问也统统不存在——而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，而它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对结果。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它，`model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 同样不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。
 
 ### 为状态收集脚本预先授权
 
@@ -290,7 +291,7 @@ bash .dsh/hooks/install.sh         # DSH
 | Cursor | 应用设置里的命令白名单 |
 | DSH | 全局 `$DSH_HOME/cordis.patch.yml`——DSH 不从项目里读取任何插件配置 |
 | Kimi Code | 全局 `~/.kimi-code/config.toml`——Kimi Code 不读取项目级配置 |
-| Pi | 无需预批：Pi 不提供权限弹窗；要限制这条命令，请用沙箱 |
+| Pi | 无需预批：Pi 没有权限体系。`.pi/extensions/star-permission-gate.ts` 会在 `rm -rf`、`sudo`、`chmod 777` 前弹确认；无界面运行时直接拒绝 |
 | Qwen Code | `.qwen/settings.json` 里的 `permissions.allow`，随仓库带好了扫描命令 |
 
 该脚本只读：它遍历 `metds/` 与 `wkdrs/`，打印 frontmatter 与文件清单，不向任何地方写入。

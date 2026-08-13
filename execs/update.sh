@@ -34,6 +34,22 @@ HOOK_TREES=(
     ".pi/extensions/star-hooks"
     ".qwen/hooks"
 )
+# Capability extensions vendored from pi's own examples/extensions (MIT), plus the
+# roster star_subagent dispatches to. Pi's core ships no sub-agents, no plan mode and
+# no structured question tool; these supply all three, and every name they claim is
+# prefixed, since pi refuses to start when two extensions claim one tool or flag name
+# and these same examples are commonly installed user-level. STAR-owned and
+# overwritten on update like skills — a project's own extensions sit beside them and
+# an update keeps those.
+EXTENSION_TREES=(
+    ".pi/agents"
+    ".pi/extensions/star-plan-mode"
+    ".pi/extensions/star-subagent"
+)
+EXTENSION_FILES=(
+    ".pi/extensions/star-permission-gate.ts"
+    ".pi/extensions/star-questionnaire.ts"
+)
 HOOK_FILES=(
     # DSH reads its hook table through the Claude Code bridge, and the row that
     # loads that bridge lives in the machine's own $DSH_HOME. Both files here are
@@ -237,6 +253,7 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         "${SKILL_ROOTS[@]}"
         "${HOOK_TREES[@]}"
+        "${EXTENSION_TREES[@]}"
         ".claude/commands"
         ".cursor/commands"
         ".qwen/commands"
@@ -255,6 +272,7 @@ if [[ "${ADOPT}" == true ]]; then
         "execs/run.sh"
         "execs/update.sh"
         "execs/scpts/00_exp.sh"
+        "${EXTENSION_FILES[@]}"
         "${HOOK_FILES[@]}"
         "${INSTALL_CONFIGS[@]}"
     )
@@ -304,6 +322,8 @@ else
         # argument-hint is a prompt-template field there and not a skill field.
         ".pi/prompts"
         "${SKILL_ROOTS[@]}"
+        "${EXTENSION_TREES[@]}"
+        "${EXTENSION_FILES[@]}"
         "${HOOK_TREES[@]}"
         "${HOOK_FILES[@]}"
         "docs/mds/star-workflow"

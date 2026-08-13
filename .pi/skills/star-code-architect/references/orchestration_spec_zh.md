@@ -1,6 +1,6 @@
 # 编排规范
 
-本 skill 的主 agent 如何安排这些工作的次序。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。Pi 不提供子代理，所以按规约 §6.1：下面每一类角色都是主 agent 自己跑的一遍，顺序、范围、返回格式与交给受派方时一致。主 agent 负责编排、复核、提交。
+本 skill 的主 agent 如何调度子代理。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。派发一律走 `star_subagent`。主 agent 负责编排、复核、提交，自己不改代码。
 
 ## 角色
 

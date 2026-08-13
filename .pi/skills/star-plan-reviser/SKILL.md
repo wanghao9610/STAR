@@ -124,5 +124,5 @@ A drop that comes up *during* a full review is not this mode — it is a Step 4 
 
 ## Dialogue Discipline
 
-- Every question is plain text (Pi ships no structured question tool, so plain text is the mechanism rather than a fallback) — still one candidate at a time, still explicit approval before any write.
+- Every question goes through `star_questionnaire` — still one candidate at a time, still explicit approval before any write.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The plan body and the review report follow the plan's frontmatter `language`; keep technical terms in English inside Chinese plans.

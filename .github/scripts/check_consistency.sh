@@ -1514,13 +1514,31 @@ check_subagent_types .claude/skills    'Explore|general-purpose'
 check_subagent_types .cursor/skills    'explore'
 check_subagent_types .kimi-code/skills 'explore|coder'
 check_subagent_types .qwen/skills      'Explore|general-purpose|fork'
-# Pi ships no sub-agents at all, so the question is not which values are allowed
-# but whether the key appears — it may not, in any spelling.
+# Pi delegates through the vendored star_subagent, whose parameter is `agent` and
+# whose values are the roster in .pi/agents — there is no type key to name, so the
+# other harnesses' spellings of one may not appear here.
 pi_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .pi/skills || true)"
 if [[ -n "${pi_types}" ]]; then
-    fail ".pi/skills: names a delegation type, and Pi ships no sub-agents:"
+    fail ".pi/skills: names a delegation type, and Pi's star_subagent takes an agent name instead:"
     printf '%s\n' "${pi_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
     vocab_errors=1
+fi
+# Every agent .pi/skills dispatches to has to be in the roster it dispatches from.
+# A name that is not there fails at run time, inside the tool, with the run already
+# under way — nothing upstream of that notices.
+pi_roster="$(grep -h '^name:' .pi/agents/*.md 2>/dev/null | sed 's/^name: *//' | sort -u)"
+if [[ -z "${pi_roster}" ]]; then
+    fail ".pi/agents holds no agent definitions, and .pi/skills dispatches to them."
+    vocab_errors=1
+else
+    pi_unknown="$(grep -REho --include='*.md' 'agent: "[a-z0-9-]+"' .pi/skills \
+        | sed 's/.*"\(.*\)"/\1/' | sort -u \
+        | grep -vxF "${pi_roster}" || true)"
+    if [[ -n "${pi_unknown}" ]]; then
+        fail ".pi/skills dispatches to an agent that is not in .pi/agents:"
+        printf '%s\n' "${pi_unknown}" | sed 's/^/      /'
+        vocab_errors=1
+    fi
 fi
 # DSH does ship sub-agents, but its `subagent` tool takes only a description, a
 # prompt, and run_in_background — there is no type parameter to name. A ported

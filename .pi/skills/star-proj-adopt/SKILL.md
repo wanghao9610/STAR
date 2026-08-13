@@ -56,11 +56,11 @@ Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) for t
 
 Detect, without writing anything: candidate source directories (top-level importable packages, the one the entrypoints import), the runtime actually in use (`conda env list`, a `.venv`, `which python`, an env name in existing scripts), where data / weights / outputs currently live, the launch entrypoints and how they are invoked, the existing tests, and the git history shape (first commit, commit count, active paths). Present the mapping as one compact block, marking every low-confidence line.
 
-Probing goes **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only collection pass each, taken in that order (Pi ships no sub-agents; conventions §6.1), each held to this verbatim scope: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each pass returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Confirmation point 1 at all, so it is assigned afterwards, over all six areas at once, rather than inside any one of them. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
+Probing may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `star_subagent` dispatch each (`agent: "star-collector"`), run in parallel, each held to this verbatim scope: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each pass returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` the confidence decides what reaches Confirmation point 1 at all, so it is assigned afterwards, over all six areas at once, rather than inside any one of them. Confirming a `certain` line takes a command (`test -d`, an interpreter version check) rather than a re-read, so none of the repository's bulk comes back with it. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
 
 #### Step S2: Confirmation point 1 — confirm the mapping
 
-Ask one plain-text question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
+Ask through `star_questionnaire`, one question at a time, only about what the probe could not settle: which directory is `CODE_NAME`, which interpreter is `PYTHON_HOME`, which existing directories are the data / weights / output roots. Options come from the probe with the recommendation marked. Nothing is written until the user answers.
 
 #### Step S3: Put the mechanical setup in place
 
@@ -107,7 +107,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 
 ## Dialogue Discipline
 
-- All three confirmation points are plain-text questions, one per message. Pi ships no structured question tool, so plain text is the mechanism rather than a fallback — still one at a time, and still requiring an explicit answer before any write past a confirmation point.
+- All three confirmation points go through `star_questionnaire`, one per call — still one at a time, and still requiring an explicit answer before any write past a confirmation point.
 - **Material a question is about goes in the text of the same message, above the call** — the prior-run list, the proposed leaf rows. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
 - Lead with what the probe found and what it could not settle. An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: it did not read the code architecture, did not write a research plan, and did not judge any result. Name the skill that owns each.

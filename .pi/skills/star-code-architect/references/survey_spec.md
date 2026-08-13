@@ -4,7 +4,7 @@ Read-only reconnaissance that turns a codebase into a **repo map** the architect
 
 ## Areas
 
-One read-only pass per area, run in sequence — Pi ships no sub-agents, so conventions §6.1 has the main agent fill each pass itself, in this order and against the return format below (which also settles the fan-out question these areas would otherwise raise: nothing runs concurrently, so nothing shares a per-host request budget, conventions §6.9):
+One read-only `star_subagent` dispatch per area (`agent: "star-collector"`), run in parallel (none of them writes a file another surveyor writes, so running them together is safe here — it is not safe everywhere: subagents that fetch share one budget per host, conventions §6.9):
 
 | Area | Looks at | Key questions |
 |---|---|---|

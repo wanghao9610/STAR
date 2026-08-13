@@ -1,6 +1,6 @@
 # Orchestration Spec
 
-How the main agent sequences this skill's work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Pi ships no sub-agents, so conventions §6.1 applies: each role below is a pass the main agent runs itself, keeping the same order, scope and return format a delegate would have been given. The main agent orchestrates, verifies, and commits.
+How the main agent coordinates subagents for this skill. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Dispatch goes through `star_subagent`. The main agent orchestrates, verifies, and commits; it does not edit code itself.
 
 ## Roles
 

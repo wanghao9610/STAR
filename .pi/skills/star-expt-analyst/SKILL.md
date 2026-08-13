@@ -131,5 +131,5 @@ A quick check of a run that may still be executing — dimension C plus liveness
 
 ## Dialogue Discipline
 
-- Ask only where the workflow calls for it (which run to analyze, an ambiguous match). Pi ships no structured question tool, so plain text is the mechanism rather than a fallback and require an explicit answer. Since the skill writes nothing outside its own report, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, or a log.
+- Ask only where the workflow calls for it (which run to analyze, an ambiguous match). Ask through `star_questionnaire` and require an explicit answer. Since the skill writes nothing outside its own report, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, or a log.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The report follows the plan's frontmatter `language` (else the dialogue language); keep technical terms — metric names, log keys, file paths — in English inside Chinese reports.

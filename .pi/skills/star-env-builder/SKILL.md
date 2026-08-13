@@ -133,6 +133,6 @@ The environment already exists; this mode installs into it and records what it i
 
 ## Dialogue Discipline
 
-- The confirmation point and all situational questions are plain text — one question per message, each with a recommendation. Pi ships no structured question tool, so plain text is the mechanism rather than a fallback, and the install plan needs an explicit approval message before anything installs.
+- The confirmation point and all situational questions go through `star_questionnaire` — one question per call, each with a recommendation, and the install plan needs an explicit approval message before anything installs.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.
