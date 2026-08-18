@@ -4,20 +4,20 @@
 
 ## 何时推荐开分支
 
-依据 Step 2 的 gap 列表：只要有 action 要**修改** `${CODE_NAME}/` 下已存在且被跟踪的文件 → 推荐 `branch: <run>`。只有"需新建"条目、或写入只落在 `tasks/<plan-name>/` 与 `wkdrs/<run>/` → `branch: none`。空代码库从不开分支。改动量、入口影响面、有多少其他计划碰同一批文件，只用来把推荐语说得更准，绝不取代这条规则。Step 3 由用户定夺——两个方向都正当——答案写进 EXEC_PLAN 的 `branch:`。
+依据 Step 2 的缺口清单：只要有 action 要**修改** `${CODE_NAME}/` 下已存在且被跟踪的文件 → 推荐 `branch: <run>`。只有"需新建"条目、或写入只落在 `tasks/<plan-name>/` 与 `wkdrs/<run>/` → `branch: none`。空代码库从不开分支。改动量、入口影响面、有多少其他计划碰同一批文件，只用来把推荐语说得更准，绝不取代这条规则。Step 3 由用户定夺——两个方向都正当——答案写进 EXEC_PLAN 的 `branch:`。
 
 ## 何时推荐进 worktree
 
-分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是被调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了，所以变成问用户的一句确认；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`，本文件其余部分照旧。进树的 run 一律带分支，即便 gap 列表判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。两行都在 Step 3 暂停时一并定夺。
+分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是被调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了，所以变成问用户的一句确认；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`，本文件其余部分照旧。进树的 run 一律带分支，即便缺口清单判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。两行都在 Step 3 暂停时一并定夺。
 
 ## 创建（Step 4，批准后）
 
 1. 把 checkout 当前分支与短 SHA 记为 `base:`（`git rev-parse --abbrev-ref HEAD`、`git rev-parse --short HEAD`）。绝不假定是 `main`。
 2. 前置条件已在 Step 3 暂停时说明：当前 checkout 没有正在运行的任务——跑着的任务会中途重读被切换的文件。checkout 正忙不再是等待的理由：它正是把这个 run 送进 worktree 的那个信号。
 3. 只开分支：`git switch -c <run>`。运行前就有的未提交改动原样带过去；它们仍按既有改动点名，永不暂存（规约 §1.4）。
-4. 进 worktree：在被调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净物化，这正是选它要的隔离。
-5. 进 worktree：git 只物化被跟踪文件，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份委派契约写明树根（`agent_dispatch_spec_zh.md`）。
-6. 选了分支就同时选了逐 action checkpoint 提交：没有提交的分支没有东西可合并，所以不存在无提交的分支运行。
+4. 进 worktree：在被调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净地建出来，这正是选它要的隔离。
+5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
+6. 选了分支就同时选了逐 action 提交：没有提交的分支没有东西可合并，所以不存在无提交的分支运行。
 
 ## 分支上的提交（Step 5）
 

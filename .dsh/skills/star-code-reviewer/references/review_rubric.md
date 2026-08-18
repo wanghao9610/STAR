@@ -4,7 +4,7 @@ How findings are formed, graded, and returned. Read the code, not just its names
 
 The project guidelines cited as §n below are AGENTS.md's numbered sections; architecture rules live in metds/codearc.md.
 
-## Finding contract (structured return)
+## Finding format (structured return)
 
 One entry per finding, in file order:
 
@@ -75,7 +75,7 @@ Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`);
 - Runtime assumptions match the project: entrypoints documented to run via the `.env` conda env / `execs/run.sh`; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
 - Names left unchanged on purpose (codearc.md §7) — registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/project names — are untouched.
 
-## E. Correctness smells (high-confidence only)
+## E. Suspicious correctness patterns (high-confidence only)
 
 Report only what the code in front of you demonstrates:
 

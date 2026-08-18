@@ -43,7 +43,7 @@ Before promoting, compare against `${CODE_NAME}/`: same or near-identical functi
 - The candidate is materially better (fixes a bug, handles a case the existing one drops) → `merge`: the row states which existing file receives the change and what changes, and the merge is applied as an edit to that file, not as a new one.
 - Genuinely different despite the resemblance → `move`, and the row says how they differ, so a reviewer is not surprised by two similar files.
 
-## The decision contract
+## The decision record format
 
 One entry per candidate, in sweep order:
 

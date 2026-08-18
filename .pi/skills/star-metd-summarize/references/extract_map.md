@@ -102,7 +102,7 @@ A passage from a leaf whose `exec_status` is not `done` is design intent. Close 
 
 One line per subsection, not per sentence; content from `done` leaves and from strategy nodes carries no mark. Where a subsection mixes both, mark it and name only the unverified sources.
 
-## Frontmatter contract
+## Frontmatter format
 
 Every generated document opens with:
 
@@ -119,7 +119,7 @@ sources:                          # every plan that fed this document, with the 
 
 `type:` + `generated:` are what mark a file as compiled and therefore safe to regenerate; a file without them is hand-authored. `sources:` is the staleness check: a recorded `updated` older than that plan's current `updated` means the document is stale.
 
-## Extraction contract (structured return)
+## Extraction format (structured return)
 
 A collection pass returns exactly these three lists plus `plans_read: <n>`, and nothing else:
 
@@ -140,7 +140,7 @@ unread:                             # a plan in the slice that could not be read
 plans_read: 7
 ```
 
-`target:` is required because a collector holds plans, not a document — nothing about its identity says which of the five a passage belongs to, and the five templates' section names collide only by accident. `exec_status` is a leaf field: strategy nodes do not carry one and the collector omits it there rather than filling a plausible value, the same rule the sibling contracts state (`scan_policy.md`: never fill a field the record does not carry).
+`target:` is required because a collector holds plans, not a document — nothing about its identity says which of the five a passage belongs to, and the five templates' section names collide only by accident. `exec_status` is a leaf field: strategy nodes do not carry one and the collector omits it there rather than filling a plausible value, the same rule the sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
 
 `unread` is not a gap. A gap means no plan covers the section, and it reaches the delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could not open is a plan the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
 

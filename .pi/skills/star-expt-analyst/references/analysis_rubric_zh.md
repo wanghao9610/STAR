@@ -27,7 +27,7 @@
   metric: <来源打印出的名字>
   value: <来源打印出的原值——不要四舍五入成另一个判定>
   split: train | val | test | unknown
-  threshold: <计划声明的阈值，或 "none stated">
+  threshold: <计划写明的阈值，或 "none stated">
   verdict: met | not met | unmeasurable
   source: <路径，+ 行号或 JSON 键>
 ```
@@ -38,7 +38,7 @@
 
 - **blocker** —— run 的结果不可信或不可用：进程在产出结果前就死了、评测读了训练集、checkpoint 为空或损坏、日志里引用的指标在它所指的文件里根本不存在、完成判据所依赖的某个 §4 交付物缺失。
 - **major** —— 实质改变解读：§5 判据未达标、训练出现 NaN/Inf、loss 发散、train↓/val↑ 背离、某条红线命令从未跑过、产物写在布局规则（§8）之外、指标只能从弱于计划暗示的来源拿到。
-- **minor** —— 值得记录，不改变判定：可恢复的 warning 风暴、dataloader worker 死掉又重启、多出来一个没人承诺过的产物、指标报出的精度低于阈值所需。
+- **minor** —— 值得记录，不改变判定：可恢复的警告风暴、dataloader worker 死掉又重启、多出来一个没人承诺过的产物、指标报出的精度低于阈值所需。
 - **nit** —— 细枝末节：产物命名不一致、日志没有时间戳。只在已经带有更高级别观察的 run 上报 nit。
 
 严重度拿不准时，往低了判，并在 `implication` 里说明为什么。
@@ -55,7 +55,7 @@
 
 ## A. 产物清点
 
-- 每个 §4 交付物，按其声明的路径：`present` / `missing` / `unexpected`（在磁盘上，但哪里都没承诺过）。
+- 每个 §4 交付物，按其写明的路径：`present` / `missing` / `unexpected`（在磁盘上，但哪里都没承诺过）。
 - 按产物类型做轻量完整性检查：文件非空；JSON/CSV 可解析且含有计划写明的字段；checkpoint 既不是 0 字节，也不会小到与该架构不相称；图片能打开；目录里的文件数大致符合预期（例如每个保存的 epoch 一个 checkpoint）。
 - 布局符合度（§8）：生成的输出在 `wkdrs/<run>/`、数据在 `datas/`、权重在 `inits/`；`metds/` 里和包内部没有留下生成物。
 - 记录这个 run 在磁盘上的真实体积——研究者决定留哪些东西时需要它。
@@ -69,7 +69,7 @@
 - EXEC_LOG 的 frontmatter `status` 与它自己的步骤行：日志写 `done` 却有 `blocked` 行，或写 `in_progress` 却每行都 `done`，这种不一致值得一条 minor 观察。
 - 未同步的 "Pending amendments"，以及任何记录在案的 **方向性信号**：带进报告——那是 executor 自己留下的"计划与现实已经分叉"的记号。
 
-规则：日志是声明，磁盘是证据。核实沿这个方向做，绝不反过来。
+规则：日志是说法，磁盘是证据。核实沿这个方向做，绝不反过来。
 
 ## C. 日志健康
 
@@ -77,13 +77,13 @@
 
 **致命信号**（blocker）：traceback；`CUDA out of memory`；`Killed` / OOM-killer；记录在案的非零退出码；终结了 run 的 NCCL / 分布式超时；日志在某个 epoch 中途截断、没有完成标记，而该步骤却声称 `done`。
 
-**数值信号**（major）：loss 或梯度里出现 `nan` / `inf`；loss 从第一步起就是平的（什么都没在学）；loss 发散；梯度 overflow 刷屏且再没恢复；指标在每个 epoch 完全相同（权重被冻住，或评测压根没重跑）。
+**数值信号**（major）：loss 或梯度里出现 `nan` / `inf`；loss 从第一步起就是平的（什么都没在学）；loss 发散；梯度溢出刷屏且再没恢复；指标在每个 epoch 完全相同（权重被冻住，或评测压根没重跑）。
 
 **动态信号**（major 或 minor，按差距的严重程度）：train loss 在降而 val loss 在升（过拟合）——说明从第几个 epoch 开始；val 指标在 run 结束前很久就已进入平台期（算力浪费，或学习率有问题）；指标在中途见顶，而被 checkpoint 下来的不是那个点。
 
-**值得提一句的 warning**（minor）：dataloader worker 反复死掉重启；checkpoint 保存失败后重试；混合精度 overflow 警告；数据集规模悄悄小于计划 §2 所写。
+**值得提一句的警告**（minor）：dataloader worker 反复死掉重启；checkpoint 保存失败后重试；混合精度溢出警告；数据集规模悄悄小于计划 §2 所写。
 
-不算观察：deprecation 警告、tqdm/进度条噪音、框架 banner 刷屏、计划本来就要求的 early stopping。
+不算观察：弃用警告、tqdm/进度条噪音、框架启动横幅刷屏、计划本来就要求的 early stopping。
 
 ### 读大日志
 
@@ -94,7 +94,7 @@
 - 每个指标从可得的最权威来源提取，顺序为——这是把几个来源互相排序，因此由手上握着全部来源的主 agent 来应用，绝不由只拿着一个文件的收集器来应用：run 写出的结果 JSON/CSV > 评测日志的最终汇总段 > TB event 文件（仅当 tensorboard 已安装）> 训练日志里最后一条匹配行。记下用的是哪一档；只能靠最弱一档才拿到的判据，值得记一条关于该 run 报告方式的 minor 观察。
 - 每条评判依据打成一个指标行：先 §5 完成判据，再根计划 §4 指标，再计划写明的任何 baseline。
 - **split 纪律**：每个数字都要写明它来自哪个 split。若计划给了阈值却没说 split（"mAP ≥ 30"），报出计划 §5 上下文所暗示的那个 split 上的数字，点明这处歧义，并且绝不挑那个好看的 split。
-- **未声明预期**是合法的一行：报出数字，`threshold` 留 `none stated`，不给它打分。不打分的数字是诚实的；倒推出来的阈值不是。
+- **未写明预期**是合法的一行：报出数字，`threshold` 留 `none stated`，不给它打分。不打分的数字是诚实的；倒推出来的阈值不是。
 - **unmeasurable** 意思是这个数字磁盘上哪里都没有。说明什么能产出它，并把那条命令交还——绝不自己跑（见红线）。
 - 数值按来源打印的原样引用。四舍五入到翻转判定（29.96 → "30，达标"）是 blocker 级的报告错误。
 

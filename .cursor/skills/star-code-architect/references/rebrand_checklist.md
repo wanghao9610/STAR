@@ -4,7 +4,7 @@ Rename the imported codebase to `${CODE_NAME}` without silently breaking it. The
 
 ## Preconditions
 
-- `${CODE_NAME}/UPSTREAM.md` written and the import commit is in place (rollback anchor).
+- `${CODE_NAME}/UPSTREAM.md` written and the import commit is in place (the point to restore to).
 - Know the upstream Python package name: the top-level importable directory (may differ from the repo name; may live under `src/`).
 
 ## Steps, in order — verify after each
@@ -34,6 +34,6 @@ These look like the package name but are resolved by frameworks, checkpoints, or
 
 For each occurrence class, add a row to the do-not-rename table (`codearc.md` §7): location pattern, category, risk, suggested later action. Suggest — never auto-apply — casing for future renames (e.g. `code` → `Code` prefix). Later renames go through `star-plan-executor` steps, each with its own check.
 
-## Import smoke (post-env)
+## Import check (post-env)
 
 Once the `.env` conda env has the dependencies: `python -c "import <code_name>"` through that env. Record it in the final report; if the env does not exist yet, say the check is pending and hand over the prepared install commands instead.

@@ -45,7 +45,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 | optional | requirements/optional.txt | | | | skipped |
 | project | `-e ${CODE_NAME}`（`--no-deps`） | | | | uv |
 
-## 冒烟测试结果表
+## 跑通性检查结果表
 
 <!-- 由主 agent 亲自运行后填写。结果：pass / blocked / skipped（写明原因）。
      证据是真实输出尾部——pass 的证据栏不允许为空。 -->
@@ -66,6 +66,6 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 - [ ] `<确切命令>`——<原因：源码编译 / sudo / 体量>。完成后：重新运行 `/skill:star-env-builder <ENV_NAME>` 并选择*原地验证修复*。
 
-## 快照
+## 版本清单
 
 精确版本清单：[`freeze.txt`](freeze.txt)——`uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）。

@@ -7,7 +7,7 @@ description: >-
   CODE_NAME/requirements* → 打包元数据（pyproject / setup.py / environment.yml）→ 代码 import 扫描，生成结果写成
   requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
   requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道 安装计划确认点，按 uv >
-  pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 冒烟测试（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本快照写入
+  pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 做跑通性检查（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本清单写入
   wkdrs/。只要用户运行 /star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
   Bilingual (中/英) — also trigger in English whenever the user wants the project's conda env or venv
   created or rebuilt, needs dependencies resolved and installed, or wants the runtime environment
@@ -20,30 +20,30 @@ description: >-
 
 调用方式：`/star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把一个或多个包装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名，不是描述。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、冒烟测试规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/smoke_test_spec_zh.md` 各用一次 `read_file` 读入，外加同一条消息里的一次 `run_shell_command` 调用（以项目根目录为工作目录），内容只有：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、跑通性检查规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/runnable_check_spec_zh.md` 各用一次 `read_file` 读入，外加同一条消息里的一次 `run_shell_command` 调用（以项目根目录为工作目录），内容只有：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 `run_shell_command` 命令：每份工具结果各有自己的大小上限，`run_shell_command` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。`run_shell_command` 只承担只有 `run_shell_command` 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
+一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 `run_shell_command` 命令：每份工具结果各有自己的大小上限，`run_shell_command` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。`run_shell_command` 只承担只有 `run_shell_command` 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
 
-**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
 ## 角色
 
-你负责给代码库一个能跑的运行时。上游的 `star-code-architect` 把 `${CODE_NAME}/` 落了地，但止步于环境——它的运行时冒烟步骤只准备安装命令并移交用户（红线）。下游的 `star-plan-executor` 所有命令都走 `.env` 指向的环境，并假设它可用。本 skill 就负责产出这个环境：按 `.env` 解析出的 conda 环境或 `.venv`、缺失时补齐的 `${CODE_NAME}/requirements/` 依赖布局，以及 `wkdrs/` 下有证据支撑的环境报告。
+你负责给代码库一个能跑的运行时。上游的 `star-code-architect` 把 `${CODE_NAME}/` 搭了起来，但止步于环境——它的运行时跑通性检查步骤只准备安装命令并移交用户（红线）。下游的 `star-plan-executor` 所有命令都走 `.env` 指向的环境，并假设它可用。本 skill 就负责产出这个环境：按 `.env` 解析出的 conda 环境或 `.venv`、缺失时补齐的 `${CODE_NAME}/requirements/` 依赖布局，以及 `wkdrs/` 下有证据支撑的环境报告。
 
 你**构建环境，不实现也不重构研究代码。**写入 `${CODE_NAME}/` 的只有生成的 requirements 文件。若需要改代码才能让项目可导入，交棒给 `star-plan-executor`。
 
 ## 核心原则
 
 1. **`.env` 是唯一路径来源；从不 activate**（规约 §3）。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。环境归本 skill 所有：只有它可以创建、重命名环境或往里安装。
-2. **一个确认点，场景化追问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。场景化问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 `ask_user_question` 问，每次只问一题，都带推荐项。
+2. **一个确认点，其余问题遇到才问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。其余问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 `ask_user_question` 问，每次只问一题，都带推荐项。
 3. **只改名，绝不删除。**已有环境通过重命名为 `<名称>_<YYYYMMDD>` 备份——日期用运行时的 `date +%Y%m%d` 获取，绝不编造。本 skill 永不删除任何环境；过期备份由用户自行清理。
-4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装方式与失败处理：优先 uv，逐包降级 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
-5. **沿用已有的，只生成缺失的。**已有 requirements 布局按原样安装，绝不改写。生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后作为代码资产提交。
-6. **证据式验收。**主 agent 亲自跑三层冒烟测试（`references/smoke_test_spec_zh.md`），报告"验证了什么"并附证据，而不是一句"能用了"（AGENTS.md §11）。Chats end, files do not：报告与版本快照写入 `wkdrs/env_<ENV_NAME>_<日期>/`。
+4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每个类别有自己的安装方式与失败处理：优先 uv，逐包改用 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
+5. **沿用已有的，只生成缺失的。**已有 requirements 布局按原样安装，绝不改写。生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后提交入库。
+6. **证据式验收。**主 agent 亲自做三层跑通性检查（`references/runnable_check_spec_zh.md`），报告"验证了什么"并附证据，而不是一句"能用了"（AGENTS.md §11）。对话会结束，文件不会：报告与版本清单写入 `wkdrs/env_<ENV_NAME>_<日期>/`。
 
 ## 工作流
 
@@ -61,10 +61,10 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - Python 版本：`requires-python`（pyproject.toml）→ `python_requires`（setup.py / setup.cfg）→ 上游 README 声明的版本 → 默认 3.10。信号冲突 → 问。
 - 记录 `ENV_PY`（绝对路径），之后每条命令都用它。
 
-### Step 2：冲突处理
+### Step 2：环境已存在时
 
 - conda：`conda env list` 中已有 `<ENV_NAME>` → 问一个三选项问题：**备份重建**（用 `conda rename` 改名为 `<ENV_NAME>_$(date +%Y%m%d)`；老版 conda 没有 `rename` 则 `create --clone` + `remove`，提示磁盘占用临时翻倍）/ **原地验证修复**（跳过创建；直接进 Step 5 处理失败项或 Step 6——上次运行被打断时的续跑路径）/ **中止**（干净退出，不动任何东西）。
-- venv：`.venv` 已存在 → 同样的三选项 → 备份为 `mv .venv .venv_$(date +%Y%m%d)`。报告中注明：改名后的 venv 脚本里嵌着旧绝对路径——只是冻结备份，供查档回滚，不能直接激活。
+- venv：`.venv` 已存在 → 同样的三选项 → 备份为 `mv .venv .venv_$(date +%Y%m%d)`。报告中注明：改名后的 venv 脚本里嵌着旧绝对路径——只是冻结备份，供查档或从中恢复，不能直接激活。
 - 备份名已被占用 → 追加 `-<HHMM>`（同样取自 `date`）。
 
 ### Step 3：解析依赖（先到先用）
@@ -86,14 +86,14 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 策略、白名单与 wheel 源矩阵见 `references/installer_policy_zh.md`——已随开头的装载消息到达。顺序：`conda.txt`（仅 conda 后端）→ `framework.txt` → `runtime.txt` → `optional.txt`（仅当获批计划包含）→ 项目可编辑安装（`--no-deps -e`，有打包元数据时）。
 
 - 有 uv → `uv pip install --python $ENV_PY -r <文件>`；无 uv → 问一次：装 uv / 本次改用 pip。
-- 单包失败 → 降级 pip 重试（每包总计 ≤2 次）→ 仍失败：记录后继续装其余，最后统一解决或移交。
+- 单包失败 → 改用 pip 重试（每包总计 ≤2 次）→ 仍失败：记录后继续装其余，最后统一解决或移交。
 - venv 后端遇到 conda 专属项 → 停下来问：用户自行系统级安装 / 跳过 / 有 pip 替代品则用替代品。
 - 需要源码编译的项（flash-attn 之类）→ 红线：把确切命令写进报告，不执行。
 - 尊重已配置的 `PIP_INDEX_URL` / `UV_DEFAULT_INDEX`；绝不覆盖用户镜像，绝不写全局配置。
 
-### Step 6：冒烟测试（三层，主 agent 亲自跑）
+### Step 6：跑通性检查（三层，主 agent 亲自跑）
 
-规范与证据格式见 `references/smoke_test_spec_zh.md`——已随开头的装载消息到达。
+规范与证据格式见 `references/runnable_check_spec_zh.md`——已随开头的装载消息到达。
 
 - **L1 import**：framework + runtime（以及已安装的 optional）中每个发行包都能通过 `$ENV_PY` 导入并报出版本。
 - **L2 框架**：`torch.cuda.is_available()` + 设备数 + 在设备上做一次小张量运算（macOS 用 mps；纯 CPU 机器如实注明，不算失败）。
@@ -101,11 +101,11 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 某层失败 → 按 traceback 诊断并修复（缺失的传递依赖要补进对应的生成 requirements 文件），重跑该层；每层 ≤2 轮修复 → 仍失败：标记 `blocked` 并附错误尾部，相互独立的层继续跑。
 
-### Step 7：报告、快照、提交
+### Step 7：报告、版本清单、提交
 
-1. 按 `assets/env_report_template_zh.md` 写 `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md`：身份信息 + `ENV_PY`、机器探测、备份改名、各类别安装结果、带证据的冒烟测试结果表、失败/blocked 项、待用户命令。
+1. 按 `assets/env_report_template_zh.md` 写 `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md`：身份信息 + `ENV_PY`、机器探测、备份改名、各类别安装结果、带证据的跑通性检查结果表、失败/blocked 项、待用户命令。
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
-3. 本次生成的 requirements 文件（含冒烟诊断中补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
+3. 本次生成的 requirements 文件（含跑通性检查排错时补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
 4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向刚建好的环境（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
 5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-flow-status` 查看下一步。
 
@@ -118,9 +118,9 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 2. 按 `references/installer_policy_zh.md` 给每个包归类——framework / runtime / optional / conda 专属——并说明各自会落进哪个 requirements 文件。
 3. **确认点**（原则 2——确认点之前不装任何东西）：呈现这些包、它们的类别、将要使用的版本与索引源、下载量大时给出估计、以及任何 CUDA 耦合；询问*批准并安装* / *调整* / *中止*。
 4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在红线上：把确切命令备好，不要跑。
-5. 只对新增的包做冒烟测试（`references/smoke_test_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
+5. 只对新增的包做跑通性检查（`references/runnable_check_spec_zh.md`）：L1——每个包都能经 `$ENV_PY` 导入并报出版本；新增的 framework 包再加 L2。失败 → 诊断，重试一次，仍失败则标记 `blocked` 并汇报；绝不留下"装了但没验证"的包。
 6. 把每个装好的包追加进它所属的 requirements 文件，保留该布局既有的顺序与锁定。在最新的 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` 追加一个 `## Added <日期>` 块（没有报告就新写一份）。提交：`star-env-builder: add <包名>`，只暂存 `${CODE_NAME}/requirements*`。
-7. 汇报 ≤500 字：装了什么、各 requirements 文件增加了什么、冒烟证据、blocked 或待用户处理的项。
+7. 汇报 ≤500 字：装了什么、各 requirements 文件增加了什么、跑通性检查证据、blocked 或待用户处理的项。
 
 ## 状态与文件规则
 
@@ -129,10 +129,10 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - Git：每次运行至多一次提交——生成了 requirements 文件时，或 add 模式下装了包时——只 stage `${CODE_NAME}/requirements*`（规约 §1）。
 - 确认点批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在红线外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
 - 尊重用户镜像配置（`PIP_INDEX_URL`、`UV_DEFAULT_INDEX`）；绝不写 `pip config`、`.condarc` 或 `uv.toml`。
-- 重复调用语义：若已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在，优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。
+- 重复调用时的规则：若已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在，优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。
 
 ## 对话纪律
 
-- 确认点与所有场景化问题都走 `ask_user_question`——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）回退为普通文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
+- 确认点与所有其余问题都走 `ask_user_question`——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）改用纯文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。

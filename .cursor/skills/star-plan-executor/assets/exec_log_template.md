@@ -22,7 +22,7 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 ## Step status
 
 <!-- One row per EXEC_PLAN action. `check result` is filled by the main agent re-running the step's own
-     check, not by the agent's self-report. Legal status: pending / in_progress / done / blocked /
+     check, not by the agent's self-report. Allowed status: pending / in_progress / done / blocked /
      skipped. -->
 
 | # | Step | status | model | artifact (wkdrs/<run>/…) | check result | note |

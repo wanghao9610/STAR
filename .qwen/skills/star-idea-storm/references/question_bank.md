@@ -43,7 +43,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 
 ---
 
-## Stage 3: Scan Probes (scan)
+## Stage 3: Landscape scan (scan)
 
 What the scan must answer per direction — the how (sources, limits, caching) lives in the scan policy:
 - How many groups published on this in the last two years, and is the count rising or falling?

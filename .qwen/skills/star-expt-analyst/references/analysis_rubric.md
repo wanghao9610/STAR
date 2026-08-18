@@ -4,7 +4,7 @@ How a run is examined, what gets recorded, and how the verdict is reached. Apply
 
 The project guidelines cited as §n below are AGENTS.md's numbered sections; §1–§6 of a *plan* are the sub-plan's own sections. Skill names appear bare (`star-plan-executor`); invoke them the way this tool invokes skills.
 
-## Observation contract (structured return)
+## Observation format (structured return)
 
 One entry per observation, grouped by dimension:
 
@@ -17,7 +17,7 @@ One entry per observation, grouped by dimension:
   implication: <what it means for the run's verdict, one sentence>
 ```
 
-## Metric row contract
+## Metric row format
 
 One entry per scored expectation — this is what fills the scorecard:
 

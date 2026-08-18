@@ -18,7 +18,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 <!-- The run dir and how it resolved (plan name → the last exec_runs entry, or a path → its plan). Expectations
      loaded: sub-plan §4/§5, root §4 metrics and §5 kill-criteria, EXEC_PLAN/EXEC_LOG — and which
-     were absent. Files read (counts, not a listing). Sibling runs detected. Degradations: "no
+     were absent. Files read (counts, not a listing). Sibling runs detected. Not done in full: "no
      matplotlib — text-only", "tensorboard absent — TB metrics unread", "env unusable — reading
      only". -->
 

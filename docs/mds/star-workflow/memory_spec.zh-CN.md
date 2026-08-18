@@ -11,7 +11,7 @@
 | 类型 | 装什么 | 例子 |
 |---|---|---|
 | `env` | 关于某台机器、集群或工具链的事实，通常是踩坑换来的 | 这个集群要先 `module load gcc/11` 才编得出 flash-attn |
-| `pref` | 用户对"活该怎么干"的长期偏好 | 直接提交到 `main`，不开 feature 分支 |
+| `pref` | 用户对"活该怎么干"的长期偏好 | 直接提交到 `main`，不开特性分支 |
 | `insight` | 活得比产生它的那次运行更久的研究判断 | 那个 baseline 公布的数字复现不到 0.3 以上，别拿它当参照点 |
 | `deadend` | 试过、失败了、不值得再试的事，连同它的代价 | 换成另一个采样器毫无变化，代价两天 A100 |
 
@@ -56,7 +56,7 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 | `scope` | `global`、`machine:<name>`、`plan:<prefix>` 或 `code:<path>`——事实在哪里成立，不是在哪里学到的 |
 | `language` | 正文语言（约定 §7.6，回复语言规则）；frontmatter 的键始终英文 |
 | `verified` | 最后一次确认它为真的日期，取自系统时钟（约定 §4，真实日期） |
-| `model_id` | 写下它或最后一次复核它的模型，原样照录（约定 §8，产物登记表；兜底见 `model_id_spec.zh-CN.md`） |
+| `model_id` | 写下它或最后一次复核它的模型，原样照录（约定 §8，产物登记表；退路见 `model_id_spec.zh-CN.md`） |
 | `source` | 这条事实是从哪个产物里出来的，或者 `conversation` |
 | `supersedes` | 可选：这条记忆取代了哪个 slug |
 

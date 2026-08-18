@@ -5,7 +5,7 @@
 # conventions §1 forbid.
 #
 # EASIEST: run `bash .kimi-code/hooks/install.sh` once — it writes all three
-# blocks below into your global config for you (idempotent, backs up first). The
+# blocks below into your global config for you (safe to run again, backs up first). The
 # manual route below is the same thing by hand.
 #
 # Kimi does not auto-load project-level config, so these cannot live in the repo

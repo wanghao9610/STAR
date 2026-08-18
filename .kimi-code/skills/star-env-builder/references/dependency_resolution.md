@@ -62,7 +62,7 @@ Routing follows **how the code uses a package, not its reputation**: `matplotlib
 `requirements/framework.txt` — opens with the wheel index matched at build time:
 
 ```text
-# Wheel index matched to detected CUDA <X.Y> on <YYYY-MM-DD>; probe details in ENV_REPORT.
+# Wheel index matched to detected CUDA <X.Y> on <YYYY-MM-DD>; detection details in ENV_REPORT.
 --extra-index-url https://download.pytorch.org/whl/<cuXXX>
 torch==<pin if the source pinned one>
 torchvision
@@ -80,4 +80,4 @@ ffmpeg
 
 - Constraints from priority-1/2 sources are kept verbatim.
 - Scanned dependencies stay unpinned, except known-coupled sets pinned together: `torch` / `torchvision` / `torchaudio` (use the official compatibility pairs), `mmcv` ↔ `torch`, and `numpy<2` when the pinned torch predates NumPy 2 support.
-- After a successful build, `freeze.txt` in the run directory is the exact snapshot; promote pins from it into requirements only when the user asks.
+- After a successful build, `freeze.txt` in the run directory is the exact version list; promote pins from it into requirements only when the user asks.

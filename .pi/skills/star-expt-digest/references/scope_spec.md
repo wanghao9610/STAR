@@ -48,13 +48,13 @@ The last covered date is the newest digest's `covers.through` — read from fron
 
 The rule this protects: **a backward-looking digest must never cause the next incremental run to skip work.** Since the last covered date is "the newest digest's `covers.through`", a `plan`-mode digest whose `covers.through` is an old date is naturally ignored by the max — but a `plan`-mode digest written *today* over a family whose runs all finished today would otherwise poison it. So the next incremental run takes the newest `covers.through` **among digests whose `mode` is `incremental`, `window`, or `all`**, ignoring `plan`-mode files entirely.
 
-## Overlap and idempotence
+## Overlap and re-runs
 
 - Two digests **may** cover overlapping periods. That is not an error: a `7d` digest written for a report on Friday does not invalidate Monday's incremental one. Overlap is visible because every digest states its own window.
 - Re-running the same selector on the same day **overwrites that day's file** (conventions §4.3). It does not append and does not create `_v2`.
 - A run appearing in two digests is expected and needs no reconciliation. What must never happen is a run appearing in **none** — which is exactly what the half-open incremental window and the `plan`-mode exception above prevent.
 
-## Frontmatter contract
+## Frontmatter format
 
 ```yaml
 ---

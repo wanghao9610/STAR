@@ -72,7 +72,7 @@ files, `run_shell_command` in 30 `.qwen` files, and lowercase `shell` in `.agent
 writes it; the file reader is `Read` in 28 files each of `.claude`, `.cursor` and `.kimi-code` and
 `read_file` in 28 `.qwen` files, while `.agents` names none — Codex has no
 file-reading tool, so those loads say "file read" and carry a marked fallback that `cat`s the files into
-the shell call and accepts the spill. A term concentrated in the trees whose harness actually has it is
+the shell call and accepts that the result is written out. A term concentrated in the trees whose harness actually has it is
 almost always correct.
 
 Every one of those names was checked against its harness's own tool list, not against how the other
@@ -126,12 +126,12 @@ is not, appearing only in community bug reports. Note which word moved where: in
 Cursor publishes three built-in subagents — `explore`, `bash` and `browser` — so `explore` is the only
 type this tree may name, and it is the only one it does. Its ten file-writing dispatch sites carried
 `generalPurpose`, which the current docs do not list; none of the three built-ins is the file-writing
-migrator it stood for, so those sites now set no type at all and state the write surface the contract
+migrator it stood for, so those sites now set no type at all and state what they may write, which the dispatch brief
 already gave them. Naming a custom subagent instead was the alternative: Cursor loads them from
 `.cursor/agents/*.md` (and, for compatibility, `.claude/agents/` and `.codex/agents/`, with `.cursor/`
 winning a name clash), where frontmatter `name` is the identifier the `Task` tool hints at and
 `readonly: true` withholds file edits and state-changing shell commands. That would make the read-only
-contract a mechanism rather than an instruction, at the cost of an artifact to maintain across six
+rule a mechanism rather than an instruction, at the cost of an artifact to maintain across six
 trees and a `.claude/agents/` directory that Cursor would also read. It stays available and unused.
 
 Codex delegation names the real call without changing the cost stance: **collect locally by default,
@@ -173,7 +173,7 @@ substitute for structured questions at all 132 of `.claude`'s `AskUserQuestion` 
 in 4 files that "Cursor has no structured question tool", which had stopped being true. When you port
 a workaround, name the capability it stands in for, so the next reader knows what to re-check.
 
-Everything else — rules, thresholds, step semantics, write boundaries, rubrics — must not differ.
+Everything else — rules, thresholds, step semantics, what each may write, rubrics — must not differ.
 
 ## `.pi` is the tree that ships its own mechanisms
 
@@ -187,7 +187,7 @@ mechanisms the other five trees lean on. Rather than substitute for them, `.pi` 
 |---|---|---|
 | Structured questions | `AskUserQuestion` / `AskQuestion` / `request_user_input` / `ask_user_question` | `star_questionnaire` — one question per call, 2–4 options with the recommendation marked. Headless it returns `UI not available`, which is a stop, not a cue to ask in plain text instead. |
 | Plan approval | `EnterPlanMode` / `ExitPlanMode` / `SwitchMode` / `update_plan` | `/star-plan` exists but is the **user's** switch: the extension registers a command and a flag, no tool. So the executor's Step 3 is still the mode it imposes on itself — it says out loud that nothing is written or run until Step 4's approval, and holds itself to it. |
-| Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | `star_subagent`, dispatching to the roster in `.pi/agents/`: `star-collector` (read-only, §6.4), `star-implementer` (one step under a contract, §6.5), `star-auditor` (blind second read, §6.7). Its scope parameter defaults to `project` so it reaches that roster; upstream defaults to the user's own. |
+| Delegation | `Agent` / `Task` / `spawn_agent` / `agent` | `star_subagent`, dispatching to the roster in `.pi/agents/`: `star-collector` (read-only, §6.4), `star-implementer` (one step under a brief, §6.5), `star-auditor` (blind second read, §6.7). Its scope parameter defaults to `project` so it reaches that roster; upstream defaults to the user's own. |
 
 **The two separators are not a slip.** `star_subagent` and `star_questionnaire` are tool names, and
 every tool name in all seven trees is snake or camel — `ask_user_question`, `spawn_agent`,
@@ -397,15 +397,15 @@ nothing enforces that judgement.
     heading. On skill coverage the two shapes differ — the guide owes one numbered section per skill
     and no more, the READMEs only have to name each skill, since there it is a table row. What a
     section *says* about a skill is checked by nobody.
-19. **The opening-load shape holds in every tree.** One `.env` probe line per file, no `cat` of the
+19. **The opening-load shape holds in every tree.** One `.env` lookup line per file, no `cat` of the
     whole conventions file inside a Bash block (only `.agents`' fallback sentence may, and it is marked
-    "accept the spill" / "接受落盘"), `SKILL_zh.md` never a runtime load, and the two passages that are
+    "accept that the result is written out" / "接受结果被存成文件"), `SKILL_zh.md` never a runtime load, and the two passages that are
     uniform across all ninety file pairs by design — the language paragraph and the
     `SKILL_zh.md` header blockquote — still identical, so a partial re-edit shows up. The strings it
-    pins are the probe line and those two openings; rewording any of them centrally means updating
+    pins are the lookup line and those two openings; rewording any of them centrally means updating
     the check in the same commit.
-20. **A skill that loads only part of the conventions says so accurately, and stays under the spill
-    line.** Two skills take an `awk` excerpt of the sections they act on rather than the whole file
+20. **A skill that loads only part of the conventions says so accurately, and stays under the size
+    limit.** Two skills take an `awk` excerpt of the sections they act on rather than the whole file
     (`star-expt-digest`, `star-refs-reviewer`). Per such file: the excerpt prints exactly the sections
     its regex names, so a renumber upstream fails here; it reads its own language's conventions file;
     it stays under `LOAD_EXCERPT_MAX` (28000 bytes), which is the only place that can be caught, since

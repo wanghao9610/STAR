@@ -1,8 +1,8 @@
-# Adoption Spec — probe recipe, inventory contract, and write rules
+# Adoption Spec — survey recipe, inventory format, and write rules
 
 The exact rules behind `star-proj-adopt`. `SKILL.md` states the shape; this file states what counts.
 
-## 1. The probe (read-only)
+## 1. The survey (read-only)
 
 Six areas. Each carries a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1 — a `certain` line is reported, not asked about. Because that label decides it, the main agent is the one who sets it. An area handed to a subagent comes back with findings and evidence paths and the confidence column left empty; filling it in there would let the subagent decide what the user gets asked about.
 
@@ -21,7 +21,7 @@ Also record, for the inventory: first commit date, commit count, the 20 most rec
 
 ## 2. The mapping block
 
-Report the probe as one block before Confirmation point 1, one line per area:
+Report the survey as one block before Confirmation point 1, one line per area:
 
 ```
 source     CODE_NAME=<dir>            certain   (only importable package; imported by train.py)
@@ -61,7 +61,7 @@ bash scripts/train.sh "$@"
 
 Rules: never edit the wrapped script; never inline its body; never "improve" its arguments. When the existing command hardcodes a path that a symlink now also reaches, leave the hardcoded path alone — both resolve, and rewriting it is a code change, which is out of bounds. `<name>` distinguishes the task (conventions §9), and a name already taken in `execs/scpts/` is a conflict to ask about, not to suffix.
 
-## 5. The work inventory contract
+## 5. The work inventory format
 
 One row per identifiable unit of finished or in-flight work. Fewer, well-evidenced rows beat many speculative ones — if two commits and one output dir describe one thing, that is one row.
 

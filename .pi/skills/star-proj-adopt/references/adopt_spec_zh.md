@@ -13,7 +13,7 @@
 | 数据 | 名为 `data*` / `dataset*` 的目录、配置与 dataloader 默认值里的路径、体量大的非代码目录树 | 唯一路径，且被不止一个配置或脚本引用 |
 | 权重 | 名为 `ckpt*` / `checkpoint*` / `weights` / `pretrained` / `models` 的目录、`.pt` / `.pth` / `.safetensors` / `.bin` 的聚集处 | 唯一路径，且入口脚本加载的正是其中的 checkpoint |
 | 输出 | 名为 `out*` / `runs` / `logs` / `exp*` / `work_dir*` 的目录、TensorBoard event 文件、按 run 分子目录的模式 | 唯一路径，且其子目录看起来就是一次次 run（时间戳、配置名） |
-| 入口 | 可执行脚本、`if __name__ == "__main__"`、`console_scripts`、`Makefile` / `*.sh` 目标、README 里的命令 | ——始终作为一个列表报告，绝不收敛成单一答案 |
+| 入口 | 可执行脚本、`if __name__ == "__main__"`、`console_scripts`、`Makefile` / `*.sh` 目标、README 里的命令 | ——始终作为一个列表报告，绝不压成单一答案 |
 
 同时为工作清单记录：首次提交日期、提交总数、最近改动的 20 条路径，以及 README 里任何描述状态或结果的段落。
 
@@ -74,7 +74,7 @@ bash scripts/train.sh "$@"
 | `run_dir` | `state` 为 `run` 或 `concluded` 时填既往 run 目录；否则留空 |
 | `metric` | 日志、README 或结果文件里可见的任何数字，连同出处逐字引用。绝不计算，绝不四舍五入 |
 
-**绝不进入某一行的东西：** 这项工作为什么做、支撑哪条声明、是否成功、接下来该做什么。那些归 coach 去问、归分析师去判（`SKILL_zh.md` 原则 5）。
+**绝不进入某一行的东西：** 这项工作为什么做、支撑哪条主张、是否成功、接下来该做什么。那些归 coach 去问、归分析师去判（`SKILL_zh.md` 原则 5）。
 
 ## 6. 入账规则（确认点 2）
 

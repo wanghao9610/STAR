@@ -102,7 +102,7 @@ A passage from a leaf whose `exec_status` is not `done` is design intent. Close 
 
 One line per subsection, not per sentence; content from `done` leaves and from strategy nodes carries no mark. Where a subsection mixes both, mark it and name only the unverified sources.
 
-## Frontmatter contract
+## Frontmatter format
 
 Every generated document opens with:
 
@@ -119,7 +119,7 @@ sources:                          # every plan that fed this document, with the 
 
 `type:` + `generated:` are what mark a file as compiled and therefore safe to regenerate; a file without them is hand-authored. `sources:` is the staleness check: a recorded `updated` older than that plan's current `updated` means the document is stale.
 
-## Extraction contract (structured return)
+## Extraction format (structured return)
 
 Read-only subagents return exactly these three lists plus `plans_read: <n>`, and nothing else:
 

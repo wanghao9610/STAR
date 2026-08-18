@@ -21,7 +21,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 ## 步骤状态
 
 <!-- 每个 EXEC_PLAN 动作一行。`检查结果` 由**主 agent**重跑绑定 check 填写,不是 agent 自报。
-     合法 status:pending / in_progress / done / blocked / skipped。 -->
+     允许的 status:pending / in_progress / done / blocked / skipped。 -->
 
 | # | 步骤 | status | model | 产物(wkdrs/<run>/…) | 检查结果 | 备注 |
 |---|------|--------|-------|----------------------|----------|------|

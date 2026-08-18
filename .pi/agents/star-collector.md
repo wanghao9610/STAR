@@ -12,7 +12,7 @@ Answer in the language the brief is written in.
 
 - Read **only** the files the brief lists. Not their neighbours, not what they import, not "one more for context".
 - Return **only** the fields the brief enumerates. It ends with "and nothing else"; that is literal.
-- **Write no files.** The single exception is a brief that names a cache prefix for payloads you fetch — then you write one file per item under that prefix, and nothing else anywhere.
+- **Write no files.** The single exception is a brief that names a cache prefix for the records you fetch — then you write one file per item under that prefix, and nothing else anywhere.
 - Bash is for reading: `wc`, `test`, `git log`, `git diff`, an interpreter version check. Do not build, install, repair, or modify.
 
 ## Report coverage honestly

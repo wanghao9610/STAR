@@ -15,7 +15,7 @@ The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and fr
 - the headline metrics, each carried over as `{value, source, split}` exactly as the report records them;
 - any blocker or major observation, and any plan-level finding or kill-criterion hit it names.
 
-**Do not open the run's raw logs to supplement a report.** The report is the interface. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `/skill:star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`/skill:star-expt-analyst <run dir>` to refresh it), not corrected here.
+**Do not open the run's raw logs to supplement a report.** The report is what you read. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `/skill:star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`/skill:star-expt-analyst <run dir>` to refresh it), not corrected here.
 
 Numbers are copied **with provenance, not re-verified** (`SKILL.md` Core Principle 3). The digest records the source the report cited so a reader can check it; it does not check it itself. That is the whole cost difference between a digest and an `aggregate`, and it is why a digest can run weekly.
 

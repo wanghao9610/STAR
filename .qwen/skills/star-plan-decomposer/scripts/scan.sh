@@ -2,14 +2,14 @@
 #
 # STAR flow data collector — one digest instead of one read per file.
 #
-# Shared by the skills that open the same plans, run logs, and registered
+# Shared by the skills that open the same plans, run logs, and listed
 # artifacts before doing anything else. Every copy is byte-identical and CI
 # enforces that; it names no harness and no skill, so there is nothing to adapt
 # per tree.
 #
 # Deliberately dumb: it globs, greps, and prints. It decides nothing. No glyphs,
 # no coverage verdicts, no ordering, no scoping, no knowledge of which filenames
-# the registry expects — it prints what is on disk and the skill applies the
+# the output table expects — it prints what is on disk and the skill applies the
 # rules. That split is the point: conventions §8 and each skill's own spec stay
 # the single home of every rule, so a producer skill that renames its output
 # never has to be mirrored here.
@@ -17,7 +17,7 @@
 # Each of the three sweeps is one awk pass over its whole file list, not one
 # process per file. Pulling a file's frontmatter, section bodies, placeholder
 # counts and dates costs four or five processes when each extractor is its own
-# utility, and on a project with a few hundred registered files that startup
+# utility, and on a project with a few hundred listed files that startup
 # overhead is most of the runtime — the reading itself is microseconds. The awk
 # program below holds the same extractors as functions over one buffered file at
 # a time, so the output is unchanged and the process count stays constant.
@@ -38,7 +38,7 @@
 #                 its name and the date in it; how many were left out is printed,
 #                 never dropped silently. A run directory here is a wkdrs/ subdir
 #                 holding an EXEC_LOG.md, which is the same thing the RUNS sweep
-#                 globs for — no new knowledge of the registry enters the script.
+#                 globs for — no new knowledge of the output table enters the script.
 #                 Frontmatter, dates, plans, LISTING and DIRS are untouched, and
 #                 --trails keeps every artifact, since a provenance read wants the
 #                 writers this would drop.
@@ -103,7 +103,7 @@ say() { printf '%s\n' "$*"; }
 # stdin and the file itself is read with getline, so an unreadable or empty file
 # behaves as it did when every extractor opened the file for itself.
 #
-# Every routine works over buf[1..n], the whole file buffered. Registered
+# Every routine works over buf[1..n], the whole file buffered. Listed
 # artifacts are small, and buffering is what lets one pass do the work that
 # frontmatter, section_body, tbd_counts and dates_seen each used to open the
 # file for.
@@ -495,7 +495,7 @@ fi
 # Which wkdrs/ subdirs --slim treats as run directories: the ones holding an
 # EXEC_LOG.md, which is the same set the RUNS sweep globs. wkdrs/digests/,
 # wkdrs/results/ and wkdrs/env_*/ hold no log, so their frontmatter is never
-# skipped — and the script still has no list of what the registry expects.
+# skipped — and the script still has no list of what the output table expects.
 RUN_DIRS=""
 [ "$SLIM" = 0 ] || RUN_DIRS=$(find_md wkdrs 2 'EXEC_LOG.md' | sed 's|^wkdrs/||; s|/EXEC_LOG\.md$||' | tr '\n' ',')
 
@@ -516,9 +516,9 @@ say "## RUNS — wkdrs/*/EXEC_LOG.md"
 find_md wkdrs 2 'EXEC_LOG.md' | sweep runs "(none)"
 
 # ---------------------------------------------------------------- other artifacts
-# Every other registered-area .md, one depth level down as the self-audit rule
+# Every other listed-area .md, one depth level down as the self-audit rule
 # defines it: metds/, its ideas dir, and each wkdrs/<dir>/. Frontmatter only —
-# the state field each row of the registry needs lives there. metds/refs/ is
+# the state field each row of the output table needs lives there. metds/refs/ is
 # listed but not dumped by default: it is checked for the index's presence, and a
 # project with fifty paper notes would otherwise drown the digest — --trails
 # widens to it, because a provenance ledger does want every note's writer.
@@ -534,9 +534,9 @@ artifact_files | sweep artifacts "(none with frontmatter)"
 
 # ---------------------------------------------------------------- listing
 # Presence and filename dates for the coverage band, and the raw material for the
-# self-audit line. Depth 1 only: producers' working subdirs are not registered.
+# self-audit line. Depth 1 only: producers' working subdirs are not in the output table.
 say ""
-say "## LISTING — registered areas, depth 1, *.md"
+say "## LISTING — output-table areas, depth 1, *.md"
 listing=$(
     find_md metds 1 '*.md'
     find_md metds/ideas 1 '*.md'

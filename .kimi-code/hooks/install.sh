@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Register STAR's Kimi hooks in Kimi's GLOBAL config, idempotently.
+# Register STAR's Kimi hooks in Kimi's GLOBAL config; running it again changes nothing.
 #
 # Three hooks: model_id provenance, the project-memory index injected from
 # .star/memory/, and the commit guard that declines the git commands the workflow

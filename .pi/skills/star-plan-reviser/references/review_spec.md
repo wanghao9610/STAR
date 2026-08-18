@@ -17,7 +17,7 @@ How star-plan-reviser gathers evidence and what each report section must contain
 
 Missing evidence is reported as "unknown" or "absent" — never guessed.
 
-## Collector contracts (structured returns)
+## Collector formats (structured returns)
 
 **Log collector** — for one run dir:
 
@@ -55,12 +55,12 @@ Score each completion claim by the highest level that actually holds:
 
 Never promote `unverifiable` to `met` on the log's word alone.
 
-**What counts as a cheap check**: file existence / size / head, a tiny parse, a checksum, a unit-test-scale command — roughly under a minute, no GPU, no paid API, no side effects. Everything beyond is heavy: do not run it; note in the report what a full re-verification would take.
+**What counts as a cheap check**: file existence / size / head, a tiny parse, a checksum, a unit-test-scale command — roughly under a minute, no GPU, no paid API, no files changed. Everything beyond is heavy: do not run it; note in the report what a full re-verification would take.
 
 ## Scoping by node type
 
 - **Leaf**: all three levels over its own run.
-- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run the log collector contract only on runs that exist, one run at a time; audit this node's own §1–§6 assumptions against the aggregated signals (a child's plan-level finding is evidence against a parent assumption).
+- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run a log collector only on runs that exist, one run at a time; audit this node's own §1–§6 assumptions against the aggregated signals (a child's plan-level finding is evidence against a parent assumption).
 - **No execution evidence anywhere**: document-only review — the scorecard reads `unverifiable`/absent; divergences and candidates draw on the plan text and on what the user supplies.
 
 ## Report sections

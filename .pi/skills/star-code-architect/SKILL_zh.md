@@ -5,7 +5,7 @@ description: >-
   从 metds/plans/ 下的研究计划提炼检索要素，在 GitHub 上检索候选参考实现并按评分表打分（计划贴合度、
   完整性、许可证、活跃度），由用户选定后克隆、去除 git 历史、记录出处，并保守地重命名为 CODE_NAME。
   当代码已存在时：改为做一次只读勘察。两条路径随后汇合：设计目标架构与迁移表，仅执行
-  用户批准的迁移项（一次一组 + 逐组验证 + git 检查点），并把架构规范写入
+  用户批准的迁移项（一次一组 + 逐组验证 + 每组提交一次），并把架构规范写入
   metds/codearc.md，在 AGENTS.md 留下一小段指路说明。当用户运行
   /star-code-architect，或想为计划找参考实现或起步代码库、想搭建 ${CODE_NAME}/、或想整理/重构现有
   代码库并写下架构规范时，都应使用本 skill。Bilingual (中/英) — also trigger in English whenever
@@ -20,9 +20,9 @@ description: >-
 
 调用方式：`/star-code-architect [GITHUB_URL | PLAN_NAME] [描述]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载，以一条消息发出：规约文件经它自己的 `read` 读入，绝不 `cat` 进 `bash` 命令——`bash` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——外加一次小的 `bash` 调用（以项目根目录为工作目录），做这里唯一只有 `bash` 才做得了的事，即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。两次调用一起发出仍只花一趟往返——而它们也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。这次阅读就是开场装载，以一条消息发出：规约文件经它自己的 `read` 读入，绝不 `cat` 进 `bash` 命令——`bash` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——外加一次小的 `bash` 调用（以项目根目录为工作目录），做这里唯一只有 `bash` 才做得了的事，即这次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。两次调用一起发出仍只花一趟往返——而它们也是本 skill 唯一的无条件装载：`references/` 与 `assets/` 下的每个文件都归属某个分支或步骤，留到引用它的步骤再读，不前置装载。
 
-**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
 ## 角色
 
@@ -36,7 +36,7 @@ description: >-
 2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
 3. **上游结构为基线。**克隆库的组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交之前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
-5. **主 agent 编排、复核，动手的是子代理。**勘察派给只读的 `star_subagent`（`agent: "star-collector"`）；迁移派给 `star_subagent`（`agent: "star-implementer"`），每个只写本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就打一个 git 检查点，重试 ≤2 次，仍失败则回滚。格式约定见 `references/orchestration_spec_zh.md`。
+5. **主 agent 编排、复核，动手的是子代理。**勘察派给只读的 `star_subagent`（`agent: "star-collector"`）；迁移派给 `star_subagent`（`agent: "star-implementer"`），每个只写本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就提交一次，重试 ≤2 次，仍失败则恢复该组文件。规范见 `references/orchestration_spec_zh.md`。
 6. **单一规范，一小段指路说明。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划各组件对应的代码路径、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行的摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链）。这一节就是这里唯一的常驻指路说明：Pi 启动时把 `AGENTS.md` 当上下文文件读进来，没有第二条常驻通道要同步。规范内容绝不复制成多份。
 
 ## 工作流
@@ -57,7 +57,7 @@ description: >-
 
 #### Step A2：检索并入围
 
-优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划提到的 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则退化为网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 以最小骨架从零起步。
+优先 `gh search repos` / `gh api`（结构化的 stars / license / pushed_at），配合网页检索计划提到的 baseline 的官方实现。入围 5–10 个；跳过已归档、仅 demo、awesome 清单类仓库；fork 让位于源仓库。`gh` 不可用或未登录则改用网页检索。确实找不到合格候选就如实说明，给出：细化检索要素 / 以最小骨架从零起步。
 
 #### Step A3：评分
 
@@ -65,12 +65,12 @@ description: >-
 
 #### Step A4：确认点 1——用户选定参考库
 
-以普通文本呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留兜底选项（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
+以普通文本呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 
 #### Step A5：克隆到位
 
 1. 浅克隆到临时目录；记下 URL、commit SHA、commit 日期、许可证。
-2. 若实现只是 monorepo 的子目录，与用户确认子路径，只取该部分。
+2. 若实现只是某个大仓库里的一个子目录，与用户确认子路径，只取该部分。
 3. 删除 `.git`；内容移入 `${CODE_NAME}/`；上游 `LICENSE` 与 `CITATION*` 文件原位保留。
 4. 按 `assets/upstream_template.md` 写 `${CODE_NAME}/UPSTREAM.md`（该文件一律英文，无 `_zh` 版本）。
 5. 提交 import（只暂存 `${CODE_NAME}/`）：`star-code-architect: import <repo> @ <short-sha>`。
@@ -79,9 +79,9 @@ description: >-
 
 按 `references/rebrand_checklist_zh.md` 执行：顶层包目录、全部 import、打包元数据（`setup.py` / `pyproject.toml` 的包名、packages、console 入口）、README 标题与安装片段。每改一处：grep 旧名确认计数按预期下降，再跑 `python -m compileall -q ${CODE_NAME}`（无需装依赖）。禁改清单上的名称（注册表字符串、配置 `type:` 键、checkpoint `state_dict` 前缀、logger/wandb 项目名）进入**残留表**，写入 `codearc.md` §7。提交：`star-code-architect: rebrand to <CODE_NAME>`。
 
-#### Step A7：运行时冒烟（含红线）
+#### Step A7：运行时跑通性检查（含红线）
 
-若 `.env` 指向的 conda 环境可用，通过它跑 `python -c "import <package>"`。建环境与装依赖通常是重操作：准备好确切命令（`conda create …`、`pip install -r …`）；纯 Python 轻量安装需用户当场明确同意才执行；涉及 CUDA 编译或超过约 1 GB 的下载一律移交用户（红线，见 `references/orchestration_spec_zh.md`）。记录哪些已跑、哪些待用户执行。整套环境构建可交棒给 `/star-env-builder`——后端选择、依赖解析、按优先顺序安装与冒烟验证都由它在自己的安装计划确认点下完成。
+若 `.env` 指向的 conda 环境可用，通过它跑 `python -c "import <package>"`。建环境与装依赖通常是重操作：准备好确切命令（`conda create …`、`pip install -r …`）；纯 Python 轻量安装需用户当场明确同意才执行；涉及 CUDA 编译或超过约 1 GB 的下载一律移交用户（红线，见 `references/orchestration_spec_zh.md`）。记录哪些已跑、哪些待用户执行。整套环境构建可交棒给 `/star-env-builder`——后端选择、依赖解析、按优先顺序安装与跑通性检查都由它在自己的安装计划确认点下完成。
 
 #### Step A8：勘察这份克隆
 
@@ -105,7 +105,7 @@ description: >-
 
 #### Step C3：执行迁移
 
-把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组可以并行，有依赖的组按依赖顺序串行。每组派一次 `star_subagent`（`agent: "star-implementer"`），格式约定为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 回滚该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
+把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组可以并行，有依赖的组按依赖顺序串行。每组派一次 `star_subagent`（`agent: "star-implementer"`），交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
 #### Step C4：写出规范
 
@@ -128,12 +128,12 @@ description: >-
 - 只写这些位置：`${CODE_NAME}/`、`metds/codearc.md`、`AGENTS.md` 的 `## Code Architecture` 一节。绝不碰 `metds/plans/*`。
 - 溯源不可省略：import 提交前 `${CODE_NAME}/UPSTREAM.md` 必须存在；上游 `LICENSE` / `CITATION*` 文件绝不删除或改写；许可证问题在确认点 1 就摆到台面，并记入 `codearc.md` §5。
 - Git：每完成一个阶段或验证完一个迁移组提交一次，只 stage `${CODE_NAME}/` 与本 skill 拥有的规约文件；开工前该组待改路径必须干净（规约 §1）。
-- 审计线索 = git 检查点 + `codearc.md` §6 迁移记录；本 skill 不建 `wkdrs/` 运行目录——它产出代码与规范，不产出实验产物。
+- 审计线索 = 逐组提交 + `codearc.md` §6 迁移记录；本 skill 不建 `wkdrs/` 运行目录——它产出代码与规范，不产出实验产物。
 - 红线：涉及 CUDA 编译的环境构建、超过约 1 GB 的下载、完整测试套件、任何训练——准备好命令交给用户，绝不擅自启动。
 - 改名残留清单在 `codearc.md` §7；后续改名走 `star-plan-executor` 的步骤或再次运行本 skill，逐项验证。
 
 ## 对话纪律
 
-- 两个确认点与所有提问都走 `star_questionnaire`——一次调用只问一题：仍一次一题，且任何跨确认点副作用都要先拿到明确的批准文字。
+- 两个确认点与所有提问都走 `star_questionnaire`——一次调用只问一题：仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
 - 用户用什么语言就用什么语言对话；中文对话加载 `*_zh.md` 资源。
 - `metds/codearc.md` 正文语言跟随根计划的 `language`（无计划则用对话语言）；`UPSTREAM.md` 一律英文（事实元数据）；中文文档中专业术语保留英文。

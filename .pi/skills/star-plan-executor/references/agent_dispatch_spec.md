@@ -1,4 +1,4 @@
-# Agent Dispatch Contract (Pi — filled locally)
+# Agent Dispatch Brief (Pi — filled locally)
 
 One `star_subagent` dispatch per step (or coherent step-group) in EXEC_PLAN. Use `agent: "star-implementer"` for a step that changes files, `agent: "star-collector"` for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step. Keep agents narrow so failures localize and contexts stay short.
 
@@ -13,7 +13,7 @@ One `star_subagent` dispatch per step (or coherent step-group) in EXEC_PLAN. Use
 These are the terms the dispatch states, and the delegate is held to for the length of the step:
 
 - **Scope** — the one step's goal, verbatim from EXEC_PLAN, plus the step's own check. State: "do **ONLY** this step; do not proceed to later steps."
-- **Write surface** — and nothing outside it: the exact files/modules to create or modify under `${CODE_NAME}/` (from the gap list); artifacts under `wkdrs/<run>/`; intermediate working files under `tasks/<plan-name>/`, never another plan's; and, for a STOP-line step only, the prepared launch script `execs/scpts/<run>.sh` — writing it is light, running it is not (`stop_line_rules.md`). Match existing code style and touch only what this step needs (AGENTS.md §3, surgical changes).
+- **What it may write** — and nothing outside it: the exact files/modules to create or modify under `${CODE_NAME}/` (from the gap list); artifacts under `wkdrs/<run>/`; intermediate working files under `tasks/<plan-name>/`, never another plan's; and, for a STOP-line step only, the prepared launch script `execs/scpts/<run>.sh` — writing it is light, running it is not (`stop_line_rules.md`). Match existing code style and touch only what this step needs (AGENTS.md §3, surgical changes).
 - **Runtime** — the absolute interpreter path resolved at Step 2, used verbatim. Do not re-read `.env` per step: the working directory may not be the project root. A missing package is a blocker it returns, never something it installs (conventions §3.5).
 - **Boundary** — a step may run **light validation only**. A step on the STOP line **prepares the command and hands it back, and does not run it** (`stop_line_rules.md`).
 
@@ -27,8 +27,8 @@ These are the terms the dispatch states, and the delegate is held to for the len
 
 ## After the agent returns
 
-**Run the step's own check as its own command**, read its output, then checkpoint to EXEC_LOG. Nothing counts as `pass` on the strength of having written the code — the check's output is the evidence, and a delegate's self-reported pass is a claim like any other.
+**Run the step's own check as its own command**, read its output, then record the result in EXEC_LOG. Nothing counts as `pass` on the strength of having written the code — the check's output is the evidence, and a delegate's self-reported pass is a claim like any other.
 
 - **Pass** → mark the step `done` in EXEC_LOG with the artifact path + check result; update the sub-plan's `exec_status` / `updated`.
-- **Fail** → record the failure in EXEC_LOG. Restore this step's files before retrying — minus anything named pre-existing — so the next attempt starts from a known tree. Restore to how the tree stood when this step started, not to `HEAD`: the confirmation point may have declined per-step checkpoint commits, and then earlier verified steps are uncommitted too, so resetting to `HEAD` would erase work EXEC_LOG already records as `done`. A restore never touches files outside this step's own; retry at most twice, carrying the failure into the next attempt. Still failing → the step is `blocked`, and its half-finished edits may still be worth something: ask before restoring them (conventions §7.7 — it stops for confirmation before a deletion), record which way it went, name the paths either way, and stop with the log. No step ends leaving edits nobody has accounted for: a later step's commit stages "the files that step touched" and cannot tell them apart.
+- **Fail** → record the failure in EXEC_LOG. Restore this step's files before retrying — minus anything named pre-existing — so the next attempt starts from a known tree. Restore to how the tree stood when this step started, not to `HEAD`: the confirmation point may have declined per-step commits, and then earlier verified steps are uncommitted too, so resetting to `HEAD` would erase work EXEC_LOG already records as `done`. A restore never touches files outside this step's own; retry at most twice, carrying the failure into the next attempt. Still failing → the step is `blocked`, and its half-finished edits may still be worth something: ask before restoring them (conventions §7.7 — it stops for confirmation before a deletion), record which way it went, name the paths either way, and stop with the log. No step ends leaving edits nobody has accounted for: a later step's commit stages "the files that step touched" and cannot tell them apart.
 - **Handoff present** → move the command into EXEC_LOG "Awaiting user" and stop; do not run it.

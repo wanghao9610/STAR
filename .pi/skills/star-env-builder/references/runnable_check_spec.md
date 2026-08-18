@@ -1,6 +1,6 @@
-# Smoke Test Spec — three layers, evidence required
+# Runnable Check Spec — three layers, evidence required
 
-Run after installation, through the absolute `$ENV_PY`. Budget: minutes, CPU-light, no data, no weights, no network downloads. Every check records its exact command and output tail as evidence in ENV_REPORT's smoke-test results table.
+Run after installation, through the absolute `$ENV_PY`. Budget: minutes, CPU-light, no data, no weights, no network downloads. Every check records its exact command and output tail as evidence in ENV_REPORT's runnable-check results table.
 
 ## L1 — imports
 
@@ -28,7 +28,7 @@ Pass = the import succeeds; record the version. The matrix is transcribed from t
 For torch (adapt the same shape for jax / tensorflow):
 
 - Report `torch.__version__` and `torch.version.cuda`.
-- GPU expected (the preflight `nvidia-smi` succeeded): `torch.cuda.is_available()` must be `True`; record `device_count()`; run a small op — `(torch.randn(64,64,device='cuda') @ torch.randn(64,64,device='cuda')).sum()`.
+- GPU expected (the preliminary check's `nvidia-smi` succeeded): `torch.cuda.is_available()` must be `True`; record `device_count()`; run a small op — `(torch.randn(64,64,device='cuda') @ torch.randn(64,64,device='cuda')).sum()`.
 - macOS: check `torch.backends.mps.is_available()`; run the op on `mps`.
 - CPU-only machine: run the op on CPU and report *CPU-only (expected)* — a finding, not a failure.
 - `is_available()` `False` on a GPU machine **is** a failure. Usual causes, in order: the CPU wheel got installed (`torch.version.cuda` is `None` — wrong index used), or the driver is older than the wheel's CUDA runtime (re-match the index against the ceiling).
@@ -50,7 +50,7 @@ A failed layer → diagnose from the traceback:
 
 ≤2 fix rounds per layer; still failing → mark the layer `blocked` in the results table with the error tail, continue to later layers only where independent, and point it out in the final report.
 
-## Evidence format (smoke-test results rows)
+## Evidence format (runnable-check results rows)
 
 | Layer | Check | Command | Result | Evidence |
 |---|---|---|---|---|

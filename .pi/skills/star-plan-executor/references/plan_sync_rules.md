@@ -64,7 +64,7 @@ For each confirmed row:
    ```
 
 4. **Bump frontmatter `updated`**; touch nothing else in the frontmatter.
-5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). The write-back is idempotent: a marked row is never applied twice.
+5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). The write-back applies once: a marked row is never applied twice.
 
 Dates come from the user/session context — never invent timestamps.
 

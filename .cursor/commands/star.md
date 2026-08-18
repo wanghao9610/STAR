@@ -4,7 +4,7 @@ The STAR skill roster, with what each one is for:
 
 | Skill | | Purpose |
 |---|---|---|
-| `star-code-architect` | † | Bootstrap or reorganize the codebase and write metds/codearc.md |
+| `star-code-architect` | † | Set up or reorganize the codebase and write metds/codearc.md |
 | `star-code-release` | † | Prepare the repository for release; it never publishes one |
 | `star-code-reviewer` | | Review code against the conventions and against what a plan promised |
 | `star-env-builder` | | Build and verify the project's Python runtime from .env |

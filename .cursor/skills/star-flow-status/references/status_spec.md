@@ -2,7 +2,7 @@
 
 Everything here is derived by reading files. Write nothing.
 
-The plan tree has ordering semantics, so it gets a graph walk. The follow-up checks are thin by design — presence and freshness only. The priority order picks the one recommendation across both; the unrecognized-files line is the check that catches a renamed output.
+The plan tree has an ordering, so it gets a graph walk. The follow-up checks are thin by design — presence and freshness only. The priority order picks the one recommendation across both; the unrecognized-files line is the check that catches a renamed output.
 
 ## Scope — what a `PLAN_NAME` narrows
 
@@ -27,7 +27,7 @@ For a leaf with `exec_runs`, also read the current run's `wkdrs/<run>/EXEC_LOG.m
 
 The scan call also lists execution branches (conventions §11). One matching a leaf whose run dir is absent from this checkout is a run in flight on that branch: the base branch is canonical (§11.3), so the leaf's frontmatter here correctly reads not-done — render the leaf with the branch named rather than as merely pending, and read branch-side state only where a row below needs it, through read-only `git show <run>:wkdrs/<run>/EXEC_LOG.md` (§1's read-only list covers `show`). The worktree listing reads the same way (§11.7–9): a tree whose path ends in a run's name is that run's home — name it beside the branch when rendering the leaf — and a tree matching no leaf and no run record is not ours to mention.
 
-For the follow-up checks, read the other registered artifacts by presence and by the one date field each carries — never their full bodies. Conventions §8 is the registry; the coverage table below names the exact field per row.
+For the follow-up checks, read the other listed artifacts by presence and by the one date field each carries — never their full bodies. Conventions §8 is the output table; the coverage table below names the exact field per row.
 
 ## Node classification
 
@@ -145,7 +145,7 @@ Keep this section short and omit it entirely when nothing is flagged.
 The follow-up checks match artifacts by name. If a producer skill changes what it writes, the checks would quietly stop firing that row — a silent under-report nobody notices. This line flips that failure into a visible one. Count only **report-shaped** files, so that run artifacts (checkpoints, figures, raw logs) never enter:
 
 - a `*.md` directly inside a `wkdrs/<run>/` dir whose name is not `EXEC_PLAN.md`, `EXEC_LOG.md`, `CODE_REVIEW_<date>.md`, `EXPT_ANALYSIS_<date>.md`, or `REVIEW_<date>.md`;
-- a `*.md` directly inside one of the four registered non-run `wkdrs/` dirs, under a name §8 does not register there: in `wkdrs/reviews/` (the shared no-run fallback) the registered names are `code_<scope>_<date>.md` and `<prefix>_<slug>_<date>.md` (numeric prefix); in a `wkdrs/env_<name>_<date>/` dir the registered name is `ENV_REPORT.md`; in `wkdrs/digests/` the registered names are `EXPT_DIGEST_<date>.md` and `MODEL_LEDGER.md`; in `wkdrs/results/` the registered names are `results.md` and `results_<slug>.md`. Any other `wkdrs/` subdir is audited as a run dir under the previous bullet;
+- a `*.md` directly inside one of the four listed non-run `wkdrs/` dirs, under a name §8 does not list there: in `wkdrs/reviews/` (the shared no-run fallback) the listed names are `code_<scope>_<date>.md` and `<prefix>_<slug>_<date>.md` (numeric prefix); in a `wkdrs/env_<name>_<date>/` dir the listed name is `ENV_REPORT.md`; in `wkdrs/digests/` the listed names are `EXPT_DIGEST_<date>.md` and `MODEL_LEDGER.md`; in `wkdrs/results/` the listed names are `results.md` and `results_<slug>.md`. Any other `wkdrs/` subdir is audited as a run dir under the previous bullet;
 - a top-level `metds/*.md` whose stem is not one of `overview`, `framework`, `dataset`, `training`, `evaluation`, `codearc`, `adopt`, **and** which carries any of `type:`, `generated:`, or `sources:`. Those three together are the compiled-document fingerprint: keying on all three rather than on `type:` alone means a producer that renames its output *and* drops `type:` is still caught, while a hand-authored note in `metds/` — which carries none of them — stays silent.
 
-Do not descend into subdirectories (`analysis/`, `raw/`, `refs/`) — those are the producers' own working space and are not registered. Report one line: `⚠ N unrecognized report file(s)` plus up to three paths. Omit the line entirely when N is 0. This is a naming mismatch, not a verdict on the files: it means the registry in conventions §8 and what is on disk have diverged, and one of them needs updating.
+Do not descend into subdirectories (`analysis/`, `raw/`, `refs/`) — those are the producers' own working space and are not listed. Report one line: `⚠ N unrecognized report file(s)` plus up to three paths. Omit the line entirely when N is 0. This is a naming mismatch, not a verdict on the files: it means the output table in conventions §8 and what is on disk have diverged, and one of them needs updating.

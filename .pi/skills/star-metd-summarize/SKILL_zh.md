@@ -20,16 +20,16 @@ description: >-
 
 调用方式：`/star-metd-summarize [OPT] [描述]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 这个写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 `bash` 调用：规约文件用单独的 `read` 读入，绝不 `cat` 进 `bash` 命令——`bash` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 `bash` 才做得了的那两件事，以项目根目录为工作目录的一次调用：
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 `bash` 调用：规约文件用单独的 `read` 读入，绝不 `cat` 进 `bash` 命令——`bash` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 `bash` 才做得了的那两件事，以项目根目录为工作目录的一次调用：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位；两行都折进这条消息，谁也不另占一趟往返。第二行是共享采集脚本，它的摘要就是步骤 1 的全部输入：每个计划的 frontmatter、它的 `## Sub-plans` 索引与占位符计数、每份运行日志的 frontmatter，以及 `metds/` 和 `wkdrs/` 的一层目录清单——这一步过去逐个计划读的那轮循环，现在合成一份结果。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样，再对它套用本文件的规则。`--slim` 是在有历史的项目上把结果压在落盘线以内的手段；万一仍然落盘，把这一行单独重跑一次。若脚本缺失或执行失败，退回列出 `metds/plans/*_plan.md` 并逐个读 frontmatter，并在回复里说明这次走了退路。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
+`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位；两行都折进这条消息，谁也不另占一趟往返。第二行是共享采集脚本，它的摘要就是步骤 1 的全部输入：每个计划的 frontmatter、它的 `## Sub-plans` 索引与占位符计数、每份运行日志的 frontmatter，以及 `metds/` 和 `wkdrs/` 的一层目录清单——这一步过去逐个计划读的那轮循环，现在合成一份结果。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样，再对它套用本文件的规则。`--slim` 是在有历史的项目上把结果压在大小上限以内的手段；万一仍然被存成文件，把这一行单独重跑一次。若脚本缺失或执行失败，退回列出 `metds/plans/*_plan.md` 并逐个读 frontmatter，并在回复里说明这次走了退路。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
 
-**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
 ## 角色
 
@@ -39,7 +39,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 核心原则
 
-1. **计划是唯一信息源；每句话都要能追溯到某个计划。** 只读 `metds/plans/*_plan.md`——不读代码、不读日志、不读 `wkdrs/`、不读对话记忆。executor 会把确认过的执行偏离同步回子计划（`plan_sync_rules.md`），所以计划既权威又最新；只存在于某个 run 日志里的事实是一处 plan-sync 缺口，不是你的输入。映射见 `references/extract_map_zh.md`。
+1. **计划是唯一信息源；每句话都要能追溯到某个计划。** 只读 `metds/plans/*_plan.md`——不读代码、不读日志、不读 `wkdrs/`、不读对话记忆。executor 会把确认过的执行偏离同步回子计划（`plan_sync_rules.md`），所以计划既权威又最新；只存在于某个 run 日志里的事实是一处计划回写缺口，不是你的输入。映射见 `references/extract_map_zh.md`。
 2. **只编译，绝不发明。** 改写、重排、并成一个声音，这是本职；添加事实不是。一个看起来合理的默认值（没写明的学习率、"显然要做"的预处理、标准指标的定义）就是发明——不许进文档。计划里没有的，就是缺口。
 3. **缺口是产出，不是难堪。** 模板里没有计划覆盖的小节转成 `TODO`，并写明该由哪个计划的哪一节补上；缺口清单是汇报的重点之一。文档是一面镜子：它精确告诉研究者方法还有哪里没写，并把修补推回计划——那是 coach 与 decomposer 的地盘。
 4. **沿方法本身的维度组织，而不是计划的结构。** 一个计划小节可以输入给多份文档；一个文档小节可以合并十几个计划。要合并，不要拼接——读起来像计划摘录清单、或因为父计划和叶子都说过而重复两遍的小节，就是失败。二者冲突时：**叶子压父计划，`updated` 新的压旧的**。谁都不占优时，两个值并列写出、前缀 ⚠、写明两处来源——绝不悄悄挑一个赢家。
@@ -83,7 +83,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 填 `assets/<OPT>_template_zh.md`（英文：`assets/<OPT>_template.md`）。保持模板的小节与顺序；没有覆盖的小节保留标题并写 `TODO`——既不删掉，也不注水。frontmatter 记录 `type`、`language`、`generated`（真实日期，绝不编造）与 `sources:`——每个输入给本文档的计划，以及读取时它所带的 `updated` 日期——下次重跑就是靠它检测过期。
 
-### Step 5：写入，带 diff 确认点
+### Step 5：写入，先与现有内容比对
 
 对每个目标，按依赖顺序：
 
@@ -100,7 +100,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 - 唯一的写入是 `metds/overview.md`、`metds/dataset.md`、`metds/framework.md`、`metds/training.md`、`metds/evaluation.md`——五个 OPT 目标，除此之外不写任何东西、任何地方。
 - 绝不碰 `metds/plans/*`——计划文本属于 `/star-plan-coach`、`/star-plan-decomposer`、`/star-plan-executor`、`/star-plan-reviser`；你发现的缺口或错误表述只汇报与转交，绝不就地修改。绝不碰 `metds/codearc.md`（`/star-code-architect` 的）、`metds/refs/*`（`/star-refs-reviewer` 的）、`wkdrs/*`（含 `/star-expt-analyst` 的结果汇总表 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
-- 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：执行现实经由 executor 的同步回写进入计划，所以如果某个 run 的细节在这里缺失，该修的是 plan sync，而不是扩大读取范围。
+- 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：执行现实经由 executor 的同步回写进入计划，所以如果某个 run 的细节在这里缺失，该修的是计划回写，而不是扩大读取范围。
 - 本 skill 不跑任何东西：不跑 python、不训练、不评测、不安装——没有哪条命令的输出是它需要的。
 - Git：只读；本 skill 绝不提交（规约 §1）。
 - 它不设置任何计划 frontmatter，也不创建 run 目录；每份文档的 `sources:` 块就是全部审计轨迹。

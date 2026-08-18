@@ -16,7 +16,7 @@
 
 ## 2. 检索
 
-优先结构化检索，逐级退化：
+优先结构化检索，不行就依次往下试：
 
 1. `gh search repos "<关键词>" --language=python --sort=stars --json fullName,stargazersCount,license,updatedAt,description`（更精细的查询用 `gh api search/repositories`）。需要已登录的 `gh`。
 2. 网页检索：`"<baseline 名>" official implementation github`、`"<论文标题>" code`、`<任务> <框架> training github`。
@@ -48,4 +48,4 @@
 
 ## 5. 呈现入围名单（确认点 1）
 
-top 3–5，一个候选一个选项，每项带：一句话贴合理由、许可证、stars、最近更新、主要风险（一个短语）。得分最高者放第一位并注明推荐。始终保留兜底选项："都不合适——细化检索 / 从零起步"。留存最终得分；被选中仓库的那一行记入 `codearc.md` §5。
+top 3–5，一个候选一个选项，每项带：一句话贴合理由、许可证、stars、最近更新、主要风险（一个短语）。得分最高者放第一位并注明推荐。始终保留一条退路："都不合适——细化检索 / 从零起步"。留存最终得分；被选中仓库的那一行记入 `codearc.md` §5。

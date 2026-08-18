@@ -2,7 +2,7 @@
 
 <!-- 由 /skill:star-plan-reviser 生成（model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded">）。目标：metds/plans/<file>；节点类型：leaf | internal | root；
      exec_runs：<run 目录列表，最新的在最后，或 none>。每条结论都要引证据（路径[:行号]、命令输出、或 frontmatter 字段）。
-     无话可说的节收敛成一行——绝不注水。 -->
+     无话可说的节压成一行——绝不注水。 -->
 
 ## 1. 目标回顾
 

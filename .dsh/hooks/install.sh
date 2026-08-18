@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Register STAR's DSH hooks in DeepSeek Harness's GLOBAL composition, idempotently.
+# Register STAR's DSH hooks in DeepSeek Harness's GLOBAL composition; running it again changes nothing.
 #
 # Three hooks: model_id provenance, the project-memory index injected from
 # .star/memory/, and the commit guard that declines the git commands the workflow

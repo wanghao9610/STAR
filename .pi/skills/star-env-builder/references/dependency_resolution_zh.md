@@ -14,7 +14,7 @@
 
 ## import 扫描
 
-1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与 vendor 进来的第三方目录。**这一遍要用已解析的解释器一次跑完，每行打印一个名字。**绝不要逐个文件去读：进入本次运行的是这一遍的输出，不是源码——一个中等规模的代码库有好几 MB，而它要产出的只是约七十个名字。用 AST 解析而不是 grep：grep 会把 `all`、`input`、`metadata` 当成 import 名，AST 不会。
+1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与随仓库带进来的第三方目录。**这一遍要用已解析的解释器一次跑完，每行打印一个名字。**绝不要逐个文件去读：进入本次运行的是这一遍的输出，不是源码——一个中等规模的代码库有好几 MB，而它要产出的只是约七十个名字。用 AST 解析而不是 grep：grep 会把 `all`、`input`、`metadata` 当成 import 名，AST 不会。
 2. 去掉 stdlib：与 `python -c "import sys; print(sorted(sys.stdlib_module_names))"` 对照（任何 ≥ 3.10 的 Python 都能做这一步）。
 3. 去掉本地模块：`${CODE_NAME}/` 内的顶层包目录与 `.py` 文件。
 4. import 名 → 发行名映射（见下表）。未知名要用取字段的方式验证，绝不是把整份文档抓回来——`curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`，没有 jq 时用已解析的解释器跑等价的一行（绝不去装 jq）——验证过再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
@@ -62,7 +62,7 @@
 `requirements/framework.txt`——开头写构建时匹配好的 wheel 源：
 
 ```text
-# Wheel index matched to detected CUDA <X.Y> on <YYYY-MM-DD>; probe details in ENV_REPORT.
+# Wheel index matched to detected CUDA <X.Y> on <YYYY-MM-DD>; detection details in ENV_REPORT.
 --extra-index-url https://download.pytorch.org/whl/<cuXXX>
 torch==<pin if the source pinned one>
 torchvision
@@ -80,4 +80,4 @@ ffmpeg
 
 - 来自优先级 1/2 的约束逐字保留。
 - 扫描得到的依赖不锁版本，但已知耦合组要一起锁：`torch` / `torchvision` / `torchaudio`（按官方配对表）、`mmcv` ↔ `torch`、若锁定的 torch 尚不支持 NumPy 2，则加 `numpy<2`。
-- 构建成功后，运行目录里的 `freeze.txt` 就是精确快照；只有用户要求时才把其中的锁定版本移入 requirements。
+- 构建成功后，运行目录里的 `freeze.txt` 就是精确的版本清单；只有用户要求时才把其中的锁定版本移入 requirements。

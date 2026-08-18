@@ -17,7 +17,7 @@ How star-plan-reviser gathers evidence and what each report section must contain
 
 Missing evidence is reported as "unknown" or "absent" — never guessed.
 
-## Collector contracts (structured returns)
+## Collector formats (structured returns)
 
 **Log collector** — for one run dir:
 
@@ -55,7 +55,7 @@ Score each completion claim by the highest level that actually holds:
 
 Never promote `unverifiable` to `met` on the log's word alone.
 
-**What counts as a cheap check**: file existence / size / head, a tiny parse, a checksum, a unit-test-scale command — roughly under a minute, no GPU, no paid API, no side effects. Everything beyond is heavy: do not run it; note in the report what a full re-verification would take.
+**What counts as a cheap check**: file existence / size / head, a tiny parse, a checksum, a unit-test-scale command — roughly under a minute, no GPU, no paid API, no files changed. Everything beyond is heavy: do not run it; note in the report what a full re-verification would take.
 
 ## Scoping by node type
 

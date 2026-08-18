@@ -1,10 +1,10 @@
 # Orchestration Spec
 
-How this skill structures survey and migration work. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Delegate a bounded area or group whenever collaboration tools are available and delegation materially helps; execute locally when they are not. When delegating, call `spawn_agent` with `agent_type: explorer` for a survey area or `agent_type: worker` for a migration group. The main agent always owns the confirmation points, verification, commits, and rollback.
+How this skill structures survey and migration work. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Delegate a bounded area or group whenever collaboration tools are available and delegation materially helps; execute locally when they are not. When delegating, call `spawn_agent` with `agent_type: explorer` for a survey area or `agent_type: worker` for a migration group. The main agent always owns the confirmation points, verification, commits, and restoring what failed.
 
 ## Roles
 
-- **Main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits checkpoints, rolls back failures.
+- **Main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits each verified group, restores what failed.
 - **Survey areas** — read-only (`survey_spec.md`); sequential locally, or delegated when bounded and independent.
 - **Migration groups** — one unit of work each; writes limited to the group's files, whether executed locally or delegated.
 
@@ -15,7 +15,7 @@ How this skill structures survey and migration work. Sibling contract: the execu
 3. Order groups upstream-first along import chains. When delegation is available, independent groups may run concurrently; otherwise execute them one by one.
 4. Precondition per group: its paths are clean in git (nothing unstaged/uncommitted touching them).
 
-## Work contract (per migration group, local or delegated)
+## Work brief (per migration group, local or delegated)
 
 Each group's execution binds:
 
@@ -34,7 +34,7 @@ The **main agent re-runs the verification itself** — never trust a self-report
 
 1. `python -m compileall -q ${CODE_NAME}`; import sweep and quick tests when the env is usable.
 2. **Pass** → commit `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths; update the migration record.
-3. **Fail** → feed the failure back, bounded retry (≤2). Still failing → roll back the group's paths (`git restore` / `git checkout -- <paths>`), mark its items `blocked` in `codearc.md` §6 with the blocker, continue with other groups.
+3. **Fail** → feed the failure back, bounded retry (≤2). Still failing → restore the group's paths (`git restore` / `git checkout -- <paths>`), mark its items `blocked` in `codearc.md` §6 with the blocker, continue with other groups.
 
 ## STOP line (this skill's version)
 

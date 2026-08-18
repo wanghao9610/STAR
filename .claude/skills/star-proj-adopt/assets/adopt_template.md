@@ -23,7 +23,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## 2. Mapping
 
-<!-- The confirmed probe result, one row per area. `confidence` is what it was at Confirmation point 1, kept so a
+<!-- The confirmed survey result, one row per area. `confidence` is what it was at Confirmation point 1, kept so a
      later reader knows which lines were guessed at and confirmed rather than detected. -->
 
 | Area | Mapped to | Target | Confidence | Note |
@@ -64,7 +64,7 @@ Left as evidence only: <N> prior run(s) — see §4.
 
 ## 6. Open questions
 
-<!-- What the probe could not settle and the user could not answer yet. Each with who or what would
+<!-- What the survey could not settle and the user could not answer yet. Each with who or what would
      settle it. An empty section is a fine outcome; a padded one is not. -->
 
 ## 7. Backfill record

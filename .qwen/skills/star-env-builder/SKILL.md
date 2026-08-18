@@ -8,32 +8,32 @@ description: >-
   first. Dependencies come from the first source that has them: existing CODE_NAME/requirements* →
   packaging metadata (pyproject / setup.py / environment.yml) → import scan of the code, written out as
   requirements.txt plus a requirements/ folder (framework|runtime|optional.txt, conda-only in conda.txt).
-  Installs uv > pip > conda, CUDA-aware, behind one install-plan confirmation, then smoke-tests imports,
+  Installs uv > pip > conda, CUDA-aware, behind one install-plan confirmation, then checks imports,
   framework/GPU and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use when the user runs
   /star-env-builder, when a run names it as the next action, wants the conda env or venv created or
   rebuilt, needs dependencies resolved and installed, or wants the environment verified. Bilingual
   (en/zh).
 ---
 
-# Research Env Builder — runtime environment bootstrap
+# Research Env Builder — runtime environment setup
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
 Invocation: `/star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs one or more packages into the environment `.env` already names and records them in the requirements layout. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. `add` is the exception: every token after it is a package name, never a description. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
 
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the smoke-test spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/smoke_test_spec.md` each as its own `read_file` call, plus one `run_shell_command` call in the same message, with the project root as the working directory, carrying exactly:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. Before acting, load it in one message, together with the two references every run reaches — the installer policy (Steps 5 and 8) and the runnable-check spec (Steps 6 and 8): the conventions file, `<this skill's directory>/references/installer_policy.md`, and `<this skill's directory>/references/runnable_check_spec.md` each as its own `read_file` call, plus one `run_shell_command` call in the same message, with the project root as the working directory, carrying exactly:
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-One message, four results — still one round trip. Keep the files out of the `run_shell_command` command: each tool result has its own size limit, and a `run_shell_command` result past roughly 30 KB is spilled to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. `run_shell_command` carries only what only `run_shell_command` can do — here, the `.env` probe above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
+One message, four results — still one round trip. Keep the files out of the `run_shell_command` command: each tool result has its own size limit, and a `run_shell_command` result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid, and the conventions file alone is already past that limit before the two references stack on top. `run_shell_command` carries only what only `run_shell_command` can do — here, the `.env` lookup above. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
 
-**Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the probe's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+**Reusing an earlier load.** A second STAR skill in the same conversation does not pay for this twice. Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again — a wasted read costs one message, a wrong assumption costs the run. What never carries over is a collector digest, where one is loaded above: it is a snapshot of files a skill run may have written to since, so the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
 ## Role
 
-You give the codebase a working runtime. Upstream, `star-code-architect` writes `${CODE_NAME}/` but stops at the environment — its runtime-smoke step prepares install commands and hands them to the user (STOP line). Downstream, `star-plan-executor` runs every command through the `.env` environment and assumes it works. This skill produces that environment: a conda env or `.venv` resolved from `.env`, a dependency layout under `${CODE_NAME}/requirements/` when one was missing, and an evidence-backed environment report under `wkdrs/`.
+You give the codebase a working runtime. Upstream, `star-code-architect` writes `${CODE_NAME}/` but stops at the environment — its runtime-check step prepares install commands and hands them to the user (STOP line). Downstream, `star-plan-executor` runs every command through the `.env` environment and assumes it works. This skill produces that environment: a conda env or `.venv` resolved from `.env`, a dependency layout under `${CODE_NAME}/requirements/` when one was missing, and an evidence-backed environment report under `wkdrs/`.
 
 You **build the environment; you do not implement or refactor research code.** The only writes into `${CODE_NAME}/` are generated requirements files. If code changes are needed to make the project importable, hand off to `star-plan-executor`.
 
@@ -43,16 +43,16 @@ You **build the environment; you do not implement or refactor research code.** T
 2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via `ask_user_question`, one question per call, each with a recommendation.
 3. **Rename, never delete.** An existing environment is backed up by renaming to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. This skill deletes no environment, ever; stale backups are the user's to clean.
 4. **Category is policy; the install order is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own install route and failure handling: prefer uv, fall back to pip per package, use conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
-5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed as a code asset once the build is verified.
-6. **Evidence-based acceptance.** The main agent runs the three smoke layers itself (`references/smoke_test_spec.md`) and reports what was verified with evidence, not that it "works" (AGENTS.md §11). Chats end, files do not: the report and version freeze go to `wkdrs/env_<ENV_NAME>_<date>/`.
+5. **Adopt what exists; generate only what is missing.** An existing requirements layout is installed as-is, never rewritten. Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed once the build is verified.
+6. **Evidence-based acceptance.** The main agent runs the three runnable-check layers itself (`references/runnable_check_spec.md`) and reports what was verified with evidence, not that it "works" (AGENTS.md §11). Chats end, files do not: the report and version list go to `wkdrs/env_<ENV_NAME>_<date>/`.
 
 ## Workflow
 
-### Step 0: Preflight
+### Step 0: Preliminary check
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. `ENV_NAME` := the argument, else `CODE_NAME`. An `add <package>…` argument instead selects **add mode**: skip to Step 8, targeting the environment `.env` already names — nothing is created, renamed, or rebuilt.
-3. Probe and record (this feeds the install plan and the report): platform + arch; `nvidia-smi` (driver's CUDA ceiling); `nvcc --version` / `CUDA_HOME` (local toolkit, often absent); `$CONDA_HOME/bin/conda --version`; `uv --version`.
+3. Detect and record (this feeds the install plan and the report): platform + arch; `nvidia-smi` (driver's CUDA ceiling); `nvcc --version` / `CUDA_HOME` (local toolkit, often absent); `$CONDA_HOME/bin/conda --version`; `uv --version`.
 4. `${CODE_NAME}/` missing or effectively empty → there is no dependency source; recommend `/star-code-architect` first, and offer to build a bare env (python only) if the user wants one anyway.
 
 ### Step 1: Choose the backend (deterministic)
@@ -62,10 +62,10 @@ You **build the environment; you do not implement or refactor research code.** T
 - Python version: `requires-python` (pyproject.toml) → `python_requires` (setup.py / setup.cfg) → the upstream README's stated version → default 3.10. Conflicting signals → ask.
 - Record `ENV_PY` (absolute path) and use it for every later command.
 
-### Step 2: Collision handling
+### Step 2: When the environment already exists
 
 - conda: `<ENV_NAME>` already in `conda env list` → ask one question with three options: **backup & rebuild** (rename to `<ENV_NAME>_$(date +%Y%m%d)` via `conda rename`; older conda lacking `rename`: `create --clone` + `remove`, warn that disk usage doubles temporarily) / **verify & repair in place** (skip creation; jump to Step 5 for failed items or Step 6 — the resume path when a previous run was interrupted) / **abort** (exit cleanly, nothing touched).
-- venv: `.venv` exists → same three-way ask → backup is `mv .venv .venv_$(date +%Y%m%d)`. Note in the report: a moved venv has its old absolute paths baked into scripts — it is a frozen backup for reference and rollback, not an activatable environment.
+- venv: `.venv` exists → same three-way ask → backup is `mv .venv .venv_$(date +%Y%m%d)`. Note in the report: a moved venv has its old absolute paths baked into scripts — it is a frozen backup to consult or restore from, not an activatable environment.
 - Backup name already taken → append `-<HHMM>` (also from `date`).
 
 ### Step 3: Resolve dependencies (first signal wins)
@@ -92,9 +92,9 @@ Policy, whitelist, and wheel-index matrix: `references/installer_policy.md` — 
 - Source-build items (flash-attn and friends) → STOP line: prepare the exact command in the report; do not run it.
 - Respect `PIP_INDEX_URL` / `UV_DEFAULT_INDEX` already configured; never override the user's mirrors, never write global config.
 
-### Step 6: Smoke test (three layers, run by the main agent)
+### Step 6: Runnable check (three layers, run by the main agent)
 
-Spec and evidence format: `references/smoke_test_spec.md` — arrived with the opening load.
+Spec and evidence format: `references/runnable_check_spec.md` — arrived with the opening load.
 
 - **L1 imports**: every distribution in framework + runtime (and installed optional) imports and reports a version through `$ENV_PY`.
 - **L2 framework**: `torch.cuda.is_available()` + device count + a small tensor op on the device (mps on macOS; CPU-only boxes noted as expected, not failed).
@@ -102,11 +102,11 @@ Spec and evidence format: `references/smoke_test_spec.md` — arrived with the o
 
 A failed layer → diagnose from the traceback, fix (a missing transitive dep goes into the right generated requirements file), re-run the layer; ≤2 fix rounds per layer → still failing: mark it `blocked` with the error tail and continue where independent.
 
-### Step 7: Report, snapshot, commit
+### Step 7: Report, version list, commit
 
-1. Write `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md` from `assets/env_report_template.md`: identity + `ENV_PY`, machine probe, backup renames, per-category install results, the smoke-test results with evidence, failures/blocked items, awaiting-user commands.
+1. Write `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md` from `assets/env_report_template.md`: identity + `ENV_PY`, machine detection, backup renames, per-category install results, the runnable-check results with evidence, failures/blocked items, awaiting-user commands.
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
-3. Requirements files generated this run (including deps added during smoke diagnosis) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
+3. Requirements files generated this run (including deps added while diagnosing runnable-check failures) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
 4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at the environment just built (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
 5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `/star-plan-executor <leaf>` now has a runtime; `/star-flow-status` shows what to run next.
 
@@ -119,9 +119,9 @@ The environment already exists; this mode installs into it and records what it i
 2. Categorise each package per `references/installer_policy.md` — framework / runtime / optional / conda-only — and say which requirements file each will be recorded in.
 3. **Confirmation point** (Principle 2 — nothing installs before it): present the packages, their categories, the versions and index that will be used, the download size when it is large, and any CUDA coupling; ask *approve and install* / *adjust* / *abort*.
 4. Install in the uv > pip > conda order (conda only under a conda backend and only for the whitelist). A source-build item stays on the STOP line: prepare the exact command, do not run it.
-5. Smoke-test only the new packages (`references/smoke_test_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
+5. Run the runnable check on the new packages only (`references/runnable_check_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
 6. Append each installed package to its requirements file, preserving the layout's existing order and pins. Append an `## Added <date>` block to the newest `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` (none exists → write a fresh report). Commit: `star-env-builder: add <packages>`, staging only `${CODE_NAME}/requirements*`.
-7. Report ≤500 words: what installed, what each requirements file gained, the smoke evidence, anything blocked or awaiting the user.
+7. Report ≤500 words: what installed, what each requirements file gained, the runnable-check evidence, anything blocked or awaiting the user.
 
 ## State & File Rules
 
@@ -130,7 +130,7 @@ The environment already exists; this mode installs into it and records what it i
 - Git: at most one commit per run — requirements generated, or packages added in add mode — staging only `${CODE_NAME}/requirements*` (conventions §1).
 - Installs approved at the confirmation point run autonomously, including framework-scale downloads. STOP line regardless of approval: `sudo` or system package managers (apt / brew), driver or CUDA-toolkit system installs, CUDA source compilation (flash-attn-style builds), downloads over ~10 GB, deleting any environment. Prepare those as exact commands in the report instead.
 - Respect the user's mirror configuration (`PIP_INDEX_URL`, `UV_DEFAULT_INDEX`); never write `pip config`, `.condarc`, or `uv.toml`.
-- Re-invoke semantics: if a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present, prefer **verify & repair in place** (Step 2) — resume from its failures instead of rebuilding.
+- On a repeat invocation: if a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present, prefer **verify & repair in place** (Step 2) — resume from its failures instead of rebuilding.
 
 ## Dialogue Discipline
 

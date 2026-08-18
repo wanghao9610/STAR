@@ -4,7 +4,7 @@
 
 ## 角色
 
-- **主 agent（架构师）**——制定方案、执行两个确认点、划分工作、亲自重跑检查、打提交检查点、回滚失败。
+- **主 agent（架构师）**——制定方案、执行两个确认点、划分工作、亲自重跑检查、每组提交一次、恢复失败的组。
 - **勘察者**——只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），一组一个（`survey_spec_zh.md`）。
 - **迁移者**——`Agent` subagent（`subagent_type: general-purpose`），每组一个，写权限仅限本组文件。
 
@@ -15,7 +15,7 @@
 3. 无相互依赖的组可并行；有 import 链依赖的组串行，上游先行。
 4. 每组前置条件：其涉及路径在 git 中是干净的（没有未暂存/未提交的改动）。
 
-## 派发格式约定（迁移者）
+## 交办说明（迁移者）
 
 给每个迁移者：
 
@@ -34,7 +34,7 @@
 
 1. `python -m compileall -q ${CODE_NAME}`；环境可用时再做 import 扫描与快速测试。
 2. **通过** → 提交 `star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径；更新迁移记录。
-3. **失败** → 把失败信息回传，有限次重试（≤2）。仍失败 → 回滚该组路径（`git restore` / `git checkout -- <paths>`），在 `codearc.md` §6 把其条目标 `blocked` 并记下 blocker，继续其他组。
+3. **失败** → 把失败信息回传，有限次重试（≤2）。仍失败 → 恢复该组路径（`git restore` / `git checkout -- <paths>`），在 `codearc.md` §6 把其条目标 `blocked` 并记下 blocker，继续其他组。
 
 ## 红线（本 skill 版本）
 

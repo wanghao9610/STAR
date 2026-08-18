@@ -4,10 +4,10 @@ Codex and any delegated workers may write code and run **light validation**. Any
 
 ## Codex runs (light validation)
 
-- Unit / smoke tests, import checks, a forward pass on a tiny batch.
+- Unit tests / runnable checks, import checks, a forward pass on a tiny batch.
 - Small-scale, **no-finetune** inference on a small subset — e.g. an MVP done-criterion: "no training, small subset, swap the text input and compare."
 - Dry-runs, config validation, shape / dtype checks, a few-step overfit sanity run.
-- Anything that finishes in minutes on modest resources, writes generated outputs and durable execution checkpoints only under `wkdrs/<run>/`, and keeps intermediate working files under `tasks/<plan-name>/`.
+- Anything that finishes in minutes on modest resources, writes generated outputs and durable execution records only under `wkdrs/<run>/`, and keeps intermediate working files under `tasks/<plan-name>/`.
 
 ## Crosses the STOP line → hand to user
 

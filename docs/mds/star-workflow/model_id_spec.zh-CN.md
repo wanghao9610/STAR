@@ -1,4 +1,4 @@
-# 模型 id 兜底
+# 模型 id 的退路
 
 **语言：** [English](model_id_spec.md) | 简体中文
 
@@ -16,11 +16,11 @@
 | Pi | `.pi/extensions/star-hooks/star_model_id.sh` | `before_agent_start`，由 `.pi/extensions/star-hooks/index.ts` 接线 | id | 就在要用它的那一问之前；模型每换一次再读一次 |
 | Qwen Code | `.qwen/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 transcript 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
 
-要紧的差别在最后一列。写入当刻读到的值不可能过期；Cursor 与 Kimi 那两行则可能，因为会话中途换模型不会改变它们读的任何东西——这正是 `research-workflow-conventions.zh-CN.md` §8 提醒的那种滞后，如今只剩这两行还有。Pi 在另一个极端，连恢复命令都不需要：它的扩展 API 把当前模型对象（`ctx.model`）交给每个处理器，`/model` 或 `Ctrl+P` 一换就触发 `model_select`，所以那行写的就是即将开跑的那个模型，且每换一次就会再来一行新的——你最后拿到的那行，就是正在写的那个。Claude Code 还会在系统提示里写明模型。DSH 归在第一类，但到达的路径不同：它那座桥的 SessionStart 载荷里根本没有 `model` 字段，所以这一行无条件注入一条命令，而不是退回去写 id——而它要读的那份日志默认是 Zstandard 分帧的，因此这条恢复命令需要 PATH 上有 `zstd`，没有就什么都不打印。钩子文件在，不等于已注册——各运行时的注册方式不同（`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json`、`.dsh/hooks.json` 外加 `$DSH_HOME/cordis.patch.yml` 里的一行，以及需手动配置的 `.kimi-code/hooks.example.toml`），所以一个项目可能有脚本却什么都没注入。Pi 的注册是代码而不是配置——扩展会被自动发现，但要等项目获得信任之后（`/trust`，或 `defaultProjectTrust`）；未获信任的项目不加载任何项目级扩展，也就什么都不注入。Qwen Code 在这之上还多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。
+要紧的差别在最后一列。写入当刻读到的值不可能过期；Cursor 与 Kimi 那两行则可能，因为会话中途换模型不会改变它们读的任何东西——这正是 `research-workflow-conventions.zh-CN.md` §8 提醒的那种滞后，如今只剩这两行还有。Pi 在另一个极端，连恢复命令都不需要：它的扩展 API 把当前模型对象（`ctx.model`）交给每个处理器，`/model` 或 `Ctrl+P` 一换就触发 `model_select`，所以那行写的就是即将开跑的那个模型，且每换一次就会再来一行新的——你最后拿到的那行，就是正在写的那个。Claude Code 还会在系统提示里写明模型。DSH 归在第一类，但到达的路径不同：它那座桥的 SessionStart 的 payload 里根本没有 `model` 字段，所以这一行无条件注入一条命令，而不是退回去写 id——而它要读的那份日志默认是 Zstandard 分帧的，因此这条恢复命令需要 PATH 上有 `zstd`，没有就什么都不打印。钩子文件在，不等于已注册——各运行时的注册方式不同（`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json`、`.dsh/hooks.json` 外加 `$DSH_HOME/cordis.patch.yml` 里的一行，以及需手动配置的 `.kimi-code/hooks.example.toml`），所以一个项目可能有脚本却什么都没注入。Pi 的注册是代码而不是配置——扩展会被自动发现，但要等项目获得信任之后（`/trust`，或 `defaultProjectTrust`）；未获信任的项目不加载任何项目级扩展，也就什么都不注入。Qwen Code 在这之上还多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在你打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。
 
 ## Claude Code、Codex 与 Qwen Code：为什么 id 要在写入当刻才读
 
-`model` 字段只挂在 `SessionStart` 上：Claude Code 与 Codex 在 `/clear`、resume、compact、fork 之后不带它，Qwen Code 则对它报出的每一种启动原因（startup、resume、clear、compact）都带；即便有，它描述的也只是会话开启那一刻——之后 `/model` 换模型不会触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的会是开始时那个。这三个运行时都保有逐回合的实际记录，因此只要载荷里给出了它，注入行带来的就是一条命令而不是 id。记录该值的当刻跑它：
+`model` 字段只挂在 `SessionStart` 上：Claude Code 与 Codex 在 `/clear`、resume、compact、fork 之后不带它，Qwen Code 则对它报出的每一种启动原因（startup、resume、clear、compact）都带；即便有，它描述的也只是会话开启那一刻——之后 `/model` 换模型不会触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的会是开始时那个。这三个运行时都保有逐回合的实际记录，因此只要 payload 里给出了它，注入行带来的就是一条命令而不是 id。记录该值的当刻跑它：
 
 ```bash
 bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
@@ -28,7 +28,7 @@ bash .codex/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 ```
 
-参数用那行已经填好的，把打印出来的值原样记录。Claude Code 这版读的是本次会话主循环 assistant 轮次上的 `message.model`，委派出去的子 agent 轮次会跳过——要问的是哪个模型在写这份产物；Codex 这版读的是 rollout 里 `turn_context` 记录上的 `payload.model`，无需跳过任何东西，因为 Codex 的子 agent 自带独立 rollout；Qwen Code 这版读的是 transcript 里 `type: "assistant"` 记录上的顶层 `model`，同样无需跳过任何东西，因为 Qwen 的子 agent 写的是自己那份 transcript——载荷里以 `agent_transcript_path` 另行指明。三者都是运行时的记录而非猜测。`session_model` 是 `SessionStart` 报出的那个：逐回合记录还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住记录丢掉的后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那个不同就是会话中途换过模型，而看见这件事的是逐回合记录。
+参数用那行已经填好的，把打印出来的值原样记录。Claude Code 这版读的是本次会话主循环 assistant 轮次上的 `message.model`，委派出去的子 agent 轮次会跳过——要问的是哪个模型在写这份产物；Codex 这版读的是 rollout 里 `turn_context` 记录上的 `payload.model`，无需跳过任何东西，因为 Codex 的子 agent 自带独立 rollout；Qwen Code 这版读的是 transcript 里 `type: "assistant"` 记录上的顶层 `model`，同样无需跳过任何东西，因为 Qwen 的子 agent 写的是自己那份 transcript——payload 里以 `agent_transcript_path` 另行指明。三者都是运行时的记录而非猜测。`session_model` 是 `SessionStart` 报出的那个：逐回合记录还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住记录丢掉的后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那个不同就是会话中途换过模型，而看见这件事的是逐回合记录。
 
 ## Kimi：一行都没注入时
 

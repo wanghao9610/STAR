@@ -8,7 +8,7 @@
 
 <!-- Which method source drove the search (metds/<file>.md, a plan under metds/plans/, or a topic the
      user gave) and the profile extracted from it. The queries that were run. The run cache holding
-     the raw payloads: wkdrs/refs_<date>/raw/. Mode: full | append | verify | organize. -->
+     the raw records: wkdrs/refs_<date>/raw/. Mode: full | append | verify | organize. -->
 
 ## 2. Core Papers
 

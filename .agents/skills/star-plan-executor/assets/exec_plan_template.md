@@ -45,7 +45,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 | # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | owner |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
-| 1 | <create/modify …> | <path> | — | — | <import / smoke test> | codex |
+| 1 | <create/modify …> | <path> | — | — | <import / runnable check> | codex |
 | 2 | <…> | <path> | <cmd> | <path> | <what proves it> | codex/delegate |
 | N | <heavy experiment> | — | <prepared cmd> | <path> | §5 done-criterion | stop → user |
 

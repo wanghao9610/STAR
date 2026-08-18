@@ -99,7 +99,7 @@
   <text class="nt" x="110" y="627">$star-env-builder</text>
   <rect x="304" y="608" width="84" height="18" rx="9" fill="#ffffff" stroke="#fed7aa"/>
   <text class="tag" x="346" y="620.5">first run only</text>
-  <text class="np" x="78" y="652">The runtime built from .env and smoke-verified</text>
+  <text class="np" x="78" y="652">The runtime built from .env and verified to run</text>
   <text class="no" x="78" y="674">wkdrs/env_*/ENV_REPORT.md · freeze.txt</text>
 
   <!-- 6 plan-decomposer (PLAN) -->
@@ -221,7 +221,7 @@
 
   <!-- 6 -> flow-status : a read, not a handoff. Drawn in the .read style
        because nothing is passed here — flow-status goes and reads the tree
-       (and every other registered artifact) whenever it is invoked. -->
+       (and every other listed artifact) whenever it is invoked. -->
   <path class="read" d="M400,740 L458,740 L458,142 L516,142"/>
   <path class="ahr" d="M516,142 L507,137.5 L507,146.5 Z"/>
   <text class="elc" x="450" y="450" transform="rotate(-90 450 450)">reads the plan tree — and every other artifact</text>

@@ -1,10 +1,10 @@
 # Orchestration Spec
 
-How the main agent coordinates `Task` subagents for this skill. Sibling contract: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.
+How the main agent coordinates `Task` subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.
 
 ## Roles
 
-- **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits checkpoints, rolls back failures.
+- **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits each verified group, restores what failed.
 - **Surveyors** — read-only `Task` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
 - **Migrators** — `Task` subagents with no `subagent_type` set (Cursor publishes no file-writing built-in), one per migration group, write access limited to their group's files.
 
@@ -15,7 +15,7 @@ How the main agent coordinates `Task` subagents for this skill. Sibling contract
 3. Groups with no mutual dependencies may run in parallel; groups linked by import chains run serially, upstream first.
 4. Precondition per group: its paths are clean in git (nothing unstaged/uncommitted touching them).
 
-## Dispatch contract (migrator)
+## Dispatch brief (migrator)
 
 Give each migrator:
 
@@ -34,7 +34,7 @@ The **main agent re-runs the verification itself** — never trust a self-report
 
 1. `python -m compileall -q ${CODE_NAME}`; import sweep and quick tests when the env is usable.
 2. **Pass** → commit `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths; update the migration record.
-3. **Fail** → feed the failure back, bounded retry (≤2). Still failing → roll back the group's paths (`git restore` / `git checkout -- <paths>`), mark its items `blocked` in `codearc.md` §6 with the blocker, continue with other groups.
+3. **Fail** → feed the failure back, bounded retry (≤2). Still failing → restore the group's paths (`git restore` / `git checkout -- <paths>`), mark its items `blocked` in `codearc.md` §6 with the blocker, continue with other groups.
 
 ## STOP line (this skill's version)
 

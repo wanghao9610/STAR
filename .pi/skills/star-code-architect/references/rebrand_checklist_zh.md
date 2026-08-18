@@ -4,7 +4,7 @@
 
 ## 前置条件
 
-- `${CODE_NAME}/UPSTREAM.md` 已写好，import 提交已完成（回滚锚点）。
+- `${CODE_NAME}/UPSTREAM.md` 已写好，import 提交已完成（出问题就恢复到这里）。
 - 弄清上游 Python 包名：顶层可 import 的目录（可能与仓库名不同；可能在 `src/` 下）。
 
 ## 步骤按序执行——每步验证
@@ -16,7 +16,7 @@
 3. **打包元数据**：`pyproject.toml` 的 `[project].name`（及 `[tool.setuptools]` packages），或 `setup.py`/`setup.cfg` 的 `name=`、`packages=`、`package_dir`。
 4. **命令行入口**：`[project.scripts]` / `entry_points={'console_scripts': …}` 指向的目标。
 5. **README**：标题、安装命令（`pip install <名称>`）、用法示例里的 import 片段。
-6. **文档配置**（仅当改动 trivial）：`docs/conf.py` 的项目名。
+6. **文档配置**（仅当改动很小）：`docs/conf.py` 的项目名。
 
 然后提交：`star-code-architect: rebrand to <CODE_NAME>`（只暂存 `${CODE_NAME}/`）。
 
@@ -34,6 +34,6 @@
 
 每一类出现都在残留表（`codearc.md` §7）加一行：位置模式、类别、风险、建议的后续处理。未来改名的大小写只做**建议**（如 `code` → `Code` 前缀），绝不自动执行。后续改名走 `star-plan-executor` 的步骤，每条自带检查。
 
-## import 冒烟（环境就绪后）
+## import 跑通性检查（环境就绪后）
 
 `.env` 指向的 conda 环境装好依赖后：通过该环境跑 `python -c "import <code_name>"`。写进最终汇报；环境尚不存在时，说明该检查待办，并把准备好的安装命令移交用户。

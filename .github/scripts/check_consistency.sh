@@ -539,7 +539,7 @@ done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | so
 # 14. Top-level section parity between .agents and .claude manifests.
 #     Check 11 excludes .agents on purpose: it is an adapted variant, not a copy,
 #     and its ### sequence and reference-file headings carry their own vocabulary
-#     (7-step executor against the others' 9; "contract per area" for "contract
+#     (7-step executor against the others' 9; "return format per area" for "return format
 #     per surveyor"). But a SKILL.md's ## sections are its shape, not its wording
 #     — Role, Core Principles, Workflow, State & File Rules, Dialogue Discipline —
 #     and those are shared. Nothing compared them, and the gap already cost
@@ -950,13 +950,13 @@ done
 # 19. Opening-load invariants.
 #     Three passes built the skills' opening load (10dd4da, e5841a2, bfe6c03):
 #     one message per run — whole files through the harness's file-reading
-#     tool, Bash carrying only the .env probe and the scripts only Bash can
+#     tool, Bash carrying only the .env lookup and the scripts only Bash can
 #     run — and SKILL_zh.md kept as a human-readable edition, never a runtime
 #     load. Nothing above guards any of that: an edit could cat the
-#     conventions back into a Bash block (guaranteeing the >30 KB spill the
+#     conventions back into a Bash block (guaranteeing the >30 KB result the
 #     shape exists to avoid), re-add the SKILL_zh runtime read, or drop the
-#     .env probe from one tree, and every check above would stay green. The
-#     literals pinned here — the probe line, the language-paragraph opening,
+#     .env lookup from one tree, and every check above would stay green. The
+#     literals pinned here — the lookup line, the language-paragraph opening,
 #     the zh blockquote opening — are the strings the load discipline rides
 #     on; rewording any of them centrally means updating this check in the
 #     same commit.
@@ -965,11 +965,11 @@ done
 #     star-expt-digest and star-refs-reviewer load a bounded awk excerpt of
 #     the sections they act on (about 26-27 KB) instead of the whole file,
 #     which is what lets it ride in Bash at all. That is why the ban below is
-#     on `cat`-ing the *whole* conventions file — 35 KB, a guaranteed spill —
+#     on `cat`-ing the *whole* conventions file — 35 KB, guaranteed to be written out —
 #     rather than on Bash carrying any conventions text.
 section "Opening-load invariants"
 open_errors=0
-PROBE_LINE="grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'"
+LOOKUP_LINE="grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'"
 lang_seen="$(mktemp)"
 bq_seen="$(mktemp)"
 
@@ -978,16 +978,16 @@ for root in "${SKILL_ROOTS[@]}"; do
         for f in SKILL.md SKILL_zh.md; do
             path="${root}/${skill}/${f}"
             [[ -f "${path}" ]] || continue   # check 3 owns missing files
-            n="$(grep -cF -- "${PROBE_LINE}" "${path}")"
+            n="$(grep -cF -- "${LOOKUP_LINE}" "${path}")"
             if (( n != 1 )); then
-                fail "${path}: ${n} .env probe lines, expected exactly 1"
+                fail "${path}: ${n} .env lookup lines, expected exactly 1"
                 open_errors=1
             fi
             # Only the .agents fallback sentence may cat the conventions, and
-            # that sentence is marked by "accept the spill" / "接受落盘".
+            # that sentence is marked by "accept that the result is written out" / "接受结果被存成文件".
             while IFS= read -r hit; do
                 [[ -n "${hit}" ]] || continue
-                printf '%s' "${hit}" | grep -q 'accept the spill\|接受落盘' && continue
+                printf '%s' "${hit}" | grep -q 'accept that the result is written out\|接受结果被存成文件' && continue
                 fail "${path}:${hit%%:*}: cats the conventions inside Bash outside the marked fallback sentence"
                 open_errors=1
             done < <(grep -n 'cat docs/mds/star-workflow/research-workflow-conventions' "${path}" 2>/dev/null)
@@ -1039,14 +1039,14 @@ if [[ -n "${stale_reads}" ]]; then
     open_errors=1
 fi
 
-(( open_errors == 0 )) && note "opening loads hold: one probe line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform"
+(( open_errors == 0 )) && note "opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform"
 
 # 20. The section-selective conventions load stays honest.
 #     Two skills load only the conventions sections they act on, as an awk
 #     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
 #     costs two invariants nothing else holds.
 #
-#     Each call's excerpt has to stay under the Bash spill line, which is why a
+#     Each call's excerpt has to stay under the Bash size limit, which is why a
 #     load may be split across several calls in one message: the budget below is
 #     per call, while the prose, the citations and the quoted size are checked
 #     against the union of them. This is the only place that can be caught: `execs/update.sh` copies
@@ -1123,7 +1123,7 @@ for root in "${SKILL_ROOTS[@]}"; do
             fi
 
             # A load may be split across several calls in one message, since the
-            # spill line is per tool result: each selector is sized on its own,
+            # size limit is per tool result: each selector is sized on its own,
             # while the prose, the citations and the quoted size read the union.
             wants=()
             bytes=0
@@ -1157,10 +1157,10 @@ for root in "${SKILL_ROOTS[@]}"; do
                     sel_errors=1
                 fi
 
-                # 20c. every call stays clear of the Bash spill line on its own
+                # 20c. every call stays clear of the Bash size limit on its own
                 one_bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
                 if (( one_bytes > LOAD_EXCERPT_MAX )); then
-                    fail "${path}: the (${want}) excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will spill and cost the round trip the one-message load exists to avoid. Move a section to another call in the same message, or drop one."
+                    fail "${path}: the (${want}) excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will be written out and cost the round trip the one-message load exists to avoid. Move a section to another call in the same message, or drop one."
                     sel_errors=1
                 fi
 

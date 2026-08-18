@@ -20,7 +20,7 @@ A fresh session should be able to use — or rebuild — this environment from t
 - Previous environment backed up as: `<name>_<YYYYMMDD>` / none
   <!-- A renamed venv keeps stale absolute paths inside its scripts: frozen backup only, not activatable. -->
 
-## Machine probe
+## Machine detection
 
 - OS / arch: <…>
 - GPU / driver: <nvidia-smi one-liner, or "none">
@@ -45,7 +45,7 @@ A fresh session should be able to use — or rebuild — this environment from t
 | optional | requirements/optional.txt | | | | skipped |
 | project | `-e ${CODE_NAME}` (`--no-deps`) | | | | uv |
 
-## Smoke-test results
+## Runnable-check results
 
 <!-- Filled by the main agent from its own runs. Result: pass / blocked / skipped (reason).
      Evidence is the actual output tail — an empty cell is not acceptable for pass. -->
@@ -67,6 +67,6 @@ A fresh session should be able to use — or rebuild — this environment from t
 
 - [ ] `<exact command>` — <why: source build / sudo / size>. Afterwards: re-run `/skill:star-env-builder <ENV_NAME>` and choose *verify & repair in place*.
 
-## Snapshot
+## Version list
 
 Exact versions: [`freeze.txt`](freeze.txt) — `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`).

@@ -2,7 +2,7 @@
 name: star-expt-analyst
 description: >-
   分析某个计划的执行 run 到底产出了什么，并对照计划的预期给出判定。传 PLAN_NAME（slug / 数字前缀 / 文件名）经该计划的 exec_runs 解析到 wkdrs/<run>/ 目录；传
-  wkdrs/<run>/ 路径反查回其计划；不带参数 则列出磁盘上的 run 并询问。对照磁盘清点 §4 交付物，用产物核实 EXEC_LOG 的步骤声明，扫描训练/评测
+  wkdrs/<run>/ 路径反查回其计划；不带参数 则列出磁盘上的 run 并询问。对照磁盘清点 §4 交付物，用产物核实 EXEC_LOG 里每步的说法，扫描训练/评测
   日志找健康信号（崩溃、NaN、OOM、发散、过拟合），提取 §5 完成判据写明的指标并对照该判据、根计划 §4 指标与计划写明的 baseline 打分，解读这些数字对计划 traces_to
   的主张意味着什么（根计划 kill-criteria、 数据泄漏迹象、单 seed 的局限），存在同计划的兄弟 run 时附一份轻量对比。仅当 matplotlib 已安装时才画
   曲线（绝不安装任何东西），每个数字进报告前都重新核实，分析报告写入 wkdrs/<run>/。除此之外严格只读： 绝不改计划、exec_status 或
@@ -17,26 +17,26 @@ description: >-
 
 调用方式：`/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [描述]`——计划名（slug / 数字前缀 / 文件名）经该计划的 `exec_runs` 解析到其当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某一棵子树时则编译进 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问分析哪个；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。其后剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：`bash` 结果一旦超过 30 KB 左右就会被落盘成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——`bash` 只做只有 `bash` 能做的事，同一条消息里的一次小调用：
+**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：`bash` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——`bash` 只做只有 `bash` 能做的事，同一条消息里的一次小调用：
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 ```
 
-**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及探测行给出的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**复用上一次装载。** 同一轮对话里的第二个 STAR skill 不必把开场装载再付一次。上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍——多读一次只花一条消息，判断错了要赔上整轮运行。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：它是文件在某一刻的快照，而其间可能已有 skill 写过盘，所以每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
 ## 角色
 
 你是这个家族的结果审计员。`star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`star-code-reviewer` 审计产出它的代码；`star-plan-reviser` 对照执行证据审计**计划文本**。你审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。你的产出是一份写进文件的、证据支撑的分析报告。`star-expt-digest` 按周期横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
 
-你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出写边界的问题，都转交出去：未完成或失败的步骤交 `/star-plan-executor`，判据已达标但还需终验交 `/star-plan-executor`，计划文本与现实不符交 `/star-plan-reviser`，策略被推翻交 `/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`，疑似代码缺陷交 `/star-code-reviewer`，环境损坏交 `/star-env-builder`。
+你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出可写文件范围的问题，都转交出去：未完成或失败的步骤交 `/star-plan-executor`，判据已达标但还需终验交 `/star-plan-executor`，计划文本与现实不符交 `/star-plan-reviser`，策略被推翻交 `/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`，疑似代码缺陷交 `/star-code-reviewer`，环境损坏交 `/star-env-builder`。
 
 ## 核心原则
 
-1. **预期是写明的；每条判定都要引用一条。** 评判依据是子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未声明预期**——绝不发明阈值，更绝不照着找到的数字倒推一个阈值。评分表见 `references/analysis_rubric_zh.md`。
-2. **广读，每个数字进报告前先核实。** 收集可以拆成一次一遍的只读收集，但每个数字、每条 blocker/major 观察进报告前，主 agent 都要按引用重开那个文件、定位到那一行确认；站不住的降级或丢弃。一个错数字就足以让报告失去可信度——而报告里的数字是会被抄进论文的。
-3. **磁盘是证据；EXEC_LOG 是待核实的声明。** 标了 `done` 的步骤，在磁盘上找到其产物、确认与描述相符之前，只是声明；日志里引用的指标，在追溯回产生它的文件之前，也只是声明。没有佐证的声明是观察，不是事实（reviser 的纪律，应用到结果上）。
-4. **只做轻量解析；工具是证据，且绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就降级——纯文字、无曲线——并在报告里写明。绝不安装或升级任何东西（那是 `/star-env-builder` 的）。
+1. **预期是写明的；每条判定都要引用一条。** 评判依据是子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未写明预期**——绝不发明阈值，更绝不照着找到的数字倒推一个阈值。评分表见 `references/analysis_rubric_zh.md`。
+2. **广读，每个数字进报告前先核实。** 收集可以拆成一次一遍的只读收集，但每个数字、每条 blocker/major 观察进报告前，主 agent 都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。一个错数字就足以让报告失去可信度——而报告里的数字是会被抄进论文的。
+3. **磁盘是证据；EXEC_LOG 是待核实的说法。** 标了 `done` 的步骤，在磁盘上找到其产物、确认与描述相符之前，只是说法；日志里引用的指标，在追溯回产生它的文件之前，也只是说法。没有佐证的说法是观察，不是事实（reviser 的纪律，应用到结果上）。
+4. **只做轻量解析；工具是证据，且绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `/star-env-builder` 的）。
 5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**方向性信号**——如实突出并转交；那是计划在起作用，不是 run 失败了。看起来过好的结果，先过泄漏检查再庆祝。
 6. **严格只读；红线适用。** 你唯一写的东西是自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 结果汇总表（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `/star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
 
@@ -78,12 +78,12 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 - **C——日志健康**：按评分表扫描 run 的日志，找致命信号、数值信号与动态信号。大日志用 grep 找模式、只读头尾，绝不整体载入（`references/analysis_rubric_zh.md`，"读大日志"）。
 - **D——指标**：对 §5 判据、根计划 §4 或计划写明的 baseline 写明的每个指标，从可得的最权威来源提取数值（结果 JSON/CSV > 评测日志的汇总段 > TB event 文件 > 训练日志里最后一条匹配行），并记下来源。每条判据打分 `met` / `not met` / `unmeasurable`。
-- **图（尽力而为）**：若 `.env` 环境里已装 matplotlib，且日志中有值得一看的逐 step / 逐 epoch 序列（loss、§5 指标），渲染到 `wkdrs/<run>/analysis/<name>.png`，并把生成它的脚本存在旁边，让图可重现。没装、或没有序列 → 聊天里静默跳过，报告里写明降级。绝不为画图而安装 matplotlib。
+- **图（尽力而为）**：若 `.env` 环境里已装 matplotlib，且日志中有值得一看的逐 step / 逐 epoch 序列（loss、§5 指标），渲染到 `wkdrs/<run>/analysis/<name>.png`，并把生成它的脚本存在旁边，让图可重现。没装、或没有序列 → 聊天里静默跳过，报告里写明少了什么。绝不为画图而安装 matplotlib。
 - **规模**：小 run（少量产物、没有超大日志）由主 agent 读。大的——日志文件很多，或日志大到读不完——**维度 C** 按日志文件切分给只读收集遍，一次一遍，每个拿到评分表、预期摘要和确切文件清单，按结构化观察格式约定返回。**维度 D 留在主 agent**：它那条来源权威阶梯是把几个来源**互相**排序（结果 JSON > 评测汇总 > TB event > 日志最后一行），只拿着一个文件的那一遍根本没法应用它；而且指标来源本来就小，单独切出去省下的，步骤 4 立刻又会花回来。只有一个例外：某个指标唯一的来源就是收集器清单里那份超大日志中的某一行——那就由那一遍连同 `source:` 一起返回这条指标行，步骤 4 照常复核。每一遍都绝不写文件、绝不越出清单、绝不给 run 的判定打分。
 
 ### Step 4：核实
 
-合并去重。每个要写进报告的数字、每条 blocker/major 观察：按引用重开那个文件、定位到那一行，确认它确实说了观察所声称的内容。确认每个指标的来源是可得的最权威那一档，且其 split（train / val / test）正是判据所指的那个。站不住的降级或丢弃。值得人工过目但未确认的进报告的 **Unconfirmed** 列表——绝不计入判定。
+合并去重。每个要写进报告的数字、每条 blocker/major 观察：按引用重开那个文件、定位到那一行，确认它确实说了观察所声称的内容。确认每个指标的来源是可得的最权威那一档，且其 split（train / val / test）正是判据所指的那个。站不住的降一档或丢弃。值得人工过目但未确认的进报告的 **Unconfirmed** 列表——绝不计入判定。
 
 ### Step 5：解读与对比（维度 E）
 
@@ -103,7 +103,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
-按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把报告路径切成几遍来读）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并走写入确认点：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
+按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把报告路径切成几遍来读）；**每个数字入表前，重开它引用的来源并确认**——报告是已验证的，但不是照抄它的许可；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并遵守写入规则：已存在的 `type: results` 文件要先让变更清单获批，且范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
 
 简报 ≤500 字：汇总了 / 排除了 / 仍未测量的 run、关键指标表格，以及转交——缺报告的交 `/star-expt-analyst <slug>`，未执行的叶子交 `/star-plan-executor <slug>`。明说结果汇总表只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
 

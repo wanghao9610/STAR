@@ -17,7 +17,7 @@ One `agent` subagent (`subagent_type: Explore`) per area, run in parallel (none 
 
 **Light mode** (repos under ~50 Python files — size only; a fresh clone is routinely 3–12× that, so provenance is not the test): collapse to a single pass over all areas — by one subagent or the main agent itself.
 
-## Contract per surveyor
+## Return format per surveyor
 
 - **Scope**: its area only, read-only; "do not modify, create, or delete any file."
 - **Return** (structured):
@@ -33,8 +33,8 @@ The main agent merges area reports into one repo map:
 
 1. **Module inventory** — annotated tree, one-line responsibility per top-level dir.
 2. **Dependency direction** — which layers import which; note violations.
-3. **Ranked smells** — deduplicated across areas, ranked by how much they would obstruct the plan's work; keep only those worth a migration item. Everything else is recorded as style notes for `codearc.md` §3, not as migrations.
+3. **Ranked suspicious patterns** — deduplicated across areas, ranked by how much they would obstruct the plan's work; keep only those worth a migration item. Everything else is recorded as style notes for `codearc.md` §3, not as migrations.
 
-   A ranked smell becomes a numbered migration item only after the main agent re-opens its cited path at the cited evidence and confirms the finding still holds (conventions §6.6). What does not hold up is dropped, or demoted to a §3 style note for `codearc.md`. The `path:line` it was confirmed at goes in the migration table's reason column — this is the one place in the skill where an unconfirmed subagent claim would otherwise pass a user confirmation point and then move files.
+   A ranked suspicious pattern becomes a numbered migration item only after the main agent re-opens its cited path at the cited evidence and confirms the finding still holds (conventions §6.6). What does not hold up is dropped, or demoted to a §3 style note for `codearc.md`. The `path:line` it was confirmed at goes in the migration table's reason column — this is the one place in the skill where an unconfirmed subagent claim would otherwise pass a user confirmation point and then move files.
 
 The repo map feeds Step C1 directly and is summarized (not dumped) to the user.

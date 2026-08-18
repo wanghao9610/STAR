@@ -32,7 +32,7 @@ Files sort naturally in a directory listing (`0`, `00`, `01`, `02`, `020`, `021`
 
 1. **Max 10 siblings per node.** One digit per level means indices only run 0–9. If a node seems to need more than 10 children, do **not** append a second digit (`10_` is ambiguous — see below). Instead: group units, or split in two levels (decompose into ≤10 units now, each still too big to run, then recurse into the heavy ones). This cap is a re-scoping signal, not a bug to engineer around.
 
-2. **Why not two digits per level.** Prefix `10_` could mean "child 0 of plan 1" or "top-level plan 10". With a fixed one-digit-per-level scheme and ≤10 nodes at every level, prefixes stay unambiguous and the parent is always recoverable by dropping one digit. Keep the invariant.
+2. **Why not two digits per level.** Prefix `10_` could mean "child 0 of plan 1" or "top-level plan 10". With a fixed one-digit-per-level scheme and ≤10 nodes at every level, prefixes stay unambiguous and the parent is always recoverable by dropping one digit. Keep it one digit per level.
 
 3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` gives each new root the smallest free digit, but projects created before that rule may hold two unrelated roots both numbered `0_` (distinguished only by slug), whose children then both start `00_`, etc. The numeric prefix therefore orders and hints the tree for humans, but the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it (not the prefix) when reconstructing which sub-plan belongs to which parent.
 

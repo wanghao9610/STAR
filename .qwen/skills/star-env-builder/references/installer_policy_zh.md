@@ -7,7 +7,7 @@
 | 层级 | 何时用 | 命令形态 |
 |---|---|---|
 | uv（默认） | uv 在 PATH 上，或用户同意安装它 | `uv pip install --python $ENV_PY -r <文件>` |
-| pip（降级） | uv 缺失且用户拒装，或某个包在 uv 下失败 | `$ENV_PY -m pip install <包>` |
+| pip（次选） | uv 缺失且用户拒装，或某个包在 uv 下失败 | `$ENV_PY -m pip install <包>` |
 | conda（仅白名单） | conda 后端**且**包在白名单上 | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <包> -y` |
 
 - uv 缺失 → 问一次并带推荐：装 uv（如 `$PYTHON_HOME/bin/python -m pip install --user uv`，用户偏好官方独立安装器亦可）/ 本次改用 pip。拒装只损失速度，不损失正确性。

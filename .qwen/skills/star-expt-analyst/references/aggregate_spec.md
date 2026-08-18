@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers. That is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `agent` subagents (`subagent_type: Explore`), run in parallel, each given its exact list and this return contract:
+A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `agent` subagents (`subagent_type: Explore`), run in parallel, each given its exact list and this return format:
 
 ```yaml
 - run: <slug>
@@ -78,7 +78,7 @@ A run whose report verdict is `invalid` or `inconclusive`, or whose number faile
 
 A **`not met` run is not excluded** — a negative result is a result. It belongs in its table with its verdict shown.
 
-## Frontmatter contract
+## Frontmatter format
 
 ```yaml
 ---

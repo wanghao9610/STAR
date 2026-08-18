@@ -107,7 +107,7 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 
 影响力分（`references/refs_rubric_zh.md`"影响力分"一节）由三类指标算出。它们一律不进 `reference.bib`；落在 index 里，带抓取日期。
 
-- **引用数**搭上面已列的 Semantic Scholar 调用顺路取得——检索、`/references`、`/citations` 的字段清单里都有 `citationCount`，完整流程不多花一次请求。`score` 模式一次调用刷新全库：`POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`，body 里最多 500 个 id（`{"ids": ["DOI:…", "ARXIV:…", …]}`），id 取自 index 已登记的 provenance。批量端点解析不了的条目保留旧值旧日期。
+- **引用数**搭上面已列的 Semantic Scholar 调用顺路取得——检索、`/references`、`/citations` 的字段清单里都有 `citationCount`，完整流程不多花一次请求。`score` 模式一次调用刷新全库：`POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`，body 里最多 500 个 id（`{"ids": ["DOI:…", "ARXIV:…", …]}`），id 取自 index 已登记的出处。批量端点解析不了的条目保留旧值旧日期。
 - **发表档位**离线：抓回记录的 venue 字段对 `references/venue_tiers_zh.md` 查表。
 - **星标与最近提交** —— `https://api.github.com/repos/<owner>/<repo>` → `stargazers_count`、`pushed_at`。响应先缓存成 `<citekey>.github.json` 再用。无认证的 GitHub 限 **60 请求/小时**——这才是真正的约束，但仍比一次运行该用到的 ≤15 个仓库（核心论文、综述精读层）宽出数倍；照旧按 host 约 1 请求/秒串行。这里的 403/429 多半就**是**小时上限：退避一次，然后记录失败、把该分量标为未抓到——按评分表记残缺分，绝不循环重试，绝不凭记忆填数。
 
@@ -118,7 +118,7 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 一篇笔记最多带三张图：论文自己用来展示笔记正文带不动的那些东西的图。是哪几张由 Step 3 看图注、看这篇论文的性质来定；这一节定的是它们只能从哪里来、拿到之后怎么处置。
 
 - **只一个来源。** 论文的 arXiv HTML 渲染版 `https://arxiv.org/html/<arxiv-id>`——存在时 Step 3 本就会读的那个页面。arXiv 大致从 2024 年起才渲染，而且只渲染投稿 LaTeX 能转成功的，所以很多论文根本没有：这是笔记要写明的事实，不是去别处找的理由。这里不渲染 PDF，也绝不从项目主页、仓库 README、博客或搜索结果里取图。
-- **抓下来是什么字节，存的就是什么字节。** 把选中的每张图的 `<img>`（相对页面自身 URL 解析）下载到 `metds/refs/figs/<缩写>_fig<N>.<扩展名>`——`<缩写>` 用笔记的，`<N>` 用论文的图编号，扩展名用文件自己的。绝不重编码、不裁剪、不缩放、不把两张拼成一张。这个文件就是它自己的缓存载荷：不在 `raw/` 下再存一份。
+- **抓下来是什么字节，存的就是什么字节。** 把选中的每张图的 `<img>`（相对页面自身 URL 解析）下载到 `metds/refs/figs/<缩写>_fig<N>.<扩展名>`——`<缩写>` 用笔记的，`<N>` 用论文的图编号，扩展名用文件自己的。绝不重编码、不裁剪、不缩放、不把两张拼成一张。这个文件本身就是那份缓存：不在 `raw/` 下再存一份。
 - **出处跟着图走。** 每张图下那一行写图编号、原图注的第一句（原文照录）、图片 URL 和抓取日期——与 `% src:` 行同一条"出处紧贴着产物"的规矩，也是这张图被拷出笔记后仍然可追溯的原因。没有这一行的图就是一张来历不明的图：删掉，不解释。
 - **图的说明同样要有出处。** 图下那几句"这张图在说什么"只出自两处：图注全文，以及同一个抓下来的页面里按编号引用这张图的那些句子——把图变成文字在这里没有第三条路，两处都没说的标 `[unverified]`。说明写不出来的图就不放进笔记，而不是放一张读者读不懂的图。
 - **留几张图就多几次 arXiv 请求。** 每张都紧接着选它的那个页面抓，遵守 arXiv 要求的约 3 秒 1 次；最多三次，因为笔记的上限就是三张。下载失败就记一笔、笔记不带那张图照常发出——绝不滞在重试循环里，也绝不拿另一篇论文的图顶替。
@@ -132,7 +132,7 @@ AI 会议模板（NeurIPS / CVPR / ICML / ICLR / ACL）实际渲染的是 author
 
 ## 收尾前的自查
 
-1. `reference.bib` 里的每个 citekey 都在运行缓存里有原始内容，**且**在 `refs_index.md` 里有 provenance 行，**且**条目正上方那行 `% src:` 与该行是同一个 URL、同一个日期。
+1. `reference.bib` 里的每个 citekey 都在运行缓存里有原始内容，**且**在 `refs_index.md` 里有出处行，**且**条目正上方那行 `% src:` 与该行是同一个 URL、同一个日期。
 2. 随机重抓 5 条；与文件逐字段 diff。有出入 → 把文件改成与来源一致，然后重查该条所在的整批。
 3. `.env` 的 conda 环境里**已装** `bibtexparser` 时用它解析（绝不安装——那是 `/skill:star-env-builder` 的活）；否则例行检查花括号配平与 key 唯一性。
 4. 没有条目的必填字段为空；没有 key 出现两次。

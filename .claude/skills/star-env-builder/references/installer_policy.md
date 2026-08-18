@@ -7,7 +7,7 @@ Which tool installs what, in what order, and what happens on failure. Every comm
 | Tier | When | Command shape |
 |---|---|---|
 | uv (default) | uv on PATH, or the user approved installing it | `uv pip install --python $ENV_PY -r <file>` |
-| pip (fallback) | uv absent and declined, or a package fails under uv | `$ENV_PY -m pip install <pkg>` |
+| pip (second choice) | uv absent and declined, or a package fails under uv | `$ENV_PY -m pip install <pkg>` |
 | conda (whitelist only) | conda backend **and** the package is on the whitelist | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <pkg> -y` |
 
 - uv missing → ask once, with a recommendation: install uv (e.g. `$PYTHON_HOME/bin/python -m pip install --user uv`, or the official standalone installer if the user prefers) / use pip for this run. Declining costs speed, not correctness.

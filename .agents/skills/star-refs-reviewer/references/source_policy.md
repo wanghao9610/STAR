@@ -27,7 +27,7 @@ Per paper, stop at the first source that yields a matching record:
    - `http://export.arxiv.org/api/query?id_list=<id>` (Atom)
    - becomes `@misc` with `eprint`, `archivePrefix = {arXiv}`, `primaryClass`, `year`
 
-Cache every fetched payload under `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>` **before** using it. The cache is the audit trail and the resume point for a re-run.
+Cache every fetched record under `wkdrs/refs_<date>/raw/<citekey>.<source>.<ext>` **before** using it. The cache is the audit trail and the resume point for a re-run.
 
 ## Matching a record to the paper
 
@@ -118,7 +118,7 @@ The impact score (`references/refs_rubric.md`, Impact score) is computed from th
 A note may carry up to three images: the figures its own paper uses to show what the note's prose cannot. Step 3 decides which figures those are, from the captions and from what the paper is; this section fixes where they may come from and what happens to them after.
 
 - **One source.** The paper's arXiv HTML rendering, `https://arxiv.org/html/<arxiv-id>` — the page Step 3 already reads where it exists. arXiv renders roughly 2024 onward, and only where the submitted LaTeX converted, so many papers have none: that is a fact the note states, never a reason to look elsewhere. The PDF is not rendered here, and no image is ever taken from a project page, a repository README, a blog, or a search result.
-- **Fetched as bytes, kept as fetched.** Download each chosen figure's `<img>`, resolved against the page's own URL, to `metds/refs/figs/<ABBREV>_fig<N>.<ext>` — `<ABBREV>` the note's, `<N>` the paper's figure number, the extension the file's own. Never re-encode, crop, rescale, or merge two images into one. The file is its own cached payload: no second copy goes under `raw/`.
+- **Fetched as bytes, kept as fetched.** Download each chosen figure's `<img>`, resolved against the page's own URL, to `metds/refs/figs/<ABBREV>_fig<N>.<ext>` — `<ABBREV>` the note's, `<N>` the paper's figure number, the extension the file's own. Never re-encode, crop, rescale, or merge two images into one. The file is its own cache: no second copy goes under `raw/`.
 - **Provenance travels with it.** The line under each image carries the figure number, the caption's first sentence verbatim, the image URL, and the fetch date — the same origin-beside-the-artifact rule the `% src:` line follows, and the reason a figure copied out of the note can still be traced. An image with no such line is a figure from nowhere: delete it rather than explain it.
 - **The description is sourced too.** The sentences under a figure that say what it shows come from the caption in full and from the passages of that same fetched page which cite the figure by number — nothing else turns a figure into words here, and what neither states is marked `[unverified]`. A figure whose description cannot be written from them is dropped rather than shipped unreadable.
 - **One arXiv request per figure kept.** Each is fetched right after the page it was chosen from, under the ~1 per 3 seconds arXiv asks for — three requests at most, because three is the note's ceiling. A download that fails is recorded and the note goes out without that figure — never a retry loop, and never another paper's figure in its place.
@@ -132,7 +132,7 @@ A note may carry up to three images: the figures its own paper uses to show what
 
 ## Self-audit before finishing
 
-1. Every citekey in `reference.bib` has a cached payload in the run dir **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date.
+1. Every citekey in `reference.bib` has a cached record in the run dir **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date.
 2. Re-fetch 5 entries at random; diff field-by-field against the file. Any mismatch → correct the file to match the source, then re-check that entry's whole batch.
 3. Parse the file with `bibtexparser` through the `.env` conda env **if it is already installed** (never install it — that is `$star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
 4. No entry has an empty required field; no key appears twice.

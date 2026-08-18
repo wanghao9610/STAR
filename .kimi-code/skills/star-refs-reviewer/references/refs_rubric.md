@@ -50,7 +50,7 @@ Each note (`assets/ref_analysis_template.md`) is graded on:
 - **Figures are the paper's own, explained, or absent.** At most three, each sitting in the section whose content it shows and each carrying its number, its caption's first sentence, its URL and its fetch date, and under those the 2–4 sentences that say what it shows and how to read it — written from the caption in full and the passages citing that figure by number, `[unverified]` on anything neither states. The method-as-a-whole figure has the first claim; a second or third has to carry what the prose cannot. "No method figure" and "arXiv has not rendered this paper" are both honest answers and are told apart; a results plot standing in for a missing method figure is neither, and an image nobody explained is not kept at all.
 - **Claims are the paper's, not yours.** Report numbers as reported (metric + dataset + split), each as one self-contained line so it survives being quoted out of the note — STAGE audits manuscript sentences against exactly these lines, and a number stranded from its setting backs nothing. Never extrapolate, never compare across incomparable settings, mark anything uncertain `[unverified]`.
 
-## Note collector contract
+## Note collector format
 
 What a read-only subagent returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`, and for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8), and for `category`, which is derived at Step 6 from the whole collected pool and cannot exist yet, and for §7's follow-ups, which are citekeys already in `reference.bib` — a file Step 5 has not yet built. A collector that fills those writes a record that is provably false.
 
@@ -67,7 +67,7 @@ One paper each. The return:
 
 and nothing else: no frontmatter provenance, no `category`, no `read_on`, no §5. The main agent writes every file.
 
-## Survey collector contract
+## Survey collector format
 
 What a read-only subagent returns when Step 10.4's reading fans out. One paper each. The return:
 
@@ -83,7 +83,7 @@ and nothing else: no branch assignment (the taxonomy is settled by the main agen
 ## reference.bib organization
 
 - **3–8 categories.** Fewer than 3 is not a classification; more than 8 fragments the field.
-- Categories come from the semantics of what was actually collected — titles, tasks, mechanisms — not from a fixed taxonomy imposed in advance.
+- Categories come from the content of what was actually collected — titles, tasks, mechanisms — not from a fixed taxonomy imposed in advance.
 - Names are specific to this literature: `Open-vocabulary detection`, not `Related methods`.
 - Each category gets a `%%` block header: name, entry count, one-line scope. Entries inside sorted by year ascending, then citekey.
 - Every entry belongs to exactly one category. Genuine misfits go to a final `Other / cross-cutting` block, capped at ~10% of entries — more than that means the categories are wrong, not that the papers are.
