@@ -41,7 +41,12 @@ status:
 
 <!-- Ordered, verb-concrete steps a researcher can execute and check off. No "explore/combine/
      look into"-style verbs whose completion can't be verified. Each step should be small enough
-     that its completion is unambiguous. Number them. -->
+     that its completion is unambiguous. Number them.
+     If this leaf runs a set of configurations (a hyper-parameter grid, repeats over seeds), write
+     that as one step here: the axes and their values, the cell count, and the order to drop cells in
+     if the whole grid cannot be run. Never make one cell a leaf, and never compress the set into
+     "tune the parameters".
+     -->
 
 ## 4. Deliverables & Outputs
 
@@ -49,13 +54,33 @@ status:
      generated outputs under wkdrs/<run-name>/… with a run name that distinguishes this task/
      experiment; datasets under datas/; weights under inits/; any script this plan must write itself
      under tasks/<plan-name>/ (never execs/ — its root is closed). Name the files/dirs, not just
-     "results". -->
+     "results".
+     A set of configurations lands under wkdrs/<run>/cells/<axis>=<value>[_<axis>=<value>]/, one
+     directory per cell, with the per-cell metrics collected in wkdrs/<run>/matrix.md. It is still
+     one run: exec_runs does not grow with the cell count.
+     If this leaf settles a configuration (hyper-parameters an ablation picked, a threshold fixed),
+     write the chosen values into a named file and give its path here — a downstream leaf cites that
+     path in its own §2 rather than describing it in prose.
+     -->
 
 ## 5. Verification / Done-Criteria
 
 <!-- The single check that proves this sub-plan is done: a test that passes, a metric that clears
      a threshold, a specific output that exists and looks right. Tie thresholds back to the root's
-     §4 metrics / §5 kill-criteria where relevant. If it can't be checked, it isn't a done-criterion. -->
+     §4 metrics / §5 kill-criteria where relevant. If it can't be checked, it isn't a done-criterion.
+     Three kinds of leaf take three shapes of criterion; do not apply the wrong one:
+     - A leaf that runs a set of configurations is judged on the whole grid (every cell ran, and the
+       chosen cell clears the threshold on ≥N seeds), never on one cell; reporting the chosen cell
+       means reporting the spread along the same axis with it.
+     - A leaf that builds or curates data cannot stop at file counts and checksums: it needs the
+       headline statistics (size, class or length distribution), one hand check with the sample size
+       and what to look at written down, and an overlap / leakage check against the evaluation sets.
+       Bad data contaminates every number that comes after it.
+     - A pilot leaf — the kind run to find out what to do next — is judged on a decision being
+       recorded: what will be looked at, and which decision each outcome triggers (continue / change
+       the approach / drop it), written into EXEC_LOG with the evidence when the run ends. Its
+       numbers stay provisional and never enter the results table.
+     -->
 
 ## 6. Local Risks & Fallback
 

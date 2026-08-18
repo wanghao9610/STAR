@@ -41,7 +41,10 @@ model_trail:                    # append-only: one entry per write session, newe
 
 <!-- Ordered. Each action binds a check. `run by` = `agent` (executes here) or `stop → user`
      (agent prepares the command, user runs it — see STOP line). Commands go through the .env conda
-     env; artifacts are written under wkdrs/<run>/. -->
+     env; artifacts are written under wkdrs/<run>/.
+     A whole set of configurations (a grid, repeats over seeds) is **one** action, not one row per
+     cell: the artifact column reads wkdrs/<run>/cells/, and the check column carries the criterion
+     the sub-plan's §5 states for the whole grid. -->
 
 | # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | run by |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
@@ -55,7 +58,11 @@ model_trail:                    # append-only: one entry per write session, newe
      API). For each: the exact command through the conda env (via execs/run.sh where one exists),
      what it produces and where, and what output the user should bring back so the done-criterion can
      be verified. A reusable launch script may be written to execs/scpts/<run>.sh (writing it is fine;
-     running it stays with the user). -->
+     running it stays with the user).
+     Each one also states its expected cost: GPUs × hours, or call count and spend. That is what the
+     root plan's §4 compute budget is reconciled against — when the command comes back, the actual
+     cost goes into EXEC_LOG's cost section.
+     -->
 
 ## Done-criterion
 

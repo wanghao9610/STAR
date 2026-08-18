@@ -80,7 +80,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 决定本地执行还是委派。委派时调用 `spawn_agent`，实现工作使用 `agent_type: worker`（只有只读勘察使用 `explorer`），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其窄范围范围受限检查。
 3. 在主 agent 中重跑或独立验证范围受限检查。通过后，记录证据和产物路径；若逐 action 提交已获批准，则提交该 action 的文件——在执行分支上，这次提交连同本 action 更新过的运行记录一起暂存，因为只有提交才会被合并（规约 §11.2）。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
-4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，不运行并停止。
+4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，并在 `开销` 一节记一行预计开销（GPU 数 × 小时，或调用次数与费用），不运行并停止。用户带结果回来时把实际开销补进同一行——那是根计划 §4 算力预算唯一的对账处；拿不到实际值就写 `未记`，不要留空。
 5. 若重试或 blocker 在子计划粒度改变了方法（新增/删除/替换步骤，交付物路径或完成判据变化），在 EXEC_LOG 的 `Pending amendments` 下记录变更项行并继续——这些在 finalize 时同步，而不是运行中同步。
 
 ### Step 5：完成

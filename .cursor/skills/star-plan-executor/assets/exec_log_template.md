@@ -38,6 +38,17 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 
 - [ ] `<conda command>` → produces `wkdrs/<run>/…`; bring back <metric/output> for the done-criterion.
 
+## Cost
+
+<!-- One row per command that crossed the STOP line. Expected comes from EXEC_PLAN's STOP-line
+     section; actual is filled in when the user brings the run back. This is the only place the root
+     plan's §4 compute budget is reconciled: the budget is written once, the actual accrues here.
+     If the actual cannot be recovered, write `unrecorded` — an empty cell reads as free. -->
+
+| Action | Expected | Actual | Basis |
+|--------|----------|--------|-------|
+| <#N heavy run> | <GPU×hours / calls and spend> | <same units, or `unrecorded`> | <log line / invoice / wall-clock> |
+
 ## Pending amendments (not yet synced to sub-plan)
 
 <!-- Material deviations that emerged DURING execution, in the same delta form as EXEC_PLAN's

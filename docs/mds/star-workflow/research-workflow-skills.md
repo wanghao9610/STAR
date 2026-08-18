@@ -658,7 +658,7 @@ wkdrs/01_mvp-verify/
 ```
 
 - `EXEC_PLAN.md` records actions, files, commands, artifacts, checks, the STOP line, and any divergences from the sub-plan;
-- `EXEC_LOG.md` records step status, verification evidence, blockers, commands awaiting the user, and pending amendments;
+- `EXEC_LOG.md` records step status, verification evidence, blockers, commands awaiting the user, the expected and actual cost of each heavy run, and pending amendments;
 - The plan file receives the lightweight `exec_status`, `exec_runs`, and `updated` fields — plus, after your confirmation, material deviations written back into its §2–§5 (see below).
 
 When the same plan is invoked again, the skill treats `EXEC_LOG.md` as the source of truth, skips completed steps, and resumes from the first unfinished action.
