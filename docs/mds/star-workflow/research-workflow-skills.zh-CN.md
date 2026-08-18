@@ -32,6 +32,22 @@ STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊
 
 ![STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环](../../srcs/star-research-workflow.png)
 
+**从哪儿下手。** 研究本身有它的顺序：定下要问的问题、把它写成计划并在写定位时把最接近的工作读一遍、给代码和运行环境找到落脚处、把计划拆成能各自回答的子问题、跑实验、读结果、把结果带回计划、最后汇总成文。下面每个阶段都会在磁盘上留下东西供下一个阶段取用，这也是隔几天回来还能接着做的原因。先找到你实际所处的阶段，从那个 skill 的小节读起。
+
+| 研究阶段 | 承担它的 skill | 它写出的文件 | 下一个阶段凭什么继续 |
+| --- | --- | --- | --- |
+| 定下要问的问题 | `$star-idea-storm` | `metds/ideas/<slug>_idea.md` | 一句话的研究问题、它所站的那个缺口，以及一个可能否掉它的首个实验 |
+| 写计划，并在写定位时把领域读一遍 | `$star-plan-coach`，中途转去 `$star-refs-reviewer` | `metds/plans/<数字>_<slug>_plan.md`；`metds/refs/`：每篇核心论文一份笔记、`reference.bib`、`refs_index.md` | 问题、定位、方法、实验、风险、里程碑六节，且定位写自读过的工作而非记忆——外加这个领域默认会拿来比的 baseline，以及允许这份计划被拆的 `finalized` 日期 |
+| 给代码和运行环境找到落脚处 | `$star-code-architect`，随后 `$star-env-builder` | `${CODE_NAME}/` 与 `metds/codearc.md`；`wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` | 叶子能按路径点名的真实模块，以及一个已经把它们导入过的解释器 |
+| 拆成能各自回答的子问题 | `$star-plan-decomposer` | 每个单元一份子计划，平铺在 `metds/plans/` 下 | 每个问题一个叶子，各有自己的交付物和一条真跑得起来的完成判据 |
+| 跑实验 | `$star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md`，以及这次 run 自己的产物 | 代码、轻量验证留下的证据，以及交回你手上去跑的那条训练或评测命令 |
+| 审一遍数字将要立在其上的代码 | `$star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<日期>.md` | 按严重度分组的问题项——在算力花掉之前抓住，而不是之后 |
+| 读结果 | `$star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`；`aggregate` 模式下另有跨 run 的 `wkdrs/results/results.md` | 每条完成判据都打上 `met` / `not met` / `unmeasurable`，每个数字都带着它的来源 |
+| 把结果带回计划 | `$star-plan-reviser` | 就地修订的计划，外加 `wkdrs/<run>/REVIEW_<日期>.md` | 与证据一致的计划，以及一棵不再推荐已被证据关掉的方向的树 |
+| 汇总成文 | `$star-metd-summarize`，随后 `$star-code-release` | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md`；`README.md` | 写成文字的方法，加上汇进一张表的数字——论文的方法节与结果节正是据此写的 |
+
+另有两个 skill 不在这条顺序里。`$star-flow-status` 随时通读整棵树，指出唯一的下一步动作；`$star-expt-digest` 说清这一段时期里实验做了什么、相对上次变了什么；而一个已经做了几个月的项目从 `$star-proj-adopt` 进来——它先把已经建成、已经跑过的东西记录成证据，再从上表的计划那一行汇入。
+
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
 
 ## 目录
@@ -90,7 +106,7 @@ $star-code-release
 /skill:star-plan-coach 开放词汇检测与分割
 ```
 
-七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条按 harness 各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
+七个 skill——`$star-proj-adopt`、`$star-idea-storm`、`$star-plan-coach`、`$star-code-architect`、`$star-plan-decomposer`、`$star-plan-reviser`、`$star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
@@ -108,6 +124,14 @@ $star-code-release
 
 ## 2. 开始前的准备
 
+开头那张表里的哪个阶段是你的入口，取决于你手上工作的三件事，而不取决于流程本身：
+
+- **问题定下来了吗？** 还没定——只有一个兴趣、一股直觉、三个挑不出高下的方向——从 `$star-idea-storm` 起步：它先发散，再对着文献扫描你留下的那些方向，收敛出选题之后才谈得上写计划。已经定了、且一句话说得清，直接从 `$star-plan-coach` 起步。定下来有一阵、之后没再对着文献看过的，先跑一次 `$star-refs-reviewer survey <topic>`，让计划里的缺口对着领域写，而不是凭记忆写。
+- **仓库是新的，还是项目已经跑了几个月？** 有真实代码、有几个月的提交、手里已经攥着结果——这种是接入，不是重来。`$star-proj-adopt` 先把已经建成、已经跑过、已经得出结论的东西记录成证据，计划写在这之后，写在已经存在的工作之上。
+- **有没有可以起步的代码，环境跑不跑得起来？** `$star-code-architect` 要么从一份打过分的参考实现搭起代码库，要么把已有代码整理清楚，并记录下后续都遵循的架构；`$star-env-builder` 把它变成一个确实把项目导入过的解释器。两者都只在第一轮做，也都排在第一个叶子开始执行之前。
+
+无论从哪一路进来，例行准备都一样：
+
 - 在 STAR 项目根目录中使用这些 skill。
 - 研究计划统一放在 `metds/plans/`。
 - 搭建代码库或执行代码前，先创建本地 `.env` 并设置 `CODE_NAME`，再单独设置 `PYTHON_HOME`，或成对设置 `CONDA_HOME` 与 `ENV_NAME`。
@@ -118,7 +142,7 @@ $star-code-release
 
 如果只是编写或拆解计划，不需要提前准备数据、权重或可运行代码；这些输入会在执行阶段检查。
 
-每个 skill 写出的产物都记录它由哪个模型产出，好让日后横向比较不同模型时有据可依：单次写入记在 `model_id`，跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——由 `star-expt-digest ledger` 汇总进 `wkdrs/digests/MODEL_LEDGER.md`。取值是运行时在写入当时报出的值：它是自报而非核实的，所以把它当作关于来源的证据，而不是证明。完整规则见[规约 §8](research-workflow-conventions.zh-CN.md)；运行时没报出模型时各自的兜底，在 [`model_id_spec.zh-CN.md`](model_id_spec.zh-CN.md)。
+每个 skill 写出的产物都记录它由哪个模型产出，好让日后横向比较不同模型时有据可依：单次写入记在 `model_id`，跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——由 `star-expt-digest ledger` 汇总进 `wkdrs/digests/MODEL_LEDGER.md`。取值是运行时在写入当时报出的值：它是自报而非核实的，所以把它当作关于来源的证据，而不是证明。完整规则见[规约 §8](research-workflow-conventions.zh-CN.md)；运行时没报出模型时各自的退路，在 [`model_id_spec.zh-CN.md`](model_id_spec.zh-CN.md)。
 
 ## 3. `$star-proj-adopt`：接入一个做了一半的项目
 
@@ -175,7 +199,7 @@ metds/adopt.md
 
 ### 它绝不碰什么
 
-不搬东西、不改名、不覆盖任何已经写好的文件——整个 skill 就架在这一条约束上。`${CODE_NAME}/` 及其下一切、项目自己的启动器、配置和 CI 只读不改；要写的路径已经存在时，那是一个要问你的问题，而不是它能擅自给出的处置；软链绝不建在非空的真实目录之上。对计划文件，它唯一的豁免就是上面那两个 frontmatter 字段，且只写在你逐个确认过的 leaf 上——计划正文、`status`、`finalized`、`children` 和 `depends_on` 都轮不到它写。接入也不发明研究策略：清单只描述仓库显示了什么，而为什么做这些工作、它支撑哪条声明、什么情况下本该叫停，留给 `$star-plan-coach` 去向你问出来。从 git log 编造出来的计划树，比没有计划树更糟。
+不搬东西、不改名、不覆盖任何已经写好的文件——整个 skill 就架在这一条约束上。`${CODE_NAME}/` 及其下一切、项目自己的启动器、配置和 CI 只读不改；要写的路径已经存在时，那是一个要问你的问题，而不是它能擅自给出的处置；软链绝不建在非空的真实目录之上。对计划文件，它唯一的豁免就是上面那两个 frontmatter 字段，且只写在你逐个确认过的 leaf 上——计划正文、`status`、`finalized`、`children` 和 `depends_on` 都轮不到它写。接入也不发明研究策略：清单只描述仓库显示了什么，而为什么做这些工作、它支撑哪条主张、什么情况下本该叫停，留给 `$star-plan-coach` 去向你问出来。从 git log 编造出来的计划树，比没有计划树更糟。
 
 ### 使用建议
 
@@ -421,7 +445,7 @@ $star-code-architect open-vocab-det-seg
 
 当代码已存在时（整理）：按关注点逐个只读勘察，汇成仓库地图。
 
-两条路径随后都会设计目标架构和编号迁移表——现状即基线，迁移保持精简。**确认点 2**：由你逐条批准迁移项。获批迁移按文件所有权互不相交的分组执行，每组验证并打一个 git 检查点；失败的组会回滚并标记 blocked。
+两条路径随后都会设计目标架构和编号迁移表——现状即基线，迁移保持精简。**确认点 2**：由你逐条批准迁移项。获批迁移按文件所有权互不相交的分组执行，每组验证并提交一次；失败的组会恢复原样并标记 blocked。
 
 ### 主要输出
 
@@ -473,15 +497,15 @@ $star-env-builder add wandb einops    # 装进已有环境并记录下来
 3. 按"先到先用"解析依赖：已有 `${CODE_NAME}/requirements*` → `pyproject.toml` / `setup.py` / `environment.yml` → 代码 import 扫描。生成结果写入两层布局：`requirements.txt` 只引用 `requirements/framework|runtime|optional.txt`，conda 专属项进 `requirements/conda.txt`；
 4. **确认点**：由你批准安装计划——后端、python 版本、各类别包、torch↔CUDA wheel 匹配、下载量级，以及所有已标记的不确定项；
 5. 按 uv > pip > conda 的优先顺序安装（conda 只装 `cudatoolkit`、`ffmpeg` 这类需系统隔离的项），尊重已配置的镜像；
-6. 分三层冒烟测试——import、框架/GPU 检查、项目入口——每项检查的证据都由主 agent 记录。
+6. 分三层做跑通性检查——import、框架/GPU 检查、项目入口——每项检查的证据都由主 agent 记录。
 
 ### 主要输出
 
 ```text
 $CONDA_HOME/envs/<ENV_NAME>/（或 .venv/）     # 可用的运行环境
 ${CODE_NAME}/requirements*                    # 仅当布局缺失时生成（会提交）
-wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md     # 身份信息、安装结果、冒烟矩阵
-wkdrs/env_<ENV_NAME>_<日期>/freeze.txt        # 精确版本快照
+wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md     # 身份信息、安装结果、跑通性检查矩阵
+wkdrs/env_<ENV_NAME>_<日期>/freeze.txt        # 精确版本清单
 ```
 
 报告中记录了后续所有命令都应使用的解释器绝对路径（`ENV_PY`）——这些 skill 从不依赖 `source activate`。
@@ -562,7 +586,7 @@ $star-plan-decomposer 01
 - 父计划的方法和里程碑还很模糊时，先回到 `$star-plan-coach` 补完。
 - 一个子计划应当有一条能明确判断成功或失败的完成判据；“调研一下”或“尝试优化”还不够具体。
 - 不要手工重排已使用的数字前缀，否则会破坏更深层计划和已有依赖引用。
-- 根 §4 写明、而 `datas/` 尚未持有的数据集，要有属于它自己的**数据就绪叶子**——§3 负责获取，§5 的完成判据是一次完整性校验（manifest、文件数、校验和），每个使用它的叶子都依赖它。获取命令跨过红线，所以会交回给你来跑。没有这个叶子，执行会卡在一个没有任何计划负责的缺失输入上。
+- 根 §4 写明、而 `datas/` 尚未持有的数据集，要有属于它自己的**数据就绪叶子**——§3 负责获取，§5 的完成判据是一次完整性校验（文件清单、文件数、校验和），每个使用它的叶子都依赖它。获取命令跨过红线，所以会交回给你来跑。没有这个叶子，执行会卡在一个没有任何计划负责的缺失输入上。
 
 完整定义见 [`star-plan-decomposer/SKILL_zh.md`](../../../.claude/skills/star-plan-decomposer/SKILL_zh.md)。
 
@@ -590,14 +614,14 @@ skill 会先确认：
 
 - 子计划 §3 的任务是否具体；
 - §5 是否给出了可运行的完成判据；
-- 这个叶子是否还是一个工作单元——一条完成判据、一类活、至多越过一次 STOP line；
+- 这个叶子是否还是一个工作单元——一条完成判据、一类活、至多越过一次红线；
 - `depends_on` 中的上游计划是否已经完成；
 - 所需数据、权重和代码模块是否存在；
 - `.env` 中的项目路径与 Conda 环境是否可用（环境缺失时可先用 `$star-env-builder` 构建）。
 
 缺少硬依赖时，skill 会报告具体 blocker，而不会伪造输入或跳过依赖。
 
-一个叶子可能通过了其余所有检查，仍然大到不该当作一个单元来跑——这份计划可能是几周前拆的，也可能是手写的。遇到这种情况，skill 会先展示这个叶子会怎么分（2–5 个单元，每个给一句话目标和它会拥有的那条完成判据），并推荐先用 `$star-plan-decomposer <叶子>` 拆分，把这份草图作为描述一并带过去。预览本身不写任何文件：decomposer 仍然自己选轴、自己确认列表。照原样执行始终是一个选项，代价也会一并说明——每一次越过 STOP line 都要整个 run 停下再恢复，一个 blocked 步骤会挡住它后面的全部工作，失败则整片叶子重跑。正在恢复的 run 不会被问，因为运行途中拆分，会把它的记录挂在一个再没有执行器会光顾的节点上。
+一个叶子可能通过了其余所有检查，仍然大到不该当作一个单元来跑——这份计划可能是几周前拆的，也可能是手写的。遇到这种情况，skill 会先展示这个叶子会怎么分（2–5 个单元，每个给一句话目标和它会拥有的那条完成判据），并推荐先用 `$star-plan-decomposer <叶子>` 拆分，把这份草图作为描述一并带过去。预览本身不写任何文件：decomposer 仍然自己选轴、自己确认列表。照原样执行始终是一个选项，代价也会一并说明——每一次越过红线都要整个 run 停下再恢复，一个 blocked 步骤会挡住它后面的全部工作，失败则整片叶子重跑。正在恢复的 run 不会被问，因为运行途中拆分，会把它的记录挂在一个再没有执行器会光顾的节点上。
 
 ### 它会做什么
 
@@ -653,7 +677,7 @@ wkdrs/01_mvp-verify/
 
 - 某个叶子执行完了，想在继续叠加工作之前审一遍新代码。
 - 代码库长大了，想做一次规范审计（docstring、命名、简洁性、硬编码路径），并留下写进文件的报告。
-- 想核对计划 §3 的任务是否真的落在代码里，而不是只看执行日志的声明。
+- 想核对计划 §3 的任务是否真的落在代码里，而不是只看执行日志的说法。
 - 刚改了一些文件，想只对 diff 做一次快速审查。
 
 ### 怎么调用
@@ -675,7 +699,7 @@ $star-code-reviewer HEAD~3..               # 某个 git 范围
 3. 按六维评分表收集问题项：docstring 与注释、命名、简洁性、STAR 项目约定（硬编码路径、布局、放置规则）、高置信正确性可疑写法，以及计划模式下的计划符合度；
 4. 每条 blocker/major 问题项先对照代码复核再写入报告；未确认的怀疑单独列出，绝不计入统计；
 5. 报告写入 `wkdrs/`，并给出带转交建议的简短摘要：功能缺口 → `$star-plan-executor`，计划文本偏差 → `$star-plan-reviser`，结构性重组 → `$star-code-architect`；
-6. 可选：逐条走一遍修复轮，只做例行、不改行为的修复（docstring、范围内改名、unused imports、本项目引入的死代码），每条写入后复检。
+6. 可选：逐条走一遍修复轮，只做例行、不改行为的修复（docstring、范围内改名、未使用的 import、本项目引入的死代码），每条写入后复检。
 
 ### 主要输出
 
@@ -761,7 +785,7 @@ wkdrs/results/results.md              # 仅 aggregate 模式：跨 run 的结果
 
 ### 什么时候用
 
-- 周五了，或一个冲刺结束了，你想要一页纸说清这周的实验做了什么。
+- 周五了，或一轮实验刚跑完，你想要一页纸说清这周的实验做了什么。
 - 你离开两周后回来，需要知道这期间发生了什么。
 - 你要写进度汇报，或准备见导师。
 - 你想把一个计划家族到目前为止的全部产出——父计划的问题加上每个后代的答案——放在一处看。
@@ -813,7 +837,7 @@ wkdrs/digests/EXPT_DIGEST_<日期>.md   # 该周期的 digest
 
 digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它连同出处抄录数字，而不回到源头去确认。这就是两者全部的成本差别，也是 digest 能按周跑而 aggregate 不能的原因。这同时意味着 digest 永远不是你把数字抄进论文时该引用的那个文件——那是 `wkdrs/results/results.md`，而每份 digest 自己都写明了这一点。
 
-### 写入边界
+### 它可以写什么
 
 本 skill **除自己的 digest 外严格只读**。它绝不改计划、`exec_status`、`EXEC_LOG.md`、分析报告或结果汇总表，也绝不为填缺口去跑任何东西——每个缺口都是一行带着关闭命令的条目。它同样绝不说某个变体*为什么*赢：和结果汇总表一样，它报告变化的方向，并把解读转交出去。
 
@@ -855,7 +879,7 @@ $star-plan-reviser 01 把这个方向收回来            # 取消丢弃
 3. 在 `wkdrs/` 下写出七段式审查报告（目标回顾、实际发生了什么、完成度记分卡、偏差清单、阻塞与遗留、影响范围图、修订候选）；
 4. 一次一问地走完修订候选——每条采纳、调整或跳过；
 5. 把批准的改动就地写回计划文件，追加一条 `## Revision History`，更新 `updated`；若叶子的完成判据变了，还会提议重置其 `exec_status`；
-6. 最后给出后续动作：重新拆解、重新执行，或回到 coaching 对话。
+6. 最后给出后续动作：重新拆解、重新执行，或回到重新做计划的对话。
 
 一条都不采纳也是合法结局：写出的审查报告本身就是交付物。
 
@@ -900,7 +924,7 @@ metds/plans/<prefix>_<slug>_plan.md   # 就地修订，并带一条 Revision His
 $star-flow-status
 ```
 
-只查看某个计划子树——树、三个计数、覆盖检查与下一步动作一并收敛到它：
+只查看某个计划子树——树、三个计数、覆盖检查与下一步动作一并收窄到它：
 
 ```text
 $star-flow-status open-vocab-det-seg
@@ -917,7 +941,7 @@ $star-flow-status 01
 - 子计划比父计划还旧、悬挂链接、无效依赖、孤儿 run 等失配；
 - 一行自审信息：统计形似报告、却不匹配任何已知产物模式的文件，好让某个产出方 skill 改了输出命名这件事被看见，而不是让对应的后续检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 注册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/` 与 `wkdrs/results/`）——不会创建或修改任何文件。因为它是整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、以及一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，用它输出的那些规则仍然留在 skill 里。
+这是一个**严格只读**的 skill：只扫描规约 §8 登记在册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/` 与 `wkdrs/results/`）——不会创建或修改任何文件。因为它是整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、以及一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，用它输出的那些规则仍然留在 skill 里。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.claude/skills/star-flow-status/SKILL_zh.md)。
 
@@ -969,7 +993,7 @@ $star-metd-summarize
 
 ### 不编造的边界
 
-计划是唯一信息源。这个 skill 不读代码、不读日志、不读 `wkdrs/`、不读聊天记录，也绝不用一个看起来合理的默认值去填没写明的值——没写明的学习率就保持 `TBD` 并成为一个缺口，因为在这里填一个合理默认值，就是把一个错数字写进论文。结果数字同样不进这些文档：`evaluation.md` 定义协议，而某个 run 实际测出了什么留在 `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`。如果文档里缺了执行细节，该修的是 `$star-plan-executor` 的 plan sync，而不是把读取范围扩大。
+计划是唯一信息源。这个 skill 不读代码、不读日志、不读 `wkdrs/`、不读聊天记录，也绝不用一个看起来合理的默认值去填没写明的值——没写明的学习率就保持 `TBD` 并成为一个缺口，因为在这里填一个合理默认值，就是把一个错数字写进论文。结果数字同样不进这些文档：`evaluation.md` 定义协议，而某个 run 实际测出了什么留在 `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`。如果文档里缺了执行细节，该修的是 `$star-plan-executor` 的计划回写，而不是把读取范围扩大。
 
 ### 使用建议
 
@@ -1036,7 +1060,7 @@ README 的第一行是一条 HTML 注释形式的溯源标记——不是 frontm
 
 ## 18. 一套完整的使用示例
 
-下面是一条典型路径。
+下面把一个课题从一句兴趣走到能写进论文的数字，按它实际发生的顺序走一遍。每一步都说清这时候工作需要什么，以及满足它的那条调用。
 
 要接入的项目从 `$star-proj-adopt` 起步，而不是第零步，之后从第一步起完全一致；等第四步拆出 leaf，再用 `$star-proj-adopt backfill` 把这个环闭上。
 
@@ -1082,7 +1106,7 @@ $star-code-architect
 $star-env-builder
 ```
 
-经过安装计划确认点后，环境创建完成，依赖按 uv > pip > conda 的优先顺序装好，三层冒烟测试把证据写入 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md`。
+经过安装计划确认点后，环境创建完成，依赖按 uv > pip > conda 的优先顺序装好，三层跑通性检查把证据写入 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md`。这次检查正是这一步的意义所在：第一个叶子该栽在研究问题上，而不是栽在一个装漏的包上。
 
 ### 第四步：拆成执行单元
 
@@ -1107,25 +1131,26 @@ $star-plan-decomposer open-vocab-det-seg
 $star-flow-status open-vocab-det-seg
 ```
 
-如果报告推荐 `00_baseline-impl`，执行：
+挑哪个叶子由这次状态查看决定：在 `depends_on` 上游全部完成的叶子里，它点出证据还缺的那一个，于是顺序来自依赖图，而不是来自记忆。如果它推荐 `00_baseline-impl`，执行：
 
 ```text
 $star-plan-executor 00_baseline-impl_plan.md
 ```
 
-### 第六步：在红线之后续跑
+### 第六步：读结果，再续跑
 
 如果日志中留下了一条需要你来跑的训练命令：
 
 1. 按 `wkdrs/00_baseline-impl/EXEC_LOG.md` 运行命令；
 2. 训练期间，`$star-expt-analyst watch 00` 只报日志健康，不打分；
 3. 确认产物写入日志指定位置；
-4. 再次调用 `$star-plan-executor 00`；
-5. skill 会读取旧日志并从完成判据验证处继续。
+4. `$star-expt-analyst 00` 对照这个叶子的完成判据给这次 run 打分，并说清数字意味着什么——这一步决定这个方向站不站得住；
+5. 再次调用 `$star-plan-executor 00`；
+6. skill 会读取旧日志并从完成判据验证处继续。
 
 ### 第七步：循环推进——轻路径还是全路径
 
-每完成一个叶子，`$star-flow-status` 给出唯一的下一步建议。每个叶子要跑多少环节，取决于这个叶子是干什么用的；见[每个叶子都要跑完整个循环吗？](#每个叶子都要跑完整个循环吗)。
+每完成一个叶子，`$star-flow-status` 给出唯一的下一步建议。与计划预期相矛盾的结果，在下一个叶子开始之前先经 `$star-plan-reviser` 写回计划正文，好让这棵树不再推荐一个证据已经关掉的方向。每个叶子要跑多少环节，取决于这个叶子是干什么用的；见[每个叶子都要跑完整个循环吗？](#每个叶子都要跑完整个循环吗)。
 
 ### 第八步：为论文编译方法文档
 
@@ -1191,7 +1216,9 @@ $star-code-release
 
 完整训练、全量评测和高成本调用越过红线。skill 负责把命令和输出位置准备到可复现状态，由你决定何时占用资源运行。
 
-### 如何跨 session 继续？
+### 隔了两周回来，怎么接着做？
+
+不依赖对话窗口还开着：每个阶段的进度都记在自己的文件里，`$star-flow-status` 读这些记录、说出你停在哪个阶段，再次调用那个阶段的 skill，它就从自己写下的内容接着往下走。
 
 - idea storm 从 idea 文件 frontmatter 的阶段状态继续；`finalized` 的 idea 从收敛阶段重开；
 - coach 从计划 frontmatter 的章节状态继续；
@@ -1199,16 +1226,16 @@ $star-code-release
 - decomposer 从父子链接和已有子计划继续；
 - executor 从 `exec_runs` 最后一项指向的 `EXEC_LOG.md` 继续；
 - env builder 依据最近的 `wkdrs/env_*/ENV_REPORT.md` 走“原地验证修复”续跑；
-- code reviewer 的报告持久化在 `wkdrs/`（run 目录或 `wkdrs/reviews/`），写入的修复留在 git 里；
-- expt analyst 的报告持久化在 `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`，连同它渲染出的图；
-- reviser 的报告持久化在 `wkdrs/` 下，每处写入的改动都记录在计划的 `## Revision History` 里；
+- code reviewer 的报告留在 `wkdrs/` 下（run 目录或 `wkdrs/reviews/`），写入的修复留在 git 里；
+- expt analyst 的报告留在 `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`，连同它渲染出的图；
+- reviser 的报告留在 `wkdrs/` 下，每处写入的改动都记录在计划的 `## Revision History` 里；
 - metd summarize 不需要自己的记忆：它从计划重新编译，每份文档的 `sources:` frontmatter 记录了它来自哪些计划、以及那些计划当时有多新；
 - status 可以在任何时候只读重建全局状态。
 
 
 ### 哪些环节可以无人值守？
 
-这是两个不同的问题，本节只回答第二个。**谁可以启动一个 skill**，看名册（[规约 §10](research-workflow-conventions.zh-CN.md)）：七个只能你点名，另外八个 agent 可以自行拾起——包括一次跑完的运行点名它是下一步动作的情形。**一次运行在需要你之前能走多远**，才是下面这份清单，而且两种启动方式毫无区别：agent 自己启动的 skill，会停在你亲手点名时它同样会停的地方。审批确认点在 headless / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
+这是两个不同的问题，本节只回答第二个。**谁可以启动一个 skill**，看名册（[规约 §10](research-workflow-conventions.zh-CN.md)）：七个只能你点名，另外八个 agent 可以自行拾起——包括一次跑完的运行点名它是下一步动作的情形。**一次运行在需要你之前能走多远**，才是下面这份清单，而且两种启动方式毫无区别：agent 自己启动的 skill，会停在你亲手点名时它同样会停的地方。审批确认点在无人值守 / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`$star-flow-status`（只读、无提问）；带明确目标的 `$star-expt-analyst <叶子 | run 目录>`，以及 `$star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `$star-metd-summarize`——没就绪的树会停在就绪门槛上，来源没动的文档原样不动，实质性覆写会停在变更清单的提问上，不会直接盖掉。
 - **跑到确认点会停**：`$star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停，直到 diff 被确认，其 `survey` 只问一个判断型问题（画像、分类轴、分层阅读清单），`involve=low` 会按推荐项代答——剩下会停的只有覆盖已有综述文件那一问；`wkdrs/results/results.md` 已存在时，`$star-expt-analyst aggregate` 停在变更清单提问；`$star-code-release check` 除报告外只读，可以挂定时任务，它另外三个阶段则会停在各自的确认点。
@@ -1222,7 +1249,7 @@ $star-code-release
 
 STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪器或写作工具。三条边界是有意划下的：
 
-- **超参 sweep 与实验追踪。** sweep 是一个计划决策（`$star-plan-decomposer` 划定它，红线把命令交回给你）；用哪个 sweeper、哪个 tracker 跑它是你的事。把它们指向 `wkdrs/<run>/`，工作流照常运转。
+- **超参 sweep 与实验追踪。** sweep 是一个计划决策（`$star-plan-decomposer` 划定它，红线把命令交回给你）；用哪个 sweep 工具、哪个实验追踪工具跑它是你的事。把它们指向 `wkdrs/<run>/`，工作流照常运转。
 - **决定在乎什么。** `$star-idea-storm` 从你带来的种子兴趣出发——它负责发散、扫描、收敛，但不替你挑选领域；`$star-plan-coach` 再把收敛出的选题磨锋利。哪些问题值得你投入几年，这件事在 STAR 的上游。
 - **论文写作。** STAR 止步于素材。交付物是 `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md`（方法）、`metds/refs/reference.bib`（引文）、`metds/refs/related_work.md`（合成后的相关工作叙述），以及 `wkdrs/results/results.md`（数字，且每个数字背后都有它的 run）。之后交给任何写作工具。
 

@@ -8,7 +8,7 @@
 
 **语言：** [English](README.md) | 简体中文
 
-STAR 为人工智能研究项目提供了一个轻量起点。它把源代码、数据集、模型权重、实验输出和方法记录分别放在约定好的目录中，并给研究者和 AI 编程助手同一个实验入口、同一份项目规范。内置的研究工作流按“研究构想 → 计划 → 可执行子计划 → 实现与验证 → 状态追踪”依次推进，过程中把关键决策、任务依赖和验证记录写进项目文件，因此工作能跨会话接着做，过程也可事后追溯。
+STAR 是一个人工智能研究项目的工作底座，管的是从选题到成文这一整条链路：定下选题、读清相关工作、把想法写成计划、搭起代码与环境、把计划拆成可以各自单独验证的子问题、跑实验、判读跑出来的结果、拿这份判读回头改计划，随时能看到整条流程走到了哪一步，最后把定稿的计划编译成可直接写进论文的方法文档。它留下的是一份可追溯的实验记录——每次运行为回答哪个问题而跑、依赖哪些别的子问题、由哪条命令和哪份配置产生了这些数字、这些数字对照的是什么判据，以及据此做了什么决定。源代码、数据集、模型权重、实验输出和方法记录各有各的目录；所有实验都从同一个入口启动；研究者和 AI 编程助手读同一份项目规范。因为这份记录写在项目文件里而不是留在聊天窗口里，工作能跨会话接着做，隔很久之后也查得清楚。
 
 STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验证记录，你仍可自行选择模型技术栈、依赖管理工具和实验跟踪平台。
 
@@ -42,15 +42,15 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 ## 主要特性
 
 - **统一的项目结构**：清晰组织代码、数据、权重、输出和研究记录。
-- **可迁移的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
+- **跟着项目走的运行环境**：本机路径仅保存在本地 `.env` 文件中，不写入脚本。
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
-- **完整的研究生命周期**：十五个相互配合的 skill，按运行顺序依次是——不改动原有内容地接入已经开工的项目、收敛研究选题、写成计划、调研相关工作、递归拆解计划、搭建代码库、构建运行环境、执行叶子计划、审查代码、分析实验结果、汇总阶段进展、以执行证据修订计划、汇报全局状态、把定稿计划编译成方法文档、把仓库整理到可发布状态。
-- **可追踪、可恢复的研究过程**：将计划保存在 `metds/plans/`，将计划执行过程的中间文件保存在 `tasks/`，将生成的 run 产物保存在 `wkdrs/`，不依赖聊天记录保存上下文。
+- **研究的每一步各有一个 skill**：一共十五个。其中十三个按研究推进的顺序依次是——把已经开工的项目不改动原有内容地接进来、收敛研究选题、写成计划、调研相关工作、搭建代码库、构建运行环境、把计划拆成可以各自单独验证的子问题、逐个实现并轻量验证、审查代码、对照计划的预期判读一次运行的结果、拿这些证据修订计划、把定稿计划编译成方法文档、把仓库整理到别人能照着跑起来的样子；另外两个任何时候都能调：汇报整条流程走到了哪一步、汇总最近一段的实验进展。
+- **可回溯、也能接着做的研究过程**：计划放在 `metds/plans/`，每个计划执行过程的中间文件放在 `tasks/`，一次 run 产生的东西放在 `wkdrs/`——重新上手时读的是文件，不是聊天记录。
 - **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个工具驱动 STAR。
 - **面向 AI 协作的规范**：为 Codex、Claude、DSH、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
-- **适合大文件的安全默认配置**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
+- **太大或只属于本机的东西不进版本库**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制，仓库里装的是代码和记录，不是数据。
 
-十五个 skill 各自负责什么、产出什么，以及在你所用工具里怎么调用，见[研究工作流](#研究工作流)；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
+十五个 skill 按研究阶段分组列在[研究工作流](#研究工作流)一节：各自负责什么、产出什么，以及在你所用工具里怎么调用；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
 
 ## 项目结构
 
@@ -253,7 +253,7 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、DSH、Kimi Code 和 Pi 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，但原因是它自己的：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何 harness 上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution` 上，Pi 挂在它的 `tool_call` 事件上——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，它不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、DSH、Kimi Code 和 Pi 没有这个钩子：Cursor 没有任何在文件编辑之前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，但原因是它自己的：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution` 上，Pi 挂在它的 `tool_call` 事件上——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
 如果你用 **Kimi Code** 或 **DSH** 驱动 STAR，每台机器运行一次对应的安装脚本，把钩子注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
@@ -298,9 +298,9 @@ bash .dsh/hooks/install.sh         # DSH
 
 ## 研究工作流
 
-STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可追踪、可审计的执行流程。
+STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方法这一整条路线。其中十三个落在这条路线的某个确定位置上，另外两个任何时候都能调。下面按阶段列出：每段先说这一阶段在研究里对应什么，再列出属于它的技能和各自写下的东西。
 
-**调用方式。** 前缀因工具而异，下表中的技能清单统一采用 Codex 写法：
+**调用方式。** 前缀因工具而异；下面各张技能表统一采用 Codex 写法：
 
 | 工具 | 调用写法 | 示例 |
 | --- | --- | --- |
@@ -318,29 +318,56 @@ STAR 提供十五个相互配合的技能，将模糊的研究兴趣转化为可
   <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环" width="100%">
 </div>
 
+**定下选题，并把它写成一份计划。** 研究是从一个还说不清、也没法验证的兴趣开始的。这一阶段把它收窄成一个可能被证伪的问题，写进一份说清楚“什么结果算支持它、什么结果算不支持”的计划，并把最贴近的工作读到能说出自己的方法和它们差在哪里。项目已经开工的，从下表第一行起步：先把已有的代码、数据、权重和跑过的实验接进同一套记录。
+
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
 | `$star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env`，用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西。待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
 | `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域、六维打分，最后连同首个验证实验定稿选题。点到的每篇论文都转录自抓取的记录 | `metds/ideas/<slug>_idea.md` |
-| `$star-plan-coach` | 通过分阶段提问明确研究想法 | `metds/plans/<数字>_<主题>_plan.md` |
+| `$star-plan-coach` | 通过分阶段提问，把研究想法写成一份计划 | `metds/plans/<数字>_<主题>_plan.md` |
 | `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类的文献库，其中每一条都转录自抓取的记录。`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
+
+**把代码和环境准备到实验真能跑起来。** 在有东西能执行它之前，计划是验证不了的。这一阶段从一份打过分、而不是随手挑的参考实现搭起代码库，装上它需要的依赖；环境要到 import 过得去、框架看得见显卡、项目自己的入口跑得动，才算准备好。
+
+| 技能 | 用途 | 主要输出 |
+| --- | --- | --- |
 | `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
-| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并做冒烟验证。`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
-| `$star-plan-decomposer` | 将总体计划拆分成可验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
+| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并对结果跑一遍三层的跑通性检查——先 import，再框架与显卡，最后项目入口。`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+
+**把计划拆成可以各自单独验证的子问题，一块一块做出来。** 整份计划是跑不动的，能跑的是带着自己那条完成判据的一小块。这一阶段先做拆分，再一次做一块：写出代码并轻量验证，重实验——长时间或多卡训练、以及花钱的接口调用——作为命令交回你手上运行；最后把写出来的代码对照项目规范、以及这个子计划当初承诺的东西各过一遍。
+
+| 技能 | 用途 | 主要输出 |
+| --- | --- | --- |
+| `$star-plan-decomposer` | 把总体计划拆成可以各自单独验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
 | `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落实经批准的例行性修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
+
+**读实验结果，再把它带回计划。** 一次跑完的实验是证据，不是结论。这一阶段把产物和日志对照计划的预期核一遍，把指标对照完成判据和 baseline 打分——每个数字进报告前都按引用重新打开原文核实，站不住的降一档或丢弃——随后据此修订计划：哪条假设没站住、哪条判据定错了、下一步该做什么。
+
+| 技能 | 用途 | 主要输出 |
+| --- | --- | --- |
 | `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对该主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `wkdrs/results/results.md`（限定范围时为 `wkdrs/results/results_<slug>.md`） |
-| `$star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族。把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
 | `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
-| `$star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
+
+**把研究写成文字，并把仓库留成别人能照着跑起来的样子。** 走到这里，计划就是方法的定本，而仓库是读者真会去跑的那份东西。这一阶段把前者编译成能直接写进论文的文字，把后者收拾干净。
+
+| 技能 | 用途 | 主要输出 |
+| --- | --- | --- |
 | `$star-metd-summarize` | 在所有实验完成、计划定稿后，把计划树编译成可直接用于论文的方法文档，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
 | `$star-code-release` | 把仓库整理到可发布状态：按已记录的放置规则把散落代码移入 `${CODE_NAME}/`，打磨对外发布的部分，从方法文档与结果汇总表编译出 README，并排查密钥凭据、机器本地路径和解析不了的命令 | `README.md` 与 `wkdrs/release/RELEASE_<日期>.md` |
 
+**两个不属于任何一个阶段的技能。** 它们横向通读上面所有这些阶段，回答任何时刻都会冒出来的两个问题：现在走到哪一步、下一步该做什么；以及最近这一段实验到底做出了什么。两者都不写进计划，也不写进某次运行的目录。
+
+| 技能 | 用途 | 主要输出 |
+| --- | --- | --- |
+| `$star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
+| `$star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族。把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
+
 ### 模型选择建议
 
-不同阶段对模型能力的侧重有所不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。
+这些技能分成两类工作，两类各自侧重的模型能力不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。
 
-| 阶段 | Skills | 建议模型 |
+| 工作性质 | Skills | 建议模型 |
 |---|---|---|
 | **判断与写作**——研究方向、计划、相关工作如何定位本方法、结果意味着什么、方法表述 | `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser`、`$star-metd-summarize` | Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3 |
 | **搭建与执行**——代码库、运行环境、执行计划、代码审查、进展汇总、全局状态、发布准备 | `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status`、`$star-code-release` | Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3 |
@@ -438,7 +465,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 - **[v0.1.46](https://github.com/wanghao9610/STAR/tree/v0.1.46)**（2026-08-13）—— `.pi/` 补上了 v0.1.44 只能替换掉的那三样机制，全部借自 pi 自己的 `examples/extensions`（MIT）：`star_subagent` 派发到新增的 `.pi/agents/` 花名册——收集者、执行者、复核者，对应规约 [§6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 点名的三类受派方——`star_questionnaire` 负责提问，`/star-plan` 负责只读探索，外加 `rm -rf`、`sudo`、`chmod 777` 之前的确认框。它们占用的每一个名字都加了前缀，连注入的上下文标记也不例外：两个扩展抢同一个工具名或开关时，pi 会直接 `exit 1`、整个会话起不来，而这几份示例很多人也装在用户级；标记不加前缀的话，用户级那份会把这份注入的消息静默过滤掉；四样都要等项目获得信任才加载，没有它们时技能回落到规约 §6.1 的本地履行和纯文本提问。调用方式现在只剩 `/star-<名>`——`.pi/prompts/` 每个技能给一条命令，`enableSkillCommands: false` 去掉了并排的 `/skill:` 那条——钩子也搬进了 `.pi/extensions/star-hooks/`，因为空的 `.pi/hooks/` 是扩展目录的旧名，只要它存在 Pi 每次启动都会警告。
 - **[v0.1.45](https://github.com/wanghao9610/STAR/tree/v0.1.45)**（2026-08-13）—— 第七棵技能树 `.dsh/` 把十五个 skill 带到 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)：它发现 `.dsh/skills/` 的优先级高于 `.agents/skills/`，调用写作 `/skill:star-*`。有三处只能重做、改名不管用：每条 description 都重写到 500 字符以内，因为 DSH 的目录会在那里静默截断，而切掉的正是末尾那句触发语；DSH 没有 agent 类型参数、没有进入 plan 模式的工具、工具名全小写，所以 `subagent_type`、`EnterPlanMode` 与 `Bash` 是被替换掉而不是换个写法；钩子经 DSH 的 Claude Code 桥从 `.dsh/hooks.json` 读取，由 `.dsh/hooks/install.sh` 每台机器注册一次。参与度闸门是有意缺席的——DSH 默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问，没有弹窗要它回答——而 `model_id` 从会话日志里恢复，需要 PATH 上有 `zstd`。
-- **[v0.1.44](https://github.com/wanghao9610/STAR/tree/v0.1.44)**（2026-08-13）—— 第六棵技能树 `.pi/` 把十五个 skill 带到 [Pi](https://github.com/earendil-works/pi)：调用写作 `/skill:star-*`，工具名用 Pi 自己的小写内置名（`read`、`bash`、`edit`、`write`、`grep`、`find`、`ls`），三个钩子由一个 Pi 自动发现的 TypeScript 扩展接线——没有注册文件要合并，`model_id` 也不会过期：扩展在每次提问前读当前模型，`/model` 一换就再注入一行。Pi 不提供子代理、计划模式和权限弹窗，所以这是第一棵把这三样替换掉而不是改个名的树：提问一律纯文本，执行器自己守住「批准前不产生副作用」那道关，每一处派发都落回规约 §6.1 的本地履行。参与度闸门有意缺席——它是用来回答权限弹窗的，而这里没有弹窗；`.pi/APPEND_SYSTEM.md` 则解决该按哪份副本执行的问题，因为 Pi 也会读 `.agents/skills/`。
+- **[v0.1.44](https://github.com/wanghao9610/STAR/tree/v0.1.44)**（2026-08-13）—— 第六棵技能树 `.pi/` 把十五个 skill 带到 [Pi](https://github.com/earendil-works/pi)：调用写作 `/skill:star-*`，工具名用 Pi 自己的小写内置名（`read`、`bash`、`edit`、`write`、`grep`、`find`、`ls`），三个钩子由一个 Pi 自动发现的 TypeScript 扩展接线——没有注册文件要合并，`model_id` 也不会过期：扩展在每次提问前读当前模型，`/model` 一换就再注入一行。Pi 不提供子代理、计划模式和权限弹窗，所以这是第一棵把这三样替换掉而不是改个名的树：提问一律纯文本，执行器自己守住「批准前不写文件、不跑命令」那道关，每一处派发都落回规约 §6.1 的本地履行。参与度闸门有意缺席——它是用来回答权限弹窗的，而这里没有弹窗；`.pi/APPEND_SYSTEM.md` 则解决该按哪份副本执行的问题，因为 Pi 也会读 `.agents/skills/`。
 <details>
 <summary>更早的版本</summary>
 
@@ -446,15 +473,15 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - **[v0.1.42](https://github.com/wanghao9610/STAR/tree/v0.1.42)** (2026-08-12) — `star-plan-executor` 不再以"推荐审查"收尾：报告那一步只留报告要说的话，新增一步在同一轮里直接把 `star-code-reviewer` 对着这个叶子启动——规约 [§10.6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 本来要的就是这个。唯一那个很窄的跳过备选（探索性叶子、交回的命令很便宜）仍然问一次，`low` 档取推荐项即启动审查。§10.6 也补上了"运行结束之后"是哪一刻：报告发出的同一轮，而不是等用户下一次开口。
 - **[v0.1.41](https://github.com/wanghao9610/STAR/tree/v0.1.41)** (2026-08-12) — 哪些 skill 会提参与度档位此前是随机的：十二个会写文件的现在都在调用说明里提一句、排在描述之后，只读的报告型都不提——`star-flow-status` 除外，它按条装载规约 §7、偏偏不含剥离这个记号的那一条，于是保留一句机械说明，否则没有别处会说。`.claude` 与 `.qwen` 的参数提示按常用档位标注：三个改计划的标 `involve=high`，五个搭代码或执行的标 `involve=low`，其余跟 `.env` 里的 `INVOLVE`。`.qwen` 的中文提示同时补上了 v0.1.37–38 加描述时漏掉的那一格。
 - **[v0.1.40](https://github.com/wanghao9610/STAR/tree/v0.1.40)** (2026-08-12) — `star-plan-executor` 与 `star-plan-decomposer` 的调用说明改按规约 [§7.12](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 写的次序出场——计划名、描述、`involve=`——不再把档位排在它要从中剥离的那段文字之前。那一句本身也随之写明：这个写法既不属于计划名也不属于描述，两者解析之前先剥离；解析没有变化，它本来就与位置无关。
-- **[v0.1.39](https://github.com/wanghao9610/STAR/tree/v0.1.39)** (2026-08-11) — `star-plan-executor` 现在会在开工前判断这个叶子是否还是一个工作单元，依据都在计划自己的正文里：不止一条彼此独立的完成判据、不止一次越过 STOP line、取数据与建代码跑实验混在一起，以及步骤超过 12 条、产物横跨互不相关的产物族这一对只在同时命中时才算数的弱信号。命中时先展示这个叶子会怎么分——2–5 个单元，每个带上它会拥有的那条完成判据，是草图而不是文件——并推荐 `star-plan-decomposer <叶子>`，把草图作为描述一并带过去；照原样执行仍是一个选项，代价会一并说明。恢复中的 run 不会被问，而画完的 `EXEC_PLAN` 会在审批确认点给同一个问题第二次读数，不额外花一趟往返。
+- **[v0.1.39](https://github.com/wanghao9610/STAR/tree/v0.1.39)** (2026-08-11) — `star-plan-executor` 现在会在开工前判断这个叶子是否还是一个工作单元，依据都在计划自己的正文里：不止一条彼此独立的完成判据、不止一次越过红线、取数据与建代码跑实验混在一起，以及步骤超过 12 条、产物横跨互不相关的产物族这一对只在同时命中时才算数的弱信号。命中时先展示这个叶子会怎么分——2–5 个单元，每个带上它会拥有的那条完成判据，是草图而不是文件——并推荐 `star-plan-decomposer <叶子>`，把草图作为描述一并带过去；照原样执行仍是一个选项，代价会一并说明。恢复中的 run 不会被问，而画完的 `EXEC_PLAN` 会在审批确认点给同一个问题第二次读数，不额外花一趟往返。
 - **[v0.1.38](https://github.com/wanghao9610/STAR/tree/v0.1.38)** (2026-08-11) — [§7.12](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 定义的描述铺到了名册其余部分：另外十一个 skill 也收参数之后的自由文本，各自写明它能做什么——引导这次运行看哪里、提供运行随后写进产物的文字——以及不能做什么：顶替确认点。与某个 skill 的参数都对不上的成句文本就是描述，运行照不带参数那样跑并先说明这一点；而形似参数、却什么都对不上的孤立词仍然是要问清的问题，不是可读的散文。第一个参数本来就是自由文本的三个——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——不用改，那个参数就是描述。
 - **[v0.1.37](https://github.com/wanghao9610/STAR/tree/v0.1.37)** (2026-08-11) — 规约 [§7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 新增第 12 条：`<skill> [目标] [描述] [involve=<档位>]` 是整份名册共用的形状，目标之后的自由文本就是用户用自己的话说明这次运行要做什么。它是线索而不是命令——可以引导运行、也可以提供运行随后写进文件的文字，但绝不顶替确认点、绝不替 §5.2 该问的目标做主、也绝不授权红线上的动作——由描述定下路径的运行还要在写入之前说明自己走的是哪条路，于是读错的代价是一行字，而不是一处改错。`star-plan-reviser` 第一个用它换掉关键词：`drop` 与 `undrop` 取消，「这条不做了，由 02 取代」既选定丢弃那条路，又成为写进计划的理由。
-- **[v0.1.36](https://github.com/wanghao9610/STAR/tree/v0.1.36)** (2026-08-11) — 只装载自己要用的那几节规约的两个 skill——`star-refs-reviewer` 与 `star-expt-digest`——现在把摘录拆到同一条消息的两次调用里：落盘线是按每份工具结果算的，而七节挤在一次调用里已经逼近守着它的预算，只差约 10 字节。拆开后每次调用 12–17 KB，还留着增长空间，而装载代价不变：同一条消息里的多次调用之间只算一趟往返，不是各占一趟。一致性检查第 20 项随之改为读取文件里的每一个选择器、各自单独计量，并把散文、引用与所报总量对着它们的并集来核——预算也退回本轮之前的 28400 字节。
+- **[v0.1.36](https://github.com/wanghao9610/STAR/tree/v0.1.36)** (2026-08-11) — 只装载自己要用的那几节规约的两个 skill——`star-refs-reviewer` 与 `star-expt-digest`——现在把摘录拆到同一条消息的两次调用里：大小上限是按每份工具结果算的，而七节挤在一次调用里已经逼近守着它的预算，只差约 10 字节。拆开后每次调用 12–17 KB，还留着增长空间，而装载代价不变：同一条消息里的多次调用之间只算一趟往返，不是各占一趟。一致性检查第 20 项随之改为读取文件里的每一个选择器、各自单独计量，并把散文、引用与所报总量对着它们的并集来核——预算也退回本轮之前的 28400 字节。
 - **[v0.1.35](https://github.com/wanghao9610/STAR/tree/v0.1.35)** (2026-08-11) — 把十五个 skill 过了一遍找冗余，值得删的有两处。`star-flow-status` 那句「不设字数上限」放松了规约 [§7.1](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 的约 500 字上限，而优先级规则只允许 skill 收紧、不允许放松，于是把这条例外写回 §7.1——长度由必须逐条列出的内容决定的回复，改由形状约束——报告则改为援引它，而不是自称没有上限。`level:` 由模板写进每一份子计划，却没有任何 skill 读它，值又等于前缀的位数，删掉；其余看着重复的，要么是 CI 强制五棵树逐字一致的文本，要么边界早已写在可能混淆的地方。
 - **[v0.1.34](https://github.com/wanghao9610/STAR/tree/v0.1.34)** (2026-08-11) — 新的丢弃字段照出来的五处遗留。`exec_status: skipped` 没有任何 skill 会写它，于是不再是合法取值，只在计划手工写过时仍被认得；而 `abandoned`——它此前既没有自己的状态符号，在方法文档的就绪门槛里也没有位置——现在有了自己的符号 `✖`（判读规范的示例树里就与那对已丢弃节点并排），像已丢弃的叶子一样退出执行进度的分母、不再让这个比值永久卡在 100% 以下，也能通过 `star-metd-summarize` 的就绪检查，同时一行内容都不进任何文档。代码审查过期那条检查改为比对该 run `EXEC_LOG.md` 里最新的日期——扫描给每个 run 打的日期行本来就收集了文件里的全部日期——而不是比对日志模板里从来就没有的步骤表日期列，正是后者让规范一直得承认这一行基本触发不了。
 - **[v0.1.33](https://github.com/wanghao9610/STAR/tree/v0.1.33)** (2026-08-11) — 一份计划现在可以被放弃而不必删除：`star-plan-reviser <计划>` 加一句表达放弃这个方向的描述，就在该节点上写入 `dropped: <日期> — <原因>`——这条路跳过审查，因为丢弃记录的是已经做出的决定，理由直接取自你说的那句话——所有 skill 都按整棵子树继承来读这个字段，于是一行就把这个节点连同它的后代移出计数、覆盖检查与下一步动作。`star-flow-status` 把它们渲染成 `⊗`、括号里保留丢弃前的状态并排除在三个数之外，`star-plan-executor` 与 `star-plan-decomposer` 拒绝对它们动手，`star-metd-summarize` 也不从它们编译任何内容——而父计划保留 `children:` 条目与索引行，行上标 `— dropped <日期>`，所以「这条路试过」仍然读得到。丢弃不隐藏的是磁盘上还在的东西：仍依赖着被丢弃节点的活叶子、未合并的执行分支、它下面的 worktree，各自照旧得到一条失配标记。
-- **[v0.1.32](https://github.com/wanghao9610/STAR/tree/v0.1.32)** (2026-08-11) — `star-flow-status` 现在把范围内的每个节点都单独打一行，那条约 500 词的回复预算——正是它逼着大树被折成"8 个叶子全部完成"这类句子——也取消了：报告该多长由它要展示的树决定，其余部分改由形状约束——每节点一行、每个计数一句、每条触发的检查一行。`PLAN_NAME` 参数从此收敛的不只是检查，还有渲染：Step 2 就把树剪到解析出的子树，三个计数也只在它上面算。它的 spec 新增收敛范围一节，写明一个从不提问的 skill 碰上歧义名该怎么收场：数字前缀精确匹配足以分开两棵同 slug 的根，命中多份就每份都渲染，一份没命中就列出候选并停下。
-- **[v0.1.31](https://github.com/wanghao9610/STAR/tree/v0.1.31)** (2026-08-11) — 七个 skill 派出的只读收集器——`star-code-reviewer`、`star-expt-analyst`、`star-plan-reviser`、`star-proj-adopt`、`star-code-architect`、`star-idea-storm`，以及 executor 的只读勘察步骤——在 `.claude/` 这一棵树里写明 `model: sonnet`，也只有它的 harness 认这个参数：它们都是照写死的返回格式抄录、不下任何判断，而它引用的每一行，在进报告或进确认点之前主 agent 都要重开确认。判断或写作本身就是产出的那些委派仍用会话模型：executor 的步骤 agent、architect 的迁移执行者、`star-refs-reviewer` 的单篇笔记、`star-plan-coach` 的定稿盲读。`star-code-reviewer` 另外不再在任何规模下由主 agent 自己收集问题项——一直在讨论这份代码的上下文不是它的中立读者——改为按规模分派：约 50 个文件以内一个收集器，超过则每片 10–15 个文件。
+- **[v0.1.32](https://github.com/wanghao9610/STAR/tree/v0.1.32)** (2026-08-11) — `star-flow-status` 现在把范围内的每个节点都单独打一行，那条约 500 词的回复预算——正是它逼着大树被折成"8 个叶子全部完成"这类句子——也取消了：报告该多长由它要展示的树决定，其余部分改由形状约束——每节点一行、每个计数一句、每条触发的检查一行。`PLAN_NAME` 参数从此收窄的不只是检查，还有渲染：Step 2 就把树剪到解析出的子树，三个计数也只在它上面算。它的 spec 新增限定范围一节，写明一个从不提问的 skill 碰上歧义名该怎么收场：数字前缀精确匹配足以分开两棵同 slug 的根，命中多份就每份都渲染，一份没命中就列出候选并停下。
+- **[v0.1.31](https://github.com/wanghao9610/STAR/tree/v0.1.31)** (2026-08-11) — 七个 skill 派出的只读收集器——`star-code-reviewer`、`star-expt-analyst`、`star-plan-reviser`、`star-proj-adopt`、`star-code-architect`、`star-idea-storm`，以及 executor 的只读勘察步骤——在 `.claude/` 这一棵树里写明 `model: sonnet`，也只有它的宿主认这个参数：它们都是照写死的返回格式抄录、不下任何判断，而它引用的每一行，在进报告或进确认点之前主 agent 都要重开确认。判断或写作本身就是产出的那些委派仍用会话模型：executor 的步骤 agent、architect 的迁移执行者、`star-refs-reviewer` 的单篇笔记、`star-plan-coach` 的定稿盲读。`star-code-reviewer` 另外不再在任何规模下由主 agent 自己收集问题项——一直在讨论这份代码的上下文不是它的中立读者——改为按规模分派：约 50 个文件以内一个收集器，超过则每片 10–15 个文件。
 - **[v0.1.30](https://github.com/wanghao9610/STAR/tree/v0.1.30)** (2026-08-10) — 先摆内容再提问的七个 skill——`star-plan-coach`、`star-idea-storm`、`star-plan-executor`、`star-code-release`、`star-metd-summarize`、`star-refs-reviewer`、`star-proj-adopt`——现在把这条要求同时写在"发问"那一端，而不只写在"写内容"那一端；后者正是 v0.1.29 在 `star-plan-decomposer` 身上认定为不够用的写法。每个 skill 的对话纪律多一行，点名它自己的那份内容——一批评分表不达标项、一张候选表、一批待同步修正——并带上随之而来的回看：选项上面空无一物，说明内容是被跳过了、不是被压缩了。这条规则没有写进规约 [§7.3](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（十五个 skill 本可一并继承），因为 `star-refs-reviewer` 对该文档的按节载入距 28400 字节的预算只剩 49 字节余量。
 - **[v0.1.29](https://github.com/wanghao9610/STAR/tree/v0.1.29)** (2026-08-10) — `star-plan-decomposer` 的子计划清单确认重新走提问工具，三个答案又能点选而不必手打，卡片写在同一条消息的正文里、排在这次调用之前。v0.1.28 把这次确认整段改成纯文本，依据是客户端可能吞掉同一轮里工具调用之前的文字；此后一次运行显示选轴那题上面的文字渲染正常，剩下的只有起草时跳过卡片一种，于是防跳过的那句话从"写内容"处挪到"发问"处。对话纪律随之改口：装不进选项的内容——某份子计划草稿、回写父计划的索引草稿、评分表不达标项——排在调用之前，而不是取代它。
 - **[v0.1.28](https://github.com/wanghao9610/STAR/tree/v0.1.28)** (2026-08-10) — 确认型问题不再代替它所问的内容：`star-plan-coach` 与 `star-idea-storm` 的评分表不达标项、`star-plan-executor` 的待同步修正、`star-code-release` 与 `star-metd-summarize` 的分节变更清单，现在都在提问之前逐条落到正文。内容本来就装不进选项的地方——`star-refs-reviewer` 的约 15 篇排序候选、`star-proj-adopt` 无上界的 run 与叶子清单——改为给行编号、推荐标在表里、对着编号提问，因为规约 [§7.3](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把一题的选项封在 4 个。`star-plan-decomposer` 的子计划清单与针对它的问题现在作为同一条消息发出，中间不隔工具调用——卡片写好后在同一轮里用提问工具确认，已经出现过用户只看到三个选项、上面什么都没有的情况。
@@ -463,23 +490,23 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - **[v0.1.25](https://github.com/wanghao9610/STAR/tree/v0.1.25)** (2026-08-08) — 第五棵 skill 树 `.qwen/` 把十五个 skill 带到 Qwen Code：调用写法与 Claude、Cursor 相同（`/star-*`），四个钩子全部注册在项目自己的 `.qwen/settings.json` 里——参与度闸门也在其中，这是它第三次落地，因为 Qwen Code 的 `PreToolUse` 能回 `permissionDecision: "allow"`。移植写的是 Qwen Code 的工具标识符（`run_shell_command`、`read_file`），而不是它同时公布的界面展示名——它自带的 skill 从不写展示名——check 23 现在逐棵树钉住这个选择。`allowed-tools` 是有意不带的：Qwen Code 的 `allowedTools` 给的是本次会话内的免确认放行而不是收紧权限，照搬过去只会放宽 skill 能做的事，而不是限制它。
 - **[v0.1.24](https://github.com/wanghao9610/STAR/tree/v0.1.24)** (2026-08-08) — run 可以住进 executor 自己创建的 `git worktree` 了：分支照旧隔离历史，树回答的是另一个正交的问题——checkout 正忙（HEAD 停在别的 run 的分支上、工作区有归属别人的未提交路径、交回用户的命令还没回收结果）——与分支在同一个审批确认点上定夺，进树的 run 一律带分支（规约 [§11.7–9](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)）。树建在 `../<根目录名>--wt/<run>`，链入 `.env`、`datas/`、`inits/`，路径以 `worktree:` 记进运行记录；合并在主 checkout 里 squash、什么都不用切，移除前先把非 md 产物挪出来——绝不带 `--force`，`star_commit_guard.sh` 现在直接拦下它。`star-flow-status` 在执行分支旁边列出 worktree，并标记被遗留的树。
 - **[v0.1.23](https://github.com/wanghao9610/STAR/tree/v0.1.23)** (2026-08-08) — `star-code-reviewer` 不再让写代码的那段对话自己收集问题项：本会话此前写出或改过范围内文件时，小范围收集也交给一个带全部文件清单、上下文全新的只读收集器，并在报告范围行记下这次委派。作者重读自己的代码，读到的是当初产生它的那套推理；较大范围本就经收集器收集，这次补上的是小范围（≤ 约 20 个文件，diff 审查的常态）这个缺口。
-- **[v0.1.22](https://github.com/wanghao9610/STAR/tree/v0.1.22)** (2026-08-08) — 执行分支改用 run 自己的名字 `<run>`，分支与 `wkdrs/<run>/` 直接同名、不必再剥前缀，各 skill 开场读取的那份分支清单也随之改成按 run 命名规则匹配的通配。另一条线上，`star-flow-status` 与 `star-expt-digest`——仓库里仅有的两个 `context: fork` skill——改从调用方式那一行的 `$ARGUMENTS` 占位符读参数：fork 看不到用户消息，harness 只能把参数追加在整份清单之后，`/star-flow-status 030` 因此稳定漏读、报出整棵树而非该计划的子树。不带参数时占位符在三条调用路径下都替换为空，不留字面量。
-- **[v0.1.21](https://github.com/wanghao9610/STAR/tree/v0.1.21)** (2026-08-07) — 委派不再是例外：[§6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把这个决定交给主 agent，取消「同时最多三个」的死上限，也不再把会改文件的委派限定给 `star-plan-executor` 与 `star-code-architect`，`star-flow-status` 则去掉了全套 skill 里唯一一条禁止派 subagent 的硬规定。保留下来的都是本来就与谨慎无关的东西——并发委派之间文件归属互不重叠、主 agent 亲自重跑每个检查并独占判断、只读委派什么都不写，以及抓取型 fan-out 真正的边界所在：按 host 的请求预算。另一条线上，Claude 清单新增 `argument-hint` 与只覆盖当前轮次的 `allowed-tools`，并在 skill 新建文件而非编辑文件的路径上于 `Edit` 之外补上 `Write`；`allowed-tools` 是免确认授权，从不构成限制。
-- **[v0.1.20](https://github.com/wanghao9610/STAR/tree/v0.1.20)** (2026-08-06) — 要修改既有代码的叶子可以在自己的分支上执行，改动挣到合并资格之前基础分支始终是准据：规约 [§11](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 让方案审批确认点推荐在 `exec/<run>` 上执行，选了分支就同时选了逐步 checkpoint 提交，因为只有提交才会被合并。合并之前 run 写下的一切只存在于分支上，从基础分支看这个叶子就是还没做完，于是下游叶子自动保持受阻、一行新检查都不用写；合并是必问确认点、默认 squash，弃用时先把运行记录提交到基础分支，好让死路也留下证据。executor 周边：`star-code-reviewer` 按 `<base>...HEAD` 的 diff 审分支上的 run，`star-expt-digest` 把未合并分支列进缺口，`star_commit_guard.sh` 新增判定臂，拦下一键就能踩破这一切的写法。
-- **[v0.1.19](https://github.com/wanghao9610/STAR/tree/v0.1.19)** (2026-08-06) — Kimi 树不再叫两个 Kimi Code CLI 根本没有的工具名：三十份清单把文件读取叫 `ReadFile`、把终端叫 `Shell`，而该 harness 公布的是 `Read` 与 `Bash`——和 Claude 用的是同两个词——所以改动的四十六行里有四十五行与 Claude 对应行逐字节相同。这次撤销的重命名来自 [v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)，那一版把 `.kimi-code` 按怀疑而不是按 Kimi 公布的清单一并扫了进去，这是同一个缺陷里更贵的那个方向：它留下一条「名字已经核对过」的记录，而核对过的名字没有人会再核对。新增的 check 23 逐棵树钉住各 harness 公布的文件读取工具、终端与 `subagent_type` 取值；`.cursor` 也重读了一遍并刻意没有改动，因为 Cursor 公布的是能力而不是工具标识符。
-- **[v0.1.18](https://github.com/wanghao9610/STAR/tree/v0.1.18)** (2026-08-06) — 论文的架构图现在会落进读它的那篇笔记里：`star-refs-reviewer` 的分析笔记可以在方法一节带一张图，靠图注而绝不靠编号来认定，并从论文自己的 arXiv HTML 渲染页取得。「没有」是一等答案，它的两种成因用一行区分开——本就没有这类图的论文，和 arXiv 没有渲染的论文——而把结果图硬塞进这个空位会被评分表判为失败。取回来的内容原样写入 `metds/refs/figs/`，图下一行带着图号、图注首句、图片 URL 与抓取日期，所以从笔记里复制走的图仍然追得回来。
+- **[v0.1.22](https://github.com/wanghao9610/STAR/tree/v0.1.22)** (2026-08-08) — 执行分支改用 run 自己的名字 `<run>`，分支与 `wkdrs/<run>/` 直接同名、不必再剥前缀，各 skill 开场读取的那份分支清单也随之改成按 run 命名规则匹配的通配。另一条线上，`star-flow-status` 与 `star-expt-digest`——仓库里仅有的两个 `context: fork` skill——改从调用方式那一行的 `$ARGUMENTS` 占位符读参数：fork 看不到用户消息，宿主只能把参数追加在整份清单之后，`/star-flow-status 030` 因此稳定漏读、报出整棵树而非该计划的子树。不带参数时占位符在三条调用路径下都替换为空，不留字面量。
+- **[v0.1.21](https://github.com/wanghao9610/STAR/tree/v0.1.21)** (2026-08-07) — 委派不再是例外：[§6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把这个决定交给主 agent，取消「同时最多三个」的死上限，也不再把会改文件的委派限定给 `star-plan-executor` 与 `star-code-architect`，`star-flow-status` 则去掉了全套 skill 里唯一一条禁止派 subagent 的硬规定。保留下来的都是本来就与谨慎无关的东西——并发委派之间文件归属互不重叠、主 agent 亲自重跑每个检查并独占判断、只读委派什么都不写，以及抓取型并行派发真正的边界所在：按 host 的请求预算。另一条线上，Claude 清单新增 `argument-hint` 与只覆盖当前轮次的 `allowed-tools`，并在 skill 新建文件而非编辑文件的路径上于 `Edit` 之外补上 `Write`；`allowed-tools` 是免确认授权，从不构成限制。
+- **[v0.1.20](https://github.com/wanghao9610/STAR/tree/v0.1.20)** (2026-08-06) — 要修改既有代码的叶子可以在自己的分支上执行，改动挣到合并资格之前基础分支始终是准据：规约 [§11](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 让方案审批确认点推荐在 `exec/<run>` 上执行，选了分支就同时选了逐步提交，因为只有提交才会被合并。合并之前 run 写下的一切只存在于分支上，从基础分支看这个叶子就是还没做完，于是下游叶子自动保持受阻、一行新检查都不用写；合并是必问确认点、默认 squash，弃用时先把运行记录提交到基础分支，好让死路也留下证据。executor 周边：`star-code-reviewer` 按 `<base>...HEAD` 的 diff 审分支上的 run，`star-expt-digest` 把未合并分支列进缺口，`star_commit_guard.sh` 新增判定臂，拦下一键就能踩破这一切的写法。
+- **[v0.1.19](https://github.com/wanghao9610/STAR/tree/v0.1.19)** (2026-08-06) — Kimi 树不再叫两个 Kimi Code CLI 根本没有的工具名：三十份清单把文件读取叫 `ReadFile`、把终端叫 `Shell`，而该宿主公布的是 `Read` 与 `Bash`——和 Claude 用的是同两个词——所以改动的四十六行里有四十五行与 Claude 对应行逐字节相同。这次撤销的重命名来自 [v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)，那一版把 `.kimi-code` 按怀疑而不是按 Kimi 公布的清单一并扫了进去，这是同一个缺陷里更贵的那个方向：它留下一条「名字已经核对过」的记录，而核对过的名字没有人会再核对。新增的 check 23 逐棵树钉住各宿主公布的文件读取工具、终端与 `subagent_type` 取值；`.cursor` 也重读了一遍并刻意没有改动，因为 Cursor 公布的是能力而不是工具标识符。
+- **[v0.1.18](https://github.com/wanghao9610/STAR/tree/v0.1.18)** (2026-08-06) — 论文的架构图现在会落进读它的那篇笔记里：`star-refs-reviewer` 的分析笔记可以在方法一节带一张图，靠图注而绝不靠编号来认定，并从论文自己的 arXiv HTML 渲染页取得。「没有」是一个成立的答案，它的两种成因用一行区分开——本就没有这类图的论文，和 arXiv 没有渲染的论文——而把结果图硬塞进这个空位会被评分表判为失败。取回来的内容原样写入 `metds/refs/figs/`，图下一行带着图号、图注首句、图片 URL 与抓取日期，所以从笔记里复制走的图仍然追得回来。
 - **[v0.1.17](https://github.com/wanghao9610/STAR/tree/v0.1.17)** (2026-08-05) — 提交提议不再是一个你必须回答的问题：[§7.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 不再把它算作必问确认点，于是 `medium` 与 `high` 照旧问、`low` 不问直接做，而无论哪种，最后的回复都会点名做过的每一次提交。这个确认点真正守的从来不是提交本身，而是它旁边的暂存，所以 §1.4 补上了它一直需要的机制——运行开始时拍一张 `git status` 快照。四棵工具树同时新增 `star_commit_guard.sh`，拦下无差别或强制暂存、§1.3 点名的历史重写，以及任何暂存文件超过 10 MB 的提交。
-- **[v0.1.16](https://github.com/wanghao9610/STAR/tree/v0.1.16)** (2026-08-05) — 参与度闸门接上了 Codex：`.codex/hooks/star_involve_gate.sh` 在 `.env` 为 `INVOLVE=low` 时，用一个 allow 回应 `PermissionRequest`——正是 CLI 即将等你回答之前触发的那个事件——放行 `apply_patch`。它不是把 Claude 那块直接搬过来：Codex 把一次编辑报成补丁信封而不是路径字段，所以路径取自信封自己的 `*** Add File:` 与 `*** Update File:` 头，且每一条都必须落在项目之内、根目录各点目录之外。四个 harness 里只接上两个，是能力决定的而不是选择：Cursor 根本没有在文件编辑前触发的 hook，而 Kimi Code 的 `PreToolUse` 只写了 `deny`、没有 allow。
-- **[v0.1.15](https://github.com/wanghao9610/STAR/tree/v0.1.15)** (2026-08-05) — `INVOLVE=low` 现在管得到权限确认框，而不只是 skill 主动问的那些问题：`.claude/hooks/star_involve_gate.sh` 对 `Edit`、`Write`、`NotebookEdit` 的 `PreToolUse` 回一个 allow，而项目之外的路径、以及项目根下每一个点目录仍然照常弹框，`Bash` 则根本不在匹配器里。它只挪权限确认框、别的一概不动，这正是 [§7.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 自己那条划分落到 harness 上的样子——红线、提交提议、删除与覆盖、方案审批在 `low` 与在 `high` 完全一样地成立。同一版还给 `reference.bib` 每条记录加上 `% src:` 出处行，把论文笔记的头条数字连同数据集、指标与设定写进自足的一行，并让 §10.6 的接手规则学会混合情形。
-- **[v0.1.14](https://github.com/wanghao9610/STAR/tree/v0.1.14)** (2026-08-04) — 十五个 skill 里有八个现在可以自己发起：规约 [§10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 列出全部十五个并给七个标上 † 表示 slash-only，因为一个由 agent 自作主张走到的决定，等于没有人做过这个决定。被自行拾起并不改变运行随后的行为——红线、提交提议、删除与覆盖、每一个必问确认点，都与你亲手点名时一模一样——并有三条规则给它划出边界：目标不明就问而不猜、一次调用一个 skill、并在决策记录里留一行。光有权限什么也没动，因为每份契约仍然只是把命令打印给读者，所以 §10.6 补上这个缺口：一次运行以这八个之一收尾且目标已经确定时，就直接跑它，而不是把命令印出来。
+- **[v0.1.16](https://github.com/wanghao9610/STAR/tree/v0.1.16)** (2026-08-05) — 参与度闸门接上了 Codex：`.codex/hooks/star_involve_gate.sh` 在 `.env` 为 `INVOLVE=low` 时，用一个 allow 回应 `PermissionRequest`——正是 CLI 即将等你回答之前触发的那个事件——放行 `apply_patch`。它不是把 Claude 那块直接搬过来：Codex 把一次编辑报成补丁信封而不是路径字段，所以路径取自信封自己的 `*** Add File:` 与 `*** Update File:` 头，且每一条都必须落在项目之内、根目录各点目录之外。四个宿主里只接上两个，是能力决定的而不是选择：Cursor 根本没有在文件编辑前触发的 hook，而 Kimi Code 的 `PreToolUse` 只写了 `deny`、没有 allow。
+- **[v0.1.15](https://github.com/wanghao9610/STAR/tree/v0.1.15)** (2026-08-05) — `INVOLVE=low` 现在管得到权限确认框，而不只是 skill 主动问的那些问题：`.claude/hooks/star_involve_gate.sh` 对 `Edit`、`Write`、`NotebookEdit` 的 `PreToolUse` 回一个 allow，而项目之外的路径、以及项目根下每一个点目录仍然照常弹框，`Bash` 则根本不在匹配器里。它只挪权限确认框、别的一概不动，这正是 [§7.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 自己那条划分落到宿主上的样子——红线、提交提议、删除与覆盖、方案审批在 `low` 与在 `high` 完全一样地成立。同一版还给 `reference.bib` 每条记录加上 `% src:` 出处行，把论文笔记的头条数字连同数据集、指标与设定写进自足的一行，并让 §10.6 的接手规则学会混合情形。
+- **[v0.1.14](https://github.com/wanghao9610/STAR/tree/v0.1.14)** (2026-08-04) — 十五个 skill 里有八个现在可以自己发起：规约 [§10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 列出全部十五个并给七个标上 † 表示 slash-only，因为一个由 agent 自作主张走到的决定，等于没有人做过这个决定。被自行拾起并不改变运行随后的行为——红线、提交提议、删除与覆盖、每一个必问确认点，都与你亲手点名时一模一样——并有三条规则给它划出边界：目标不明就问而不猜、一次调用一个 skill、并在决策记录里留一行。光有权限什么也没动，因为每份技能文本仍然只是把命令打印给读者，所以 §10.6 补上这个缺口：一次运行以这八个之一收尾且目标已经确定时，就直接跑它，而不是把命令印出来。
 - **[v0.1.13](https://github.com/wanghao9610/STAR/tree/v0.1.13)** (2026-08-04) — 每条文献记录都带上影响力分数：`star-refs-reviewer` 把年均引用、venue 分级与代码采纳按固定权重合成 0–10 的总分，数据全部来自本次运行中抓取并标注日期的指标——绝不靠印象，也绝不写进 `reference.bib` 字段。分数决定详略而不决定去留，「近比有名重要」依然负责挑核心集；新增的 `score` 模式用一次批量调用重抓整个 bib 的指标，让既有的文献库一条命令就能用上这个功能。同一版还让更新脚本永不覆盖 `AGENTS.md` 及镜像它的那条 Cursor 规则。
 - **[v0.1.12](https://github.com/wanghao9610/STAR/tree/v0.1.12)** (2026-08-03) — 项目有了自己的记忆：一次会话学到的、而任何计划、日志或报告都不拥有的事实，记录在 `.star/memory/` 下，一个事实一个文件，旁边一行索引；第二个会话钩子会在每次会话开始时把这份索引摆到 agent 面前。`AGENTS.md` 新增 §10 承载全部写入规则——只记项目里没有文件已经拥有的事实、要提议而不要擅自、记忆与仓库文件冲突时以文件为准——于是「验证」挪到 §11，四棵 skill 树里所有对它的引用一并跟着挪。格式与退役规则见 [`memory_spec.md`](docs/mds/star-workflow/memory_spec.zh-CN.md)；只对某一台机器成立的事实放进 `.star/memory/local/`，像 `.env` 一样被 git 忽略。
 - **[v0.1.11](https://github.com/wanghao9610/STAR/tree/v0.1.11)** (2026-08-03) — 项目指向了它写作侧的搭档 [STAGE](https://github.com/wanghao9610/STAGE)：首页副标题改为「Every STAGE needs a STAR」，结尾的行动号召新增「Pair it with STAGE」按钮，页脚新增 STAGE 链接，与 STAGE 一直保留的指向 STAR 的链接对称。两份 README 现在都以分工开篇——STAR 负责把研究跑起来，产出方法文档、结果与摘要；STAGE 以只读、带指纹的证据形式导入它们，并在其上写论文，于是稿子里的一个数字能回溯到产生它的那次运行。这种配对在两个方向上都是可选的。
 - **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — `star-plan-decomposer` 子计划清单确认点里的「调整粒度」有了明确行为，它是一个方向、并且优先问：*更粗*把同类别或有依赖关系的单元合并后重新展示清单，若合并会剩不到三个就询问是否就此打住而不是硬并到两个；*更细*绝不新增同级单元，而是把被点名太粗的单元带进递归步骤。更新脚本的上游变得可配置，`execs/update.sh` 依次从环境变量、`.env`、内置默认值解析 `STAR_REPOSITORY`，于是跟踪一个 fork 只需一行。更新集合还纳入了 `execs/run.sh`，而 `execs/scpts/` 下的实验脚本仍然属于项目自己、永不被触碰。
 - **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — 代码审查挪到了红线命令之前：`star-plan-executor` 为重型运行停下时，报告现在把 `star-code-reviewer` 写在它交回的命令上方，因为在算力开销之前抓到的缺陷只值一次审查，而同一个缺陷在之后被抓到，代价是算力加重跑。回环也一并闭合了——`CODE_REVIEW_<date>.md` 里日志没有记录为已了结的 blocker/major 问题项，会重新打开它们所落的那些步骤。`star-flow-status` 按同样的顺序推荐审查，评分表把只有那条尚未执行的命令才能产出的交付物记为 `pending` 而不是缺失。
-- **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己 harness 公布的工具清单与 `SKILL.md` 规范来核对，而不是对照另外几棵树怎么写：Cursor 树通过 `AskQuestion` 恢复了结构化提问，另外三棵树不再叫各自 harness 从来没有过的工具名。Codex 根本没有读文件的工具，所以它的加载环节直说这一点、并把文件 `cat` 进 shell 调用；它的选择性委派也是可执行的——有边界的只读工作用 `spawn_agent` 配 `agent_type: explorer`，实现工作用 `worker`。四棵树的描述现在都落在规范的 1024 字符上限之内，检查项同时强制这个上限与各 harness 的委派词汇。
+- **[v0.1.8](https://github.com/wanghao9610/STAR/tree/v0.1.8)** (2026-08-01) — 每棵 skill 树都改为对照它自己宿主公布的工具清单与 `SKILL.md` 规范来核对，而不是对照另外几棵树怎么写：Cursor 树通过 `AskQuestion` 恢复了结构化提问，另外三棵树不再叫各自宿主从来没有过的工具名。Codex 根本没有读文件的工具，所以它的加载环节直说这一点、并把文件 `cat` 进 shell 调用；它的选择性委派也是可执行的——有边界的只读工作用 `spawn_agent` 配 `agent_type: explorer`，实现工作用 `worker`。四棵树的描述现在都落在规范的 1024 字符上限之内，检查项同时强制这个上限与各宿主的委派词汇。
 - **[v0.1.7](https://github.com/wanghao9610/STAR/tree/v0.1.7)** (2026-08-01) — Kimi 版的 skill 树恢复了移植时被改写成散文的机制——`AskUserQuestion` 结构化提问、经 `EnterPlanMode`/`ExitPlanMode` 的计划模式审批、`Agent` 子代理派发——子代理类型映射为 Kimi 的 `explore`/`coder`，`multiSelect` 改为 Kimi 的参数名 `multi_select`。合法适配保留：`/skill:` 调用语法、`AGENTS.md` 引用、Kimi 版 model-id 措辞和 `kimi -p` 回退句。
-- **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双落盘；拆开之后摘录必定完整送达，只有摘要还可能落盘。
+- **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` 的开场装载拆成同时发出的两条命令：大小固定的规约摘录，和随项目历史增长的采集摘要。两者原本共用一个结果大小上限，项目一旦有了历史，相加就会越限、双双被存成文件；拆开之后摘录必定完整送达，只有摘要还可能被存成文件。
 - **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — 又有四个 skill——`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`、`star-metd-summarize`——改为通过共享的只读收集器读取计划树，而不再逐份打开计划；同一轮对话里的第二个 skill 可以复用它仍然看得见的那次开场加载，收集器的摘要除外。`star-plan-decomposer` 把三条分解轴改名为阶段、组件、实验，各自以该层所承载的单元命名。它只在代码能端到端跑通之后才推荐实验轴，该轴承载的是实验组，单条主张再深一位。
 - **[v0.1.4](https://github.com/wanghao9610/STAR/tree/v0.1.4)** (2026-07-29) — 每个 skill 用一条消息完成开场装载，`SKILL_zh.md` 不再在运行时读取——它仍是供人阅读的完整镜像。其中两个 skill 只装载自己真正用到的规约章节。
 
