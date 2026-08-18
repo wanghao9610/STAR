@@ -372,17 +372,22 @@ bash execs/update.sh
 
 该命令默认从 STAR 的 `main` 分支更新以下路径：
 
-- `.cursor/rules/skill-roots.mdc`——各个 skill 根目录归哪个工具所有，以及 Cursor 该跟随哪一份副本
+- `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个工具所有，以及 Cursor 和 Pi 该跟随哪一份副本
 - `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
+- `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/`——把描述出来的需求分流到某个 skill 的 `/star` 斜杠命令，外加 Pi 那份每个 skill 一条的 `/star-<名>`
+- `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
+- `execs/update.sh`——更新脚本自己，好让你的项目建好之后上游才新增的路径仍然能到达它
 
 agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cursor/rules/agent-instructions.mdc` 不在上面这份清单里。它们遵循与下文钩子注册配置相同的规则——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。已经写了自己那一份的项目会原样保留；一份都没有的项目则从上游取得。
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 
-钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。如果项目是在钩子纳入更新范围之前基于 STAR 创建的，请先手动刷新一次更新脚本本身——`execs/update.sh` 不会覆盖自己：
+钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。
+
+更新脚本自己也在更新范围内，于是它同步的清单会跟着上游长，而不是永远停在你项目创建时的那一份——斜杠命令和 Pi 的那几个扩展能到达更早创建的项目，靠的就是这一条。替换方式是改名而非就地覆盖，所以做替换的这一次运行仍用它启动时的那份副本跑完，新版本从下一次运行起生效；命令替换了自己时会明说，再跑一次就能收到新版更新器新增的路径。若项目的更新脚本比这条改动还早——它的 `Updated:` 那一行里没有 `execs/update.sh`——需要先手动刷新一次，这个循环才转得起来：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh

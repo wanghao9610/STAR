@@ -377,17 +377,22 @@ bash execs/update.sh
 
 By default, the command updates these paths from STAR's `main` branch:
 
-- `.cursor/rules/skill-roots.mdc` — which skill root each tool owns, and which copy Cursor must follow
+- `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each tool owns, and which copy Cursor and Pi must follow
 - `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
+- `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/` — the `/star` slash command that routes a described request to a skill, plus Pi's one prompt per skill, `/star-<name>`
+- `.pi/agents/`, `.pi/extensions/star-plan-mode/`, `.pi/extensions/star-subagent/`, `.pi/extensions/star-permission-gate.ts`, and `.pi/extensions/star-questionnaire.ts` — the sub-agents, plan mode, and structured questions Pi's core does not ship; your project's own extensions sit beside them and are kept
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.dsh/hooks/`, `.kimi-code/hooks/`, `.pi/extensions/star-hooks/`, `.qwen/hooks/`, and the files that register them where registration is not automatic — `.dsh/hooks.json` with `.dsh/cordis.patch.yml`, `.kimi-code/hooks.example.toml`, and `.pi/extensions/star-hooks/index.ts` — the model-id provenance, project memory, and involve-gate hooks
 - `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
 - `execs/run.sh` — the stock experiment launcher; your own edits to it are replaced, while the experiment scripts it launches, under `execs/scpts/`, are yours and are never touched
+- `execs/update.sh` — the updater itself, so that a path added upstream after your project was created still reaches it
 
 The agent instructions are the project's own: `AGENTS.md` and `.cursor/rules/agent-instructions.mdc`, which carries its body, are not in that list. They follow the same rule as the hook registration configs below — installed only when missing, and never overwritten unless you pass `--force`. A project that has written its own keeps them; one that has none gets upstream's.
 
 The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 
-Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing, and never overwritten unless you pass `--force`. When a kept config does not register the STAR hook, the command prints a note. Projects created before hooks joined the update set should refresh the updater itself once, since `execs/update.sh` never overwrites itself:
+Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing, and never overwritten unless you pass `--force`. When a kept config does not register the STAR hook, the command prints a note.
+
+The updater is in its own update set, so what it syncs grows with upstream instead of staying frozen at whatever your project was created with — that is how the slash commands and the Pi extensions reach a project that predates them. It is replaced by rename, so the run doing the replacing finishes with the copy it started from and the new one applies from the next run; the command says so when it replaced itself, and running it once more picks up any path the new updater adds. A project whose updater predates this — its `Updated:` line does not name `execs/update.sh` — needs one manual refresh before that can start:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh

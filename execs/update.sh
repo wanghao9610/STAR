@@ -11,6 +11,12 @@ FORCE=false
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
 
+# This script's own path in the project. It is in the sync set below, because an
+# updater that never replaces itself keeps updating the path list it was written
+# with: every path added upstream afterwards — the slash commands, the Pi
+# extensions — is invisible to it, and the project silently never receives them.
+SELF_PATH="execs/update.sh"
+
 SKILL_ROOTS=(
     ".agents/skills"
     ".claude/skills"
@@ -152,11 +158,16 @@ Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
        bash execs/update.sh --diff [ref] [--skill NAME] [--force]
        bash update.sh [ref] --adopt
 
-Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), research
-workflow documentation, and the stock experiment launcher execs/run.sh with files from upstream.
+Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), the slash
+commands each tool tree defines, research workflow documentation, the stock experiment launcher
+execs/run.sh, and this script itself with files from upstream.
 The default ref is main; a branch or tag may be supplied instead. By default all of them are
 updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
 scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
+This script is in that set so a project keeps receiving paths added upstream after it was created:
+an updater that never replaced itself would keep updating the path list it shipped with. The
+replacement takes effect from the next run — the current one finishes with the copy it started
+from — so when the command reports that it replaced itself, run it once more.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
 body), the hook registration configs (.claude/settings.json, .codex/hooks.json,
 .cursor/hooks.json, .qwen/settings.json) and the project config .pi/settings.json are
@@ -331,6 +342,9 @@ else
         # The stock experiment launcher. Only this one file: the experiment
         # scripts it launches, under execs/scpts/, are the project's own.
         "execs/run.sh"
+        # The updater itself, replaced by rename rather than extracted — see the
+        # extract step below.
+        "${SELF_PATH}"
     )
 fi
 
@@ -491,8 +505,33 @@ if [[ "${ADOPT}" == false ]]; then
         log "NOTE: not a git repository, so an update cannot be undone. Back up the STAR-managed paths first if you have local edits."
     fi
 
-    tar -C "${SOURCE_DIR}" -cf "${ARCHIVE_FILE}" "${SYNCED[@]}"
-    tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
+    # Everything but this script is extracted in place. This script is not: bash
+    # reads a running script from the file as it goes, by byte offset, so
+    # extracting over it would leave the shell resuming inside whatever the new
+    # bytes put at that offset. Copy-then-rename instead — the rename swaps the
+    # directory entry while the running copy keeps the file it was started from.
+    TAR_PATHS=()
+    SELF_SYNCED=false
+    for path in "${SYNCED[@]}"; do
+        if [[ "${path}" == "${SELF_PATH}" ]]; then
+            SELF_SYNCED=true
+        else
+            TAR_PATHS+=("${path}")
+        fi
+    done
+
+    if (( ${#TAR_PATHS[@]} > 0 )); then
+        tar -C "${SOURCE_DIR}" -cf "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
+        tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
+    fi
+
+    SELF_REPLACED=false
+    if [[ "${SELF_SYNCED}" == true ]] && \
+       ! cmp -s "${SOURCE_DIR}/${SELF_PATH}" "${ROOT_DIR}/${SELF_PATH}"; then
+        cp -p "${SOURCE_DIR}/${SELF_PATH}" "${ROOT_DIR}/${SELF_PATH}.new"
+        mv -f "${ROOT_DIR}/${SELF_PATH}.new" "${ROOT_DIR}/${SELF_PATH}"
+        SELF_REPLACED=true
+    fi
 
     if [[ -z "${SKILL_NAME}" ]]; then
         for doc in "${INSTRUCTION_FILES[@]}"; do
@@ -526,6 +565,10 @@ if [[ "${ADOPT}" == false ]]; then
     fi
 
     log "Updated: ${SYNCED[*]}"
+    if [[ "${SELF_REPLACED}" == true ]]; then
+        log "NOTE: ${SELF_PATH} itself changed, and this run used the copy it started with."
+        log "      Run it once more to receive any path the new updater adds."
+    fi
     log "Review the changes with git status and git diff before committing them."
     exit 0
 fi
