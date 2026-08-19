@@ -7,6 +7,7 @@ REF_SET=false
 ADOPT=false
 DIFF=false
 FORCE=false
+TOOLS_ARG=""
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
@@ -94,6 +95,10 @@ INSTRUCTION_FILES=(
     "AGENTS.md"
     ".cursor/rules/agent-instructions.mdc"
 )
+# The tool trees --tools and STAR_TOOLS name, one entry per agent tool. Which paths
+# belong to which is decided by path_tool below, not by a list here, so a path added
+# upstream reaches the right tree without being registered anywhere.
+ALL_TOOLS=(claude codex cursor dsh kimi pi qwen)
 
 log() {
     printf '[STAR update] %s\n' "$*"
@@ -102,6 +107,67 @@ log() {
 fail() {
     printf '[STAR update] ERROR: %s\n' "$*" >&2
     exit 1
+}
+
+# Which tool tree a path belongs to, empty when it belongs to none and every run
+# therefore covers it. Codex owns two directories — .agents/skills for the skills,
+# .codex/ for the hooks — and .cursorignore is Cursor's one path outside .cursor/;
+# every other path starts with its tool's own directory, so one added upstream is
+# classified without being listed here.
+path_tool() { # $1 = path relative to the project root
+    case "$1" in
+        .agents/*|.codex/*)      printf 'codex' ;;
+        .claude/*)               printf 'claude' ;;
+        .cursor/*|.cursorignore) printf 'cursor' ;;
+        .dsh/*)                  printf 'dsh' ;;
+        .kimi-code/*)            printf 'kimi' ;;
+        .pi/*)                   printf 'pi' ;;
+        .qwen/*)                 printf 'qwen' ;;
+    esac
+}
+
+# The directories a tool owns, for the sparse checkout below — path_tool read the
+# other way round, and kept beside it so the two are edited together. A directory
+# missing here is a path the checkout does not have, which stops the command.
+tool_dirs() { # $1 = tool name
+    case "$1" in
+        codex)  printf '.agents .codex' ;;
+        claude) printf '.claude' ;;
+        cursor) printf '.cursor' ;;
+        dsh)    printf '.dsh' ;;
+        kimi)   printf '.kimi-code' ;;
+        pi)     printf '.pi' ;;
+        qwen)   printf '.qwen' ;;
+    esac
+}
+
+is_selected() { # $1 = tool name
+    local name
+    for name in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
+        [[ "${name}" == "$1" ]] && return 0
+    done
+    return 1
+}
+
+# True for a path this run covers: one outside the tool trees, or one in a selected
+# tree. A path that is neither is left exactly as it is — never written, never removed.
+path_selected() { # $1 = path relative to the project root
+    local tool
+    tool="$(path_tool "$1")"
+    [[ -n "${tool}" ]] || return 0
+    is_selected "${tool}"
+}
+
+# Drops the paths this run does not cover; the result is FILTERED.
+FILTERED=()
+filter_paths() { # $@ = paths relative to the project root
+    local path
+    FILTERED=()
+    for path in "$@"; do
+        if path_selected "${path}"; then
+            FILTERED+=("${path}")
+        fi
+    done
 }
 
 # Names of the STAR hooks a kept registration config does not register. Empty
@@ -154,9 +220,9 @@ missing_hooks() { # $1 = registration config path
 
 usage() {
     cat <<'EOF'
-Usage: bash execs/update.sh [ref] [--skill NAME] [--force]
-       bash execs/update.sh --diff [ref] [--skill NAME] [--force]
-       bash update.sh [ref] --adopt
+Usage: bash execs/update.sh [ref] [--tools LIST] [--skill NAME] [--force]
+       bash execs/update.sh --diff [ref] [--tools LIST] [--skill NAME] [--force]
+       bash update.sh [ref] [--tools LIST] --adopt
 
 Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), the slash
 commands each tool tree defines, research workflow documentation, the stock experiment launcher
@@ -175,6 +241,14 @@ installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the Codex, Claude, Cursor, DSH, Kimi, Pi and Qwen Code
 skill directories.
+
+--tools limits the run to the named tool trees, comma separated: claude, codex, cursor, dsh,
+kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
+tree left out is not touched at all: not installed, not updated, and never deleted, so a project
+keeps whatever it already has there. Without the flag the list comes from STAR_TOOLS
+(environment first, then .env), and from every tool when that is unset too. The shared paths —
+the workflow documentation, execs/run.sh, this script, AGENTS.md — are updated whichever trees
+are selected.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -202,6 +276,8 @@ Examples:
   bash execs/update.sh --force
   bash execs/update.sh --skill star-plan-coach
   bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
+  bash execs/update.sh --tools claude
+  bash execs/update.sh --tools claude,pi --diff
 
   cd /path/to/my-existing-project
   curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
@@ -226,6 +302,17 @@ while (( $# > 0 )); do
             SKILL_NAME="${1#*=}"
             [[ -n "${SKILL_NAME}" ]] || fail "--skill requires a skill name."
             ;;
+        --tools)
+            shift
+            (( $# > 0 )) || fail "--tools requires a list of tools."
+            [[ -z "${TOOLS_ARG}" ]] || fail "--tools may only be specified once."
+            TOOLS_ARG="$1"
+            ;;
+        --tools=*)
+            [[ -z "${TOOLS_ARG}" ]] || fail "--tools may only be specified once."
+            TOOLS_ARG="${1#*=}"
+            [[ -n "${TOOLS_ARG}" ]] || fail "--tools requires a list of tools."
+            ;;
         --adopt)
             ADOPT=true
             ;;
@@ -246,6 +333,65 @@ while (( $# > 0 )); do
     esac
     shift
 done
+
+# The project this run targets: --adopt installs into the current directory, every
+# other mode updates the project this script lives in. Its .env supplies the keys
+# resolved here and further down.
+ENV_DIR="${ROOT_DIR}"
+[[ "${ADOPT}" == false ]] || ENV_DIR="$(pwd -P)"
+
+env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
+    [[ -f "${ENV_DIR}/.env" ]] || return 0
+    sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
+}
+
+# Which tool trees this run covers: the flag first, then the environment, then .env,
+# then every one of them.
+TOOLS_SPEC="${TOOLS_ARG}"
+TOOLS_SOURCE="--tools"
+if [[ -z "${TOOLS_SPEC}" ]]; then
+    TOOLS_SPEC="${STAR_TOOLS:-}"
+    TOOLS_SOURCE="the STAR_TOOLS environment variable"
+fi
+if [[ -z "${TOOLS_SPEC}" ]]; then
+    TOOLS_SPEC="$(env_value STAR_TOOLS)"
+    TOOLS_SOURCE="STAR_TOOLS in .env"
+fi
+if [[ -z "${TOOLS_SPEC}" ]]; then
+    TOOLS_SPEC="all"
+    TOOLS_SOURCE="the default"
+fi
+
+SELECTED_TOOLS=()
+if [[ "${TOOLS_SPEC}" == "all" ]]; then
+    SELECTED_TOOLS=("${ALL_TOOLS[@]}")
+elif [[ "${TOOLS_SPEC}" != "none" ]]; then
+    while IFS= read -r name; do
+        name="${name//[[:space:]]/}"
+        [[ -n "${name}" ]] || continue
+        known=false
+        for tool in "${ALL_TOOLS[@]}"; do
+            [[ "${name}" == "${tool}" ]] && known=true
+        done
+        [[ "${known}" == true ]] || \
+            fail "Unknown tool '${name}' in ${TOOLS_SOURCE}. Valid: ${ALL_TOOLS[*]}, all, none."
+        is_selected "${name}" || SELECTED_TOOLS+=("${name}")
+    done < <(tr ',' '\n' <<<"${TOOLS_SPEC}")
+    (( ${#SELECTED_TOOLS[@]} > 0 )) || \
+        fail "${TOOLS_SOURCE} names no tool. Use 'none' to cover the shared paths by themselves."
+fi
+
+# What a narrowed run leaves behind, said once here rather than path by path below.
+if (( ${#SELECTED_TOOLS[@]} < ${#ALL_TOOLS[@]} )); then
+    untouched=()
+    for tool in "${ALL_TOOLS[@]}"; do
+        is_selected "${tool}" || untouched+=("${tool}")
+    done
+    selected_label="none"
+    (( ${#SELECTED_TOOLS[@]} == 0 )) || selected_label="${SELECTED_TOOLS[*]}"
+    log "Tools (${TOOLS_SOURCE}): ${selected_label}."
+    log "Left alone, neither written nor deleted: ${untouched[*]}."
+fi
 
 if [[ "${ADOPT}" == true ]]; then
     [[ -z "${SKILL_NAME}" ]] || fail "--adopt cannot be combined with --skill."
@@ -298,6 +444,12 @@ if [[ "${ADOPT}" == true ]]; then
         "wkdrs"
         "execs/scpts"
     )
+    # The layout directories above belong to no tool and are always created; the
+    # two lists before them lose the trees this run does not cover.
+    filter_paths "${ADOPT_TREES[@]}"
+    ADOPT_TREES=("${FILTERED[@]}")
+    filter_paths "${ADOPT_FILES[@]}"
+    ADOPT_FILES=("${FILTERED[@]}")
 elif [[ -n "${SKILL_NAME}" ]]; then
     [[ "${SKILL_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || \
         fail "Invalid skill name '${SKILL_NAME}'."
@@ -306,6 +458,10 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     for root in "${SKILL_ROOTS[@]}"; do
         SYNC_PATHS+=("${root}/${SKILL_NAME}")
     done
+    filter_paths "${SYNC_PATHS[@]}"
+    SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
+    (( ${#SYNC_PATHS[@]} > 0 )) || \
+        fail "--skill has no tree to act on: ${TOOLS_SOURCE} selects no tool."
 
     if [[ "${DIFF}" == true ]]; then
         log "Diffing skill: ${SKILL_NAME}"
@@ -346,6 +502,8 @@ else
         # extract step below.
         "${SELF_PATH}"
     )
+    filter_paths "${SYNC_PATHS[@]}"
+    SYNC_PATHS=("${FILTERED[@]}")
 fi
 
 # Without --adopt this script rewrites the project it lives in, derived from its
@@ -356,8 +514,8 @@ if [[ "${ADOPT}" == false ]]; then
 fi
 
 # Upstream resolution: environment wins, then .env, then the public default.
-if [[ -z "${STAR_REPOSITORY:-}" && -f "${ROOT_DIR}/.env" ]]; then
-    STAR_REPOSITORY="$(sed -n 's/^STAR_REPOSITORY=//p' "${ROOT_DIR}/.env" | tail -1)"
+if [[ -z "${STAR_REPOSITORY:-}" ]]; then
+    STAR_REPOSITORY="$(env_value STAR_REPOSITORY)"
 fi
 STAR_REPOSITORY="${STAR_REPOSITORY:-https://github.com/wanghao9610/STAR.git}"
 
@@ -388,11 +546,17 @@ if [[ "${ADOPT}" == false ]]; then
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode, so a single file in SYNC_PATHS arrives through its
-        # directory — .cursor covers .cursor/rules/skill-roots.mdc. The tar below
-        # still copies only SYNC_PATHS: execs brings execs/scpts/ along here, and
-        # none of it is copied out.
-        git -C "${SOURCE_DIR}" sparse-checkout set \
-            .agents .claude .codex .cursor .dsh .kimi-code .pi .qwen docs/mds/star-workflow docs/srcs execs
+        # directory — .cursor covers .cursor/rules/skill-roots.mdc. A whole tool
+        # directory rather than its skill root, because the configs installed when
+        # missing are read from here too. The tar below still copies only
+        # SYNC_PATHS: execs brings execs/scpts/ along here, and none of it is
+        # copied out.
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs)
+        for tool in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
+            read -ra tool_roots <<<"$(tool_dirs "${tool}")"
+            SPARSE_PATHS+=("${tool_roots[@]}")
+        done
+        git -C "${SOURCE_DIR}" sparse-checkout set "${SPARSE_PATHS[@]}"
     fi
 
     SYNCED=()
@@ -433,6 +597,9 @@ if [[ "${ADOPT}" == false ]]; then
         # Agent instructions: installed when missing, never overwritten.
         if [[ -z "${SKILL_NAME}" ]]; then
             for doc in "${INSTRUCTION_FILES[@]}"; do
+                # These two lists are not the synced paths and were not filtered
+                # with them, so each entry is checked against the selection here.
+                path_selected "${doc}" || continue
                 [[ -e "${SOURCE_DIR}/${doc}" ]] || continue
                 if [[ ! -e "${ROOT_DIR}/${doc}" && ! -L "${ROOT_DIR}/${doc}" ]]; then
                     printf '  new      %s (agent instructions)\n' "${doc}"
@@ -451,6 +618,7 @@ if [[ "${ADOPT}" == false ]]; then
         # Hook registration configs: installed when missing, never overwritten.
         if [[ -z "${SKILL_NAME}" ]]; then
             for cfg in "${INSTALL_CONFIGS[@]}"; do
+                path_selected "${cfg}" || continue
                 [[ -e "${SOURCE_DIR}/${cfg}" ]] || continue
                 if [[ ! -e "${ROOT_DIR}/${cfg}" && ! -L "${ROOT_DIR}/${cfg}" ]]; then
                     printf '  new      %s (%s)\n' "${cfg}" "$(config_kind "${cfg}")"
@@ -470,6 +638,8 @@ if [[ "${ADOPT}" == false ]]; then
             hint="bash execs/update.sh"
             [[ "${REF_SET}" == false ]] || hint="${hint} ${STAR_REF}"
             [[ -z "${SKILL_NAME}" ]] || hint="${hint} --skill ${SKILL_NAME}"
+            # Only the flag: a selection from STAR_TOOLS is already in the plain command.
+            [[ -z "${TOOLS_ARG}" ]] || hint="${hint} --tools ${TOOLS_ARG}"
             [[ "${FORCE}" == false ]] || hint="${hint} --force"
             log "${changed} differ, ${added} new upstream, ${kept} extra local."
             log "'differs' is direction-blind: it includes files you edited yourself."
@@ -490,7 +660,8 @@ if [[ "${ADOPT}" == false ]]; then
         # configs, so they belong in what gets reported as about to be lost.
         DIRTY_PATHS=("${SYNCED[@]}")
         if [[ "${FORCE}" == true && -z "${SKILL_NAME}" ]]; then
-            DIRTY_PATHS+=("${INSTRUCTION_FILES[@]}" "${INSTALL_CONFIGS[@]}")
+            filter_paths "${INSTRUCTION_FILES[@]}" "${INSTALL_CONFIGS[@]}"
+            DIRTY_PATHS+=(${FILTERED[@]+"${FILTERED[@]}"})
         fi
         DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)"
         if [[ -n "${DIRTY}" ]]; then
@@ -535,6 +706,7 @@ if [[ "${ADOPT}" == false ]]; then
 
     if [[ -z "${SKILL_NAME}" ]]; then
         for doc in "${INSTRUCTION_FILES[@]}"; do
+            path_selected "${doc}" || continue
             [[ -e "${SOURCE_DIR}/${doc}" ]] || continue
             if [[ ! -e "${ROOT_DIR}/${doc}" && ! -L "${ROOT_DIR}/${doc}" ]]; then
                 mkdir -p "$(dirname -- "${ROOT_DIR}/${doc}")"
@@ -549,6 +721,7 @@ if [[ "${ADOPT}" == false ]]; then
 
     if [[ -z "${SKILL_NAME}" ]]; then
         for cfg in "${INSTALL_CONFIGS[@]}"; do
+            path_selected "${cfg}" || continue
             [[ -e "${SOURCE_DIR}/${cfg}" ]] || continue
             if [[ ! -e "${ROOT_DIR}/${cfg}" && ! -L "${ROOT_DIR}/${cfg}" ]]; then
                 mkdir -p "$(dirname -- "${ROOT_DIR}/${cfg}")"
@@ -652,7 +825,9 @@ if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     fi
 fi
 for cfg in "${INSTALL_CONFIGS[@]}"; do
-    if [[ ! -e "${ROOT_DIR}/${cfg}" ]]; then
+    if ! path_selected "${cfg}"; then
+        continue
+    elif [[ ! -e "${ROOT_DIR}/${cfg}" ]]; then
         continue
     elif [[ -n "$(missing_hooks "${ROOT_DIR}/${cfg}")" ]]; then
         log "NOTE: your ${cfg} was kept and does not register the STAR $(missing_hooks "${ROOT_DIR}/${cfg}") hook."
