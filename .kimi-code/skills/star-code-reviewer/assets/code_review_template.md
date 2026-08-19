@@ -60,5 +60,5 @@
 
 ## 7. Fix Record
 
-<!-- Appended by the fix pass: one line per eligible finding — F<n>: applied / skipped / reverted
+<!-- Appended by the fix pass: one line per eligible finding — F<n>: applied / applied unasked / skipped / reverted
      (<reason>) — plus the commit hash when the fixes were committed. "No fix pass run" otherwise. -->

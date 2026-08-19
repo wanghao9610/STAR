@@ -57,5 +57,5 @@
 
 ## 7. 修复记录
 
-<!-- 由修复轮追加：每条可修问题项一行——F<n>：applied / skipped / reverted（<原因>）
+<!-- 由修复轮追加：每条可修问题项一行——F<n>：applied / applied unasked / skipped / reverted（<原因>）
      ——以及提交修复时的 commit hash。未运行修复轮时写"未运行修复轮"。 -->

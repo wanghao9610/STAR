@@ -699,7 +699,7 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 3. Collects findings against a six-dimension rubric: docstrings & comments, naming, simplicity, STAR project conventions (hardcoded paths, layout, placement rules), high-confidence suspicious correctness patterns, and — in plan mode — plan conformance;
 4. Re-verifies every blocker/major finding against the code before reporting; unconfirmed suspicions are listed separately and never counted;
 5. Writes the report under `wkdrs/` and gives a short digest with routing: feature gaps → `$star-plan-executor`, plan-text divergence → `$star-plan-reviser`, structural reorganization → `$star-code-architect`;
-6. Optionally walks a fix pass, one finding at a time: only mechanical, behavior-preserving fixes (docstrings, scope-internal renames, unused imports, project-introduced dead code), each re-verified after application.
+6. Runs a fix pass of mechanical, behavior-preserving fixes only (docstrings, scope-internal renames, unused imports, project-introduced dead code): `minor` and `nit` ones are applied unasked and named as they are applied, `blocker` and `major` ones — and every fix that deletes code — are asked one at a time, and each fix is re-verified after application.
 
 ### Main outputs
 
@@ -712,13 +712,13 @@ The report records the scope and evidence base, a verdict, findings by severity 
 
 ### The fix boundary
 
-The fix pass never changes behavior: no feature completion, no signature changes visible outside the scope, no file moves, no edits to the names a rename left unchanged on purpose. Plan files are never edited — what the review learns about the plan routes to `$star-plan-reviser`.
+The fix pass never changes behavior: no feature completion, no signature changes visible outside the scope, no file moves, no edits to the names a rename left unchanged on purpose. Plan files are never edited — what the review learns about the plan routes to `$star-plan-reviser`. Nothing is applied unasked beyond `minor` and `nit`; `involve=high` puts even those to you one at a time.
 
 ### Practical guidance
 
 - Run it after a leaf completes, before `$star-plan-reviser` — the code audit gives the plan review harder evidence.
 - `diff` mode is the cheapest habit: review what you just wrote while it is still uncommitted. A run that executed on an execution branch is reviewed as its branch diff against the base (conventions §11) — the merge confirmation point waits on the verdict.
-- A finding you disagree with can simply be skipped in the fix pass; the report keeps the record either way.
+- A finding you disagree with can simply be skipped in the fix pass; the report keeps the record either way, and a minor fix applied unasked is recorded there too — `git diff` shows it before anything is committed.
 
 See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.claude/skills/star-code-reviewer/SKILL.md).
 

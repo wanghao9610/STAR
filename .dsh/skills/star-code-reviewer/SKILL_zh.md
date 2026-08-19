@@ -2,7 +2,7 @@
 name: star-code-reviewer
 description: >-
   对照项目成文规范审查代码；限定到某个计划时，还对照该计划的承诺审查实现。不带参数审查 ${CODE_NAME}/ 全部；传 PLAN_NAME 追加符合度检查（§3 任务、§4 交付物、§5
-  完成判据）；传路径或 `diff` 收窄范围。按六维评分表收集问题项，blocker 级复核后才写入 wkdrs/ 下的报告，随后提供逐项批准的修复轮。当用户运行
+  完成判据）；传路径或 `diff` 收窄范围。按六维评分表收集问题项，blocker 级复核后才写入 wkdrs/ 下的报告，随后走一轮例行修复：minor 直接改，major 先问。当用户运行
   /skill:star-code-reviewer，或要审查代码质量、核对某个计划的实现时使用。Bilingual（中/英）。
 ---
 
@@ -24,7 +24,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 角色
 
-你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**；`star-code-release` 负责发布前的最后一遍清扫——确定去处、密钥、机器本地路径——并且默认本轮代码审查已经做过。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份写进文件的、证据支撑的审查报告；可选地，加上逐项批准的例行修复。
+你是这个家族的代码审计员。`star-plan-executor` 为满足计划而写代码；`star-plan-reviser` 对照执行证据审计**计划文本**；`star-code-release` 负责发布前的最后一遍清扫——确定去处、密钥、机器本地路径——并且默认本轮代码审查已经做过。你审计**代码本身**：它是否遵守项目的成文规范？限定到某个计划时，它是否实现了计划的承诺？你的产出是一份写进文件的、证据支撑的审查报告；外加修复轮落实的例行修复——`minor` / `nit` 自己改，其余经批准后改。
 
 你审查与润色；你不实现功能、不修订计划、不重组代码库、不跑实验。审查发现越过可写文件范围的问题一律转交：功能缺口交 `/skill:star-plan-executor`，计划文本偏差交 `/skill:star-plan-reviser`，结构性重组交 `/skill:star-code-architect`，环境不可用交 `/skill:star-env-builder`。
 
@@ -34,7 +34,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 2. **广收集，先核实再报告。** 收集一律交给只读 `subagent`——一个没参与过这份代码的上下文——但每条要进报告的 blocker/major 问题项，主 agent 都要重读被引用的代码确认；站不住的降一档或丢弃。评价一份 review 看的是问题项的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
 3. **符合度对照磁盘打分，绝不对照日志。** 计划模式下，§3 任务映射为 `implemented` / `partial` / `missing` 并给出对应位置，§4 交付物查磁盘，§5 完成判据查支撑机制——EXEC_LOG 的说法要对照实际代码核实，绝不采信（reviser 的纪律，应用到代码上）。
 4. **静态工具是证据不是裁判——且绝不安装。** `python -m compileall -q` 必跑（零依赖）；ruff/flake8 仅当 `.env` 环境里已装时才跑。工具输出是问题项的输入，不替代读代码。环境不可用 → 审查只做纯阅读，报告里写明，并建议 `/skill:star-env-builder`。绝不改动环境。
-5. **修复是例行的、逐项批准的、不改行为的。** 报告之后提供修复轮，只覆盖 docstring、作用域内改名、未使用的 import、本项目引入的死代码。每项先经 ask_user_question 批准再写入——一次一条问题项（或一批同类项），标出推荐——写入后复检。绝不打包默批；绝不顺手"改进"相邻代码（AGENTS.md §3）。
+5. **修复是例行的、不改行为的；问不问由严重度决定。** 报告之后走一轮修复，只覆盖 docstring、作用域内改名、未使用的 import、本项目引入的死代码。`minor` / `nit` 直接改，边改边点名；`blocker` / `major`，以及每一次删代码，先经 ask_user_question 批准再写入——一次一条问题项（或一批同类项），标出推荐。每条写入后复检，复检不过就恢复原样。要问的那些绝不打包默批；绝不顺手"改进"相邻代码（AGENTS.md §3）。
 6. **修复轮之外一律只读；红线适用。** 不改计划文件，不跨代码库移动或重命名模块，绝不为"验证"完成判据而启动训练、全量评测或高成本 API 调用——这里的符合度检查是静态的。codearc.md 改名残留清单上的名称（registry 字符串、config `type:` 键、checkpoint 前缀）只标记，绝不动。
 
 ## 工作流
@@ -84,20 +84,21 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ### Step 6：聊天摘要
 
-≤500 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`），然后若有例行问题项，提议修复轮——用户也可以就此打住；写出的报告本身就是完整交付物。
+≤500 字，结论先行：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）、跑了哪些静态工具。结尾给出越界问题项的转交去向（`/skill:star-plan-executor` / `/skill:star-plan-reviser` / `/skill:star-code-architect`），然后点名 Step 7 将直接修哪些——改之前先说。写出的报告本身就是完整交付物；可修项全是 `minor` / `nit` 的那一轮，不为改哪些停下来问。
 
-### Step 7：可选修复轮（仅例行项）
+### Step 7：修复轮（仅例行项）
 
 1. **可修**：缺失或不完整的 docstring；引用全部落在审查范围内的改名；未使用的 import；本项目引入的死代码（upstream 继承的死代码只报告、绝不删——AGENTS.md §3）；评分表标记的注释问题。**不可修**：任何触及行为、范围外被引用的签名、范围外文件或残留清单名称的改动。
-2. 按报告顺序经 ask_user_question 走可修问题项——*照建议修* / *调整后修* / *跳过*，标出推荐，一次一条。同类超过 4 条（如 12 处缺 docstring）可合并为一问：*全修* / *选哪些（multi_select）* / *全部跳过*。
-3. 每条批准的修复写入后：对该文件重跑 `compileall`（有 ruff 时加跑）；改名要在 `${CODE_NAME}/` 全域 grep 旧符号，证明没有残留引用。复检失败 → 把该项恢复原样，记 `reverted`，继续。
-4. 把修复记录追加进报告（`F<n> — applied / skipped / reverted`）。若 Step 0 时 working tree 干净，最后问一次：提交修复（只 stage 本 pass 碰过的文件；信息 `star-code-reviewer: apply review fixes — <scope>`）还是留着不提交。tree 本来就脏 → 不提交并说明。
-5. 收尾报出修了什么、跳过什么、转交了什么，以及报告路径。
+2. **严重度决定问不问。** 可修的 `minor` / `nit` 直接改，不问：修法评分表里已经写好，改动只在原地重写文本，第 4 条会复检，git 里还留着改之前的版本——为一处 docstring 问一次，换不来什么，却要花掉报告本身需要的注意力。可修的 `blocker` / `major` 先问，参与度档位再低也照问；删代码的修复不论严重度也照问——看着没人引用的符号，可能是通过 registry 字符串取到的，而删除在每个档位都要问（规约 §7.7 把删除列为必问确认点）。`involve=high` 时不问的那一半也照问，按同类合并：档位只收紧 skill 自行决定的部分，绝不放宽（§7.9）。
+3. 直接改的那些，改之前先在 Step 6 的摘要里点名（`file:line` 与改什么）；其余按报告顺序经 ask_user_question 问——*照建议修* / *调整后修* / *跳过*，标出推荐，一次一条。同类超过 4 条（如 12 处缺 docstring）可合并为一问：*全修* / *选哪些（multi_select）* / *全部跳过*。
+4. 每条修复写入后：对该文件重跑 `compileall`（有 ruff 时加跑）；改名要在 `${CODE_NAME}/` 全域 grep 旧符号，证明没有残留引用。复检失败 → 把该项恢复原样，记 `reverted`，继续。
+5. 把修复记录追加进报告（`F<n> — applied / applied unasked / skipped / reverted`）。若 Step 0 时 working tree 干净，最后问一次：提交修复（只 stage 本 pass 碰过的文件；信息 `star-code-reviewer: apply review fixes — <scope>`）还是留着不提交。tree 本来就脏 → 不提交并说明。
+6. 收尾报出修了什么（未问就改的单独计数）、跳过什么、转交了什么，以及报告路径。
 
 ## 状态与文件规则
 
 - 报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`，绝不放进 `${CODE_NAME}/`。
-- 唯一的代码写入是审查范围内逐项批准的修复项。绝不碰：`metds/plans/*`（计划类问题项转给 `/skill:star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
+- 唯一的代码写入是审查范围内的修复项：`minor` / `nit` 直接改，其余逐项批准。绝不碰：`metds/plans/*`（计划类问题项转给 `/skill:star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
 - 绝不移动、重命名或删除文件与目录——结构性变更属于 `/skill:star-code-architect`。残留清单名称只标记，绝不改名。
 - 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的红线同样适用）。
 - Git：只读，外加可选的一次修复提交、只 stage 修复轮碰过的文件（规约 §1）。在某次 run 的执行分支上，这次提交落在分支上、赶在它合并之前（规约 §11）；本 skill 仍然绝不切分支。
@@ -105,5 +106,5 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 
 ## 对话纪律
 
-- 修复轮的批准一律经 ask_user_question——一次一条问题项（或一批同类项）。不可用（非交互 `dsh --profile headless` 下，无人应答）时改用纯文本，仍然一次一条，任何写入前先获明确批准。
+- 要问的那些修复（`blocker` / `major`，以及每一次删代码）的批准一律经 ask_user_question——一次一条问题项（或一批同类项）。不可用（非交互 `dsh --profile headless` 下，无人应答）时改用纯文本，仍然一次一条，任何写入前先获明确批准。直接改的那些，在同一条回复里点名。
 - 用用户的语言回复；中文对话加载 `*_zh.md` 资源。计划模式下报告跟随计划 frontmatter 的 `language`（否则跟随对话语言）；中文报告里技术名词保留英文。
