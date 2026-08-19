@@ -6,7 +6,7 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 
 | Target | Allowed? |
 |---|---|
-| target plan body §1–§6 (root or sub-plan) | yes — per-item user approval, one candidate at a time |
+| target plan body §1–§6 (root or sub-plan) | yes — per-item user approval: the whole candidate list on the page, settled in one question over it (conventions §7.13) |
 | target frontmatter `updated` | yes — always bumped after any edit |
 | target section `status` map | yes — to reflect the post-edit content honestly |
 | target frontmatter `depends_on` | yes — only as an approved candidate; must remain an acyclic list of sibling prefixes |

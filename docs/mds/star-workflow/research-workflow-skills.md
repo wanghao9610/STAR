@@ -699,7 +699,7 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 3. Collects findings against a six-dimension rubric: docstrings & comments, naming, simplicity, STAR project conventions (hardcoded paths, layout, placement rules), high-confidence suspicious correctness patterns, and — in plan mode — plan conformance;
 4. Re-verifies every blocker/major finding against the code before reporting; unconfirmed suspicions are listed separately and never counted;
 5. Writes the report under `wkdrs/` and gives a short digest with routing: feature gaps → `$star-plan-executor`, plan-text divergence → `$star-plan-reviser`, structural reorganization → `$star-code-architect`;
-6. Runs a fix pass of mechanical, behavior-preserving fixes only (docstrings, scope-internal renames, unused imports, project-introduced dead code): `minor` and `nit` ones are applied unasked and named as they are applied, `blocker` and `major` ones — and every fix that deletes code — are asked one at a time, and each fix is re-verified after application.
+6. Runs a fix pass of mechanical, behavior-preserving fixes only (docstrings, scope-internal renames, unused imports, project-introduced dead code): `minor` and `nit` ones are applied unasked and named as they are applied, `blocker` and `major` ones go on the page as one list settled in a single question over it, every fix that deletes code is asked on its own, and each fix is re-verified after application.
 
 ### Main outputs
 
@@ -877,7 +877,7 @@ Any node works: a leaf is audited against its own run; a root or internal node i
 1. Reads the plan and scopes the evidence: `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`, every §4 deliverable on disk, the named code modules — or, for internal nodes, children frontmatter and executed descendants' logs;
 2. Collects the evidence read-only and scores completion claim by claim (`met` / `partial` / `unmet` / `unverifiable`) — a log's self-reported `done` is never trusted without the artifact behind it;
 3. Writes a seven-part review report (intent recap, what actually happened, completion scorecard, divergences, blockers and leftovers, knock-on effects, revision candidates) under `wkdrs/`;
-4. Walks the revision candidates one question at a time — adopt, adjust, or skip each;
+4. Puts every revision candidate on the page and settles the list in one question — adopt all as listed, adopt all but the ones you name, have the ones you name answered first, or adopt none;
 5. Applies approved edits to the plan file in place, appends a `## Revision History` entry, updates `updated`, and offers to reset a leaf's `exec_status` when its done-criterion changed;
 6. Ends with the follow-up action: re-decompose, re-execute, or a coaching session.
 

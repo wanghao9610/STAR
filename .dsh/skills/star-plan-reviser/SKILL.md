@@ -5,7 +5,7 @@ description: >-
   Review one research plan (any node under metds/plans/) against its execution evidence, then revise
   it in place with per-item user approval. Dispatches read-only subagents over wkdrs/<run>/ logs and
   artifacts, scores completion claim-by-claim against files on disk, writes a review report to
-  wkdrs/, walks the revision candidates one at a time, and appends a Revision History entry. Use
+  wkdrs/, settles the candidate list in one question, and appends a Revision History entry. Use
   when the user runs /skill:star-plan-reviser, or wants a plan audited, revised, or abandoned.
   Bilingual (en/zh).
 ---
@@ -37,7 +37,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies to you too). This applies the project's Verification rule (AGENTS.md §11) to the plan itself. Rules: `references/review_spec.md`.
 2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to parallel **read-only `subagent` calls** (execution log / artifacts / code state), each returning the structured collector format in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
-3. **The user owns every change.** Findings become numbered revision candidates. Each is adopted / adjusted / skipped via ask_user_question, one candidate per call, with your recommendation marked — never bundle-approve, never edit unasked.
+3. **The user owns every change.** Findings become numbered revision candidates. The whole list goes on the page, and **one** ask_user_question over it settles them — adopt all as listed / adopt all but the ones you name / answer questions on the named ones first / adopt none — recommendation marked, with every candidate the user names coming back on its own (conventions §7.13). Never put a list up for approval that the user cannot see, never edit unasked.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree that status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
 5. **Stay inside the family's write discipline.** Never renumber prefixes; never touch `EXEC_PLAN.md` / `EXEC_LOG.md` (the executor's); structural re-shaping (add/remove sub-plans, redraw the dependency graph) routes to `/skill:star-plan-decomposer`; research-question or method pivots route to `/skill:star-plan-coach`. Boundaries: `references/revision_rules.md`.
 6. **Knock-on effects.** A revision can invalidate work built on the old text. Point out reverse `depends_on` edges and derived children *before* asking for changes (report §6); sync the parent's `## Sub-plans` one-liner when the objective line changes; let the bumped `updated` show staleness in `/skill:star-flow-status`.
@@ -72,11 +72,13 @@ Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_te
 
 Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a ≤500-word digest: verdict, top divergences, and the candidate list as one-liners.
 
-### Step 4: Revision Q&A (one candidate at a time)
+### Step 4: Revision Q&A (the whole list, then one question)
 
-1. Walk the candidates in report order, one ask_user_question per candidate: *adopt as proposed* / *adopt with changes* / *skip* — recommendation marked; the built-in "Other" field lets the user answer freely. For **structural** or **strategic** candidates the options are *route to `/skill:star-plan-decomposer` or `/skill:star-plan-coach`* (recommended) vs *bounded text edit here anyway*. Keep the running record as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and anchor the next candidate on it in one clause whenever it interacts with one already decided (§7.10). A per-candidate walk is the longest question series in the workflow; without that record the user approves edit 9 with no view of edits 1–8.
-2. After the list, ask once whether anything else should change. User-added items become candidates too (evidence: "user directive").
-3. If nothing is adopted, skip to Step 7 — a pure review is a valid outcome; the persisted report is the deliverable.
+1. Put every candidate on the page first, in the text of the message that carries the question (conventions §7.13 — a drafted list is one question, not one per row): one numbered row per candidate, with which section it changes, from what to what, its evidence path, its grade (local / structural / strategic), and the action you recommend. A **structural** or **strategic** row recommends routing it — `/skill:star-plan-decomposer` for shape, `/skill:star-plan-coach` for strategy — and names a bounded text edit here as the alternative.
+2. Then **one** ask_user_question over that list: *adopt all as listed* / *adopt all but the ones I name* / *answer my questions on the ones I name first* / *adopt none* — recommendation marked, and the built-in "Other" field lets the user answer freely. With four candidates or fewer, ask over the candidates themselves (multi_select) rather than over their numbers. Rows the user pulls out open a second round in the same shape, carrying the redraft or the answer they asked for; a round down to one candidate is asked as that one candidate. A candidate that drops this node is never a row on the list — `references/revision_rules.md` has it asked on its own — and Step 5's `exec_status` reset and `finalized:` clearing are questions of their own there, after the edits.
+3. Keep the running record as you go (conventions §7.8) — one line per candidate as it settles, `candidate → adopted / adjusted / skipped → what changed in the file` — and open each later round with what the earlier ones settled, in one clause (§7.10). The list on the page is what the user decides from; the record is what carries a decision across rounds, so the third round does not re-argue the first.
+4. Once the list is settled, ask once whether anything else should change. User-added items become candidates too (evidence: "user directive").
+5. If nothing is adopted, skip to Step 7 — a pure review is a valid outcome; the persisted report is the deliverable.
 
 ### Step 5: Apply the approved edits
 
@@ -120,5 +122,6 @@ A drop that comes up *during* a full review is not this mode — it is a Step 4 
 
 ## Dialogue Discipline
 
-- If ask_user_question is unavailable (non-interactive `dsh --profile headless`, no human to answer), fall back to plain-text questions — still one candidate at a time, still explicit approval before any write.
+- If ask_user_question is unavailable (non-interactive `dsh --profile headless`, no human to answer), fall back to plain-text questions — still the whole candidate list on the page before the one question that settles it, still explicit approval before any write.
+- **The candidate list goes in the text of the same message, above the call** — the options carry the answers and none of the material. A message that reaches the user as bare options has lost the list rather than shortened it.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The plan body and the review report follow the plan's frontmatter `language`; keep technical terms in English inside Chinese plans.

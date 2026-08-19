@@ -102,7 +102,7 @@ From the repo map + the plan, draft: the directory layout (current layout is the
 
 #### Step C2: Confirmation point 2 — the user approves
 
-Show the architecture summary and the numbered migration table as normal text. Then ask: with ≤4 migration items, ask over the numbered items and let the user reply with the numbers to approve; with more, offer *approve all* / *approve all except (name the numbers)* / *redesign*. Wait for the explicit answer; only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
+Show the architecture summary and the numbered migration table as normal text. Then ask: with ≤4 migration items, ask over the numbered items and let the user reply with the numbers to approve; with more, offer *approve all* / *approve all except (name the numbers)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Wait for the explicit answer; only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
 
 #### Step C3: Execute migrations
 

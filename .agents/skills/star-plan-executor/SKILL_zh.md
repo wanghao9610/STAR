@@ -87,7 +87,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 1. 运行子计划 §5 完成判据，并把证据记录到 `EXEC_LOG.md`。
 2. 满足时，把 run 与子计划 `exec_status` 设为 `done`，然后只提议一次删除该计划的 `tasks/<plan-name>/` **草稿文件**——先把仍值得保留的内容挪进 `wkdrs/<run>/`，并在 `EXEC_LOG.md` 记录选择；保留也完全可以。**该提议绝不覆盖该计划自有的工具脚本**（规约 §9）：把它们按名字列为保留项，只有用户自己指明才删。未满足时，按 §6 的本地备选方案处理，或报告已验证缺口。
-3. 若 EXEC_LOG 的 `Pending amendments` 非空，先把整批落到正文——每条修正一行并编号，写明改哪一节、从什么改成什么、为什么——再一次提问（全部同步 / 选择部分（报行号） / 跳过，标出你推荐的一项），按 `references/plan_sync_rules_zh.md` 把确认行写回（原地更新 §2–§5 + 添加 `## Revision History` + 更新 `updated`，然后勾掉各行）。仅限战术层：任何触碰 §1/§6、父计划或 kill-criterion 的内容都通过第 5 点的方向性信号转交，绝不回同步。
+3. 若 EXEC_LOG 的 `Pending amendments` 非空，先把整批落到正文——每条修正一行并编号，写明改哪一节、从什么改成什么、为什么——再一次提问（全部同步 / 除我点名的以外全部同步 / 先解答我点名的几行 / 跳过，标出你推荐的一项——规约 §7.13），按 `references/plan_sync_rules_zh.md` 把确认行写回（原地更新 §2–§5 + 添加 `## Revision History` + 更新 `updated`，然后勾掉各行）。仅限战术层：任何触碰 §1/§6、父计划或 kill-criterion 的内容都通过第 5 点的方向性信号转交，绝不回同步。
 4. 检查 `references/exec_rubric_zh.md`，报告前修复范围内的失败；最多列出五个剩余失败及具体补救方法。
 5. 若结果命中根计划 kill-criterion 或使低开销 MVP 假设失效，在日志中记录 **方向性信号**，并推荐 `$star-plan-reviser <slug>`（审计证据并修订计划）、`$star-plan-coach <slug>` 或 `$star-plan-decomposer <slug>`。不要编辑父计划的策略章节。
 
