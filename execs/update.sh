@@ -530,7 +530,14 @@ ARCHIVE_FILE="${TEMP_DIR}/star-content.tar"
 
 log "Fetching ${STAR_REF} from ${STAR_REPOSITORY}"
 
-CLONE_ARGS=(--quiet --depth 1 --branch "${STAR_REF}" --single-branch)
+# core.symlinks is set on the clone rather than left to the host's git: where it is
+# off — the usual configuration on Windows — a symlink checks out as a small text
+# file holding its target path. A file identical across the tool trees is stored
+# once under .agents/skills and carried in the other trees as a link to it, so
+# every one of them would arrive as that path text and install as garbage. Clone's
+# own -c writes it into the new repository's config before anything is checked out,
+# so the sparse checkout below reads it too.
+CLONE_ARGS=(-c core.symlinks=true --quiet --depth 1 --branch "${STAR_REF}" --single-branch)
 if [[ "${ADOPT}" == false ]]; then
     CLONE_ARGS+=(--filter=blob:none --sparse)
 fi
@@ -542,7 +549,12 @@ git clone \
 
 if [[ "${ADOPT}" == false ]]; then
     if [[ -n "${SKILL_NAME}" ]]; then
-        git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}"
+        # The Codex copy of the skill comes along whichever tools are selected: it
+        # holds the one stored copy of every file the other trees share, and their
+        # links resolve to nothing without it. A checkout path only — SYNC_PATHS
+        # above is what gets copied out, so the Codex tree is still written to the
+        # project only when codex is selected.
+        git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}" ".agents/skills/${SKILL_NAME}"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode, so a single file in SYNC_PATHS arrives through its
@@ -550,8 +562,11 @@ if [[ "${ADOPT}" == false ]]; then
         # directory rather than its skill root, because the configs installed when
         # missing are read from here too. The tar below still copies only
         # SYNC_PATHS: execs brings execs/scpts/ along here, and none of it is
-        # copied out.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs)
+        # copied out — which is also why .agents/skills is listed unconditionally.
+        # It holds the one stored copy of every skill file the trees share, linked
+        # from the others, so a run selecting only claude still needs it in the
+        # checkout for those links to resolve; it is not thereby installed.
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills)
         for tool in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
             read -ra tool_roots <<<"$(tool_dirs "${tool}")"
             SPARSE_PATHS+=("${tool_roots[@]}")
@@ -575,7 +590,11 @@ if [[ "${ADOPT}" == false ]]; then
         added=0
         kept=0
 
-        # Upstream files that an update would overwrite or add.
+        # Upstream files that an update would overwrite or add. -L so the walk
+        # follows symlinks: a file identical across the tool trees is stored once
+        # under .agents/skills and linked from the others, and a link is type l,
+        # not type f — without it every shared file would go uncounted and an
+        # update that changes one would preview as nothing to do.
         while IFS= read -r rel; do
             if [[ ! -e "${ROOT_DIR}/${rel}" && ! -L "${ROOT_DIR}/${rel}" ]]; then
                 printf '  new      %s\n' "${rel}"
@@ -584,15 +603,17 @@ if [[ "${ADOPT}" == false ]]; then
                 printf '  differs  %s\n' "${rel}"
                 changed=$(( changed + 1 ))
             fi
-        done < <(cd "${SOURCE_DIR}" && find "${SYNCED[@]}" -type f | sort)
+        done < <(cd "${SOURCE_DIR}" && find -L "${SYNCED[@]}" -type f | sort)
 
-        # Project-local files under the same paths; an update keeps them.
+        # Project-local files under the same paths; an update keeps them. -L here
+        # too, so both sides count a file the same way — a project that is itself
+        # a STAR checkout has the same links, and they are its files.
         while IFS= read -r rel; do
             if [[ ! -e "${SOURCE_DIR}/${rel}" ]]; then
                 printf '  extra    %s (not in upstream ref; update keeps it)\n' "${rel}"
                 kept=$(( kept + 1 ))
             fi
-        done < <(cd "${ROOT_DIR}" && find "${SYNCED[@]}" -type f 2>/dev/null | sort)
+        done < <(cd "${ROOT_DIR}" && find -L "${SYNCED[@]}" -type f 2>/dev/null | sort)
 
         # Agent instructions: installed when missing, never overwritten.
         if [[ -z "${SKILL_NAME}" ]]; then
@@ -692,7 +713,11 @@ if [[ "${ADOPT}" == false ]]; then
     done
 
     if (( ${#TAR_PATHS[@]} > 0 )); then
-        tar -C "${SOURCE_DIR}" -cf "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
+        # -h stores what each symlink points at instead of the link itself, so a
+        # file the trees share arrives in the project as a real file. Storing the
+        # link would install a path into .agents/skills, which a project that did
+        # not select codex never receives.
+        tar -C "${SOURCE_DIR}" -chf "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
         tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
     fi
 
@@ -769,9 +794,13 @@ install_file() {
 
 for tree in "${ADOPT_TREES[@]}"; do
     [[ -d "${SOURCE_DIR}/${tree}" ]] || fail "Upstream ref is missing ${tree}."
+    # -L for the same reason as the diff walks above: the shared skill files are
+    # links to the one copy under .agents/skills, and this walk has to list them
+    # to install them. The cp in install_file follows the link and writes a real
+    # file, so what lands in the project is self-contained.
     while IFS= read -r rel; do
         install_file "${rel}"
-    done < <(cd "${SOURCE_DIR}" && find "${tree}" -type f | sort)
+    done < <(cd "${SOURCE_DIR}" && find -L "${tree}" -type f | sort)
 done
 
 for file in "${ADOPT_FILES[@]}"; do
