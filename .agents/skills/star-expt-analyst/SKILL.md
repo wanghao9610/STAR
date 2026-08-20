@@ -117,18 +117,11 @@ Lead with the verdict, under about 500 words: the run verdict and the §5 scorec
 
 ### Step 8: Aggregate (aggregate mode only)
 
-Compile the results table per `references/aggregate_spec.md`: resolve the scope's leaves; per leaf take its newest `EXPT_ANALYSIS_<date>.md` (no report → a gap, routed, never read raw; past ~6 reports the paths partition across collectors, per the spec's **Scale**); **re-open each number's cited source and confirm it before the number enters**; group along the root §4 claim→experiment map and ablation design, never along the run tree; exclude `invalid` / `inconclusive` runs and failed re-verifications to §5 with their reason, keeping `not met` runs in their tables. Fill `assets/results_template.md` (Chinese: `assets/results_template_zh.md`) into the destination the **scope** selects — `wkdrs/results/results.md` for all plan trees, `wkdrs/results/results_<slug>.md` when scoped to a subtree, never one over the other — under the write rules: an existing `type: results` file needs its change list approved; a file whose `scope:` is wider than the one being compiled is never narrowed; a hand-authored one is never overwritten on a diff alone.
-
-Digest ≤500 words: runs aggregated / excluded / still unmeasured, the headline table, and the routing — a missing report to `star-expt-analyst <slug>`, an unexecuted leaf to `star-plan-executor <slug>`. Say plainly the results table reports numbers and does not explain them: naming *why* a variant won needs a controlled comparison this skill does not run.
+`aggregate [PLAN_NAME]` runs this step alone — compiling every run's verified numbers into the results table and closing with its own digest — and the procedure is in `references/aggregate_step.md`, read with `references/aggregate_spec.md` when that is the mode and not before. A full analysis reads neither.
 
 ### Step 9: Watch (watch mode only)
 
-A quick check of a run that may still be executing — dimension C plus liveness, nothing else. Chat-only: no verdict, no report file, no figures; re-run it as often as needed.
-
-1. Resolve the run as in Step 0. No run directory, or no logs in it yet → say so and stop; nothing to watch.
-2. Scan the logs for dimension C's fatal, numeric, and dynamics signals (crash, traceback, NaN/Inf, OOM, divergence, a plateau) — grep for patterns and read head and tail, never a big log whole.
-3. Liveness and progress: the newest log/artifact mtime ("last write N minutes ago"), and the latest progress line — step / epoch / eval with its values, quoted as the log states them.
-4. Report ≤200 words, liveness first: alive or stalled since when, the latest progress line, any fatal or anomalous signal with its `file:line`, and one next action — keep waiting; a fatal signal → stop the job, fix and relaunch via `star-plan-executor <slug>`; import or environment errors → `star-env-builder`. Say plainly the run has not been scored: when it finishes, the full pass (`star-expt-analyst <slug>`) does that.
+`watch [PLAN_NAME | RUN_DIR]` runs this step alone — a chat-only liveness and dimension-C check over a run that may still be executing, no verdict and no report file — and the procedure is in `references/watch_step.md`, read when that is the mode and not before.
 
 ## State & File Rules
 

@@ -143,16 +143,7 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ### Dropping a plan, and taking one back
 
-A drop records a decision you have already made, so this path does not audit the plan: Step 0 resolves the target as always, the four steps below replace Steps 1–6, Step 7 reports as always, and nothing here writes a review report. The description routes a run here (conventions §7.12), so say in one line which path this run took before reading anything — a misread description then costs that line rather than an edit.
-
-1. **Read what goes dark**, from the opening digest alone — no collectors, no run bodies: every descendant of the target with its `exec_status`, the follow-ups their runs were owed (a review, an analysis), any unmerged `branch:`, live `worktree:` or un-ticked STOP command underneath, and any live leaf whose `depends_on` names the target or one of its descendants.
-2. **Show that list and ask once** — one line per descendant, one line per loose end — confirming the drop and its one-line reason in the same question; the reason is the description's own words where it carried them, and asked for where it did not. This is a mandatory confirmation point (conventions §7.7): asked at every involve level, `low` included, never bundled with anything else. No reason, no drop.
-3. **Write the three places** `references/revision_rules.md` names — `dropped: <date> — <reason>` on the target, the `— dropped <date>` marker on the parent's `## Sub-plans` line, one `## Revision History` entry — and bump `updated`. No descendant is edited: they go dark by inheritance.
-4. **Report** what went dark and what the drop did not settle — dependency edges now pointing at a dropped node, and any branch, worktree or STOP command still on disk — then the commit offer, as Step 7.
-
-Taking a node back is the same walk with the field cleared instead of written — a description asking for it routes there — plus one check before the question: no ancestor may be dropped, or inheritance keeps the node dark and the cleared field reads as a bug. Its Revision History entry says why the direction is live again.
-
-A drop that comes up *during* a full review is not this mode — it is a Step 4 candidate, approved like any other, writing the same three places.
+This path replaces Steps 1–6 with four steps of its own — read what goes dark, ask once, write the three places, report — and its rules, including where `dropped:` is written and what inheritance does to the descendants, are in `references/drop_rules.md`, read where the run is a drop or a revival and not before. A review run reads none of it.
 
 ## State & File Rules
 

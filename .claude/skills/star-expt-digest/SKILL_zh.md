@@ -110,14 +110,8 @@ bash <本 skill 所在目录>/scripts/scan.sh
 
 ### Step 8：模型记录表（仅 ledger 模式）
 
-把每份产物的 `model_trail` 汇总成一张表——**谁写了什么**的跨产物视图，这是任何单份产物都给不出的。它是例行汇总，不是解读：读、分组、计数、写出。
+`ledger` 只跑这一步：把每份产物的 `model_trail` 汇成一张"谁写了什么"的表，纯机械——读、归组、计数、写出，绝不从计数得出结论。流程在 `references/ledger_spec_zh.md`，是这个模式时才读，之前不读；按时段或按计划的摘要运行完全不读它。
 
-1. 按 `--trails` 扫描列出的清单，遍历规约 §8 登记在册、磁盘上存在的产物。**只用 frontmatter**——`model_id`、`model_trail`，以及该文件自己的日期字段——外加扫描为无 frontmatter 产物打印的头部行 `model_id`。绝不为推断作者身份去读正文。
-2. 每一行都抄自某条 trail 条目。没有 `model_trail` 的产物是**缺口**，连同"为什么没有"（写于该字段存在之前，或某个 skill 漏写）列进 §5——绝不假定单模型，也绝不靠猜回填。
-3. 某份产物若带有比 trail 更细的逐事件归属——计划的 `## Revision History`、`EXEC_LOG` 步骤表的 `model` 列、`refs_index` 的 `Model` 列——优先用它：它说的是某个模型写了哪一**步**或哪一**条**，而不只是哪一次会话。
-4. 填 `assets/model_ledger_template_zh.md`（英文：`assets/model_ledger_template.md`）写入 `wkdrs/digests/MODEL_LEDGER.md`。日期规则与 digest 相同：同一天覆盖，跨天各写各的。
-
-**计数不是判决。** 报出各模型的写入事件数，到此为止。写入事件多的模型只是写得多，不等于"做得好"——本模型记录表没有质量信号，用这些数字去说质量，与把指标差值归因到某个原因是同一种错误。trail 是自报的（规约 §8），模型记录表因此继承同一限制，并在正面写明。
 ## 状态与文件规则
 
 - 写入只有 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`，以及——仅在 `ledger` 模式下——`wkdrs/digests/MODEL_LEDGER.md`。别处一律不写——不出图、不留脚本、不建子目录。

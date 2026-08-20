@@ -1,0 +1,8 @@
+# Step 8: Aggregate (aggregate mode only)
+
+Read where the invocation carried `aggregate`. A full analysis and a `watch` run never read this file. The rules this step works from are in `aggregate_spec.md`, read with it.
+
+Compile the results table per `references/aggregate_spec.md`: resolve the scope's leaves; per leaf take its newest `EXPT_ANALYSIS_<date>.md` (no report → a gap, routed, never read raw; past ~6 reports the paths partition across collectors, per the spec's **Scale**); **re-open each number's cited source and confirm it before the number enters**; group along the root §4 claim→experiment map and ablation design, never along the run tree; exclude `invalid` / `inconclusive` runs and failed re-verifications to §5 with their reason, keeping `not met` runs in their tables. Fill `assets/results_template.md` (Chinese: `assets/results_template_zh.md`) into the destination the **scope** selects — `wkdrs/results/results.md` for all plan trees, `wkdrs/results/results_<slug>.md` when scoped to a subtree, never one over the other — under the write rules: an existing `type: results` file needs its change list approved; a file whose `scope:` is wider than the one being compiled is never narrowed; a hand-authored one is never overwritten on a diff alone.
+
+Digest ≤500 words: runs aggregated / excluded / still unmeasured, the headline table, and the routing — a missing report to `/star-expt-analyst <slug>`, an unexecuted leaf to `/star-plan-executor <slug>`. Say plainly the results table reports numbers and does not explain them: naming *why* a variant won needs a controlled comparison this skill does not run.
+

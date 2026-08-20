@@ -577,11 +577,6 @@ Present as normal text: backend + env name + python version; dependency source u
 ### Step 6：跑通性检查（三层，直接运行）
 ### star-env-builder/SKILL_zh.md
 --- 1
-4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在红线上：把确切命令备好，不要跑。
-+++ 1
-4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在 STOP line 上：把确切命令备好，不要跑。
-### star-env-builder/SKILL_zh.md
---- 1
 - 确认点批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在红线外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
 +++ 1
 - 确认点批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在 STOP line 外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
@@ -590,6 +585,11 @@ Present as normal text: backend + env name + python version; dependency source u
 - 确认点与所有其余问题都走 your question tool——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）改用纯文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
 +++ 1
 - 确认点与所有其余问题一次只问一题——使用你的提问工具，仅在非交互运行下改用简洁纯文本——都带推荐项，等待明确答复；安装计划必须先收到明确的批准文字才能开始安装。
+### star-env-builder/references/add_mode_zh.md
+--- 1
+4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在红线上：把确切命令备好，不要跑。
++++ 1
+4. 按优先顺序安装（uv > pip > conda；conda 仅在 conda 后端下、且仅限白名单）。需要源码编译的项留在 STOP line 上：把确切命令备好，不要跑。
 ### star-expt-analyst/SKILL.md
 --- 1
 # Research Experiment Analyst — results audit
@@ -831,9 +831,9 @@ Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, r
 3. No argument → if an unfinished idea file exists, ask whether to continue it (continue that storm / start a new one); otherwise ask for the seed as one open question (no forced options).
 ### star-idea-storm/SKILL.md
 --- 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2 — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one your question tool (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one your question tool (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 +++ 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2 — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 ### star-idea-storm/SKILL.md
 --- 1
 Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a note on how crowded the area is (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scanning may fan out to read-only read-only sub-agents, run in parallel, one direction each, each returning the collector format in `references/scan_policy.md` — the briefing, and each collector's share of the rate budget, are built by the main agent, never by the collector; the main agent writes the file and owns every judgment line. Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are reported the moment they are found, not at stage end. A failed search is reported as failed, never padded.
@@ -861,9 +861,9 @@ Check the draft against the rubric's topic-statement test (Part C); put the fail
 3. 不带参数 → 若存在未完成的 idea 文件，问是否继续（继续那次风暴 / 新开一次）；否则用一道开放问题问种子（不硬给选项）。
 ### star-idea-storm/SKILL_zh.md
 --- 1
-用问题库 Stage 2 的生成手法，从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一次 your question tool（multiSelect，标出推荐项）：留 2–4 个进扫描——候选 5 个时选项装不下（规约 §7.3 把一题的选项封在 4 个），改成给表加编号、对着编号问：*留推荐的那几个* / *留另一组（报编号）* / *重新生成*。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
+用问题库 Stage 2 的生成手法（那一节在进入本阶段时读），从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一次 your question tool（multiSelect，标出推荐项）：留 2–4 个进扫描——候选 5 个时选项装不下（规约 §7.3 把一题的选项封在 4 个），改成给表加编号、对着编号问：*留推荐的那几个* / *留另一组（报编号）* / *重新生成*。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
 +++ 1
-用问题库 Stage 2 的生成手法，从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一个直接问题问哪 2–4 个入围扫描（用户可多选）；标出你推荐的项。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
+用问题库 Stage 2 的生成手法（那一节在进入本阶段时读），从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一个直接问题问哪 2–4 个入围扫描（用户可多选）；标出你推荐的项。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
 ### star-idea-storm/SKILL_zh.md
 --- 1
 对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、竞争激烈程度说明（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇最接近的工作及各自摘要**没有**声称的东西、表面缺口。默认深度为标题 + 摘要；只有用户指明某方向、或某条缺口判断直接决定两个入选方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读收集器 your sub-agent tool 子代理（read-only），并行派发、每个负责一个方向、各自按 `references/scan_policy_zh.md` 的收集器返回格式返回——交办说明、以及按份数分给各收集器的速率配额，都由主 agent 构建，收集器绝不自己攒；主 agent 写文件，并亲自下所有判断行。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
@@ -2170,11 +2170,6 @@ List the prior runs the survey found — path, date, what it appears to have pro
 List the prior runs the survey found — path, date, what it appears to have produced, any metric visible in its logs. Ask once, as one question, which of these to record (the user may pick several). Symlink each chosen run to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command where recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
 ### star-proj-adopt/SKILL.md
 --- 1
-The user confirms leaf by leaf via your question tool — one question over the numbered rows when there are several (*confirm all* / *confirm some (say the numbers)* / *confirm none*), one question each at four or fewer. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
-+++ 1
-The user confirms leaf by leaf — one question listing the proposed rows when there are several (the user may confirm several), one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
-### star-proj-adopt/SKILL.md
---- 1
 - All three confirmation points go through your question tool, one question per call. If it is unavailable (headless / scripted), fall back to plain text — still one at a time, still an explicit answer before any write past a confirmation point.
 +++ 1
 - Ask one question at a time — your question tool, with concise plain text only in a non-interactive run — and wait for the answer. All three confirmation points require an explicit answer before any write past a confirmation point.
@@ -2200,14 +2195,19 @@ The user confirms leaf by leaf — one question listing the proposed rows when t
 列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。一次性问一个问题：哪些要记录到 wkdrs/（可多选）。把选中的每个 run 软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余仅作为证据留在清单里，报告中说明有多少没有入账。
 ### star-proj-adopt/SKILL_zh.md
 --- 1
-用户通过 your question tool 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
-+++ 1
-用户逐个确认——条目较多时用一个问题列出全部提议行（可多选），较少时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
-### star-proj-adopt/SKILL_zh.md
---- 1
 - 三个确认点全部通过 your question tool，每次调用只问一个问题。若该工具不可用（无人值守 / 脚本化运行），改用纯文本——仍然一次一问，任何跨确认点写入之前必须拿到明确答复。
 +++ 1
 - 一次只问一个问题——使用你的提问工具，仅在非交互运行下改用简洁纯文本——并等待答复。三个确认点在任何跨确认点写入之前都必须拿到明确答复。
+### star-proj-adopt/references/backfill.md
+--- 1
+The user confirms leaf by leaf via your question tool — one question over the numbered rows when there are several (*confirm all* / *confirm some (say the numbers)* / *confirm none*), one question each at four or fewer. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
++++ 1
+The user confirms leaf by leaf — one question listing the proposed rows when there are several (the user may confirm several), one question each when there are few. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
+### star-proj-adopt/references/backfill_zh.md
+--- 1
+用户通过 your question tool 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
++++ 1
+用户逐个确认——条目较多时用一个问题列出全部提议行（可多选），较少时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
 ### star-refs-reviewer/SKILL.md
 --- 1
 # Research Refs Reviewer — related-work base & verified bibliography

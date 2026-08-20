@@ -95,17 +95,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 ### 阶段 `backfill`
 
-#### Step B1：清单与 leaf 对账
-
-读 `metds/adopt.md` 和 `metds/plans/` 里的每个 leaf（规约 §5.4）。小树（≤ ~8 个 leaf）通常由主 agent 自己读更省事；更大的则把 leaf 切成互不相交的只读收集，逐 leaf 返回 `{leaf, deliverable_paths, step_paths, done_criterion（原文照录）, exec_status, overlap, weak}`——匹配规则只用得到这些，用不着整份计划正文。主 agent 对每个准备判为 `done` 的 leaf 重读完整 §5，并保留多对多那条规则和确认点。给出映射表：清单条目 → leaf → 它支持的状态（`done` / `in_progress`）→ 证据。两类错配都要如实报告——没有任何 leaf 覆盖的清单条目（计划树漏掉的工作），以及清单够不着的 leaf（真正的新工作，是常态，不是问题）。
-
-#### Step B2：确认点 3——逐 leaf 确认
-
-用户通过 AskUserQuestion 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`/star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
-
-#### Step B3：写入、记录、汇报
-
-只在获确认的 leaf 上写 `exec_status:`，以及在 S5 已入账 run 时写 `exec_runs:`——只碰 frontmatter 字段，文件里别的一律不动（原则 6）。对获确认且 run 已入账的匹配，同时把那份重建版 `EXEC_LOG.md` 的 `source_plan:` 改为该 leaf 的文件名——用户刚刚确认的正是这层对应关系，日志里留着 `(none)` 会让状态 skill 的 orphaned-run 检查在每个接入 run 上误报。向 `metds/adopt.md` 追加一段带日期的回填记录，写明每个被改动的 leaf 及其证据，并把 frontmatter 的 `backfilled:` 设为今天的日期——哪怕一个 leaf 都没获确认，这个阶段也跑过了，记录里写明即可。状态 skill 的覆盖行读的正是这个字段；不设它，那一行会在健康的项目上一直触发。汇报后交棒 `/star-flow-status`，那是接入后的项目第一次拿到诚实的全景图。
+这个阶段把工作清单与已分解的计划树对账，并为每处匹配提出应得的 `exec_status`。它的步骤，连同原属 `adopt_spec_zh.md` 第 7 节的对账规则，都在 `references/backfill_zh.md`，Step 0 解析出这个阶段时才读，之前不读。走 `survey` 的运行完全不读它。
 
 ## 状态与文件规则
 

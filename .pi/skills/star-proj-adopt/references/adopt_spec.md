@@ -89,17 +89,4 @@ An `EXEC_LOG.md` already in a selected run directory is left untouched; the run 
 
 ## 7. Backfill matching (Phase `backfill`)
 
-A leaf is matched to an inventory row only on **evidence overlap**: the leaf's §4 deliverable paths or §3 steps name a path, script, or module that appears in the row's `evidence` or `run_dir`. Name similarity alone is not a match — propose it as `weak` and let the user decide.
-
-State proposed per matched leaf:
-
-| Inventory `state` | Proposed leaf `exec_status` |
-|---|---|
-| `concluded` | `done` |
-| `run` | `done` when the leaf's §5 done-criterion is visibly met by the evidence; otherwise `in_progress` |
-| `built` | `in_progress` |
-| `abandoned` | no proposal — report it and let the user decide |
-
-`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run keeps `exec_status` alone and is flagged in the report as one `/star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the same pass updates the reconstructed log's `source_plan:` to the leaf's filename — the confirmation is precisely that correspondence.
-
-Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree: information, not an error to smooth over.
+The matching rules live with the phase, in `backfill.md`, read where Step 0 resolved `backfill` and not before. A `survey` run needs none of them.

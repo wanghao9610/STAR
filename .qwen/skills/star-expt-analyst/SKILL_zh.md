@@ -117,18 +117,11 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
-按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把路径切分给收集器）；**每个数字入表前，重开它引用的来源并确认**；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并遵守写入规则：已存在的 `type: results` 文件要先让变更清单获批；范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
-
-简报 ≤500 字：汇总 / 排除 / 仍未测量的 run、关键指标表格，以及转交——缺报告的交 `/star-expt-analyst <slug>`，未执行的叶子交 `/star-plan-executor <slug>`。明说结果汇总表只报数字、不解释数字：说清某个变体*为什么*赢，需要一次这个 skill 并不运行的受控对比。
+`aggregate [PLAN_NAME]` 只跑这一步——把每次运行核验过的数字汇编进结果表，并以它自己的摘要收尾——流程在 `references/aggregate_step_zh.md`，是这个模式时与 `references/aggregate_spec_zh.md` 一同读，之前不读。整轮分析两个都不读。
 
 ### Step 9：Watch（仅 watch 模式）
 
-对可能仍在运行的 run 做一次快速健康检查——只看维度 C 加存活情况，别的不做。只在聊天里：不打判定、不写报告文件、不画图；需要就反复跑。
-
-1. 按 Step 0 的规则解析 run。run 目录不存在、或还没有日志 → 如实说明并停止；没什么可看的。
-2. 按维度 C 扫描日志的致命、数值与动态信号（崩溃、traceback、NaN/Inf、OOM、发散、平台期）——grep 模式、只读头尾，绝不整读大日志。
-3. 存活情况与进度：最新日志/产物的 mtime（"距上次写入 N 分钟"），以及最近一条进度行——step / epoch / 评测行及其数值，按日志原样引用。
-4. 汇报 ≤200 字，存活情况先行：还活着还是从何时起停滞、最近的进度行、任何致命或异常信号及其 `file:line`，以及一个下一步——继续等；致命信号 → 停掉任务、修复后经 `/star-plan-executor <slug>` 重启；import 或环境错误 → `/star-env-builder`。明说这个 run 尚未被打分：跑完后由完整流程（`/star-expt-analyst <slug>`）来打。
+`watch [PLAN_NAME | RUN_DIR]` 只跑这一步——对可能还在跑的运行做一次只在对话里的存活性与 C 维检查，不下结论、不落报告文件——流程在 `references/watch_step_zh.md`，是这个模式时才读，之前不读。
 
 ## 状态与文件规则
 

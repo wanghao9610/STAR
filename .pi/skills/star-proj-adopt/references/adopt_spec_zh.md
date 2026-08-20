@@ -89,17 +89,4 @@ bash scripts/train.sh "$@"
 
 ## 7. 回填对账（`backfill` 阶段）
 
-leaf 与清单行只在**证据重叠**时才算匹配：leaf 的 §4 交付路径或 §3 步骤中出现了某条路径、脚本或模块，而它也出现在该行的 `evidence` 或 `run_dir` 里。仅凭名字相似不算匹配——把它作为 `weak` 提出来，交给用户定夺。
-
-对匹配上的每个 leaf，提议的状态如下：
-
-| 清单 `state` | 提议的 leaf `exec_status` |
-|---|---|
-| `concluded` | `done` |
-| `run` | 证据显示 leaf 的 §5 done-criterion 明显已达成时 `done`；否则 `in_progress` |
-| `built` | `in_progress` |
-| `abandoned` | 不提议——报告出来交给用户决定 |
-
-`exec_runs` 只在该行的 run 已于确认点 2 入账时才写；`done` 但没有入账 run 的 leaf 只写 `exec_status`，并在报告中标出——`/star-flow-status` 会把它列在 done-with-no-run 之下。对获确认且 run 已入账的匹配，同一趟把重建日志的 `source_plan:` 更新为该 leaf 的文件名——用户确认的正是这层对应关系。
-
-绝不提议 `blocked`，绝不写 `depends_on`，绝不重排任何东西。当一条清单行匹配到多个 leaf、或多条清单行匹配到同一个 leaf 时，如实呈现并询问——多对多的匹配通常意味着拆解与历史彼此对不上：是信息，不是需要抹平的错误。
+对账规则与这个阶段放在一起，在 `backfill_zh.md`，Step 0 解析出 `backfill` 时才读，之前不读。走 `survey` 的运行一条都用不上。
