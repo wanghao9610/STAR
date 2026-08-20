@@ -420,6 +420,7 @@ By default, the command updates these paths from STAR's `main` branch — every 
 
 - `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each tool owns, and which copy Cursor and Pi must follow
 - `.agents/skills/` — the shared root, updated by every run — then `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
+- `.codex/skills/` — the per-skill manifests Codex reads, installed with the rest of its tree; upstream `.agents/skills/` links to them, and a project receives both as real files
 - `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/` — the `/star` slash command that routes a described request to a skill, plus Pi's one prompt per skill, `/star-<name>`
 - `.pi/agents/`, `.pi/extensions/star-plan-mode/`, `.pi/extensions/star-subagent/`, `.pi/extensions/star-permission-gate.ts`, and `.pi/extensions/star-questionnaire.ts` — the sub-agents, plan mode, and structured questions Pi's core does not ship; your project's own extensions sit beside them and are kept
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.dsh/hooks/`, `.kimi-code/hooks/`, `.pi/extensions/star-hooks/`, `.qwen/hooks/`, and the files that register them where registration is not automatic — `.dsh/hooks.json` with `.dsh/cordis.patch.yml`, `.kimi-code/hooks.example.toml`, and `.pi/extensions/star-hooks/index.ts` — the model-id provenance, project memory, and involve-gate hooks

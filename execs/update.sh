@@ -422,6 +422,9 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         # The shared root first: every project gets it, whichever tools it picks.
         ".agents/skills"
+        # Codex's own half of it — the per-skill manifests .agents/skills links
+        # to upstream — installed with the rest of the Codex tree and only then.
+        ".codex/skills"
         "${SKILL_ROOTS[@]:1}"
         "${HOOK_TREES[@]}"
         "${EXTENSION_TREES[@]}"
@@ -486,6 +489,8 @@ else
     SYNC_PATHS=(
         # The shared root first: every run syncs it, whichever tools were named.
         ".agents/skills"
+        # Codex's own half of it, installed and updated with the Codex tree.
+        ".codex/skills"
         # Which skill root each tool owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,

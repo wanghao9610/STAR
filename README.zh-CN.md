@@ -412,6 +412,7 @@ bash execs/update.sh
 
 - `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个工具所有，以及 Cursor 和 Pi 该跟随哪一份副本
 - `.agents/skills/`——共享根目录，每次运行都更新——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
+- `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
 - `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/`——把描述出来的需求分流到某个 skill 的 `/star` 斜杠命令，外加 Pi 那份每个 skill 一条的 `/star-<名>`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
