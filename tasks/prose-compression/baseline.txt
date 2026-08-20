@@ -1,0 +1,64 @@
+file	words	em-dash	em/1kw	sentences
+docs/mds/star-workflow/research-workflow-skills.md	14699	216	14.7	854
+docs/mds/star-workflow/research-workflow-conventions.md	9402	156	16.6	408
+.claude/skills/star-refs-reviewer/SKILL.md	6422	129	20.1	233
+.claude/skills/star-flow-status/references/status_spec.md	4553	93	20.4	181
+.claude/skills/star-plan-executor/SKILL.md	5306	90	17.0	201
+.claude/skills/star-plan-reviser/SKILL.md	3286	70	21.3	134
+.claude/skills/star-code-reviewer/SKILL.md	3442	60	17.4	143
+.claude/skills/star-expt-digest/SKILL.md	3808	60	15.8	156
+.claude/skills/star-plan-decomposer/SKILL.md	3861	59	15.3	172
+.claude/skills/star-expt-analyst/SKILL.md	3292	55	16.7	142
+.claude/skills/star-flow-status/SKILL.md	3022	55	18.2	129
+.claude/skills/star-metd-summarize/SKILL.md	3189	55	17.2	134
+.claude/skills/star-idea-storm/SKILL.md	2855	54	18.9	123
+.claude/skills/star-code-release/SKILL.md	3139	49	15.6	143
+.claude/skills/star-refs-reviewer/references/refs_rubric.md	2111	47	22.3	118
+.claude/skills/star-proj-adopt/SKILL.md	2732	46	16.8	131
+.claude/skills/star-refs-reviewer/references/source_policy.md	2262	46	20.3	138
+.claude/skills/star-env-builder/SKILL.md	2590	41	15.8	131
+.claude/skills/star-plan-coach/SKILL.md	2822	40	14.2	116
+.claude/skills/star-code-architect/SKILL.md	2667	35	13.1	142
+.claude/skills/star-plan-reviser/references/revision_rules.md	1308	34	26.0	72
+.claude/skills/star-plan-executor/references/plan_sync_rules.md	985	30	30.5	62
+.claude/skills/star-expt-analyst/references/analysis_rubric.md	1974	29	14.7	106
+.claude/skills/star-plan-executor/references/branch_rules.md	1273	29	22.8	61
+.claude/skills/star-plan-decomposer/references/decomposition_axes.md	1585	28	17.7	82
+.claude/skills/star-idea-storm/references/scan_policy.md	1081	26	24.1	55
+.claude/skills/star-code-release/references/readme_map.md	1191	25	21.0	56
+.claude/skills/star-plan-reviser/references/review_spec.md	913	25	27.4	59
+.claude/skills/star-code-architect/references/orchestration_spec.md	604	20	33.1	41
+.claude/skills/star-code-reviewer/references/review_rubric.md	1215	20	16.5	74
+.claude/skills/star-idea-storm/references/idea_rubric.md	709	20	28.2	53
+.claude/skills/star-idea-storm/references/question_bank.md	1024	19	18.6	67
+.claude/skills/star-plan-decomposer/references/subplan_rubric.md	703	19	27.0	25
+.claude/skills/star-code-release/references/gather_rubric.md	1085	17	15.7	64
+.claude/skills/star-plan-executor/references/agent_dispatch_spec.md	688	17	24.7	40
+.claude/skills/star-code-release/references/release_checklist.md	1141	16	14.0	70
+.claude/skills/star-expt-analyst/references/aggregate_spec.md	1292	16	12.4	80
+.claude/skills/star-refs-reviewer/references/venue_tiers.md	590	14	23.7	56
+.claude/skills/star-code-architect/references/survey_spec.md	509	12	23.6	38
+.claude/skills/star-env-builder/references/installer_policy.md	660	12	18.2	40
+.claude/skills/star-env-builder/references/runnable_check_spec.md	564	12	21.3	37
+.claude/skills/star-expt-digest/references/scope_spec.md	933	12	12.9	54
+.claude/skills/star-metd-summarize/references/extract_map.md	1538	12	7.8	134
+.claude/skills/star-plan-coach/references/plan_rubric.md	320	12	37.5	14
+.claude/skills/star-proj-adopt/references/adopt_spec.md	1188	12	10.1	82
+.claude/skills/star-expt-digest/references/digest_rubric.md	1217	11	9.0	79
+.claude/skills/star-plan-executor/references/exec_rubric.md	386	11	28.5	18
+.claude/skills/star-env-builder/references/dependency_resolution.md	746	10	13.4	49
+.claude/skills/star-plan-coach/references/question_bank.md	1019	10	9.8	91
+.claude/skills/star-code-architect/references/repo_rubric.md	520	8	15.4	48
+.claude/skills/star-plan-executor/references/stop_line_rules.md	429	7	16.3	28
+.claude/skills/star-plan-executor/references/orient_checklist.md	318	6	18.9	19
+.claude/skills/star-code-architect/references/rebrand_checklist.md	396	3	7.6	32
+.claude/skills/star-plan-decomposer/references/naming_convention.md	488	2	4.1	30
+
+files      54
+words      116052 (prose only; frontmatter and fenced code excluded)
+em-dashes  2012  = 17.3 per 1000 words
+sentences  5845
+mean       19.9 words
+p90        39 words
+max        175 words
+>40 words  507  (9%)
