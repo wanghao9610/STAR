@@ -417,21 +417,74 @@ norm_headings() { # $1 = file; prints one normalized heading per line
     ' "$1"
 }
 
+# Detection is one awk pass over every file in the six trees; the per-file diff
+# below runs only for a file that actually differs, which is normally none.
+# Before, this loop re-normalized each baseline file once per non-baseline root
+# and compared through process substitution: 155 files x 5 roots = 775 diff and
+# 1,550 awk processes. That was 3.2 s of the run, and under concurrent load the
+# 1,550 process substitutions exhausted file descriptors and reported heading
+# differences that were not there.
+#
+# Rule the pass must keep: register EVERY file it visits, not only the ones that
+# emit a heading. Nine files per tree carry no h2-h4 heading; a version that
+# records only heading-emitting files never compares them, so a non-baseline
+# file that lost all of its headings passes silently, which is the exact drift
+# this section exists to catch.
 struct_errors=0
-struct_files=0
-while IFS= read -r rel; do
+struct_mismatch="$(mktemp)"
+find "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
+  | xargs -0 awk -v baseline="${STRUCT_ROOTS[0]}" '
+    function flush() {
+        if (path != "") seq[tree SUBSEP rel] = acc
+    }
+    FNR == 1 {
+        flush()
+        path = FILENAME
+        i = index(path, "/skills/")
+        tree = substr(path, 1, i - 1)
+        rel  = substr(path, i + 8)
+        acc = ""
+        seen[tree] = 1
+        if (tree "/skills" == baseline) base[rel] = 1
+    }
+    /^#/ {
+        n = 0
+        while (substr($0, n + 1, 1) == "#") n++
+        if (n < 2 || n > 4) next
+        if (substr($0, n + 1, 1) != " ") next
+        line = $0
+        p = index(line, "(")
+        q = index(line, "（")
+        if (q > 0 && (p == 0 || q < p)) p = q
+        if (p > 0) line = substr(line, 1, p - 1)
+        gsub(/`/, "", line)
+        gsub(/[ \t]+/, " ", line)
+        sub(/^ +/, "", line)
+        sub(/ +$/, "", line)
+        acc = acc tolower(line) "\n"
+    }
+    END {
+        flush()
+        b = baseline; sub(/\/skills$/, "", b)
+        for (rel in base)
+            for (tree in seen) {
+                if (tree == b) continue
+                k = tree SUBSEP rel
+                if (!(k in seq)) continue
+                if (seq[k] != seq[b SUBSEP rel]) print tree "/skills/" rel
+            }
+    }
+' | sort > "${struct_mismatch}"
+struct_files="$(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | wc -l | tr -d " ")"
+while IFS= read -r other; do
+    [[ -n "${other}" ]] || continue
+    rel="${other#*/skills/}"
     baseline_file="${STRUCT_ROOTS[0]}/${rel}"
-    struct_files=$(( struct_files + 1 ))
-    for root in "${STRUCT_ROOTS[@]:1}"; do
-        other="${root}/${rel}"
-        [[ -f "${other}" ]] || continue   # inventory parity is check 3's job
-        if ! diff -q <(norm_headings "${baseline_file}") <(norm_headings "${other}") > /dev/null; then
-            fail "${other}: heading structure differs from ${baseline_file}:"
-            diff <(norm_headings "${baseline_file}") <(norm_headings "${other}") | sed 's/^/      /'
-            struct_errors=1
-        fi
-    done
-done < <(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | sed 's|^\./||' | sort)
+    fail "${other}: heading structure differs from ${baseline_file}:"
+    diff <(norm_headings "${baseline_file}") <(norm_headings "${other}") | sed 's/^/      /'
+    struct_errors=1
+done < "${struct_mismatch}"
+rm -f "${struct_mismatch}"
 (( struct_errors == 0 )) && note "heading structure matches across the ${#STRUCT_ROOTS[@]} trees (${struct_files} files)"
 
 # 12. Frontmatter descriptions stay inside the SKILL.md spec limit, in every tree.
