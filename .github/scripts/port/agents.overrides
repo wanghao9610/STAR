@@ -992,6 +992,11 @@ Lead with what was written, under about 500 words: per document — written / sk
 - 按用户语言对话；文档跟随计划的 `language`（Step 1），可能与对话语言不同。中文文档里技术术语——指标名、模块路径、数据集名——保留英文。
 +++ 0
 ### star-metd-summarize/references/extract_map.md
+--- 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
++++ 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks design intent as verified work or the reverse.
+### star-metd-summarize/references/extract_map.md
 --- 4
 `target:` is required because a collector holds plans, not a document, and the five
 templates' section names collide only by accident. `exec_status` is a leaf field the

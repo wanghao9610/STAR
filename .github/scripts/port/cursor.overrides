@@ -113,6 +113,27 @@ Invocation: `/star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, 
 对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、竞争激烈程度说明（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇最接近的工作及各自摘要**没有**声称的东西、表面缺口。默认深度为标题 + 摘要；只有用户指明某方向、或某条缺口判断直接决定两个入选方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读收集器 `Task` 子代理（`subagent_type: explore`），并行派发、每个负责一个方向、各自按 `references/scan_policy_zh.md` 的收集器返回格式返回——交办说明、以及按份数分给各收集器的速率配额，都由主 agent 构建，收集器绝不自己攒；主 agent 写文件，并亲自下所有判断行。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
 +++ 1
 对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、竞争激烈程度说明（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇最接近的工作及各自摘要**没有**声称的东西、表面缺口。默认深度为标题 + 摘要；只有用户指明某方向、或某条缺口判断直接决定两个入选方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读 `Task` 子代理（`subagent_type: explore`），并行派发、每个负责一个方向、各自按 `references/scan_policy_zh.md` 的收集器返回格式返回——交办说明、以及按份数分给各收集器的速率配额，都由主 agent 构建，收集器绝不自己攒；主 agent 写文件，并亲自下所有判断行。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
+### star-metd-summarize/references/extract_map.md
+--- 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
++++ 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks design intent as verified work or the reverse.
+### star-metd-summarize/references/extract_map.md
+--- 4
+`target:` is required because a collector holds plans, not a document, and the five
+templates' section names collide only by accident. `exec_status` is a leaf field the
+collector omits on strategy nodes rather than filling a plausible value, the rule the
+sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
++++ 1
+`target:` is required because a collector holds plans, not a document, and the five templates' section names collide only by accident. `exec_status` is a leaf field the collector omits on strategy nodes rather than filling a plausible value, the rule the sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
+### star-metd-summarize/references/extract_map.md
+--- 4
+`unread` is not a gap. A gap means no plan covers the section, and reaches the
+delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could
+not open is one the main agent reads itself. Keeping them in one list turns a read
+failure into a false hole in the method.
++++ 1
+`unread` is not a gap. A gap means no plan covers the section, and reaches the delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could not open is one the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
 ### star-plan-executor/SKILL.md
 --- 1
 2. **Plan behind a confirmation point, execute behind an agent.** The executable plan (EXEC_PLAN) is produced in **plan mode** and approved via **`ExitPlanMode`** before anything is written or run. Execution goes to **subagents, one per step / step-group**: the main agent orchestrates and verifies, and never edits code or launches jobs itself. Reference: `references/agent_dispatch_spec.md`.

@@ -623,9 +623,30 @@ Where Step 2 split into passes, reconcile before merging: every plan the partiti
 - 五个确认点都用普通文本提问：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。提问走 `star_questionnaire`；且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
 ### star-metd-summarize/references/extract_map.md
 --- 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
++++ 1
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks design intent as verified work or the reverse.
+### star-metd-summarize/references/extract_map.md
+--- 1
 Read-only subagents return exactly these three lists plus `plans_read: <n>`, and nothing else:
 +++ 1
 A collection pass returns exactly these three lists plus `plans_read: <n>`, and nothing else:
+### star-metd-summarize/references/extract_map.md
+--- 4
+`target:` is required because a collector holds plans, not a document, and the five
+templates' section names collide only by accident. `exec_status` is a leaf field the
+collector omits on strategy nodes rather than filling a plausible value, the rule the
+sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
++++ 1
+`target:` is required because a collector holds plans, not a document, and the five templates' section names collide only by accident. `exec_status` is a leaf field the collector omits on strategy nodes rather than filling a plausible value, the rule the sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
+### star-metd-summarize/references/extract_map.md
+--- 4
+`unread` is not a gap. A gap means no plan covers the section, and reaches the
+delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could
+not open is one the main agent reads itself. Keeping them in one list turns a read
+failure into a false hole in the method.
++++ 1
+`unread` is not a gap. A gap means no plan covers the section, and reaches the delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could not open is one the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
 ### star-metd-summarize/references/extract_map.md
 --- 1
 Read-only subagents extract only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile a document. `overview` is compiled last, from the other four documents' compiled content — but its extraction is ordinary work: a collector returns its slice's `overview` rows like any other target's.
