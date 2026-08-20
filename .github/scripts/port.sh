@@ -21,11 +21,13 @@
 #
 # A file the trees do not word differently at all — a rubric, a template, a scan
 # script — is stored once, in .agents/skills, and every other tree carries a
-# relative symlink at the same path. Nothing lists which files those are: a tree
-# links a file when its generated text and .agents' come out the same, and holds
-# its own file when they do not, decided again on every run. Downstream projects
-# never see the links; execs/update.sh resolves them as it copies, so an
-# installed tree is real files, self-contained, exactly as before.
+# relative symlink at the same path. .claude included: every edit still goes
+# through .claude/skills, whose own copy of such a file is a link to that text.
+# Nothing lists which files those are — a tree links a file when its generated
+# text and .agents' come out the same, and holds its own when they do not,
+# decided again on every run. Downstream projects never see the links:
+# execs/update.sh writes out what one points at, so an installed tree is real
+# files, self-contained, exactly as before.
 #
 # Frontmatter is not generated. Each harness tunes its own `description` to its own
 # length limit and trigger wording; check_consistency.sh holds those invariants.
@@ -46,7 +48,10 @@ while [[ $# -gt 0 ]]; do
         --write) MODE="write"; shift ;;
         --regen) MODE="regen"; shift ;;
         --tree)  TREES+=("${2#.}"); shift 2 ;;
-        -h|--help) sed -n '2,30p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        # the whole header block, however long it grows — a line range would go
+        # stale the next time something is explained here
+        -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' \
+                       "${BASH_SOURCE[0]}"; exit 0 ;;
         *) echo "port.sh: unknown argument '$1'" >&2; exit 2 ;;
     esac
 done
@@ -63,7 +68,8 @@ rc=$?
 
 if [[ "${MODE}" == "check" ]]; then
     if [[ ${rc} -eq 0 ]]; then
-        echo "ok  every tree is what .claude/skills plus its own vocabulary produces, and every file it does not word differently is a link into .agents/skills"
+        echo "ok  every tree is what .claude/skills plus its own vocabulary produces,"
+        echo "    and the files none of them words differently are links into .agents/skills"
     else
         cat <<'MSG'
 
