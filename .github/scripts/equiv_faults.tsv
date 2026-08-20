@@ -38,6 +38,9 @@ f21	Opening-load invariants	perl -pi -e "s/^Match the user's language\./Match th
 f21b	Opening-load invariants	perl -pi -e "s/grep -sE '\^\(STAR_LANG\|INVOLVE\)=' \.env/grep -sE 'STAR_LANG' .env/" "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md
 f22	Selective conventions load	perl -pi -e 's/\(0\|3\|5\|6\)/(0|3|5|6|9)/' "$W/.claude/skills/star-expt-digest/SKILL.md"	.claude/skills/star-expt-digest/SKILL.md
 f23	Reuse-an-earlier-load paragraph	perl -pi -e 's/^(\*\*Reusing an earlier load\.\*\*) /$1 Note: /' "$W/.qwen/skills/star-flow-status/SKILL.md"	reuse paragraph
-f24	Harness-specific delegation vocabulary	perl -pi -e 's/agent_type: explorer/agent_type: scout/g' "$W/.agents/skills/star-plan-executor/references/agent_dispatch_spec.md"	.agents/skills/star-plan-executor
+# f24 puts a harness's delegation tool back into the neutral root; f24b does the
+# same with a question tool. Both are what that root exists not to name.
+f24	Delegation vocabulary	perl -pi -e 's/dispatch a writing sub-agent/call `spawn_agent` with `agent_type: worker`/' "$W/.agents/skills/star-plan-executor/references/agent_dispatch_spec.md"	.agents/skills
+f24b	Harness tool vocabulary	perl -pi -e 's/your question tool/AskUserQuestion/' "$W/.agents/skills/star-plan-coach/SKILL.md"	.agents/skills
 f25	Harness tool vocabulary	perl -pi -e 's/`run_shell_command`/Bash/g' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
 f25b	Harness tool vocabulary	perl -pi -e 's/AskQuestion/AskUserQuestion/g' "$W/.cursor/skills/star-plan-coach/SKILL.md"	.cursor/skills/star-plan-coach

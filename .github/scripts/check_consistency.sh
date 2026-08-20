@@ -205,8 +205,10 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( conv_errors == 0 )) && note "every SKILL.md references the conventions document"
 
-# 7. Invocation tokens are tree-appropriate: $star-* in .agents, /star-* in
-#    .claude, .cursor, .pi and .qwen, /skill:star-* in .dsh and .kimi-code.
+# 7. Invocation tokens are tree-appropriate: none at all in .agents, which is
+#    the root every agent following the AGENTS.md convention reads and so spells
+#    no one tool's prefix; /star-* in .claude, .cursor, .pi and .qwen,
+#    /skill:star-* in .dsh and .kimi-code.
 #    .pi reaches /star-* the long way round: Pi has no per-skill slash command of
 #    that shape, so .pi/prompts/ supplies one per skill and .pi/settings.json
 #    turns off the /skill: commands that would otherwise duplicate them.
@@ -216,7 +218,11 @@ token_errors=0
 # two below it read every file in a tree and not only its Markdown.
 check_absent() { # $1 = tree, $2 = literal token
     local hits
-    hits="$(find -L "$1" -type f -exec grep -nHF -- "$2" {} + || true)"
+    # A skill's agents/ directory is Codex's — .agents/skills links there for the
+    # manifests, which .codex/skills holds — and its default_prompt is written in
+    # Codex's own invocation syntax on purpose. Check 3 excludes it from the
+    # inventory baseline for the same reason.
+    hits="$(find -L "$1" -type f ! -path '*/agents/*' -exec grep -nHF -- "$2" {} + || true)"
     if [[ -n "${hits}" ]]; then
         fail "$1 contains foreign invocation token '$2':"
         printf '%s\n' "${hits}" | sed 's/^/      /'
@@ -224,8 +230,12 @@ check_absent() { # $1 = tree, $2 = literal token
     fi
 }
 while IFS= read -r skill; do
+    # The neutral root carries the bare name and no prefix at all — not the
+    # one Codex uses either, though .agents/skills is the only project root it
+    # scans. Every prefix is somebody's, and every agent knows its own.
     check_absent .agents/skills "/${skill}"
     check_absent .agents/skills "skill:${skill}"
+    check_absent .agents/skills "\$${skill}"
     for root in .claude/skills .cursor/skills .pi/skills .qwen/skills; do
         check_absent "${root}" "\$${skill}"
         check_absent "${root}" "skill:${skill}"
@@ -935,23 +945,25 @@ for guide_row in "${GUIDES[@]}"; do
     if [[ "${guide_mode}" == "guide" ]]; then
         # one numbered section per skill, and no numbered skill section beyond them
         while IFS= read -r skill; do
-            n="$(grep -E '^## [0-9]+\.' "${guide}" | grep -cF "\`\$${skill}\`")"
+            n="$(grep -E '^## [0-9]+\.' "${guide}" | grep -cF "\`${skill}\`")"
             if (( n != 1 )); then
                 fail "${guide}: ${n} sections for ${skill}, expected 1 — a skill was added, removed, or renamed without the guide"
                 guide_errors=1
             fi
         done < <(printf '%s\n' "${SKILLS}")
-        sections="$(grep -cE '^## [0-9]+\. `\$star-' "${guide}")"
+        sections="$(grep -cE '^## [0-9]+\. `star-' "${guide}")"
         expected_sections="$(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ')"
         if [[ "${sections}" != "${expected_sections}" ]]; then
             fail "${guide} has ${sections} per-skill sections for ${expected_sections} skills"
             guide_errors=1
         fi
     else
-        # the name must end where the skill's name ends: a plain substring match
-        # would accept `$star-expt-digestx` as a mention of `star-expt-digest`
+        # No prefix is required: the landing page names a skill the way the
+        # trees do now, plainly. The name must still end where the skill's name
+        # ends — a plain substring match would accept `star-expt-digestx` as a
+        # mention of `star-expt-digest`.
         while IFS= read -r skill; do
-            if ! grep -qE "\\\$${skill}([^A-Za-z0-9_-]|\$)" "${guide}"; then
+            if ! grep -qE "${skill}([^A-Za-z0-9_-]|\$)" "${guide}"; then
                 fail "${guide} never names ${skill} — a skill was added or renamed without the landing page"
                 guide_errors=1
             fi
@@ -1459,7 +1471,7 @@ rm -f "${reuse_en}" "${reuse_zh}"
 #     subagent_type. Codex has the same component surface, but calls spawn_agent
 #     with agent_type. Keep the selective/local-by-default policy in prose while
 #     making every actual dispatch site executable rather than tool-shaped prose.
-section "Harness-specific delegation vocabulary"
+section "Delegation vocabulary"
 delegation_errors=0
 
 # .agents/skills is the root every agent following the AGENTS.md convention
