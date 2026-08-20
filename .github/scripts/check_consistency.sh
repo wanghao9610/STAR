@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # STAR upstream consistency check.
 #
-# Guards the invariants the five per-tool skill trees (.agents/.claude/.cursor/
-# .kimi-code/.qwen) and the shared docs are supposed to keep while being
+# Guards the invariants the seven per-tool skill trees (.agents/.claude/.cursor/
+# .dsh/.kimi-code/.pi/.qwen) and the shared docs are supposed to keep while being
 # maintained by hand. Run from anywhere inside the repo: bash .github/scripts/check_consistency.sh
 # Exits non-zero if any check fails. Upstream-maintainer tooling only — this
 # directory is not synced to downstream projects by execs/update.sh.
@@ -26,7 +26,7 @@ frontmatter_has_line() { # $1 = file, $2 = exact line expected inside the leadin
     awk -v want="$2" 'NR == 1 { next } /^---[ \t]*$/ { exit } $0 == want { found = 1; exit } END { exit !found }' "$1"
 }
 
-# 1. The five roots carry the same, non-empty set of skill directories.
+# 1. The seven roots carry the same, non-empty set of skill directories.
 section "Skill directory sets"
 SKILLS="$(list_skills "${SKILL_ROOTS[0]}")"
 if [[ -z "${SKILLS}" ]]; then
@@ -60,7 +60,7 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( name_errors == 0 )) && note "every SKILL.md name matches its directory"
 
-# 3. Per-skill file inventory is identical across the five trees, apart from the
+# 3. Per-skill file inventory is identical across the seven trees, apart from the
 #    Codex-only agents/ manifest directory.
 section "File inventory parity (ignoring .agents agents/ manifests)"
 parity_errors=0
@@ -78,7 +78,7 @@ done < <(printf '%s\n' "${SKILLS}")
 (( parity_errors == 0 )) && note "file sets match across all ${#SKILL_ROOTS[@]} trees"
 
 # 4. Slash-only guards: the conventions roster (§10) marks that set with †, and
-#    the five trees enforce it — Codex via agents/openai.yaml, the other four
+#    the seven trees enforce it — Codex via agents/openai.yaml, the other six
 #    via disable-model-invocation frontmatter. Checked both ways: a † whose
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
@@ -106,7 +106,7 @@ if [[ -z "${SLASH_ONLY}" ]]; then
 fi
 ROSTER_ALL="$(roster_rows "${CONVENTIONS}" "${ANY_ROW}")"
 if [[ "${ROSTER_ALL}" != "${SKILLS}" ]]; then
-    fail "${CONVENTIONS}: the §10 roster does not list exactly the skills the five trees carry:"
+    fail "${CONVENTIONS}: the §10 roster does not list exactly the skills the ${#SKILL_ROOTS[@]} trees carry:"
     diff <(printf '%s\n' "${SKILLS}") <(printf '%s\n' "${ROSTER_ALL}") | sed 's/^/      /'
     guard_errors=1
 fi
@@ -144,7 +144,7 @@ while IFS= read -r skill; do
         fi
     fi
 
-    for root in .claude/skills .cursor/skills .kimi-code/skills .qwen/skills; do
+    for root in .claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills; do
         has=false
         frontmatter_has_line "${root}/${skill}/SKILL.md" "disable-model-invocation: true" && has=true
         if [[ "${want_guarded}" != "${has}" ]]; then
@@ -349,7 +349,7 @@ grep -qF 'block: true' .pi/extensions/star-hooks/index.ts || \
 grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
     { fail ".dsh/hooks.json no longer matches DSH's lowercase bash tool"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
-#     five memory hooks split on byte-exactly, and what the spec and the shipped
+#     seven memory hooks split on byte-exactly, and what the spec and the shipped
 #     index document. Reword it in one place and the hooks silently stop marking
 #     anything: same failure mode as check 15's registry, one file set earlier.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
@@ -380,7 +380,7 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
     { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
 (( hook_errors == 0 )) && note "all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
-# 11. Heading structure matches across the five trees that share it.
+# 11. Heading structure matches across the six trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
 #     section could be dropped from one tree, or reordered, and every check passed.
 #     This compares the heading sequence of each file.
@@ -391,8 +391,8 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
 #     compare equal to their siblings. What remains must match exactly.
 #
 #     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
-#     executor against the others' 9), and its headings differ in 23 files. That is a
-#     known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
+#     executor against the others' 9), and its headings differ in 10 files under
+#     this check's own normalization. That is a known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
 section "Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)"
 STRUCT_ROOTS=(.claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
 
@@ -496,7 +496,7 @@ while IFS= read -r manifest; do
 done < <(find .dsh/skills -name 'SKILL.md' | sort)
 (( dsh_desc_errors == 0 )) && note "every .dsh description survives DSH's ${DSH_DESC_MAX}-character catalog intact"
 
-# 13. Skill helper scripts are byte-identical across the five trees, and executable.
+# 13. Skill helper scripts are byte-identical across the seven trees, and executable.
 #     The .md files are adapted per tree — invocation tokens, harness vocabulary —
 #     but a script reads project files and names no harness, so it has nothing to
 #     adapt. A copy that has drifted is a bug, not a variant. Check 3 compares file
@@ -582,10 +582,10 @@ done < <(printf '%s\n' "${SKILLS}")
 (( section_errors == 0 )) && note ".agents manifests carry the same ## sections as .claude (${section_files} files)"
 
 # 15. The shared scripts parse, and every string they match byte-exactly still has
-#     a producer. Check 13 compares the five copies against each other, so a script
-#     that is broken or silently mismatched the same way in all five passes it: the
+#     a producer. Check 13 compares the seven copies against each other, so a script
+#     that is broken or silently mismatched the same way in all seven passes it: the
 #     copies agree, and agreement is all it asks. Two failure modes get through.
-#     A syntax error edited into all five at once — which is how these files are
+#     A syntax error edited into all seven at once — which is how these files are
 #     normally edited — stays byte-identical and executable. And a scanner matches
 #     on strings some *other* skill's template writes, with nothing linking the two:
 #     reword the producer and the scan does not error, it just reports zero, and a
@@ -1019,7 +1019,7 @@ for root in "${SKILL_ROOTS[@]}"; do
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-# Both passages are uniform across all sixty file pairs by design, so a
+# Both passages are uniform across all 105 file pairs by design, so a
 # partial re-edit — one tree reworded, the rest left behind — shows up here.
 if (( $(sort -u "${lang_seen}" | wc -l) > 1 )); then
     fail "the language paragraph differs across SKILL.md files; it is uniform by design:"
@@ -1292,7 +1292,7 @@ done
 
 # The other direction, per tree: a registry row whose citation is gone is as
 # misleading as an unregistered citation, and asking each tree separately also
-# catches the restatement dropped from one tree and left in the other four.
+# catches the restatement dropped from one tree and left in the other six.
 for row in "${RESTATED_REGISTRY[@]}"; do
     for root in "${SKILL_ROOTS[@]}"; do
         skill_of_row="${row%%|*}"
@@ -1446,7 +1446,7 @@ rm -f "${codex_expected}" "${codex_actual}"
 #     names, onto ReadFile and Shell, which it has never had. Pinned here so
 #     neither direction rests on how plausible a name feels.
 #
-#     All five now come from a vendor's published list. Cursor's prose pages give
+#     All seven now come from a vendor's published list. Cursor's prose pages give
 #     capabilities rather than identifiers ("Read files", "Run shell commands", a
 #     page titled Terminal), which is why .cursor's Read and Shell began as this
 #     repository's descriptive choice; two config surfaces have since published
@@ -1493,7 +1493,7 @@ check_vocab .cursor/skills    '`Read`'      '\bBash\b|\bReadFile\b'
 check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 # Pi publishes its built-ins lowercase — read, bash, edit, write, grep, find, ls
-# — so the capitalized spellings of the other five trees are all foreign here.
+# — so the capitalized spellings of the other six trees are all foreign here.
 check_vocab .pi/skills        '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
 # DSH publishes its tools lowercase too — bash, read, write, edit, glob, grep —
 # so the capitalized spellings are foreign here for the same reason as in Pi.
