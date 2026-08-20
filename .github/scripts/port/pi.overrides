@@ -1219,16 +1219,6 @@ Expansion may fan out over the core papers, **one paper each** — a single seri
 Expansion goes over the core papers, **one paper at a time** — which is also what the request budget in `source_policy.md` wants, since it is **per host** rather than per pass, and anything concurrent would multiply the real rate against every host this skill promises to be polite to. Cite that file instead of repeating its numbers — they are kept current there. Each returns `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <one clause>}]`, `queries_run`, `failures: [{host, error, retries}]`, `papers_seen`, and nothing else. It fetches no bibliographic record and decides nothing about what is core; the pages it fetches are cached under this run's own `raw/` prefix, scoped to its own paper (conventions §6.4), and nothing else is written. Nothing it returns is trusted as a bib field — Step 5 re-fetches an authoritative record for every survivor from scratch, so a mis-transcribed title costs one failed match, routed to Needs-manual-check.
 ### star-refs-reviewer/SKILL.md
 --- 1
-2. **Search wide.** Step 1's machinery as written — same queries from the profile, same fan-out cap and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
-+++ 1
-2. **Search wide.** Step 1's machinery as written — same queries from the profile, same grouping and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
-### star-refs-reviewer/SKILL.md
---- 1
-4. **Read.** The deep and abstract tiers may fan out as Step 3 does — one paper per collector, per-host budget split as numbers per `references/source_policy.md`, one `raw/` prefix per paper — each returning the survey collector format in `references/refs_rubric.md`. Below 6 papers to read, skip the fan-out and read them in the main session. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
-+++ 1
-4. **Read.** The deep and abstract tiers are read as Step 3 reads — one paper at a time, requests serialized against the per-host budget in `references/source_policy.md`, one `raw/` prefix per paper — each filling the survey collector format in `references/refs_rubric.md`. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
-### star-refs-reviewer/SKILL.md
---- 1
 - The core-set confirmation is the only mandatory question in the full pass — one `star_questionnaire` over the table's numbered rows, recommendations marked in the table. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; Step 10.7's overwrite question stays mandatory there at every level. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one direct question with the candidates. If `star_questionnaire` is unavailable (headless / scripted), fall back to plain text and require an explicit answer before reading.
 +++ 1
 - The core-set confirmation is the only mandatory question in the full pass — one `star_questionnaire` call over the table's numbered rows, recommendations marked in the table. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; Step 10.7's overwrite question stays mandatory there at every level. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one direct question with the candidates. Ask through `star_questionnaire` and require an explicit answer before reading.
@@ -1259,16 +1249,6 @@ Expansion goes over the core papers, **one paper at a time** — which is also w
 扩展按核心论文来,**一次一篇**——这也正是 `source_policy_zh.md` 里请求预算想要的:它是**按 host** 算的、不是按遍数算的,任何并发都会把本 skill 承诺要礼貌相待的每个 host 的真实速率成倍放大。要用就引那份文件,不要复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
 ### star-refs-reviewer/SKILL_zh.md
 --- 1
-2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
-+++ 1
-2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分组方式与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
-### star-refs-reviewer/SKILL_zh.md
---- 1
-4. **阅读。** 精读层与泛读层可按 Step 3 的方式分派——一篇一个收集器、host 预算按 `references/source_policy_zh.md` 拆成具体数字、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。待读不足 6 篇就不分派，主会话自己读。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。
-+++ 1
-4. **阅读。** 精读层与泛读层按 Step 3 的方式读——一次一篇、请求对着 `references/source_policy_zh.md` 的按 host 预算串行地打、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。
-### star-refs-reviewer/SKILL_zh.md
---- 1
 - 核心集确认是完整流程里唯一的强制提问——一次 `star_questionnaire`，对着编号提问，推荐标在表里。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；Step 10.7 的覆写确认在任何级别下仍必答。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。`star_questionnaire` 不可用（无人值守 / 脚本化）时改用纯文本，精读前必须拿到明确答复。
 +++ 1
 - 核心集确认是完整流程里唯一的强制提问——一个普通文本问题，对着编号提问，推荐标在表里。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；Step 10.7 的覆写确认在任何级别下仍必答。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。提问一律走 `star_questionnaire`，精读前必须拿到明确答复。
@@ -1292,3 +1272,23 @@ Step 3 的精读分派出去时,只读收集遍返回的就是这一份。`asset
 Step 10.4 的阅读分派出去时,只读 subagent 返回的就是这一份。一个收集器一篇论文。返回:
 +++ 1
 Step 10.4 的阅读分派出去时,只读收集遍返回的就是这一份。一个收集器一篇论文。返回:
+### star-refs-reviewer/references/survey_spec.md
+--- 1
+2. **Search wide.** Step 1's machinery as written — same queries from the profile, same fan-out cap and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
++++ 1
+2. **Search wide.** Step 1's machinery as written — same queries from the profile, same grouping and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
+### star-refs-reviewer/references/survey_spec.md
+--- 1
+4. **Read.** The deep and abstract tiers may fan out as Step 3 does — one paper per collector, per-host budget split as numbers per `references/source_policy.md`, one `raw/` prefix per paper — each returning the survey collector format in `references/refs_rubric.md`. Below 6 papers to read, skip the fan-out and read them in the main session. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
++++ 1
+4. **Read.** The deep and abstract tiers are read as Step 3 reads — one paper at a time, requests serialized against the per-host budget in `references/source_policy.md`, one `raw/` prefix per paper — each filling the survey collector format in `references/refs_rubric.md`. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
+### star-refs-reviewer/references/survey_spec_zh.md
+--- 1
+2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
++++ 1
+2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分组方式与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
+### star-refs-reviewer/references/survey_spec_zh.md
+--- 1
+4. **阅读。** 精读层与泛读层可按 Step 3 的方式分派——一篇一个收集器、host 预算按 `references/source_policy_zh.md` 拆成具体数字、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。待读不足 6 篇就不分派，主会话自己读。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。
++++ 1
+4. **阅读。** 精读层与泛读层按 Step 3 的方式读——一次一篇、请求对着 `references/source_policy_zh.md` 的按 host 预算串行地打、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。
