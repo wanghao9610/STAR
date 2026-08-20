@@ -1,6 +1,6 @@
 # 代码审查 — <scope>（<YYYY-MM-DD>）
 
-<!-- 由 /skill:star-code-reviewer 写出（model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded">）。模式：full | plan | path | diff；目标：<原样的参数>；
+<!-- 由 /skill:star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。模式：full | plan | path | diff；目标：<原样的参数>；
      审查文件数：<n>。问题项编号 F1、F2、…，均引用 file:line、违反的规则和具体修法。
      无话可说的节收缩为一行——绝不注水。 -->
 

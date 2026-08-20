@@ -1,4 +1,4 @@
-<!-- Compiled by /star-code-release on <YYYY-MM-DD> · model_id: <模型 id，照抄运行时本会话为你声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded"> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by /star-code-release on <YYYY-MM-DD> · model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- 本模板用于 README.zh-CN.md；README.md 始终为英文，见 readme_template.md。
      小节类型见 references/readme_map_zh.md：(M) 始终出现，来源缺失时带 TODO；

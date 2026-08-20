@@ -1,6 +1,6 @@
 # Release Preparation — <project> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-code-release (model_id: <model id, copied verbatim from what `bash .dsh/hooks/star_model_id.sh --resolve` prints — DSH states no model at session start, so the provenance line injected there names that command; "unrecorded" only if it prints nothing>).
+<!-- Written by /skill:star-code-release (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>).
      Phases run: gather | polish | readme | check (or "full pass"). Sections with nothing to say
      collapse to one line — never pad. -->
 

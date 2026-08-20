@@ -1,6 +1,6 @@
 # Reference Index —— <主题>（<YYYY-MM-DD>）
 
-<!-- 由 /skill:star-refs-reviewer 写出（model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded">）。本文件是 reference.bib 的审计线索：每条条目的出处都记在这里，
+<!-- 由 /skill:star-refs-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。本文件是 reference.bib 的审计线索：每条条目的出处都记在这里，
      因此 bib 里的任何字段都能对照它来自的那条记录复查。没有这里的行，条目就不允许存在。 -->
 
 ## 1. 范围

@@ -1,4 +1,4 @@
-<!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <model id, copied verbatim from what `bash .dsh/hooks/star_model_id.sh --resolve` prints — DSH states no model at session start, so the provenance line injected there names that command; "unrecorded" only if it prints nothing> · sources: <artifact>@<date>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md> · sources: <artifact>@<date>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- Section kinds from references/readme_map.md: (M) always present, carrying a TODO when its
      source is absent; (O) dropped entirely when its source is absent — never padded.

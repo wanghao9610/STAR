@@ -9,7 +9,7 @@ branch: <run 名 | none>   # 执行分支（规约 §11）；与 EXEC_PLAN 一�
 worktree: <绝对路径 | none>   # 安置本次 run 的工作树（规约 §11.7–9）；与 EXEC_PLAN 一致；none 时整行省略
 merged: <pending | YYYY-MM-DD @<短SHA> | discarded YYYY-MM-DD>   # 在合并/弃用确认点填写；branch 为 none 时整行省略
 code_commit: <交回第一条红线命令时 ${CODE_NAME} 的短 SHA | unrecorded>   # 这轮 run 的指标可以回到哪个提交上重算；工作树不干净或没记就写 `unrecorded`
-model_id: <模型 id，照抄运行时本会话为你声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded">
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
 model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---

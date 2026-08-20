@@ -1,6 +1,6 @@
 # Release Preparation — <project> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-code-release (model_id: <model id, copied verbatim from what your runtime states this session — your Kimi session reports it where available; "unrecorded" only if the session names none>).
+<!-- Written by /skill:star-code-release (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>).
      Phases run: gather | polish | readme | check (or "full pass"). Sections with nothing to say
      collapse to one line — never pad. -->
 

@@ -9,7 +9,7 @@ papers:
   deep: <计数>
   abstract: <计数>
   record: <计数>
-model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded">
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
 model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: star-refs-reviewer, scope: <本次会话写了什么> }
 ---

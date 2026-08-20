@@ -1,4 +1,4 @@
-<!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded"> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- 本模板用于 README.zh-CN.md；README.md 始终为英文，见 readme_template.md。
      小节类型见 references/readme_map_zh.md：(M) 始终出现，来源缺失时带 TODO；

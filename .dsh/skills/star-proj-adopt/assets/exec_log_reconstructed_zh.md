@@ -5,7 +5,7 @@ reconstructed: <YYYY-MM-DD>
 reconstructed_by: star-proj-adopt
 updated: <YYYY-MM-DD>
 status: done
-model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded">
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
 model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---

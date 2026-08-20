@@ -9,7 +9,7 @@ branch: <run name | none>   # execution branch (conventions §11); mirrors EXEC_
 worktree: <absolute path | none>   # the tree housing this run (conventions §11.7–9); mirrors EXEC_PLAN; omit the line when none
 merged: <pending | YYYY-MM-DD @<short-sha> | discarded YYYY-MM-DD>   # set at the merge/discard confirmation point; omit the line when branch is none
 code_commit: <short-sha of ${CODE_NAME} when the first STOP-line command was handed back | unrecorded>   # what a metric from this run can be regenerated at; `unrecorded` when the tree was dirty or the sha was not taken
-model_id: <model id, copied verbatim from what your runtime states this session — Qwen Code injects it at session start; "unrecorded" only if the session names none>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>
 model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---

@@ -2,7 +2,7 @@
 type: evaluation
 language: zh
 generated: <YYYY-MM-DD>
-model_id: <模型 id，照抄运行时本会话为你声明的那串——Pi 在首个回合前注入，模型一变就再注入一次；仅当本会话未声明任何模型才写 "unrecorded">
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
 model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 sources:

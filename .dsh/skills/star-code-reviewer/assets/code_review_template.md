@@ -1,6 +1,6 @@
 # Code Review — <scope> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-code-reviewer (model_id: <model id, copied verbatim from what `bash .dsh/hooks/star_model_id.sh --resolve` prints — DSH states no model at session start, so the provenance line injected there names that command; "unrecorded" only if it prints nothing>). Mode: full | plan | path | diff; target: <argument as given>;
+<!-- Written by /skill:star-code-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>). Mode: full | plan | path | diff; target: <argument as given>;
      files reviewed: <n>. Findings are numbered F1, F2, … and cite file:line, the violated rule,
      and a concrete fix. Sections with nothing to say collapse to one line — never pad. -->
 

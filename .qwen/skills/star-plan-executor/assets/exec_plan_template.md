@@ -10,7 +10,7 @@ branch: <run name | none>          # execution branch this run executes on, name
 base: <branch@short-sha | —>         # what the branch forked from — the merge target; — when branch is none
 worktree: <absolute path | none>     # the tree housing this run (conventions §11.7–9); none = the invoking checkout
 done_criterion: "<the sub-plan §5 check this run must satisfy, with its threshold>"
-model_id: <model id, copied verbatim from what your runtime states this session — Qwen Code injects it at session start; "unrecorded" only if the session names none>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>
 model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---

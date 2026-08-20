@@ -1,6 +1,6 @@
 # Review — <prefix>_<slug> (<YYYY-MM-DD>)
 
-<!-- Written by /skill:star-plan-reviser (model_id: <model id, copied verbatim from what `bash .dsh/hooks/star_model_id.sh --resolve` prints — DSH states no model at session start, so the provenance line injected there names that command; "unrecorded" only if it prints nothing>). Target: metds/plans/<file>; node type: leaf | internal | root;
+<!-- Written by /skill:star-plan-reviser (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>). Target: metds/plans/<file>; node type: leaf | internal | root;
      exec_runs: <run dirs, newest last, or none>. Every claim cites evidence (path[:line], command output, or a
      frontmatter field). Sections with nothing to say collapse to one line — never pad. -->
 

@@ -3,7 +3,7 @@ run: <prefix>_<slug>
 source_plan: <prefix>_<slug>_plan.md
 analyzed: <YYYY-MM-DD>
 verdict: <met | partially met | not met | inconclusive | invalid>
-model_id: <model id, copied verbatim from what `bash .dsh/hooks/star_model_id.sh --resolve` prints — DSH states no model at session start, so the provenance line injected there names that command; "unrecorded" only if it prints nothing>
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>
 model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---

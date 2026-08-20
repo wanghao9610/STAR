@@ -1,6 +1,6 @@
 # 发布准备 — <项目>（<YYYY-MM-DD>）
 
-<!-- 由 /skill:star-code-release 写出（model_id: <模型 id，照抄 `bash .dsh/hooks/star_model_id.sh --resolve` 打印出来的那串——DSH 在会话开始不声明模型，开场注入的溯源提示会给出这条命令；仅当它什么都不打印才写 "unrecorded">）。
+<!-- 由 /skill:star-code-release 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。
      本次跑了哪些阶段：gather | polish | readme | check（或"完整流程"）。
      无话可说的节收缩为一行——绝不注水。 -->
 
