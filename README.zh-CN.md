@@ -75,13 +75,14 @@ star-ai-research/
 │   ├── run.sh              # 实验统一入口
 │   ├── update.sh           # 同步上游 STAR skill 与工作流指南
 │   └── scpts/              # 各实验对应的 Shell 脚本
-├── .agents/skills/         # Codex 使用的研究工作流技能
+├── .agents/skills/         # 凡遵循 AGENTS.md 约定的 agent 都会读的研究工作流技能
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
+├── .codex/skills/          # Codex 每个技能一份的清单，由 .agents/skills/ 用软链接指过来
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
@@ -190,7 +191,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项，并把这次取值记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的那些问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。若只想对单次运行生效，调用 skill 时附带同一参数即可，如 `$star-plan-executor 00 involve=low`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项，并把这次取值记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的那些问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。若只想对单次运行生效，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用工具的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
@@ -255,7 +256,7 @@ bash execs/run.sh 00_exp --config config.yaml
 
 STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方法这一整条路线。其中十三个落在这条路线的某个确定位置上，另外两个任何时候都能调。下面按阶段列出：每段先说这一阶段在研究里对应什么，再列出属于它的技能和各自写下的东西。
 
-**调用方式。** 前缀因工具而异；下面各张技能表统一采用 Codex 写法：
+**调用方式。** 下面各张技能表只写技能名、不带前缀；前缀取自你所用的工具，各家写法不同：
 
 | 工具 | 调用写法 | 示例 |
 | --- | --- | --- |
@@ -277,46 +278,46 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env`，用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西。待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
-| `$star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域、六维打分，最后连同首个验证实验定稿选题。点到的每篇论文都转录自抓取的记录 | `metds/ideas/<slug>_idea.md` |
-| `$star-plan-coach` | 通过分阶段提问，把研究想法写成一份计划 | `metds/plans/<数字>_<主题>_plan.md` |
-| `$star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类的文献库，其中每一条都转录自抓取的记录。`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
+| `star-proj-adopt` | 把已经开工的项目不改动原有内容地接入：勘察已有仓库，配好 `.env`，用软链接连接已有的数据 / 权重 / 输出目录，包装已有启动命令，记录已经建成和已经跑过的东西。待计划树建好后，再回填那些已完成的叶子 | `metds/adopt.md`，以及获确认叶子上的 `exec_status:` / `exec_runs:` |
+| `star-idea-storm` | 把模糊兴趣收敛成站得住的研究选题：发散候选方向、摘要级扫描领域、六维打分，最后连同首个验证实验定稿选题。点到的每篇论文都转录自抓取的记录 | `metds/ideas/<slug>_idea.md` |
+| `star-plan-coach` | 通过分阶段提问，把研究想法写成一份计划 | `metds/plans/<数字>_<主题>_plan.md` |
+| `star-refs-reviewer` | 调研与方法相关的工作：精读最贴近的论文写成分析笔记，并建立分好类的文献库，其中每一条都转录自抓取的记录。`survey` 把一整个领域分层读完，写成一份独立综述 | `metds/refs/<缩写>.md`、`metds/refs/reference.bib`、`metds/refs/refs_index.md`、`metds/refs/<slug>_survey.md` |
 
 **把代码和环境准备到实验真能跑起来。** 在有东西能执行它之前，计划是验证不了的。这一阶段从一份打过分、而不是随手挑的参考实现搭起代码库，装上它需要的依赖；环境要到 import 过得去、框架看得见显卡、项目自己的入口跑得动，才算准备好。
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
-| `$star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并对结果跑一遍三层的跑通性检查——先 import，再框架与显卡，最后项目入口。`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
+| `star-code-architect` | 从打分选出的参考实现搭建 `${CODE_NAME}/` 或整理已有代码，并写下架构规范 | `${CODE_NAME}/` 及 `UPSTREAM.md`，外加 `metds/codearc.md` |
+| `star-env-builder` | 依据 `.env` 构建 conda 环境或 venv，按 uv > pip > conda 的优先顺序解析并安装依赖，并对结果跑一遍三层的跑通性检查——先 import，再框架与显卡，最后项目入口。`add` 把新包安装进已有环境并记录 | 运行环境，以及 `wkdrs/env_<名称>_<日期>/ENV_REPORT.md` 和 `freeze.txt` |
 
 **把计划拆成可以各自单独验证的子问题，一块一块做出来。** 整份计划是跑不动的，能跑的是带着自己那条完成判据的一小块。这一阶段先做拆分，再一次做一块：写出代码并轻量验证，重实验——长时间或多卡训练、以及花钱的接口调用——作为命令交回你手上运行；最后把写出来的代码对照项目规范、以及这个子计划当初承诺的东西各过一遍。
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-plan-decomposer` | 把总体计划拆成可以各自单独验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
-| `$star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
-| `$star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落实例行性修复——minor 直接改，major 经批准后改 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
+| `star-plan-decomposer` | 把总体计划拆成可以各自单独验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
+| `star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
+| `star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落实例行性修复——minor 直接改，major 经批准后改 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
 
 **读实验结果，再把它带回计划。** 一次跑完的实验是证据，不是结论。这一阶段把产物和日志对照计划的预期核一遍，把指标对照完成判据和 baseline 打分——每个数字进报告前都按引用重新打开原文核实，站不住的降一档或丢弃——随后据此修订计划：哪条假设没站住、哪条判据定错了、下一步该做什么。
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对该主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `wkdrs/results/results.md`（限定范围时为 `wkdrs/results/results_<slug>.md`） |
-| `$star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
+| `star-expt-analyst` | 对照计划的预期审计一个 run 的产出：产物清点、日志健康、指标对照完成判据打分，以及结果对该主张意味着什么 | `wkdrs/<运行名称>/EXPT_ANALYSIS_<日期>.md`，以及 `wkdrs/<运行名称>/analysis/` 下的图；`aggregate` 模式下的 `wkdrs/results/results.md`（限定范围时为 `wkdrs/results/results_<slug>.md`） |
+| `star-plan-reviser` | 以执行证据审查一个计划并就地修订 | `wkdrs/<运行名称>/REVIEW_<日期>.md`，以及带 Revision History 的修订后计划 |
 
 **把研究写成文字，并把仓库留成别人能照着跑起来的样子。** 走到这里，计划就是方法的定本，而仓库是读者真会去跑的那份东西。这一阶段把前者编译成能直接写进论文的文字，把后者收拾干净。
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-metd-summarize` | 在所有实验完成、计划定稿后，把计划树编译成可直接用于论文的方法文档，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
-| `$star-code-release` | 把仓库整理到可发布状态：按已记录的放置规则把散落代码移入 `${CODE_NAME}/`，打磨对外发布的部分，从方法文档与结果汇总表编译出 README，并排查密钥凭据、机器本地路径和解析不了的命令 | `README.md` 与 `wkdrs/release/RELEASE_<日期>.md` |
+| `star-metd-summarize` | 在所有实验完成、计划定稿后，把计划树编译成可直接用于论文的方法文档，并把无计划覆盖之处转成 TODO | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md` |
+| `star-code-release` | 把仓库整理到可发布状态：按已记录的放置规则把散落代码移入 `${CODE_NAME}/`，打磨对外发布的部分，从方法文档与结果汇总表编译出 README，并排查密钥凭据、机器本地路径和解析不了的命令 | `README.md` 与 `wkdrs/release/RELEASE_<日期>.md` |
 
 **两个不属于任何一个阶段的技能。** 它们横向通读上面所有这些阶段，回答任何时刻都会冒出来的两个问题：现在走到哪一步、下一步该做什么；以及最近这一段实验到底做出了什么。两者都不写进计划，也不写进某次运行的目录。
 
 | 技能 | 用途 | 主要输出 |
 | --- | --- | --- |
-| `$star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
-| `$star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族。把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
+| `star-flow-status` | 汇总整条流程的进度——计划树，以及已完成工作里缺失或过期的审查、分析、方法文档——并指出唯一的下一步 | 只读状态摘要 |
+| `star-expt-digest` | 按时间轴汇总最近的实验进展：从上一份 digest 续接，或覆盖一个显式时间窗、一整个计划家族。把每个 run 的判定与关键指标从其分析报告中取出成表，推导相对上次的变化，并列出缺口 | `wkdrs/digests/EXPT_DIGEST_<日期>.md` |
 
 ### 模型选择建议
 
@@ -324,8 +325,8 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 
 | 工作性质 | Skills | 建议模型 |
 |---|---|---|
-| **判断与写作**——研究方向、计划、相关工作如何定位本方法、结果意味着什么、方法表述 | `$star-idea-storm`、`$star-plan-coach`、`$star-refs-reviewer`、`$star-plan-decomposer`、`$star-expt-analyst`、`$star-plan-reviser`、`$star-metd-summarize` | Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3 |
-| **搭建与执行**——代码库、运行环境、执行计划、代码审查、进展汇总、全局状态、发布准备 | `$star-proj-adopt`、`$star-code-architect`、`$star-env-builder`、`$star-plan-executor`、`$star-code-reviewer`、`$star-expt-digest`、`$star-flow-status`、`$star-code-release` | Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3 |
+| **判断与写作**——研究方向、计划、相关工作如何定位本方法、结果意味着什么、方法表述 | `star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`、`star-plan-decomposer`、`star-expt-analyst`、`star-plan-reviser`、`star-metd-summarize` | Claude Fable5 Extra、ChatGPT5.6 Sol High 或 Kimi K3 |
+| **搭建与执行**——代码库、运行环境、执行计划、代码审查、进展汇总、全局状态、发布准备 | `star-proj-adopt`、`star-code-architect`、`star-env-builder`、`star-plan-executor`、`star-code-reviewer`、`star-expt-digest`、`star-flow-status`、`star-code-release` | Claude Opus4.8 Medium（Sonnet5 High）、ChatGPT5.6 Sol Medium（Terra High）、Cursor Grok4.5 High 或 Kimi K3 |
 
 条件允许时，十五个 skill 均使用能力最强的可用模型，通常能获得最佳的整体效果。
 
@@ -468,7 +469,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
-- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 装的是同一套十五个 skill，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 `execs/update.sh` 接入或更新出来的项目里，每棵树都是各自独立的实文件副本，删除顺序无所谓——更新器复制时会把软链接指向的内容写成实文件。直接克隆 STAR、或用 GitHub 模板生成的仓库则不然：各家措辞完全一致的那批文件只在 `.agents/skills/` 下存一份，其余六棵靠相对软链接指过去。此时先用 `tar -chf - .claude/skills | tar -xf -`（树名换成你要留的那棵）把留下的那棵变成独立副本，它会把其中的软链接原地换成所指的文件（`-h` 表示跟随软链接，BSD 与 GNU 的 tar 都可用），`.agents/` 放到最后再删。删不是唯一的路：接入时用 `--tools` 点名要装哪几棵，`.env` 里的 `STAR_TOOLS` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——Pi 那边否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来，DSH 那边则由发现顺序自动定胜负，结果是对的，但你看不见。
+- 删掉用不到的工具目录。`.agents/`（`AGENTS.md` 约定规定放技能的那个共享根目录）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 装的是同一套十五个 skill，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 Codex 时 `.codex/` 要和 `.agents/` 一起留着：钩子在那里，`.agents/skills/` 在 Codex 扫描的路径上软链接过去的那十五份 per-skill 清单也在那里。用 `execs/update.sh` 接入或更新出来的项目里，每棵树都是各自独立的实文件副本，删除顺序无所谓——更新器复制时会把软链接指向的内容写成实文件。直接克隆 STAR、或用 GitHub 模板生成的仓库则不然：各家措辞完全一致的那批文件只在 `.agents/skills/` 下存一份，其余六棵靠相对软链接指过去。此时先用 `tar -chf - .claude/skills | tar -xf -`（树名换成你要留的那棵）把留下的那棵变成独立副本，它会把其中的软链接原地换成所指的文件（`-h` 表示跟随软链接，BSD 与 GNU 的 tar 都可用），`.agents/` 放到最后再删。删不是唯一的路：接入时用 `--tools` 点名要装哪几棵，`.env` 里的 `STAR_TOOLS` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——Pi 那边否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来，DSH 那边则由发现顺序自动定胜负，结果是对的，但你看不见。
 
 只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用：目录布局、`.env` 和 `execs/run.sh` 在完全不装任何 skill 的情况下也能工作，因此删掉全部工具目录同样是受支持的用法。
 
@@ -476,12 +477,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.2.6](https://github.com/wanghao9610/STAR/tree/v0.2.6)**（2026-08-20）—— `.agents/skills/` 是凡遵循 `AGENTS.md` 约定的 agent 都会读的共享根目录，不是某一家宿主自己的私有目录，因此其中十五个 skill 的正文不再点名任何一家自有的工具——一律改用角色指代，读者统称 agent——也不再带任何一家的调用前缀，因为前缀各家写法不同，而各家自己清楚该怎么写。Codex 自己那份每个技能一份的清单——显示名、默认提示词，以及决定一个技能是否只在被点名时才跑的那个开关——迁到 `.codex/skills/<skill>/agents/openai.yaml`，再由 Codex 扫描的那个路径上的相对软链接指过去，因为 Codex 只会从技能目录内部读这份清单。接入与更新不受影响：`execs/update.sh` 复制时会把软链接指向的内容写成实文件，项目拿到的仍是实文件，`--tools codex` 也仍然同时选中 `.agents` 与 `.codex`。
 - **[v0.2.5](https://github.com/wanghao9610/STAR/tree/v0.2.5)**（2026-08-19）—— 七棵工具树里措辞完全一致的那批文件改为只存一份，落在 `.agents/skills/` 下，其余六棵在相同路径上放一条相对软链接；每个 `SKILL.md`，以及凡是写了某家自有内置工具名的参考文档与模板，仍是各棵树各自的实文件。接入与更新不受影响：`execs/update.sh` 复制时会把软链接指向的内容写成实文件，项目拿到的仍是每棵树一份独立完整的副本。只有直接克隆本仓库才带着软链接，此时先用 `tar -chf - .claude/skills | tar -xf -` 把要留的那棵变成独立副本，再把 `.agents/` 放到最后删掉。
 - **[v0.2.4](https://github.com/wanghao9610/STAR/tree/v0.2.4)**（2026-08-19）—— 一次运行拟出一张要你逐条接受或否决的清单时，不再一条一条问：规约 [§7.13](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把整张清单定成一个问题——编号行连同"改什么、依据是什么"先摊在页面上，然后只问一次：*全部按清单采纳* / *除我点名的以外全部采纳* / *先解答我点名的几项* / *一项都不采纳*，被点出来的行进第二轮，形状照旧。`star-plan-reviser` 的修订候选与 `star-code-reviewer` 要问的那批修复就此不再逐条走；`star-code-architect`、`star-code-release`、`star-plan-executor`、`star-metd-summarize` 那几个本来就成批问的问题，补上了"先解释这几项"这条从来没有过的路；而必须单独问的仍旧单独问——红线上的一切、每一次删除与覆盖，以及放弃一个计划。引导式提问不受影响，因为每个答案决定下一个问什么的辅导连问没有拟好的东西可以摊开；`involve=high` 会把任何一张清单重新拆回一行一问。
-- **[v0.2.3](https://github.com/wanghao9610/STAR/tree/v0.2.3)**（2026-08-19）—— `execs/update.sh` 不再把七棵工具树当成不可分的一整块：`--tools claude,pi` 把这次运行限定在点名的那几棵上，`.env` 里的 `STAR_TOOLS` 让这个选择长期生效，另外两个取值是 `all` 与 `none`——`none` 表示这次更新只剩共享骨架：工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：`--adopt` 不装、更新不写、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来。收窄过的运行只拉取它将要写入的那几棵，未提交改动的拦截也只针对这几棵。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.2.3](https://github.com/wanghao9610/STAR/tree/v0.2.3)**（2026-08-19）—— `execs/update.sh` 不再把七棵工具树当成不可分的一整块：`--tools claude,pi` 把这次运行限定在点名的那几棵上，`.env` 里的 `STAR_TOOLS` 让这个选择长期生效，另外两个取值是 `all` 与 `none`——`none` 表示这次更新只剩共享骨架：工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：`--adopt` 不装、更新不写、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来。收窄过的运行只拉取它将要写入的那几棵，未提交改动的拦截也只针对这几棵。
 - **[v0.2.2](https://github.com/wanghao9610/STAR/tree/v0.2.2)**（2026-08-18）—— `star-code-reviewer` 的修复轮不再逐条问每一处例行修复：`minor` / `nit` 级的那些——docstring、注释、未使用的 import、引用全落在审查范围内的改名——直接改，改之前在摘要里点名，报告里记为 `applied unasked`；`blocker` / `major` 仍然逐条先问、任何参与度档位都问，删代码的修复不论严重度也照问，因为看着没人引用的符号可能是通过 registry 字符串取到的。可修项全是 minor 的那一轮，从此不为其中任何一条停下来问——为一处 docstring 问一次所花掉的注意力，正是报告本身需要的。`involve=high` 时不问的那一半重新交回用户，按同类合并。
 - **[v0.2.1](https://github.com/wanghao9610/STAR/tree/v0.2.1)**（2026-08-18）—— 对照算法研究实际的推进方式复查流程后，补上"一个叶子一次 run"这个假设装不下的几类工作：一组配置（超参网格、多 seed 重复）现在是一个叶子，在 §3 声明轴与格数、按格落在 `wkdrs/<run>/cells/` 下、判据对整张网格说，分析报选中格时必须同时报同轴上的散布；重实验的预计与实际开销进入 `EXEC_LOG.md` 新增的"开销"一节，那是根计划 §4 算力预算唯一的对账处。方法还没定的时候，探针叶子是正当的一格——它的 §5 写成"看什么 → 哪种结果触发哪个决定"，数字只作未核实层，因此不会把一个猜想抬成主张；被否掉的方向除了留在原处的完整交代，还向上汇总一行到根计划 §5、紧挨着当初预测它的 kill-criteria，因为那棵子树此后不会再被打开。构建数据的叶子不再以文件数与校验和收尾（要关键统计量、写明抽样量的人工抽查、与评测集的重叠检查），消融选定的配置必须写成具名文件供下游叶子按路径引用；另修掉一处缺陷：编译方法文档所依据的抽取图，中文版把计划模板的五个小节名记成了旧名；升级换的是模板、不动已经写好的文件——已有的子计划与 `EXEC_LOG.md` 不会自动长出这些小节，下次调用对应技能时补上，或让 `star-plan-reviser` 在修订那份计划时带入。
 - **[v0.2.0](https://github.com/wanghao9610/STAR/tree/v0.2.0)**（2026-08-18）—— 整套工作流的措辞从软件开发口径换成算法研发口径：落盘改成存成文件，冒烟测试改成跑通性检查（参考文件跟着改名），契约按语义拆成派给子代理的交办说明和它要还回来的格式约定，日志里说过的事在产物证实之前一律叫说法。`checkpoint` 现在只指模型权重——git 那一义叫阶段提交，动词那一义叫记录——共享规约的词汇表（[§0](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)）新增十一行把新说法钉死，而 git 自己的词、计划模板的小节名、ML 代码库里的注册器，以及任何被别的技能按字节读的字面量，一律不动。README 与使用指南按研究推进的五段重排——定选题并写成计划、把代码和环境准备到实验真能跑起来、拆成子问题一块块做、读结果再带回计划、写成文字并收拾仓库——指南开头还多了一张「从哪儿下手」的表，让人只读自己所在的那一节，而不是另外十四节。
