@@ -62,7 +62,6 @@ ok    opening loads hold: one lookup line per file, no conventions cat outside t
 
 == Selective conventions load ==
 FAIL  .claude/skills/star-flow-status/SKILL.md: the load block never spells the item selector's list ("items 1, 4, 5, 6, 11, 13"); the selector and the prose have drifted
-FAIL  .claude/skills/star-flow-status/SKILL.md: the block says the excerpt is 17 KB; it is 18637 bytes (19 KB)
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
@@ -73,4 +72,4 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
-2 check(s) failed.
+1 check(s) failed.
