@@ -1699,6 +1699,61 @@ fi
 
 (( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and question tool"
 
+# 24. The files a skill tells a run to read exist, and every file it ships is
+#     told to someone. On-demand loading turned these into load-bearing paths:
+#     a step that says "read `references/x.md` when the mode is `add`" is the
+#     only thing that ever opens that file, and the seven trees are generated
+#     from one source, so a mistyped path is mistyped identically in all of them
+#     and every check above stays green. It surfaces at run time, inside a mode
+#     the tests never enter, as a read that returns nothing.
+#
+#     Both directions, because both have already happened in this repository's
+#     history in other forms: a path with no file (the read fails), and a file
+#     no path names (a section moved out and left its old file behind, shipped
+#     to every downstream project forever).
+#
+#     Two allowances, each for a real form that is not a mistake:
+#       - a path may resolve in another skill of the same tree. star-plan-executor
+#         cites the decomposer's `references/subplan_rubric.md` by that form, with
+#         the prose naming whose it is; nothing here can improve on that.
+#       - a `_zh.md` twin rides on its base name being named. The Chinese editions
+#         are reached through the language paragraph's "switch every resource to
+#         its `_zh` variant", so several are never spelled out anywhere, by design.
+#     Paths carrying a `*` or a `<` are patterns, not paths, and are skipped.
+section "Reference paths a skill names"
+ref_errors=0
+ref_checked=0
+for root in "${SKILL_ROOTS[@]}"; do
+    while IFS= read -r skill; do
+        d="${root}/${skill}"
+        while IFS= read -r p; do
+            [[ -n "${p}" ]] || continue
+            ref_checked=$(( ref_checked + 1 ))
+            [[ -e "${d}/${p}" ]] && continue
+            found=0
+            for other in "${root}"/*/; do
+                [[ -e "${other}${p}" ]] && { found=1; break; }
+            done
+            if (( found == 0 )); then
+                fail "${d}: names ${p}, which exists in no skill of ${root}"
+                ref_errors=1
+            fi
+        done < <(mdgrep -ohE '`(references|assets|scripts)/[^`[:space:]]+`' -- "${d}" 2>/dev/null \
+                 | tr -d '`' | grep -v '[*<]' | sort -u)
+
+        for r in "${d}"/references/*.md; do
+            [[ -f "${r}" ]] || continue
+            b="$(basename "${r}")"
+            base="${b/_zh.md/.md}"
+            grep -qrF "references/${base}" "${d}" --include='*.md' \
+                 --exclude="${base}" --exclude="${base/.md/_zh.md}" && continue
+            fail "${r}: no file in ${skill} names references/${base}; a moved section left it behind"
+            ref_errors=1
+        done
+    done < <(printf '%s\n' "${SKILLS}")
+done
+(( ref_errors == 0 )) && note "${ref_checked} reference paths resolve, and every reference file is named by the skill that ships it"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

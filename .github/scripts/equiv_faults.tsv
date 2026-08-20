@@ -50,3 +50,8 @@ f24	Delegation vocabulary	perl -pi -e 's/dispatch a writing sub-agent/call `spaw
 f24b	Harness tool vocabulary	perl -pi -e 's/your question tool/AskUserQuestion/' "$W/.agents/skills/star-plan-coach/SKILL.md"	.agents/skills
 f25	Harness tool vocabulary	perl -pi -e 's/`run_shell_command`/Bash/g' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
 f25b	Harness tool vocabulary	perl -pi -e 's/AskQuestion/AskUserQuestion/g' "$W/.cursor/skills/star-plan-coach/SKILL.md"	.cursor/skills/star-plan-coach
+# f26 names a file no tree ships - the shape a mistyped or renamed reference
+# path takes, identical in all seven because one source generates them. f26b is
+# the other direction: a file every tree ships and no step ever opens.
+f26	Reference paths a skill names	printf 'Recipe: `references/repo_rubrics.md`.\n' >> "$W/.claude/skills/star-code-architect/SKILL.md"	.claude/skills/star-code-architect
+f26b	Reference paths a skill names	for t in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do : > "$W/$t/skills/star-code-architect/references/leftover_spec.md"; : > "$W/$t/skills/star-code-architect/references/leftover_spec_zh.md"; done	leftover_spec.md
