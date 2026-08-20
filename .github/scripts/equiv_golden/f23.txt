@@ -68,8 +68,8 @@ FAIL  the en reuse paragraph differs across manifests; it is uniform by design:
       **Reusing an earlier load.** Note: Skip any part of the load above whose text yo
       **Reusing an earlier load.** Skip any part of the load above whose text you can 
 
-== Harness-specific delegation vocabulary ==
-ok    28 Codex delegation files name spawn_agent with explorer/worker agent_type
+== Delegation vocabulary ==
+ok    the neutral tree names no delegation tool or type key, and no tree carries another's
 
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool

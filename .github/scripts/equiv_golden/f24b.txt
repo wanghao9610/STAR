@@ -43,8 +43,7 @@ ok    every .dsh description survives DSH's 500-character catalog intact
 ok    skill scripts are byte-identical and executable in all 7 trees
 
 == Manifest section parity (.agents vs .claude) ==
-diff: /dev/fd/62: Bad file descriptor
-FAIL  .agents/skills/star-env-builder/SKILL.md: ## sections differ from .claude/skills/star-env-builder/SKILL.md:
+ok    .agents manifests carry the same ## sections as .claude (30 files)
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees
@@ -56,9 +55,7 @@ ok    AGENTS.md heading map pinned; 136 labelled citations resolve
 ok    conventions headings and item counts pinned; workflow docs line-aligned en/zh
 
 == Skills guide coverage ==
-FAIL  docs/mds/star-workflow/research-workflow-skills.md: 0 sections for star-expt-digest, expected 1 — a skill was added, removed, or renamed without the guide
-FAIL  docs/mds/star-workflow/research-workflow-skills.md: link target ../../../.claude/skills/star-expt-digestX/SKILL.md does not exist
-FAIL  docs/mds/star-workflow/research-workflow-skills.md: in-page link #13-star-expt-digestX-summarize-progress-over-a-period matches no heading
+ok    skills guide covers every skill once, links and anchors resolve, conventions citations land
 
 == Opening-load invariants ==
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
@@ -73,6 +70,8 @@ ok    every manifest carries the reuse paragraph, uniform per language, inside t
 ok    the neutral tree names no delegation tool or type key, and no tree carries another's
 
 == Harness tool vocabulary ==
-ok    each tree names only its own harness's file reader, terminal, and question tool
+FAIL  .agents/skills: names a tool this harness does not have:
+      .agents/skills/star-plan-coach/SKILL.md:29:2. **One question at a time.** Deliver every coaching question one at a time — through AskUserQue
+      .agents/skills/star-plan-coach/SKILL.md:78:- Ask through AskUserQuestion; fall back to plain text only in a non-interactive run, where human
 
-4 check(s) failed.
+1 check(s) failed.

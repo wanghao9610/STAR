@@ -71,8 +71,8 @@ ok    28 selective loads hold: sections printed match sections named, prose matc
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
 
-== Harness-specific delegation vocabulary ==
-ok    28 Codex delegation files name spawn_agent with explorer/worker agent_type
+== Delegation vocabulary ==
+ok    the neutral tree names no delegation tool or type key, and no tree carries another's
 
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool

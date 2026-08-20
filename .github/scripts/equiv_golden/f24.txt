@@ -66,9 +66,9 @@ ok    28 selective loads hold: sections printed match sections named, prose matc
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
 
-== Harness-specific delegation vocabulary ==
-FAIL  .agents/skills/star-plan-executor/references/agent_dispatch_spec.md: unsupported or unbounded Codex agent_type:
-      agent_type: scout
+== Delegation vocabulary ==
+FAIL  .agents/skills names a harness's delegation tool or type key, and it is the neutral root:
+      .agents/skills/star-plan-executor/references/agent_dispatch_spec.md:3:Delegate whenever collaboration tools are available and the work is bo
 
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
