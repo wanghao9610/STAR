@@ -61,7 +61,7 @@ ok    skills guide covers every skill once, links and anchors resolve, conventio
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-ok    42 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 9 restatements pinned
+ok    140 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 17 restatements pinned
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
@@ -71,9 +71,9 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 
 == Harness tool vocabulary ==
 FAIL  .cursor/skills: names a tool this harness does not have:
-      .cursor/skills/star-plan-coach/SKILL.md:31:2. **One question at a time, via AskUserQuestion**: Deliver every coaching question through the A
-      .cursor/skills/star-plan-coach/SKILL.md:41:3. If a plan has any section whose `status` is not `done`, ask whether to continue it (via AskUse
-      .cursor/skills/star-plan-coach/SKILL.md:61:- At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it,
-      .cursor/skills/star-plan-coach/SKILL.md:80:- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text question
+      .cursor/skills/star-plan-coach/SKILL.md:49:2. **One question at a time, via AskUserQuestion**: Deliver every coaching question through the A
+      .cursor/skills/star-plan-coach/SKILL.md:59:3. If a plan has any section whose `status` is not `done`, ask whether to continue it (via AskUse
+      .cursor/skills/star-plan-coach/SKILL.md:79:- At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it,
+      .cursor/skills/star-plan-coach/SKILL.md:99:- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text question
 
 1 check(s) failed.

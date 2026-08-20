@@ -61,7 +61,7 @@ FAIL  docs/mds/star-workflow/research-workflow-skills.md: link target ../../../.
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-ok    42 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 9 restatements pinned
+ok    140 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 17 restatements pinned
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
