@@ -211,11 +211,8 @@ done
 #    turns off the /skill: commands that would otherwise duplicate them.
 section "Invocation-token hygiene"
 token_errors=0
-# Every scan of a tree below goes through find -L rather than grep's own
-# recursion. A file a tree shares with .agents is a symlink, and the two
-# disagree about those: find -L reads them, BSD grep skips them under -r and
-# -R alike, and GNU grep skips them under -r. A scan that quietly stopped
-# reading 397 files would still print ok.
+# find -L for the reason mdgrep gives, spelled out here because this scan and the
+# two below it read every file in a tree and not only its Markdown.
 check_absent() { # $1 = tree, $2 = literal token
     local hits
     hits="$(find -L "$1" -type f -exec grep -nHF -- "$2" {} + || true)"
