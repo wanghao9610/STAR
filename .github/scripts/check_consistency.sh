@@ -226,7 +226,7 @@ done < <(printf '%s\n' "${SKILLS}")
 # and the checks above passed it: the token is not foreign to that tree, and
 # check 6 matches the filename, not the directory. Every "docs/mds" in the
 # skill trees must still be followed by "/star-workflow/".
-mangled_paths="$(grep -rn 'docs/mds[^/]' "${SKILL_ROOTS[@]}" || true)"
+mangled_paths="$(grep -Rn 'docs/mds[^/]' "${SKILL_ROOTS[@]}" || true)"
 if [[ -n "${mangled_paths}" ]]; then
     fail "docs/mds/ path separator damaged (token rewrite hit a directory name):"
     printf '%s\n' "${mangled_paths}" | sed 's/^/      /'
@@ -799,7 +799,7 @@ for rule in "${CITATION_LABELS[@]}"; do
                 cite_errors=1
             fi
         done < <(printf '%s\n' "${text}" | grep -oE "${pattern}")
-    done < <(grep -rnE "${pattern}" --include='*.md' "${CITATION_SCAN[@]}" 2>/dev/null | grep -v 'research-workflow-conventions')
+    done < <(grep -RnE "${pattern}" --include='*.md' "${CITATION_SCAN[@]}" 2>/dev/null | grep -v 'research-workflow-conventions')
 
     if (( rule_hits == 0 )); then
         fail "citation rule '${pattern}' matches nothing any more; drop the row or restore the citation"
@@ -1085,7 +1085,7 @@ if (( $(sort -u "${bq_seen}" | wc -l) > 1 )); then
 fi
 rm -f "${lang_seen}" "${bq_seen}"
 
-stale_reads="$(grep -rn 'in full before acting\|与读取本文件\|issue its read together' "${SKILL_ROOTS[@]}" || true)"
+stale_reads="$(grep -Rn 'in full before acting\|与读取本文件\|issue its read together' "${SKILL_ROOTS[@]}" || true)"
 if [[ -n "${stale_reads}" ]]; then
     fail "SKILL_zh runtime-read phrasing has returned:"
     printf '%s\n' "${stale_reads}" | sed 's/^/      /'
