@@ -62,7 +62,7 @@ ok    skills guide covers every skill once, links and anchors resolve, conventio
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 22 restatements pinned
+ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 22000 bytes with their stated sizes, 22 restatements pinned
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block

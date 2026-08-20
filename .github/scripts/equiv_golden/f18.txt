@@ -52,7 +52,7 @@ ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees
 ok    AGENTS.md heading map pinned; 136 labelled citations resolve
 
 == Conventions document structure ==
-FAIL  docs/mds/star-workflow/research-workflow-conventions.md is 298 lines and docs/mds/star-workflow/research-workflow-conventions.zh-CN.md is 297; the workflow docs are kept line-aligned so cross-language diffs stay readable
+FAIL  docs/mds/star-workflow/research-workflow-conventions.md is 296 lines and docs/mds/star-workflow/research-workflow-conventions.zh-CN.md is 295; the workflow docs are kept line-aligned so cross-language diffs stay readable
 
 == Skills guide coverage ==
 ok    skills guide covers every skill once, links and anchors resolve, conventions citations land
@@ -61,7 +61,7 @@ ok    skills guide covers every skill once, links and anchors resolve, conventio
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 22 restatements pinned
+ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 22000 bytes with their stated sizes, 22 restatements pinned
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
