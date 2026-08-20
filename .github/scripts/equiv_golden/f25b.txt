@@ -31,7 +31,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (163 files)
+ok    heading structure matches across the 6 trees (181 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -75,5 +75,8 @@ FAIL  .cursor/skills: names a tool this harness does not have:
       .cursor/skills/star-plan-coach/SKILL.md:59:3. If a plan has any section whose `status` is not `done`, ask whether to continue it (via AskUse
       .cursor/skills/star-plan-coach/SKILL.md:79:- At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it,
       .cursor/skills/star-plan-coach/SKILL.md:99:- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text question
+
+== Reference paths a skill names ==
+ok    1004 reference paths resolve, and every reference file is named by the skill that ships it
 
 1 check(s) failed.

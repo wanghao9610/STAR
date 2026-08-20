@@ -36,7 +36,7 @@ grep: .qwen/hooks/star_memory.sh: No such file or directory
 FAIL  .qwen/hooks/star_memory.sh no longer gates the stale mark on the literal type env
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (163 files)
+ok    heading structure matches across the 6 trees (181 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -76,5 +76,8 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
+
+== Reference paths a skill names ==
+ok    1004 reference paths resolve, and every reference file is named by the skill that ships it
 
 4 check(s) failed.

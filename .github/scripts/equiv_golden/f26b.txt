@@ -31,7 +31,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (181 files)
+ok    heading structure matches across the 6 trees (183 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -61,7 +61,7 @@ ok    skills guide covers every skill once, links and anchors resolve, conventio
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-FAIL  .claude/skills/star-flow-status/SKILL.md: the load block never spells the item selector's list ("items 1, 4, 5, 6, 11, 13"); the selector and the prose have drifted
+ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 22000 bytes with their stated sizes, 22 restatements pinned
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
@@ -73,6 +73,19 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
 == Reference paths a skill names ==
-ok    1004 reference paths resolve, and every reference file is named by the skill that ships it
+FAIL  .agents/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .agents/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .claude/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .claude/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .cursor/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .cursor/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .dsh/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .dsh/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .kimi-code/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .kimi-code/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .pi/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .pi/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .qwen/skills/star-code-architect/references/leftover_spec_zh.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
+FAIL  .qwen/skills/star-code-architect/references/leftover_spec.md: no file in star-code-architect names references/leftover_spec.md; a moved section left it behind
 
-1 check(s) failed.
+14 check(s) failed.

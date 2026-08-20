@@ -79,4 +79,7 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
+== Reference paths a skill names ==
+ok    1004 reference paths resolve, and every reference file is named by the skill that ships it
+
 1 check(s) failed.

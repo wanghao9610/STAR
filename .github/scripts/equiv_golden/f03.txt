@@ -34,7 +34,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (163 files)
+ok    heading structure matches across the 6 trees (181 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -75,4 +75,8 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
-1 check(s) failed.
+== Reference paths a skill names ==
+FAIL  .dsh/skills/star-expt-digest/references/extra_zh.md: no file in star-expt-digest names references/extra.md; a moved section left it behind
+FAIL  .dsh/skills/star-expt-digest/references/extra.md: no file in star-expt-digest names references/extra.md; a moved section left it behind
+
+3 check(s) failed.
