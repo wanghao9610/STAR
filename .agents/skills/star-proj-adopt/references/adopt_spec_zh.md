@@ -100,6 +100,6 @@ leaf 与清单行只在**证据重叠**时才算匹配：leaf 的 §4 交付路�
 | `built` | `in_progress` |
 | `abandoned` | 不提议——报告出来交给用户决定 |
 
-`exec_runs` 只在该行的 run 已于确认点 2 入账时才写；`done` 但没有入账 run 的 leaf 只写 `exec_status`，并在报告中标出——`$star-flow-status` 会把它列在 done-with-no-run 之下。对获确认且 run 已入账的匹配，同一趟里把重建日志的 `source_plan:` 更新为该 leaf 的文件名——用户确认的正是这层对应关系。
+`exec_runs` 只在该行的 run 已于确认点 2 入账时才写；`done` 但没有入账 run 的 leaf 只写 `exec_status`，并在报告中标出——`star-flow-status` 会把它列在 done-with-no-run 之下。对获确认且 run 已入账的匹配，同一趟里把重建日志的 `source_plan:` 更新为该 leaf 的文件名——用户确认的正是这层对应关系。
 
 绝不提议 `blocked`，绝不写 `depends_on`，绝不重排任何东西。当一条清单行匹配到多个 leaf、或多条清单行匹配到同一个 leaf 时，如实呈现并询问——多对多的匹配通常意味着拆解与历史彼此对不上，那是信息，不是需要抹平的错误。

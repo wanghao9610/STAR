@@ -1,6 +1,6 @@
 # 发布准备 — <项目>（<YYYY-MM-DD>）
 
-<!-- 由 $star-code-release 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。
+<!-- 由 star-code-release 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。
      本次跑了哪些阶段：gather | polish | readme | check（或"完整流程"）。
      无话可说的节收缩为一行——绝不注水。 -->
 
@@ -16,10 +16,10 @@
 
 | 来源 | 状态 | 产出方 | 对本次运行的影响 |
 |---|---|---|---|
-| `metds/overview.md` | present / absent / stale | `$star-metd-summarize overview` | <它输入给 README 的哪一节，或留下了哪条 TODO> |
-| `wkdrs/results/results.md` | | `$star-expt-analyst aggregate` | |
-| `metds/codearc.md` | | `$star-code-architect` | |
-| `${CODE_NAME}/requirements*` | | `$star-env-builder` | |
+| `metds/overview.md` | present / absent / stale | `star-metd-summarize overview` | <它输入给 README 的哪一节，或留下了哪条 TODO> |
+| `wkdrs/results/results.md` | | `star-expt-analyst aggregate` | |
+| `metds/codearc.md` | | `star-code-architect` | |
+| `${CODE_NAME}/requirements*` | | `star-env-builder` | |
 
 ## 3. 移入记录
 
@@ -31,7 +31,7 @@
 
 **复核方式：** <每行重跑的 compileall 与残留引用 grep>
 
-**因此过期的计划文本：** <路径已移动的计划 file:line——转交给 `$star-plan-reviser`，或"无">
+**因此过期的计划文本：** <路径已移动的计划 file:line——转交给 `star-plan-reviser`，或"无">
 
 ## 4. 打磨记录
 
@@ -42,7 +42,7 @@
 |---|---|---|---|
 | P1 | `<file>:<line>` | <一行> | applied / skipped / reverted（<原因>） |
 
-**对外发布的部分之外，转交给 `$star-code-reviewer`：** <数量与一行小结，或"无">
+**对外发布的部分之外，转交给 `star-code-reviewer`：** <数量与一行小结，或"无">
 
 ## 5. README 小节映射
 
@@ -50,7 +50,7 @@
 
 | 小节 | 来源 | 状态 |
 |---|---|---|
-| 摘要 | `metds/overview.md`@<日期> | written / TODO（`$star-metd-summarize overview`）/ omitted（无来源） |
+| 摘要 | `metds/overview.md`@<日期> | written / TODO（`star-metd-summarize overview`）/ omitted（无来源） |
 | 安装 | `requirements.txt`、`ENV_REPORT.md`@<日期> | |
 | 结果 | `wkdrs/results/results.md`@<日期> | |
 
@@ -89,4 +89,4 @@
 ## 8. 下一步
 
 <!-- 转交，最严重的在前：每条 README TODO 由哪个产出方来填、对外发布的部分之外的代码问题项去哪里、
-     哪些计划在移入之后需要 `$star-plan-reviser`、以及用户在发布前必须先决定什么。 -->
+     哪些计划在移入之后需要 `star-plan-reviser`、以及用户在发布前必须先决定什么。 -->

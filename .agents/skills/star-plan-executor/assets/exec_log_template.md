@@ -65,5 +65,5 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 <!-- Anything a resuming session needs: assumptions made, blockers hit and how they were resolved, and for a step left `blocked`, what became of its edits — restored, or kept by an explicit decision, with the paths named either way
      (material deviations from the sub-plan go under "Pending amendments" above, not here).
      If a result hit a root §5 kill-criterion, record it here as a
-     **Plan-level finding** and note the recommended feedback path ($star-plan-coach or
-     $star-plan-decomposer) — the executor never edits the parent plan itself. -->
+     **Plan-level finding** and note the recommended feedback path (star-plan-coach or
+     star-plan-decomposer) — the executor never edits the parent plan itself. -->

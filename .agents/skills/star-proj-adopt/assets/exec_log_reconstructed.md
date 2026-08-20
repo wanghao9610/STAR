@@ -13,7 +13,7 @@ model_trail:                    # append-only: one entry per write session, newe
 # Execution Log — <run> (reconstructed)
 
 > **This is not an execution record.** It was reconstructed during project adoption on
-> <YYYY-MM-DD> from artifacts already on disk, by `$star-proj-adopt`. Nobody observed these steps
+> <YYYY-MM-DD> from artifacts already on disk, by `star-proj-adopt`. Nobody observed these steps
 > running, and no step-level progress was recorded at the time. Read every line below as evidence
 > found afterwards, not as something logged while it happened.
 

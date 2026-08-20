@@ -14,7 +14,7 @@ sources:
 
 # 结果
 
-<!-- 由 $star-expt-analyst aggregate 写入。下面每个数字入表前都在其来源处重开确认过
+<!-- 由 star-expt-analyst aggregate 写入。下面每个数字入表前都在其来源处重开确认过
      （references/aggregate_spec_zh.md），并携带它的出处。这些数字是在什么协议下测出来的，见
      metds/evaluation.md——本文件只放分数。请把它当作生成物：要改一个数字，去修或重跑那个 run
      再重新编译，绝不在这里手改。 -->
@@ -67,11 +67,11 @@ sources:
 
 | Run | 判定 | 排除原因 | 下一步 |
 |---|---|---|---|
-| `<prefix>_<slug>` | invalid | <…> | `$star-expt-analyst <slug>` |
+| `<prefix>_<slug>` | invalid | <…> | `star-expt-analyst <slug>` |
 
 ## 6. 尚未测量
 
 <!-- 根 §4 要求、但还没有 run 产出的东西：主张/benchmark、应该产出它的计划，以及它的状态
      （从未执行 / 红线命令仍在等用户）。这就是结果节目前还缺的清单。设计已被完整覆盖则写"无"。 -->
 
-- <主张 / benchmark> —— `<prefix>_<slug>_plan.md`；<状态> → `$star-plan-executor <slug>`
+- <主张 / benchmark> —— `<prefix>_<slug>_plan.md`；<状态> → `star-plan-executor <slug>`

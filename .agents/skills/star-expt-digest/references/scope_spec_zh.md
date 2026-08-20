@@ -33,7 +33,7 @@
 
 ## 上次覆盖到的日期
 
-上次覆盖到的日期是最新一份 digest 的 `covers.through`——从 frontmatter 读取，绝不推断。正是它让不带参数的 `$star-expt-digest` 等于"自上次以来"。
+上次覆盖到的日期是最新一份 digest 的 `covers.through`——从 frontmatter 读取，绝不推断。正是它让不带参数的 `star-expt-digest` 等于"自上次以来"。
 
 **解析增量窗：**
 

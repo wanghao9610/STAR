@@ -15,7 +15,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 - 关键指标，逐条按报告记录的 `{值, 来源, split, seeds, spread}` 原样转录——只跑过一次的数字在这里写 `n=1`，不留空；
 - 它写明的任何 blocker 或 major 观察，以及任何方向性信号或 kill-criterion 命中。
 
-**不要为了补充报告而打开该 run 的原始日志。** 报告就是你要读的东西。绕到它背后去"核对"、或补上它遗漏的某个指标，属于逐 run 分析——那是 `$star-expt-analyst` 的活，且带着本 skill 不做的核实环节。看起来不对的报告要转交出去（`$star-expt-analyst <run dir>` 刷新它），而不是在这里改正。
+**不要为了补充报告而打开该 run 的原始日志。** 报告就是你要读的东西。绕到它背后去"核对"、或补上它遗漏的某个指标，属于逐 run 分析——那是 `star-expt-analyst` 的活，且带着本 skill 不做的核实环节。看起来不对的报告要转交出去（`star-expt-analyst <run dir>` 刷新它），而不是在这里改正。
 
 数字是**连同出处一起抄录，而非重新核实**（`SKILL.md` 核心原则 3）。digest 记录报告所引的来源，让读者能自己去查；它自己不查。这就是 digest 与 `aggregate` 全部的成本差别，也正是 digest 能按周跑的原因。
 
@@ -32,7 +32,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 - **绝不给未核实 run 评分**，不对照任何 §5 done-criterion。它没有判定；frontmatter 记 `verdict: —`，表格里写 `awaiting analysis`。
 - **每个临时值都要标注** `provisional (unverified)`，并带上它的 `path:line`。
 
-未核实层的每一行都要带上它的转交去向：`$star-expt-analyst <run dir>`。
+未核实层的每一行都要带上它的转交去向：`star-expt-analyst <run dir>`。
 
 ### 两层之间的那堵墙
 
@@ -57,7 +57,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 | 新近分析 | 该 run 在那边是 `tier: provisional`，在这边是 `report-backed` |
 | 报告刷新 | 同一 run、同一层，但 `report:` 文件名更新 |
 
-平实地写出方向（`not met → met`），写明该 run 与两个报告日期，到此为止。**为什么**变化不归你说（核心原则 5）。一个从 `met → not met` 的判定是值得放在最前面讲的发现，也值得转交给 `$star-plan-reviser`——但 digest 报告的是这个变化，不是它的成因。
+平实地写出方向（`not met → met`），写明该 run 与两个报告日期，到此为止。**为什么**变化不归你说（核心原则 5）。一个从 `met → not met` 的判定是值得放在最前面讲的发现，也值得转交给 `star-plan-reviser`——但 digest 报告的是这个变化，不是它的成因。
 
 没有上一份 digest → 整段省略，并由 §1 说明序列从此开始。与上一份 digest 求差为空则写"无变化"，这本身也是信息：一个有 run 却没有任何判定变化的周期，说明活干了、判定没动。
 
@@ -68,7 +68,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 - **绝不复述协议或方法。** benchmark 怎么跑属于 `metds/evaluation.md`；方法是什么属于 `metds/overview.md`。digest 引用一下就走。
 - **绝不成为可引用的来源。** 每份 digest 都在自己的文件头里写明：其中的数字抄自报告，经核实的结果汇总表是 `wkdrs/results/results.md`。从 digest 里把数字抄进论文，是这个文件正面就在警告的误用。
 - **绝不靠跑点什么来填缺口。** 未执行的叶子、未分析的 run、待用户执行的红线命令：每一条都是带着关闭命令的缺口，交回给用户（规约 §2）。
-- **绝不把空周期报成成绩。** 窗内没有 run 就写"本周期没有 run"，附上最新 run 日期与上次覆盖到的日期，别的不写。用树的状态去填满一份空 digest，那是 `$star-flow-status` 的输出，不是这里的。
+- **绝不把空周期报成成绩。** 窗内没有 run 就写"本周期没有 run"，附上最新 run 日期与上次覆盖到的日期，别的不写。用树的状态去填满一份空 digest，那是 `star-flow-status` 的输出，不是这里的。
 
 ## 写核心结论
 
@@ -77,4 +77,4 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 - 先讲发现，别讲活动。"3-way ablation 在 `02_core-method` 上证伪了共享头假设"胜过"本周完成了三个 run"。
 - 如果负面结果是本周期最大的事实，就让它打头。kill-criterion 命中永远打头（`analysis_rubric.md` 的立场，在此沿用）：那是计划在起作用。
 - 用半句话点明还有什么没测。本周期若只给五条主张中的两条产出了数字，就该说清还有哪三条悬着。
-- 如果范围内每个 run 都是未核实层，核心结论就恰如其分地说出这件事——*完成 N 个 run，均未分析*——对它们的数字只字不提。那是这个周期最诚实的核心结论，并且直接转交给 `$star-expt-analyst`。
+- 如果范围内每个 run 都是未核实层，核心结论就恰如其分地说出这件事——*完成 N 个 run，均未分析*——对它们的数字只字不提。那是这个周期最诚实的核心结论，并且直接转交给 `star-expt-analyst`。

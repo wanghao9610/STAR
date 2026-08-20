@@ -20,10 +20,10 @@ sources:
 
 # Experiment Digest — <period>
 
-<!-- Written by $star-expt-digest. This is a PROGRESS RECORD, not a results table. Numbers in §3 are
+<!-- Written by star-expt-digest. This is a PROGRESS RECORD, not a results table. Numbers in §3 are
      copied from EXPT_ANALYSIS reports with their provenance and were NOT re-verified here; numbers in
      §4 are provisional and unverified. The verified results table a paper is written from is wkdrs/results/results.md
-     ($star-expt-analyst aggregate); the protocol those numbers were measured under is
+     (star-expt-analyst aggregate); the protocol those numbers were measured under is
      metds/evaluation.md. Never quote a number from this file into a paper. -->
 
 ## 1. Period & Scope
@@ -60,7 +60,7 @@ sources:
 
 | Run | Plan | Log status | Steps | Reported number (provisional) | Source | Next |
 |---|---|---|---|---|---|---|
-| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | in_progress | 3/5 | <value> — provisional (unverified) | `<path:line>` | `$star-expt-analyst <run dir>` |
+| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | in_progress | 3/5 | <value> — provisional (unverified) | `<path:line>` | `star-expt-analyst <run dir>` |
 
 ## 5. What Moved
 
@@ -80,7 +80,7 @@ sources:
      down, plus the routing. A kill-criterion hit is the plan working — say so plainly. Write "None"
      if nothing fired. -->
 
-- <signal> — `<prefix>_<slug>`, <where it is recorded> → `$star-plan-reviser <slug>`
+- <signal> — `<prefix>_<slug>`, <where it is recorded> → `star-plan-reviser <slug>`
 
 ## 7. Plan-Tree Changes in Period
 
@@ -102,8 +102,8 @@ sources:
 ## 9. Next
 
 <!-- The one or two things to do next, each with its exact command. Route, never act: an unanalyzed
-     run to $star-expt-analyst, a stale results table to $star-expt-analyst aggregate, an unexecuted or
-     awaiting leaf to $star-plan-executor, a refuted claim to $star-plan-reviser, the current state of
-     the whole tree to $star-flow-status. -->
+     run to star-expt-analyst, a stale results table to star-expt-analyst aggregate, an unexecuted or
+     awaiting leaf to star-plan-executor, a refuted claim to star-plan-reviser, the current state of
+     the whole tree to star-flow-status. -->
 
 - <action> → `<command>`

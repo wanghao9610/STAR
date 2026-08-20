@@ -1,8 +1,8 @@
-# STOP-line Rules — what Codex runs vs what the user runs
+# STOP-line Rules — what the agent runs vs what the user runs
 
-Codex and any delegated workers may write code and run **light validation**. Anything **heavy or irreversible** crosses the STOP line: prepare the exact command, write it to EXEC_LOG's "Awaiting user" area, and stop for the user to run it. Never launch across the STOP line autonomously.
+The agent and any delegate may write code and run **light validation**. Anything **heavy or irreversible** crosses the STOP line: prepare the exact command, write it to EXEC_LOG's "Awaiting user" area, and stop for the user to run it. Never launch across the STOP line autonomously.
 
-## Codex runs (light validation)
+## Agent runs (light validation)
 
 - Unit tests / runnable checks, import checks, a forward pass on a tiny batch.
 - Small-scale, **no-finetune** inference on a small subset — e.g. an MVP done-criterion: "no training, small subset, swap the text input and compare."
@@ -25,6 +25,6 @@ For each STOP action, write into EXEC_LOG "Awaiting user":
 - **what it produces and where** (`wkdrs/<run>/…`);
 - **what output to bring back** so the done-criterion can be verified.
 
-For reproducibility, Codex may also **write** the heavy command as a runnable script under `execs/scpts/<run>.sh` (writing the file is light; running it is not) so the user launches it with one command. Never execute it — that stays across the STOP line.
+For reproducibility, an agent may also **write** the heavy command as a runnable script under `execs/scpts/<run>.sh` (writing the file is light; running it is not) so the user launches it with one command. Never execute it — that stays across the STOP line.
 
-Then stop and tell the user in the report which commands are waiting on them — and name `$star-code-reviewer <leaf>` above them as the next command: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. An exploratory leaf whose command is cheap may skip the review and run it; offer that rather than deciding it. On re-invoke, apply first any blocker or major findings that review left unsettled (the skill's resume rule), then, if those outputs now exist, resume at done-criterion verification (Step 5).
+Then stop and tell the user in the report which commands are waiting on them — and name `star-code-reviewer <leaf>` above them as the next command: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. An exploratory leaf whose command is cheap may skip the review and run it; offer that rather than deciding it. On re-invoke, apply first any blocker or major findings that review left unsettled (the skill's resume rule), then, if those outputs now exist, resume at done-criterion verification (Step 5).

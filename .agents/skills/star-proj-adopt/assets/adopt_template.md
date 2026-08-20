@@ -69,7 +69,7 @@ Left as evidence only: <N> prior run(s) — see §4.
 
 ## 7. Backfill record
 
-<!-- Appended by `$star-proj-adopt backfill`, one dated block per run. Each line: leaf, the field
+<!-- Appended by `star-proj-adopt backfill`, one dated block per run. Each line: leaf, the field
      written, the value, and the inventory id that justified it. Leaves the user declined are
      recorded as declined — that is a decision worth keeping, not an absence. -->
 

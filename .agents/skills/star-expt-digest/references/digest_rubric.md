@@ -15,7 +15,7 @@ The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and fr
 - the headline metrics, each carried over as `{value, source, split, seeds, spread}` exactly as the report records them — a number over one run reads `n=1` here, never blank;
 - any blocker or major observation, and any plan-level finding or kill-criterion hit it names.
 
-**Do not open the run's raw logs to supplement a report.** The report is what you read. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `$star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`$star-expt-analyst <run dir>` to refresh it), not corrected here.
+**Do not open the run's raw logs to supplement a report.** The report is what you read. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`star-expt-analyst <run dir>` to refresh it), not corrected here.
 
 Numbers are copied **with provenance, not re-verified** (`SKILL.md` Core Principle 3). The digest records the source the report cited so a reader can check it; it does not check it itself. That is the whole cost difference between a digest and an `aggregate`, and it is why a digest can run weekly.
 
@@ -32,7 +32,7 @@ Hard bounds on this tier:
 - **Never score a provisional run** against a §5 done-criterion. It has no verdict; the frontmatter records `verdict: —` and the table says `awaiting analysis`.
 - **Every provisional value is tagged** `provisional (unverified)` in the table and carries its `path:line`.
 
-A provisional row always carries its routing: `$star-expt-analyst <run dir>`.
+A provisional row always carries its routing: `star-expt-analyst <run dir>`.
 
 ### The wall between the tiers
 
@@ -57,7 +57,7 @@ Derived by diffing this digest's run set against the previous digest's `sources:
 | Newly analyzed | the run was `tier: provisional` there and is `report-backed` here |
 | Report refreshed | same run, same tier, but a newer `report:` filename |
 
-State the direction plainly (`not met → met`), name the run and both report dates, and stop there. **Why** it moved is not yours to say (Core Principle 5). A verdict that went `met → not met` is a finding worth leading with, and worth routing to `$star-plan-reviser` — but the digest reports the change, not its cause.
+State the direction plainly (`not met → met`), name the run and both report dates, and stop there. **Why** it moved is not yours to say (Core Principle 5). A verdict that went `met → not met` is a finding worth leading with, and worth routing to `star-plan-reviser` — but the digest reports the change, not its cause.
 
 No previous digest → the section is omitted, and §1 says the series starts here. An empty diff against a previous digest is written as "nothing moved", which is itself information: a period with runs but no movement means work happened and no verdict changed.
 
@@ -68,7 +68,7 @@ No previous digest → the section is omitted, and §1 says the series starts he
 - **Never restates a protocol or a method.** How a benchmark is run is `metds/evaluation.md`; what the method is, `metds/overview.md`. The digest cites and moves on.
 - **Never becomes the quotable source.** Every digest says, in its own header, that its numbers are copied from reports and that `wkdrs/results/results.md` is the verified results table. A number quoted into a paper from a digest is a misuse the file warns against on its face.
 - **Never fills a gap by running something.** An unexecuted leaf, an unanalyzed run, an awaiting STOP-line command: each is a listed gap with the command that closes it, handed back to the user (conventions §2).
-- **Never reports an empty period as an achievement.** No runs in the window is written as "no runs in this period", with the newest run date and the last covered date, and nothing else. Padding an empty digest with the state of the tree is `$star-flow-status`'s output, not this one's.
+- **Never reports an empty period as an achievement.** No runs in the window is written as "no runs in this period", with the newest run date and the last covered date, and nothing else. Padding an empty digest with the state of the tree is `star-flow-status`'s output, not this one's.
 
 ## Writing the headline
 
@@ -77,4 +77,4 @@ Three to five sentences, and the hardest part of the file to get right. It answe
 - Lead with the finding, not the activity. "The 3-way ablation refutes the shared-head hypothesis at `02_core-method`" beats "three runs completed this week."
 - A negative result leads if it is the period's biggest fact. A kill-criterion hit always leads (`analysis_rubric.md`'s stance, carried here): it is the plan working.
 - Name what is still unmeasured, in one clause. A period that produced numbers for two of five claims should say which three are still open.
-- If every in-scope run is provisional, the headline says exactly that — *N runs completed, none analyzed yet* — and nothing about their numbers. That is the honest headline for the period, and it routes straight to `$star-expt-analyst`.
+- If every in-scope run is provisional, the headline says exactly that — *N runs completed, none analyzed yet* — and nothing about their numbers. That is the honest headline for the period, and it routes straight to `star-expt-analyst`.

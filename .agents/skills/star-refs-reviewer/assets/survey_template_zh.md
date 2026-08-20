@@ -16,7 +16,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 # <话题> —— 领域综述
 
-<!-- 由 $star-refs-reviewer survey 写出。下文每条论断都能追溯到本轮抓取、列在 §12 的来源；
+<!-- 由 star-refs-reviewer survey 写出。下文每条论断都能追溯到本轮抓取、列在 §12 的来源；
      其余一律标注为本综述自己的推断。没内容的节压成一行——绝不注水。 -->
 
 ## 1. TL;DR
@@ -70,8 +70,8 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 ## 11. Read Next
 
 <!-- 值得建一篇完整分析笔记的论文，每篇一句话理由，附 id 或 URL——按相关性排序，
-     同级按影响力分。单篇是 `$star-refs-reviewer <arxiv-id>`；整个清单一次
-     `$star-refs-reviewer add …`。 -->
+     同级按影响力分。单篇是 `star-refs-reviewer <arxiv-id>`；整个清单一次
+     `star-refs-reviewer add …`。 -->
 
 ## 12. Annotated References
 

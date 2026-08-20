@@ -1,4 +1,4 @@
-<!-- Compiled by $star-code-release on <YYYY-MM-DD> · model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md> · sources: <artifact>@<date>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with $star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by star-code-release on <YYYY-MM-DD> · model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md> · sources: <artifact>@<date>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- Section kinds from references/readme_map.md: (M) always present, carrying a TODO when its
      source is absent; (O) dropped entirely when its source is absent — never padded.
@@ -47,7 +47,7 @@
      six sentences. This and the section below are what most readers actually read — everything
      after them is for the reader who has already decided to try it. -->
 
-<TODO: compile from metds/overview.md — run $star-metd-summarize overview>
+<TODO: compile from metds/overview.md — run star-metd-summarize overview>
 
 ## ✨ Highlights
 

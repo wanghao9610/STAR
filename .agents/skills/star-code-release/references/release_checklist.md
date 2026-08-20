@@ -25,7 +25,7 @@ Grep through the tracked file list with `grep -InE -B2 -A2`, so the surrounding 
 | A root `LICENSE` exists | blocker | The user chooses the license; name the constraint from §5 below and ask. Never pick one for them |
 | It is compatible with the upstream license `metds/codearc.md` §5 recorded | blocker on conflict | Report the conflict precisely — "upstream is GPL-3.0, root LICENSE is MIT" — and stop there. Resolving a license conflict is a legal decision, not a skill's |
 | Upstream `LICENSE` / `CITATION*` files still in place under `${CODE_NAME}/` | blocker if removed | Restore them from git history |
-| `${CODE_NAME}/UPSTREAM.md` exists when the codebase was started from a repo | major | `$star-code-architect` records provenance |
+| `${CODE_NAME}/UPSTREAM.md` exists when the codebase was started from a repo | major | `star-code-architect` records provenance |
 | The README's Acknowledgement names the upstream repo and the core papers | major | Compile it from `UPSTREAM.md` and `metds/refs/refs_index.md` |
 | Third-party code copied in without attribution | major | Name the file and where it came from, if that is recoverable; otherwise flag it for the user |
 

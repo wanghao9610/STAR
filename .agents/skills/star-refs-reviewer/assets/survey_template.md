@@ -16,7 +16,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 # <Topic> — a field survey
 
-<!-- Written by $star-refs-reviewer survey. Every claim below traces to a source fetched during the
+<!-- Written by star-refs-reviewer survey. Every claim below traces to a source fetched during the
      run and listed in §12; mark anything else as this survey's own inference. Sections with nothing
      to say collapse to one line — never pad. -->
 
@@ -73,7 +73,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 <!-- Papers that deserve a full analysis note, each with one clause of why and its id or URL —
      ordered by relevance, impact score breaking ties.
-     One paper is `$star-refs-reviewer <arxiv-id>`; the whole list is one `$star-refs-reviewer add …`. -->
+     One paper is `star-refs-reviewer <arxiv-id>`; the whole list is one `star-refs-reviewer add …`. -->
 
 ## 12. Annotated References
 

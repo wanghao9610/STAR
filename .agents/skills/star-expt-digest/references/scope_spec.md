@@ -33,7 +33,7 @@ A run is dated **once**, by the rule above, even when its two candidate dates di
 
 ## The last covered date
 
-The last covered date is the newest digest's `covers.through` — read from frontmatter, never inferred. It is what makes `$star-expt-digest` with no argument mean "since last time".
+The last covered date is the newest digest's `covers.through` — read from frontmatter, never inferred. It is what makes `star-expt-digest` with no argument mean "since last time".
 
 **Resolving the incremental window:**
 

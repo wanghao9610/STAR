@@ -5,7 +5,7 @@ source_plan: <prefix>_<slug>_plan.md # 本次执行的 metds/plans/ 下叶子子
 task_dir: tasks/<prefix>_<slug>      # 该计划执行过程的中间文件目录
 code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
-started: <YYYY-MM-DD>                # Codex 开始本次已授权执行的日期
+started: <YYYY-MM-DD>                # agent 开始本次已授权执行的日期
 branch: <run 名 | none>          # 本次执行所在的执行分支，名字与上面的 run: 完全相同（规约 §11）；none = 在基础分支上执行
 base: <分支名@短SHA | —>             # 分支从哪里分出——也是合并目标；branch 为 none 时写 —
 worktree: <绝对路径 | none>          # 安置本次 run 的工作树（规约 §11.7–9）；none = 在被调用的 checkout 里执行
@@ -36,15 +36,15 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 ## 动作清单
 
-<!-- 有序。每个动作绑一个 check。`执行方` = `codex`、`子代理` 或 `stop → 用户`(Codex 备好命令、用户来跑
+<!-- 有序。每个动作绑一个 check。`执行方` = `agent`、`子代理` 或 `stop → 用户`(agent 备好命令、用户来跑
      ——见红线)。命令走 .env 的 conda 环境;产物落 wkdrs/<run>/ 下。
      一整组配置(超参网格、多 seed 重复)算**一个**动作,不是一格一行:产物列写 wkdrs/<run>/cells/,
      检查列写子计划 §5 对整张网格提的那条判据。 -->
 
 | # | 动作 | 文件 / 模块(${CODE_NAME}/…) | 命令(走 conda) | 产物(wkdrs/<run>/…) | 检查 | 执行方 |
 |---|------|------------------------------|-----------------|----------------------|------|--------|
-| 1 | <新建/修改 …> | <路径> | — | — | <import / runnable check> | codex |
-| 2 | <…> | <路径> | <命令> | <路径> | <证明它完成的检查> | codex/子代理 |
+| 1 | <新建/修改 …> | <路径> | — | — | <import / runnable check> | agent |
+| 2 | <…> | <路径> | <命令> | <路径> | <证明它完成的检查> | agent/子代理 |
 | N | <重实验> | — | <备好的命令> | <路径> | §5 完成判据 | stop → 用户 |
 
 ## 红线

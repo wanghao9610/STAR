@@ -5,7 +5,7 @@ source_plan: <prefix>_<slug>_plan.md # the leaf sub-plan under metds/plans/ this
 task_dir: tasks/<prefix>_<slug>      # plan-specific execution-process intermediate files
 code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
-started: <YYYY-MM-DD>                # date Codex started this authorized execution run
+started: <YYYY-MM-DD>                # date the agent started this authorized execution run
 branch: <run name | none>          # execution branch this run executes on, named exactly as run: above (conventions §11); none = the base branch
 base: <branch@short-sha | —>         # what the branch forked from — the merge target; — when branch is none
 worktree: <absolute path | none>     # the tree housing this run (conventions §11.7–9); none = the invoking checkout
@@ -39,8 +39,8 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## Actions
 
-<!-- Ordered. Each action binds a check. `owner` = `codex`, `delegate`, or `stop → user`
-     (Codex prepares the command, user runs it — see STOP line). Commands go through the .env conda
+<!-- Ordered. Each action binds a check. `owner` = `agent`, `delegate`, or `stop → user`
+     (the agent prepares the command, user runs it — see STOP line). Commands go through the .env conda
      env; artifacts are written under wkdrs/<run>/.
      A whole set of configurations (a grid, repeats over seeds) is **one** action, not one row per
      cell: the artifact column reads wkdrs/<run>/cells/, and the check column carries the criterion
@@ -48,8 +48,8 @@ model_trail:                    # append-only: one entry per write session, newe
 
 | # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | owner |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
-| 1 | <create/modify …> | <path> | — | — | <import / runnable check> | codex |
-| 2 | <…> | <path> | <cmd> | <path> | <what proves it> | codex/delegate |
+| 1 | <create/modify …> | <path> | — | — | <import / runnable check> | agent |
+| 2 | <…> | <path> | <cmd> | <path> | <what proves it> | agent/delegate |
 | N | <heavy experiment> | — | <prepared cmd> | <path> | §5 done-criterion | stop → user |
 
 ## STOP line

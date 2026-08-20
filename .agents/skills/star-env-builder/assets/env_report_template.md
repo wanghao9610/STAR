@@ -65,7 +65,7 @@ A fresh session should be able to use — or rebuild — this environment from t
 <!-- Source builds, sudo/system installs, >10 GB downloads. Exact command + why it crossed the
      line + what to do afterwards. -->
 
-- [ ] `<exact command>` — <why: source build / sudo / size>. Afterwards: re-run `$star-env-builder <ENV_NAME>` and choose *verify & repair in place*.
+- [ ] `<exact command>` — <why: source build / sudo / size>. Afterwards: re-run `star-env-builder <ENV_NAME>` and choose *verify & repair in place*.
 
 ## Version list
 

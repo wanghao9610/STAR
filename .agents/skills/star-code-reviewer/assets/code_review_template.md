@@ -1,6 +1,6 @@
 # Code Review — <scope> (<YYYY-MM-DD>)
 
-<!-- Written by $star-code-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>). Mode: full | plan | path | diff; target: <argument as given>;
+<!-- Written by star-code-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>). Mode: full | plan | path | diff; target: <argument as given>;
      files reviewed: <n>. Findings are numbered F1, F2, … and cite file:line, the violated rule,
      and a concrete fix. Sections with nothing to say collapse to one line — never pad. -->
 
@@ -54,9 +54,9 @@
 
 ## 6. Next Actions
 
-<!-- Routing for findings outside what this skill may write: feature gaps → $star-plan-executor <leaf>; plan-text
-     divergence → $star-plan-reviser <slug>; structural reorganization → $star-code-architect;
-     unusable env → $star-env-builder. Then the fix-pass candidates (mechanical findings, by number). -->
+<!-- Routing for findings outside what this skill may write: feature gaps → star-plan-executor <leaf>; plan-text
+     divergence → star-plan-reviser <slug>; structural reorganization → star-code-architect;
+     unusable env → star-env-builder. Then the fix-pass candidates (mechanical findings, by number). -->
 
 ## 7. Fix Record
 

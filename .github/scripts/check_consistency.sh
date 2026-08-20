@@ -93,8 +93,9 @@ done < <(printf '%s\n' "${SKILLS}")
 (( parity_errors == 0 )) && note "file sets match across all ${#SKILL_ROOTS[@]} trees"
 
 # 4. Slash-only guards: the conventions roster (§10) marks that set with †, and
-#    the seven trees enforce it — Codex via agents/openai.yaml, the other six
-#    via disable-model-invocation frontmatter. Checked both ways: a † whose
+#    the seven trees enforce it — Codex via its own .codex/skills manifests,
+#    which .agents links to at the path Codex scans, the other six via
+#    disable-model-invocation frontmatter. Checked both ways: a † whose
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
 #    pick up. Both failures are silent in use, which is what this check is for.
@@ -141,7 +142,7 @@ while IFS= read -r skill; do
     want_guarded=false
     grep -qxF "${skill}" <<< "${SLASH_ONLY}" && want_guarded=true
 
-    manifest=".agents/skills/${skill}/agents/openai.yaml"
+    manifest=".codex/skills/${skill}/agents/openai.yaml"
     if [[ ! -f "${manifest}" ]]; then
         fail "${manifest} is missing"
         guard_errors=1
@@ -1460,40 +1461,15 @@ rm -f "${reuse_en}" "${reuse_zh}"
 #     making every actual dispatch site executable rather than tool-shaped prose.
 section "Harness-specific delegation vocabulary"
 delegation_errors=0
-codex_expected="$(mktemp)"
-codex_actual="$(mktemp)"
 
-mdgrep -l 'subagent_type:' -- .claude/skills \
-    | sed 's|^\.claude/skills/||' | sort > "${codex_expected}"
-mdgrep -l 'agent_type:' -- .agents/skills \
-    | sed 's|^\.agents/skills/||' | sort > "${codex_actual}"
-
-if ! diff -u "${codex_expected}" "${codex_actual}" >/dev/null; then
-    fail ".agents agent_type file set differs from Claude's delegation-capable file set:"
-    diff -u "${codex_expected}" "${codex_actual}" | sed 's/^/      /'
-    delegation_errors=1
-fi
-
-while IFS= read -r rel; do
-    [[ -n "${rel}" ]] || continue
-    path=".agents/skills/${rel}"
-    if ! grep -q 'spawn_agent' "${path}"; then
-        fail "${path}: names agent_type without spawn_agent"
-        delegation_errors=1
-    fi
-    invalid_types="$(grep -oE 'agent_type: [A-Za-z_-]+' "${path}" \
-        | grep -vE '^agent_type: (explorer|worker)$' || true)"
-    if [[ -n "${invalid_types}" ]]; then
-        fail "${path}: unsupported or unbounded Codex agent_type:"
-        printf '%s\n' "${invalid_types}" | sed 's/^/      /'
-        delegation_errors=1
-    fi
-done < "${codex_actual}"
-
-foreign_codex_type="$(mdgrep -n 'subagent_type:' -- .agents/skills || true)"
-if [[ -n "${foreign_codex_type}" ]]; then
-    fail ".agents contains foreign subagent_type vocabulary:"
-    printf '%s\n' "${foreign_codex_type}" | sed 's/^/      /'
+# .agents/skills is the root every agent following the AGENTS.md convention
+# reads, so a delegate there is named by what it does — a read-only sub-agent, a
+# writing sub-agent — and never by one product's tool or type key. This is the
+# check that keeps it that way; the six named trees keep their own vocabulary.
+neutral_delegation="$(mdgrep -nE 'spawn_agent|star_subagent|(^|[^[:alnum:]_])(sub)?agent_type:|`Agent`|`Task`' -- .agents/skills || true)"
+if [[ -n "${neutral_delegation}" ]]; then
+    fail ".agents/skills names a harness's delegation tool or type key, and it is the neutral root:"
+    printf '%s\n' "${neutral_delegation}" | cut -c1-140 | head -5 | sed 's/^/      /'
     delegation_errors=1
 fi
 
@@ -1505,9 +1481,7 @@ if [[ -n "${foreign_spawn}" ]]; then
     delegation_errors=1
 fi
 
-codex_delegate_files="$(wc -l < "${codex_actual}" | tr -d ' ')"
-rm -f "${codex_expected}" "${codex_actual}"
-(( delegation_errors == 0 )) && note "${codex_delegate_files} Codex delegation files name spawn_agent with explorer/worker agent_type"
+(( delegation_errors == 0 )) && note "the neutral tree names no delegation tool or type key, and no tree carries another's"
 
 # 23. Every tree names only its own harness's tools.
 #     Check 22 covers the delegation call itself; this one covers the two names a
@@ -1562,7 +1536,8 @@ check_vocab() { # $1 = skill root, $2 = expected-present ERE ('' = none), $3 = b
 check_vocab .claude/skills    '`Read`'      '\bShell\b|\bReadFile\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
 check_vocab .kimi-code/skills '`Read`'      '\bShell\b|\bReadFile\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
 check_vocab .cursor/skills    '`Read`'      '\bBash\b|\bReadFile\b|\bAskUserQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
-check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\bask_user_question\b|\bstar_questionnaire\b'
+# The neutral root names none of them — not its own, because it has none.
+check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`|`read`|`read_file`|`run_shell_command`|\bAskUserQuestion\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b|\bupdate_plan\b|\bEnterPlanMode\b|\bExitPlanMode\b|\benter_plan_mode\b|\bexit_plan_mode\b'
 check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\brequest_user_input\b|\bstar_questionnaire\b'
 # Pi publishes its built-ins lowercase — read, bash, edit, write, grep, find, ls
 # — so the capitalized spellings of the other six trees are all foreign here.

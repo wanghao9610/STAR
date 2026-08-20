@@ -1,6 +1,6 @@
 # Release Preparation — <project> (<YYYY-MM-DD>)
 
-<!-- Written by $star-code-release (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>).
+<!-- Written by star-code-release (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/model_id_spec.md>).
      Phases run: gather | polish | readme | check (or "full pass"). Sections with nothing to say
      collapse to one line — never pad. -->
 
@@ -16,10 +16,10 @@
 
 | Source | State | Producer | Effect on this run |
 |---|---|---|---|
-| `metds/overview.md` | present / absent / stale | `$star-metd-summarize overview` | <which README section it fed, or which TODO it left> |
-| `wkdrs/results/results.md` | | `$star-expt-analyst aggregate` | |
-| `metds/codearc.md` | | `$star-code-architect` | |
-| `${CODE_NAME}/requirements*` | | `$star-env-builder` | |
+| `metds/overview.md` | present / absent / stale | `star-metd-summarize overview` | <which README section it fed, or which TODO it left> |
+| `wkdrs/results/results.md` | | `star-expt-analyst aggregate` | |
+| `metds/codearc.md` | | `star-code-architect` | |
+| `${CODE_NAME}/requirements*` | | `star-env-builder` | |
 
 ## 3. Promotion Record
 
@@ -32,7 +32,7 @@
 
 **Verified by:** <the compileall and stale-reference greps that were re-run per row>
 
-**Plan text made stale:** <plan file:line pairs whose paths moved — routed to `$star-plan-reviser`, or "none">
+**Plan text made stale:** <plan file:line pairs whose paths moved — routed to `star-plan-reviser`, or "none">
 
 ## 4. Polish Record
 
@@ -43,7 +43,7 @@
 |---|---|---|---|
 | P1 | `<file>:<line>` | <one line> | applied / skipped / reverted (<reason>) |
 
-**Outside those files, routed to `$star-code-reviewer`:** <count and one-line summary, or "none">
+**Outside those files, routed to `star-code-reviewer`:** <count and one-line summary, or "none">
 
 ## 5. README Section Map
 
@@ -51,7 +51,7 @@
 
 | Section | Source | State |
 |---|---|---|
-| Abstract | `metds/overview.md`@<date> | written / TODO (`$star-metd-summarize overview`) / omitted (no source) |
+| Abstract | `metds/overview.md`@<date> | written / TODO (`star-metd-summarize overview`) / omitted (no source) |
 | Installation | `requirements.txt`, `ENV_REPORT.md`@<date> | |
 | Results | `wkdrs/results/results.md`@<date> | |
 
@@ -90,5 +90,5 @@
 ## 8. Next Actions
 
 <!-- Routing, worst first: which producer fills each README TODO, where the code findings outside
-     those files go, which plans need `$star-plan-reviser` after a promotion, and what the user must
+     those files go, which plans need `star-plan-reviser` after a promotion, and what the user must
      decide before publishing. -->

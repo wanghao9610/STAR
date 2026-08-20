@@ -10,7 +10,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 # Experiment Analysis — <run> (<YYYY-MM-DD>)
 
-<!-- Written by $star-expt-analyst. Read-only audit of what this run produced, scored against what
+<!-- Written by star-expt-analyst. Read-only audit of what this run produced, scored against what
      the plan expected. Every number here was re-opened at its source before it was written down.
      Sections with nothing to say collapse to one line — never pad. -->
 
@@ -90,9 +90,9 @@ model_trail:                    # append-only: one entry per write session, newe
 ## 8. Recommendations & Routing
 
 <!-- One owner per open item; this skill writes nothing but this report. Unfinished steps or a
-     pending STOP-line command → $star-plan-executor <slug>; §5 met and needing finalization →
-     $star-plan-executor <slug> (it owns exec_status); plan text no longer true →
-     $star-plan-reviser <slug>; kill-criterion hit or claim refuted → $star-plan-reviser /
-     $star-plan-coach / $star-plan-decomposer; a code defect the logs point at →
-     $star-code-reviewer <slug>; a broken env → $star-env-builder. Metrics that need a new run:
+     pending STOP-line command → star-plan-executor <slug>; §5 met and needing finalization →
+     star-plan-executor <slug> (it owns exec_status); plan text no longer true →
+     star-plan-reviser <slug>; kill-criterion hit or claim refuted → star-plan-reviser /
+     star-plan-coach / star-plan-decomposer; a code defect the logs point at →
+     star-code-reviewer <slug>; a broken env → star-env-builder. Metrics that need a new run:
      the exact command, ready to paste, never executed here. -->

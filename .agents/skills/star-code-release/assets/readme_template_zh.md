@@ -1,4 +1,4 @@
-<!-- Compiled by $star-code-release on <YYYY-MM-DD> · model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with $star-code-release readme; hand edits to a section are detected and kept. -->
+<!-- Compiled by star-code-release on <YYYY-MM-DD> · model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md> · sources: <产物>@<日期>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with star-code-release readme; hand edits to a section are detected and kept. -->
 
 <!-- 本模板用于 README.zh-CN.md；README.md 始终为英文，见 readme_template.md。
      小节类型见 references/readme_map_zh.md：(M) 始终出现，来源缺失时带 TODO；
@@ -45,7 +45,7 @@
 <!-- (M §3) 取自 metds/overview.md：问题、缺口、核心想法，按此顺序。三到六句。
      这一节和下一节是多数读者真正会读的部分——之后的一切都是写给已经决定试一试的读者的。 -->
 
-<TODO：从 metds/overview.md 编译——运行 $star-metd-summarize overview>
+<TODO：从 metds/overview.md 编译——运行 star-metd-summarize overview>
 
 ## ✨ 亮点
 

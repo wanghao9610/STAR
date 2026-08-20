@@ -1,6 +1,6 @@
 # 代码审查 — <scope>（<YYYY-MM-DD>）
 
-<!-- 由 $star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。模式：full | plan | path | diff；目标：<原样的参数>；
+<!-- 由 star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。模式：full | plan | path | diff；目标：<原样的参数>；
      审查文件数：<n>。问题项编号 F1、F2、…，均引用 file:line、违反的规则和具体修法。
      无话可说的节收缩为一行——绝不注水。 -->
 
@@ -51,9 +51,9 @@
 
 ## 6. 下一步
 
-<!-- 越界问题项的转交去向：功能缺口 → $star-plan-executor <叶子>；计划文本偏差 →
-     $star-plan-reviser <slug>；结构性重组 → $star-code-architect；环境不可用 →
-     $star-env-builder。然后列修复轮候选（例行问题项，按编号）。 -->
+<!-- 越界问题项的转交去向：功能缺口 → star-plan-executor <叶子>；计划文本偏差 →
+     star-plan-reviser <slug>；结构性重组 → star-code-architect；环境不可用 →
+     star-env-builder。然后列修复轮候选（例行问题项，按编号）。 -->
 
 ## 7. 修复记录
 
