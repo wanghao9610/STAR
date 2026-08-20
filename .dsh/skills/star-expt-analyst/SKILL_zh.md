@@ -12,11 +12,24 @@ description: >-
 
 调用方式：`/skill:star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [描述]`——计划名（slug / 数字前缀 / 文件名）经 `exec_runs` 解析到当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某棵子树时则为 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——是本次运行可以采纳、也可以写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；更严之处以本文件为准。用一条消息装齐，每个文件各自一次 `read`：规约本身，以及——完整分析路径上——`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。别把文件 `cat` 进命令里：bash 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而光规约文件就超过这个上限——`bash` 只做只有 `bash` 能做的事，同一条消息里的一次小调用：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。结果审计真正用到的部分——§0 词汇表、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册、§11 执行分支——经下面的开场装载进入。另有一节不装载：§1 git——本 skill 对仓库只读、绝不提交，这条已在状态与文件规则里独立成行重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——三次 bash 调用，以项目根目录为工作目录，一起发出；完整分析路径上，同一条消息里再加一次 `read`：`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+一条消息，三个 bash 结果——完整分析路径上，外加那次 `read` 拿到的评分表。三次调用分开发，是因为每个工具结果各有自己的尺寸上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那次往返——而规约摘录合计约 49 KB，三次调用分担 15、19、14。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

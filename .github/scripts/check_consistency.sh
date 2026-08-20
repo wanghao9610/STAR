@@ -1175,6 +1175,7 @@ RESTATED_REGISTRY=(
     "star-code-release|SKILL.md|11"
     "star-plan-coach|SKILL.md|11"
     "star-metd-summarize|SKILL.md|1"
+    "star-expt-analyst|SKILL.md|1"
     "star-expt-digest|SKILL.md|1"
     "star-expt-digest|SKILL.md|2"
     "star-expt-digest|SKILL.md|4"
