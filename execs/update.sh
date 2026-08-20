@@ -78,7 +78,8 @@ HOOK_CONFIGS=(
 # .pi/settings.json keeps Pi's skill discovery off .agents/skills: Pi scans both
 # roots, and while .pi/skills always wins the name collision — it is loaded first
 # — the loser is still reported on every start. Excluding it silences that and
-# leaves the Codex tree alone, since Codex reads .agents/skills itself.
+# leaves the shared root alone for the agents that read it as their own — Codex
+# has no other, and any agent following the AGENTS.md convention finds it there.
 PROJECT_CONFIGS=(
     ".pi/settings.json"
 )
