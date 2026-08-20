@@ -138,7 +138,7 @@ The operational form of `AGENTS.md` §9.
 
 ## 7. Dialogue
 
-The tool-neutral half. **How** to ask — AskUserQuestion, Codex's structured user-input tool, or plain text — is platform-specific and stays in each `SKILL.md`.
+The tool-neutral half. **How** to ask — a structured question tool where the agent has one, plain text where it does not — is per-tool and stays in each `SKILL.md`.
 
 1. **Keep each chat reply under about 500 words.** Files the run writes do not count. Detail belongs in the artifact; the reply is the digest. **One exception**: where a reply's length is set by what it must enumerate — `star-flow-status`'s tree — shape bounds it instead, stated by that skill (one line per node), never no bound at all.
 2. **Ask one question at a time and wait for an explicit answer** before acting on it. Never bundle-approve, never assume a yes. **This holds in headless and scripted runs**: a skill that reaches a confirmation point stops and waits rather than proceeding — see the guide's "Which parts can run unattended?". A drafted list the user reviews in one pass is *one* question and not one per row — item 13 gives its shape.

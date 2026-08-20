@@ -36,17 +36,17 @@ The list reads as one pass, but the workflow is not linear: `star-proj-adopt` ru
 
 | Research stage | The skill that carries it | What it writes | What the next stage works from |
 | --- | --- | --- | --- |
-| Settle what you are asking | `$star-idea-storm` | `metds/ideas/<slug>_idea.md` | A one-sentence question, the gap it sits in, and a first experiment that could kill it |
-| Write the plan, reading the field as you position it | `$star-plan-coach`, breaking out to `$star-refs-reviewer` | `metds/plans/<digit>_<slug>_plan.md`; `metds/refs/`: one note per core paper, `reference.bib`, `refs_index.md` | Problem, positioning, method, experiments, risks and milestones, positioned against work that was read rather than recalled — plus the baselines the field expects, and the `finalized` date that lets the plan be split |
-| Give the code and the runtime somewhere to live | `$star-code-architect`, then `$star-env-builder` | `${CODE_NAME}/` and `metds/codearc.md`; `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` | Modules a leaf can name by path, and an interpreter that has already imported them |
-| Split it into separately answerable questions | `$star-plan-decomposer` | one sub-plan per unit, flat under `metds/plans/` | One leaf per question, each with its own deliverables and one done-criterion that can actually be run |
-| Run the experiment | `$star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and the run's own artifacts | Code, the evidence of its light validation, and the training or evaluation command handed back for you to run |
-| Check the code the numbers will rest on | `$star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md` | Findings by severity, caught before the compute is spent rather than after |
-| Read what came back | `$star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; `wkdrs/results/results.md` in `aggregate` mode | Every done-criterion scored `met` / `not met` / `unmeasurable`, with the source behind each number |
-| Take the result back into the plan | `$star-plan-reviser` | the plan revised in place, plus `wkdrs/<run>/REVIEW_<date>.md` | A plan that matches the evidence, and a tree that no longer recommends a direction the evidence closed |
-| Write the whole thing up | `$star-metd-summarize`, then `$star-code-release` | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md`; `README.md` | The method in prose and the numbers in one table — what a paper's method and results sections are written from |
+| Settle what you are asking | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | A one-sentence question, the gap it sits in, and a first experiment that could kill it |
+| Write the plan, reading the field as you position it | `star-plan-coach`, breaking out to `star-refs-reviewer` | `metds/plans/<digit>_<slug>_plan.md`; `metds/refs/`: one note per core paper, `reference.bib`, `refs_index.md` | Problem, positioning, method, experiments, risks and milestones, positioned against work that was read rather than recalled — plus the baselines the field expects, and the `finalized` date that lets the plan be split |
+| Give the code and the runtime somewhere to live | `star-code-architect`, then `star-env-builder` | `${CODE_NAME}/` and `metds/codearc.md`; `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` | Modules a leaf can name by path, and an interpreter that has already imported them |
+| Split it into separately answerable questions | `star-plan-decomposer` | one sub-plan per unit, flat under `metds/plans/` | One leaf per question, each with its own deliverables and one done-criterion that can actually be run |
+| Run the experiment | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and the run's own artifacts | Code, the evidence of its light validation, and the training or evaluation command handed back for you to run |
+| Check the code the numbers will rest on | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md` | Findings by severity, caught before the compute is spent rather than after |
+| Read what came back | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; `wkdrs/results/results.md` in `aggregate` mode | Every done-criterion scored `met` / `not met` / `unmeasurable`, with the source behind each number |
+| Take the result back into the plan | `star-plan-reviser` | the plan revised in place, plus `wkdrs/<run>/REVIEW_<date>.md` | A plan that matches the evidence, and a tree that no longer recommends a direction the evidence closed |
+| Write the whole thing up | `star-metd-summarize`, then `star-code-release` | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md`; `README.md` | The method in prose and the numbers in one table — what a paper's method and results sections are written from |
 
-Two skills sit outside that order. `$star-flow-status` reads the whole tree at any point and names the one next action; `$star-expt-digest` says what the experiments did over a period and what moved since the last one; and a project already months old enters at `$star-proj-adopt`, which records what has been built and run as evidence before joining the table at the plan.
+Two skills sit outside that order. `star-flow-status` reads the whole tree at any point and names the one next action; `star-expt-digest` says what the experiments did over a period and what moved since the last one; and a project already months old enters at `star-proj-adopt`, which records what has been built and run as evidence before joining the table at the plan.
 
 The skills keep plan state in project files, so work can continue across conversations and sessions without relying on chat history for context.
 
@@ -54,59 +54,47 @@ The skills keep plan state in project files, so work can continue across convers
 
 - [1. Invoking the skills](#1-invoking-the-skills)
 - [2. Before you start](#2-before-you-start)
-- [3. `$star-proj-adopt`: adopt an in-progress project](#3-star-proj-adopt-adopt-an-in-progress-project)
-- [4. `$star-idea-storm`: converge on a research topic](#4-star-idea-storm-converge-on-a-research-topic)
-- [5. `$star-plan-coach`: write a research plan](#5-star-plan-coach-write-a-research-plan)
-- [6. `$star-refs-reviewer`: survey the related work](#6-star-refs-reviewer-survey-the-related-work)
-- [7. `$star-code-architect`: set up or organize the codebase](#7-star-code-architect-set-up-or-organize-the-codebase)
-- [8. `$star-env-builder`: build the runtime environment](#8-star-env-builder-build-the-runtime-environment)
-- [9. `$star-plan-decomposer`: create execution sub-plans](#9-star-plan-decomposer-create-execution-sub-plans)
-- [10. `$star-plan-executor`: execute one leaf plan](#10-star-plan-executor-execute-one-leaf-plan)
-- [11. `$star-code-reviewer`: review code against conventions and the plan](#11-star-code-reviewer-review-code-against-conventions-and-the-plan)
-- [12. `$star-expt-analyst`: analyze a run's results](#12-star-expt-analyst-analyze-a-runs-results)
-- [13. `$star-expt-digest`: summarize progress over a period](#13-star-expt-digest-summarize-progress-over-a-period)
-- [14. `$star-plan-reviser`: review and revise one plan](#14-star-plan-reviser-review-and-revise-one-plan)
-- [15. `$star-flow-status`: inspect the whole flow](#15-star-flow-status-inspect-the-whole-flow)
-- [16. `$star-metd-summarize`: compile the plans into method documents](#16-star-metd-summarize-compile-the-plans-into-method-documents)
-- [17. `$star-code-release`: prepare the repository for release](#17-star-code-release-prepare-the-repository-for-release)
+- [3. `star-proj-adopt`: adopt an in-progress project](#3-star-proj-adopt-adopt-an-in-progress-project)
+- [4. `star-idea-storm`: converge on a research topic](#4-star-idea-storm-converge-on-a-research-topic)
+- [5. `star-plan-coach`: write a research plan](#5-star-plan-coach-write-a-research-plan)
+- [6. `star-refs-reviewer`: survey the related work](#6-star-refs-reviewer-survey-the-related-work)
+- [7. `star-code-architect`: set up or organize the codebase](#7-star-code-architect-set-up-or-organize-the-codebase)
+- [8. `star-env-builder`: build the runtime environment](#8-star-env-builder-build-the-runtime-environment)
+- [9. `star-plan-decomposer`: create execution sub-plans](#9-star-plan-decomposer-create-execution-sub-plans)
+- [10. `star-plan-executor`: execute one leaf plan](#10-star-plan-executor-execute-one-leaf-plan)
+- [11. `star-code-reviewer`: review code against conventions and the plan](#11-star-code-reviewer-review-code-against-conventions-and-the-plan)
+- [12. `star-expt-analyst`: analyze a run's results](#12-star-expt-analyst-analyze-a-runs-results)
+- [13. `star-expt-digest`: summarize progress over a period](#13-star-expt-digest-summarize-progress-over-a-period)
+- [14. `star-plan-reviser`: review and revise one plan](#14-star-plan-reviser-review-and-revise-one-plan)
+- [15. `star-flow-status`: inspect the whole flow](#15-star-flow-status-inspect-the-whole-flow)
+- [16. `star-metd-summarize`: compile the plans into method documents](#16-star-metd-summarize-compile-the-plans-into-method-documents)
+- [17. `star-code-release`: prepare the repository for release](#17-star-code-release-prepare-the-repository-for-release)
 - [18. End-to-end example](#18-end-to-end-example)
 - [19. Frequently asked questions](#19-frequently-asked-questions)
 - [20. Skill locations](#20-skill-locations)
 
 ## 1. Invoking the skills
 
-This guide uses Codex syntax, where a skill is invoked with `$skill-name`:
+This guide names a skill plainly, without a prefix, because each tool supplies its own: `/` in Claude Code, Cursor, Pi and Qwen Code, `$` in Codex, `/skill:` in Kimi Code and DSH.
 
 ```text
-$star-proj-adopt
-$star-idea-storm open-vocabulary perception
-$star-plan-coach open-vocabulary detection and segmentation
-$star-refs-reviewer open-vocab-det-seg
-$star-code-architect
-$star-env-builder
-$star-plan-decomposer 0_open-vocab-det-seg_plan.md
-$star-plan-executor 00
-$star-code-reviewer 00
-$star-expt-analyst 00
-$star-plan-reviser 00
-$star-flow-status
-$star-metd-summarize framework
-$star-code-release
+star-proj-adopt
+star-idea-storm open-vocabulary perception
+star-plan-coach open-vocabulary detection and segmentation
+star-refs-reviewer open-vocab-det-seg
+star-code-architect
+star-env-builder
+star-plan-decomposer 0_open-vocab-det-seg_plan.md
+star-plan-executor 00
+star-code-reviewer 00
+star-expt-analyst 00
+star-plan-reviser 00
+star-flow-status
+star-metd-summarize framework
+star-code-release
 ```
 
-In Claude, Cursor, Pi and Qwen Code, use `/skill-name` instead (DSH and Kimi write `/skill:skill-name`):
-
-```text
-/star-plan-coach open-vocabulary detection and segmentation
-```
-
-In DSH and Kimi, use `/skill:skill-name`:
-
-```text
-/skill:star-plan-coach open-vocabulary detection and segmentation
-```
-
-Seven skills — `$star-proj-adopt`, `$star-idea-storm`, `$star-plan-coach`, `$star-code-architect`, `$star-plan-decomposer`, `$star-plan-reviser`, `$star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, DSH, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
+Seven skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release` — are slash-only: they run only when named explicitly, never on the agent's own initiative, because each one sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). It is enforced per harness, not by convention — `disable-model-invocation: true` in the Claude, Cursor, DSH, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in `.agents/skills/<name>/agents/openai.yaml` for Codex. Describing one of them in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge instead, and produces plan-shaped files carrying none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The other eight the agent may also pick up when the task plainly matches and the target is unambiguous — naming a skill explicitly still works, and is how you say which one you meant.
 
 When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
@@ -118,17 +106,17 @@ When a skill needs a target plan, `PLAN_NAME` accepts three forms:
 
 Multiple root plans may currently start with `0_`. If a match is ambiguous, use the slug or full filename.
 
-Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `$star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Mandatory confirmation points — the STOP line, every deletion and every overwrite, and any ambiguity about what you meant — always ask, at every level; the commit offer is a judgment call, so `low` takes it unasked and names the commits afterward. Full rule: [conventions §7.7](research-workflow-conventions.md).
+Any skill invocation also accepts an optional `involve=low|medium|high` token that sets how much this run asks before deciding — e.g. `star-plan-executor 00 involve=low`. `low` takes the recommended option on judgment calls (and logs each), `high` confirms step by step; it overrides `INVOLVE` in `.env` for that one run, and you can tell a running skill "ask me less" to change it mid-run. Mandatory confirmation points — the STOP line, every deletion and every overwrite, and any ambiguity about what you meant — always ask, at every level; the commit offer is a judgment call, so `low` takes it unasked and names the commits afterward. Full rule: [conventions §7.7](research-workflow-conventions.md).
 
-Every skill also takes an optional description — free text after the argument, saying in your own words what this run is for: `$star-plan-reviser 01 this one is finished, 02 replaces it`. It is a lead, not a command: it can route a run down one of that skill's own paths and supply words the run then records — the example both drops the plan and becomes the reason written into it — and it never replaces a confirmation point, never settles an ambiguous plan name, and never authorizes anything on the STOP line. A run a description routed says which path it took before it writes, so a misreading costs one line rather than one wrong edit. Where a skill's first argument is already free text — `$star-idea-storm`, `$star-plan-coach`, `$star-refs-reviewer` — that argument is the description. Full rule: [conventions §7.12](research-workflow-conventions.md).
+Every skill also takes an optional description — free text after the argument, saying in your own words what this run is for: `star-plan-reviser 01 this one is finished, 02 replaces it`. It is a lead, not a command: it can route a run down one of that skill's own paths and supply words the run then records — the example both drops the plan and becomes the reason written into it — and it never replaces a confirmation point, never settles an ambiguous plan name, and never authorizes anything on the STOP line. A run a description routed says which path it took before it writes, so a misreading costs one line rather than one wrong edit. Where a skill's first argument is already free text — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer` — that argument is the description. Full rule: [conventions §7.12](research-workflow-conventions.md).
 
 ## 2. Before you start
 
 Which stage in the table at the top you enter at is decided by three facts about the work in front of you, not by the workflow:
 
-- **Is the question settled?** Still open — an interest, a hunch, three directions you cannot choose between — start at `$star-idea-storm`, which diverges, scans the directions you keep against the literature, and converges before anything becomes a plan. Already decided, and sayable in one sentence, start at `$star-plan-coach`. Decided a while ago and not read against since, run `$star-refs-reviewer survey <topic>` first, so the plan's gap is written against the field rather than from memory.
-- **Is the repository new, or has the project been running for months?** Real code, months of commits, results already in hand — that is adopted, not restarted. `$star-proj-adopt` records what has been built, run and concluded as evidence, and the plan is written afterwards, over work that already exists.
-- **Is there code to start from, and does anything run yet?** `$star-code-architect` starts the codebase from a scored reference implementation, or organizes the code already there, and records the architecture the later steps follow; `$star-env-builder` turns that into an interpreter that has demonstrably imported the project. Both are first-pass steps, and both come before the first leaf executes.
+- **Is the question settled?** Still open — an interest, a hunch, three directions you cannot choose between — start at `star-idea-storm`, which diverges, scans the directions you keep against the literature, and converges before anything becomes a plan. Already decided, and sayable in one sentence, start at `star-plan-coach`. Decided a while ago and not read against since, run `star-refs-reviewer survey <topic>` first, so the plan's gap is written against the field rather than from memory.
+- **Is the repository new, or has the project been running for months?** Real code, months of commits, results already in hand — that is adopted, not restarted. `star-proj-adopt` records what has been built, run and concluded as evidence, and the plan is written afterwards, over work that already exists.
+- **Is there code to start from, and does anything run yet?** `star-code-architect` starts the codebase from a scored reference implementation, or organizes the code already there, and records the architecture the later steps follow; `star-env-builder` turns that into an interpreter that has demonstrably imported the project. Both are first-pass steps, and both come before the first leaf executes.
 
 Whichever way you come in, the setup is the same:
 
@@ -144,7 +132,7 @@ You do not need prepared data, weights, or runnable code merely to draft or deco
 
 Every artifact a skill writes records which model produced it, so a later comparison across models has something to key on: `model_id` for that write, and — on artifacts written across several sessions — an append-only `model_trail`, one entry per session, which `star-expt-digest ledger` rolls into `wkdrs/digests/MODEL_LEDGER.md`. The value is what the runtime reported at write time: self-reported rather than verified, so read it as evidence about provenance rather than proof of it. Full rule: [conventions §8](research-workflow-conventions.md); the per-runtime fallbacks, for a session whose runtime named no model, are in [`model_id_spec.md`](model_id_spec.md).
 
-## 3. `$star-proj-adopt`: adopt an in-progress project
+## 3. `star-proj-adopt`: adopt an in-progress project
 
 ### When to use it
 
@@ -165,9 +153,9 @@ bash /tmp/star-update.sh --adopt
 `--adopt` installs into the current working directory, which must be a git repository root, and never overwrites a file that is already there: every existing path is left alone and reported (`bash execs/update.sh --help` describes the rest). Then:
 
 ```text
-$star-proj-adopt              # auto-select the phase
-$star-proj-adopt survey       # inspect the repository and land the setup
-$star-proj-adopt backfill     # make the plan tree reflect finished work
+star-proj-adopt              # auto-select the phase
+star-proj-adopt survey       # inspect the repository and land the setup
+star-proj-adopt backfill     # make the plan tree reflect finished work
 ```
 
 With no argument the phase is detected: no `metds/adopt.md` yet → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. Re-running `survey` on an adopted project re-inspects and updates the record rather than starting over.
@@ -181,13 +169,13 @@ Phase `survey`, before the plan tree exists:
 3. Puts the mechanical setup in place: `.env` from `.env.example`, symlinks at `datas/` / `inits/` / `wkdrs/` that *reach* the existing trees instead of relocating them, and one `execs/scpts/<name>.sh` per entrypoint that calls the project's existing command unchanged;
 4. Builds a work inventory — one row per identifiable unit of finished or in-flight work: what it is, its state (`built` / `run` / `concluded` / `abandoned`), and the paths, commits, scripts, or log lines that evidence it;
 5. **Confirmation point 2:** you pick which of the prior runs found on disk are recorded. Each chosen run is symlinked to `wkdrs/<run>/` and given a reconstructed `EXEC_LOG.md` — labelled as reconstructed, with no step table, because there were no steps to record. The rest stay in the inventory as evidence, and the report says how many were left out;
-6. Writes `metds/adopt.md`, then routes on: `$star-code-architect` for the architecture spec (its organize path surveys the existing code, which adoption deliberately does not duplicate), `$star-plan-coach` for the research plan (it reads the work inventory as its seed), `$star-plan-decomposer` for the leaves, and finally `$star-proj-adopt backfill`.
+6. Writes `metds/adopt.md`, then routes on: `star-code-architect` for the architecture spec (its organize path surveys the existing code, which adoption deliberately does not duplicate), `star-plan-coach` for the research plan (it reads the work inventory as its seed), `star-plan-decomposer` for the leaves, and finally `star-proj-adopt backfill`.
 
 Phase `backfill`, once the leaves exist:
 
 1. Matches inventory rows to leaves on evidence overlap — a shared path, script, or module, never name similarity alone — and reports both misfits honestly: inventory items no leaf covers, and leaves nothing in the inventory reaches;
 2. **Confirmation point 3:** you confirm leaf by leaf. An unconfirmed leaf is left exactly as it is;
-3. Writes `exec_status` and, where that row's run was recorded, `exec_runs` on the confirmed leaves (updating that reconstructed log's `source_plan:` to the leaf in the same pass), appends a dated backfill record to `metds/adopt.md` and stamps its `backfilled:` date, and hands off to `$star-flow-status` for the first honest picture of the adopted project.
+3. Writes `exec_status` and, where that row's run was recorded, `exec_runs` on the confirmed leaves (updating that reconstructed log's `source_plan:` to the leaf in the same pass), appends a dated backfill record to `metds/adopt.md` and stamps its `backfilled:` date, and hands off to `star-flow-status` for the first honest picture of the adopted project.
 
 ### Main output
 
@@ -199,18 +187,18 @@ The record holds the confirmed mapping, the symlink and wrapper results, the wor
 
 ### What it never touches
 
-Nothing moves, nothing is renamed, and nothing already written is overwritten — the whole skill turns on that one constraint. `${CODE_NAME}/` and everything under it, the project's own launchers, configs, and CI are read and never edited; a path the skill would write that already exists becomes a question rather than a resolution; a symlink is never created over a non-empty real directory. On plan files its only exception is the two frontmatter fields above, on leaves you confirmed individually — plan bodies, `status`, `finalized`, `children`, and `depends_on` are never its to write. Adoption also does not invent research strategy: the inventory describes what the repository shows, while why the work was done, what claim it supports, and what would have killed it are left for `$star-plan-coach` to ask you. A plan tree fabricated from a git log is worse than no plan tree.
+Nothing moves, nothing is renamed, and nothing already written is overwritten — the whole skill turns on that one constraint. `${CODE_NAME}/` and everything under it, the project's own launchers, configs, and CI are read and never edited; a path the skill would write that already exists becomes a question rather than a resolution; a symlink is never created over a non-empty real directory. On plan files its only exception is the two frontmatter fields above, on leaves you confirmed individually — plan bodies, `status`, `finalized`, `children`, and `depends_on` are never its to write. Adoption also does not invent research strategy: the inventory describes what the repository shows, while why the work was done, what claim it supports, and what would have killed it are left for `star-plan-coach` to ask you. A plan tree fabricated from a git log is worse than no plan tree.
 
 ### Practical guidance
 
-- Run it before anything else on an existing project, and skip `$star-idea-storm` — the code that exists already chose the topic.
+- Run it before anything else on an existing project, and skip `star-idea-storm` — the code that exists already chose the topic.
 - An unknown reported as unknown is the point of this skill; a confidently wrong `CODE_NAME` costs you every downstream skill.
 - Record the runs whose numbers you would still quote. The rest belong in the inventory as evidence, not in `wkdrs/`.
 - Run `backfill` even when it only covers two leaves. A tree reading 0% while a third of the work is done is a tree nobody trusts.
 
 See the complete definition in [`star-proj-adopt/SKILL.md`](../../../.claude/skills/star-proj-adopt/SKILL.md).
 
-## 4. `$star-idea-storm`: converge on a research topic
+## 4. `star-idea-storm`: converge on a research topic
 
 ### When to use it
 
@@ -224,14 +212,14 @@ See the complete definition in [`star-proj-adopt/SKILL.md`](../../../.claude/ski
 Start a new storm from a seed:
 
 ```text
-$star-idea-storm open-vocabulary perception
+star-idea-storm open-vocabulary perception
 ```
 
 Resume (or reopen) an existing exploration:
 
 ```text
-$star-idea-storm open-vocab-perception
-$star-idea-storm
+star-idea-storm open-vocab-perception
+star-idea-storm
 ```
 
 An idea name (slug or filename under `metds/ideas/`) resumes that exploration; no argument resumes the unfinished one or asks for a seed.
@@ -260,18 +248,18 @@ For example:
 metds/ideas/open-vocab-perception_idea.md
 ```
 
-The idea file holds the seed and constraints, all candidate directions, the per-direction scan tables, the scored comparison and decision, the topic statement, and the parked directions. Once `finalized`, it seeds the plan: `$star-plan-coach <slug>` pre-drafts its Problem stage from the topic statement, and `$star-refs-reviewer` falls back to it when no plan or method notes exist yet.
+The idea file holds the seed and constraints, all candidate directions, the per-direction scan tables, the scored comparison and decision, the topic statement, and the parked directions. Once `finalized`, it seeds the plan: `star-plan-coach <slug>` pre-drafts its Problem stage from the topic statement, and `star-refs-reviewer` falls back to it when no plan or method notes exist yet.
 
 ### Practical guidance
 
 - One vague sentence is enough to start; the skill asks before it widens.
 - Keep directions that differ in kind, not in wording — the scan is most useful when the candidates would be scooped by different papers.
 - The scan shows what a direction would cost; it does not veto it. A crowded field with a real angle can still be the right call, and the file records that choice with its reason.
-- This is topic selection, not the survey: expect abstracts and a map, not per-paper analyses. The deep read on the winner belongs to `$star-refs-reviewer`.
+- This is topic selection, not the survey: expect abstracts and a map, not per-paper analyses. The deep read on the winner belongs to `star-refs-reviewer`.
 
 See the complete definition in [`star-idea-storm/SKILL.md`](../../../.claude/skills/star-idea-storm/SKILL.md).
 
-## 5. `$star-plan-coach`: write a research plan
+## 5. `star-plan-coach`: write a research plan
 
 ### When to use it
 
@@ -285,13 +273,13 @@ See the complete definition in [`star-idea-storm/SKILL.md`](../../../.claude/ski
 Start a new plan:
 
 ```text
-$star-plan-coach open-vocabulary detection and segmentation
+star-plan-coach open-vocabulary detection and segmentation
 ```
 
 Seed a new plan from a finalized idea file:
 
 ```text
-$star-plan-coach open-vocab-perception
+star-plan-coach open-vocab-perception
 ```
 
 An argument matching `metds/ideas/*_idea.md` by slug or filename seeds the plan from that idea file: the plan reuses the idea's slug, and the Problem stage opens with a draft built from its topic statement — confirmed and sharpened rather than asked from scratch.
@@ -299,16 +287,16 @@ An argument matching `metds/ideas/*_idea.md` by slug or filename seeds the plan 
 Resume an existing plan:
 
 ```text
-$star-plan-coach
+star-plan-coach
 ```
 
 Reopen one section of a finished plan:
 
 ```text
-$star-plan-coach open-vocab-det-seg related_work
+star-plan-coach open-vocab-det-seg related_work
 ```
 
-The section key is one of `problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`. This is the way back into a `finalized` plan when something outside it moved — a closer paper `$star-refs-reviewer` found, a result that changed the positioning, a reviewer's objection. The section is coached alone, the whole plan is re-checked against the rubric, and `finalized` is re-dated.
+The section key is one of `problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`. This is the way back into a `finalized` plan when something outside it moved — a closer paper `star-refs-reviewer` found, a result that changed the positioning, a reviewer's objection. The section is coached alone, the whole plan is re-checked against the rubric, and `finalized` is re-dated.
 
 With no topic, the skill scans `metds/plans/*_plan.md`. If it finds unfinished plans, it asks whether to continue one of them or create a new plan.
 
@@ -344,11 +332,11 @@ The plan contains six research sections and their statuses. When all sections ar
 - One or two sentences about the research topic are enough to begin; you do not need a complete proposal first.
 - If you are unsure about an experiment or metric, say so. The skill will offer two or three concrete candidates.
 - Avoid decomposing the plan before its key sections are confirmed, or downstream sub-plans may contain many `[TBD]` items.
-- Arriving without `$star-idea-storm` and without recent reading? Run `$star-refs-reviewer survey <topic>` first, so §1's gap is written against a map of the field rather than from memory.
+- Arriving without `star-idea-storm` and without recent reading? Run `star-refs-reviewer survey <topic>` first, so §1's gap is written against a map of the field rather than from memory.
 
 See the complete definition in [`star-plan-coach/SKILL.md`](../../../.claude/skills/star-plan-coach/SKILL.md).
 
-## 6. `$star-refs-reviewer`: survey the related work
+## 6. `star-refs-reviewer`: survey the related work
 
 ### When to use it
 
@@ -361,16 +349,16 @@ See the complete definition in [`star-plan-coach/SKILL.md`](../../../.claude/ski
 ### How to invoke it
 
 ```text
-$star-refs-reviewer                        # read the method from metds/, run the full pass
-$star-refs-reviewer open-vocab-det-seg     # scope the search to one plan
-$star-refs-reviewer open-vocabulary segmentation   # a free-text topic
-$star-refs-reviewer 2103.00020             # append one paper by arXiv id, DOI, or URL
-$star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # append several at once — ids, DOIs, URLs, titles mixed
-$star-refs-reviewer verify                 # re-fetch every entry and diff it against the file
-$star-refs-reviewer organize               # re-classify the existing bib, offline
-$star-refs-reviewer score                  # refresh citation/star metrics, rebuild the impact-score table
-$star-refs-reviewer synthesize             # compile the notes into metds/refs/related_work.md
-$star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
+star-refs-reviewer                        # read the method from metds/, run the full pass
+star-refs-reviewer open-vocab-det-seg     # scope the search to one plan
+star-refs-reviewer open-vocabulary segmentation   # a free-text topic
+star-refs-reviewer 2103.00020             # append one paper by arXiv id, DOI, or URL
+star-refs-reviewer add 2103.00020, 2304.02643, "Attention Is All You Need"   # append several at once — ids, DOIs, URLs, titles mixed
+star-refs-reviewer verify                 # re-fetch every entry and diff it against the file
+star-refs-reviewer organize               # re-classify the existing bib, offline
+star-refs-reviewer score                  # refresh citation/star metrics, rebuild the impact-score table
+star-refs-reviewer synthesize             # compile the notes into metds/refs/related_work.md
+star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
 ```
 
 With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, and finally asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries are left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain. `add` splits its list on newlines and commas — quoted text is a title, and a title is resolved to a fetched record before anything is read: a clean single match proceeds, several candidates get asked about, an unfindable one goes to the manual-check list rather than a guess. A bare list of nothing but ids and URLs works without the keyword; a bare title without `add` still means a topic.
@@ -402,7 +390,7 @@ Each note carries a TL;DR, the problem, the method, the results, and — the rea
 
 ### The fabrication boundary
 
-A bib field is legal only if it appears in a record fetched during the run. Nothing is written from memory, no field is "corrected", no missing page range is inferred, and a paper whose record cannot be fetched is listed for manual check rather than guessed. Every entry's source URL and fetch date go into `refs_index.md`, so any field can be re-checked later — which is exactly what `$star-refs-reviewer verify` does. The impact scores obey the same boundary: citations per year, venue tier, and repo stars are fetched, dated metrics composed by fixed arithmetic — never impressions — and `$star-refs-reviewer score` re-fetches them once they drift.
+A bib field is legal only if it appears in a record fetched during the run. Nothing is written from memory, no field is "corrected", no missing page range is inferred, and a paper whose record cannot be fetched is listed for manual check rather than guessed. Every entry's source URL and fetch date go into `refs_index.md`, so any field can be re-checked later — which is exactly what `star-refs-reviewer verify` does. The impact scores obey the same boundary: citations per year, venue tier, and repo stars are fetched, dated metrics composed by fixed arithmetic — never impressions — and `star-refs-reviewer score` re-fetches them once they drift.
 
 Google Scholar is deliberately not a source: it has no API, gates automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — often missing pages, abbreviating venues, and preferring the preprint over the published record. The skill fetches from the databases that bibtex is generated from instead, which is both automatable and closer to the source. Read Scholar yourself if you like; the skill never scrapes it.
 
@@ -415,7 +403,7 @@ Google Scholar is deliberately not a source: it has no API, gates automated quer
 
 See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.claude/skills/star-refs-reviewer/SKILL.md).
 
-## 7. `$star-code-architect`: set up or organize the codebase
+## 7. `star-code-architect`: set up or organize the codebase
 
 ### When to use it
 
@@ -427,9 +415,9 @@ See the complete definition in [`star-refs-reviewer/SKILL.md`](../../../.claude/
 ### How to invoke it
 
 ```text
-$star-code-architect
-$star-code-architect https://github.com/<owner>/<repo>
-$star-code-architect open-vocab-det-seg
+star-code-architect
+star-code-architect https://github.com/<owner>/<repo>
+star-code-architect open-vocab-det-seg
 ```
 
 With no argument, the skill resolves the root plan and inspects `${CODE_NAME}/` itself. A GitHub URL skips the search and uses that repository. A plan name chooses which plan drives the search.
@@ -461,7 +449,7 @@ The architecture spec records directory responsibilities, placement rules, namin
 
 ### The STOP line
 
-Environment builds involving CUDA compilation, downloads over ~1 GB, full test suites, and anything that trains are prepared as exact commands and handed to you — never launched autonomously. The full environment build belongs to `$star-env-builder`.
+Environment builds involving CUDA compilation, downloads over ~1 GB, full test suites, and anything that trains are prepared as exact commands and handed to you — never launched autonomously. The full environment build belongs to `star-env-builder`.
 
 ### Practical guidance
 
@@ -471,7 +459,7 @@ Environment builds involving CUDA compilation, downloads over ~1 GB, full test s
 
 See the complete definition in [`star-code-architect/SKILL.md`](../../../.claude/skills/star-code-architect/SKILL.md).
 
-## 8. `$star-env-builder`: build the runtime environment
+## 8. `star-env-builder`: build the runtime environment
 
 ### When to use it
 
@@ -483,9 +471,9 @@ See the complete definition in [`star-code-architect/SKILL.md`](../../../.claude
 ### How to invoke it
 
 ```text
-$star-env-builder
-$star-env-builder my-env
-$star-env-builder add wandb einops    # install into the existing env and record it
+star-env-builder
+star-env-builder my-env
+star-env-builder add wandb einops    # install into the existing env and record it
 ```
 
 With no argument, the environment name is `CODE_NAME` from `.env`. A valid `CONDA_HOME` in `.env` selects the conda backend; otherwise the skill creates `.venv` in the project root (the name argument then does not apply).
@@ -516,13 +504,13 @@ Installs approved at the confirmation point run autonomously, including large fr
 
 ### Practical guidance
 
-- Run it once after `$star-code-architect` puts the codebase in place and before the first `$star-plan-executor` run.
+- Run it once after `star-code-architect` puts the codebase in place and before the first `star-plan-executor` run.
 - Re-running it later is safe: choose *verify & repair in place* to fix a broken environment without rebuilding, or *backup & rebuild* to start clean.
 - On a CUDA mismatch the skill stops and presents concrete options instead of guessing — have your target torch/CUDA combination in mind.
 
 See the complete definition in [`star-env-builder/SKILL.md`](../../../.claude/skills/star-env-builder/SKILL.md).
 
-## 9. `$star-plan-decomposer`: create execution sub-plans
+## 9. `star-plan-decomposer`: create execution sub-plans
 
 ### When to use it
 
@@ -533,9 +521,9 @@ See the complete definition in [`star-env-builder/SKILL.md`](../../../.claude/sk
 ### How to invoke it
 
 ```text
-$star-plan-decomposer open-vocab-det-seg
-$star-plan-decomposer 0
-$star-plan-decomposer 0_open-vocab-det-seg_plan.md
+star-plan-decomposer open-vocab-det-seg
+star-plan-decomposer 0
+star-plan-decomposer 0_open-vocab-det-seg_plan.md
 ```
 
 If no argument is given or the match is ambiguous, the skill lists candidate plans for selection.
@@ -578,19 +566,19 @@ The `parent` field in a sub-plan's frontmatter is the authoritative parent link,
 To decompose a sub-plan that is still too big to run:
 
 ```text
-$star-plan-decomposer 01
+star-plan-decomposer 01
 ```
 
 ### Practical guidance
 
-- If the parent method and milestones remain vague, return to `$star-plan-coach` first.
+- If the parent method and milestones remain vague, return to `star-plan-coach` first.
 - Every sub-plan should have one check that clearly distinguishes success from failure. “Investigate” or “try to optimize” is not yet concrete enough.
 - Do not manually renumber existing prefixes; that can break deeper plans and dependency references.
 - A dataset the root §4 names but `datas/` does not hold gets its own **data-readiness leaf** — acquisition in §3, an integrity check (manifest, file count, checksum) as the §5 done-criterion, and every consumer depending on it. The acquisition command crosses the STOP line, so it comes back to you to run. Without that leaf, execution stops at a missing input no plan owns.
 
 See the complete definition in [`star-plan-decomposer/SKILL.md`](../../../.claude/skills/star-plan-decomposer/SKILL.md).
 
-## 10. `$star-plan-executor`: execute one leaf plan
+## 10. `star-plan-executor`: execute one leaf plan
 
 ### When to use it
 
@@ -601,9 +589,9 @@ See the complete definition in [`star-plan-decomposer/SKILL.md`](../../../.claud
 ### How to invoke it
 
 ```text
-$star-plan-executor 01
-$star-plan-executor mvp-verify
-$star-plan-executor 01_mvp-verify_plan.md
+star-plan-executor 01
+star-plan-executor mvp-verify
+star-plan-executor 01_mvp-verify_plan.md
 ```
 
 Only a **leaf plan** is executable. If the target still has `children`, the skill asks you to choose one of its leaves or recommends further decomposition.
@@ -617,11 +605,11 @@ The skill first verifies that:
 - The leaf is still one unit of work — one done-criterion, one kind of work, and at most one crossing of the STOP line;
 - Every upstream plan in `depends_on` is complete;
 - Required data, weights, and code modules exist;
-- The project paths and Conda environment in `.env` are usable (if the environment is missing, `$star-env-builder` builds it).
+- The project paths and Conda environment in `.env` are usable (if the environment is missing, `star-env-builder` builds it).
 
 If a hard dependency is missing, the skill reports the exact blocker rather than fabricating an input or skipping the dependency.
 
-A leaf can pass every other check and still be too big to run as one unit — the plan may have been split weeks ago, or written by hand. When it is, the skill shows a preview of how that leaf would divide (2–5 units, each with a one-line objective and the done-criterion it would own) and recommends splitting it first with `$star-plan-decomposer <leaf>`, carrying the sketch along as the description. The preview writes nothing: the decomposer still chooses its own axis and confirms its own list. Executing as it stands stays an option, with its cost stated — every STOP-line crossing stops and resumes the whole run, one blocked step holds up everything behind it, and a failure re-runs the whole leaf. A run being resumed is never asked, because splitting mid-run would leave its records hanging off a node no executor revisits.
+A leaf can pass every other check and still be too big to run as one unit — the plan may have been split weeks ago, or written by hand. When it is, the skill shows a preview of how that leaf would divide (2–5 units, each with a one-line objective and the done-criterion it would own) and recommends splitting it first with `star-plan-decomposer <leaf>`, carrying the sketch along as the description. The preview writes nothing: the decomposer still chooses its own axis and confirms its own list. Executing as it stands stays an option, with its cost stated — every STOP-line crossing stops and resumes the whole run, one blocked step holds up everything behind it, and a failure re-runs the whole leaf. A run being resumed is never asked, because splitting mid-run would leave its records hanging off a node no executor revisits.
 
 ### What it does
 
@@ -644,7 +632,7 @@ The skill does not automatically start:
 - Operations that may overwrite valuable artifacts;
 - Work whose duration or cost cannot be bounded.
 
-Instead, it prepares the exact command, records it under “Awaiting user” in the execution log, and stops — then starts `$star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. The command stays yours to run; the review is not, and only an exploratory leaf whose command is cheap may skip it — which you are asked before it starts. Blocker or major findings go back through `$star-plan-executor`, which reopens the affected steps, fixes and verifies them, and only then hands the command back. After you run the command, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
+Instead, it prepares the exact command, records it under “Awaiting user” in the execution log, and stops — then starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, the same defect caught after costs the compute and the re-run too. The command stays yours to run; the review is not, and only an exploratory leaf whose command is cheap may skip it — which you are asked before it starts. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them, and only then hands the command back. After you run the command, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
 
 ### Main outputs
 
@@ -663,15 +651,15 @@ wkdrs/01_mvp-verify/
 
 When the same plan is invoked again, the skill treats `EXEC_LOG.md` as the source of truth, skips completed steps, and resumes from the first unfinished action.
 
-When the run executed on an execution branch, everything above — the code, the run records, the plan's own status — lives on `<run>` until the leaf is done and reviewed; invoking the plan again then reaches the merge confirmation point: a squash merge onto the base branch by default, conflicts named and handed to you, the branch's deletion asked separately. Discarding instead copies `wkdrs/<run>/*.md` back to the base branch first, so a negative result keeps its evidence, and `$star-flow-status` lists unmerged execution branches so none of this waits invisibly.
+When the run executed on an execution branch, everything above — the code, the run records, the plan's own status — lives on `<run>` until the leaf is done and reviewed; invoking the plan again then reaches the merge confirmation point: a squash merge onto the base branch by default, conflicts named and handed to you, the branch's deletion asked separately. Discarding instead copies `wkdrs/<run>/*.md` back to the base branch first, so a negative result keeps its evidence, and `star-flow-status` lists unmerged execution branches so none of this waits invisibly.
 
 ### Writing the changes back into the plan
 
-Execution rarely matches the written plan exactly. When the difference is material at the plan's own granularity — a step added, dropped, or replaced; a dependency that turned out wrong; a changed deliverable path; an adjusted done-criterion — the skill records it as an ADDED / MODIFIED / REMOVED delta and confirms it with you: deviations found while planning are confirmed together with the executable plan itself, and deviations that emerge during execution are batch-confirmed once at finalization. Confirmed deltas are then written back into the sub-plan — the affected §2–§5 passages are updated in place and a `## Revision History` entry records the date, run, change, and reason — so the plan you reread later matches what was actually executed. A fourth delta type, ENRICHED, covers a value the plan left open that execution settled — a learning rate, the backbone, the reproduction command — but only where a method document would cite it: the plans are what `$star-metd-summarize` compiles from, so a value that stays in the run log alone becomes a permanent TODO in `metds/training.md`. Objective- or plan-level divergence is never written back this way; it routes to `$star-plan-reviser` / `$star-plan-coach` / `$star-plan-decomposer`.
+Execution rarely matches the written plan exactly. When the difference is material at the plan's own granularity — a step added, dropped, or replaced; a dependency that turned out wrong; a changed deliverable path; an adjusted done-criterion — the skill records it as an ADDED / MODIFIED / REMOVED delta and confirms it with you: deviations found while planning are confirmed together with the executable plan itself, and deviations that emerge during execution are batch-confirmed once at finalization. Confirmed deltas are then written back into the sub-plan — the affected §2–§5 passages are updated in place and a `## Revision History` entry records the date, run, change, and reason — so the plan you reread later matches what was actually executed. A fourth delta type, ENRICHED, covers a value the plan left open that execution settled — a learning rate, the backbone, the reproduction command — but only where a method document would cite it: the plans are what `star-metd-summarize` compiles from, so a value that stays in the run log alone becomes a permanent TODO in `metds/training.md`. Objective- or plan-level divergence is never written back this way; it routes to `star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`.
 
 See the complete definition in [`star-plan-executor/SKILL.md`](../../../.claude/skills/star-plan-executor/SKILL.md).
 
-## 11. `$star-code-reviewer`: review code against conventions and the plan
+## 11. `star-code-reviewer`: review code against conventions and the plan
 
 ### When to use it
 
@@ -683,11 +671,11 @@ See the complete definition in [`star-plan-executor/SKILL.md`](../../../.claude/
 ### How to invoke it
 
 ```text
-$star-code-reviewer                        # everything under ${CODE_NAME}/
-$star-code-reviewer 00                     # the code that plan touches + plan conformance
-$star-code-reviewer ${CODE_NAME}/models    # one path
-$star-code-reviewer diff                   # uncommitted changes only
-$star-code-reviewer HEAD~3..               # a git range
+star-code-reviewer                        # everything under ${CODE_NAME}/
+star-code-reviewer 00                     # the code that plan touches + plan conformance
+star-code-reviewer ${CODE_NAME}/models    # one path
+star-code-reviewer diff                   # uncommitted changes only
+star-code-reviewer HEAD~3..               # a git range
 ```
 
 A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkdrs/<run>/` path back-resolves to its plan.
@@ -698,7 +686,7 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 2. Gathers cheap static evidence through the `.env` environment (`compileall` always; ruff/flake8 only if already installed — it never installs tools);
 3. Collects findings against a six-dimension rubric: docstrings & comments, naming, simplicity, STAR project conventions (hardcoded paths, layout, placement rules), high-confidence suspicious correctness patterns, and — in plan mode — plan conformance;
 4. Re-verifies every blocker/major finding against the code before reporting; unconfirmed suspicions are listed separately and never counted;
-5. Writes the report under `wkdrs/` and gives a short digest with routing: feature gaps → `$star-plan-executor`, plan-text divergence → `$star-plan-reviser`, structural reorganization → `$star-code-architect`;
+5. Writes the report under `wkdrs/` and gives a short digest with routing: feature gaps → `star-plan-executor`, plan-text divergence → `star-plan-reviser`, structural reorganization → `star-code-architect`;
 6. Runs a fix pass of mechanical, behavior-preserving fixes only (docstrings, scope-internal renames, unused imports, project-introduced dead code): `minor` and `nit` ones are applied unasked and named as they are applied, `blocker` and `major` ones go on the page as one list settled in a single question over it, every fix that deletes code is asked on its own, and each fix is re-verified after application.
 
 ### Main outputs
@@ -712,17 +700,17 @@ The report records the scope and evidence base, a verdict, findings by severity 
 
 ### The fix boundary
 
-The fix pass never changes behavior: no feature completion, no signature changes visible outside the scope, no file moves, no edits to the names a rename left unchanged on purpose. Plan files are never edited — what the review learns about the plan routes to `$star-plan-reviser`. Nothing is applied unasked beyond `minor` and `nit`; `involve=high` puts even those to you one at a time.
+The fix pass never changes behavior: no feature completion, no signature changes visible outside the scope, no file moves, no edits to the names a rename left unchanged on purpose. Plan files are never edited — what the review learns about the plan routes to `star-plan-reviser`. Nothing is applied unasked beyond `minor` and `nit`; `involve=high` puts even those to you one at a time.
 
 ### Practical guidance
 
-- Run it after a leaf completes, before `$star-plan-reviser` — the code audit gives the plan review harder evidence.
+- Run it after a leaf completes, before `star-plan-reviser` — the code audit gives the plan review harder evidence.
 - `diff` mode is the cheapest habit: review what you just wrote while it is still uncommitted. A run that executed on an execution branch is reviewed as its branch diff against the base (conventions §11) — the merge confirmation point waits on the verdict.
 - A finding you disagree with can simply be skipped in the fix pass; the report keeps the record either way, and a minor fix applied unasked is recorded there too — `git diff` shows it before anything is committed.
 
 See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.claude/skills/star-code-reviewer/SKILL.md).
 
-## 12. `$star-expt-analyst`: analyze a run's results
+## 12. `star-expt-analyst`: analyze a run's results
 
 ### When to use it
 
@@ -735,11 +723,11 @@ See the complete definition in [`star-code-reviewer/SKILL.md`](../../../.claude/
 ### How to invoke it
 
 ```text
-$star-expt-analyst 01                             # the plan's current run, via its exec_runs
-$star-expt-analyst mvp-verify
-$star-expt-analyst wkdrs/01_mvp-verify/           # a run directory
-$star-expt-analyst                                # list the runs on disk and pick one
-$star-expt-analyst watch 01                       # health read of a possibly still-running run
+star-expt-analyst 01                             # the plan's current run, via its exec_runs
+star-expt-analyst mvp-verify
+star-expt-analyst wkdrs/01_mvp-verify/           # a run directory
+star-expt-analyst                                # list the runs on disk and pick one
+star-expt-analyst watch 01                       # health read of a possibly still-running run
 ```
 
 A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkdrs/<run>/` path back-resolves to its plan. `watch` (same argument forms) is a chat-only health read for a run that may still be executing — log health and liveness, no verdict, no files — useful while a long training job the STOP line handed back is still going.
@@ -765,23 +753,23 @@ wkdrs/results/results.md              # aggregate mode only: the cross-run resul
 
 ### The results table (`aggregate`)
 
-`$star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `wkdrs/results/results.md` — or `wkdrs/results/results_<slug>.md` when you scope it to a subtree, so a scoped run never overwrites the project results table: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The results table reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
+`star-expt-analyst aggregate [PLAN_NAME]` answers the question a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in — a report is verified, not a licence to copy — and compiles `wkdrs/results/results.md` — or `wkdrs/results/results_<slug>.md` when you scope it to a subtree, so a scoped run never overwrites the project results table: one table per claim and per ablation, taken from the root's §4 claim→experiment map rather than from the plan tree, every number carrying the run, the source, and its verdict. Runs whose verdict was `invalid` or `inconclusive`, and numbers that fail re-verification, are excluded to a section that names them and says why, so a reader can count what was left out; a `not met` run stays in its table, because a negative result is a result. The results table reports numbers and does not explain them — saying *why* a variant won needs a controlled comparison this skill does not run. Together with `metds/evaluation.md`, which defines the protocol and never carries scores, it is the pair a paper's results section is written from.
 
 The report records the scope and evidence base, a run verdict, the done-criteria scorecard, the artifact inventory and completion, log health, metrics with their sources and any cross-run comparison, the interpretation, and the routing.
 
 ### The read boundary
 
-This skill is **read-only apart from its own report**. It never edits plan files, never sets `exec_status`, and never touches `EXEC_PLAN.md` / `EXEC_LOG.md` — when a done-criterion is met, it recommends `$star-plan-executor`, which owns finalization. It never re-runs an experiment to fill in a missing metric: that metric is reported `unmeasurable` and the command comes back to you. The executor's STOP line applies here too.
+This skill is **read-only apart from its own report**. It never edits plan files, never sets `exec_status`, and never touches `EXEC_PLAN.md` / `EXEC_LOG.md` — when a done-criterion is met, it recommends `star-plan-executor`, which owns finalization. It never re-runs an experiment to fill in a missing metric: that metric is reported `unmeasurable` and the command comes back to you. The executor's STOP line applies here too.
 
 ### Practical guidance
 
-- The natural moment is right after you run a STOP-line command: the analyst tells you what came back, then hands the plan to `$star-plan-executor` to finalize it.
+- The natural moment is right after you run a STOP-line command: the analyst tells you what came back, then hands the plan to `star-plan-executor` to finalize it.
 - The run verdict is deliberately blunt. `inconclusive` means the evidence is not there — usually a STOP-line command that was never run. `invalid` means the numbers exist but cannot be trusted, and a re-run is cheaper than an interpretation.
-- A negative result that hits a root kill-criterion is the most valuable thing this skill can find: route it to `$star-plan-reviser` while the evidence is fresh.
+- A negative result that hits a root kill-criterion is the most valuable thing this skill can find: route it to `star-plan-reviser` while the evidence is fresh.
 
 See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.claude/skills/star-expt-analyst/SKILL.md).
 
-## 13. `$star-expt-digest`: summarize progress over a period
+## 13. `star-expt-digest`: summarize progress over a period
 
 ### When to use it
 
@@ -794,12 +782,12 @@ See the complete definition in [`star-expt-analyst/SKILL.md`](../../../.claude/s
 ### How to invoke it
 
 ```text
-$star-expt-digest                          # since the previous digest — the default
-$star-expt-digest 7d                       # the last seven days
-$star-expt-digest 2026-07-01               # since that date
-$star-expt-digest 01                       # a plan family: the node, its ancestors, all its leaves
-$star-expt-digest core-method
-$star-expt-digest all                      # the whole history; re-seeds the series
+star-expt-digest                          # since the previous digest — the default
+star-expt-digest 7d                       # the last seven days
+star-expt-digest 2026-07-01               # since that date
+star-expt-digest 01                       # a plan family: the node, its ancestors, all its leaves
+star-expt-digest core-method
+star-expt-digest all                      # the whole history; re-seeds the series
 ```
 
 With no argument the skill reads the newest digest's `covers.through` as a last covered date and covers everything after it, so running it regularly produces a series with no gaps and no double-counting. A plan argument takes the usual slug / numeric prefix / filename forms.
@@ -830,10 +818,10 @@ Three skills read across runs, and they answer different questions:
 
 | Question | Skill | Axis |
 |---|---|---|
-| Did *this run* meet its plan? | `$star-expt-analyst <plan>` | one run, verified |
-| What are the final numbers, by claim? | `$star-expt-analyst aggregate` | claim, re-verified from source |
-| Where does everything stand right now? | `$star-flow-status` | current state, no memory |
-| What happened lately, and what did we learn? | `$star-expt-digest` | time, report-level |
+| Did *this run* meet its plan? | `star-expt-analyst <plan>` | one run, verified |
+| What are the final numbers, by claim? | `star-expt-analyst aggregate` | claim, re-verified from source |
+| Where does everything stand right now? | `star-flow-status` | current state, no memory |
+| What happened lately, and what did we learn? | `star-expt-digest` | time, report-level |
 
 The digest is **report-level, not re-verified**: unlike `aggregate`, it copies a number with its provenance rather than re-opening the source to confirm it. That is the whole cost difference, and it is why a digest can run weekly while an aggregate cannot. It also means a digest is never the file you quote a number into a paper from — `wkdrs/results/results.md` is, and every digest says so on its face.
 
@@ -844,13 +832,13 @@ This skill is **read-only apart from its own digest**. It never edits plans, `ex
 ### Practical guidance
 
 - Run it regularly — weekly is the natural one. The value compounds: each digest's "what moved" section is only as good as the previous digest it diffs against.
-- A digest full of provisional rows is a signal, not a failure: it means runs are finishing faster than they are being analyzed. Clear it with `$star-expt-analyst` on the named runs.
+- A digest full of provisional rows is a signal, not a failure: it means runs are finishing faster than they are being analyzed. Clear it with `star-expt-analyst` on the named runs.
 - Use plan mode before a milestone review, when you want a family's whole story rather than a date range.
 - Under `wkdrs/` everything is git-ignored **except `*.md`**, so the digest series can enter the repository history — but no skill commits it for you, since the digest skill is read-only. Digests are regenerable from the analysis reports, so losing an uncommitted one is recoverable.
 
 See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/skills/star-expt-digest/SKILL.md).
 
-## 14. `$star-plan-reviser`: review and revise one plan
+## 14. `star-plan-reviser`: review and revise one plan
 
 ### When to use it
 
@@ -863,11 +851,11 @@ See the complete definition in [`star-expt-digest/SKILL.md`](../../../.claude/sk
 ### How to invoke it
 
 ```text
-$star-plan-reviser 01
-$star-plan-reviser mvp-verify
-$star-plan-reviser 0_open-vocab-det-seg_plan.md
-$star-plan-reviser 01 this one is finished, 02 replaces it   # gives it up, no review pass
-$star-plan-reviser 01 bring this direction back              # clears the drop
+star-plan-reviser 01
+star-plan-reviser mvp-verify
+star-plan-reviser 0_open-vocab-det-seg_plan.md
+star-plan-reviser 01 this one is finished, 02 replaces it   # gives it up, no review pass
+star-plan-reviser 01 bring this direction back              # clears the drop
 ```
 
 Any node works: a leaf is audited against its own run; a root or internal node is audited against the summary of its children and the plan-level findings recorded in descendants' logs.
@@ -885,11 +873,11 @@ Adopting nothing is a valid outcome: the review report it wrote is a deliverable
 
 ### The revision boundary
 
-One session revises one target file (plus the parent's index line when the target's objective changed). Structural changes — adding or removing sub-plans, redrawing the dependency graph — are routed to `$star-plan-decomposer`; research-question or method pivots are routed to `$star-plan-coach`. Prefixes are never renumbered, versioned copies are never created, and `EXEC_PLAN.md` / `EXEC_LOG.md` are never modified.
+One session revises one target file (plus the parent's index line when the target's objective changed). Structural changes — adding or removing sub-plans, redrawing the dependency graph — are routed to `star-plan-decomposer`; research-question or method pivots are routed to `star-plan-coach`. Prefixes are never renumbered, versioned copies are never created, and `EXEC_PLAN.md` / `EXEC_LOG.md` are never modified.
 
 ### Dropping a plan
 
-A direction you gave up on is marked, never deleted. Saying so in the invocation — `$star-plan-reviser 01 this direction is finished` — is the short path: it skips the audit, because a drop records a decision you have already made, and asks once, showing what goes dark before it writes. There is no keyword to remember; the words you use become the reason on the record. The reviser writes `dropped: <date> — <one-line reason>` on that node, marks the parent's index line `— dropped <date>`, and records what ended the direction in the `## Revision History`. Every skill reads the field as inherited by the whole subtree, so one line takes that node and everything under it out of the counts, the follow-up checks and the next action: `$star-flow-status` renders them `⊗` and leaves them out of its three numbers, `$star-plan-executor` refuses to run them, `$star-plan-decomposer` refuses to split them, `$star-metd-summarize` compiles nothing from them. The files, their runs and their results stay exactly where they are — a direction that failed is evidence — and the parent keeps the link, so what was tried is still readable from it. Undropping is clearing the field. Two things a drop does not settle: a leaf still depending on the dropped node (its dependency can never be met, so the status report flags it for you to redraw), and an unmerged execution branch or live worktree underneath it, which are still on disk and still flagged.
+A direction you gave up on is marked, never deleted. Saying so in the invocation — `star-plan-reviser 01 this direction is finished` — is the short path: it skips the audit, because a drop records a decision you have already made, and asks once, showing what goes dark before it writes. There is no keyword to remember; the words you use become the reason on the record. The reviser writes `dropped: <date> — <one-line reason>` on that node, marks the parent's index line `— dropped <date>`, and records what ended the direction in the `## Revision History`. Every skill reads the field as inherited by the whole subtree, so one line takes that node and everything under it out of the counts, the follow-up checks and the next action: `star-flow-status` renders them `⊗` and leaves them out of its three numbers, `star-plan-executor` refuses to run them, `star-plan-decomposer` refuses to split them, `star-metd-summarize` compiles nothing from them. The files, their runs and their results stay exactly where they are — a direction that failed is evidence — and the parent keeps the link, so what was tried is still readable from it. Undropping is clearing the field. Two things a drop does not settle: a leaf still depending on the dropped node (its dependency can never be met, so the status report flags it for you to redraw), and an unmerged execution branch or live worktree underneath it, which are still on disk and still flagged.
 
 ### Main outputs
 
@@ -901,12 +889,12 @@ metds/plans/<prefix>_<slug>_plan.md   # revised in place, with a Revision Histor
 ### Practical guidance
 
 - Run it after a leaf completes or blocks, before starting the next leaf — revision is cheapest while the evidence is fresh.
-- Revising a parent bumps its `updated`, so `$star-flow-status` will flag its children as stale; that is the intended signal to re-decompose the affected children.
-- For a quick progress overview use `$star-flow-status`; the reviser is for depth on one plan, with write access.
+- Revising a parent bumps its `updated`, so `star-flow-status` will flag its children as stale; that is the intended signal to re-decompose the affected children.
+- For a quick progress overview use `star-flow-status`; the reviser is for depth on one plan, with write access.
 
 See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.claude/skills/star-plan-reviser/SKILL.md).
 
-## 15. `$star-flow-status`: inspect the whole flow
+## 15. `star-flow-status`: inspect the whole flow
 
 ### When to use it
 
@@ -921,14 +909,14 @@ See the complete definition in [`star-plan-reviser/SKILL.md`](../../../.claude/s
 Inspect the whole flow:
 
 ```text
-$star-flow-status
+star-flow-status
 ```
 
 Inspect one plan subtree — the tree, the three counts, the follow-up checks and the next action all narrow to it:
 
 ```text
-$star-flow-status open-vocab-det-seg
-$star-flow-status 01
+star-flow-status open-vocab-det-seg
+star-flow-status 01
 ```
 
 ### What it reports
@@ -945,7 +933,7 @@ This skill is **strictly read-only**. It scans the artifacts listed in §8 of th
 
 See the complete definition in [`star-flow-status/SKILL.md`](../../../.claude/skills/star-flow-status/SKILL.md).
 
-## 16. `$star-metd-summarize`: compile the plans into method documents
+## 16. `star-metd-summarize`: compile the plans into method documents
 
 ### When to use it
 
@@ -959,13 +947,13 @@ See the complete definition in [`star-flow-status/SKILL.md`](../../../.claude/sk
 Compile one document:
 
 ```text
-$star-metd-summarize framework
+star-metd-summarize framework
 ```
 
 Compile all five:
 
 ```text
-$star-metd-summarize
+star-metd-summarize
 ```
 
 `OPT` is one of `overview`, `dataset`, `framework`, `training`, `evaluation`. With no argument the skill compiles all five in dependency order (`dataset` → `framework` → `training` → `evaluation` → `overview`, which links the other four and so goes last).
@@ -993,17 +981,17 @@ Each document records in its frontmatter the plans it was compiled from and the 
 
 ### The fabrication boundary
 
-Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat history, and it never fills an unstated value with a plausible default — an unstated learning rate stays `TBD` and becomes a gap, because a plausible default here is a wrong number in a paper. Result numbers never enter these documents either: `evaluation.md` defines the protocol, while what a run actually scored stays in `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`. If execution detail is missing from a document, the fix is for `$star-plan-executor` to write it back into the plan, not a wider read.
+Plans are the only source. The skill does not read code, logs, `wkdrs/`, or chat history, and it never fills an unstated value with a plausible default — an unstated learning rate stays `TBD` and becomes a gap, because a plausible default here is a wrong number in a paper. Result numbers never enter these documents either: `evaluation.md` defines the protocol, while what a run actually scored stays in `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`. If execution detail is missing from a document, the fix is for `star-plan-executor` to write it back into the plan, not a wider read.
 
 ### Practical guidance
 
-- Compile once the loop has closed — every leaf executed, the plans finalized. A premature run stops at the readiness check and hands back what is still open: while the method is moving, the route is `$star-plan-executor` and `$star-plan-coach`, not a draft document. Run it as soon as the confirmation point opens, though — the gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
+- Compile once the loop has closed — every leaf executed, the plans finalized. A premature run stops at the readiness check and hands back what is still open: while the method is moving, the route is `star-plan-executor` and `star-plan-coach`, not a draft document. Run it as soon as the confirmation point opens, though — the gap list is most useful *before* the writing deadline, when there is still time to answer what it asks.
 - Treat these documents as generated. To change one, change the plan it came from and recompile — hand edits are overwritten on the next run, though a file the skill did not generate is never overwritten without asking first.
 - A regeneration whose sections are all unchanged writes nothing, so re-running it costs you only the reading.
 
 See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.claude/skills/star-metd-summarize/SKILL.md).
 
-## 17. `$star-code-release`: prepare the repository for release
+## 17. `star-code-release`: prepare the repository for release
 
 ### When to use it
 
@@ -1015,11 +1003,11 @@ See the complete definition in [`star-metd-summarize/SKILL.md`](../../../.claude
 ### How to invoke it
 
 ```text
-$star-code-release              # the full pass: gather → polish → readme → check
-$star-code-release gather       # only consolidate the scattered code
-$star-code-release polish       # only the pass over the files a reader will open
-$star-code-release readme       # only compile README.md
-$star-code-release check        # only the hygiene sweep — read-only apart from its report
+star-code-release              # the full pass: gather → polish → readme → check
+star-code-release gather       # only consolidate the scattered code
+star-code-release polish       # only the pass over the files a reader will open
+star-code-release readme       # only compile README.md
+star-code-release check        # only the hygiene sweep — read-only apart from its report
 ```
 
 ### What it does
@@ -1041,7 +1029,7 @@ The README opens with an HTML-comment provenance marker — not frontmatter, whi
 
 ### The compile boundary
 
-Every section traces to an artifact. **Numbers come only from `wkdrs/results/results.md`** — never from an execution log, never from a digest, never from memory — and a number the results table excluded as invalid or inconclusive does not appear at all. **Every command is resolved before it is printed**: the script exists, the config path exists, the entry point imports; what does not resolve is dropped or marked unverified. Superlatives are claims, so "state-of-the-art" appears only where the results table's own verdict carries it. A section no artifact covers becomes a `TODO` naming the skill that fills it — the gap list doubles as the to-do list, exactly as it does for `$star-metd-summarize`.
+Every section traces to an artifact. **Numbers come only from `wkdrs/results/results.md`** — never from an execution log, never from a digest, never from memory — and a number the results table excluded as invalid or inconclusive does not appear at all. **Every command is resolved before it is printed**: the script exists, the config path exists, the entry point imports; what does not resolve is dropped or marked unverified. Superlatives are claims, so "state-of-the-art" appears only where the results table's own verdict carries it. A section no artifact covers becomes a `TODO` naming the skill that fills it — the gap list doubles as the to-do list, exactly as it does for `star-metd-summarize`.
 
 The skill also never writes `metds/` at all. Its inputs belong to their producers, and a release run that edited its own sources would no longer be compiling.
 
@@ -1062,29 +1050,29 @@ See the complete definition in [`star-code-release/SKILL.md`](../../../.claude/s
 
 One topic, from a sentence of interest to numbers a paper can quote, in the order it actually happens. Each step names what the work needs at that point, and the invocation that meets it.
 
-A project being adopted starts at `$star-proj-adopt` instead of Step 0 and continues identically from Step 1, closing the loop with `$star-proj-adopt backfill` once Step 4 has produced the leaves.
+A project being adopted starts at `star-proj-adopt` instead of Step 0 and continues identically from Step 1, closing the loop with `star-proj-adopt backfill` once Step 4 has produced the leaves.
 
 ### Step 0: converge on a topic (only when none is chosen yet)
 
 ```text
-$star-idea-storm reliable open-vocabulary perception, but I have not settled on a question
+star-idea-storm reliable open-vocabulary perception, but I have not settled on a question
 ```
 
-The storm clarifies the seed and constraints, diverges into 3–5 candidate directions, scans the landscape for the kept ones (abstract-level, every paper from a fetched record), scores them on six dimensions, and frames the winner into `metds/ideas/open-vocab-perception_idea.md` with a topic statement and a first validation experiment. Already have a topic? Skip straight to Step 1 — or pass the finalized idea to the coach: `$star-plan-coach open-vocab-perception`. A topic settled a while ago and not read against since is worth one `$star-refs-reviewer survey <topic>` before the coach: §1's gap is a claim about what the field cannot do, and §1 is also one of the sources the later literature pass builds its search profile from — written from memory, it bounds the very search meant to check it.
+The storm clarifies the seed and constraints, diverges into 3–5 candidate directions, scans the landscape for the kept ones (abstract-level, every paper from a fetched record), scores them on six dimensions, and frames the winner into `metds/ideas/open-vocab-perception_idea.md` with a topic statement and a first validation experiment. Already have a topic? Skip straight to Step 1 — or pass the finalized idea to the coach: `star-plan-coach open-vocab-perception`. A topic settled a while ago and not read against since is worth one `star-refs-reviewer survey <topic>` before the coach: §1's gap is a claim about what the field cannot do, and §1 is also one of the sources the later literature pass builds its search profile from — written from memory, it bounds the very search meant to check it.
 
 ### Step 1: turn an idea into a plan — with the literature interleaved
 
 ```text
-$star-plan-coach I want to study more reliable text-description generation for open-vocabulary detection and segmentation
+star-plan-coach I want to study more reliable text-description generation for open-vocabulary detection and segmentation
 ```
 
 Work §1 Problem with the coach. Then, before writing §2, break out and read the field:
 
 ```text
-$star-refs-reviewer open-vocab-det-seg
+star-refs-reviewer open-vocab-det-seg
 ```
 
-This writes per-paper analyses and a verified `reference.bib` under `metds/refs/`. Now resume the coach — `$star-plan-coach open-vocab-det-seg related_work` reopens just that section — and write the positioning from what was **read** rather than recalled, citing the citekeys the survey produced. The remaining sections follow, and the finalized plan is:
+This writes per-paper analyses and a verified `reference.bib` under `metds/refs/`. Now resume the coach — `star-plan-coach open-vocab-det-seg related_work` reopens just that section — and write the positioning from what was **read** rather than recalled, citing the citekeys the survey produced. The remaining sections follow, and the finalized plan is:
 
 ```text
 metds/plans/0_open-vocab-det-seg_plan.md
@@ -1095,7 +1083,7 @@ Interleaving matters: §2 positioning and the §1 gap are claims about what the 
 ### Step 2: give the method a place for the code to live (first run only)
 
 ```text
-$star-code-architect
+star-code-architect
 ```
 
 After Confirmation point 1 (pick the scored reference repository) and Confirmation point 2 (approve the migration table), `${CODE_NAME}/` holds the renamed, provenance-tracked codebase and `metds/codearc.md` records the architecture every later step follows. This runs off the **root plan**, so it needs no sub-plans yet.
@@ -1103,7 +1091,7 @@ After Confirmation point 1 (pick the scored reference repository) and Confirmati
 ### Step 3: build the runtime environment (first run only)
 
 ```text
-$star-env-builder
+star-env-builder
 ```
 
 After the install-plan confirmation point, the environment is created, dependencies install in the uv > pip > conda install order, and a three-layer runnable check writes its evidence to `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md`. That check is the point of the step: the first leaf should fail on the research question, not on a missing wheel.
@@ -1111,7 +1099,7 @@ After the install-plan confirmation point, the environment is created, dependenc
 ### Step 4: split it into execution units
 
 ```text
-$star-plan-decomposer open-vocab-det-seg
+star-plan-decomposer open-vocab-det-seg
 ```
 
 After confirming milestone-based decomposition, the skill may produce:
@@ -1128,13 +1116,13 @@ Decomposing **after** Steps 2–3 is what lets each leaf's §2 name real modules
 ### Step 5: identify the next task
 
 ```text
-$star-flow-status open-vocab-det-seg
+star-flow-status open-vocab-det-seg
 ```
 
 The status read is what picks the leaf: among the leaves whose `depends_on` upstreams are all complete, it names the one whose evidence is still missing, so the order comes off the dependency graph rather than off memory. If it recommends `00_baseline-impl`, run:
 
 ```text
-$star-plan-executor 00_baseline-impl_plan.md
+star-plan-executor 00_baseline-impl_plan.md
 ```
 
 ### Step 6: read what came back, then resume
@@ -1142,22 +1130,22 @@ $star-plan-executor 00_baseline-impl_plan.md
 If the log contains a training command that the user must run:
 
 1. Run the command recorded in `wkdrs/00_baseline-impl/EXEC_LOG.md`;
-2. While it runs, `$star-expt-analyst watch 00` reports log health without scoring anything;
+2. While it runs, `star-expt-analyst watch 00` reports log health without scoring anything;
 3. Confirm that its artifacts were written to the recorded paths;
-4. `$star-expt-analyst 00` scores the run against the leaf's done-criterion and says what the numbers mean — the step that decides whether the direction held;
-5. Invoke `$star-plan-executor 00` again;
+4. `star-expt-analyst 00` scores the run against the leaf's done-criterion and says what the numbers mean — the step that decides whether the direction held;
+5. Invoke `star-plan-executor 00` again;
 6. The skill reads the existing log and resumes at done-criterion verification.
 
 ### Step 7: repeat — the light path or the full path
 
-After each leaf, `$star-flow-status` gives the single next recommendation. A result that contradicts what the plan expected goes back into the plan text through `$star-plan-reviser` before the next leaf starts, so the tree stops recommending a direction the evidence has already closed. How much of the loop you run per leaf depends on what the leaf is for; see [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
+After each leaf, `star-flow-status` gives the single next recommendation. A result that contradicts what the plan expected goes back into the plan text through `star-plan-reviser` before the next leaf starts, so the tree stops recommending a direction the evidence has already closed. How much of the loop you run per leaf depends on what the leaf is for; see [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
 
 ### Step 8: compile the method for the paper
 
 Once the loop has closed — every leaf executed, every top-level plan finalized, and the plans have absorbed what execution taught them:
 
 ```text
-$star-metd-summarize
+star-metd-summarize
 ```
 
 This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, and `evaluation.md` from the plan tree. The readiness check enforces the timing: while any leaf is unexecuted or any top-level plan is unfinalized, the skill stops and routes what is open instead of compiling — going ahead anyway is an explicit draft choice, whose content from unexecuted leaves is marked not yet verified. The commonest reason the confirmation point stays shut is a writing or submission leaf: it cannot be executed until the method documents exist, and the documents wait on it. Keep write-up out of the plan tree, or mark that leaf `skipped` before compiling. Every uncovered section becomes a `TODO` naming the plan section that should fill it — so the gap list doubles as the to-do list for the plans. Recompile if the plans move afterwards; a document whose sources have not changed is left untouched.
@@ -1167,7 +1155,7 @@ This compiles `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, 
 Once the method documents and `wkdrs/results/results.md` are current:
 
 ```text
-$star-code-release
+star-code-release
 ```
 
 The scattered code ends up in `${CODE_NAME}/` where `metds/codearc.md` says it belongs, the files a reader will open are polished, and `README.md` is compiled from the documents Step 8 produced plus the results table — every number traced to a run, every printed command resolved. The hygiene sweep reports what would leak, and the publish commands come back to you.
@@ -1178,39 +1166,39 @@ The scattered code ends up in `${CODE_NAME}/` where `metds/codearc.md` says it b
 
 | Current situation | Use |
 | --- | --- |
-| Your project already exists and did not start from the STAR template | `$star-proj-adopt` |
-| You have only a vague interest and no committed topic yet | `$star-idea-storm` |
-| You have an idea (or a finalized idea file) and the plan is still unwritten | `$star-plan-coach` |
-| The method is clear but you do not yet know the closest work, the baselines, or how to cite them | `$star-refs-reviewer` |
-| The plan is ready but `${CODE_NAME}/` is empty, or the codebase needs organizing | `$star-code-architect` |
-| The codebase exists but there is no usable runtime environment | `$star-env-builder` |
-| The method has a place for the code to live and you need executable tasks | `$star-plan-decomposer` |
-| You have a concrete leaf task and need code plus verification | `$star-plan-executor` |
-| The implementation is in place and you want the code audited against conventions and the plan | `$star-code-reviewer` |
-| A run produced results and you want to know what they mean and whether they met the plan | `$star-expt-analyst` |
-| A plan was (partly) executed and its text should absorb the results | `$star-plan-reviser` |
-| You do not know the current status or next action | `$star-flow-status` |
-| Every experiment is finished, the plans are finalized, and you want the method written out for a reader or a paper | `$star-metd-summarize` |
-| The work is done and the repository has to be readable — and publishable — by someone else | `$star-code-release` |
+| Your project already exists and did not start from the STAR template | `star-proj-adopt` |
+| You have only a vague interest and no committed topic yet | `star-idea-storm` |
+| You have an idea (or a finalized idea file) and the plan is still unwritten | `star-plan-coach` |
+| The method is clear but you do not yet know the closest work, the baselines, or how to cite them | `star-refs-reviewer` |
+| The plan is ready but `${CODE_NAME}/` is empty, or the codebase needs organizing | `star-code-architect` |
+| The codebase exists but there is no usable runtime environment | `star-env-builder` |
+| The method has a place for the code to live and you need executable tasks | `star-plan-decomposer` |
+| You have a concrete leaf task and need code plus verification | `star-plan-executor` |
+| The implementation is in place and you want the code audited against conventions and the plan | `star-code-reviewer` |
+| A run produced results and you want to know what they mean and whether they met the plan | `star-expt-analyst` |
+| A plan was (partly) executed and its text should absorb the results | `star-plan-reviser` |
+| You do not know the current status or next action | `star-flow-status` |
+| Every experiment is finished, the plans are finalized, and you want the method written out for a reader or a paper | `star-metd-summarize` |
+| The work is done and the repository has to be readable — and publishable — by someone else | `star-code-release` |
 
 ### How much of the loop does each leaf need?
 
 Two paths. Choose per leaf, not per project.
 
-**The light path — `$star-flow-status` → `$star-plan-executor` → `$star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to tell you whether the direction is worth pursuing. The executor's own step checks plus the analyst's done-criteria scorecard are enough. Skip the code review and the plan revision — the code is scaffolding you may well throw away, and the plan text has not been contradicted, only tested.
+**The light path — `star-flow-status` → `star-plan-executor` → `star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to tell you whether the direction is worth pursuing. The executor's own step checks plus the analyst's done-criteria scorecard are enough. Skip the code review and the plan revision — the code is scaffolding you may well throw away, and the plan text has not been contradicted, only tested.
 
-**The full path — `$star-flow-status` → `$star-plan-executor` → `$star-code-reviewer` → (STOP line: you run the command, `$star-expt-analyst watch <leaf>` while it runs) → `$star-expt-analyst` → `$star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result changes the top-level plan. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table, and the reviser folds what the run taught back into the plan the method documents compile from.
+**The full path — `star-flow-status` → `star-plan-executor` → `star-code-reviewer` → (STOP line: you run the command, `star-expt-analyst watch <leaf>` while it runs) → `star-expt-analyst` → `star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result changes the top-level plan. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table, and the reviser folds what the run taught back into the plan the method documents compile from.
 
 Two rules cut across both:
 
-- **A result that contradicts the plan promotes a light leaf to the full path.** A root kill-criterion hit, or a refuted MVP assumption, is a plan-level finding — route it to `$star-plan-reviser` regardless of which path you started on.
-- **`$star-metd-summarize` compiles from plans, not runs.** A value an exploratory leaf settled that a method document will cite still needs the executor to write it back into the plan, or it never reaches the paper.
+- **A result that contradicts the plan promotes a light leaf to the full path.** A root kill-criterion hit, or a refuted MVP assumption, is a plan-level finding — route it to `star-plan-reviser` regardless of which path you started on.
+- **`star-metd-summarize` compiles from plans, not runs.** A value an exploratory leaf settled that a method document will cite still needs the executor to write it back into the plan, or it never reaches the paper.
 
 When in doubt, ask what happens if the leaf's result turns out to be wrong. If the answer is "I lose an afternoon", take the light path. If it is "a number in the paper is wrong", take the full one.
 
 ### Why will the executor not run the plan I selected?
 
-The usual causes are that the target is not a leaf, an entry in `depends_on` is unfinished, the task breakdown/done-criterion still contains too many `[TBD]` items, or the `.env` environment itself is unusable — `$star-env-builder` rebuilds it. Running `$star-flow-status` first usually reveals the exact reason.
+The usual causes are that the target is not a leaf, an entry in `depends_on` is unfinished, the task breakdown/done-criterion still contains too many `[TBD]` items, or the `.env` environment itself is unusable — `star-env-builder` rebuilds it. Running `star-flow-status` first usually reveals the exact reason.
 
 ### Why was a training command recorded instead of executed?
 
@@ -1218,7 +1206,7 @@ Full training, full-dataset evaluation, and high-cost calls cross the STOP line.
 
 ### I have been away for two weeks — how do I pick the work back up?
 
-Nothing depends on the conversation still being open: each stage records its own progress in a file, `$star-flow-status` reads those records and says which stage you stopped in, and invoking that stage's skill again picks up from what it wrote.
+Nothing depends on the conversation still being open: each stage records its own progress in a file, `star-flow-status` reads those records and says which stage you stopped in, and invoking that stage's skill again picks up from what it wrote.
 
 - The idea storm resumes from stage statuses in the idea-file frontmatter, and a `finalized` idea reopens through its converge stage;
 - The coach resumes from section statuses in the plan frontmatter;
@@ -1237,37 +1225,37 @@ Nothing depends on the conversation still being open: each stage records its own
 
 Two different questions, and this section answers only the second. **Who may start a skill** is the roster ([conventions §10](research-workflow-conventions.md)): seven are slash-only, and the agent may pick up the other eight — including one a finished run names as the next action. **How far a run then gets before it needs you** is what follows, and it is the same either way: a skill the agent started stops at exactly the points one you typed would. The confirmation points do not relax in headless or scripted runs — a skill that reaches a question stops and waits rather than assuming a yes. In practice:
 
-- **Safe on a timer**: `$star-flow-status` (read-only, asks nothing); `$star-expt-analyst <leaf | run-dir>` with an explicit target, and `$star-expt-analyst watch <leaf>` (chat-only); a `$star-metd-summarize` recompile — an unready tree stops at its readiness check, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of overwriting.
-- **Runs until its confirmation point**: `$star-refs-reviewer` stops at the mandatory core-set confirmation, its `verify` stops on any mismatch until the diff is confirmed, and its `survey` asks one judgment call (profile, taxonomy axis, tiered reading list) that `involve=low` takes on its recommendation — leaving only the overwrite of an existing survey file to stop for; `$star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `$star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
-- **Needs you at the wheel once it is running**: `$star-idea-storm`, `$star-plan-coach`, `$star-plan-decomposer`, `$star-code-architect`, `$star-env-builder`, `$star-plan-executor`, `$star-code-reviewer`, `$star-plan-reviser`, `$star-code-release` (its gather, polish and readme phases) — their questions and confirmation points are the design; scripting a "yes" past them defeats the audit trail they exist to protect. Three of them — the environment builder, the executor, the code reviewer — the agent may nonetheless start on its own: starting a run is not finishing one unattended.
+- **Safe on a timer**: `star-flow-status` (read-only, asks nothing); `star-expt-analyst <leaf | run-dir>` with an explicit target, and `star-expt-analyst watch <leaf>` (chat-only); a `star-metd-summarize` recompile — an unready tree stops at its readiness check, documents whose sources have not moved are left untouched, and a substantive overwrite stops at its change-list question instead of overwriting.
+- **Runs until its confirmation point**: `star-refs-reviewer` stops at the mandatory core-set confirmation, its `verify` stops on any mismatch until the diff is confirmed, and its `survey` asks one judgment call (profile, taxonomy axis, tiered reading list) that `involve=low` takes on its recommendation — leaving only the overwrite of an existing survey file to stop for; `star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists; `star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
+- **Needs you at the wheel once it is running**: `star-idea-storm`, `star-plan-coach`, `star-plan-decomposer`, `star-code-architect`, `star-env-builder`, `star-plan-executor`, `star-code-reviewer`, `star-plan-reviser`, `star-code-release` (its gather, polish and readme phases) — their questions and confirmation points are the design; scripting a "yes" past them defeats the audit trail they exist to protect. Three of them — the environment builder, the executor, the code reviewer — the agent may nonetheless start on its own: starting a run is not finishing one unattended.
 
-The involve level (conventions §7.7–7.8) moves these boundaries, never past a confirmation point. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill stops asking its judgment calls: it takes the option it would have marked recommended and logs the choice instead. Runs stretch further before needing you: `$star-plan-decomposer`'s axis and sub-plan-list confirmations go quiet, and `$star-plan-executor`, pointed at a parent, starts the first ready leaf itself. What never goes quiet: the STOP line, deletions and overwrites, writing changes back into plans, the confirmation points, and genuinely open questions — `low` lengthens the unattended span, it does not make any skill fully unattended. The commit offer is no longer among them: at `low` a run commits what it wrote and names those commits in its reply (§1.5). `high` runs the other way: judgment calls a skill would batch into one confirmation point, or take on its own between confirmation points, are asked one at a time.
+The involve level (conventions §7.7–7.8) moves these boundaries, never past a confirmation point. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill stops asking its judgment calls: it takes the option it would have marked recommended and logs the choice instead. Runs stretch further before needing you: `star-plan-decomposer`'s axis and sub-plan-list confirmations go quiet, and `star-plan-executor`, pointed at a parent, starts the first ready leaf itself. What never goes quiet: the STOP line, deletions and overwrites, writing changes back into plans, the confirmation points, and genuinely open questions — `low` lengthens the unattended span, it does not make any skill fully unattended. The commit offer is no longer among them: at `low` a run commits what it wrote and names those commits in its reply (§1.5). `high` runs the other way: judgment calls a skill would batch into one confirmation point, or take on its own between confirmation points, are asked one at a time.
 
-A practical unattended pattern: run the STOP-line training command, keep `$star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
+A practical unattended pattern: run the STOP-line training command, keep `star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
 
 ### What is deliberately outside STAR?
 
 STAR defines the process, the file locations, and the verification records; it does not bring a model stack, a tracker, or a writing tool. Three boundaries are deliberate:
 
-- **Hyperparameter sweeps and experiment tracking.** A sweep is a plan decision (`$star-plan-decomposer` scopes it, the STOP line hands the command back); which sweeper and which tracker you run it through is yours. Point them at `wkdrs/<run>/` and the workflow keeps working.
-- **Choosing what to care about.** `$star-idea-storm` starts from a seed interest you bring — it diverges, scans, and converges, but it does not pick a field for you, and `$star-plan-coach` sharpens the topic that comes out. Which problems deserve your years is upstream of STAR.
+- **Hyperparameter sweeps and experiment tracking.** A sweep is a plan decision (`star-plan-decomposer` scopes it, the STOP line hands the command back); which sweeper and which tracker you run it through is yours. Point them at `wkdrs/<run>/` and the workflow keeps working.
+- **Choosing what to care about.** `star-idea-storm` starts from a seed interest you bring — it diverges, scans, and converges, but it does not pick a field for you, and `star-plan-coach` sharpens the topic that comes out. Which problems deserve your years is upstream of STAR.
 - **Paper writing.** STAR stops at the material. The handoff is `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md` (the method), `metds/refs/reference.bib` (the citations), `metds/refs/related_work.md` (the related-work narrative, once synthesized), and `wkdrs/results/results.md` (the numbers, with the run behind each one). Any writing tool takes it from there.
 
 Each of these could have been a skill. They are not, because the answer would have had to guess your stack, your field, or your voice — and the workflow is more useful when it does not.
 
 ### Can I edit plan files manually?
 
-Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, `exec_runs`, and `finalized`. `finalized` is the one three skills wait on — the decomposer will not take an unfinalized top-level plan, the architect warns, and `star-metd-summarize` refuses to compile — and only `star-plan-coach` sets it. After changing a parent plan, run `$star-flow-status` to check for drift before deciding whether to decompose it again.
+Yes, but keep the frontmatter consistent with the body, especially `parent`, `children`, `depends_on`, `status`, `exec_status`, `exec_runs`, and `finalized`. `finalized` is the one three skills wait on — the decomposer will not take an unfinalized top-level plan, the architect warns, and `star-metd-summarize` refuses to compile — and only `star-plan-coach` sets it. After changing a parent plan, run `star-flow-status` to check for drift before deciding whether to decompose it again.
 
 ## 20. Skill locations
 
-Each tool has an adapted, authoritative copy of the skills. Do not mix tool-specific invocation or control instructions across these roots:
+Each tool has an adapted, authoritative copy of the skills. `.agents/skills/` is the shared one — where the `AGENTS.md` convention puts skills, Codex's only project root, and read by Cursor, Pi and DSH beside their own — so it spells no prefix and every tool supplies its own. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all seven roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples use the Codex form from §1, but its "complete definition" links point into `.claude/skills/`, the baseline tree the other six are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
+Every skill directory has the same shape in all seven roots: `SKILL.md` is the entry point and the English definition, and `SKILL_zh.md` holds the full Chinese one. `SKILL_zh.md` is the human-readable Chinese edition, kept in step with the entry point; at runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` is authoritative. This guide's invocation examples carry no prefix (§1), and its "complete definition" links point into `.claude/skills/`, the baseline tree the other six are ported from. Read the copy your own tool owns — the row above names it — where the two differ on tool mechanics.
 
 | Tool | Authoritative directory | Invocation form |
 | --- | --- | --- |
-| Codex | `.agents/skills/` | `$star-*` |
+| Any `AGENTS.md` agent | `.agents/skills/` | each tool's own |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
