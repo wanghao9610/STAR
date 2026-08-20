@@ -9,7 +9,9 @@ f01	Skill directory sets	mkdir -p "$W/.qwen/skills/star-zzz"	.qwen/skills
 f02	Frontmatter name = directory name	perl -pi -e 's/^name: star-flow-status$/name: star-flow-statuss/' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
 f03	File inventory parity (ignoring .agents agents/ manifests)	touch "$W/.dsh/skills/star-expt-digest/references/extra.md" "$W/.dsh/skills/star-expt-digest/references/extra_zh.md"	.dsh/skills/star-expt-digest
 f04	Slash-only guards match the conventions roster	perl -pi -e 's/^disable-model-invocation: true$//' "$W/.pi/skills/star-plan-coach/SKILL.md"	.pi/skills/star-plan-coach/SKILL.md
-f04b	Slash-only guards match the conventions roster	perl -pi -e 's/allow_implicit_invocation: false/allow_implicit_invocation: true/' "$W/.agents/skills/star-plan-coach/agents/openai.yaml"	star-plan-coach
+# The manifest lives under .codex now; .agents/skills carries a link to it at the
+# path Codex scans, and perl -i would replace that link instead of the file.
+f04b	Slash-only guards match the conventions roster	perl -pi -e 's/allow_implicit_invocation: false/allow_implicit_invocation: true/' "$W/.codex/skills/star-plan-coach/agents/openai.yaml"	star-plan-coach
 f05	Bilingual twins in skill trees	touch "$W/.pi/skills/star-flow-status/references/orphan.md"	orphan.md
 f06	Shared-conventions reference	perl -pi -e 's{research-workflow-conventions}{research-workflow-CONV}g' "$W/.kimi-code/skills/star-code-release/SKILL.md"	.kimi-code/skills/star-code-release/SKILL.md
 f07	Invocation-token hygiene	printf '\n/star-plan-coach\n' >> "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
