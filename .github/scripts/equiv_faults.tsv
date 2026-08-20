@@ -1,0 +1,38 @@
+# STAR consistency-check equivalence suite.
+# One fault per line, TAB separated: <id> <section-name> <apply-command> <must-name>
+#   <apply-command> runs with $W set to the root of a throwaway work copy.
+#   <must-name> is a string the FAIL line must contain; "-" means the run must stay clean.
+# A rewrite of check_consistency.sh is behaviour-preserving when every case here
+# produces byte-identical output before and after. Faster is not the test.
+f00	(clean)	:	-
+f01	Skill directory sets	mkdir -p "$W/.qwen/skills/star-zzz"	.qwen/skills
+f02	Frontmatter name = directory name	perl -pi -e 's/^name: star-flow-status$/name: star-flow-statuss/' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
+f03	File inventory parity (ignoring .agents agents/ manifests)	touch "$W/.dsh/skills/star-expt-digest/references/extra.md" "$W/.dsh/skills/star-expt-digest/references/extra_zh.md"	.dsh/skills/star-expt-digest
+f04	Slash-only guards match the conventions roster	perl -pi -e 's/^disable-model-invocation: true$//' "$W/.pi/skills/star-plan-coach/SKILL.md"	.pi/skills/star-plan-coach/SKILL.md
+f04b	Slash-only guards match the conventions roster	perl -pi -e 's/allow_implicit_invocation: false/allow_implicit_invocation: true/' "$W/.agents/skills/star-plan-coach/agents/openai.yaml"	star-plan-coach
+f05	Bilingual twins in skill trees	touch "$W/.pi/skills/star-flow-status/references/orphan.md"	orphan.md
+f06	Shared-conventions reference	perl -pi -e 's{research-workflow-conventions}{research-workflow-CONV}g' "$W/.kimi-code/skills/star-code-release/SKILL.md"	.kimi-code/skills/star-code-release/SKILL.md
+f07	Invocation-token hygiene	printf '\n/star-plan-coach\n' >> "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
+f08	Bilingual twins in docs/mds/star-workflow	touch "$W/docs/mds/star-workflow/orphan.md"	orphan.md
+f09	Cursor rule mirrors AGENTS.md	printf 'drift\n' >> "$W/.cursor/rules/agent-instructions.mdc"	agent-instructions.mdc
+f10	Session hooks	rm -f "$W/.qwen/hooks/star_memory.sh"	star_memory.sh
+f10b	Session hooks	chmod -x "$W/.claude/hooks/star_commit_guard.sh"	star_commit_guard.sh
+f11	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl -pi -e 's/^## Role$/## Purpose/' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
+f11b	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl -ni -e 'print unless /^#{2,4} /' "$W/.pi/skills/star-plan-coach/references/question_bank.md"	question_bank.md
+f12	Description length (<= ${DESC_MAX:=1024} characters, SKILL.md spec)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
+f13	Description length in .dsh (<= ${DSH_DESC_MAX:=500}, DSH catalog bound)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
+f14	Skill script parity	printf '# drift\n' >> "$W/.pi/skills/star-flow-status/scripts/scan.sh"	scan.sh
+f15	Manifest section parity (.agents vs .claude)	perl -ni -e 'print unless /^## Dialogue Discipline/' "$W/.agents/skills/star-code-reviewer/SKILL.md"	.agents/skills/star-code-reviewer/SKILL.md
+f16	Grepped literals have a producer	grep -rl -- '[TBD]' "$W/.claude/skills" --include='*.md' | xargs perl -pi -e 's/\[TBD\]/[TBDX]/g'	.claude
+f17	AGENTS.md section citations	perl -pi -e 's/^## 9\. Project Runtime$/## 9. Project Runtime Environment/' "$W/AGENTS.md"	AGENTS.md
+f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
+f18b	Conventions document structure	perl -pi -e 's/^## 6\. Delegation$/## 6. Delegating/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
+f19	Skills guide coverage	perl -pi -e 's/star-expt-digest/star-expt-digestX/g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
+f20	complete definition	perl -pi -e 's{\.claude/skills/star-flow-status}{.claude/skills/star-flow-statusX}g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
+f21	Opening-load invariants	perl -pi -e "s/^Match the user's language\./Match the user language./" "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
+f21b	Opening-load invariants	perl -pi -e "s/grep -sE '\^\(STAR_LANG\|INVOLVE\)=' \.env/grep -sE 'STAR_LANG' .env/" "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md
+f22	Selective conventions load	perl -pi -e 's/\(0\|3\|5\|6\)/(0|3|5|6|9)/' "$W/.claude/skills/star-expt-digest/SKILL.md"	.claude/skills/star-expt-digest/SKILL.md
+f23	Reuse-an-earlier-load paragraph	perl -pi -e 's/^(\*\*Reusing an earlier load\.\*\*) /$1 Note: /' "$W/.qwen/skills/star-flow-status/SKILL.md"	reuse paragraph
+f24	Harness-specific delegation vocabulary	perl -pi -e 's/agent_type: explorer/agent_type: scout/g' "$W/.agents/skills/star-plan-executor/references/agent_dispatch_spec.md"	.agents/skills/star-plan-executor
+f25	Harness tool vocabulary	perl -pi -e 's/`run_shell_command`/Bash/g' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
+f25b	Harness tool vocabulary	perl -pi -e 's/AskQuestion/AskUserQuestion/g' "$W/.cursor/skills/star-plan-coach/SKILL.md"	.cursor/skills/star-plan-coach
