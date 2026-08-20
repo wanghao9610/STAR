@@ -1,0 +1,10 @@
+# Pi: the question tool is the vendored star_questionnaire, sub-agents go through
+# star_subagent, the shell is bash and the reader is read.
+AskUserQuestion	`star_questionnaire`
+`Agent`	`star_subagent`
+\bBash\b	`bash`
+`Read`	`read`
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+, `model: sonnet`	
+、`model: sonnet`	

@@ -65,9 +65,9 @@ done
 section "File inventory parity (ignoring .agents agents/ manifests)"
 parity_errors=0
 while IFS= read -r skill; do
-    baseline="$(cd "${SKILL_ROOTS[0]}/${skill}" && find . -type f ! -path './agents/*' | sort)"
+    baseline="$(cd "${SKILL_ROOTS[0]}/${skill}" && find -L . -type f ! -path './agents/*' | sort)"
     for root in "${SKILL_ROOTS[@]:1}"; do
-        listing="$(cd "${root}/${skill}" && find . -type f | sort)"
+        listing="$(cd "${root}/${skill}" && find -L . -type f | sort)"
         if [[ "${listing}" != "${baseline}" ]]; then
             fail "${root}/${skill} file set differs from ${SKILL_ROOTS[0]}/${skill}:"
             diff <(printf '%s\n' "${baseline}") <(printf '%s\n' "${listing}") | sed 's/^/      /'
@@ -173,7 +173,7 @@ while IFS= read -r f; do
     else
         [[ -f "${f%.md}_zh.md" ]] || { fail "${f} has no _zh.md counterpart"; twin_errors=1; }
     fi
-done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.md')
+done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.md')
 (( twin_errors == 0 )) && note "every skill .md file has its bilingual twin"
 
 # 6. Every SKILL.md defers to the shared conventions document.
@@ -432,7 +432,7 @@ norm_headings() { # $1 = file; prints one normalized heading per line
 # this section exists to catch.
 struct_errors=0
 struct_mismatch="$(mktemp)"
-find "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
+find -L "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
   | xargs -0 awk -v baseline="${STRUCT_ROOTS[0]}" '
     function flush() {
         if (path != "") seq[tree SUBSEP rel] = acc
@@ -475,7 +475,7 @@ find "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
             }
     }
 ' | sort > "${struct_mismatch}"
-struct_files="$(cd "${STRUCT_ROOTS[0]}" && find . -type f -name '*.md' | wc -l | tr -d " ")"
+struct_files="$(cd "${STRUCT_ROOTS[0]}" && find -L . -type f -name '*.md' | wc -l | tr -d " ")"
 while IFS= read -r other; do
     [[ -n "${other}" ]] || continue
     rel="${other#*/skills/}"
@@ -568,7 +568,7 @@ while IFS= read -r rel; do
             script_errors=1
         fi
     done
-done < <(cd "${SKILL_ROOTS[0]}" && find . -type f -name '*.sh' | sed 's|^\./||' | sort)
+done < <(cd "${SKILL_ROOTS[0]}" && find -L . -type f -name '*.sh' | sed 's|^\./||' | sort)
 
 # Same-named scripts are one shared file, not per-skill forks. A skill cannot
 # reference another skill's copy — the path would carry a foreign invocation
@@ -584,8 +584,8 @@ while IFS= read -r base; do
             fail "${path} differs from ${first}; same-named skill scripts must be one shared file"
             script_errors=1
         fi
-    done < <(find "${SKILL_ROOTS[@]}" -type f -name "${base}" | sort)
-done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | sort -u)
+    done < <(find -L "${SKILL_ROOTS[@]}" -type f -name "${base}" | sort)
+done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | sort -u)
 
 (( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all ${#SKILL_ROOTS[@]} trees"
 
@@ -669,7 +669,7 @@ literal_errors=0
 SHARED_SCRIPTS=()
 while IFS= read -r path; do
     SHARED_SCRIPTS+=("${path}")
-done < <(find "${SKILL_ROOTS[@]}" -type f -name '*.sh' | sort)
+done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.sh' | sort)
 
 if (( ${#SHARED_SCRIPTS[@]} == 0 )); then
     fail "no shared skill scripts found; the literal registry has nothing to check against"
@@ -1339,7 +1339,7 @@ for root in "${SKILL_ROOTS[@]}"; do
                     sel_errors=1
                 fi
             done < <(grep -nE '(conventions|规约) §[0-9]+' "${ref}" || true)
-        done < <(find "${root}/${skill}/references" -type f -name '*.md' 2>/dev/null | sort)
+        done < <(find -L "${root}/${skill}/references" -type f -name '*.md' 2>/dev/null | sort)
     done < <(printf '%s\n' "${SKILLS}")
 done
 

@@ -1,0 +1,17 @@
+# Kimi Code: skills are invoked as /skill:<name>; the context file is AGENTS.md;
+# no per-subagent model hint; the question tool's multi-select field is snake_case.
+/star-(?!workflow)	/skill:star-
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+, `model: sonnet`	
+、`model: sonnet`	
+`Explore` with `model: sonnet`	`explore`
+`Explore`、`model: sonnet`	`explore`
+multiSelect	multi_select
+subagent_type: Explore	subagent_type: explore
+subagent_type: general-purpose	subagent_type: coder
+headless or scripted runs	non-interactive `kimi -p` runs, no human to answer
+headless / scripted	non-interactive `kimi -p`, no human to answer
+无人值守 / 脚本化	非交互 `kimi -p` 下，无人应答
+headless/scripted	non-interactive `kimi -p`, no human to answer
+无人值守/脚本化	非交互 `kimi -p` 下，无人应答

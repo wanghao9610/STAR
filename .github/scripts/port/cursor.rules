@@ -1,0 +1,12 @@
+# Cursor: the terminal is Shell, sub-agents are Task, questions are AskQuestion,
+# and plan mode is entered by switching modes rather than by a dedicated tool.
+AskUserQuestion	AskQuestion
+`Agent`	`Task`
+\bBash\b	Shell
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+, `model: sonnet`	
+、`model: sonnet`	
+multiSelect	allow_multiple
+subagent_type: Explore	subagent_type: explore
+subagent_type: general-purpose	subagent_type: explore

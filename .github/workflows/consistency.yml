@@ -10,5 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # First, because it names the likeliest mistake outright: a tree was edited
+      # instead of .claude/skills, so it is no longer what the port rules produce.
+      - name: Check the six generated trees against .claude/skills
+        run: bash .github/scripts/port.sh
       - name: Run consistency checks
         run: bash .github/scripts/check_consistency.sh

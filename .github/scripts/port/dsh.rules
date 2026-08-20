@@ -1,0 +1,17 @@
+# DSH: skills are /skill:<name>; tool names are written bare, without backticks;
+# no per-subagent model hint; plan-mode tools are snake_case.
+/star-(?!workflow)	/skill:star-
+AskUserQuestion	ask_user_question
+`Agent`	`subagent`
+\bBash\b	bash
+`Read`	`read`
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+multiSelect	multi_select
+`ExitPlanMode`	`exit_plan_mode`
+ExitPlanMode	exit_plan_mode
+headless or scripted runs	non-interactive `dsh --profile headless` runs, no human to answer
+headless / scripted	non-interactive `dsh --profile headless`, no human to answer
+headless/scripted	non-interactive `dsh --profile headless`, no human to answer
+无人值守 / 脚本化	非交互 `dsh --profile headless` 下，无人应答
+无人值守/脚本化	非交互 `dsh --profile headless` 下，无人应答

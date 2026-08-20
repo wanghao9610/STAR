@@ -1,0 +1,13 @@
+# Codex: skills are $<name>; the shell is written in prose as "shell"; there is no
+# named file reader, so a read is described rather than named.
+/star-(?!workflow)	$star-
+AskUserQuestion	`request_user_input`
+`Agent`	`spawn_agent`
+only Bash can do	only the shell can do
+\bBash\b	shell
+its own `Read`	its own file read
+`Read`	file read
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+, `model: sonnet`	
+、`model: sonnet`	

@@ -1,0 +1,14 @@
+# Qwen Code: shell is run_shell_command, reader is read_file, questions are
+# ask_user_question; plan-mode tools are snake_case; AGENTS.md is the context file.
+AskUserQuestion	`ask_user_question`
+`Agent`	`agent`
+\bBash\b	`run_shell_command`
+`Read`	`read_file`
+CLAUDE\.md	AGENTS.md
+CLAUDE	AGENTS
+, `model: sonnet`	
+、`model: sonnet`	
+with `model: sonnet` 	
+`ExitPlanMode`	`exit_plan_mode`
+ExitPlanMode	exit_plan_mode
+EnterPlanMode	enter_plan_mode
