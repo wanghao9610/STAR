@@ -13,7 +13,7 @@ Taking a node back is the same walk with the field cleared instead of written �
 
 A drop that comes up *during* a full review is not this mode — it is a Step 4 candidate, approved like any other, writing the same three places.
 
-## Dropping a plan (`dropped:`)
+## What a drop writes, and what it leaves alone
 
 A direction given up on — a node the flow should stop counting, recommending, and building on. The field goes on the node where the decision was made and nowhere else: every skill reads it as inherited, so one line takes the whole subtree out, and a child added under that node later is dropped with it.
 

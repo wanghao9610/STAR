@@ -14,7 +14,7 @@ The user confirms leaf by leaf — one question over the numbered rows when ther
 
 On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5, `exec_runs:` — frontmatter fields only, nothing else in the file (Principle 6). On a confirmed match whose run was recorded, also set that reconstructed `EXEC_LOG.md`'s `source_plan:` to the leaf's filename — the user just confirmed that correspondence, and a log left saying `(none)` trips the status skill's orphaned-run flag on every adopted run. Append a dated backfill record to `metds/adopt.md` naming every leaf touched and its evidence, and set frontmatter `backfilled:` to today's date — even with no leaf confirmed, the phase ran and the record says so. The status skill's coverage row reads that field; unset, it keeps firing on a healthy project. Report, then route to `/star-flow-status` for the first honest picture of the adopted project.
 
-## 7. Backfill matching (Phase `backfill`)
+## The matching rules
 
 A leaf is matched to an inventory row only on **evidence overlap**: the leaf's §4 deliverable paths or §3 steps name a path, script, or module that appears in the row's `evidence` or `run_dir`. Name similarity alone is not a match — propose it as `weak` and let the user decide.
 

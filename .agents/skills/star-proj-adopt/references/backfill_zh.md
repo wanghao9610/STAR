@@ -14,7 +14,7 @@
 
 只在获确认的 leaf 上写 `exec_status:`，以及在 S5 已入账 run 时写 `exec_runs:`——只碰 frontmatter 字段，文件里别的一律不动（原则 6）。对获确认且 run 已入账的匹配，同时把那份重建版 `EXEC_LOG.md` 的 `source_plan:` 改为该 leaf 的文件名——用户刚刚确认的正是这层对应关系，日志里留着 `(none)` 会让状态 skill 的 orphaned-run 检查在每个接入 run 上误报。向 `metds/adopt.md` 追加一段带日期的回填记录，写明每个被改动的 leaf 及其证据，并把 frontmatter 的 `backfilled:` 设为今天的日期——哪怕一个 leaf 都没获确认，这个阶段也跑过了，记录里写明即可。状态 skill 的覆盖行读的正是这个字段；不设它，那一行会在健康的项目上一直触发。汇报后交棒 `star-flow-status`，那是接入后的项目第一次拿到诚实的全景图。
 
-## 7. 回填对账（`backfill` 阶段）
+## 对账规则
 
 leaf 与清单行只在**证据重叠**时才算匹配：leaf 的 §4 交付路径或 §3 步骤中出现了某条路径、脚本或模块，而它也出现在该行的 `evidence` 或 `run_dir` 里。仅凭名字相似不算匹配——把它作为 `weak` 提出来，交给用户定夺。
 
