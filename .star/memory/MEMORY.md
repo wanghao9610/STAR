@@ -2,8 +2,8 @@
 
 What earlier sessions in this repository learned, one line per memory, newest
 first. The session hooks under `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`,
-`.kimi-code/hooks/` and `.qwen/hooks/` parse these lines byte-exactly, so the
-shape is fixed:
+`.dsh/hooks/`, `.kimi-code/hooks/`, `.qwen/hooks/` and `.pi/extensions/star-hooks/`
+parse these lines byte-exactly, so the shape is fixed:
 
     - <type> · <scope> · <verified> · [<slug>](<slug>.md) — <one line>
     - env · machine:cluster-a · 2026-08-03 · [flash-attn-gcc11](flash-attn-gcc11.md) — builds only after `module load gcc/11`
