@@ -28,7 +28,7 @@ When the research is ready to be written up, [STAGE](https://github.com/wanghao9
   - [5. Start the research workflow](#5-start-the-research-workflow)
 - [Research workflow](#research-workflow)
   - [Model selection](#model-selection)
-- [Per-tool setup (optional)](#per-tool-setup-optional)
+- [Per-harness setup (optional)](#per-harness-setup-optional)
   - [Session hooks](#session-hooks)
   - [Pre-approve the status collector](#pre-approve-the-status-collector)
 - [Project memory](#project-memory)
@@ -46,11 +46,11 @@ When the research is ready to be written up, [STAGE](https://github.com/wanghao9
 - **A single experiment entrypoint** through `execs/run.sh`.
 - **One skill per step of the research** — fifteen of them: thirteen in the order the research goes, and two you can reach for at any moment.
 - **A research process you can retrace and resume**: plans under `metds/plans/`, each plan's execution intermediates under `tasks/`, and what a run generated under `wkdrs/` — so picking the work back up reads files rather than chat history.
-- **A memory the project owns**: what a session learns that no plan or report holds — an environment quirk, a standing preference, a dead end — is recorded under `.star/memory/` and put in front of the next session by a hook, in whichever tool you drive STAR with.
+- **A memory the project owns**: what a session learns that no plan or report holds — an environment quirk, a standing preference, a dead end — is recorded under `.star/memory/` and put in front of the next session by a hook, in whichever harness you drive STAR with.
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, DSH, Kimi Code, Cursor, Pi, and Qwen Code, with support for both English and Chinese.
 - **What is too big or too local to commit stays out of Git**: local data, weights, outputs, and environment settings are excluded from version control.
 
-See [Research workflow](#research-workflow) for the fifteen skills grouped by research stage — what each is responsible for, what it writes, and how to invoke it in your tool. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting.
+See [Research workflow](#research-workflow) for the fifteen skills grouped by research stage — what each is responsible for, what it writes, and how to invoke it in your harness. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting.
 
 ## Project structure
 
@@ -86,8 +86,8 @@ STAR/
 ├── .claude/hooks/          # Hooks for Claude: model-id provenance, project memory, involve gate
 ├── .codex/hooks/           # Hooks for Codex: model-id provenance, project memory, involve gate
 ├── .cursor/hooks/          # Session hooks for Cursor
-├── .dsh/hooks/             # Session hooks for DSH, listed in .dsh/hooks.json (see Per-tool setup)
-├── .kimi-code/hooks/       # Session hooks for Kimi Code (see Per-tool setup)
+├── .dsh/hooks/             # Session hooks for DSH, listed in .dsh/hooks.json (see Per-harness setup)
+├── .kimi-code/hooks/       # Session hooks for Kimi Code (see Per-harness setup)
 ├── .pi/extensions/         # Pi extensions: STAR's session hooks, plus sub-agents, plan mode, questions
 ├── .qwen/hooks/            # Hooks for Qwen Code: model-id provenance, project memory, involve gate
 ├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
@@ -144,7 +144,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` holds the generator that writes STAR's seven skill trees from one authored copy, and the consistency check that keeps them in step — for maintaining STAR itself, not your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
+`.github/` holds the generator that writes STAR's seven skill trees from one authored copy, and the consistency check that keeps them in step — for maintaining STAR itself, not your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a harness directory you do not use. The adopt path in step 1b never installs it.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files belong directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before `git add .`.
 
@@ -160,7 +160,7 @@ bash /tmp/star-update.sh --adopt
 ```
 
 Nothing already there is overwritten: every existing file is left alone and reported. Add
-`--tools claude` — or any comma-separated set of `claude`, `codex`, `cursor`, `dsh`, `kimi`, `pi`
+`--harnesses claude` — or any comma-separated set of `claude`, `codex`, `cursor`, `dsh`, `kimi`, `pi`
 and `qwen` — to install only the trees for the agents you use; without it all seven arrive. Then
 run `/star-proj-adopt` inside that repository. It surveys the layout and writes `.env`, reaches
 your existing data, weights, and output trees by symlink rather than moving them, wraps your
@@ -169,7 +169,7 @@ unchanged.
 
 ### 2. Configure the local runtime
 
-**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, falling back to `python3`, then to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH is the one harness needing a further tool, `zstd` (see [Per-tool setup (optional)](#per-tool-setup-optional)).
+**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, falling back to `python3`, then to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH is the one harness needing a further tool, `zstd` (see [Per-harness setup (optional)](#per-harness-setup-optional)).
 
 Copy the example environment file:
 
@@ -197,13 +197,13 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 Setting neither is an error.
 
-Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask before deciding. At `low` a skill takes the recommended option on judgment calls and logs that it did, and in Claude Code, Codex and Qwen Code the permission prompt before each file edit is skipped — Cursor, DSH, Kimi Code and Pi have no such prompt for the level to answer, so there it governs only what the skills themselves ask; `medium` (the default) asks as documented; `high` confirms each step. Mandatory confirmation points — the STOP line, every deletion and every overwrite, and any ambiguity about what you meant — are asked at every level; the commit offer is a judgment call, so `low` takes it unasked and names every commit it made. For a single run, add the same token when you call a skill: `star-plan-executor 00 involve=low`, behind your tool's prefix. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.7.
+Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask before deciding. At `low` a skill takes the recommended option on judgment calls and logs that it did, and in Claude Code, Codex and Qwen Code the permission prompt before each file edit is skipped — Cursor, DSH, Kimi Code and Pi have no such prompt for the level to answer, so there it governs only what the skills themselves ask; `medium` (the default) asks as documented; `high` confirms each step. Mandatory confirmation points — the STOP line, every deletion and every overwrite, and any ambiguity about what you meant — are asked at every level; the commit offer is a judgment call, so `low` takes it unasked and names every commit it made. For a single run, add the same token when you call a skill: `star-plan-executor 00 involve=low`, behind your harness's prefix. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.7.
 
 A second optional key, `STAR_LANG=en|zh`, fixes one language for both the agents' replies and newly generated workflow documents (plans, reports). Left unset, both follow the conversation's language. An explicit request in the conversation wins either way, and existing documents keep the language declared in their frontmatter. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.6.
 
 A third, `STAR_REPOSITORY`, names the repository `execs/update.sh` pulls later skill and workflow guide releases from; change it only to update from a fork. See [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides).
 
-A fourth, `STAR_TOOLS`, names the agent tool trees that same updater installs and keeps current. Same section as `STAR_REPOSITORY` above.
+A fourth, `STAR_HARNESSES`, names the agent harness trees that same updater installs and keeps current. Same section as `STAR_REPOSITORY` above.
 
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
@@ -247,7 +247,7 @@ The stock `00_exp.sh` runs no science. It prints the interpreter the launcher re
 
 ### 5. Start the research workflow
 
-The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` are useful without any of the skills. To pick up the workflow, start at whichever of these describes you, using your tool's prefix from [Research workflow](#research-workflow):
+The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` are useful without any of the skills. To pick up the workflow, start at whichever of these describes you, using your harness's prefix from [Research workflow](#research-workflow):
 
 | Where you are | Start with |
 | --- | --- |
@@ -262,7 +262,7 @@ The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` 
 
 STAR ships fifteen skills covering the way from a vague interest to a written-up method: thirteen at a definite point in that sequence, two runnable at any time. They are listed below by stage — each stage opens with what it corresponds to in the research, then names its skills and what each one writes.
 
-**How to invoke them.** The skill tables below name each skill without a prefix; the prefix is your tool's, and each tool spells it its own way:
+**How to invoke them.** The skill tables below name each skill without a prefix; the prefix is your harness's, and each harness spells it its own way:
 
 | Tool | Invocation | Example |
 | --- | --- | --- |
@@ -338,9 +338,9 @@ When resources permit, the strongest available model across all fifteen skills g
 
 The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) covers invocation details, a complete example, generated files, and troubleshooting; the rules every skill shares — git, the STOP line, the `.env` runtime, dates, delegation, and dialogue discipline — are in the [Research Workflow Skill Conventions](docs/mds/star-workflow/research-workflow-conventions.md).
 
-## Per-tool setup (optional)
+## Per-harness setup (optional)
 
-Neither is needed to get started. Do them when the tool you drive STAR with needs them.
+Neither is needed to get started. Do them when the harness you drive STAR with needs them.
 
 ### Session hooks
 
@@ -357,7 +357,7 @@ Each backs up and then writes the machine's own global config — `~/.kimi-code/
 
 ### Pre-approve the status collector
 
-Six skills open the same plans, run logs, and reports before doing anything else: `star-flow-status`, `star-expt-digest`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser` and `star-metd-summarize`. Rather than one file at a time, each gathers them with a single read-only script — `scripts/scan.sh`, in that skill's own directory inside your tool's directory. That is a shell call, so your agent asks to approve it the first time it runs.
+Six skills open the same plans, run logs, and reports before doing anything else: `star-flow-status`, `star-expt-digest`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser` and `star-metd-summarize`. Rather than one file at a time, each gathers them with a single read-only script — `scripts/scan.sh`, in that skill's own directory inside your harness's directory. That is a shell call, so your agent asks to approve it the first time it runs.
 
 Claude Code needs nothing on a fresh install: `.claude/settings.json` ships allow rules for exactly those six scripts and nothing else. A project adopted earlier keeps its own `settings.json` — `execs/update.sh` installs that file only when missing and never overwrites it — so add the rules there yourself:
 
@@ -380,7 +380,7 @@ Claude Code needs nothing on a fresh install: `.claude/settings.json` ships allo
 }
 ```
 
-Elsewhere, approve it once when asked, or pre-approve it in the tool:
+Elsewhere, approve it once when asked, or pre-approve it in the harness:
 
 | Tool | Where to pre-approve |
 |---|---|
@@ -395,7 +395,7 @@ The script only globs `metds/` and `wkdrs/`, prints frontmatter and file listing
 
 ## Project memory
 
-What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at every session start, in all seven tools.
+What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever harness you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at every session start, in all seven tools.
 
 Two rules keep it from becoming a second, competing source of truth:
 
@@ -412,9 +412,9 @@ After creating a project from STAR, later skill and research workflow guide rele
 bash execs/update.sh
 ```
 
-By default, the command updates these paths from STAR's `main` branch — every tool tree among them, unless `STAR_TOOLS` or `--tools` narrows the set. `.agents/skills/` is outside that narrowing: the `AGENTS.md` convention puts skills there, so every run updates it, first, whichever trees were named.
+By default, the command updates these paths from STAR's `main` branch — every harness tree among them, unless `STAR_HARNESSES` or `--harnesses` narrows the set. `.agents/skills/` is outside that narrowing: the `AGENTS.md` convention puts skills there, so every run updates it, first, whichever trees were named.
 
-- `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each tool owns, and which copy Cursor and Pi must follow
+- `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each harness owns, and which copy Cursor and Pi must follow
 - `.agents/skills/` — the shared root — then `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
 - `.codex/skills/` — the per-skill manifests Codex reads, installed with the rest of its tree; upstream `.agents/skills/` links to them, and a project receives both as real files
 - `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/` — the `/star` slash command that routes a described request to a skill, plus Pi's one prompt per skill, `/star-<name>`
@@ -428,7 +428,7 @@ The agent instructions are the project's own: `AGENTS.md` and `.cursor/rules/age
 
 The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 
-Which of the seven tool trees it touches is `STAR_TOOLS`, resolved the same way: the environment, then `.env`, then every one of them. Write `STAR_TOOLS=claude,pi` into `.env` to keep only those two current; the other two values are `all` and `none`, and `none` leaves the shared skeleton — which now includes `.agents/skills/` — the workflow documentation, `execs/run.sh`, the updater itself, `AGENTS.md` — as the whole update. A tree left out is not touched at all: not installed, not updated, never deleted — so a project that removed the trees it does not use does not get them back on the next update, and one that keeps them all changes nothing by leaving the key unset. A narrowed run fetches only the trees it will write, and its refusal over uncommitted changes covers only those.
+Which of the seven harness trees it touches is `STAR_HARNESSES`, resolved the same way: the environment, then `.env`, then every one of them. Write `STAR_HARNESSES=claude,pi` into `.env` to keep only those two current; the other two values are `all` and `none`, and `none` leaves the shared skeleton — which now includes `.agents/skills/` — the workflow documentation, `execs/run.sh`, the updater itself, `AGENTS.md` — as the whole update. A tree left out is not touched at all: not installed, not updated, never deleted — so a project that removed the trees it does not use does not get them back on the next update, and one that keeps them all changes nothing by leaving the key unset. A narrowed run fetches only the trees it will write, and its refusal over uncommitted changes covers only those.
 
 Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing, and never overwritten unless you pass `--force`. When a kept config does not register the STAR hook, the command prints a note.
 
@@ -438,12 +438,12 @@ The updater is in its own update set, so what it syncs grows with upstream inste
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-The general form is `bash execs/update.sh [--diff] [ref] [--tools LIST] [--skill NAME] [--force]`:
+The general form is `bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]`:
 
 - `--diff` previews an update without changing a file, and exits `2` when one is available, `0` when everything already matches, `1` on error — so a script can tell an available update from a failed check.
 - A `ref` pins the update to a tag or branch.
-- `--tools LIST` limits one run to the trees named — `claude,pi`, or `all`, or `none` — overriding `STAR_TOOLS` for that run alone. Deleting `.agents/skills/` is undone by the next run, unlike a tool tree. An unknown name stops the command and lists the seven valid ones.
-- `--skill NAME` updates that one skill across the shared root and all six tool directories, or across the ones a selection leaves, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the upstream skill directories in scope, stops the command without overwriting anything.
+- `--harnesses LIST` limits one run to the trees named — `claude,pi`, or `all`, or `none` — overriding `STAR_HARNESSES` for that run alone. Deleting `.agents/skills/` is undone by the next run, unlike a harness tree. An unknown name stops the command and lists the seven valid ones.
+- `--skill NAME` updates that one skill across the shared root and all six harness directories, or across the ones a selection leaves, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the upstream skill directories in scope, stops the command without overwriting anything.
 - `--force` updates the same paths with both refusals lifted: uncommitted changes under them are overwritten instead of stopping the command, and the hook registration configs are overwritten instead of kept. It widens nothing — a file upstream does not have is still left alone, so your own skills and documents under those directories stay.
 
 `bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.
@@ -474,9 +474,9 @@ When starting a new research repository from STAR:
 - Define the expected outputs, metrics, and reproduction commands for the project.
 - Update the copyright holder and year in `LICENSE`.
 - Replace `docs/htmls/star.html`, `docs/htmls/star_zh.html` and `docs/srcs/` — they are STAR's own landing pages and images, not your project's. `docs/index.html` and `docs/index_zh.html` are symlinks that serve those pages at the site root. The two pages link to each other by absolute path (`/STAR/index_zh.html`), so rewrite that `/STAR` prefix to your own repository name, or the language switch will break. Leave `docs/mds/star-workflow/` alone; `execs/update.sh` keeps it current.
-- Delete the tool directories you will not use. `.agents/` (the shared root the `AGENTS.md` convention puts skills at), `.claude/`, `.cursor/`, `.dsh/`, `.kimi-code/`, `.pi/` and `.qwen/` hold the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest. On Codex, keep `.codex/` beside `.agents/`: its hooks are there, and so are the fifteen per-skill manifests `.agents/skills/` links to at the path Codex scans. In a project installed or updated through `execs/update.sh` every tree is a self-contained copy of real files and deletion order does not matter — the updater writes out whatever a link points at. In a clone of STAR itself, or a repository made from the GitHub template, it does: the files that read the same under every tool are stored once under `.agents/skills/`, and the other six trees reach them through relative symlinks. There, make the tree you keep standalone first — `tar -chf - .claude/skills | tar -xf -`, your own tree substituted, rewrites its links as the files they point at (`-h` follows them; BSD and GNU tar alike) — and delete `.agents/` last. Deleting is not the only route: `--tools` names the trees to install at adopt time, and `STAR_TOOLS` in `.env` keeps a later `bash execs/update.sh` from putting a deleted one back — see [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides). On Pi and DSH this is worth doing rather than optional: both read `.agents/skills/` as well as their own root (`.pi/skills/`, `.dsh/skills/`), and deleting `.agents/` removes the name collision — otherwise `.pi/APPEND_SYSTEM.md` has to talk the agent out of it, and DSH resolves it silently by rank, right but invisible.
+- Delete the harness directories you will not use. `.agents/` (the shared root the `AGENTS.md` convention puts skills at), `.claude/`, `.cursor/`, `.dsh/`, `.kimi-code/`, `.pi/` and `.qwen/` hold the same fifteen skills, ~150 files each; keep the one your agent reads and `rm -rf` the rest. On Codex, keep `.codex/` beside `.agents/`: its hooks are there, and so are the fifteen per-skill manifests `.agents/skills/` links to at the path Codex scans. In a project installed or updated through `execs/update.sh` every tree is a self-contained copy of real files and deletion order does not matter — the updater writes out whatever a link points at. In a clone of STAR itself, or a repository made from the GitHub template, it does: the files that read the same under every harness are stored once under `.agents/skills/`, and the other six trees reach them through relative symlinks. There, make the tree you keep standalone first — `tar -chf - .claude/skills | tar -xf -`, your own tree substituted, rewrites its links as the files they point at (`-h` follows them; BSD and GNU tar alike) — and delete `.agents/` last. Deleting is not the only route: `--harnesses` names the trees to install at adopt time, and `STAR_HARNESSES` in `.env` keeps a later `bash execs/update.sh` from putting a deleted one back — see [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides). On Pi and DSH this is worth doing rather than optional: both read `.agents/skills/` as well as their own root (`.pi/skills/`, `.dsh/skills/`), and deleting `.agents/` removes the name collision — otherwise `.pi/APPEND_SYSTEM.md` has to talk the agent out of it, and DSH resolves it silently by rank, right but invisible.
 
-Keep only the structure that remains useful—STAR should support the research, not constrain it. The skeleton stands alone, so removing every tool directory is a supported way to use STAR.
+Keep only the structure that remains useful—STAR should support the research, not constrain it. The skeleton stands alone, so removing every harness directory is a supported way to use STAR.
 
 ## Change log
 

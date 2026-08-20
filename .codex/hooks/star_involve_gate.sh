@@ -45,7 +45,7 @@ except Exception:
 }
 
 # Every path the patch names must sit in the project, outside the dot-directories
-# at its root — .git, .codex, .star, the other tool trees — whose contents are
+# at its root — .git, .codex, .star, the other harness trees — whose contents are
 # project machinery rather than the code a run is editing.
 path_ok() { # $1 = path as the header writes it, relative to cwd or absolute
     local rel="$1"

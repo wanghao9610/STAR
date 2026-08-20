@@ -309,7 +309,7 @@ directory it belongs to, and `.agents/skills` is the only project root it scans,
 fifteen from `.codex/skills/`, while checks 3 and 7 leave `agents/` out — out of the inventory
 baseline, and out of the token scan, since a `default_prompt` is written in Codex's own `$star-*`
 syntax on purpose.
-`--tools codex` selects `.agents` and `.codex` together, and `execs/update.sh` copies what a link
+`--harnesses codex` selects `.agents` and `.codex` together, and `execs/update.sh` copies what a link
 points at, so an installed project gets a real file rather than a link into a directory it did not take.
 
 **Qwen Code reads both keys, and only one of them ports.** Its skill frontmatter takes `name`,

@@ -28,7 +28,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
   - [5. 启动研究工作流](#5-启动研究工作流)
 - [研究工作流](#研究工作流)
   - [模型选择建议](#模型选择建议)
-- [分工具配置（可选）](#分工具配置可选)
+- [分宿主配置（可选）](#分宿主配置可选)
   - [会话钩子](#会话钩子)
   - [为状态收集脚本预先授权](#为状态收集脚本预先授权)
 - [项目记忆](#项目记忆)
@@ -46,11 +46,11 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **统一的实验入口**：通过 `execs/run.sh` 查找并启动实验。
 - **研究的每一步各有一个 skill**：一共十五个，十三个按研究推进的顺序排列，另外两个任何时候都能调。
 - **可回溯、也能接着做的研究过程**：计划放在 `metds/plans/`，每个计划执行过程的中间文件放在 `tasks/`，一次 run 产生的东西放在 `wkdrs/`——重新上手时读的是文件，不是聊天记录。
-- **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个工具驱动 STAR。
+- **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个宿主驱动 STAR。
 - **面向 AI 协作的规范**：为 Codex、Claude、DSH、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **太大或只属于本机的东西不进版本库**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
-十五个 skill 按研究阶段分组列在[研究工作流](#研究工作流)一节：各自负责什么、产出什么，以及在你所用工具里怎么调用；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
+十五个 skill 按研究阶段分组列在[研究工作流](#研究工作流)一节：各自负责什么、产出什么，以及在你所用宿主里怎么调用；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。
 
 ## 项目结构
 
@@ -86,8 +86,8 @@ star-ai-research/
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
-├── .dsh/hooks/             # DSH 的会话钩子，登记在 .dsh/hooks.json（见分工具配置）
-├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分工具配置）
+├── .dsh/hooks/             # DSH 的会话钩子，登记在 .dsh/hooks.json（见分宿主配置）
+├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分宿主配置）
 ├── .pi/extensions/         # Pi 的扩展：STAR 的会话钩子，外加子代理、计划模式、结构化提问
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
@@ -144,7 +144,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` 里是 STAR 用来从同一份原稿生成七套 skill 树的生成器，以及保持它们同步的一致性检查——服务于 STAR 自身的维护，而非你的项目：保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套工具目录时失败。步骤 1b 的接入方式不会安装它。
+`.github/` 里是 STAR 用来从同一份原稿生成七套 skill 树的生成器，以及保持它们同步的一致性检查——服务于 STAR 自身的维护，而非你的项目：保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套宿主目录时失败。步骤 1b 的接入方式不会安装它。
 
 如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，其文件又要直接纳入当前项目，请在 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 
@@ -157,11 +157,11 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 bash /tmp/star-update.sh --adopt
 ```
 
-已有的东西一律不覆盖：每个已有文件都原样保留并列出。加上 `--tools claude`——或 `claude`、`codex`、`cursor`、`dsh`、`kimi`、`pi`、`qwen` 中任意几个，用逗号分隔——就只装你在用的那几棵工具树；不加则七棵全装。随后在该仓库里运行 `/star-proj-adopt`。它会勘察布局、写好 `.env`，用软链接连接你已有的数据 / 权重 / 输出目录而不搬动它们，包装已有的启动命令，并记录已经建成和已经跑过的东西。之后下面的第 2–4 步原样适用。
+已有的东西一律不覆盖：每个已有文件都原样保留并列出。加上 `--harnesses claude`——或 `claude`、`codex`、`cursor`、`dsh`、`kimi`、`pi`、`qwen` 中任意几个，用逗号分隔——就只装你在用的那几棵宿主树；不加则七棵全装。随后在该仓库里运行 `/star-proj-adopt`。它会勘察布局、写好 `.env`，用软链接连接你已有的数据 / 权重 / 输出目录而不搬动它们，包装已有的启动命令，并记录已经建成和已经跑过的东西。之后下面的第 2–4 步原样适用。
 
 ### 2. 配置本地运行环境
 
-**环境依赖。** STAR 需要 `git` 与 `bash`；`execs/update.sh` 还需要 `curl`。会话钩子解析 JSON 载荷时优先用 `jq`，退回 `python3`，再退回 `grep` / `sed`，所以两个解析器都没有的机器照样能拿到项目记忆、提交守卫和模型 id。DSH 是唯一还需要另一个工具 `zstd` 的宿主（见[分工具配置（可选）](#分工具配置可选)）。
+**环境依赖。** STAR 需要 `git` 与 `bash`；`execs/update.sh` 还需要 `curl`。会话钩子解析 JSON 载荷时优先用 `jq`，退回 `python3`，再退回 `grep` / `sed`，所以两个解析器都没有的机器照样能拿到项目记忆、提交守卫和模型 id。DSH 是唯一还需要另一个工具 `zstd` 的宿主（见[分宿主配置（可选）](#分宿主配置可选)）。
 
 复制环境配置示例文件：
 
@@ -189,13 +189,13 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用工具的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用宿主的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
 还有一个键 `STAR_REPOSITORY`，指定 `execs/update.sh` 从哪个仓库拉取后续的 skill 与工作流文档版本；只有改从 fork 更新时才需要改动。详见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。
 
-再有一个键 `STAR_TOOLS`，指定同一个更新脚本安装并维护哪几棵 agent 工具树。同见 `STAR_REPOSITORY` 指向的那一节。
+再有一个键 `STAR_HARNESSES`，指定同一个更新脚本安装并维护哪几棵 agent 宿主树。同见 `STAR_REPOSITORY` 指向的那一节。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
@@ -239,7 +239,7 @@ bash execs/run.sh 00_exp --config config.yaml
 
 ### 5. 启动研究工作流
 
-上面的骨架本身就能独立使用——目录布局、`.env` 和 `execs/run.sh` 不依赖任何 skill。若要接上研究工作流，请对照下表选择起点，并使用[研究工作流](#研究工作流)一节中你所用工具的前缀：
+上面的骨架本身就能独立使用——目录布局、`.env` 和 `execs/run.sh` 不依赖任何 skill。若要接上研究工作流，请对照下表选择起点，并使用[研究工作流](#研究工作流)一节中你所用宿主的前缀：
 
 | 你的状态 | 起点 |
 | --- | --- |
@@ -254,9 +254,9 @@ bash execs/run.sh 00_exp --config config.yaml
 
 STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方法这一整条路线：十三个落在这条路线的某个确定位置上，另外两个任何时候都能调。下面按阶段列出：每段先说这一阶段在研究里对应什么，再列出它的技能和各自写下的东西。
 
-**调用方式。** 下面各张技能表只写技能名、不带前缀；前缀取自你所用的工具，各家写法不同：
+**调用方式。** 下面各张技能表只写技能名、不带前缀；前缀取自你所用的宿主，各家写法不同：
 
-| 工具 | 调用写法 | 示例 |
+| 宿主 | 调用写法 | 示例 |
 | --- | --- | --- |
 | Codex | `$star-<name>` | `$star-plan-coach 开放词汇检测` |
 | Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
@@ -330,9 +330,9 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 
 具体的调用方式、完整示例、生成文件和常见问题见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)；所有 skill 共享的规则——git、红线、`.env` 运行时、日期、委派与对话纪律——见[研究工作流 Skill 通用规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)。
 
-## 分工具配置（可选）
+## 分宿主配置（可选）
 
-两项都不影响开始使用；用到哪个工具，再做哪一项。
+两项都不影响开始使用；用到哪个宿主，再做哪一项。
 
 ### 会话钩子
 
@@ -349,7 +349,7 @@ bash .dsh/hooks/install.sh         # DSH
 
 ### 为状态收集脚本预先授权
 
-有六个 skill 在动手之前都要打开同一批计划、run 日志与报告：`star-flow-status`、`star-expt-digest`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser` 与 `star-metd-summarize`。它们不逐个打开文件，而是各自用一个只读脚本一次收齐——所用工具目录下、各 skill 自己目录里的 `scripts/scan.sh`。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
+有六个 skill 在动手之前都要打开同一批计划、run 日志与报告：`star-flow-status`、`star-expt-digest`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser` 与 `star-metd-summarize`。它们不逐个打开文件，而是各自用一个只读脚本一次收齐——所用宿主目录下、各 skill 自己目录里的 `scripts/scan.sh`。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
 
 全新安装的 Claude Code 无需任何设置：`.claude/settings.json` 已附带只针对这六个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`——`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖——因此需要自己补上这些规则：
 
@@ -372,9 +372,9 @@ bash .dsh/hooks/install.sh         # DSH
 }
 ```
 
-其他工具可在被询问时授权一次，或预先加入白名单：
+其他宿主可在被询问时授权一次，或预先加入白名单：
 
-| 工具 | 在哪里预先授权 |
+| 宿主 | 在哪里预先授权 |
 |---|---|
 | Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
 | Cursor | 应用设置里的命令白名单 |
@@ -387,7 +387,7 @@ bash .dsh/hooks/install.sh         # DSH
 
 ## 项目记忆
 
-一次会话学到、又没有任何计划、日志或报告认领的事实——某个 build 必须先 load 一个 module 才过、你的某项长期偏好、一个不值得再跑的实验——记在项目里的 `.star/memory/`，而不是你当时在用的那个工具里。一事一文件，每条在 `.star/memory/MEMORY.md` 里占一行；会话钩子在每次会话开始时把这份索引送到 agent 面前，七个工具都是如此。
+一次会话学到、又没有任何计划、日志或报告认领的事实——某个 build 必须先 load 一个 module 才过、你的某项长期偏好、一个不值得再跑的实验——记在项目里的 `.star/memory/`，而不是你当时在用的那个宿主里。一事一文件，每条在 `.star/memory/MEMORY.md` 里占一行；会话钩子在每次会话开始时把这份索引送到 agent 面前，七个宿主都是如此。
 
 两条规则让它不会变成与真相竞争的第二个源头：
 
@@ -404,9 +404,9 @@ bash .dsh/hooks/install.sh         # DSH
 bash execs/update.sh
 ```
 
-该命令默认从 STAR 的 `main` 分支更新以下路径——七棵工具树全在其中，除非 `STAR_TOOLS` 或 `--tools` 收窄范围。`.agents/skills/` 不受收窄影响：`AGENTS.md` 约定把 skill 放在这里，所以无论点名哪几棵树，每次运行都更新它，而且排在最前面。
+该命令默认从 STAR 的 `main` 分支更新以下路径——七棵宿主树全在其中，除非 `STAR_HARNESSES` 或 `--harnesses` 收窄范围。`.agents/skills/` 不受收窄影响：`AGENTS.md` 约定把 skill 放在这里，所以无论点名哪几棵树，每次运行都更新它，而且排在最前面。
 
-- `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个工具所有，以及 Cursor 和 Pi 该跟随哪一份副本
+- `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个宿主所有，以及 Cursor 和 Pi 该跟随哪一份副本
 - `.agents/skills/`——共享根目录——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
 - `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/`——把描述出来的需求分流到某个 skill 的 `/star` 斜杠命令，外加 Pi 那份每个 skill 一条的 `/star-<名>`
@@ -420,7 +420,7 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 
-七棵工具树里动哪几棵，由 `STAR_TOOLS` 指定，取值顺序相同：环境变量、`.env`、默认全部。在 `.env` 里写 `STAR_TOOLS=claude,pi` 就只维护这两棵；另外两个取值是 `all` 和 `none`，`none` 表示这次更新只剩共享骨架——现在共享骨架里也包含 `.agents/skills/`——工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：不安装、不更新、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来；七棵都留着的项目不设这个键，行为和从前一样。收窄过的运行还只拉取它将要写入的那几棵，未提交改动的拦截也只覆盖这几棵。
+七棵宿主树里动哪几棵，由 `STAR_HARNESSES` 指定，取值顺序相同：环境变量、`.env`、默认全部。在 `.env` 里写 `STAR_HARNESSES=claude,pi` 就只维护这两棵；另外两个取值是 `all` 和 `none`，`none` 表示这次更新只剩共享骨架——现在共享骨架里也包含 `.agents/skills/`——工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：不安装、不更新、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来；七棵都留着的项目不设这个键，行为和从前一样。收窄过的运行还只拉取它将要写入的那几棵，未提交改动的拦截也只覆盖这几棵。
 
 钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。
 
@@ -430,12 +430,12 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--tools LIST] [--skill NAME] [--force]`：
+命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]`：
 
 - `--diff` 不改动任何文件地预览更新，有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”。
 - `ref` 把更新固定到某个 tag 或分支。
-- `--tools LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_TOOLS`。删掉 `.agents/skills/` 会被下一次运行装回来，工具树则不会。名称不认识时命令会停止，并列出七个有效名称。
-- `--skill NAME` 只更新共享根目录与其余六个工具目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
+- `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
+- `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
 
 `bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
@@ -466,9 +466,9 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
-- 删掉用不到的工具目录。`.agents/`（`AGENTS.md` 约定规定放技能的那个共享根目录）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 装的是同一套十五个 skill，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 Codex 时 `.codex/` 要和 `.agents/` 一起留着：钩子在那里，`.agents/skills/` 在 Codex 扫描的路径上软链接过去的那十五份 per-skill 清单也在那里。用 `execs/update.sh` 接入或更新出来的项目里，每棵树都是各自独立的实文件副本，删除顺序无所谓——更新器复制时会把软链接指向的内容写成实文件。直接克隆 STAR、或用 GitHub 模板生成的仓库则不然：各家措辞完全一致的那批文件只在 `.agents/skills/` 下存一份，其余六棵靠相对软链接指过去。此时先用 `tar -chf - .claude/skills | tar -xf -`（树名换成你要留的那棵）把留下的那棵变成独立副本，它会把其中的软链接原地换成所指的文件（`-h` 表示跟随软链接，BSD 与 GNU 的 tar 都可用），`.agents/` 放到最后再删。删不是唯一的路：接入时用 `--tools` 点名要装哪几棵，`.env` 里的 `STAR_TOOLS` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——否则 Pi 那边只能靠 `.pi/APPEND_SYSTEM.md` 把 agent 劝回来，DSH 那边由发现顺序自动定胜负，结果是对的，但你看不见。
+- 删掉用不到的宿主目录。`.agents/`（`AGENTS.md` 约定规定放技能的那个共享根目录）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 装的是同一套十五个 skill，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 Codex 时 `.codex/` 要和 `.agents/` 一起留着：钩子在那里，`.agents/skills/` 在 Codex 扫描的路径上软链接过去的那十五份 per-skill 清单也在那里。用 `execs/update.sh` 接入或更新出来的项目里，每棵树都是各自独立的实文件副本，删除顺序无所谓——更新器复制时会把软链接指向的内容写成实文件。直接克隆 STAR、或用 GitHub 模板生成的仓库则不然：各家措辞完全一致的那批文件只在 `.agents/skills/` 下存一份，其余六棵靠相对软链接指过去。此时先用 `tar -chf - .claude/skills | tar -xf -`（树名换成你要留的那棵）把留下的那棵变成独立副本，它会把其中的软链接原地换成所指的文件（`-h` 表示跟随软链接，BSD 与 GNU 的 tar 都可用），`.agents/` 放到最后再删。删不是唯一的路：接入时用 `--harnesses` 点名要装哪几棵，`.env` 里的 `STAR_HARNESSES` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——否则 Pi 那边只能靠 `.pi/APPEND_SYSTEM.md` 把 agent 劝回来，DSH 那边由发现顺序自动定胜负，结果是对的，但你看不见。
 
-只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用，因此删掉全部工具目录同样是受支持的用法。
+只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用，因此删掉全部宿主目录同样是受支持的用法。
 
 ## 更新日志
 

@@ -7,7 +7,7 @@ REF_SET=false
 ADOPT=false
 DIFF=false
 FORCE=false
-TOOLS_ARG=""
+HARNESSES_ARG=""
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
@@ -96,10 +96,10 @@ INSTRUCTION_FILES=(
     "AGENTS.md"
     ".cursor/rules/agent-instructions.mdc"
 )
-# The tool trees --tools and STAR_TOOLS name, one entry per agent tool. Which paths
-# belong to which is decided by path_tool below, not by a list here, so a path added
+# The harness trees --harnesses and STAR_HARNESSES name, one entry per agent harness. Which paths
+# belong to which is decided by path_harness below, not by a list here, so a path added
 # upstream reaches the right tree without being registered anywhere.
-ALL_TOOLS=(claude codex cursor dsh kimi pi qwen)
+ALL_HARNESSES=(claude codex cursor dsh kimi pi qwen)
 
 log() {
     printf '[STAR update] %s\n' "$*"
@@ -110,17 +110,17 @@ fail() {
     exit 1
 }
 
-# Which tool tree a path belongs to, empty when it belongs to none and every run
+# Which harness tree a path belongs to, empty when it belongs to none and every run
 # therefore covers it. .agents belongs to none on purpose: it is where the
 # AGENTS.md convention puts skills, so every agent that follows the convention
 # reads it — Codex has no other project root, Cursor scans it natively, Pi and
 # DSH read it beside their own — and a project that has it can be handed to a
-# tool STAR ships no tree for at all. It is part of the shared skeleton now,
-# updated whichever trees --tools names, and updated first. .codex stays Codex's:
+# harness STAR ships no tree for at all. It is part of the shared skeleton now,
+# updated whichever trees --harnesses names, and updated first. .codex stays Codex's:
 # its hooks and its per-skill manifests. .cursorignore is Cursor's one path
-# outside .cursor/; every other path starts with its tool's own directory, so one
+# outside .cursor/; every other path starts with its harness's own directory, so one
 # added upstream is classified without being listed here.
-path_tool() { # $1 = path relative to the project root
+path_harness() { # $1 = path relative to the project root
     case "$1" in
         .agents/*)               printf '' ;;
         .codex/*)                printf 'codex' ;;
@@ -133,10 +133,10 @@ path_tool() { # $1 = path relative to the project root
     esac
 }
 
-# The directories a tool owns, for the sparse checkout below — path_tool read the
+# The directories a harness owns, for the sparse checkout below — path_harness read the
 # other way round, and kept beside it so the two are edited together. A directory
 # missing here is a path the checkout does not have, which stops the command.
-tool_dirs() { # $1 = tool name
+harness_dirs() { # $1 = harness name
     case "$1" in
         # .agents is not here: it is in the unconditional sparse set below,
         # because every run syncs it.
@@ -150,21 +150,21 @@ tool_dirs() { # $1 = tool name
     esac
 }
 
-is_selected() { # $1 = tool name
+is_selected() { # $1 = harness name
     local name
-    for name in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
+    for name in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
         [[ "${name}" == "$1" ]] && return 0
     done
     return 1
 }
 
-# True for a path this run covers: one outside the tool trees, or one in a selected
+# True for a path this run covers: one outside the harness trees, or one in a selected
 # tree. A path that is neither is left exactly as it is — never written, never removed.
 path_selected() { # $1 = path relative to the project root
-    local tool
-    tool="$(path_tool "$1")"
-    [[ -n "${tool}" ]] || return 0
-    is_selected "${tool}"
+    local harness
+    harness="$(path_harness "$1")"
+    [[ -n "${harness}" ]] || return 0
+    is_selected "${harness}"
 }
 
 # Drops the paths this run does not cover; the result is FILTERED.
@@ -229,12 +229,12 @@ missing_hooks() { # $1 = registration config path
 
 usage() {
     cat <<'EOF'
-Usage: bash execs/update.sh [ref] [--tools LIST] [--skill NAME] [--force]
-       bash execs/update.sh --diff [ref] [--tools LIST] [--skill NAME] [--force]
-       bash update.sh [ref] [--tools LIST] --adopt
+Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
+       bash execs/update.sh --diff [ref] [--harnesses LIST] [--skill NAME] [--force]
+       bash update.sh [ref] [--harnesses LIST] --adopt
 
 Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), the slash
-commands each tool tree defines, research workflow documentation, the stock experiment launcher
+commands each harness tree defines, research workflow documentation, the stock experiment launcher
 execs/run.sh, and this script itself with files from upstream.
 The default ref is main; a branch or tag may be supplied instead. By default all of them are
 updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
@@ -251,16 +251,16 @@ so a project that has written its own keeps them and one that has none gets them
 to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
 Qwen Code skill directories.
 
---tools limits the run to the named tool trees, comma separated: claude, codex, cursor, dsh,
+--harnesses limits the run to the named harness trees, comma separated: claude, codex, cursor, dsh,
 kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
-keeps whatever it already has there. Without the flag the list comes from STAR_TOOLS
-(environment first, then .env), and from every tool when that is unset too. The shared paths —
+keeps whatever it already has there. Without the flag the list comes from STAR_HARNESSES
+(environment first, then .env), and from every harness when that is unset too. The shared paths —
 .agents/skills, the workflow documentation, execs/run.sh, this script, AGENTS.md — are updated
 whichever trees are selected, and .agents/skills is written first. It is in that list rather
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
-follows the convention reads it, so a project has it whatever tool it runs today, including one
-STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a tool tree.
+follows the convention reads it, so a project has it whatever harness it runs today, including one
+STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -288,8 +288,8 @@ Examples:
   bash execs/update.sh --force
   bash execs/update.sh --skill star-plan-coach
   bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
-  bash execs/update.sh --tools claude
-  bash execs/update.sh --tools claude,pi --diff
+  bash execs/update.sh --harnesses claude
+  bash execs/update.sh --harnesses claude,pi --diff
 
   cd /path/to/my-existing-project
   curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
@@ -314,16 +314,16 @@ while (( $# > 0 )); do
             SKILL_NAME="${1#*=}"
             [[ -n "${SKILL_NAME}" ]] || fail "--skill requires a skill name."
             ;;
-        --tools)
+        --harnesses)
             shift
-            (( $# > 0 )) || fail "--tools requires a list of tools."
-            [[ -z "${TOOLS_ARG}" ]] || fail "--tools may only be specified once."
-            TOOLS_ARG="$1"
+            (( $# > 0 )) || fail "--harnesses requires a list of harnesses."
+            [[ -z "${HARNESSES_ARG}" ]] || fail "--harnesses may only be specified once."
+            HARNESSES_ARG="$1"
             ;;
-        --tools=*)
-            [[ -z "${TOOLS_ARG}" ]] || fail "--tools may only be specified once."
-            TOOLS_ARG="${1#*=}"
-            [[ -n "${TOOLS_ARG}" ]] || fail "--tools requires a list of tools."
+        --harnesses=*)
+            [[ -z "${HARNESSES_ARG}" ]] || fail "--harnesses may only be specified once."
+            HARNESSES_ARG="${1#*=}"
+            [[ -n "${HARNESSES_ARG}" ]] || fail "--harnesses requires a list of harnesses."
             ;;
         --adopt)
             ADOPT=true
@@ -357,51 +357,51 @@ env_value() { # $1 = key; its last assignment in the target .env, empty when it 
     sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
 }
 
-# Which tool trees this run covers: the flag first, then the environment, then .env,
+# Which harness trees this run covers: the flag first, then the environment, then .env,
 # then every one of them.
-TOOLS_SPEC="${TOOLS_ARG}"
-TOOLS_SOURCE="--tools"
-if [[ -z "${TOOLS_SPEC}" ]]; then
-    TOOLS_SPEC="${STAR_TOOLS:-}"
-    TOOLS_SOURCE="the STAR_TOOLS environment variable"
+HARNESSES_SPEC="${HARNESSES_ARG}"
+HARNESSES_SOURCE="--harnesses"
+if [[ -z "${HARNESSES_SPEC}" ]]; then
+    HARNESSES_SPEC="${STAR_HARNESSES:-}"
+    HARNESSES_SOURCE="the STAR_HARNESSES environment variable"
 fi
-if [[ -z "${TOOLS_SPEC}" ]]; then
-    TOOLS_SPEC="$(env_value STAR_TOOLS)"
-    TOOLS_SOURCE="STAR_TOOLS in .env"
+if [[ -z "${HARNESSES_SPEC}" ]]; then
+    HARNESSES_SPEC="$(env_value STAR_HARNESSES)"
+    HARNESSES_SOURCE="STAR_HARNESSES in .env"
 fi
-if [[ -z "${TOOLS_SPEC}" ]]; then
-    TOOLS_SPEC="all"
-    TOOLS_SOURCE="the default"
+if [[ -z "${HARNESSES_SPEC}" ]]; then
+    HARNESSES_SPEC="all"
+    HARNESSES_SOURCE="the default"
 fi
 
-SELECTED_TOOLS=()
-if [[ "${TOOLS_SPEC}" == "all" ]]; then
-    SELECTED_TOOLS=("${ALL_TOOLS[@]}")
-elif [[ "${TOOLS_SPEC}" != "none" ]]; then
+SELECTED_HARNESSES=()
+if [[ "${HARNESSES_SPEC}" == "all" ]]; then
+    SELECTED_HARNESSES=("${ALL_HARNESSES[@]}")
+elif [[ "${HARNESSES_SPEC}" != "none" ]]; then
     while IFS= read -r name; do
         name="${name//[[:space:]]/}"
         [[ -n "${name}" ]] || continue
         known=false
-        for tool in "${ALL_TOOLS[@]}"; do
-            [[ "${name}" == "${tool}" ]] && known=true
+        for harness in "${ALL_HARNESSES[@]}"; do
+            [[ "${name}" == "${harness}" ]] && known=true
         done
         [[ "${known}" == true ]] || \
-            fail "Unknown tool '${name}' in ${TOOLS_SOURCE}. Valid: ${ALL_TOOLS[*]}, all, none."
-        is_selected "${name}" || SELECTED_TOOLS+=("${name}")
-    done < <(tr ',' '\n' <<<"${TOOLS_SPEC}")
-    (( ${#SELECTED_TOOLS[@]} > 0 )) || \
-        fail "${TOOLS_SOURCE} names no tool. Use 'none' to cover the shared paths by themselves."
+            fail "Unknown harness '${name}' in ${HARNESSES_SOURCE}. Valid: ${ALL_HARNESSES[*]}, all, none."
+        is_selected "${name}" || SELECTED_HARNESSES+=("${name}")
+    done < <(tr ',' '\n' <<<"${HARNESSES_SPEC}")
+    (( ${#SELECTED_HARNESSES[@]} > 0 )) || \
+        fail "${HARNESSES_SOURCE} names no harness. Use 'none' to cover the shared paths by themselves."
 fi
 
 # What a narrowed run leaves behind, said once here rather than path by path below.
-if (( ${#SELECTED_TOOLS[@]} < ${#ALL_TOOLS[@]} )); then
+if (( ${#SELECTED_HARNESSES[@]} < ${#ALL_HARNESSES[@]} )); then
     untouched=()
-    for tool in "${ALL_TOOLS[@]}"; do
-        is_selected "${tool}" || untouched+=("${tool}")
+    for harness in "${ALL_HARNESSES[@]}"; do
+        is_selected "${harness}" || untouched+=("${harness}")
     done
     selected_label="none"
-    (( ${#SELECTED_TOOLS[@]} == 0 )) || selected_label="${SELECTED_TOOLS[*]}"
-    log "Tools (${TOOLS_SOURCE}): ${selected_label}."
+    (( ${#SELECTED_HARNESSES[@]} == 0 )) || selected_label="${SELECTED_HARNESSES[*]}"
+    log "Harnesses (${HARNESSES_SOURCE}): ${selected_label}."
     log "Left alone, neither written nor deleted: ${untouched[*]}."
 fi
 
@@ -420,7 +420,7 @@ if [[ "${ADOPT}" == true ]]; then
 
     # Directories merged file by file, and single files, all copy-if-absent.
     ADOPT_TREES=(
-        # The shared root first: every project gets it, whichever tools it picks.
+        # The shared root first: every project gets it, whichever harnesses it picks.
         ".agents/skills"
         # Codex's own half of it — the per-skill manifests .agents/skills links
         # to upstream — installed with the rest of the Codex tree and only then.
@@ -461,7 +461,7 @@ if [[ "${ADOPT}" == true ]]; then
         "wkdrs"
         "execs/scpts"
     )
-    # The layout directories above belong to no tool and are always created; the
+    # The layout directories above belong to no harness and are always created; the
     # two lists before them lose the trees this run does not cover.
     filter_paths "${ADOPT_TREES[@]}"
     ADOPT_TREES=("${FILTERED[@]}")
@@ -478,7 +478,7 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
     (( ${#SYNC_PATHS[@]} > 0 )) || \
-        fail "--skill has no tree to act on: ${TOOLS_SOURCE} selects no tool."
+        fail "--skill has no tree to act on: ${HARNESSES_SOURCE} selects no harness."
 
     if [[ "${DIFF}" == true ]]; then
         log "Diffing skill: ${SKILL_NAME}"
@@ -487,11 +487,11 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     fi
 else
     SYNC_PATHS=(
-        # The shared root first: every run syncs it, whichever tools were named.
+        # The shared root first: every run syncs it, whichever harnesses were named.
         ".agents/skills"
         # Codex's own half of it, installed and updated with the Codex tree.
         ".codex/skills"
-        # Which skill root each tool owns, for the two hosts that discover more
+        # Which skill root each harness owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
         # installed when missing rather than overwritten.
@@ -553,7 +553,7 @@ log "Fetching ${STAR_REF} from ${STAR_REPOSITORY}"
 
 # core.symlinks is set on the clone rather than left to the host's git: where it is
 # off — the usual configuration on Windows — a symlink checks out as a small text
-# file holding its target path. A file identical across the tool trees is stored
+# file holding its target path. A file identical across the harness trees is stored
 # once under .agents/skills and carried in the other trees as a link to it, so
 # every one of them would arrive as that path text and install as garbage. Clone's
 # own -c writes it into the new repository's config before anything is checked out,
@@ -570,7 +570,7 @@ git clone \
 
 if [[ "${ADOPT}" == false ]]; then
     if [[ -n "${SKILL_NAME}" ]]; then
-        # The Codex copy of the skill comes along whichever tools are selected: it
+        # The Codex copy of the skill comes along whichever harnesses are selected: it
         # holds the one stored copy of every file the other trees share, and their
         # links resolve to nothing without it. A checkout path only — SYNC_PATHS
         # above is what gets copied out, so the Codex tree is still written to the
@@ -580,7 +580,7 @@ if [[ "${ADOPT}" == false ]]; then
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode, so a single file in SYNC_PATHS arrives through its
-        # directory — .cursor covers .cursor/rules/skill-roots.mdc. A whole tool
+        # directory — .cursor covers .cursor/rules/skill-roots.mdc. A whole harness
         # directory rather than its skill root, because the configs installed when
         # missing are read from here too. The tar below still copies only
         # SYNC_PATHS: execs brings execs/scpts/ along here, and none of it is
@@ -592,9 +592,9 @@ if [[ "${ADOPT}" == false ]]; then
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
         SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .codex/skills)
-        for tool in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
-            read -ra tool_roots <<<"$(tool_dirs "${tool}")"
-            SPARSE_PATHS+=("${tool_roots[@]}")
+        for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
+            read -ra harness_roots <<<"$(harness_dirs "${harness}")"
+            SPARSE_PATHS+=("${harness_roots[@]}")
         done
         git -C "${SOURCE_DIR}" sparse-checkout set "${SPARSE_PATHS[@]}"
     fi
@@ -616,7 +616,7 @@ if [[ "${ADOPT}" == false ]]; then
         kept=0
 
         # Upstream files that an update would overwrite or add. -L so the walk
-        # follows symlinks: a file identical across the tool trees is stored once
+        # follows symlinks: a file identical across the harness trees is stored once
         # under .agents/skills and linked from the others, and a link is type l,
         # not type f — without it every shared file would go uncounted and an
         # update that changes one would preview as nothing to do.
@@ -684,8 +684,8 @@ if [[ "${ADOPT}" == false ]]; then
             hint="bash execs/update.sh"
             [[ "${REF_SET}" == false ]] || hint="${hint} ${STAR_REF}"
             [[ -z "${SKILL_NAME}" ]] || hint="${hint} --skill ${SKILL_NAME}"
-            # Only the flag: a selection from STAR_TOOLS is already in the plain command.
-            [[ -z "${TOOLS_ARG}" ]] || hint="${hint} --tools ${TOOLS_ARG}"
+            # Only the flag: a selection from STAR_HARNESSES is already in the plain command.
+            [[ -z "${HARNESSES_ARG}" ]] || hint="${hint} --harnesses ${HARNESSES_ARG}"
             [[ "${FORCE}" == false ]] || hint="${hint} --force"
             log "${changed} differ, ${added} new upstream, ${kept} extra local."
             log "'differs' is direction-blind: it includes files you edited yourself."
