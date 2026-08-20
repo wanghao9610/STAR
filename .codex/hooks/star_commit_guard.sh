@@ -28,8 +28,8 @@
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
 # quoting, so a flag written after a commit message (`commit -m x --amend`) is
 # past where it stops reading. Silence means "no decision", so that case, an
-# unfamiliar spelling, and a machine with no JSON parser all fall through to the
-# normal permission flow. What it declines is the user's to run.
+# unfamiliar spelling, and a payload no branch below can read all fall through to
+# the normal permission flow. What it declines is the user's to run.
 set -uo pipefail
 
 # Every harness registers this script by its own path inside the project, so the
@@ -49,6 +49,15 @@ try:
     print((json.load(sys.stdin).get("tool_input") or {}).get("command") or "")
 except Exception:
     print("")' 2>/dev/null
+    else
+        # No parser on PATH. Reading the field out of the raw JSON stops at the
+        # first escaped quote, so a command carrying one is read only up to it —
+        # shorter than the truth, never different from it, and the flags this
+        # guard matches sit in the leading tokens of each segment. Without this
+        # branch the guard reads an empty command and declines nothing.
+        printf '%s' "${input}" \
+            | grep -oE '"command"[[:space:]]*:[[:space:]]*"[^"]*"' \
+            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
     fi
 }
 

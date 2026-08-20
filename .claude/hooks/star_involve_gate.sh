@@ -11,13 +11,15 @@ set -uo pipefail
 
 root="${CLAUDE_PROJECT_DIR:-${PWD}}"
 
+# The payload is read before the level is tested: the runtime writes it to this
+# hook's stdin, and a hook that exits without reading leaves that write to fail.
+input=$(cat)
+
 line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
 value="${line#INVOLVE=}"
 value="${value%%#*}"
 involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 [[ "${involve}" == "low" ]] || exit 0
-
-input=$(cat)
 
 # The edited path, from Edit/Write (file_path) or NotebookEdit (notebook_path).
 edited_path() {

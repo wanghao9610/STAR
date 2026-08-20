@@ -19,13 +19,15 @@ set -uo pipefail
 
 root="${PWD}"
 
+# The payload is read before the level is tested: the runtime writes it to this
+# hook's stdin, and a hook that exits without reading leaves that write to fail.
+input=$(cat)
+
 line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
 value="${line#INVOLVE=}"
 value="${value%%#*}"
 involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 [[ "${involve}" == "low" ]] || exit 0
-
-input=$(cat)
 
 # apply_patch arrives as the shell command that carries the patch envelope, so
 # the paths are the envelope's own headers rather than a field. Decoding a
