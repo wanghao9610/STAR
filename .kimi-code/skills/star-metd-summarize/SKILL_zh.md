@@ -20,14 +20,28 @@ description: >-
 
 调用方式：`/skill:star-metd-summarize [OPT] [描述]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、可以写进产物的线索，替代不了任何一个确认点。对不上任何参数的成句文本就只是描述：照不带参数那样跑，并先说明。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。这次阅读就是开场装载——一条消息，而非一次 Bash 调用：规约文件用单独的 `Read` 读入，绝不 `cat` 进 Bash 命令——Bash 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。同一条消息里再带上只有 Bash 才做得了的那两件事，以项目根目录为工作目录的一次调用：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。编译方法文档真正用到的部分——§0 词汇表（它定义了 `finalized:`、`exec_status:`、`dropped:` 与 `traces_to`，正是 Step 1 就绪门槛所依据的字段）、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有四节不装载，每一节都是因为本 skill 自己的文件已在用到它的地方写清了所需内容：§1 git（本 skill 从不提交，状态与文件规则原话如此）、§2 红线（本 skill 什么都不跑：不跑 python、不训练、不评测、不安装，同样见状态与文件规则）、§9 项目布局（状态与文件规则把可写路径与不可碰的目录列得比 §9 更严）、§11 执行分支（本 skill 只读 `metds/plans/`，从不进入某次运行的目录树；某个叶子因分支未合并而 `exec_status` 不可信时，它按未完成上报并路由给执行器，这也正是 §11 会给出的读法）。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把本 skill 的无条件开场读取合成一条消息发出——四次 Bash 调用，以项目根目录为工作目录，一起发出。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (7)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (8|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位；两行都折进这条消息，谁也不另占一趟往返。第二行是共享采集脚本，它的摘要就是步骤 1 的全部输入：每个计划的 frontmatter、它的 `## Sub-plans` 索引与占位符计数、每份运行日志的 frontmatter，以及 `metds/` 和 `wkdrs/` 的一层目录清单——这一步过去逐个计划读的那轮循环，现在合成一份结果。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样，再对它套用本文件的规则。`--slim` 是在有历史的项目上把结果压在大小上限以内的手段；万一仍然被存成文件，把这一行单独重跑一次。若脚本缺失或执行失败，退回列出 `metds/plans/*_plan.md` 并逐个读 frontmatter，并在回复里说明这次走了退路。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
+一条消息，四份结果：第一次调用带回 `.env` 探测与规约的前三分之一，第二次带回对话纪律那一节，第三次带回其余部分，第四次带回采集脚本的摘要。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位；两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 38 KB，分 13、12、13 三次带回；整份挤在一次结果里，还没轮到扫描的摘要就已经越线。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。第四次调用是共享采集脚本，它的摘要就是步骤 1 的全部输入：每个计划的 frontmatter、它的 `## Sub-plans` 索引与占位符计数、每份运行日志的 frontmatter，以及 `metds/` 和 `wkdrs/` 的一层目录清单——这一步过去逐个计划读的那轮循环，现在合成一份结果。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样，再对它套用本文件的规则。`--slim` 是在有历史的项目上把结果压在大小上限以内的手段；万一仍然被存成文件，把这一行单独重跑一次。若脚本缺失或执行失败，退回列出 `metds/plans/*_plan.md` 并逐个读 frontmatter，并在回复里说明这次走了退路。这条消息是本 skill 唯一的无条件装载：`references/extract_map_zh.md` 属于 Step 1 就绪门槛之后的 Step 2–3，`assets/` 模板属于 Step 4，各自留到引用它的步骤再读，不前置装载。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
