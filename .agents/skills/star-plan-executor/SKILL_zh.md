@@ -66,7 +66,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 3：构建并写出 EXEC_PLAN
 
-1. 把 §3 和缺口清单细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。
+1. 把 §3 和缺口清单细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。action 清单要朝 Step 4 委派时的成组派遣去塑（`references/agent_dispatch_spec_zh.md`）：相邻 action 碰同一批文件、收在同一个 check 里的，写成一组（至多 3 个），不留成各自委派——每省一次委派，就少开一个全新的子代理上下文，而检查粒度不受损：一组仍只收在它那一个 check，遇 STOP line 边界照样拆开。
 2. 明确标出 STOP line；已知时估算运行时间/成本。画完的计划是对 leaf 尺寸的第二次读数：若计划落成后 action 数超过 12、或越过 STOP line 不止一次，而 Step 1 的尺寸检查没有命中，把这件事带到第 5 条那次暂停里，多给一个选项——先回去拆分，它会在写下任何东西之前结束本次运行——而不是单开一个问题。
 3. 把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入，以变更项形式（ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`）记入 EXEC_PLAN 的“与子计划的偏差”表。与子计划自身粒度相矛盾算偏差；“更具体”不算——除非那是计划未写明、而某份方法文档会引用的值，那要记为一条 ENRICHED 行并写明该章节。
 4. **定下分支与 worktree 两行**（规约 §11）：EXEC_PLAN 里只要有 action 要修改 `${CODE_NAME}/` 下已存在的被跟踪文件，计划就带上 `branch: <run>` 并推荐在它上面执行；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`，无论它叫什么。worktree 这一行答的是另一个问题——当前 checkout 此刻腾不腾得出来（§11.7）：任一忙碌信号命中（HEAD 停在别的 run 的执行分支上；未提交改动的路径归属别的 run 的记录；有命令交回了用户、结果还没回收——可能有任务在跑，只问不测；或用户明说要并行）→ `worktree: ../<根目录名>--wt/<run>`，并连带把 `branch: none` 改成 `branch: <run>`——树里的提交要有自己的归宿（§11.8）；无信号 → `worktree: none`。信号与操作细节：`references/branch_rules_zh.md`。
@@ -74,7 +74,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 6. 先建获批的分支：从记下的基础分支 `git switch -c <run>`，让下面的一切都生在它上面——获批的是 worktree 时改为 `git worktree add <path> -b <run> <base>`：任何 checkout 都不切换，补上符号链接并对树里的 `.env` 重验一次解析，树的绝对路径以 `worktree:` 记进两份记录，下面的一切都发生在树里（`references/branch_rules_zh.md`）。`<plan-name>` 取所选文件名去掉 `_plan.md`，为计划中间文件创建 `tasks/<plan-name>/`。**run 名为 `<prefix>_<slug>`**；重跑时追加用户给的后缀（`_v2`、某个日期）以示区分，该目录已存在但不是此 leaf 可恢复的 run 时，问一个后缀——绝不自行编造。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的偏差行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
 
 
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 ### Step 4：执行与验证
 
 对每个未完成 action：

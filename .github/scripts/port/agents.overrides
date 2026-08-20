@@ -30,12 +30,10 @@ Architect; do not implement research features. Feature work belongs to `star-pla
 +++ 1
 2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Ask at each confirmation point as one question — ask through your question tool, falling back to one concise plain-text question only in a non-interactive run — and wait for an explicit answer before crossing. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
 ### star-code-architect/SKILL.md
---- 3
-4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), verifying after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
+--- 2
 5. **The main agent orchestrates and verifies; subagents execute.** Surveys go to read-only read-only sub-agents; migrations go to writing sub-agents whose writes are limited to their own group's files. Both carry disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), commits once per verified group, retries ≤2, and restores what still fails. Spec: `references/orchestration_spec.md`.
 6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `AGENTS.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
-+++ 3
-4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), verifying after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
++++ 2
 5. **Verify per group; delegate where it helps.** Delegate surveys and migrations wherever it helps: hand off a bounded, independent area or migration group whenever collaboration tools are available and delegation materially helps, and execute locally when it does not. When delegating, dispatch a read-only sub-agent for a read-only survey or a writing sub-agent for a migration, and give it the narrow brief in `references/orchestration_spec.md`; a migration agent writes only its own group's files. Either way: disjoint file ownership per group, re-run every check yourself (never trust a self-reported pass), commit once per verified group, retry ≤2, restore what still fails.
 6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
 ### star-code-architect/SKILL.md
@@ -655,11 +653,6 @@ Read and interpret; do not execute steps, fix code, revise plans, or flip plan s
 +++ 1
 Lead with the verdict, under about 500 words: the run verdict and the §5 scorecard in one line each, any blocker/major observations, the headline metrics with their sources, the sibling comparison if any, and where the figures are. Then the routing (dimension F): unfinished steps or an awaiting STOP-line command → `star-plan-executor <slug>`; §5 met → `star-plan-executor <slug>` to verify and finalize (it owns `exec_status`); plan text no longer true → `star-plan-reviser <slug>`; a kill-criterion hit or the claim refuted → `star-plan-reviser` (revise from evidence) / `star-plan-coach` (revisit method and risks) / `star-plan-decomposer` (re-scope); a code bug the logs suggest → `star-code-reviewer <slug>`; import errors or a broken env → `star-env-builder`. End with the report path.
 ### star-expt-analyst/SKILL.md
---- 1
-- Never touch: `metds/plans/*` — including `exec_status`, `exec_runs`, and `updated`; `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md` (the executor's log is evidence, not a scratchpad — a plan-level finding is reported and routed, not written into the log); `${CODE_NAME}/`; `metds/codearc.md`; `UPSTREAM.md`; `.env`.
-+++ 1
-- Never touch: `metds/plans/*` — including `exec_status`, `exec_runs`, and `updated`; `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md` (the executor's log is evidence, not a scratchpad — a plan-level finding is reported and routed, not written into the log); `${CODE_NAME}/`; `metds/codearc.md`; `UPSTREAM.md`; `.env`.
-### star-expt-analyst/SKILL.md
 --- 2
 - Ask via your question tool only where the workflow calls for it (which run to analyze, an ambiguous match). If it is unavailable (headless / scripted), fall back to plain text and require an explicit answer. The skill writes nothing outside its own report, so there is no confirmation point — but never state or imply that you changed a plan, a status, or a log.
 - Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. The report follows the plan's frontmatter `language` (else the dialogue language); keep technical terms — metric names, log keys, file paths — in English inside Chinese reports.
@@ -712,11 +705,6 @@ Lead with the verdict, under about 500 words: the run verdict and the §5 scorec
 ≤500 字，判定先行：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `star-plan-executor <slug>`；§5 已达标 → `star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `star-plan-reviser`（据证据修订）/ `star-plan-coach`（重审方法与风险）/ `star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `star-code-reviewer <slug>`；import 报错或环境损坏 → `star-env-builder`。结尾给报告路径。
 +++ 1
 以判定开头，控制在约 500 字以内：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `star-plan-executor <slug>`；§5 已达标 → `star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `star-plan-reviser`（据证据修订）/ `star-plan-coach`（重审方法与风险）/ `star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `star-code-reviewer <slug>`；import 报错或环境损坏 → `star-env-builder`。结尾给报告路径。
-### star-expt-analyst/SKILL_zh.md
---- 1
-- 绝不碰：`metds/plans/*`——包括 `exec_status`、`exec_runs`、`updated`；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`（executor 的日志是证据，不是草稿纸——方向性信号 是报告并转交，不是写进日志）；`${CODE_NAME}/`；`metds/codearc.md`；`UPSTREAM.md`；`.env`。
-+++ 1
-- 绝不碰：`metds/plans/*`——包括 `exec_status`、`exec_runs`、`updated`；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`（executor 的日志是证据，不是草稿纸——方向性信号 是报告并转交，不是写进日志）；`${CODE_NAME}/`；`metds/codearc.md`；`UPSTREAM.md`；`.env`。
 ### star-expt-analyst/SKILL_zh.md
 --- 2
 - 仅在工作流要求处使用 your question tool（分析哪个 run、匹配有歧义时）。不可用（无人值守 / 脚本化）时改用纯文本并要求明确答复。本 skill 除自己的报告外什么都不写，没有审批确认点——但绝不声称或暗示你改动了计划、状态或日志。
@@ -985,11 +973,6 @@ Compile and reorganize; do not decide method, revise plans, read code, or interp
 Lead with what was written, under about 500 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `star-plan-coach`, execution detail to `star-plan-decomposer`, a value an executed run settled to `star-plan-executor`, plan text contradicting reality to `star-plan-reviser`, results to `star-expt-analyst`, citations to `star-refs-reviewer`. Never call a document paper-ready: it is compiled material, and its gaps are why. A draft compile (readiness-check override) says so in the report's first line.
 ### star-metd-summarize/SKILL.md
 --- 1
-- Never touch `metds/plans/*` — plan text belongs to `star-plan-coach`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser`; a gap or a wrong statement is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`star-code-architect`'s), `metds/refs/*` (`star-refs-reviewer`'s), `wkdrs/*` (including `star-expt-analyst`'s results table `wkdrs/results/`), `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
-+++ 1
-- Never touch `metds/plans/*` — plan text belongs to `star-plan-coach`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser`; a gap or a wrong statement is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`star-code-architect`'s), `metds/refs/*` (`star-refs-reviewer`'s), `wkdrs/*` (including `star-expt-analyst`'s results table `wkdrs/results/`), `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
-### star-metd-summarize/SKILL.md
---- 1
 - your question tool carries the five confirmation points: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (headless / scripted), fall back to plain text and still require explicit approval before overwriting any existing file — and never compile past the readiness check without one.
 +++ 1
 - Ask one direct question at a time at the five confirmation points — the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way — and require explicit approval before overwriting any existing file, even in headless or scripted runs; never compile past the readiness check without one. The documents follow the plans' `language` (Step 1), which may differ from the dialogue's.
@@ -997,7 +980,6 @@ Lead with what was written, under about 500 words: per document — written / sk
 --- 1
 - Reply in the user's language; the documents follow the plans' `language` (Step 1), which may differ from the dialogue. Keep technical terms — metric names, module paths, dataset names — in English inside Chinese documents.
 +++ 0
-
 ### star-metd-summarize/SKILL_zh.md
 --- 1
 # Research Method Summarizer — 计划 → 方法文档
@@ -1047,11 +1029,6 @@ Lead with what was written, under about 500 words: per document — written / sk
 先说写入结果，控制在约 500 字以内：逐文档——已写 / 跳过 / 未变、路径、缺口数与"尚未验证"数。然后是研究者真正要据以行动的三样：**缺口**（各自要哪个计划小节，最要紧的在前）、**⚠ 冲突**（两处来源都写明）、以及转交——策略缺口交 `star-plan-coach`，执行细节交 `star-plan-decomposer`，某个已执行 run 敲定的值交 `star-plan-executor`，与现实矛盾的计划文本交 `star-plan-reviser`，结果交 `star-expt-analyst`，引文交 `star-refs-reviewer`。绝不把文档称为"可直接投稿"；它是编译出的素材，缺口正是它还不是成品的原因。草稿编译（就绪门槛豁免）要在汇报第一行注明。
 ### star-metd-summarize/SKILL_zh.md
 --- 1
-- 绝不碰 `metds/plans/*`——计划文本属于 `star-plan-coach`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`；缺口或错误表述只汇报与转交，绝不就地修改。绝不碰 `metds/codearc.md`（`star-code-architect` 的）、`metds/refs/*`（`star-refs-reviewer` 的）、`wkdrs/*`（含 `star-expt-analyst` 的结果汇总表 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
-+++ 1
-- 绝不碰 `metds/plans/*`——计划文本属于 `star-plan-coach`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`；缺口或错误表述只汇报与转交，绝不就地修改。绝不碰 `metds/codearc.md`（`star-code-architect` 的）、`metds/refs/*`（`star-refs-reviewer` 的）、`wkdrs/*`（含 `star-expt-analyst` 的结果汇总表 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
-### star-metd-summarize/SKILL_zh.md
---- 1
 - 五个确认点都走 your question tool：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。若不可用（无人值守 / 脚本化），改用纯文本，且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
 +++ 1
 - 在五个确认点上一次只问一个直接问题——就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档——覆盖任何已存在文件前都要求明确批准，即使在无人值守或脚本化运行中也是如此；没有明确批准也绝不越过就绪门槛。文档跟随计划的 `language`（Step 1），可能与对话语言不同。
@@ -1059,7 +1036,6 @@ Lead with what was written, under about 500 words: per document — written / sk
 --- 1
 - 按用户语言对话；文档跟随计划的 `language`（Step 1），可能与对话语言不同。中文文档里技术术语——指标名、模块路径、数据集名——保留英文。
 +++ 0
-
 ### star-metd-summarize/references/extract_map.md
 --- 1
 5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
@@ -1338,12 +1314,12 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 ### star-plan-executor/SKILL.md
 --- 5
 1. `EnterPlanMode`.
-2. Refine §3 + the gap list into **EXEC_PLAN**: an ordered list of actions, each annotated `{files to touch / command to run (via conda) / artifact under wkdrs/<run>/ / the step's own check}`. The terminal action binds the §5 done-criterion.
+2. Refine §3 + the gap list into **EXEC_PLAN**: an ordered list of actions, each annotated `{files to touch / command to run (via conda) / artifact under wkdrs/<run>/ / the step's own check}`. The terminal action binds the §5 done-criterion. Shape the list toward the step-groups Step 5 dispatches (`references/agent_dispatch_spec.md`): adjacent actions that touch the same files and end in one shared check are written as one group of at most 3, not left as separate dispatches — every dispatch a group saves is a fresh subagent context that never has to be opened, and the check granularity survives, since a group still ends in its one check and splits at any STOP-line boundary.
 3. **Draw the STOP line explicitly** (`references/stop_line_rules.md`): mark which actions the agent executes vs which are "prepare command, hand to user" (heavy experiments). **The finished plan is the second reading of the leaf's size**: if it runs past 12 actions or crosses the STOP line more than once and Step 1's sizing check did not fire, carry that to Step 4's confirmation point as one more option — *go back and split it first*, ending the run before anything is written — rather than as a question of its own.
 4. **Collect material divergences** from the sub-plan's §2–§5 into EXEC_PLAN's "Divergences from sub-plan" table, in delta form (ADDED / MODIFIED / REMOVED / ENRICHED — `references/plan_sync_rules.md`). A contradiction at the sub-plan's own granularity is a divergence; extra concreteness is not — except a value the plan left unstated that a method document will cite, an ENRICHED row naming that section.
 5. **Settle the branch and worktree lines** (conventions §11): if any EXEC_PLAN action modifies a pre-existing tracked file under `${CODE_NAME}/`, the plan carries `branch: <run>` and recommends executing on it; a plan that only adds new files, or writes only `tasks/<plan-name>/` and `wkdrs/<run>/`, carries `branch: none`. Record the branch the checkout is on as `base:`, whatever its name. The worktree line answers whether this checkout is free right now (§11.7): any busy signal (HEAD on another run's execution branch; uncommitted changes on paths another run's records claim; handed-back commands whose results are not collected — a possible live job, asked about, never checked by a command; or the user naming parallel work) → `worktree: ../<root-dirname>--wt/<run>`, which forces `branch: <run>` even where the gap list said none (§11.8); no signal → `worktree: none`. Signals and procedure: `references/branch_rules.md`.
 +++ 6
-1. Refine §3 plus the gap list into ordered actions. Each action must bind `{files / command through project env / artifact / check}`; the final action binds the §5 done-criterion.
+1. Refine §3 plus the gap list into ordered actions. Each action must bind `{files / command through project env / artifact / check}`; the final action binds the §5 done-criterion. Shape the list toward the step-groups Step 4 dispatches when it delegates (`references/agent_dispatch_spec.md`): adjacent actions that touch the same files and end in one shared check are written as one group of at most 3, not left as separate dispatches — every dispatch a group saves is a fresh sub-agent context that never has to be opened, and the check granularity survives, since a group still ends in its one check and splits at any STOP-line boundary.
 2. Mark the STOP line explicitly and estimate runtime/cost when known. The finished plan is the second reading of the leaf's size: if it runs past 12 actions or crosses the STOP line more than once and Step 1's sizing check did not fire, carry that to item 5's pause as one more option — go back and split it first, ending the run before anything is written — rather than as a question of its own.
 3. Collect material divergences from the sub-plan's §2–§5 into EXEC_PLAN's "Divergences from sub-plan" table, in delta form (ADDED / MODIFIED / REMOVED / ENRICHED — `references/plan_sync_rules.md`). A contradiction at the sub-plan's own granularity is a divergence; extra concreteness is not — except a value the plan left unstated that a method document will cite, an ENRICHED row naming that section.
 4. **Settle the branch and worktree lines** (conventions §11): if any EXEC_PLAN action modifies a pre-existing tracked file under `${CODE_NAME}/`, the plan carries `branch: <run>` and recommends executing on it; a plan that only adds new files, or writes only `tasks/<plan-name>/` and `wkdrs/<run>/`, carries `branch: none`. Record the branch the checkout is on as `base:`, whatever its name. The worktree line answers whether this checkout is free right now (§11.7): any busy signal (HEAD on another run's execution branch; uncommitted changes on paths another run's records claim; handed-back commands whose results are not collected — a possible live job, asked about, never checked by a command; or the user naming parallel work) → `worktree: ../<root-dirname>--wt/<run>`, which forces `branch: <run>` even where the gap list said none (§11.8); no signal → `worktree: none`. Signals and procedure: `references/branch_rules.md`.
@@ -1353,12 +1329,11 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 --- 1
 ### Step 4: Confirmation point — the user approves (`ExitPlanMode`)
 +++ 0
-
 ### star-plan-executor/SKILL.md
 --- 1
-**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: one read-only a read-only sub-agent briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
+**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: one read-only a read-only sub-agent briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan read at its §4 alone, the only root section the checklist admits as evidence (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files, and of the root plan only its §4. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
 +++ 2
-**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: a read-only sub-agent briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
+**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: a read-only sub-agent briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan read at its §4 alone, the only root section the checklist admits as evidence (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files, and of the root plan only its §4. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
 ### Step 4: Execute and verify
 ### star-plan-executor/SKILL.md
 --- 3
@@ -1558,7 +1533,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 ### star-plan-executor/SKILL_zh.md
 --- 5
 1. `EnterPlanMode`。
-2. 把 §3 + 缺口清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 conda) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。末尾动作绑 §5 完成判据。
+2. 把 §3 + 缺口清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 conda) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。末尾动作绑 §5 完成判据。动作清单要朝 Step 5 成组派遣的形状去塑(`references/agent_dispatch_spec_zh.md`):相邻动作碰同一批文件、收在同一个 check 里的,写成一组(至多 3 个),不留成各自派遣——每省一次派遣,就少开一个全新的 subagent 上下文,而检查粒度不受损:一组仍只收在它那一个 check,遇红线边界照样拆开。
 3. **显式画出红线**(`references/stop_line_rules_zh.md`):标出哪些动作 agent 执行、哪些是"备好命令交用户"(重实验)。**画完的计划是对叶子尺寸的第二次读数**：若计划落成后动作数超过 12、或越过红线不止一次，而 Step 1 的尺寸检查没有命中，把这件事带到 Step 4 的确认点，在那里多给一个选项——*先回去拆分*，在写下任何东西之前结束本次运行——而不是单开一个问题。
 4. **收集实质性偏差**:把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入,以变更项形式(ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`)记入 EXEC_PLAN 的"与子计划的偏差"表。与子计划自身粒度相矛盾算偏差;"更具体"不算——除非那是计划未写明、而某份方法文档会引用的值,记为一条 ENRICHED 行并写明该章节。
 5. **定下分支与 worktree 两行**(规约 §11):EXEC_PLAN 里只要有动作要修改 `${CODE_NAME}/` 下已存在的被跟踪文件,计划就带上 `branch: <run>` 并推荐在它上面执行;只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`,无论它叫什么。worktree 这一行答的是当前 checkout 此刻腾不腾得出来(§11.7):任一忙碌信号命中(HEAD 停在别的 run 的执行分支上;未提交改动的路径归属别的 run 的记录;有命令交回了用户、结果还没回收——可能有任务在跑,只问不测;或用户明说要并行)→ `worktree: ../<根目录名>--wt/<run>`,并连带把 `branch: none` 改成 `branch: <run>`——树里的提交要有自己的归宿(§11.8);无信号 → `worktree: none`。信号与操作细节:`references/branch_rules_zh.md`。
@@ -1574,7 +1549,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 ### Step 1：检查就绪状态
 ### star-plan-executor/SKILL_zh.md
 --- 1
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 your sub-agent tool 子代理（read-only），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 your sub-agent tool 子代理（read-only），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 +++ 4
 1. 要求具体的 §3 任务分解与 §5 完成判据。若大部分是 `[TBD]` / `【待定】`，报告缺失决定，询问是返回 `star-plan-decomposer`（推荐），还是在明确记录剩余不确定性的前提下继续。
 2. 验证写明的数据集、权重、代码模块和每个 `depends_on` 兄弟叶子——从已带着每个兄弟 frontmatter 的摘要读它们的状态，不要逐个打开。若硬依赖缺失或上游兄弟叶子未达到 `exec_status: done`，停止并报告准确 blocker。缺失数据集或权重是分解缺口，不能绕过：指明应负责它的 data-readiness leaf，或转回 `star-plan-decomposer <parent>` 添加一个。
@@ -1612,7 +1587,7 @@ What was verified (with evidence), where artifacts live, which commands were han
 --- 1
 主 agent 回复保持精简;细节都在日志里。
 +++ 6
-1. 把 §3 和缺口清单细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。
+1. 把 §3 和缺口清单细化成有序 action。每个 action 必须绑定 `{files / command through project env / artifact / check}`；最后一个 action 绑定 §5 完成判据。action 清单要朝 Step 4 委派时的成组派遣去塑（`references/agent_dispatch_spec_zh.md`）：相邻 action 碰同一批文件、收在同一个 check 里的，写成一组（至多 3 个），不留成各自委派——每省一次委派，就少开一个全新的子代理上下文，而检查粒度不受损：一组仍只收在它那一个 check，遇 STOP line 边界照样拆开。
 2. 明确标出 STOP line；已知时估算运行时间/成本。画完的计划是对 leaf 尺寸的第二次读数：若计划落成后 action 数超过 12、或越过 STOP line 不止一次，而 Step 1 的尺寸检查没有命中，把这件事带到第 5 条那次暂停里，多给一个选项——先回去拆分，它会在写下任何东西之前结束本次运行——而不是单开一个问题。
 3. 把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入，以变更项形式（ADDED / MODIFIED / REMOVED / ENRICHED——`references/plan_sync_rules_zh.md`）记入 EXEC_PLAN 的“与子计划的偏差”表。与子计划自身粒度相矛盾算偏差；“更具体”不算——除非那是计划未写明、而某份方法文档会引用的值，那要记为一条 ENRICHED 行并写明该章节。
 4. **定下分支与 worktree 两行**（规约 §11）：EXEC_PLAN 里只要有 action 要修改 `${CODE_NAME}/` 下已存在的被跟踪文件，计划就带上 `branch: <run>` 并推荐在它上面执行；只新增文件、或只写 `tasks/<plan-name>/` 与 `wkdrs/<run>/` 的计划带 `branch: none`。把 checkout 当前所在分支记为 `base:`，无论它叫什么。worktree 这一行答的是另一个问题——当前 checkout 此刻腾不腾得出来（§11.7）：任一忙碌信号命中（HEAD 停在别的 run 的执行分支上；未提交改动的路径归属别的 run 的记录；有命令交回了用户、结果还没回收——可能有任务在跑，只问不测；或用户明说要并行）→ `worktree: ../<根目录名>--wt/<run>`，并连带把 `branch: none` 改成 `branch: <run>`——树里的提交要有自己的归宿（§11.8）；无信号 → `worktree: none`。信号与操作细节：`references/branch_rules_zh.md`。
@@ -1622,12 +1597,11 @@ What was verified (with evidence), where artifacts live, which commands were han
 --- 1
 ### Step 6：收尾 / 完成判据验证
 +++ 0
-
 ### star-plan-executor/SKILL_zh.md
 --- 1
 所有 agent 步骤 `done` 后,验证子计划 §5 完成判据(相关处复用 `/verify`、`/run`)。达标 → 子计划 `exec_status: done`,随后提供一次删除本计划 `tasks/<plan-name>/` **草稿区**的机会——值得留的内容先挪进 `wkdrs/<run>/`,并把选择记进 `EXEC_LOG.md`;保留也是正当答案。**该提议绝不覆盖本计划自有的工具脚本**(规约 §9):把它们按名字列为保留项,只有用户指明才删。未达标 → 走子计划 §6 局部备选,或上报缺口。然后跑 `references/exec_rubric_zh.md`,报告不达标项(≤5,按重要性排序,每条附具体改法)。
 +++ 2
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 ### Step 4：执行与验证
 ### star-plan-executor/SKILL_zh.md
 --- 1
@@ -2153,11 +2127,6 @@ Cross-check disagreements in the main agent — log says `done` but the artifact
 Cross-check disagreements — log says `done` but the artifact is missing → the claim is **unverifiable**, not met. Re-run pivotal cheap checks; never anything heavy.
 ### star-plan-reviser/SKILL.md
 --- 1
-A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate, the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the candidate then carries that `path[:line]` as its evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
-+++ 1
-A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it becomes a numbered revision candidate, the main agent opens the cited path itself and confirms the finding still holds (conventions §6.6); the candidate then carries that `path[:line]` as its evidence. What does not hold up is dropped, or demoted to a §5 note that changes nothing.
-### star-plan-reviser/SKILL.md
---- 1
 Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a ≤500-word digest: verdict, top divergences, and the candidate list as one-liners.
 +++ 1
 Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a digest under about 500 words: verdict, top divergences, and the candidate list as one-liners.
@@ -2243,11 +2212,6 @@ Lead with the outcome, under about 500 words: the evidence base (what was read a
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 +++ 1
 交叉核对分歧——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查照样复跑；重的一律不跑。
-### star-plan-reviser/SKILL_zh.md
---- 1
-收集器给出的 `suspect` 或 `inconsistent` 是线索，不是结论。它成为编号修订候选之前，主 agent 亲自打开被引用的路径，确认这个发现仍然成立（规约 §6.6）；确认时落在的那个 `path[:line]`，就作为这条候选的证据。站不住的丢掉，或降格成 §5 里一条不引发任何改动的备注。
-+++ 1
-收集器给出的 `suspect` 或 `inconsistent` 是线索，不是结论。它成为编号修订候选之前，主 agent 亲自打开被引用的路径，确认这个发现仍然成立（规约 §6.6）；确认时落在的那个 `path[:line]`，就作为这条候选的证据。站不住的丢掉，或降格成 §5 里一条不引发任何改动的备注。
 ### star-plan-reviser/SKILL_zh.md
 --- 1
 写入 `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤500 字摘要：结论、最重要的偏差、候选清单的一行版。
@@ -2448,6 +2412,16 @@ Under about 500 words: the method source and profile, notes written (citekey →
      其余一律标注为本综述自己的推断。没内容的节收缩成一行——绝不注水。 -->
 +++ 1
      其余一律标注为本综述自己的推断。没内容的节压成一行——绝不注水。 -->
+### star-refs-reviewer/references/score_spec.md
+--- 1
+4. Digest ≤200 words: entries refreshed vs kept, the moves — any paper whose score crossed a whole point — and the failures, each keeping its old value and date, never a guess.
++++ 1
+4. Digest under about 200 words: entries refreshed vs kept, the moves — any paper whose score crossed a whole point — and the failures, each keeping its old value and date, never a guess.
+### star-refs-reviewer/references/score_spec_zh.md
+--- 1
+4. 摘要 ≤200 字：刷新了几条、保留了几条，位次变动——总分跨过整数位的论文——以及失败清单：每条失败保留旧值旧日期，绝不猜。
++++ 1
+4. 摘要约 200 字以内：刷新了几条、保留了几条，位次变动——总分跨过整数位的论文——以及失败清单：每条失败保留旧值旧日期，绝不猜。
 ### star-refs-reviewer/references/survey_spec.md
 --- 3
 2. **Search wide.** Step 1's machinery as written — same queries from the profile, same fan-out cap and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
@@ -2462,11 +2436,6 @@ Under about 500 words: the method source and profile, notes written (citekey →
 8. **Digest.** ≤500 words: the source and profile, the count ledger, the branches written, the self-check result, and the routing — each read-next paper is one `star-refs-reviewer <arxiv-id>`, the whole list one `star-refs-reviewer add …`; positioning goes to `star-plan-coach` §2 (Related Work & Positioning), or §1 (Problem Definition & Motivation) where the map shows the gap the plan wanted already closed, and `star-idea-storm` where there is no plan yet to reopen; the full pass builds the notes and verified bib when the project needs them.
 +++ 1
 8. **Digest.** Under about 500 words: the source and profile, the count ledger, the branches written, the self-check result, and the routing — each read-next paper is one `star-refs-reviewer <arxiv-id>`, the whole list one `star-refs-reviewer add …`; positioning goes to `star-plan-coach` §2 (Related Work & Positioning), or §1 (Problem Definition & Motivation) where the map shows the gap the plan wanted already closed, and `star-idea-storm` where there is no plan yet to reopen; the full pass builds the notes and verified bib when the project needs them.
-### star-refs-reviewer/references/score_spec.md
---- 1
-4. Digest ≤200 words: entries refreshed vs kept, the moves — any paper whose score crossed a whole point — and the failures, each keeping its old value and date, never a guess.
-+++ 1
-4. Digest under about 200 words: entries refreshed vs kept, the moves — any paper whose score crossed a whole point — and the failures, each keeping its old value and date, never a guess.
 ### star-refs-reviewer/references/survey_spec_zh.md
 --- 3
 2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
@@ -2481,8 +2450,3 @@ Under about 500 words: the method source and profile, notes written (citekey →
 8. **摘要。** ≤500 字：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `star-refs-reviewer <arxiv-id>`、或整单一次 `star-refs-reviewer add …`；定位交 `star-plan-coach` §2（相关工作与定位）；地图显示计划想做的那个缺口已经被填上的交 §1（问题定义与动机），计划尚不存在、无处可重开的交 `star-idea-storm`；项目需要笔记和核验 bib 时走完整流程。
 +++ 1
 8. **摘要。** 约 500 字以内：来源与画像、计数账、写了哪些支、自查结果，以及转交——补读清单逐篇 `star-refs-reviewer <arxiv-id>`、或整单一次 `star-refs-reviewer add …`；定位交 `star-plan-coach` §2（相关工作与定位）；地图显示计划想做的那个缺口已经被填上的交 §1（问题定义与动机），计划尚不存在、无处可重开的交 `star-idea-storm`；项目需要笔记和核验 bib 时走完整流程。
-### star-refs-reviewer/references/score_spec_zh.md
---- 1
-4. 摘要 ≤200 字：刷新了几条、保留了几条，位次变动——总分跨过整数位的论文——以及失败清单：每条失败保留旧值旧日期，绝不猜。
-+++ 1
-4. 摘要约 200 字以内：刷新了几条、保留了几条，位次变动——总分跨过整数位的论文——以及失败清单：每条失败保留旧值旧日期，绝不猜。
