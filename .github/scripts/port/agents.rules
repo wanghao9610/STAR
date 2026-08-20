@@ -5,8 +5,8 @@
 /star-(?!workflow)	star-
 `Agent` subagents \(`subagent_type: Explore`(, `model: sonnet`)?\)	read-only sub-agents
 `Agent` subagent \(`subagent_type: Explore`(, `model: sonnet`)?\)	a read-only sub-agent
-`Agent` subagents \(`subagent_type: general-purpose`\)	writing sub-agents
-`Agent` subagent \(`subagent_type: general-purpose`\)	a writing sub-agent
+`Agent` subagents \(`subagent_type: general-purpose`(, `model: sonnet`)?\)	writing sub-agents
+`Agent` subagent \(`subagent_type: general-purpose`(, `model: sonnet`)?\)	a writing sub-agent
 `Agent` subagent（`subagent_type: Explore`(、`model: sonnet`)?）	只读子代理
 `Agent` subagent（`subagent_type: general-purpose`(、`model: sonnet`)?）	可写子代理
 `subagent_type: Explore`	read-only

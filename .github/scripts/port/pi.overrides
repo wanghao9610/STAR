@@ -949,6 +949,11 @@ One `star_subagent` subagent per step (or coherent step-group) in EXEC_PLAN. Pre
 One `star_subagent` dispatch per step (or coherent step-group) in EXEC_PLAN. Use `agent: "star-implementer"` for a step that changes files, `agent: "star-collector"` for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
 ### star-plan-executor/references/agent_dispatch_spec.md
 --- 1
+**Within that preference the model still follows the step.** A step that writes mechanically — filling a template, moving a file, renaming a symbol the plan already named, running a formatter, setting a value the plan states — asks little of judgment: dispatch `star_subagent` subagents (`subagent_type: general-purpose`), because the step's own check catches a mistake and this is where the tier changes the bill and not the result. A step that writes or changes logic — where the plan says what to achieve rather than what to type — names no model and runs on the session's. A step that reads either way is logic: a cheap agent wrong about logic costs a retry and the main agent's re-check, dearer than the tier saved.
++++ 1
+**Within that preference the tier still follows the step.** A step that writes mechanically — filling a template, moving a file, renaming a symbol the plan already named, running a formatter, setting a value the plan states — asks little of judgment, and where a dispatch can pick how much to spend it takes the cheap end, because the step's own check catches a mistake and this is where the tier changes the bill and not the result. A step that writes or changes logic — where the plan says what to achieve rather than what to type — takes the default. A step that reads either way is logic: a cheap agent wrong about logic costs a retry and the main agent's re-check, dearer than the tier saved.
+### star-plan-executor/references/agent_dispatch_spec.md
+--- 1
 **A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is dispatched once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not return leaves every row un-done, so a resume never reads it as finished. Split a group at any STOP-line boundary.
 +++ 1
 **A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is taken once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not finish leaves every row un-done, so a resume never reads it as finished. Split a group at any STOP-line boundary.
@@ -1003,6 +1008,11 @@ The **main agent — not the agent — re-runs the step's own check**, then reco
 EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `star_subagent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`）。主 agent 负责编排与验证;agent 只做这一步的改/跑——只管一小块,以便失败可定位、上下文短。
 +++ 1
 EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一次 `star_subagent`。要改文件的步骤用 `agent: "star-implementer"`,只读摸底用 `agent: "star-collector"`。主 agent 编排并复核,受派方只做这一个步骤的改动与运行——只管一小块,以便失败可定位、上下文短。
+### star-plan-executor/references/agent_dispatch_spec_zh.md
+--- 1
+**在这个偏好之内,模型仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少:派 `star_subagent` subagents（`subagent_type: general-purpose`）,因为这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——不指定模型,随会话的模型走。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
++++ 1
+**在这个偏好之内,档位仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少,若一次派发能挑用多少算力,就取便宜的一端:这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——用默认档位。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 1
 **连贯步骤组**指至多 3 个 EXEC_PLAN 动作:它们碰同一批文件、拆开就没有意义、共用同一个 check。除此之外都是各自独立的步骤。一个组只派发一次、只检查一次,写进 EXEC_LOG 时每个成员动作各占一行并带上组标识——没有返回的组,每一行都停在未完成,恢复时就不会把它读成已完成。碰到红线边界要把组拆开。
