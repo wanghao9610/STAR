@@ -28,27 +28,27 @@ STAR 提供十五个相互衔接的研究工作流 skill，用于把一个模糊
     进度到哪里、还欠什么、下一步该做哪一件
 ```
 
-上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目永远用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是一个循环，每个叶子子计划都会重新走一遍，`star-expt-digest` 则按节奏横跨这个循环运行、而不嵌在其中，`star-metd-summarize` 要等这些循环都走完——所有叶子执行完、计划定稿——之后才跑，`star-code-release` 跑在最后、在工作已经可以给别人读的时候——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节则把结论转交回计划本身：
+上面的列表读起来是一条直线，但实际流程并非线性：`star-proj-adopt` 只在接入已有项目时跑（从模板起步的项目用不到它），`star-idea-storm` 只在选题未定时跑（选题已定就跳过），`star-code-architect` 和 `star-env-builder` 只在第一轮跑，而 `star-plan-executor` 到 `star-plan-reviser` 是个循环，每个叶子子计划都重走一遍，`star-expt-digest` 按节奏横跨这个循环、而不嵌在其中，`star-metd-summarize` 要等循环都走完——所有叶子执行完、计划定稿——之后才跑，`star-code-release` 跑在最后、在工作可以给别人读的时候——`star-flow-status` 每轮给出下一个该跑的叶子，审计环节把结论转交回计划本身：
 
 ![STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环](../../srcs/star-research-workflow.png)
 
-**从哪儿下手。** 研究本身有它的顺序：定下要问的问题、把它写成计划并在写定位时把最接近的工作读一遍、给代码和运行环境找到落脚处、把计划拆成能各自回答的子问题、跑实验、读结果、把结果带回计划、最后汇总成文。下面每个阶段都会在磁盘上留下东西供下一个阶段取用，这也是隔几天回来还能接着做的原因。先找到你实际所处的阶段，从那个 skill 的小节读起。
+**从哪儿下手。** 研究本身有它的顺序：定下要问的问题、把它写成计划并在写定位时把最接近的工作读一遍、给代码和运行环境找到落脚处、把计划拆成能各自回答的子问题、跑实验、读结果、把结果带回计划、最后汇总成文。下面每个阶段都在磁盘上留下东西供下一阶段取用，这也是隔几天回来还能接着做的原因。先找到你实际所处的阶段，从那个 skill 的小节读起。
 
 | 研究阶段 | 承担它的 skill | 它写出的文件 | 下一个阶段凭什么继续 |
 | --- | --- | --- | --- |
 | 定下要问的问题 | `star-idea-storm` | `metds/ideas/<slug>_idea.md` | 一句话的研究问题、它所站的那个缺口，以及一个可能否掉它的首个实验 |
-| 写计划，并在写定位时把领域读一遍 | `star-plan-coach`，中途转去 `star-refs-reviewer` | `metds/plans/<数字>_<slug>_plan.md`；`metds/refs/`：每篇核心论文一份笔记、`reference.bib`、`refs_index.md` | 问题、定位、方法、实验、风险、里程碑六节，且定位写自读过的工作而非记忆——外加这个领域默认会拿来比的 baseline，以及允许这份计划被拆的 `finalized` 日期 |
+| 写计划，并在写定位时把领域读一遍 | `star-plan-coach`，中途转去 `star-refs-reviewer` | `metds/plans/<数字>_<slug>_plan.md`；`metds/refs/`：每篇核心论文一份笔记、`reference.bib`、`refs_index.md` | 问题、定位、方法、实验、风险、里程碑六节，定位写自读过的工作而非记忆——外加这个领域默认会拿来比的 baseline，以及允许这份计划被拆的 `finalized` 日期 |
 | 给代码和运行环境找到落脚处 | `star-code-architect`，随后 `star-env-builder` | `${CODE_NAME}/` 与 `metds/codearc.md`；`wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` | 叶子能按路径点名的真实模块，以及一个已经把它们导入过的解释器 |
 | 拆成能各自回答的子问题 | `star-plan-decomposer` | 每个单元一份子计划，平铺在 `metds/plans/` 下 | 每个问题一个叶子，各有自己的交付物和一条真跑得起来的完成判据 |
-| 跑实验 | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md`，以及这次 run 自己的产物 | 代码、轻量验证留下的证据，以及交回你手上去跑的那条训练或评测命令 |
+| 跑实验 | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`、`EXEC_LOG.md`，以及这次 run 自己的产物 | 代码、轻量验证的证据，以及交回你手上去跑的那条训练或评测命令 |
 | 审一遍数字将要立在其上的代码 | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<日期>.md` | 按严重度分组的问题项——在算力花掉之前抓住，而不是之后 |
 | 读结果 | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`；`aggregate` 模式下另有跨 run 的 `wkdrs/results/results.md` | 每条完成判据都打上 `met` / `not met` / `unmeasurable`，每个数字都带着它的来源 |
 | 把结果带回计划 | `star-plan-reviser` | 就地修订的计划，外加 `wkdrs/<run>/REVIEW_<日期>.md` | 与证据一致的计划，以及一棵不再推荐已被证据关掉的方向的树 |
 | 汇总成文 | `star-metd-summarize`，随后 `star-code-release` | `metds/overview.md`、`dataset.md`、`framework.md`、`training.md`、`evaluation.md`；`README.md` | 写成文字的方法，加上汇进一张表的数字——论文的方法节与结果节正是据此写的 |
 
-另有两个 skill 不在这条顺序里。`star-flow-status` 随时通读整棵树，指出唯一的下一步动作；`star-expt-digest` 说清这一段时期里实验做了什么、相对上次变了什么；而一个已经做了几个月的项目从 `star-proj-adopt` 进来——它先把已经建成、已经跑过的东西记录成证据，再从上表的计划那一行汇入。
+另有两个 skill 不在这条顺序里。`star-flow-status` 随时通读整棵树，指出唯一的下一步动作；`star-expt-digest` 说清这段时期实验做了什么、相对上次变了什么；已经做了几个月的项目则从 `star-proj-adopt` 进来——它先把已经建成、已经跑过的东西记录成证据，再从上表的计划那一行汇入。
 
-这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录保存上下文。
+这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录。
 
 ## 目录
 
@@ -94,7 +94,7 @@ star-metd-summarize framework
 star-code-release
 ```
 
-七个 skill——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`——是 slash-only：只有被显式点名时才运行，agent 绝不主动发起，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个的需求（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只会凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
+七个 skill——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`——是 slash-only：只有被显式点名时才运行，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这一条由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标又没有歧义时 agent 可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
@@ -106,9 +106,9 @@ star-code-release
 
 多个根计划目前都可能以 `0_` 开头，因此出现歧义时应使用 slug 或完整文件名。
 
-任意 skill 调用还可以加上 `involve=low|medium|high` 这个写法，设定本次运行决策前问多少——如 `star-plan-executor 00 involve=low`。`low` 在裁量题上取推荐项（并逐条记录），`high` 逐步确认；它覆盖 `.env` 里的 `INVOLVE`（仅限这一次运行），运行中也可对 skill 说“少问点”临时调整。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，事后在回复里点出这些提交。完整规则见[规约 §7.7](research-workflow-conventions.zh-CN.md)。
+任意 skill 调用还可以加上 `involve=low|medium|high`，设定本次运行决策前问多少——如 `star-plan-executor 00 involve=low`。`low` 在裁量题上取推荐项（并逐条记录），`high` 逐步确认；它覆盖 `.env` 里的 `INVOLVE`（仅限这一次运行），运行中对 skill 说“少问点”也能临时调整。红线、每一次删除与覆盖、对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，事后在回复里点出这些提交。完整规则见[规约 §7.7](research-workflow-conventions.zh-CN.md)。
 
-每个 skill 还都可以带一句描述——写在参数之后的自由文本，用你自己的话说明这次要做什么：`star-plan-reviser 01 这条不做了，由 02 取代`。它是线索不是命令：可以把运行带上该 skill 自己的某一条路，也可以提供随后被记进产物的文字——上面这句既丢弃了那份计划，又成了写进它的理由——但它替代不了确认点，定不了有歧义的计划名，也授权不了红线上的任何动作。由描述定下路径的运行，会在动笔之前说明自己走的是哪条路，这样读错描述的代价是多一行说明，而不是改错一处。第一个参数本来就是自由文本的 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——那个参数就是描述。完整规则见[规约 §7.12](research-workflow-conventions.zh-CN.md)。
+每个 skill 还都可以带一句描述——写在参数之后的自由文本，用你自己的话说明这次要做什么：`star-plan-reviser 01 这条不做了，由 02 取代`。它是线索不是命令：可以把运行带上该 skill 自己的某一条路，也可以提供随后记进产物的文字——上面这句既丢弃了那份计划，又成了写进它的理由——但它替代不了确认点，定不了有歧义的计划名，也授权不了红线上的任何动作。由描述定下路径的运行，会在动笔之前说明走的是哪条路，读错描述的代价因此是多一行说明，而不是改错一处。第一个参数本来就是自由文本的 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——那个参数就是描述。完整规则见[规约 §7.12](research-workflow-conventions.zh-CN.md)。
 
 ## 2. 开始前的准备
 
@@ -1251,7 +1251,7 @@ STAR 定义流程、文件位置与验证记录；它不附带模型栈、追踪
 
 每个工具都有一份适配过的权威 skill 副本。`.agents/skills/` 是共享的那一份——`AGENTS.md` 约定把 skill 放在这里，它是 Codex 唯一的项目根目录，Cursor、Pi 与 DSH 也在自己那份之外读它——所以它不写任何前缀，前缀由各工具自己提供。不要跨这些根目录混用工具特定的调用或控制说明：
 
-七个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例不带前缀（§1），“完整定义”链接指向 `.claude/skills/`——其他六套都由这一基准树移植而来。涉及工具机制的差异，请以上表中你所用工具自己的那份为准。
+七个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`。`SKILL_zh.md` 是随英文版同步维护、供人阅读的中文对照版；运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例不带前缀（§1），“完整定义”链接指向 `.claude/skills/`——其他六套都由这一基准树移植而来。涉及工具机制的差异，请以下表中你所用工具自己的那份为准。
 
 | 工具 | 权威目录 | 调用形式 |
 | --- | --- | --- |
