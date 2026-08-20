@@ -13,7 +13,7 @@ description: >-
 
 调用方式：`/skill:star-flow-status [PLAN_NAME] [描述]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树与覆盖检查限定到该计划的子树。`PLAN_NAME` 之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。解析不到任何计划的成句文本只是描述，不是漏掉的目标——照常总览整条流程，并在回复第一行说明。形似计划名、却一个都对不上的孤立词不是描述：在同一行点明它没有匹配——本 skill 从不提问。描述引导报告重点看哪里——哪个 unknown 值得再读一遍、哪一行值得原文引用而不是计数、那句理由要回应什么；但报告该给的一样不少，也挪不动「下一步」那条推荐：它由 spec 的优先级顺序连同序时排法一并定死。调用里的 `involve=<level>` 记号先剥离，再读 `PLAN_NAME` 与描述（规约 §7.7）；除此之外在这里不改变任何行为。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。只读汇报者用得上的部分——§0 词汇表、§5 计划名解析（仅当有 `PLAN_NAME` 要解析时）、§7 的汇报规则（其引言与第 1、4、5、6、11、12 条；第 2–3、7–10 条的提问机制管的是会提问的 skill，本 skill 从不提问）、§9 项目布局、§10 skill 名册（本 skill 是 agent 可以不经点名启动的八个之一，约束这种运行的正是 §10）——随 Step 1 那一条装载消息一起到达。§8（产物登记表）就是覆盖检查对账用的那张表，只引用、不装载：spec 已逐项复述这些检查要读的文件名与状态字段，而 §8 其余部分——`model_id` / `model_trail`——管的是生产者，本 skill 不是。§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§6 委派管的是会提交、会运行、会写文件的 skill，本 skill 一样都不做。§11 的执行分支，本 skill 只用得上 Step 1 扫描调用带回的清单和 spec 复述的读法——这一节本身留给会开分支的 skill。真需要其中某节时，再整份读。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。只读汇报者用得上的部分——§0 词汇表、§5 计划名解析（仅当有 `PLAN_NAME` 要解析时）、§7 的汇报规则（其引言与第 1、4、5、6、11、12 条；第 2–3、7–10、13 条的提问机制管的是会提问的 skill，本 skill 从不提问）、§9 项目布局、§10 skill 名册（本 skill 是 agent 可以不经点名启动的八个之一，约束这种运行的正是 §10）——随 Step 1 那一条装载消息一起到达。其余不装载。§8（产物登记表）就是覆盖检查对账用的那张表，只引用、不装：spec 已逐项复述这些检查要读的文件名与状态字段，而 §8 其余部分——`model_id` / `model_trail`——管的是生产者，本 skill 不是。§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§6 委派管的是会提交、会运行、会写文件的 skill，本 skill 一样都不做。§11 的执行分支，本 skill 只用得上 Step 1 扫描调用带回的清单和 spec 复述的读法——这一节本身留给会开分支的 skill。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。规约摘录合计约 17 KB，Step 1 的四段打印分担 3、1、5、8。真需要其中某节时，再整份读。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -43,9 +43,10 @@ description: >-
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
 git branch --list '[0-9]*_*' 2>/dev/null   # 执行分支——工作还不在基础分支上的 run
 git worktree list --porcelain 2>/dev/null   # worktree——被安置的 run 住在哪（规约 §11.7）
-sed -n '/^## 0\./,/^## 1\./p; /^## 5\./,/^## 6\./p' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+awk '/^## /{k=/^## (0)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+awk '/^## /{k=/^## (5)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 awk '/^## 7\./{s=1;n=0} /^## 8\./{s=0} s{if($0~/^[0-9]+\. /)n=int($0); if(n==0||n==1||n==4||n==5||n==6||n==11||n==12)print}' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-awk '/^## 9\./{k=1} /^## 11\./{k=0} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
 第二次调用取文件摘要：
@@ -54,7 +55,7 @@ awk '/^## 9\./{k=1} /^## 11\./{k=0} k' docs/mds/star-workflow/research-workflow-
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-一条消息、三份结果：规约摘录与收集脚本的摘要来自那两次 Bash 调用，spec（`<本 skill 所在目录>/references/status_spec_zh.md`）来自同一条消息里单独发出的 `Read`。同一条消息里发几次工具调用，彼此只算一趟往返，不是每次一趟；多花一趟的是再发一条消息。两条命令因此分开：Bash 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来。合并时规约摘录与摘要共用一个大小上限，项目一旦有了历史，两者相加就会越限、一起丢失；分开之后，规约摘录固定大小、必定完整送达，只有随历史增长的摘要那份还可能被存成文件。别把 spec `cat` 进任何一条命令，理由相同：又是一整份文件，大到足以把任何一份结果推向大小上限。不带 `PLAN_NAME` 时去掉 `'/^## 5\./,/^## 6\./p'` 这段范围——§5 就是用来解析它的。那行 awk 按条号选取 §7（引言加第 1、4、5、6、11、12 条）；若它什么都没打印——下游同步的规约副本过旧、条号可能不同——就改用 `sed -n '/^## 7\./,/^## 8\./p'` 装整节。最后那条 awk 打印 §9 与 §10，遇到 `## 11.` 标题即停：§11 执行分支有意不装载——上面那两行 `git branch` / `git worktree` 带回实时清单，执行分支连同 worktree 怎么读由 spec 复述——追加在它之后的章节照样不会不声不响地搭车进来。摘要打印的每个路径都相对项目根目录。摘要是：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数的正文、以及其中的日期；run 目录之外每个已登记产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。加上 spec 与规约章节，这就是 Step 2–9 的全部输入。
+一条消息、三份结果：规约摘录与收集脚本的摘要来自那两次 Bash 调用，spec（`<本 skill 所在目录>/references/status_spec_zh.md`）来自同一条消息里单独发出的 `Read`。同一条消息里发几次工具调用，彼此只算一趟往返，不是每次一趟；多花一趟的是再发一条消息。两条命令因此分开：Bash 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来。合并时规约摘录与摘要共用一个大小上限，项目一旦有了历史，两者相加就会越限、一起丢失；分开之后，规约摘录固定大小、必定完整送达，只有随历史增长的摘要那份还可能被存成文件。别把 spec `cat` 进任何一条命令，理由相同：又是一整份文件，大到足以把任何一份结果推向大小上限。不带 `PLAN_NAME` 时去掉 `(5)` 那行打印——§5 就是用来解析它的。那行 awk 按条号选取 §7（引言加第 1、4、5、6、11、12 条）；若它什么都没打印——下游同步的规约副本过旧、条号可能不同——就改用 `sed -n '/^## 7\./,/^## 8\./p'` 装整节。最后那条 awk 只打印 §9 与 §10：§11 执行分支有意不装载——上面那两行 `git branch` / `git worktree` 带回实时清单，执行分支连同 worktree 怎么读由 spec 复述。摘要打印的每个路径都相对项目根目录。摘要是：每份计划的 frontmatter、`## Sub-plans` 索引与 §3/§5 的占位符计数（`[TBD]` 与 `【待定】` 一并计入）；每份 run 日志的 frontmatter、按标题计数的正文、以及其中的日期；run 目录之外每个已登记产物的 frontmatter；以及 `metds/` 与 `wkdrs/` 深度 1 的文件清单。加上 spec 与规约章节，这就是 Step 2–9 的全部输入。
 
 `--slim` 让项目有了历史之后这一步还跑得起：它压缩的正是摘要里随历史增长、而非随计划树增长的那两部分，40 个 run 的项目上摘要少三分之一左右。超过六行的步骤表会变成表头行、`[tally] N data rows` 与每列的取值分布——`c3: done×7, blocked×1` 就是 Step 3 要的步骤计数；写成 `N distinct` 的列是步骤名或日期，绝不会是状态列。六行及以内的表原样打印。未勾选的待办项与方向性信号从不被计数替代，所以待用户的叶子照样能看到确切的命令。位于 run 目录内的产物不再打印 frontmatter：LISTING 里已经有它的文件名和文件名中的日期，而覆盖检查读的正是这些；被略过了多少个会打印出来。只有需要逐行读某个 run 的步骤时才去掉 `--slim`，并同时用 `--runs <该 run>` 收窄。
 

@@ -39,6 +39,10 @@ f20	complete definition	perl -pi -e 's{\.claude/skills/star-flow-status}{.claude
 f21	Opening-load invariants	perl -pi -e "s/^Match the user's language\./Match the user language./" "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
 f21b	Opening-load invariants	perl -pi -e "s/grep -sE '\^\(STAR_LANG\|INVOLVE\)=' \.env/grep -sE 'STAR_LANG' .env/" "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md
 f22	Selective conventions load	perl -pi -e 's/\(0\|3\|5\|6\)/(0|3|5|6|9)/' "$W/.claude/skills/star-expt-digest/SKILL.md"	.claude/skills/star-expt-digest/SKILL.md
+# f22b edits the item selector's list without the prose following; f22c makes it
+# close two headings down, which would print the whole section in between.
+f22b	Selective conventions load	perl -pi -e 's/n==12/n==13/' "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
+f22c	Selective conventions load	perl -pi -e 's|## 8\\\./\{s=0\}|## 9\\./{s=0}|' "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
 f23	Reuse-an-earlier-load paragraph	perl -pi -e 's/^(\*\*Reusing an earlier load\.\*\*) /$1 Note: /' "$W/.qwen/skills/star-flow-status/SKILL.md"	reuse paragraph
 # f24 puts a harness's delegation tool back into the neutral root; f24b does the
 # same with a question tool. Both are what that root exists not to name.

@@ -1152,11 +1152,15 @@ fi
 #     commit. Only bare §n counts in that prose; §n.m is a sub-item citation,
 #     which is how a stay-out reason may point at a section that IS loaded.
 #
-#     Known gap, deliberate: star-flow-status also loads part of the conventions,
-#     but through `sed`/`awk` ranges plus an item-level pass over §7, so a section-
-#     level parser cannot verify it and it carries no canonical selector to find. Giving
-#     it this shape is a change to the most-run skill in the flow and belongs in
-#     its own commit.
+#     An item-grain selector loads part of one section by numbered item
+#     (star-flow-status takes §7 at its reporting items). Its shape is pinned
+#     too, found by the literal `{s=1;n=0}`: `/^## N\./{s=1;n=0}` opens the
+#     section, `/^## N+1\./{s=0}` closes it at the very next heading — anything
+#     else silently prints the sections in between — and the `n==` list names
+#     the preamble (0) and the items that print. What it prints is re-derived
+#     here the way 20b re-runs the set selectors, and the prose pin is the item
+#     list itself, spelled in the load block ("items 1, 4, 12" / "第 1、4、12
+#     条"), so a selector edit the prose does not follow fails.
 section "Selective conventions load"
 
 LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
@@ -1184,6 +1188,10 @@ RESTATED_REGISTRY=(
     "star-expt-digest|references/scope_spec.md|4"
     "star-refs-reviewer|SKILL.md|1"
     "star-refs-reviewer|SKILL.md|10"
+    "star-flow-status|SKILL.md|8"
+    "star-flow-status|SKILL.md|11"
+    "star-flow-status|references/status_spec.md|8"
+    "star-flow-status|references/status_spec.md|11"
 )
 
 sel_errors=0
@@ -1262,6 +1270,62 @@ for root in "${SKILL_ROOTS[@]}"; do
                 wants+=( "${want}" )
                 bytes=$(( bytes + one_bytes ))
             done
+
+            # 20g. the item-grain selector: one section, by numbered item.
+            ipins=()
+            while IFS= read -r isel; do
+                [[ -n "${isel}" ]] || continue
+                isect="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=1;n=0\}.*|\1|p' <<< "${isel}")"
+                istop="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=0\}.*|\1|p' <<< "${isel}")"
+                if [[ -z "${isect}" || -z "${istop}" ]]; then
+                    fail "${path}: carries an item selector whose sections cannot be parsed"
+                    sel_errors=1; sel_broken=1
+                    continue
+                fi
+                if (( istop != isect + 1 )); then
+                    fail "${path}: the item selector opens §${isect} but closes at §${istop}; it must close at the very next heading or every section between rides in"
+                    sel_errors=1; sel_broken=1
+                    continue
+                fi
+                if ! grep -qF -- "${conv}" <<< "${isel}"; then
+                    fail "${path}: its item selector does not read ${conv}"
+                    sel_errors=1
+                fi
+                inums="$(grep -oE 'n==[0-9]+' <<< "${isel}" | grep -oE '[0-9]+$' | sort -n | uniq | paste -sd'|' -)"
+                items="$(tr '|' '\n' <<< "${inums}" | grep -v '^0$' | paste -sd'|' -)"
+                if [[ -z "${items}" ]]; then
+                    fail "${path}: the item selector names no items"
+                    sel_errors=1; sel_broken=1
+                    continue
+                fi
+                excerpt="$(awk -v sect="${isect}" -v keep="|${inums}|" '
+                    $0 ~ ("^## " sect "\\.")     {s=1; n=0}
+                    $0 ~ ("^## " (sect+1) "\\.") {s=0}
+                    s { if ($0 ~ /^[0-9]+\. /) n = int($0)
+                        if (index(keep, "|" n "|")) print }' "${conv}")"
+                if [[ -z "${excerpt}" ]]; then
+                    fail "${path}: the item selector prints nothing from §${isect} of ${conv}; the conventions may have been renumbered"
+                    sel_errors=1; sel_broken=1
+                    continue
+                fi
+                got_items="$(sed -nE 's/^([0-9]+)\. .*/\1/p' <<< "${excerpt}" | sort -n | uniq | paste -sd'|' -)"
+                if [[ "${got_items}" != "${items}" ]]; then
+                    fail "${path}: the item selector names items ${items//|/, } of §${isect} but prints items ${got_items//|/, }; the section's items may have been renumbered"
+                    sel_errors=1
+                fi
+                one_bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
+                if (( one_bytes > LOAD_EXCERPT_MAX )); then
+                    fail "${path}: the §${isect} item excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget"
+                    sel_errors=1
+                fi
+                if [[ "${f}" == SKILL_zh.md ]]; then
+                    ipins+=( "第 ${items//|/、} 条" )
+                else
+                    ipins+=( "items ${items//|/, }" )
+                fi
+                wants+=( "${isect}" )
+                bytes=$(( bytes + one_bytes ))
+            done < <(grep -F '{s=1;n=0}' "${path}")
             (( sel_broken == 0 )) || continue
             wsorted="$(printf '%s\n' "${wants[@]}" | tr '|' '\n' | sort -n | paste -sd'|' -)"
 
@@ -1281,6 +1345,15 @@ for root in "${SKILL_ROOTS[@]}"; do
             # goes through a file, never `awk -v`, which would eat its backslashes.
             flat="$(mktemp)"
             tr '\n' ' ' <<< "${block}" > "${flat}"
+
+            # the item-list prose pin (20g): the block spells the exact list.
+            for pin in "${ipins[@]:-}"; do
+                [[ -n "${pin}" ]] || continue
+                if ! grep -qF -- "${pin}" "${flat}"; then
+                    fail "${path}: the load block never spells the item selector's list (\"${pin}\"); the selector and the prose have drifted"
+                    sel_errors=1
+                fi
+            done
 
             # 20d. prose vs regex: what the block says arrives is the set, and what it
             #      says stays out is the complement.
@@ -1362,6 +1435,10 @@ for root in "${SKILL_ROOTS[@]}"; do
             one="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel_line}")"
             [[ -n "${one}" ]] && want="${want}${want:+|}${one}"
         done < <(grep -F "awk '/^## /{k=/^## (" "${en_manifest}")
+        while IFS= read -r sel_line; do
+            one="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=1;n=0\}.*|\1|p' <<< "${sel_line}")"
+            [[ -n "${one}" ]] && want="${want}${want:+|}${one}"
+        done < <(grep -F '{s=1;n=0}' "${en_manifest}")
         [[ -n "${want}" ]] || continue
         while IFS= read -r ref; do
             [[ -n "${ref}" ]] || continue
