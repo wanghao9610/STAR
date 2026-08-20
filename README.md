@@ -416,10 +416,10 @@ After creating a project from STAR, you can sync later STAR skill and research w
 bash execs/update.sh
 ```
 
-By default, the command updates these paths from STAR's `main` branch — every tool tree among them, unless `STAR_TOOLS` or `--tools` narrows the set:
+By default, the command updates these paths from STAR's `main` branch — every tool tree among them, unless `STAR_TOOLS` or `--tools` narrows the set. `.agents/skills/` is outside that narrowing: it is where the `AGENTS.md` convention puts skills, so every run updates it, first, whichever trees were named.
 
 - `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each tool owns, and which copy Cursor and Pi must follow
-- `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
+- `.agents/skills/` — the shared root, updated by every run — then `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
 - `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/` — the `/star` slash command that routes a described request to a skill, plus Pi's one prompt per skill, `/star-<name>`
 - `.pi/agents/`, `.pi/extensions/star-plan-mode/`, `.pi/extensions/star-subagent/`, `.pi/extensions/star-permission-gate.ts`, and `.pi/extensions/star-questionnaire.ts` — the sub-agents, plan mode, and structured questions Pi's core does not ship; your project's own extensions sit beside them and are kept
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.dsh/hooks/`, `.kimi-code/hooks/`, `.pi/extensions/star-hooks/`, `.qwen/hooks/`, and the files that register them where registration is not automatic — `.dsh/hooks.json` with `.dsh/cordis.patch.yml`, `.kimi-code/hooks.example.toml`, and `.pi/extensions/star-hooks/index.ts` — the model-id provenance, project memory, and involve-gate hooks
@@ -431,7 +431,7 @@ The agent instructions are the project's own: `AGENTS.md` and `.cursor/rules/age
 
 The repository it pulls from is `STAR_REPOSITORY`, resolved in that order: the environment, then `.env`, then the default `https://github.com/wanghao9610/STAR.git`. Set it in `.env` to track a fork permanently, or prefix a single command — `STAR_REPOSITORY=… bash execs/update.sh` — to override it once.
 
-Which of the seven tool trees it touches is `STAR_TOOLS`, resolved the same way: the environment, then `.env`, then every one of them. Write `STAR_TOOLS=claude,pi` into `.env` to keep only those two current; the other two values are `all` and `none`, and `none` leaves the shared skeleton — the workflow documentation, `execs/run.sh`, the updater itself, `AGENTS.md` — as the whole update. A tree left out is not touched at all: not installed, not updated, and never deleted, so a project that removed the trees it does not use does not get them back on the next update, and one that keeps them all changes nothing by leaving the key unset. A narrowed run also fetches only the trees it will write, and its refusal over uncommitted changes covers only those.
+Which of the seven tool trees it touches is `STAR_TOOLS`, resolved the same way: the environment, then `.env`, then every one of them. Write `STAR_TOOLS=claude,pi` into `.env` to keep only those two current; the other two values are `all` and `none`, and `none` leaves the shared skeleton — which now includes `.agents/skills/` — the workflow documentation, `execs/run.sh`, the updater itself, `AGENTS.md` — as the whole update. A tree left out is not touched at all: not installed, not updated, and never deleted, so a project that removed the trees it does not use does not get them back on the next update, and one that keeps them all changes nothing by leaving the key unset. A narrowed run also fetches only the trees it will write, and its refusal over uncommitted changes covers only those.
 
 Hook registration configs — `.claude/settings.json`, `.codex/hooks.json`, and `.cursor/hooks.json` — are installed only when missing, and never overwritten unless you pass `--force`. When a kept config does not register the STAR hook, the command prints a note.
 
@@ -445,8 +445,8 @@ The general form is `bash execs/update.sh [--diff] [ref] [--tools LIST] [--skill
 
 - `--diff` previews an update without changing a file, and exits `2` when one is available, `0` when everything already matches, `1` on error — so a script can tell an available update from a failed check.
 - A `ref` pins the update to a tag or branch.
-- `--tools LIST` limits one run to the trees named — `claude,pi`, or `all`, or `none` — overriding `STAR_TOOLS` for that run alone. An unknown name stops the command and lists the seven valid ones.
-- `--skill NAME` updates that one skill across all seven tool directories, or across the ones a selection leaves, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the upstream skill directories in scope, stops the command without overwriting anything.
+- `--tools LIST` limits one run to the trees named — `claude,pi`, or `all`, or `none` — overriding `STAR_TOOLS` for that run alone. `.agents/skills/` is updated either way, so deleting it is undone by the next run, unlike a tool tree. An unknown name stops the command and lists the seven valid ones.
+- `--skill NAME` updates that one skill across the shared root and all six tool directories, or across the ones a selection leaves, and leaves the workflow documentation and the hooks alone. An invalid name, or one missing from any of the upstream skill directories in scope, stops the command without overwriting anything.
 - `--force` updates the same paths with both refusals lifted: uncommitted changes under them are overwritten instead of stopping the command, and the hook registration configs are overwritten instead of kept. It widens nothing — a file upstream does not have is still left alone, so your own skills and documents under those directories stay.
 
 `bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.

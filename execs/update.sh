@@ -111,17 +111,19 @@ fail() {
 }
 
 # Which tool tree a path belongs to, empty when it belongs to none and every run
-# therefore covers it. The codex entry covers two directories: .agents, the root
-# the AGENTS.md convention puts skills at and the only project root Codex scans,
-# and .codex, which holds its hooks and its per-skill manifests. Selecting codex
-# is therefore how the shared root is installed today — a project whose agent
-# reads .agents without being Codex takes it the same way.
-# .cursorignore is Cursor's one path outside .cursor/;
-# every other path starts with its tool's own directory, so one added upstream is
-# classified without being listed here.
+# therefore covers it. .agents belongs to none on purpose: it is where the
+# AGENTS.md convention puts skills, so every agent that follows the convention
+# reads it — Codex has no other project root, Cursor scans it natively, Pi and
+# DSH read it beside their own — and a project that has it can be handed to a
+# tool STAR ships no tree for at all. It is part of the shared skeleton now,
+# updated whichever trees --tools names, and updated first. .codex stays Codex's:
+# its hooks and its per-skill manifests. .cursorignore is Cursor's one path
+# outside .cursor/; every other path starts with its tool's own directory, so one
+# added upstream is classified without being listed here.
 path_tool() { # $1 = path relative to the project root
     case "$1" in
-        .agents/*|.codex/*)      printf 'codex' ;;
+        .agents/*)               printf '' ;;
+        .codex/*)                printf 'codex' ;;
         .claude/*)               printf 'claude' ;;
         .cursor/*|.cursorignore) printf 'cursor' ;;
         .dsh/*)                  printf 'dsh' ;;
@@ -136,7 +138,9 @@ path_tool() { # $1 = path relative to the project root
 # missing here is a path the checkout does not have, which stops the command.
 tool_dirs() { # $1 = tool name
     case "$1" in
-        codex)  printf '.agents .codex' ;;
+        # .agents is not here: it is in the unconditional sparse set below,
+        # because every run syncs it.
+        codex)  printf '.codex' ;;
         claude) printf '.claude' ;;
         cursor) printf '.cursor' ;;
         dsh)    printf '.dsh' ;;
@@ -244,16 +248,19 @@ body), the hook registration configs (.claude/settings.json, .codex/hooks.json,
 .cursor/hooks.json, .qwen/settings.json) and the project config .pi/settings.json are
 installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
-to update only the named skill across the Codex, Claude, Cursor, DSH, Kimi, Pi and Qwen Code
-skill directories.
+to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
+Qwen Code skill directories.
 
 --tools limits the run to the named tool trees, comma separated: claude, codex, cursor, dsh,
 kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
 keeps whatever it already has there. Without the flag the list comes from STAR_TOOLS
 (environment first, then .env), and from every tool when that is unset too. The shared paths —
-the workflow documentation, execs/run.sh, this script, AGENTS.md — are updated whichever trees
-are selected.
+.agents/skills, the workflow documentation, execs/run.sh, this script, AGENTS.md — are updated
+whichever trees are selected, and .agents/skills is written first. It is in that list rather
+than behind codex because it is where the AGENTS.md convention puts skills: every agent that
+follows the convention reads it, so a project has it whatever tool it runs today, including one
+STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a tool tree.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -413,7 +420,9 @@ if [[ "${ADOPT}" == true ]]; then
 
     # Directories merged file by file, and single files, all copy-if-absent.
     ADOPT_TREES=(
-        "${SKILL_ROOTS[@]}"
+        # The shared root first: every project gets it, whichever tools it picks.
+        ".agents/skills"
+        "${SKILL_ROOTS[@]:1}"
         "${HOOK_TREES[@]}"
         "${EXTENSION_TREES[@]}"
         ".claude/commands"
@@ -475,6 +484,8 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     fi
 else
     SYNC_PATHS=(
+        # The shared root first: every run syncs it, whichever tools were named.
+        ".agents/skills"
         # Which skill root each tool owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
@@ -493,7 +504,7 @@ else
         # request to one. They carry the argument hints a Pi skill cannot, since
         # argument-hint is a prompt-template field there and not a skill field.
         ".pi/prompts"
-        "${SKILL_ROOTS[@]}"
+        "${SKILL_ROOTS[@]:1}"
         "${EXTENSION_TREES[@]}"
         "${EXTENSION_FILES[@]}"
         "${HOOK_TREES[@]}"
