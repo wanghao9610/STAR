@@ -118,7 +118,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 对话纪律
 
-- 在非交互的 `codex exec` 中（`ask_user_question` 不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在写任何文件、跑任何命令之前要求一次明确的纯文本批准——仍然先审批再执行，仍然重实验前停，在任何同步回写子计划前仍需纯文本确认。
+- 在非交互的 `codex exec` 中（`request_user_input` 不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在写任何文件、跑任何命令之前要求一次明确的纯文本批准——仍然先审批再执行，仍然重实验前停，在任何同步回写子计划前仍需纯文本确认。
 - **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——待同步修正整批、交付批准的 EXEC_PLAN。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过了、不是被压缩了。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
 - 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、Step 3 的逐 action 提交、执行分支与 worktree 三问及偏差行确认（它回写计划 §2–§5）、合并确认点与分支或 worktree 的弃用、移除或删除（规约 §11）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退与尺寸检查（取推荐项：送回 decomposer 并停下）、以及 Step 7 那个探索性叶子命令便宜时的跳过备选（取推荐项：启动审查）。启动审查本身在任何档位都不是一个问题——理由写在 Step 7。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

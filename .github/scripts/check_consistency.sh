@@ -1487,17 +1487,17 @@ check_vocab() { # $1 = skill root, $2 = expected-present ERE ('' = none), $3 = b
 # this tree writes, and a label in a manifest is a half-finished port rather than
 # a second correct spelling. Both are banned here for that reason, alongside
 # Claude's Bash and `Read`, which are foreign outright.
-check_vocab .claude/skills    '`Read`'      '\bShell\b|\bReadFile\b'
-check_vocab .kimi-code/skills '`Read`'      '\bShell\b|\bReadFile\b'
-check_vocab .cursor/skills    '`Read`'      '\bBash\b|\bReadFile\b'
-check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
-check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+check_vocab .claude/skills    '`Read`'      '\bShell\b|\bReadFile\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
+check_vocab .kimi-code/skills '`Read`'      '\bShell\b|\bReadFile\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
+check_vocab .cursor/skills    '`Read`'      '\bBash\b|\bReadFile\b|\bAskUserQuestion\b|\bask_user_question\b|\brequest_user_input\b|\bstar_questionnaire\b'
+check_vocab .agents/skills    ''            '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\bask_user_question\b|\bstar_questionnaire\b'
+check_vocab .qwen/skills      '`read_file`' '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\brequest_user_input\b|\bstar_questionnaire\b'
 # Pi publishes its built-ins lowercase — read, bash, edit, write, grep, find, ls
 # — so the capitalized spellings of the other six trees are all foreign here.
-check_vocab .pi/skills        '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+check_vocab .pi/skills        '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\bask_user_question\b|\brequest_user_input\b'
 # DSH publishes its tools lowercase too — bash, read, write, edit, glob, grep —
 # so the capitalized spellings are foreign here for the same reason as in Pi.
-check_vocab .dsh/skills       '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`'
+check_vocab .dsh/skills       '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Read`|\bAskUserQuestion\b|\bAskQuestion\b|\brequest_user_input\b|\bstar_questionnaire\b'
 
 check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE alternation
     local root="$1" allowed="$2" bad
@@ -1551,7 +1551,7 @@ if [[ -n "${dsh_types}" ]]; then
     vocab_errors=1
 fi
 
-(( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and subagent types"
+(( vocab_errors == 0 )) && note "each tree names only its own harness's file reader, terminal, and question tool"
 
 printf '\n'
 if (( FAILURES > 0 )); then
