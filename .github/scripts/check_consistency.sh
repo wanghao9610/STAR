@@ -1163,7 +1163,7 @@ fi
 #     条"), so a selector edit the prose does not follow fails.
 section "Selective conventions load"
 
-LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
+LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-22000}
 
 # skill|file|section — a citation of a section the skill no longer loads, kept on
 # purpose because the sentence restates the rule and cites it only for provenance.
