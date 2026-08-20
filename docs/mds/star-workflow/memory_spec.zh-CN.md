@@ -92,8 +92,9 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 | Cursor | `.cursor/hooks/star_memory.sh` | `sessionStart` | 索引，装在 `additional_context` 里 |
 | DSH | `.dsh/hooks/star_memory.sh` | `SessionStart`，经 Claude Code 钩子桥接 | 索引，装在 `additionalContext` 里 |
 | Kimi | `.kimi-code/hooks/star_memory.sh` | `UserPromptSubmit` | 索引，每次会话注入一次 |
+| Pi | `.pi/extensions/star-hooks/star_memory.sh` | `before_agent_start`，由 `.pi/extensions/star-hooks/index.ts` 接线 | 索引，作为第一次 agent 运行前的一条隐藏消息，模型每换一次再注入一次 |
 | Qwen Code | `.qwen/hooks/star_memory.sh` | `SessionStart` | 索引，装在 `additionalContext` 里 |
 
 每个钩子只打印那两份索引，别的什么都不打——共享的那份，以及 `local/` 那份（存在的话）。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而在健康条目上也会亮的标记只会教读者跳过它。空记忆库什么都不打印，所以什么都没记过的项目一分钱不花。
 
-钩子存在不等于已注册。Claude、Codex、Cursor、Qwen Code 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。DSH 是同一种形状：`.dsh/hooks.json` 是那张表，但指向它的那一行要写进本机的 `$DSH_HOME/cordis.patch.yml`，由 `bash .dsh/hooks/install.sh` 写一次——而它加载的那座桥不是 dsh 的依赖，每个用到的 profile 还需执行 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`。Qwen Code 的注册多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件；`execs/update.sh` 从不覆盖，只把缺口报出来，那一条由人手工补上。
+钩子存在不等于已注册。Claude、Codex、Cursor、Qwen Code 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。DSH 是同一种形状：`.dsh/hooks.json` 是那张表，但指向它的那一行要写进本机的 `$DSH_HOME/cordis.patch.yml`，由 `bash .dsh/hooks/install.sh` 写一次——而它加载的那座桥不是 dsh 的依赖，每个用到的 profile 还需执行 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`。Pi 的注册是代码而不是配置——扩展会被自动发现，但只在受信任的项目里（`/trust`，或 `defaultProjectTrust`）；未获信任就不加载项目级扩展，也什么都不注入。Qwen Code 的注册多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件；`execs/update.sh` 从不覆盖，只把缺口报出来，那一条由人手工补上。
