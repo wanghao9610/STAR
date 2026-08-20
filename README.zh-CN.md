@@ -145,7 +145,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` 里是 STAR 用来保持七套 skill 镜像同步的一致性检查，服务于 STAR 自身的维护，而非你的项目：若保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套工具目录时失败。步骤 1b 的接入方式不会安装它。
+`.github/` 里是 STAR 用来从同一份原稿生成七套 skill 树的生成器，以及保持它们同步的一致性检查，服务于 STAR 自身的维护，而非你的项目：若保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套工具目录时失败。步骤 1b 的接入方式不会安装它。
 
 如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，并且需要将其文件直接纳入当前项目，请在执行 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 
@@ -468,7 +468,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。
 - 替换 `docs/htmls/star.html`、`docs/htmls/star_zh.html` 与 `docs/srcs/`——它们是 STAR 自己的落地页和图片，不属于你的项目。`docs/index.html` 和 `docs/index_zh.html` 是把这两个页面挂到站点根目录的软链接。两个页面之间的中英切换用的是绝对链接（`/STAR/index_zh.html`），要把其中的 `/STAR` 前缀改成你自己的仓库名，否则语言切换会失效。`docs/mds/star-workflow/` 保持不动，`execs/update.sh` 会负责更新它。
-- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 各自是同一套十五个 skill 的完整副本，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。删不是唯一的路：接入时用 `--tools` 点名要装哪几棵，`.env` 里的 `STAR_TOOLS` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——Pi 那边否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来，DSH 那边则由发现顺序自动定胜负，结果是对的，但你看不见。
+- 删掉用不到的工具目录。`.agents/`（Codex）、`.claude/`、`.cursor/`、`.dsh/`、`.kimi-code/`、`.pi/`、`.qwen/` 装的是同一套十五个 skill，每套约 150 个文件；留下你所用 agent 会读的那一套，其余 `rm -rf` 即可。用 `execs/update.sh` 接入或更新出来的项目里，每棵树都是各自独立的实文件副本，删除顺序无所谓——更新器复制时会把软链接指向的内容写成实文件。直接克隆 STAR、或用 GitHub 模板生成的仓库则不然：各家措辞完全一致的那批文件只在 `.agents/skills/` 下存一份，其余六棵靠相对软链接指过去。此时先用 `tar -chf - .claude/skills | tar -xf -`（树名换成你要留的那棵）把留下的那棵变成独立副本，它会把其中的软链接原地换成所指的文件（`-h` 表示跟随软链接，BSD 与 GNU 的 tar 都可用），`.agents/` 放到最后再删。删不是唯一的路：接入时用 `--tools` 点名要装哪几棵，`.env` 里的 `STAR_TOOLS` 则让之后的 `bash execs/update.sh` 不会把删掉的那几棵装回来——见[更新 STAR 的 skill 与工作流指南](#更新-star-的-skill-与工作流指南)。用 Pi 和 DSH 时这一步不只是可选：两者除了自己的根目录（`.pi/skills/`、`.dsh/skills/`）还会读 `.agents/skills/`，删掉 `.agents/` 就从源头消除了重名冲突——Pi 那边否则只能靠 `.pi/APPEND_SYSTEM.md` 去把 agent 劝回来，DSH 那边则由发现顺序自动定胜负，结果是对的，但你看不见。
 
 只保留确实有助于研究的结构——STAR 应当服务于研究，而不是限制研究。骨架本身可独立使用：目录布局、`.env` 和 `execs/run.sh` 在完全不装任何 skill 的情况下也能工作，因此删掉全部工具目录同样是受支持的用法。
 
@@ -476,12 +476,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.2.5](https://github.com/wanghao9610/STAR/tree/v0.2.5)**（2026-08-19）—— 七棵工具树里措辞完全一致的那批文件改为只存一份，落在 `.agents/skills/` 下，其余六棵在相同路径上放一条相对软链接；每个 `SKILL.md`，以及凡是写了某家自有内置工具名的参考文档与模板，仍是各棵树各自的实文件。接入与更新不受影响：`execs/update.sh` 复制时会把软链接指向的内容写成实文件，项目拿到的仍是每棵树一份独立完整的副本。只有直接克隆本仓库才带着软链接，此时先用 `tar -chf - .claude/skills | tar -xf -` 把要留的那棵变成独立副本，再把 `.agents/` 放到最后删掉。
 - **[v0.2.4](https://github.com/wanghao9610/STAR/tree/v0.2.4)**（2026-08-19）—— 一次运行拟出一张要你逐条接受或否决的清单时，不再一条一条问：规约 [§7.13](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把整张清单定成一个问题——编号行连同"改什么、依据是什么"先摊在页面上，然后只问一次：*全部按清单采纳* / *除我点名的以外全部采纳* / *先解答我点名的几项* / *一项都不采纳*，被点出来的行进第二轮，形状照旧。`star-plan-reviser` 的修订候选与 `star-code-reviewer` 要问的那批修复就此不再逐条走；`star-code-architect`、`star-code-release`、`star-plan-executor`、`star-metd-summarize` 那几个本来就成批问的问题，补上了"先解释这几项"这条从来没有过的路；而必须单独问的仍旧单独问——红线上的一切、每一次删除与覆盖，以及放弃一个计划。引导式提问不受影响，因为每个答案决定下一个问什么的辅导连问没有拟好的东西可以摊开；`involve=high` 会把任何一张清单重新拆回一行一问。
 - **[v0.2.3](https://github.com/wanghao9610/STAR/tree/v0.2.3)**（2026-08-19）—— `execs/update.sh` 不再把七棵工具树当成不可分的一整块：`--tools claude,pi` 把这次运行限定在点名的那几棵上，`.env` 里的 `STAR_TOOLS` 让这个选择长期生效，另外两个取值是 `all` 与 `none`——`none` 表示这次更新只剩共享骨架：工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：`--adopt` 不装、更新不写、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来。收窄过的运行只拉取它将要写入的那几棵，未提交改动的拦截也只针对这几棵。
-- **[v0.2.2](https://github.com/wanghao9610/STAR/tree/v0.2.2)**（2026-08-18）—— `star-code-reviewer` 的修复轮不再逐条问每一处例行修复：`minor` / `nit` 级的那些——docstring、注释、未使用的 import、引用全落在审查范围内的改名——直接改，改之前在摘要里点名，报告里记为 `applied unasked`；`blocker` / `major` 仍然逐条先问、任何参与度档位都问，删代码的修复不论严重度也照问，因为看着没人引用的符号可能是通过 registry 字符串取到的。可修项全是 minor 的那一轮，从此不为其中任何一条停下来问——为一处 docstring 问一次所花掉的注意力，正是报告本身需要的。`involve=high` 时不问的那一半重新交回用户，按同类合并。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.2.2](https://github.com/wanghao9610/STAR/tree/v0.2.2)**（2026-08-18）—— `star-code-reviewer` 的修复轮不再逐条问每一处例行修复：`minor` / `nit` 级的那些——docstring、注释、未使用的 import、引用全落在审查范围内的改名——直接改，改之前在摘要里点名，报告里记为 `applied unasked`；`blocker` / `major` 仍然逐条先问、任何参与度档位都问，删代码的修复不论严重度也照问，因为看着没人引用的符号可能是通过 registry 字符串取到的。可修项全是 minor 的那一轮，从此不为其中任何一条停下来问——为一处 docstring 问一次所花掉的注意力，正是报告本身需要的。`involve=high` 时不问的那一半重新交回用户，按同类合并。
 - **[v0.2.1](https://github.com/wanghao9610/STAR/tree/v0.2.1)**（2026-08-18）—— 对照算法研究实际的推进方式复查流程后，补上"一个叶子一次 run"这个假设装不下的几类工作：一组配置（超参网格、多 seed 重复）现在是一个叶子，在 §3 声明轴与格数、按格落在 `wkdrs/<run>/cells/` 下、判据对整张网格说，分析报选中格时必须同时报同轴上的散布；重实验的预计与实际开销进入 `EXEC_LOG.md` 新增的"开销"一节，那是根计划 §4 算力预算唯一的对账处。方法还没定的时候，探针叶子是正当的一格——它的 §5 写成"看什么 → 哪种结果触发哪个决定"，数字只作未核实层，因此不会把一个猜想抬成主张；被否掉的方向除了留在原处的完整交代，还向上汇总一行到根计划 §5、紧挨着当初预测它的 kill-criteria，因为那棵子树此后不会再被打开。构建数据的叶子不再以文件数与校验和收尾（要关键统计量、写明抽样量的人工抽查、与评测集的重叠检查），消融选定的配置必须写成具名文件供下游叶子按路径引用；另修掉一处缺陷：编译方法文档所依据的抽取图，中文版把计划模板的五个小节名记成了旧名；升级换的是模板、不动已经写好的文件——已有的子计划与 `EXEC_LOG.md` 不会自动长出这些小节，下次调用对应技能时补上，或让 `star-plan-reviser` 在修订那份计划时带入。
 - **[v0.2.0](https://github.com/wanghao9610/STAR/tree/v0.2.0)**（2026-08-18）—— 整套工作流的措辞从软件开发口径换成算法研发口径：落盘改成存成文件，冒烟测试改成跑通性检查（参考文件跟着改名），契约按语义拆成派给子代理的交办说明和它要还回来的格式约定，日志里说过的事在产物证实之前一律叫说法。`checkpoint` 现在只指模型权重——git 那一义叫阶段提交，动词那一义叫记录——共享规约的词汇表（[§0](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)）新增十一行把新说法钉死，而 git 自己的词、计划模板的小节名、ML 代码库里的注册器，以及任何被别的技能按字节读的字面量，一律不动。README 与使用指南按研究推进的五段重排——定选题并写成计划、把代码和环境准备到实验真能跑起来、拆成子问题一块块做、读结果再带回计划、写成文字并收拾仓库——指南开头还多了一张「从哪儿下手」的表，让人只读自己所在的那一节，而不是另外十四节。
 - **[v0.1.46](https://github.com/wanghao9610/STAR/tree/v0.1.46)**（2026-08-13）—— `.pi/` 补上了 v0.1.44 只能替换掉的那三样机制，全部借自 pi 自己的 `examples/extensions`（MIT）：`star_subagent` 派发到新增的 `.pi/agents/` 花名册——收集者、执行者、复核者，对应规约 [§6](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 点名的三类受派方——`star_questionnaire` 负责提问，`/star-plan` 负责只读探索，外加 `rm -rf`、`sudo`、`chmod 777` 之前的确认框。它们占用的每一个名字都加了前缀，连注入的上下文标记也不例外：两个扩展抢同一个工具名或开关时，pi 会直接 `exit 1`、整个会话起不来，而这几份示例很多人也装在用户级；标记不加前缀的话，用户级那份会把这份注入的消息静默过滤掉；四样都要等项目获得信任才加载，没有它们时技能回落到规约 §6.1 的本地履行和纯文本提问。调用方式现在只剩 `/star-<名>`——`.pi/prompts/` 每个技能给一条命令，`enableSkillCommands: false` 去掉了并排的 `/skill:` 那条——钩子也搬进了 `.pi/extensions/star-hooks/`，因为空的 `.pi/hooks/` 是扩展目录的旧名，只要它存在 Pi 每次启动都会警告。
