@@ -10,6 +10,13 @@ From Step 2's gap list: any action that **modifies** an existing tracked file un
 
 The branch asks whether this run's history needs isolating (above); the worktree asks whether the invoking checkout is free right now (conventions §11.7). Check the signals while orienting in Step 2: HEAD sits on another run's execution branch; uncommitted changes sit on paths another run's records claim; an EXEC_LOG records handed-back commands whose results are not collected — a job may be running, which no command can check, so ask the user; or the user has named parallel work. Any signal → recommend `worktree: ../<root-dirname>--wt/<run>`; none → `worktree: none`. A run in a worktree always carries a branch, even where the gap list said `branch: none` — its commits need a home while the base branch stays checked out elsewhere (§11.8). Both lines are settled together at the Step 4 confirmation point.
 
+## The two questions at the Step 4 confirmation point
+
+Both ride the confirmation point that approves EXEC_PLAN, never a call of their own.
+
+- **Branch**, where Step 3 set `branch: <run>` (conventions §11): name the base branch it forks from, that taking it takes the per-step commits with it — only commits merge — and its one precondition, that nothing is currently running from this checkout; declining executes on the base branch as before.
+- **Worktree**, where Step 3 set `worktree: <path>` (§11.7): name the busy signal that recommends it, the path, the symlinks it will get (`.env`, `datas/`, `inits/`), and that the whole run — commits, records, follow-on skills — then lives in that tree while this checkout stays put; declining executes here, waiting on whatever made the checkout busy.
+
 ## Creation (Step 4, on approval)
 
 1. Record the checkout's current branch and short SHA as `base:` (`git rev-parse --abbrev-ref HEAD`, `git rev-parse --short HEAD`). Never assume `main`.

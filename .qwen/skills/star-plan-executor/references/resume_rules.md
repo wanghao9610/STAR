@@ -1,0 +1,1 @@
+../../../../.agents/skills/star-plan-executor/references/resume_rules.md

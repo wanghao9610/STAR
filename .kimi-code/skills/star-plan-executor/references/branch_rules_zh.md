@@ -10,6 +10,13 @@
 
 分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是被调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了，所以要问用户；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`。进树的 run 一律带分支，即便缺口清单判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。两行都在 Step 4 确认点上一并定夺。
 
+## 确认点上的两问（Step 4）
+
+两问都搭在批准 EXEC_PLAN 的那个确认点上，绝不单独发起一次调用。
+
+- **分支**，当 Step 3 定了 `branch: <run>`（规约 §11）:点明它从哪个基础分支分出,选它就同时选了逐步提交——只有提交才会被合并——以及唯一前置条件:当前 checkout 上没有正在运行的任务;不选则照旧在基础分支上执行。
+- **worktree**，当 Step 3 定了 `worktree: <path>`（§11.7）:点明推荐它的那个忙碌信号、路径、要补的链(`.env`、`datas/`、`inits/`),以及整个 run——提交、记录、后续 skill——从此都住在那棵树里,当前 checkout 原地不动;不选则在这里执行,等 checkout 忙完。
+
 ## 创建（Step 4，批准后）
 
 1. 把 checkout 当前分支与短 SHA 记为 `base:`（`git rev-parse --abbrev-ref HEAD`、`git rev-parse --short HEAD`）。绝不假定是 `main`。
