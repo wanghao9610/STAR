@@ -12,7 +12,7 @@ The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and fr
 
 - the run verdict (`met` / `partially met` / `not met` / `inconclusive` / `invalid`);
 - the §5 done-criteria scorecard, condensed to one line;
-- the headline metrics, each carried over as `{value, source, split}` exactly as the report records them;
+- the headline metrics, each carried over as `{value, source, split, seeds, spread}` exactly as the report records them — a number over one run reads `n=1` here, never blank;
 - any blocker or major observation, and any plan-level finding or kill-criterion hit it names.
 
 **Do not open the run's raw logs to supplement a report.** The report is what you read. Going behind it to "check" or to add a metric it omitted is per-run analysis, which is `$star-expt-analyst`'s job and carries a verification pass this skill does not run. A report that looks wrong is routed (`$star-expt-analyst <run dir>` to refresh it), not corrected here.

@@ -32,7 +32,9 @@ status:
 
 <!-- Concrete prerequisites, each pointing at a project location:
      - Data: which datasets/splits, under datas/
-     - Weights: which pretrained/base models, under inits/
+     - Weights: which pretrained/base models, under inits/, and what corpus they were trained on
+       (name it, cite where it is documented, or write `unknown` — `unknown` is an honest answer and
+       it is what makes the exposure visible; an omitted line makes it invisible)
      - Code: which modules/entrypoints, under code/
      - Upstream sub-plans that must finish first (by prefix), and what artifact they hand over.
        Mirror those prefixes in the frontmatter `depends_on` list (the machine-readable order). -->

@@ -47,7 +47,7 @@ A programme of ≤ ~6 reports is usually simplest to read in the main agent. Abo
   report: <path to the EXPT_ANALYSIS it read>
   report_verdict: <the report's own verdict, verbatim>
   verdict_reason: <the report's own one-line reason for that verdict, verbatim>
-  metric_rows: [<the report's metric table rows, verbatim, each keeping its source and split>]
+  metric_rows: [<the report's metric table rows, verbatim, each keeping its source, split, seeds, spread and commit>]
   absent: [<criteria the report scores unmeasurable, or names as missing>]
   protocol_note: <the report's protocol caveat, verbatim, or none>
 reports_read: <n>
@@ -63,7 +63,7 @@ The plan tree is organised by decomposition; a reader needs the numbers organise
 - the **ablation design** gives one table per ablation, its rows being the variants;
 - a run the design maps to neither goes to a final "Other runs" block — listed, never dropped silently.
 
-Rows within a table are the runs §4 assigns to it, in the order §4 gives (else by prefix). One row per run, not per report.
+Rows within a table are the runs §4 assigns to it, in the order §4 gives (else by prefix). One row per run, not per report. Under an ablation table, one line reads `varied: <the fields the plans say differ between these arms>` — taken from what root §4's ablation design and the arms' own §2/§3 state, and `varied: not stated in the plans` when they do not, which is itself the finding. Under every table, one line reads `N runs scored on <split> for this claim` — the count is what the rows already show, said out loud, because fifteen attempts at a threshold is a different claim from one and a reader should not have to count the rows to learn which they are looking at.
 
 ## What the results table never does
 

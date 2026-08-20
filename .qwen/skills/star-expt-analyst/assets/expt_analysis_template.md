@@ -32,11 +32,13 @@ model_trail:                    # append-only: one entry per write session, newe
 
 <!-- The headline. One row per review rule: sub-plan §5 first, then root §4 metrics, then any
      baseline the plan states. `threshold: none stated` → report the value, leave the verdict blank.
-     Value as the source prints it — rounding that flips a verdict is an error, not a tidy-up. -->
+     Value as the source prints it — rounding that flips a verdict is an error, not a tidy-up.
+     `Seeds / n` is how many runs or repeats the value is over, and `Spread` how they scattered;
+     `—` there means a single run, which is different from not knowing. -->
 
-| Criterion (as written) | Origin | Metric | Value | Split | Threshold | Verdict | Source |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <"…"> | §5 / root §4 / baseline | <name> | <value> | train/val/test | <threshold or none stated> | met / not met / unmeasurable | <path:line or key> |
+| Criterion (as written) | Origin | Metric | Value | Seeds / n | Spread | Split | Threshold | Verdict | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <"…"> | §5 / root §4 / baseline | <name> | <value> | <n or 1> | <std, min–max, or — (single run)> | train/val/test | <threshold or none stated> | met / not met / unmeasurable | <path:line or key> |
 
 ## 4. Artifacts & Completion
 

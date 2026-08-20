@@ -27,9 +27,12 @@ One entry per scored expectation — this is what fills the scorecard:
   metric: <name as the source prints it>
   value: <as the source prints it — do not round into a different verdict>
   split: train | val | test | unknown
+  seeds: <n, or 1 — how many runs or repeats this value is over>
+  spread: <std, min–max, or "— single run">
   threshold: <as the plan states it, or "none stated">
   verdict: met | not met | unmeasurable
   source: <path, + line number or JSON key>
+  commit: <short-sha of ${CODE_NAME} the run executed at, from EXEC_LOG's `code_commit:` | unrecorded>
 ```
 
 A collection pass returns exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written. A dimension-C collector returns observations; it fills a metric row only for a metric whose sole source is a line in a log on its own list, because D's source ladder is a comparison across files and belongs to the agent holding all of them. Alongside the lists it returns one `config_echo` per log — `{source: <path>:<first–last line>, lines: <the verbatim config / argv / data-path block, ≤40 lines, kept to the data-path and split portion>}`, or `none` where the log has no echo — quoted, never paraphrased and never judged: the leakage and too-good checks in E are run against it by the main agent, which re-opens the cited range only on a hit. A `files_read` below the number of files the collector was given is the remainder still to collect (conventions §6.3).
@@ -98,13 +101,13 @@ Never load a multi-megabyte log whole. In order: grep the fatal and numeric patt
 - **Unmeasurable** means the number is not on disk anywhere. Say what would produce it and hand that command back — never run it (§ the STOP line).
 - Quote values as the source prints them. Rounding that flips a verdict (29.96 → "30, met") is a blocker-level reporting error.
 - **A set of configurations is read as a whole grid**: where the run directory has `cells/`, start from `matrix.md` and check every cell has a number — a missing cell is blocked, not a bad result — then score against §5. Reporting the chosen cell means reporting the spread along the same axis with it; the best cell alone hides the selection. Cells repeated over seeds are reported as median and range, never as the best draw.
-- **Cost reconciliation**: read EXEC_LOG's cost section beside the root plan's §4 compute budget in one line — what fraction of the budget the actual came to, and by how much it went over. Where the actual says `unrecorded`, say so plainly rather than skipping the line: compute is the one thing this workflow spends that cannot be recovered.
+- **Cost reconciliation**: read EXEC_LOG's cost section beside the root plan's §4 compute budget in one line — what fraction of the budget the actual came to, and by how much it went over. Where the actual says `unrecorded`, say so plainly rather than skipping the line: compute is the one thing this workflow spends that cannot be recovered. Where the root §4 claim→experiment map puts this run and a baseline run in the same table, print both runs' actual cost on that line rather than this one alone, and flag an order-of-magnitude gap as a `major` observation. That is two recorded numbers set beside each other, not a cause assigned to a delta, so it sits inside the never-attribute rule rather than against it.
 
 ## E. Interpretation
 
 - **Against the claim**: the sub-plan's `traces_to` names the root claim or section this run serves. State plainly whether the result supports it, refutes it, or leaves it open — and for "open", what is still missing.
 - **Kill-criteria**: check the result against the root's §5 kill-criteria and against any MVP done-criterion the plan called a cheap early test. A hit is a **plan-level finding**: report it prominently, route it (F), and never soften it. A plan that kills a bad idea early is working.
-- **Leakage and too-good checks** — run these before accepting a strong number: is the val/test split named in the training config's data paths? Is val ≈ train to an implausible degree? Does the number beat the published state of the art on a first run? Is the metric at or near its ceiling (1.000, 100%)? Was the checkpoint selected on the same split it is reported on? Any hit → the verdict is `invalid` until the user rules it out.
+- **Leakage and too-good checks** — run these before accepting a strong number: is the val/test split named in the training config's data paths? Is val ≈ train to an implausible degree? Does the number beat the published state of the art on a first run? Is the metric at or near its ceiling (1.000, 100%)? Was the checkpoint selected on the same split it is reported on? Is the evaluation benchmark plausibly inside the training corpus of the weights §2 names — and did §2 name that corpus at all? Any hit → the verdict is `invalid` until the user rules it out; an `unknown` corpus behind a first-run number that beats the published state of the art is a `major` observation, not a clean pass.
 - **A pilot run is judged on the decision, not the number**: where the sub-plan's §5 is written as "what to look at → which decision each outcome triggers", the verdict is whether the decision was recorded and whether the evidence carries it. Its numbers stay provisional and never enter the results table — a pilot exists to settle what to do next, not to produce a result.
 - **Limits, stated as limits**: one seed is not significance; a subset is not the benchmark; a metric with no baseline is not an improvement; a single run's gap smaller than the framework's known variance is not a result. Write what the run does *not* show.
 

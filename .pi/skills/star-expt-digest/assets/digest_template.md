@@ -47,9 +47,9 @@ sources:
      "Source" is what the report recorded, carried over so a reader can check it. Write "None" if no
      in-scope run has been analyzed. -->
 
-| Run | Plan | Verdict | Headline metric | Split | Source | Report |
-|---|---|---|---|---|---|---|
-| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | met | <value> | test | `<path:line or key>` | EXPT_ANALYSIS_<date> |
+| Run | Plan | Verdict | Headline metric | Seeds / n | Split | Source | Report |
+|---|---|---|---|---|---|---|---|
+| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | met | <value> | <n or 1> | test | `<path:line or key>` | EXPT_ANALYSIS_<date> |
 
 ## 4. Runs in Period — provisional (unverified)
 

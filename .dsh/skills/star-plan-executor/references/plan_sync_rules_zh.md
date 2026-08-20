@@ -27,8 +27,9 @@ EXEC_PLAN 本来就*应该*比子计划更具体——"更精确"**不是**偏�
 | 复现入口——读者会重跑的命令与 config | `training.md` §5、`evaluation.md` §5 |
 | 某个组件行为所依赖的关键 config | `framework.md` §2 |
 | 实际采用的 split / 预处理选择 | `dataset.md` §3 |
+| §5 写明了 seed / 重复策略时，实际跑的那些 seed 值 | `training.md` §3 |
 
-不在范围内:任何文档都不引用的东西——内部开关、临时路径、seed、环境细节(那些归 EXEC_LOG 与 `freeze.txt`)——以及计划已经写明的值(改动那种值是 MODIFIED,不是 ENRICHED)。**如果你说不出哪个文档章节会引用它,它就是细节。**子计划不是 config 转储。
+不在范围内:任何文档都不引用的东西——内部开关、临时路径、环境细节(那些归 EXEC_LOG 与 `freeze.txt`)——以及计划已经写明的值(改动那种值是 MODIFIED,不是 ENRICHED)。**如果你说不出哪个文档章节会引用它,它就是细节。**子计划不是 config 转储。
 
 ## 变更项形式
 

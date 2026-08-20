@@ -42,9 +42,9 @@ sources:
 <!-- 每个有 EXPT_ANALYSIS 报告的 run 一行；判定与数字均引自该报告。"来源"是报告记录下来的东西，
      原样转录以便读者自查。若范围内没有任何 run 被分析过，写"无"。 -->
 
-| Run | 计划 | 判定 | 关键指标 | Split | 来源 | 报告 |
-|---|---|---|---|---|---|---|
-| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | met | <值> | test | `<path:line 或 key>` | EXPT_ANALYSIS_<date> |
+| Run | 计划 | 判定 | 关键指标 | 种子数 / n | Split | 来源 | 报告 |
+|---|---|---|---|---|---|---|---|
+| `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | met | <值> | <n 或 1> | test | `<path:line 或 key>` | EXPT_ANALYSIS_<date> |
 
 ## 4. 本周期的 run —— 临时（未核实）
 

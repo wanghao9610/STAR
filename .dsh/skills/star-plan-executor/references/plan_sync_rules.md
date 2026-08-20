@@ -27,8 +27,9 @@ In scope — the value must be one a document section cites, and the row must na
 | the reproduction entry point — the command and config a reader would rerun | `training.md` §5, `evaluation.md` §5 |
 | key config a component's behaviour depends on | `framework.md` §2 |
 | the split / preprocessing choice actually used | `dataset.md` §3 |
+| the seed values actually run, where §5 states a seed or repeat policy | `training.md` §3 |
 
-Out of scope: anything no document cites — internal flags, scratch paths, seeds, environment detail (EXEC_LOG and `freeze.txt` hold those) — and any value the plan already states (changing that is MODIFIED, not ENRICHED). **If you cannot name the document section that would cite it, it is detail.** A sub-plan is not a config dump.
+Out of scope: anything no document cites — internal flags, scratch paths, environment detail (EXEC_LOG and `freeze.txt` hold those) — and any value the plan already states (changing that is MODIFIED, not ENRICHED). **If you cannot name the document section that would cite it, it is detail.** A sub-plan is not a config dump.
 
 ## Delta form
 

@@ -34,9 +34,14 @@ sources:
 
 <!-- Caption: what root §4 says this tests. -->
 
-| Run | Variant / setting | <metric> | Split | Verdict | Source |
-|---|---|---|---|---|---|
-| `<prefix>_<slug>` | <…> | <value> | test | met / not met | `<path:line or key>` @ EXPT_ANALYSIS_<date> |
+| Run | Variant / setting | <metric> | Seeds / n | Spread | Split | Verdict | Source |
+|---|---|---|---|---|---|---|---|
+| `<prefix>_<slug>` | <…> | <value> | <n or 1> | <std, min–max, or — (single run)> | test | met / not met | `<path:line or key>` @ EXPT_ANALYSIS_<date> |
+
+<!-- A verdict scored against a criterion the plan no longer states carries a dagger — `met †` — and
+     one footnote line under the table: `† §5 read "<old>" when this run was designed; it reads
+     "<new>" today.` The run's EXEC_PLAN `done_criterion:` is the criterion it was designed against;
+     compare it with the leaf's §5 before writing the row. No dagger means the two agree. -->
 
 ## 3. Ablations
 
@@ -47,9 +52,9 @@ sources:
 
 <!-- Caption: what root §4 says this ablation isolates. -->
 
-| Run | Variant | <metric> | Split | Verdict | Source |
-|---|---|---|---|---|---|
-| `<prefix>_<slug>` | <…> | <value> | val | met | `<path:line or key>` @ EXPT_ANALYSIS_<date> |
+| Run | Variant | <metric> | Seeds / n | Spread | Split | Verdict | Source |
+|---|---|---|---|---|---|---|---|
+| `<prefix>_<slug>` | <…> | <value> | <n or 1> | <std, min–max, or — (single run)> | val | met | `<path:line or key>` @ EXPT_ANALYSIS_<date> |
 
 ## 4. Other Runs
 

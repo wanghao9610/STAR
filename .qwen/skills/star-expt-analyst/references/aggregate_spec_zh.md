@@ -47,7 +47,7 @@
   report: <它读的那份 EXPT_ANALYSIS 的路径>
   report_verdict: <该报告自己的判定,原文照录>
   verdict_reason: <该报告自己给这条判定写的那一行原因,原文照录>
-  metric_rows: [<该报告指标表的各行,原文照录,各自保留 source 与 split>]
+  metric_rows: [<该报告指标表的各行,原文照录,各自保留 source、split、seeds、spread 与 commit>]
   absent: [<报告判为 unmeasurable、或点名缺失的判据>]
   protocol_note: <该报告的协议注意事项,原文照录,没有则 none>
 reports_read: <n>
@@ -63,7 +63,7 @@ reports_read: <n>
 - **消融设计**给出每个消融一张表，行是各变体；
 - 设计没有映射到的 run 进最后的"其他 run"块——列出来，绝不悄悄丢掉。
 
-表内的行是 §4 指派给它的那些 run，按 §4 给出的顺序（没有则按前缀）。一个 run 一行，不是一份报告一行。
+表内的行是 §4 指派给它的那些 run，按 §4 给出的顺序（没有则按前缀）。一个 run 一行，不是一份报告一行。消融表下面写一行 `varied: <计划里写明的、各臂之间不同的那些项>`——取自根 §4 的消融设计与各臂自己的 §2/§3；计划里没写就写 `varied: 计划未写明`，这本身就是一条发现。每张表下面都写一行 `N runs scored on <split> for this claim`——这个计数表里的行本来就摆着，只是把它说出口，因为对同一个阈值试十五次和试一次是两种不同的主张，读者不该靠数行数才知道自己在看哪一种。
 
 ## 结果汇总表绝不做的事
 

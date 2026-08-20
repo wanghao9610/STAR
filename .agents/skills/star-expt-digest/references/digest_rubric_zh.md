@@ -12,7 +12,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 
 - run 判定（`met` / `partially met` / `not met` / `inconclusive` / `invalid`）；
 - §5 done-criteria 记分卡，压缩成一行；
-- 关键指标，逐条按报告记录的 `{值, 来源, split}` 原样转录；
+- 关键指标，逐条按报告记录的 `{值, 来源, split, seeds, spread}` 原样转录——只跑过一次的数字在这里写 `n=1`，不留空；
 - 它写明的任何 blocker 或 major 观察，以及任何方向性信号或 kill-criterion 命中。
 
 **不要为了补充报告而打开该 run 的原始日志。** 报告就是你要读的东西。绕到它背后去"核对"、或补上它遗漏的某个指标，属于逐 run 分析——那是 `$star-expt-analyst` 的活，且带着本 skill 不做的核实环节。看起来不对的报告要转交出去（`$star-expt-analyst <run dir>` 刷新它），而不是在这里改正。
