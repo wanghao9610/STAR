@@ -6,8 +6,17 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 ## The shape of the problem
 
 The fifteen skills exist seven times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 155 markdown files per
-tree, 1085 in all, roughly 92% of the repository. They are maintained by hand. There is no generator.
+`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 157 markdown files per
+tree, 1099 in all, roughly 92% of the repository. Sixty-one of those files per tree are not copies:
+no tree words them differently, so they are one file under `.agents/skills/` that the rest link to.
+The other 96 are written by `.github/scripts/port.sh` from the one authored copy in `.claude/skills/`,
+through a per-harness substitution table and an override list holding every span a tree genuinely
+words for itself. CI runs the check; a tree edited directly stops being what those produce.
+
+`.agents/skills/` is not one of those tools' private tree. It is where the `AGENTS.md` convention puts
+skills, so Codex scans it as its only project root, Cursor scans it as a native root, and Pi and DSH
+read it beside their own — any agent following the convention finds the same fifteen skills there.
+That is why it is the one tree naming no harness's tools; see "What must differ, and what must not".
 
 So the cost of changing one shared rule is measured in files, not lines. Recent examples:
 
@@ -30,28 +39,33 @@ Edit there first, then port outward.
 This is not because the other trees resemble it most — they do not. After normalizing the invocation
 token and the `disable-model-invocation` line, each tree is about equally far from it:
 
+Sixty-one of the 157 Markdown files are not copies at all — no tree words them
+differently, so they are one file under `.agents/skills/` that the rest link to.
+Of the 96 each tree does word for itself:
+
 | Tree | Byte-identical to `.claude` |
 |---|---|
-| `.agents` | 56 / 155 |
-| `.cursor` | 63 / 155 |
-| `.dsh` | ported from `.kimi-code`, then adapted; see the next section |
-| `.kimi-code` | 66 / 155 |
-| `.pi` | ported from `.cursor`, then adapted; see the next section |
-| `.qwen` | 64 / 155 |
+| `.agents` | 43 / 96 |
+| `.cursor` | 51 / 96 |
+| `.dsh` | 52 / 96 |
+| `.kimi-code` | 56 / 96 |
+| `.pi` | 48 / 96 |
+| `.qwen` | 52 / 96 |
 
 The reason is completeness, which is measurable: **`.claude` never has fewer headings than any other
-tree, in any of the 155 files.** Where trees diverge structurally, `.claude` is the superset. Porting
+tree, in any of the 157 files.** Where trees diverge structurally, `.claude` is the superset. Porting
 from the longest version means adapting text down, which is safer than reconstructing text that was
 dropped — the failure mode in "What the checks do not catch" below.
 
 ## What must differ, and what must not
 
-Each tree names its own harness's tools. This is deliberate, and it is the single thing most often
-mistaken for drift.
+Each of the six named trees names its own harness's tools; the shared root names none, because it
+belongs to no one harness. This is deliberate, and it is the single thing most often mistaken for
+drift.
 
 | Tree | Tool | Invocation | Gate | Delegation | User questions |
 |---|---|---|---|---|---|
-| `.agents` | Codex | `$star-*` | `update_plan` | `spawn_agent`, `agent_type: explorer` / `worker` (selective; local by default) | `request_user_input` |
+| `.agents` | any agent reading the `AGENTS.md` root | `star-*`, no prefix | "your plan tool" | "a read-only sub-agent" / "a writing sub-agent" | "your question tool" |
 | `.claude` | Claude Code | `/star-*` | `EnterPlanMode` / `ExitPlanMode` | `Agent`, `subagent_type: Explore` / `general-purpose` | `AskUserQuestion` |
 | `.cursor` | Cursor | `/star-*` | `SwitchMode` → `plan` | `Task`, `subagent_type: explore`; writing delegates set no type | `AskQuestion` |
 | `.dsh` | DSH | `/skill:star-*` | `exit_plan_mode` only — the human turns plan mode on | `subagent`, no type parameter at all | `ask_user_question` |
@@ -61,28 +75,32 @@ mistaken for drift.
 
 Measured distribution, as a sanity check when you are unsure whether something is adaptation or drift:
 the question tool splits by name — `AskUserQuestion` in 32 `.claude` and 32 `.kimi-code` files,
-`AskQuestion` in 32 `.cursor` files, `ask_user_question` in 32 `.qwen` files, `request_user_input` in
-16 `.agents` files; `SwitchMode` in 2 `.cursor` files and 0 elsewhere, against `update_plan` in 4
-`.agents` files; the subagent tool is `Agent` in 28 files each of `.claude` and `.kimi-code`, `Task` in
-28 `.cursor` files, `agent` in the same 28 `.qwen` files (its two `exec_plan` templates use the bare
-word for the role, not the tool, so a plain grep there returns 30), and `spawn_agent` in 28 `.agents`
-files, which carry `agent_type`. The former four carry `subagent_type`.
+`AskQuestion` in 32 `.cursor` files, `ask_user_question` in 32 `.qwen` files; `SwitchMode` in 2
+`.cursor` files and 0 elsewhere; the subagent tool is `Agent` in 28 files each of `.claude` and
+`.kimi-code`, `Task` in 28 `.cursor` files, and `agent` in the same 28 `.qwen` files (its two
+`exec_plan` templates use the bare word for the role, not the tool, so a plain grep there returns 30).
+All four carry `subagent_type`.
 The terminal tool is `Bash` in 30 files each of `.claude` and `.kimi-code`, `Shell` in 30 `.cursor`
-files, `run_shell_command` in 30 `.qwen` files, and lowercase `shell` in `.agents`, which is how Codex
-writes it; the file reader is `Read` in 28 files each of `.claude`, `.cursor` and `.kimi-code` and
-`read_file` in 28 `.qwen` files, while `.agents` names none — Codex has no
-file-reading tool, so those loads say "file read" and carry a marked fallback that `cat`s the files into
-the shell call and accepts that the result is written out. A term concentrated in the trees whose harness actually has it is
-almost always correct.
+files, and `run_shell_command` in 30 `.qwen` files; the file reader is `Read` in 28 files each of
+`.claude`, `.cursor` and `.kimi-code` and `read_file` in 28 `.qwen` files. A term concentrated in the
+trees whose harness actually has it is almost always correct.
 
-Every one of those names was checked against its harness's own tool list, not against how the other
-trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the [Kimi Code CLI built-in tools
-reference](https://moonshotai.github.io/kimi-code/en/reference/tools.html), for Qwen Code its own
-source and the skills it bundles, and for Codex the tool
-handlers in `openai/codex` (`codex-rs/core/src/tools/`), where the
-registered names are `shell_command`, `apply_patch`, `update_plan`, `request_user_input` and
-`spawn_agent`. Two trees needed correcting: `.cursor` had inherited Claude's `Bash`, and `.agents`
-named `Bash`, `Read` and `ask_user_question`, the last of which Codex has never had. `.kimi-code`
+**`.agents` appears in none of those rows, because its count in each of them is zero**, and check 23 is
+what holds it there: its banned list is the union of the others' — every harness's file reader,
+terminal, question tool and plan tool, Codex's included. A load in that tree says "file read", a
+terminal call says
+"shell" as the ordinary English word rather than as a name, and it still carries the marked fallback
+that `cat`s the files into the shell call and accepts that the result is written out, because a
+harness arriving there may have no file-reading tool: Codex, whose only project root this is, has none.
+
+Every one of the six named trees' names was checked against its harness's own tool list, not against
+how the other trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the [Kimi Code CLI
+built-in tools reference](https://moonshotai.github.io/kimi-code/en/reference/tools.html), and for
+Qwen Code its own source and the skills it bundles. Codex's list is the tool handlers in
+`openai/codex` (`codex-rs/core/src/tools/`), where the registered names are `shell_command`,
+`apply_patch`, `update_plan`, `request_user_input` and `spawn_agent` — the list a change under
+`.codex/` is still checked against, and the one `.agents` was checked against while it spoke Codex.
+One tree needed correcting: `.cursor` had inherited Claude's `Bash`. `.kimi-code`
 needed neither correction — Kimi Code CLI's file tools are `Read`, `Write`, `Edit`, `Grep`, `Glob` and
 `ReadMediaFile`, and its terminal is `Bash`, the same names Claude publishes — and the delegation it
 does need holds: the `Agent` tool takes `subagent_type`, whose built-in values are `coder` (default),
@@ -134,12 +152,12 @@ winning a name clash), where frontmatter `name` is the identifier the `Task` too
 rule a mechanism rather than an instruction, at the cost of an artifact to maintain across six
 trees and a `.claude/agents/` directory that Cursor would also read. It stays available and unused.
 
-Codex delegation names the real call without changing the cost stance: **collect locally by default,
-delegate selectively**, then call `spawn_agent` only after the bounded / independent / materially
-helpful test passes. Read-only collection uses `agent_type: explorer`; file-writing implementation uses
-`agent_type: worker`. The built-in `default` type is deliberately unused because every STAR delegation
-has one of those two explicit roles. OpenAI's warning that subagent workflows spend more tokens than
-the single-agent equivalent is why naming the tool does not make delegation the default.
+`.agents` delegation is named by what the delegate does, since that tree can name no call: **a
+read-only sub-agent** for collection, **a writing sub-agent** for implementation. What decides whether
+one is dispatched is the same everywhere — the bounded / independent / materially helpful test of
+conventions §6.1 — so the shared root states the test and leaves the call to whoever reads it. Codex's
+own call is `spawn_agent` with `agent_type: explorer` or `worker`; its built-in `default` type has no
+use here, because every STAR delegation is one of those two roles.
 
 **A term appearing in the wrong tree is the actual defect.** Two real cases: 25 `.cursor` asset
 templates told users "Claude Code injects it at session start" (`e149ae0`), and `.kimi-code` names
@@ -150,9 +168,11 @@ carried unchanged into `.cursor`, `.kimi-code` and `.agents` for as long as thos
 a tool name that reads like an ordinary English word does not look like Claude vocabulary — unlike
 `AskUserQuestion`, which does. In `.cursor` and `.agents` that was the defect it looks like. `.agents`
 also named `ask_user_question`, which is worse than an unadapted name: it is harness-shaped, lowercase and
-plausible, so it reads as if someone had checked. Nobody had — Codex calls it `request_user_input`. When
+plausible, so it reads as if someone had checked. Nobody had — Codex calls it `request_user_input`, and
+that is the name the tree carried for as long as it was written for Codex. When
 you port a tree, check every tool name against that harness's published tool list, not against how
-familiar or how plausible the name feels.
+familiar or how plausible the name feels. In `.agents` there is no list to check against, because no
+tool name belongs there at all.
 
 **Renaming on that suspicion, unchecked, is the same defect inverted.** `.kimi-code` had `Bash` and
 `Read` because Kimi Code CLI calls them `Bash` and `Read`. v0.1.8 read them as unadapted Claude
@@ -227,10 +247,13 @@ correctly, because §6.1's local fill is a floor rather than a prohibition.
 
 ## `.agents` is a declared variant
 
-`.agents` is a genuine adaptation, not a copy: its executor has 7 steps where the others have 9, and
-`stop_line_rules.md` is written as "what **Codex** runs". Its heading structure differs from `.claude`
-in 10 files — six under `star-plan-executor`, four under `star-code-architect` — and those differences
-are not simple omissions: it restructures.
+`.agents` is a genuine adaptation, not a copy: its executor has 7 steps where the others have 9. Its
+heading structure differs from `.claude` in 8 files — four under `star-plan-executor` (the manifest and
+`agent_dispatch_spec.md`, each in both languages), four under `star-code-architect`
+(`orchestration_spec.md` and `survey_spec.md`, likewise) — and those differences are not simple
+omissions: it restructures. `stop_line_rules.md` was the ninth and tenth until the tree stopped naming
+a harness: it was titled "what **Codex** runs", and now says "what the agent runs", which is what
+`.claude` says, so those two files agree heading for heading.
 
 It is therefore **exempt from the structural check**, and that exemption is a known hole: see below.
 
@@ -266,7 +289,9 @@ placeholders in the body, is absent from the `/` menu entry (`tui/commands/skill
 `aliases`, `description` and nothing else), and buys nothing for bodies like ours that carry no
 placeholders. The prose `Invocation:` line already in the body is what actually reaches the model.
 
-**Codex removed per-skill permissions on purpose.** `agents/openai.yaml` accepted a `permissions:`
+**Codex removed per-skill permissions on purpose.** Its per-skill manifest — the file carrying the
+display name, the default prompt, and the `allow_implicit_invocation` flag that makes a skill
+slash-only there — accepted a `permissions:`
 block for about six weeks in early 2026 (`5b6911cb`) and lost it again (`0bb152b0`, `b3e069e8`); the
 regression test `shell_zsh_fork_skill_scripts_ignore_declared_permissions` now asserts that declared
 skill permissions "should not widen script execution beyond the turn sandbox". Both keys survive in
@@ -275,6 +300,17 @@ the shipped binary only inside the bundled skill-creator's authoring guide — o
 pins `allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}` and
 rejects anything else with "Unexpected key(s) in SKILL.md frontmatter", so adding `argument-hint`
 there would be inert at runtime *and* a validation failure on publish.
+
+**That manifest is Codex's alone, so it is stored under `.codex/`.** The fifteen files live at
+`.codex/skills/<skill>/agents/openai.yaml`, and `.agents/skills/<skill>/agents/openai.yaml` is a
+relative symlink to each. The link is not optional: Codex reads a manifest only from inside the skill
+directory it belongs to, and `.agents/skills` is the only project root it scans, so there is no
+`.codex/skills` discovery to move them to. The checks are written around that split: check 4 reads the
+fifteen from `.codex/skills/`, while checks 3 and 7 leave `agents/` out — out of the inventory
+baseline, and out of the token scan, since a `default_prompt` is written in Codex's own `$star-*`
+syntax on purpose.
+`--tools codex` selects `.agents` and `.codex` together, and `execs/update.sh` copies what a link
+points at, so an installed project gets a real file rather than a link into a directory it did not take.
 
 **Qwen Code reads both keys, and only one of them ports.** Its skill frontmatter takes `name`,
 `description`, `argument-hint`, `when_to_use`, `priority`, `paths`, `user-invocable`,
@@ -319,8 +355,8 @@ its ending in practice.
 **Codex truncates far harder than either number, and it is measurable.** `codex debug prompt-input`
 renders the model-visible input; in it every skill — Codex's own bundled ones included — is one line
 of `name: <first ~100 characters of description> (file: <path>)`, cut mid-word with no ellipsis. The
-fifteen `.agents` descriptions run 566–1016 characters, so **about 10% of what is written reaches the
-model, and the "Use when the user runs `$star-*`, or wants …" trigger clause reaches it for none of
+fifteen `.agents` descriptions run 504–947 characters, so **about 10% of what is written reaches the
+model, and the "Use when the user invokes `star-*`, or wants …" trigger clause reaches it for none of
 the fifteen.** That clause is the entire mechanism by which a description earns an unprompted
 invocation, and on Codex it is dead weight. The full `SKILL.md` still loads once a skill is invoked,
 so this costs discovery, not execution — but discovery is what a description is for.
@@ -350,11 +386,13 @@ nothing enforces that judgement.
 
 1. The six roots carry the same set of skill directories.
 2. Frontmatter `name:` matches the directory name.
-3. Per-skill file inventory is identical across trees (Codex `agents/` manifests aside).
+3. Per-skill file inventory is identical across trees (`.agents`' `agents/` links to Codex's
+   manifests aside).
 4. Slash-only guards match the conventions §10 roster in both directions, in all six trees, and the roster itself lists exactly the skills that exist, with the same rows and † set in the zh edition.
 5. Every `.md` has its `_zh.md` twin.
 6. Every `SKILL.md` references the conventions document.
-7. Invocation tokens are tree-appropriate — no `$star-*` in `.claude`, `.cursor` or `.qwen`, and so on.
+7. Invocation tokens are tree-appropriate — no prefix at all in `.agents`, `/star-*` in `.claude`,
+   `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code`.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are
@@ -425,18 +463,22 @@ nothing enforces that judgement.
     about what may be skipped; and moving it below the first `##` heading, where it stops being part of
     the load the reader is deciding about. It must also carry no bare `§n` — check 20d reads every `§n`
     in that same block as a claim about which sections the skill loads.
-22. **Delegation calls stay native to each harness.** `.agents` names `spawn_agent` with
-    `agent_type: explorer` or `worker` in exactly the files `.claude` marks with `subagent_type`, and
-    neither vocabulary appears in any of the other five trees.
-23. **Each tree names only its own harness's file reader, terminal, and subagent types.** Pi's are
-    lowercase (`read`, `bash`) and it may name no `subagent_type` at all. Claude Code
+22. **Delegation calls stay native to each harness, and the shared root names none.** `.agents` may
+    not carry a delegation tool or type key at all — `spawn_agent`, `star_subagent`, `Agent`, `Task`,
+    `agent_type:`, `subagent_type:` — because a delegate there is named by what it does. In the other
+    direction, `spawn_agent` and `agent_type:`, which are Codex's, appear in none of `.claude`,
+    `.cursor`, `.kimi-code` or `.qwen`.
+23. **Each tree names only its own harness's file reader, terminal, question tool and subagent types —
+    and `.agents` names none of them.** Pi's are lowercase (`read`, `bash`) and it may name no
+    `subagent_type` at all. Claude Code
     and Kimi Code publish `Read` and `Bash`; Cursor's terminal is `Shell`; Qwen Code's are the
     snake_case identifiers `read_file` and `run_shell_command`, with its display labels `ReadFile` and
-    `Shell` banned there alongside Claude's names; Codex has no file reader and
-    writes its terminal lowercase. The `subagent_type` values are pinned per tree — `Explore` /
+    `Shell` banned there alongside Claude's names. The shared root's banned list is the union of all of
+    them: every harness's file reader, terminal, question tool and plan tool, Codex's own included.
+    The `subagent_type` values are pinned per tree — `Explore` /
     `general-purpose` for Claude, `explore` alone for Cursor, `explore` / `coder` for
-    Kimi, `Explore` / `general-purpose` / `fork` for Qwen Code — which check 22 had covered for Codex
-    alone. It exists because the inverse of an unadapted
+    Kimi, `Explore` / `general-purpose` / `fork` for Qwen Code — while `.agents` may name no type key,
+    which is check 22's half of the job. It exists because the inverse of an unadapted
     name shipped: `.kimi-code` was renamed off `Read` and `Bash` onto names Kimi has never had, and
     every check passed it. `.cursor`'s two began as this repository's descriptive choice and are now
     citable — Cursor's hooks and CLI-permissions pages publish `Shell` and `Read` — so all six trees

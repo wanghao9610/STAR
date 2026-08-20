@@ -419,7 +419,7 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
 #     compare equal to their siblings. What remains must match exactly.
 #
 #     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
-#     executor against the others' 9), and its headings differ in 10 files under
+#     executor against the others' 9), and its headings differ in 8 files under
 #     this check's own normalization. That is a known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
 section "Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)"
 STRUCT_ROOTS=(.claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
