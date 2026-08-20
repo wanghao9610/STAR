@@ -26,11 +26,11 @@ Once the research is ready to be written up, [STAGE](https://github.com/wanghao9
   - [3. Add an experiment](#3-add-an-experiment)
   - [4. Run it](#4-run-it)
   - [5. Start the research workflow](#5-start-the-research-workflow)
+- [Research workflow](#research-workflow)
+  - [Model selection](#model-selection)
 - [Per-tool setup (optional)](#per-tool-setup-optional)
   - [Session hooks](#session-hooks)
   - [Pre-approve the status collector](#pre-approve-the-status-collector)
-- [Research workflow](#research-workflow)
-  - [Model selection](#model-selection)
 - [Project memory](#project-memory)
 - [Updating STAR skills and workflow guides](#updating-star-skills-and-workflow-guides)
 - [Project conventions](#project-conventions)
@@ -145,7 +145,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` holds the consistency check STAR uses to keep its five skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
+`.github/` holds the consistency check STAR uses to keep its seven skill mirrors in step. It is for maintaining STAR itself, not for your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a tool directory you do not use. The adopt path in step 1b never installs it.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files should be included directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before running `git add .`.
 
@@ -169,6 +169,8 @@ wraps your existing launch commands, and records what is already built and run. 
 then apply unchanged.
 
 ### 2. Configure the local runtime
+
+**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, fall back to `python3`, and fall back again to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH is the one harness needing a further tool: without `zstd` it cannot recover a model id at all (see [Per-tool setup (optional)](#per-tool-setup-optional)).
 
 Copy the example environment file:
 
@@ -196,7 +198,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 Setting neither is an error.
 
-Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask before they decide. At `low` a skill takes the recommended option on judgment calls and logs that it did, and in Claude Code, Codex and Qwen Code the permission prompt before each file edit is skipped — Cursor, DSH, Kimi Code and Pi have no such prompt for the level to answer, so there the level governs only what the skills themselves ask; `medium` (the default) asks as documented; `high` confirms each step. Safety gates — the STOP line, commits, deletions — are asked at every level. To change the level for a single run, add the same token when you call a skill: `$star-plan-executor 00 involve=low`. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.7.
+Optionally, add `INVOLVE=low|medium|high` to set how much the STAR skills ask before they decide. At `low` a skill takes the recommended option on judgment calls and logs that it did, and in Claude Code, Codex and Qwen Code the permission prompt before each file edit is skipped — Cursor, DSH, Kimi Code and Pi have no such prompt for the level to answer, so there the level governs only what the skills themselves ask; `medium` (the default) asks as documented; `high` confirms each step. Mandatory confirmation points — the STOP line, every deletion and every overwrite, and any ambiguity about what you meant — are asked at every level; the commit offer is a judgment call, so `low` takes it unasked and names every commit it made. To change the level for a single run, add the same token when you call a skill: `$star-plan-executor 00 involve=low`. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.7.
 
 A second optional key, `STAR_LANG=en|zh`, fixes one language for both the agents' replies and newly generated workflow documents (plans, reports). Left unset, both follow the conversation's language. An explicit request in the conversation wins either way, and existing documents keep the language declared in their frontmatter. Full rule: [research workflow conventions](docs/mds/star-workflow/research-workflow-conventions.md#7-dialogue) §7.6.
 
@@ -257,55 +259,6 @@ The skeleton above stands on its own — the layout, `.env`, and `execs/run.sh` 
 
 `star-flow-status` is the one to remember: it reads the plan tree and the reports on disk and names the single next action, so you never have to recall where you left off.
 
-## Per-tool setup (optional)
-
-Neither is needed to get started. Do them when the tool you drive STAR with needs them.
-
-### Session hooks
-
-Two hooks run at the start of a session: one records the model id skills write into every artifact, the other puts the [project memory](#project-memory) index in front of the agent. Claude, Codex and Qwen Code carry a third hook that is not a session hook: while `.env` reads `INVOLVE=low` it answers the permission prompt before a file edit, and at every other level it does nothing. It ships registered in `.claude/settings.json`, `.codex/hooks.json` and `.qwen/settings.json` like the other two. Cursor, DSH, Kimi Code and Pi do not carry it: Cursor has no hook that fires before a file edit, Kimi's `PermissionRequest` only observes the prompt it fires beside, and Pi ships no permission prompts at all. DSH has none to answer either, for a reason of its own: its default `workspace-write` sandbox lets an edit inside the project run without asking, and the only approval a file operation raises there is a one-shot escalation for a write *outside* the workspace — which this gate declines to answer anywhere, since it already passes on every path outside the project root. Its bridge would not honor an `allow` in any case. All seven carry a further hook, also not a session hook, and this one runs at every level: `star_commit_guard.sh` declines the git commands the [conventions](docs/mds/star-workflow/research-workflow-conventions.md) §1 forbids — blanket or forced staging, the history rewrites, and a commit whose staged files exceed 10 MB. Claude, Codex, DSH, Kimi Code and Qwen Code run it on `PreToolUse`; Cursor on `beforeShellExecution`, and Pi on its `tool_call` event, which is where a shell command is decided in each. The matcher is the harness's own tool name — `Bash` for Claude, Codex and Kimi Code, `run_shell_command` for Qwen Code, whose matcher reads the tool identifier rather than the display label, and lowercase `bash` for DSH and Pi. It is the floor under `INVOLVE=low` answering the commit offer itself: what it declines is yours to run.
-
-If you drive STAR with **Kimi Code** or **DSH**, run the matching installer once per machine so the hooks are registered, and skills record the real `model_id` instead of `unrecorded`:
-
-```bash
-bash .kimi-code/hooks/install.sh   # Kimi Code
-bash .dsh/hooks/install.sh         # DSH
-```
-
-Each writes to the machine's own global config — `~/.kimi-code/config.toml` for Kimi, `$DSH_HOME/cordis.patch.yml` for DSH — backing that file up first; running either twice changes nothing, and one run covers every STAR project on the machine. Codex, Claude, Cursor, Pi and Qwen Code ship both hooks already registered, so skip this step there. On Codex, though, registered is not yet running: a project hook fires only once the project is trusted and the hook approved. Run `/hooks` in the Codex CLI to approve them, and again whenever a hook changes. Until you do, `model_id` reads `unrecorded` in every report and no memory reaches the session, with nothing pointing out the gap. On Qwen Code the same caveat applies only if you have turned folder trust on (`security.folderTrust.enabled`, off by default): an untrusted project runs no project-level hook, again with nothing pointing out the gap. Qwen Code also reads `QWEN.md` in preference to `AGENTS.md`, so if your project has one, STAR's instructions in `AGENTS.md` are not loaded — import them from `QWEN.md` with `@AGENTS.md` or delete the file. **Pi** needs no install step and no registration file: it discovers `.pi/extensions/star-hooks/index.ts` by itself and that extension wires all three hooks — but only once the project is trusted, so answer Pi's trust prompt, or run `/trust`, or set `defaultProjectTrust`. Until then no project extension loads, no `.pi/skills/` are found, `model_id` reads `unrecorded`, and the sub-agents, plan mode and structured questions `.pi/extensions/` vendors are all absent — with nothing pointing out the gap. Pi is also the one runtime whose model id cannot go stale: the extension reads the live model before each prompt and injects a fresh line whenever `/model` changes it. **DSH** needs its installer plus one more step: the row it writes loads DSH's Claude Code hook bridge, which is not a dsh dependency, so add it to each profile you use with `dsh plugin --profile <name> add @deepseek-ai/dsh-hooks-claude-code` — the installer names the profiles that still need it. Because the bridge resolves its config path against the directory dsh was launched in, that one row serves every STAR project; launch `dsh` from the project root, and check the result with `dsh --profile <name> --dump-config`. Recovering the model id there needs the `zstd` command on PATH, since DSH stores its session log as Zstandard frames; without it `model_id` falls back to `unrecorded`. A project adopted before one of these hooks existed keeps its own registration file — `execs/update.sh` never overwrites it, and names the hook missing from it instead. Pi is exempt from that too, since its registration is code the updater always replaces. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details.
-
-### Pre-approve the status collector
-
-Six skills open the same plans, run logs, and reports before doing anything else: `star-flow-status`, `star-expt-digest`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser` and `star-metd-summarize`. Rather than open those files one by one, each gathers them with a single read-only script — `scripts/scan.sh`, in that skill's own directory inside your tool's directory. That is a shell call, so your agent asks to approve it the first time it runs.
-
-Claude Code needs nothing on a fresh install: `.claude/settings.json` ships allow rules for exactly those six scripts and nothing else. A project adopted earlier keeps its own `settings.json` — `execs/update.sh` installs that file only when it is missing, and never overwrites it — so add the rules there yourself:
-
-```json
-"permissions": {
-  "allow": [
-    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh:*)",
-    "Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh:*)"
-  ]
-}
-```
-
-Elsewhere, approve it once when asked, or pre-approve it in the tool:
-
-| Tool | Where to pre-approve |
-|---|---|
-| Codex | its approval-policy / sandbox setting (global config, not per project) |
-| Cursor | its command allowlist, in the app's settings |
-| DSH | your global `$DSH_HOME/cordis.patch.yml` — DSH reads no plugin configuration out of a project |
-| Kimi Code | your global `~/.kimi-code/config.toml` — Kimi Code does not read project-level config |
-| Pi | nothing to pre-approve — Pi has no permission system. `.pi/extensions/star-permission-gate.ts` confirms `rm -rf`, `sudo` and `chmod 777`, and refuses them outright in a headless run |
-| Qwen Code | `permissions.allow` in `.qwen/settings.json`, which ships with the scan commands already listed |
-
-The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
-
 ## Research workflow
 
 STAR ships fifteen skills covering the way from a vague interest to a written-up method. Thirteen of them sit at a definite point in that sequence; two can be run at any time. They are listed below by stage: each stage opens with what it corresponds to in the research, then names the skills that belong to it and what each one writes.
@@ -322,7 +275,7 @@ STAR ships fifteen skills covering the way from a vague interest to a written-up
 | Pi | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 
-Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works.
+Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works. Which seven, and why, is [conventions §10](docs/mds/star-workflow/research-workflow-conventions.md) (the skill roster) — that table is the source of truth and this list follows it.
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes" width="100%">
@@ -388,9 +341,64 @@ These skills preserve decisions and progress in project files instead of relying
 
 See the [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) for invocation details, a complete example, generated files, and troubleshooting guidance. The rules every skill shares — git, the STOP line, the `.env` runtime, dates, delegation, and dialogue discipline — are in the [Research Workflow Skill Conventions](docs/mds/star-workflow/research-workflow-conventions.md).
 
+## Per-tool setup (optional)
+
+Neither is needed to get started. Do them when the tool you drive STAR with needs them.
+
+### Session hooks
+
+Two hooks run at the start of a session: one records the model id skills write into every artifact, the other puts the [project memory](#project-memory) index in front of the agent. Claude, Codex and Qwen Code carry a third hook that is not a session hook: while `.env` reads `INVOLVE=low` it answers the permission prompt before a file edit, and at every other level it does nothing. It ships registered in `.claude/settings.json`, `.codex/hooks.json` and `.qwen/settings.json` like the other two. Cursor, DSH, Kimi Code and Pi do not carry it: Cursor has no hook that fires before a file edit, Kimi's `PermissionRequest` only observes the prompt it fires beside, and Pi ships no permission prompts at all. DSH has none to answer either, for a reason of its own: its default `workspace-write` sandbox lets an edit inside the project run without asking, and the only approval a file operation raises there is a one-shot escalation for a write *outside* the workspace — which this gate declines to answer anywhere, since it already passes on every path outside the project root. Its bridge would not honor an `allow` in any case. All seven carry a further hook, also not a session hook, and this one runs at every level: `star_commit_guard.sh` declines the git commands the [conventions](docs/mds/star-workflow/research-workflow-conventions.md) §1 forbids — blanket or forced staging, the history rewrites, and a commit whose staged files exceed 10 MB. Claude, Codex, DSH, Kimi Code and Qwen Code run it on `PreToolUse`; Cursor on `beforeShellExecution`, and Pi on its `tool_call` event, which is where a shell command is decided in each. The matcher is the harness's own tool name — `Bash` for Claude, Codex and Kimi Code, `run_shell_command` for Qwen Code, whose matcher reads the tool identifier rather than the display label, and lowercase `bash` for DSH and Pi. It is the floor under `INVOLVE=low` answering the commit offer itself: what it declines is yours to run.
+
+If you drive STAR with **Kimi Code** or **DSH**, run the matching installer once per machine so the hooks are registered, and skills record the real `model_id` instead of `unrecorded`:
+
+```bash
+bash .kimi-code/hooks/install.sh   # Kimi Code
+bash .dsh/hooks/install.sh         # DSH
+```
+
+Each writes to the machine's own global config — `~/.kimi-code/config.toml` for Kimi, `$DSH_HOME/cordis.patch.yml` for DSH — backing that file up first; running either twice changes nothing, and one run covers every STAR project on the machine. Codex, Claude, Cursor, Pi and Qwen Code ship both hooks already registered, so skip this step there. On Codex, though, registered is not yet running: a project hook fires only once the project is trusted and the hook approved. Run `/hooks` in the Codex CLI to approve them, and again whenever a hook changes. Until you do, `model_id` reads `unrecorded` in every report and no memory reaches the session, with nothing pointing out the gap. On Qwen Code the same caveat applies only if you have turned folder trust on (`security.folderTrust.enabled`, off by default): an untrusted project runs no project-level hook, again with nothing pointing out the gap. Qwen Code also reads `QWEN.md` in preference to `AGENTS.md`, so if your project has one, STAR's instructions in `AGENTS.md` are not loaded — import them from `QWEN.md` with `@AGENTS.md` or delete the file. **Pi** needs no install step and no registration file: it discovers `.pi/extensions/star-hooks/index.ts` by itself and that extension wires all three hooks — but only once the project is trusted, so answer Pi's trust prompt, or run `/trust`, or set `defaultProjectTrust`. Until then no project extension loads, no `.pi/skills/` are found, `model_id` reads `unrecorded`, and the sub-agents, plan mode and structured questions `.pi/extensions/` vendors are all absent — with nothing pointing out the gap. Pi is also the one runtime whose model id cannot go stale: the extension reads the live model before each prompt and injects a fresh line whenever `/model` changes it. **DSH** needs its installer plus one more step: the row it writes loads DSH's Claude Code hook bridge, which is not a dsh dependency, so add it to each profile you use with `dsh plugin --profile <name> add @deepseek-ai/dsh-hooks-claude-code` — the installer names the profiles that still need it. Because the bridge resolves its config path against the directory dsh was launched in, that one row serves every STAR project; launch `dsh` from the project root, and check the result with `dsh --profile <name> --dump-config`. Recovering the model id there needs the `zstd` command on PATH, since DSH stores its session log as Zstandard frames; without it `model_id` falls back to `unrecorded`. A project adopted before one of these hooks existed keeps its own registration file — `execs/update.sh` never overwrites it, and names the hook missing from it instead. Pi is exempt from that too, since its registration is code the updater always replaces. See [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml) for the manual route and details. What each runtime reports for `model_id`, and what it falls back to when it cannot, is [Model id provenance](docs/mds/star-workflow/model_id_spec.md).
+
+### Pre-approve the status collector
+
+Six skills open the same plans, run logs, and reports before doing anything else: `star-flow-status`, `star-expt-digest`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser` and `star-metd-summarize`. Rather than open those files one by one, each gathers them with a single read-only script — `scripts/scan.sh`, in that skill's own directory inside your tool's directory. That is a shell call, so your agent asks to approve it the first time it runs.
+
+Claude Code needs nothing on a fresh install: `.claude/settings.json` ships allow rules for exactly those six scripts and nothing else. A project adopted earlier keeps its own `settings.json` — `execs/update.sh` installs that file only when it is missing, and never overwrites it — so add the rules there yourself:
+
+```json
+"permissions": {
+  "allow": [
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-plan-executor/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-plan-reviser/scripts/scan.sh:*)",
+    "Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh)",
+    "Bash(bash .claude/skills/star-metd-summarize/scripts/scan.sh:*)"
+  ]
+}
+```
+
+Elsewhere, approve it once when asked, or pre-approve it in the tool:
+
+| Tool | Where to pre-approve |
+|---|---|
+| Codex | its approval-policy / sandbox setting (global config, not per project) |
+| Cursor | its command allowlist, in the app's settings |
+| DSH | your global `$DSH_HOME/cordis.patch.yml` — DSH reads no plugin configuration out of a project |
+| Kimi Code | your global `~/.kimi-code/config.toml` — Kimi Code does not read project-level config |
+| Pi | nothing to pre-approve — Pi has no permission system. `.pi/extensions/star-permission-gate.ts` confirms `rm -rf`, `sudo` and `chmod 777`, and refuses them outright in a headless run |
+| Qwen Code | `permissions.allow` in `.qwen/settings.json`, which ships with the scan commands already listed |
+
+The script only reads. It globs `metds/` and `wkdrs/`, prints frontmatter and file listings, and writes nothing anywhere.
+
 ## Project memory
 
-What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at the start of every session, in all five tools.
+What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever tool you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at the start of every session, in all seven tools.
 
 Two rules keep it from becoming a second, competing source of truth:
 
@@ -527,7 +535,6 @@ Highlights by release, newest first. Each release is a git tag, so `bash execs/u
 - **[v0.1.6](https://github.com/wanghao9610/STAR/tree/v0.1.6)** (2026-07-30) — `star-flow-status` splits its opening load into two commands sent together — the conventions excerpts, whose size is fixed, and the collector's digest, which grows with the project's history. The two shared one result-size limit, so on a project with history the pair overran it and both were written out to a file; split, the excerpts always arrive and only the digest can still be written out.
 - **[v0.1.5](https://github.com/wanghao9610/STAR/tree/v0.1.5)** (2026-07-30) — Four more skills — `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser`, `star-metd-summarize` — read the plan tree through the shared read-only collector instead of opening each plan, and a second skill in the same conversation may reuse the opening load it can still see, the collector's digest excepted. `star-plan-decomposer` renames its three decomposition axes to phase, component and experiment, each named for the unit that level holds. It recommends the experiment axis only once the code runs end to end, that axis holding experiment groups with the individual claims one digit deeper.
 - **[v0.1.4](https://github.com/wanghao9610/STAR/tree/v0.1.4)** (2026-07-29) — Every skill opens with a single load message, and `SKILL_zh.md` is no longer read at runtime — it stays a full mirror for human readers. Two skills load only the conventions sections they act on.
-
 - **[v0.1.3](https://github.com/wanghao9610/STAR/tree/v0.1.3)** (2026-07-29) — `star-refs-reviewer` gains a `survey` mode, which writes a standalone field survey to `metds/refs/`, and an `add` form that takes several papers in one call.
 - **[v0.1.2](https://github.com/wanghao9610/STAR/tree/v0.1.2)** (2026-07-28) — One wording rule, in `AGENTS.md` §7 and conventions §7.11: write the action, not its name. All fifteen skills are audited against it.
 - **[v0.1.1](https://github.com/wanghao9610/STAR/tree/v0.1.1)** (2026-07-27) — `star-flow-status` scans the plan tree once and `star-expt-digest` reads the same scan. Adds `STAR_LANG` to pin the language of replies and generated documents; `execs/update.sh` gains `AGENTS.md` sync and `--force`; the provenance hooks read the model id at the moment a skill records it.
