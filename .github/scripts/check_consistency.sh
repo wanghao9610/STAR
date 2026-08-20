@@ -22,6 +22,21 @@ list_skills() { # $1 = skill root
     find "$1" -mindepth 1 -maxdepth 1 -type d | sed 's|.*/||' | sort
 }
 
+# grep over one or more trees, options first, then a lone --, then the roots:
+#   mdgrep -n -E "${pattern}" -- .claude/skills .cursor/skills
+# The walk is find -L rather than grep's own recursion, because a file a tree
+# words the same as .agents is a symlink into it, and the two disagree about
+# those: find -L reads them, BSD grep skips them under -r and -R alike, GNU grep
+# under -r. A scan that had quietly stopped reading 397 files would still print
+# ok. Markdown only, which is what every caller wanted; find runs no grep at all
+# when nothing matches, so an empty tree returns empty rather than reading stdin.
+mdgrep() {
+    local opts=()
+    while [[ $# -gt 0 && "$1" != "--" ]]; do opts+=("$1"); shift; done
+    shift
+    find -L "$@" -type f -name '*.md' -exec grep "${opts[@]}" {} +
+}
+
 frontmatter_has_line() { # $1 = file, $2 = exact line expected inside the leading --- block
     awk -v want="$2" 'NR == 1 { next } /^---[ \t]*$/ { exit } $0 == want { found = 1; exit } END { exit !found }' "$1"
 }
@@ -196,9 +211,14 @@ done
 #    turns off the /skill: commands that would otherwise duplicate them.
 section "Invocation-token hygiene"
 token_errors=0
+# Every scan of a tree below goes through find -L rather than grep's own
+# recursion. A file a tree shares with .agents is a symlink, and the two
+# disagree about those: find -L reads them, BSD grep skips them under -r and
+# -R alike, and GNU grep skips them under -r. A scan that quietly stopped
+# reading 397 files would still print ok.
 check_absent() { # $1 = tree, $2 = literal token
     local hits
-    hits="$(grep -RnF -- "$2" "$1" || true)"
+    hits="$(find -L "$1" -type f -exec grep -nHF -- "$2" {} + || true)"
     if [[ -n "${hits}" ]]; then
         fail "$1 contains foreign invocation token '$2':"
         printf '%s\n' "${hits}" | sed 's/^/      /'
@@ -226,7 +246,7 @@ done < <(printf '%s\n' "${SKILLS}")
 # and the checks above passed it: the token is not foreign to that tree, and
 # check 6 matches the filename, not the directory. Every "docs/mds" in the
 # skill trees must still be followed by "/star-workflow/".
-mangled_paths="$(grep -Rn 'docs/mds[^/]' "${SKILL_ROOTS[@]}" || true)"
+mangled_paths="$(find -L "${SKILL_ROOTS[@]}" -type f -exec grep -nH 'docs/mds[^/]' {} + || true)"
 if [[ -n "${mangled_paths}" ]]; then
     fail "docs/mds/ path separator damaged (token rewrite hit a directory name):"
     printf '%s\n' "${mangled_paths}" | sed 's/^/      /'
@@ -799,7 +819,8 @@ for rule in "${CITATION_LABELS[@]}"; do
                 cite_errors=1
             fi
         done < <(printf '%s\n' "${text}" | grep -oE "${pattern}")
-    done < <(grep -RnE "${pattern}" --include='*.md' "${CITATION_SCAN[@]}" 2>/dev/null | grep -v 'research-workflow-conventions')
+    done < <(find -L "${CITATION_SCAN[@]}" -type f -name '*.md' \
+                  -exec grep -nHE "${pattern}" {} + 2>/dev/null | grep -v 'research-workflow-conventions')
 
     if (( rule_hits == 0 )); then
         fail "citation rule '${pattern}' matches nothing any more; drop the row or restore the citation"
@@ -1085,7 +1106,8 @@ if (( $(sort -u "${bq_seen}" | wc -l) > 1 )); then
 fi
 rm -f "${lang_seen}" "${bq_seen}"
 
-stale_reads="$(grep -Rn 'in full before acting\|与读取本文件\|issue its read together' "${SKILL_ROOTS[@]}" || true)"
+stale_reads="$(find -L "${SKILL_ROOTS[@]}" -type f \
+    -exec grep -nH 'in full before acting\|与读取本文件\|issue its read together' {} + || true)"
 if [[ -n "${stale_reads}" ]]; then
     fail "SKILL_zh runtime-read phrasing has returned:"
     printf '%s\n' "${stale_reads}" | sed 's/^/      /'
@@ -1444,9 +1466,9 @@ delegation_errors=0
 codex_expected="$(mktemp)"
 codex_actual="$(mktemp)"
 
-grep -Rl --include='*.md' 'subagent_type:' .claude/skills \
+mdgrep -l 'subagent_type:' -- .claude/skills \
     | sed 's|^\.claude/skills/||' | sort > "${codex_expected}"
-grep -Rl --include='*.md' 'agent_type:' .agents/skills \
+mdgrep -l 'agent_type:' -- .agents/skills \
     | sed 's|^\.agents/skills/||' | sort > "${codex_actual}"
 
 if ! diff -u "${codex_expected}" "${codex_actual}" >/dev/null; then
@@ -1471,15 +1493,15 @@ while IFS= read -r rel; do
     fi
 done < "${codex_actual}"
 
-foreign_codex_type="$(grep -Rn --include='*.md' 'subagent_type:' .agents/skills || true)"
+foreign_codex_type="$(mdgrep -n 'subagent_type:' -- .agents/skills || true)"
 if [[ -n "${foreign_codex_type}" ]]; then
     fail ".agents contains foreign subagent_type vocabulary:"
     printf '%s\n' "${foreign_codex_type}" | sed 's/^/      /'
     delegation_errors=1
 fi
 
-foreign_spawn="$(grep -Rn --include='*.md' -E 'spawn_agent|(^|[^[:alnum:]_])agent_type:' \
-    .claude/skills .cursor/skills .kimi-code/skills .qwen/skills || true)"
+foreign_spawn="$(mdgrep -nE 'spawn_agent|(^|[^[:alnum:]_])agent_type:' \
+    -- .claude/skills .cursor/skills .kimi-code/skills .qwen/skills || true)"
 if [[ -n "${foreign_spawn}" ]]; then
     fail "non-Codex skill tree contains Codex delegation vocabulary:"
     printf '%s\n' "${foreign_spawn}" | sed 's/^/      /'
@@ -1518,13 +1540,13 @@ vocab_errors=0
 
 check_vocab() { # $1 = skill root, $2 = expected-present ERE ('' = none), $3 = banned ERE
     local root="$1" want="$2" banned="$3" hits
-    hits="$(grep -REn --include='*.md' "${banned}" "${root}" || true)"
+    hits="$(mdgrep -nE "${banned}" -- "${root}" || true)"
     if [[ -n "${hits}" ]]; then
         fail "${root}: names a tool this harness does not have:"
         printf '%s\n' "${hits}" | cut -c1-140 | head -5 | sed 's/^/      /'
         vocab_errors=1
     fi
-    if [[ -n "${want}" ]] && ! grep -REq --include='*.md' "${want}" "${root}"; then
+    if [[ -n "${want}" ]] && [[ -z "$(mdgrep -lE "${want}" -- "${root}")" ]]; then
         fail "${root}: no file names its file reader (${want})"
         vocab_errors=1
     fi
@@ -1554,7 +1576,7 @@ check_vocab .dsh/skills       '`read`'      '\bBash\b|\bShell\b|\bReadFile\b|`Re
 
 check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE alternation
     local root="$1" allowed="$2" bad
-    bad="$(grep -REno --include='*.md' 'subagent_type: [A-Za-z_-]+' "${root}" \
+    bad="$(mdgrep -noE 'subagent_type: [A-Za-z_-]+' -- "${root}" \
         | grep -vE "subagent_type: (${allowed})$" || true)"
     if [[ -n "${bad}" ]]; then
         fail "${root}: subagent_type outside this harness's published types (${allowed}):"
@@ -1570,7 +1592,7 @@ check_subagent_types .qwen/skills      'Explore|general-purpose|fork'
 # Pi delegates through the vendored star_subagent, whose parameter is `agent` and
 # whose values are the roster in .pi/agents — there is no type key to name, so the
 # other harnesses' spellings of one may not appear here.
-pi_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .pi/skills || true)"
+pi_types="$(mdgrep -nE 'subagent_type|spawn_agent|agent_type' -- .pi/skills || true)"
 if [[ -n "${pi_types}" ]]; then
     fail ".pi/skills: names a delegation type, and Pi's star_subagent takes an agent name instead:"
     printf '%s\n' "${pi_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
@@ -1584,7 +1606,7 @@ if [[ -z "${pi_roster}" ]]; then
     fail ".pi/agents holds no agent definitions, and .pi/skills dispatches to them."
     vocab_errors=1
 else
-    pi_unknown="$(grep -REho --include='*.md' 'agent: "[a-z0-9-]+"' .pi/skills \
+    pi_unknown="$(mdgrep -hoE 'agent: "[a-z0-9-]+"' -- .pi/skills \
         | sed 's/.*"\(.*\)"/\1/' | sort -u \
         | grep -vxF "${pi_roster}" || true)"
     if [[ -n "${pi_unknown}" ]]; then
@@ -1597,7 +1619,7 @@ fi
 # prompt, and run_in_background — there is no type parameter to name. A ported
 # `subagent_type: explore` is therefore an argument the tool rejects, so the key
 # may not appear here either, in any spelling.
-dsh_types="$(grep -REn --include='*.md' 'subagent_type|spawn_agent|agent_type' .dsh/skills || true)"
+dsh_types="$(mdgrep -nE 'subagent_type|spawn_agent|agent_type' -- .dsh/skills || true)"
 if [[ -n "${dsh_types}" ]]; then
     fail ".dsh/skills: names a delegation type, and DSH's subagent tool takes none:"
     printf '%s\n' "${dsh_types}" | cut -c1-140 | head -5 | sed 's/^/      /'
