@@ -43,8 +43,7 @@ ok    every .dsh description survives DSH's 500-character catalog intact
 ok    skill scripts are byte-identical and executable in all 7 trees
 
 == Manifest section parity (.agents vs .claude) ==
-diff: /dev/fd/62: Bad file descriptor
-FAIL  .agents/skills/star-env-builder/SKILL.md: ## sections differ from .claude/skills/star-env-builder/SKILL.md:
+ok    .agents manifests carry the same ## sections as .claude (30 files)
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees
@@ -75,4 +74,4 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
-4 check(s) failed.
+3 check(s) failed.
