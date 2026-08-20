@@ -21,7 +21,7 @@ for dist, mod in PAIRS:                    # the mapped list, in framework.txt +
 EOF
 ```
 
-Pass = the import succeeds; record the version. The matrix is transcribed from this one output rather than reassembled from thirty-odd separate calls — which is the likeliest way an evidence cell ends up empty while the check is recorded as run. The main agent runs the loop itself; Principle 6 is unchanged, and batching commands is not delegating them. Every row carries its exact command, and a failing row carries the error tail, or the loop becomes the thing that hides one.
+Pass = the import succeeds; record the version. The matrix is transcribed from this one output rather than reassembled from thirty-odd separate calls — the likeliest way an evidence cell ends up empty while the check is recorded as run. The main agent runs the loop itself: Principle 6 is unchanged, and batching commands is not delegating them. Every row carries its exact command, a failing row the error tail, or the loop becomes what hides one.
 
 ## L2 — framework deep check
 

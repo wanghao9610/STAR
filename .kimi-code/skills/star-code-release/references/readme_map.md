@@ -1,8 +1,8 @@
 # README Extraction Map
 
-Which artifact feeds which README section, what to do when it is absent, and how the content is transcribed. The README is compiled from this map — a section with no source in the table below does not belong in the README, and a source not in the table is not read for it.
+Which artifact feeds which README section, what to do when it is absent, and how the content is transcribed. The README is compiled from this map: a section with no source in the table below does not belong in it, and a source not in the table is not read for it.
 
-The reference shape comes from what research repositories converge on (GroundingDINO, YOLO-World, LLaVA, SAM all order it roughly this way): identity → what it is → how to install it → what you can download → how to run it → what it scored → how to cite it. STAR's addition is that every one of those sections has a file behind it.
+The reference shape is what research repositories converge on (GroundingDINO, YOLO-World, LLaVA, SAM all order it roughly this way): identity → what it is → how to install it → what you can download → how to run it → what it scored → how to cite it. STAR's addition: every section has a file behind it.
 
 ## Section table
 
@@ -31,15 +31,15 @@ The reference shape comes from what research repositories converge on (Grounding
 
 ## Transcription rules
 
-These are what separate a compiled README from a written one.
+What separates a compiled README from a written one:
 
-1. **A number is copied, never recomputed.** Every figure in §8 and §12 is transcribed from `wkdrs/results/results.md` exactly as the results table carries it, together with the run name the results table cites. A number the results table excluded (its `invalid` / `inconclusive` section) does not enter the README at all — not even with a caveat. If the results table is absent, §12 is omitted and the report routes to `/skill:star-expt-analyst aggregate`.
-2. **A command is resolved before it is printed.** For every command: the script file exists, each config path it names exists, and the module it invokes imports under the `.env` interpreter. Resolved → print it verbatim, exactly as the script or `metds/training.md` records it. Unresolvable → drop it, or keep it under an explicit *not yet verified* line naming what is missing. A README whose install or train command fails on a fresh clone is the most common way a research repo loses its reader.
+1. **A number is copied, never recomputed.** Every figure in §8 and §12 is transcribed from `wkdrs/results/results.md` exactly as that table carries it, with the run name it cites. A number the results table excluded (its `invalid` / `inconclusive` section) does not enter the README at all — not even with a caveat. If the results table is absent, §12 is omitted and the report routes to `/skill:star-expt-analyst aggregate`.
+2. **A command is resolved before it is printed.** For every command: the script file exists, each config path it names exists, and the module it invokes imports under the `.env` interpreter. Resolved → print it verbatim, as the script or `metds/training.md` records it. Unresolvable → drop it, or keep it under an explicit *not yet verified* line naming what is missing. A README whose install or train command fails on a fresh clone is the most common way a research repo loses its reader.
 3. **A path is checked before it is linked.** Figures, weights, configs, and relative links point at files that exist. A teaser image referenced by `metds/framework.md` but absent from `docs/srcs/` means no image — not a broken `<img>`.
 4. **A claim carries its evidence.** "State of the art", "outperforms", "best", "significantly" appear only where `wkdrs/results/results.md` carries a verdict that says so. Comparative language against a named baseline needs that baseline's number in the same results table. Everything else is described, not ranked.
-5. **Unverified content is marked, not hidden.** Content compiled from a leaf whose `exec_status` is not `done` — a training recipe never run end to end, an evaluation protocol never executed — keeps one italic line saying it is not yet verified, the same discipline `/skill:star-metd-summarize` uses. A README that silently presents intent as fact is the failure this rule exists to prevent. A dropped leaf is not a case of this: a node carrying `dropped:`, and everything under it, contributes nothing to the README at all.
+5. **Unverified content is marked, not hidden.** Content compiled from a leaf whose `exec_status` is not `done` — a training recipe never run end to end, an evaluation protocol never executed — keeps one italic line saying it is not yet verified, the same discipline `/skill:star-metd-summarize` uses. The failure this prevents: a README that silently presents intent as fact. A dropped leaf is not a case of this: a node carrying `dropped:`, and everything under it, contributes nothing to the README.
 6. **Merge along the reader's axis.** One method document may feed three sections; one section may merge four. Rewrite into one voice — a section that reads as pasted excerpts, or that repeats what the section above already said, has failed. Where two sources disagree, the newer `generated:` wins and the report names the conflict.
-7. **Length is a feature.** The header through §4 is what most readers read. Keep §1–§4 under about 400 words total; push detail down into the sections that exist to hold it, and link out to `metds/` for the rest.
+7. **Length is a feature.** The header through §4 is what most readers read. Keep §1–§4 under about 400 words total; push detail down into the sections that hold it, and link out to `metds/` for the rest.
 
 ## The provenance marker
 
@@ -49,6 +49,6 @@ The first line of the compiled README, before the title:
 <!-- Compiled by /skill:star-code-release on <YYYY-MM-DD> · model_id: <id or unrecorded> · sources: metds/overview.md@<generated>, metds/framework.md@<generated>, wkdrs/results/results.md@<generated>, metds/codearc.md@<updated>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /skill:star-code-release readme; hand edits to a section are detected and kept. -->
 ```
 
-It is an HTML comment, not YAML frontmatter: GitHub renders frontmatter in a README as a table at the top of the page. This marker is the artifact's header line for conventions §8 — it carries `model_id`, and each source with the date that source carried when it was read, which is what makes a stale README detectable by comparison rather than by file mtime.
+An HTML comment, not YAML frontmatter: GitHub renders frontmatter in a README as a table at the top of the page. This marker is the artifact's header line for conventions §8 — it carries `model_id`, and each source with the date it carried when read, making a stale README detectable by comparison rather than by file mtime.
 
-On a re-run, the marker's `sources:` dates identify what moved, and a section whose text differs from what the recorded sources would produce is treated as hand-edited and defaults to being kept.
+On a re-run, the marker's `sources:` dates identify what moved; a section whose text differs from what the recorded sources would produce is treated as hand-edited and kept by default.

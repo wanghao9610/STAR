@@ -1,8 +1,8 @@
 # README 抽取映射表
 
-哪份产物输入给哪一节、来源缺失时怎么办、内容如何原样转录。README 就按这张表编译——表里没有来源的节不该出现在 README 里，表里没列的来源也不为它而读。
+哪份产物输入给哪一节、来源缺失时怎么办、内容如何原样转录。README 就按这张表编译：表里没有来源的节不该进 README，表里没列的来源也不为它而读。
 
-参考形态取自研究仓库的共识做法（GroundingDINO、YOLO-World、LLaVA、SAM 的顺序大体一致）：身份 → 它是什么 → 怎么装 → 能下载什么 → 怎么跑 → 跑出了什么 → 怎么引用。STAR 加的是：上面每一节背后都有一个文件。
+参考形态取自研究仓库的共识做法（GroundingDINO、YOLO-World、LLaVA、SAM 的顺序大体一致）：身份 → 它是什么 → 怎么装 → 能下载什么 → 怎么跑 → 跑出了什么 → 怎么引用。STAR 加的是：每一节背后都有一个文件。
 
 ## 小节表
 
@@ -31,15 +31,15 @@
 
 ## 原样转录规则
 
-编译出来的 README 和写出来的 README，区别就在这几条。
+编译出的 README 与写出的 README，区别就在这几条。
 
-1. **数字是抄的，不是算的。** §8 和 §12 里每个数值都从 `wkdrs/results/results.md` 原样转录，连同结果汇总表引用的 run 名一起。被结果汇总表排除的数字（它的 `invalid` / `inconclusive` 小节里那些）根本不进 README——加注解也不行。结果汇总表不存在时，§12 省略，报告转交给 `/star-expt-analyst aggregate`。
+1. **数字是抄的，不是算的。** §8 和 §12 里每个数值都从 `wkdrs/results/results.md` 原样转录，连同该表引用的 run 名。被结果汇总表排除的数字（它的 `invalid` / `inconclusive` 小节里那些）根本不进 README——加注解也不行。结果汇总表不存在时，§12 省略，报告转交给 `/star-expt-analyst aggregate`。
 2. **命令先解析再打印。** 对每条命令：脚本文件存在、它写明的每个配置路径存在、它调用的模块在 `.env` 解释器下可导入。能解析 → 按脚本或 `metds/training.md` 的记录原样打印。解析不了 → 删掉，或放在一条明确的*尚未验证*行下并说明缺什么。README 里的 install 或 train 命令在全新 clone 上跑不通，是研究仓库失去读者最常见的原因。
 3. **路径先检查再链接。** 图片、权重、配置和相对链接都指向确实存在的文件。teaser 图在 `metds/framework.md` 里有引用、`docs/srcs/` 里却没有——那就不放图，而不是留一个坏掉的 `<img>`。
 4. **主张要带证据。** "state of the art"、"outperforms"、"best"、"significantly" 只在 `wkdrs/results/results.md` 带有支持该说法的结论时才出现。对具名 baseline 的比较句，需要该 baseline 的数字出现在同一张结果汇总表里。其余一律只描述，不排名。
-5. **未验证的内容要标出来，不藏起来。** 来自 `exec_status` 非 `done` 叶子的内容——从未端到端跑过的训练配方、从未执行过的评测协议——保留一行斜体说明它尚未验证，与 `/star-metd-summarize` 的纪律一致。把意图当事实静默呈现的 README，正是这条规则要挡住的失败。已丢弃的叶子不属于这一类：带 `dropped:` 的节点连同其下的一切，根本不向 README 贡献任何内容。
+5. **未验证的内容要标出来，不藏起来。** 来自 `exec_status` 非 `done` 叶子的内容——从未端到端跑过的训练配方、从未执行过的评测协议——保留一行斜体说明它尚未验证，与 `/star-metd-summarize` 的纪律一致。这条规则要挡住的失败：把意图当事实静默呈现的 README。已丢弃的叶子不属于这一类：带 `dropped:` 的节点连同其下的一切，不向 README 贡献任何内容。
 6. **按读者的轴归并。** 一份方法文档可能输入给三节，一节也可能归并四份。要改写成统一的口吻——读起来像摘抄拼接、或者把上一节说过的话再说一遍的小节，就是失败的。两个来源冲突时，`generated:` 较新者胜，并在报告里指明该冲突。
-7. **篇幅本身就是特性。** 头部到 §4 是多数读者真正会读的部分。§1–§4 合计控制在约 400 词以内；细节下沉到为它准备的那些小节，其余链接到 `metds/`。
+7. **篇幅本身就是特性。** 头部到 §4 是多数读者真正会读的部分。§1–§4 合计控制在约 400 词以内；细节下沉到承载它的小节，其余链接到 `metds/`。
 
 ## 溯源标记
 
@@ -49,6 +49,6 @@
 <!-- Compiled by /star-code-release on <YYYY-MM-DD> · model_id: <id 或 unrecorded> · sources: metds/overview.md@<generated>, metds/framework.md@<generated>, wkdrs/results/results.md@<generated>, metds/codearc.md@<updated>, … · report: wkdrs/release/RELEASE_<date>.md · Regenerate with /star-code-release readme; hand edits to a section are detected and kept. -->
 ```
 
-它是 HTML 注释，不是 YAML frontmatter：README 里的 frontmatter 会被 GitHub 渲染成页首的一张表。按规约 §8，这条标记就是本产物的 header line——它带 `model_id`，并记下每个来源在读取时带的日期——这样 README 是否过期靠比对就能发现，而不必看文件 mtime。
+它是 HTML 注释，不是 YAML frontmatter：README 里的 frontmatter 会被 GitHub 渲染成页首的一张表。按规约 §8，这条标记就是本产物的 header line——它带 `model_id`，并记下每个来源读取时的日期——README 是否过期靠比对就能发现，而不必看文件 mtime。
 
-重跑时，标记里的 `sources:` 日期用于识别哪些来源动了；某一节的文本若与这些来源应生成的内容不同，就按人工改过处理，默认保留。
+重跑时，标记里的 `sources:` 日期识别哪些来源动了；某一节的文本若与这些来源应生成的内容不同，就按人工改过处理，默认保留。

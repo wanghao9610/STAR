@@ -20,11 +20,11 @@ One entry per finding, in file order:
   confidence: high | low
 ```
 
-A collection pass returns exactly this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the number of files the collector was given is the remainder still to collect (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
+A collection pass returns this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the file count the collector was given is the remainder still to collect (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
 
 ## The review rule digest
 
-One block, built by the main agent at Step 1 and handed to every collector **verbatim and identically**. Three collectors improvising three rule sets produce findings Step 4 cannot compare, and the same construct becomes a finding in one package and not in another:
+One block, built by the main agent at Step 1 and handed to every collector **verbatim and identically**. Three collectors improvising three rule sets produce findings Step 4 cannot compare — the same construct becomes a finding in one package and not in another:
 
 - `layout_rules` — `codearc.md` §2 placement rules, verbatim.
 - `naming_rules` — `codearc.md` §3 naming and style conventions, verbatim.
@@ -90,7 +90,7 @@ Not a finding here: hypothetical races, performance guesses, "might fail if …"
 Score against disk, never against EXEC_LOG claims:
 
 - One row per §3 task: `implemented` (code exists and does what the task says — cite module/function) / `partial` (started; name the gaps) / `missing` (no code found; say where you looked).
-- Each §4 deliverable that is code, or is produced by code in scope: present at the stated path? One that only an un-run STOP-line command in EXEC_LOG's "Awaiting user" list can produce is scored `pending`, naming that command — never absent, which would turn every review run before the compute into a major nobody can act on.
+- Each §4 deliverable that is code, or produced by code in scope: present at the stated path? One that only an un-run STOP-line command in EXEC_LOG's "Awaiting user" list can produce is scored `pending`, naming that command — never absent, which would turn every review run before the compute into a major nobody can act on.
 - §5 done-criterion: the machinery to check it exists (a test, an eval script, an assertion) — verify the machinery statically; running heavy checks is the executor's business, not the reviewer's.
 - Cross-check EXEC_LOG: files it claims changed exist and contain the claimed change; a claim without matching code is a major finding.
 

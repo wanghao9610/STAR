@@ -1,6 +1,6 @@
 # Pre-compute Design Check
 
-Run this against the EXEC_PLAN about to be approved, not against the sub-plan as written. The root plan and the leaf passed their own checklists when they were written (`star-plan-coach`'s `plan_rubric.md`, `star-plan-decomposer`'s `subplan_rubric.md`); this asks whether the concrete run now on the page still satisfies them, plus two things neither checklist covers. Evidence is the EXEC_PLAN, the leaf sub-plan, and the root plan's §4 — nothing else. An item whose evidence is not in those three files is `unclear`, never `pass`.
+Run this against the EXEC_PLAN about to be approved, not against the sub-plan as written. The root plan and the leaf passed their own checklists (`star-plan-coach`'s `plan_rubric.md`, `star-plan-decomposer`'s `subplan_rubric.md`); this asks whether the concrete run now on the page still satisfies them, plus two things neither checklist covers. Evidence is the EXEC_PLAN, the leaf sub-plan, and the root plan's §4 — nothing else. An item whose evidence is not in those three files is `unclear`, never `pass`.
 
 Return one entry per item — `item`, `verdict: pass | fail | unclear`, `evidence` (the quoted line, or the exact statement of what is absent), `fix` — and nothing else. Do not rank, do not decide, do not run anything.
 

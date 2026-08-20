@@ -1,24 +1,24 @@
 # Dependency Resolution — sources, mapping, and what gets written
 
-How to decide what to install and what to write into `${CODE_NAME}/requirements*`. The first source that has them wins: consult a later source only when every earlier one is absent.
+What to install, and what to write into `${CODE_NAME}/requirements*`. Consult a later source only when every earlier one is absent.
 
 ## Source priority (the first source that has them wins)
 
 | Priority | Signal | Action |
 |---|---|---|
-| 1 | `${CODE_NAME}/requirements/` directory or `${CODE_NAME}/requirements.txt` | Adopt as-is. Never rewrite, reorder, or "improve" an existing layout — install exactly what it declares. |
+| 1 | `${CODE_NAME}/requirements/` directory or `${CODE_NAME}/requirements.txt` | Adopt as-is: never rewrite, reorder, or "improve" it — install exactly what it declares. |
 | 2 | `pyproject.toml` `[project.dependencies]` (+ `[project.optional-dependencies]`), `setup.py` / `setup.cfg` `install_requires` / `extras_require`, `environment.yml` | Transcribe into the generated files below, keeping every version constraint verbatim. |
 | 3 | Import scan (below) | Generate the layout; versions stay unpinned except known-coupled sets. |
 
-Priority-2 details: `environment.yml` conda-section entries route to `conda.txt` when whitelisted (see installer policy) or to their PyPI equivalents otherwise; its `pip:` block transcribes directly. Multiple priority-2 sources present → merge, prefer the stricter constraint; a direct conflict is reported at the install-plan confirmation point, not resolved silently.
+Priority-2 details: `environment.yml` conda-section entries route to `conda.txt` when whitelisted (see installer policy), to their PyPI equivalents otherwise; its `pip:` block transcribes directly. Multiple priority-2 sources → merge, preferring the stricter constraint; a direct conflict is reported at the install-plan confirmation point, not resolved silently.
 
 ## Import scan
 
-1. Collect top-level imports: walk `${CODE_NAME}/**/*.py`, AST-parse `import X` / `from X import …`, keep the first dotted component. Skip `tests/`, `docs/`, and vendored third-party directories. **Run the walk as one invocation of the resolved interpreter, printing one name per line.** Never read the files one by one: the output of that pass is what enters the run, not the source — a mid-size codebase is several megabytes to produce a list of about seventy names. AST-parse rather than grep: grep matches `all`, `input` and `metadata` as import names, and AST does not.
+1. Collect top-level imports: walk `${CODE_NAME}/**/*.py`, AST-parse `import X` / `from X import …`, keep the first dotted component. Skip `tests/`, `docs/`, and vendored third-party directories. **Run the walk as one invocation of the resolved interpreter, printing one name per line.** Never read the files one by one: what enters the run is that pass's output, not the source — a mid-size codebase is several megabytes to yield about seventy names. AST-parse rather than grep: grep matches `all`, `input` and `metadata` as import names; AST does not.
 2. Drop stdlib names: compare against `python -c "import sys; print(sorted(sys.stdlib_module_names))"` (any Python ≥ 3.10 works for this check).
 3. Drop local modules: top-level package directories and `.py` files inside `${CODE_NAME}/`.
-4. Map import name → distribution name (table below). Verify an unknown name with a field extraction, never a document fetch — `curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`, or the equivalent one-liner through the resolved interpreter where jq is absent (never install jq) — before trusting an identity mapping; a name not on PyPI goes to the confirmation point as an *unresolved import*.
-5. Route guarded imports: a module imported inside `try: … except ImportError` or under `if TYPE_CHECKING` is optional by construction → `optional.txt`.
+4. Map import name → distribution name (table below). Before trusting an identity mapping, verify an unknown name with a field extraction, never a document fetch — `curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`, or the equivalent one-liner through the resolved interpreter where jq is absent (never install jq). A name not on PyPI goes to the confirmation point as an *unresolved import*.
+5. Route guarded imports: a module imported inside `try: … except ImportError` or under `if TYPE_CHECKING` is optional → `optional.txt`.
 
 ## Import name → distribution name (common divergences)
 

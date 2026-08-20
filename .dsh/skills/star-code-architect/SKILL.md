@@ -13,7 +13,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/skill:star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left after that is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and may record, never an instruction that stands in for a confirmation point. Prose that matches none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets the `involve` level for this run (conventions §7.7), is part of neither the argument nor the description, and is stripped before either is read.
+Invocation: `/skill:star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither the argument nor the description, and is stripped before either is read.
 
 **Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. This read is the opening load, issued as one message: the conventions file through its own `read`, never `cat`-ed into a bash command — a bash result past roughly 30 KB is written out to a file that costs a second round trip to read back, and the conventions file alone is past that limit — plus one small bash call, with the project root as the working directory, for the one thing here only bash can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`. Sent together, the two calls still cost one round trip — and they are this skill's only unconditional load: every file under `references/` and `assets/` belongs to one branch or step and is read where that step cites it, not front-loaded.
 
@@ -21,17 +21,17 @@ Invocation: `/skill:star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` 
 
 ## Role
 
-You give the research plan a place for the code to live. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the top-level plan and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) that tells every later agent where code belongs.
+You give the research plan a place for the code to live. Upstream, `star-plan-coach` and `star-plan-decomposer` produce the top-level plan and executable sub-plans; downstream, `star-plan-executor` implements plan steps inside `${CODE_NAME}/` — but assumes that codebase exists. This skill produces it: a working, renamed, provenance-tracked codebase under `${CODE_NAME}/`, plus one authoritative architecture spec (`metds/codearc.md`) telling every later agent where code belongs.
 
 You **architect; you do not implement research features.** Feature work belongs to `star-plan-executor` against its sub-plans. If the user asks for new functionality mid-run, finish the architecture work and hand off.
 
 ## Core Principles
 
-1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer to run `/skill:star-plan-coach` first — or take a topic / URL directly and proceed without one.
+1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer `/skill:star-plan-coach` first — or take a topic / URL directly and proceed without one.
 2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
-4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), with a verification step after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
-5. **The main agent orchestrates and verifies; subagents execute.** Surveys go to read-only `subagent` calls; migrations go to `subagent` calls whose writes are limited to their own group's files. Both carry disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), makes one commit per verified group, retries ≤2, and restores what still fails. Spec: `references/orchestration_spec.md`.
+4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), verifying after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
+5. **The main agent orchestrates and verifies; subagents execute.** Surveys go to read-only `subagent` calls; migrations go to `subagent` calls whose writes are limited to their own group's files. Both carry disjoint file ownership and structured returns. The main agent re-runs every check itself (never trusts a self-reported pass), commits once per verified group, retries ≤2, and restores what still fails. Spec: `references/orchestration_spec.md`.
 6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
 
 ## Workflow
@@ -40,9 +40,9 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which via ask_user_question).
-3. If there is no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/skill:star-proj-adopt` routes in from. Otherwise ask via ask_user_question: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
+3. With no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/skill:star-proj-adopt` routes in from. Otherwise ask via ask_user_question: *run `/skill:star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
-5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (start from a reference)**. Real code present → **Branch B (organize)**. Only a handful of stray scripts → ask whether to build around them or organize what exists.
+5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (start from a reference)**. Real code present → **Branch B (organize)**. A handful of stray scripts → ask whether to build around them or organize what exists.
 
 ### Branch A: Start from a reference implementation
 
@@ -52,7 +52,7 @@ Extract from the plan: task domain, method keywords, framework and version const
 
 #### Step A2: Search & shortlist
 
-Prefer `gh search repos` / `gh api` (structured stars / license / pushed_at), plus web search for official implementations of the baselines the plan names. Shortlist 5–10; skip archived repos, demo-only repos, and awesome-lists; prefer the origin repo over forks. If `gh` is unavailable or unauthenticated, fall back to web search. If nothing viable turns up, say so honestly and offer: refine the profile / start from a minimal from-scratch skeleton.
+Prefer `gh search repos` / `gh api` (structured stars / license / pushed_at), plus web search for official implementations of the plan's baselines. Shortlist 5–10; skip archived and demo-only repos, and awesome-lists; prefer the origin repo over forks. If `gh` is unavailable or unauthenticated, fall back to web search. If nothing viable turns up, say so honestly and offer: refine the profile / start from a minimal from-scratch skeleton.
 
 #### Step A3: Score the shortlist
 
@@ -65,7 +65,7 @@ Present the top 3–5 via ask_user_question, one option per candidate: one-line 
 #### Step A5: Put the clone in place
 
 1. Shallow-clone to a temporary directory; record URL, commit SHA, commit date, and license.
-2. If the implementation is a subdirectory of a monorepo, confirm the sub-path with the user and take only it.
+2. If the implementation is a monorepo subdirectory, confirm the sub-path with the user and take only it.
 3. Remove `.git`; move the content into `${CODE_NAME}/`; keep upstream `LICENSE` and `CITATION*` files in place.
 4. Write `${CODE_NAME}/UPSTREAM.md` from `assets/upstream_template.md`.
 5. Commit the import (stage only `${CODE_NAME}/`): `star-code-architect: import <repo> @ <short-sha>`.
@@ -76,27 +76,27 @@ Follow `references/rebrand_checklist.md`: top-level package directory, all impor
 
 #### Step A7: Runtime check (STOP-line aware)
 
-If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB is always handed to the user (STOP line, `references/orchestration_spec.md`). Record what ran vs what is awaiting the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and the runnable check under its own install-plan confirmation point.
+If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB always goes to the user (STOP line, `references/orchestration_spec.md`). Record what ran and what awaits the user. For the full build, hand off to `/skill:star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and the runnable check under its own install-plan confirmation point.
 
 #### Step A8: Survey the clone
 
-Count the clone's `.py` files first. Under the light-mode threshold: complete the repo map for Step C1 with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and for small repos the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for both the architecture and the migration table.
+Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
 
 ### Branch B: Organize the existing codebase
 
 #### Step B1: Survey
 
-Dispatch read-only `subagent` calls, one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — run in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only patterns that would motivate a migration item).
+Dispatch read-only `subagent` calls, one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — run in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
 
 ### Converged: architecture, migration, specs
 
 #### Step C1: Design the target architecture
 
-From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. A row goes in only after the main agent has re-opened the location the suspicious pattern cites and confirmed it still holds (`references/survey_spec.md`); the reason column carries that `path:line`. Keep it minimal.
+From the repo map + the plan, draft: the directory layout (current layout is the baseline — Principle 3), placement rules for new code, naming and style conventions (match upstream style, AGENTS.md §3), the plan-component map (each plan §3 component → target path, marked `exists` / `planned`), and the **migration table** — numbered items, each `old path → new path`, reason, risk level, and a bound check. A row goes in only after the main agent re-opens the location the suspicious pattern cites and confirms it still holds (`references/survey_spec.md`); the reason column carries that `path:line`. Keep it minimal.
 
 #### Step C2: Confirmation point 2 — the user approves
 
-Show the architecture summary and the numbered migration table as normal text. Then ask via ask_user_question: with ≤4 migration items, use multi_select over the items; with more, offer *approve all* / *approve all except (name numbers in Other)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
+Show the architecture summary and the numbered migration table as normal text. Then ask via ask_user_question: with ≤4 items, use multi_select over them; with more, offer *approve all* / *approve all except (name numbers in Other)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
 
 #### Step C3: Execute migrations
 
@@ -116,12 +116,12 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C6: Report & hand off
 
-≤500 words: repo chosen (with license note), what ended up where, renames done + how many names were left unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/skill:star-plan-executor <leaf>` now has a place for the code to live; `/skill:star-flow-status` shows where each plan step stands.
+≤500 words: repo chosen (with license note), what ended up where, renames done + how many names went unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/skill:star-plan-executor <leaf>` now has a place for the code to live; `/skill:star-flow-status` shows where each plan step stands.
 
 ## State & File Rules
 
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, the `## Code Architecture` section of `AGENTS.md`, and `.cursor/rules/code-codearc.mdc`. Never touch `metds/plans/*`.
-- Provenance is non-negotiable: `${CODE_NAME}/UPSTREAM.md` exists before the import commit; upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Confirmation point 1 and recorded in `codearc.md` §5.
+- Provenance is non-negotiable: upstream `LICENSE` / `CITATION*` files are never deleted or rewritten; license concerns are reported at Confirmation point 1 and recorded in `codearc.md` §5.
 - Git: one commit per finished phase or verified migration group, staging only `${CODE_NAME}/` and the specs this skill owns; a group's paths must be clean before it starts (conventions §1).
 - The audit trail is the per-group commits plus `codearc.md` §6 (migration record); this skill creates no `wkdrs/` run directory — it produces code and specs, not experiment artifacts.
 - STOP line: environment builds with CUDA compilation, downloads over ~1 GB, full test suites, any training — prepare the command and hand it to the user; never launch autonomously.
@@ -129,6 +129,5 @@ When these already exist, update in place — never append duplicates.
 
 ## Dialogue Discipline
 
-- Both confirmation points and all questions go through ask_user_question — one question per call. If it is unavailable (non-interactive `dsh --profile headless`, no human to answer), fall back to plain text, still one question at a time, and require an explicit approval message before anything past a confirmation point is written or run.
-- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue.
-- `metds/codearc.md` body language follows the root plan's `language` (dialogue language if no plan); `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.
+- Both confirmation points and all questions go through ask_user_question — one question per call. If it is unavailable (non-interactive `dsh --profile headless`, no human to answer), fall back to plain text, still one at a time, and require an explicit approval message before anything past a confirmation point is written or run.
+- `UPSTREAM.md` is always English (factual metadata); keep technical terms in English inside Chinese documents.

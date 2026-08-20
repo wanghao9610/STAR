@@ -1,6 +1,6 @@
 # 算力前的设计检查
 
-对着即将被批准的那份 EXEC_PLAN 跑，不是对着子计划的原文跑。根计划与叶子在写下来时已经过各自的检查表（`star-plan-coach` 的 `plan_rubric.md`、`star-plan-decomposer` 的 `subplan_rubric.md`）；这里问的是页面上这次具体的 run 是否仍然满足它们，外加两件两张表都没覆盖的事。证据只有 EXEC_PLAN、叶子子计划、根计划 §4 三份文件。证据不在这三份里的条目一律 `unclear`，绝不 `pass`。
+对着即将被批准的那份 EXEC_PLAN 跑，不是对着子计划的原文跑。根计划与叶子已经过各自的检查表（`star-plan-coach` 的 `plan_rubric.md`、`star-plan-decomposer` 的 `subplan_rubric.md`）；这里问的是页面上这次具体的 run 是否仍然满足它们，外加两件两张表都没覆盖的事。证据只有 EXEC_PLAN、叶子子计划、根计划 §4 三份文件。证据不在这三份里的条目一律 `unclear`，绝不 `pass`。
 
 每条返回一个条目——`item`、`verdict: pass | fail | unclear`、`evidence`（引用的那一行，或"缺什么"的确切陈述）、`fix`——别的都不返回。不排序、不决定、不运行任何东西。
 

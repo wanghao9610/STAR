@@ -4,7 +4,7 @@ The exact rules behind `star-proj-adopt`. `SKILL.md` states the shape; this file
 
 ## 1. The survey (read-only)
 
-Six areas. Each carries a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1 — a `certain` line is reported, not asked about. Because that label decides it, the main agent is the one who sets it. An area handed to a subagent comes back with findings and evidence paths and the confidence column left empty; filling it in there would let the subagent decide what the user gets asked about.
+Six areas, each with a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1; a `certain` line is reported, not asked about. Because that label decides what is asked, the main agent sets it: an area handed to a subagent comes back with findings and evidence paths and an empty confidence column, so the subagent never decides what the user gets asked about.
 
 | Area | Look at | `certain` when |
 |---|---|---|
@@ -42,7 +42,7 @@ For each of `datas/`, `inits/`, `wkdrs/`, in this order:
 4. Path is a symlink to a **different** target, or a **non-empty real directory** → do nothing, report the conflict, ask. Never replace it, never merge into it.
 5. The confirmed target is inside the repository and already in the right place → no link needed, report `already in place`.
 
-A target outside the repository is normal and fine; record its absolute path in `metds/adopt.md`. A target on a network or removable mount is recorded with that caveat.
+A target outside the repository is fine; record its absolute path in `metds/adopt.md`. A target on a network or removable mount is recorded with that caveat.
 
 ## 4. Wrapper rules
 
@@ -59,18 +59,18 @@ cd "${ROOT_DIR}"
 bash scripts/train.sh "$@"
 ```
 
-Rules: never edit the wrapped script; never inline its body; never "improve" its arguments. When the existing command hardcodes a path that a symlink now also reaches, leave the hardcoded path alone — both resolve, and rewriting it is a code change, which is out of bounds. `<name>` distinguishes the task (conventions §9), and a name already taken in `execs/scpts/` is a conflict to ask about, not to suffix.
+Rules: never edit the wrapped script; never inline its body; never "improve" its arguments. When the existing command hardcodes a path a symlink now also reaches, leave it alone — both resolve, and rewriting it is a code change, out of bounds. `<name>` distinguishes the task (conventions §9), and a name already taken in `execs/scpts/` is a conflict to ask about, not to suffix.
 
 ## 5. The work inventory format
 
-One row per identifiable unit of finished or in-flight work. Fewer, well-evidenced rows beat many speculative ones — if two commits and one output dir describe one thing, that is one row.
+One row per identifiable unit of finished or in-flight work. Fewer, well-evidenced rows beat many speculative ones: two commits and one output dir describing one thing are one row.
 
 | Field | Content |
 |---|---|
 | `id` | `W1`, `W2`, … — stable, referenced by the backfill record |
 | `what` | One descriptive line. What was built or run, in the repository's own vocabulary |
 | `state` | `built` (code exists, no run found) / `run` (a run produced output) / `concluded` (a result is written down somewhere) / `abandoned` (superseded or explicitly dropped) |
-| `evidence` | Paths, commit SHAs, script names, log lines. At least one. A row with no evidence does not exist |
+| `evidence` | Paths, commit SHAs, script names, log lines. A row with no evidence does not exist |
 | `run_dir` | The prior run directory, when `state` is `run` or `concluded`; else empty |
 | `metric` | Any number visible in a log, README, or result file, quoted verbatim with its source. Never computed, never rounded |
 
@@ -80,12 +80,12 @@ One row per identifiable unit of finished or in-flight work. Fewer, well-evidenc
 
 For each run the user selects:
 
-1. Symlink the existing run directory to `wkdrs/<run>/`, where `<run>` is its existing name when that name is already distinctive, and `<existing>_<date-of-run>` when it is not (`output/`, `run1/`).
+1. Symlink the existing run directory to `wkdrs/<run>/`, where `<run>` is its existing name when that is already distinctive, and `<existing>_<date-of-run>` when it is not (`output/`, `run1/`).
 2. Write `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_reconstructed.md`. If the link points into a read-only or external location, write the log to `wkdrs/<run>_adopted/EXEC_LOG.md` instead and say so in the report.
-3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — adopted before the plan tree existed)`, the command if it is recoverable verbatim from a script or a saved config, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this whole rule exists to prevent.
+3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — adopted before the plan tree existed)`, the command where a script or saved config records it verbatim, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this rule prevents.
 4. Never write into the linked directory itself. The `EXEC_LOG.md` goes at the `wkdrs/` level.
 
-An `EXEC_LOG.md` already present in a selected run directory is left untouched, and the run is reported as `already recorded`.
+An `EXEC_LOG.md` already in a selected run directory is left untouched; the run is reported as `already recorded`.
 
 ## 7. Backfill matching (Phase `backfill`)
 
@@ -100,6 +100,6 @@ State proposed per matched leaf:
 | `built` | `in_progress` |
 | `abandoned` | no proposal — report it and let the user decide |
 
-`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run is left with `exec_status` alone and flagged in the report as one `/star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the reconstructed log's `source_plan:` is updated to the leaf's filename in the same pass — the confirmation is precisely that correspondence.
+`exec_runs` is set only when that row's run was recorded in Confirmation point 2; a `done` leaf with no recorded run keeps `exec_status` alone and is flagged in the report as one `/star-flow-status` will list under done-with-no-run. On a confirmed match whose run was recorded, the same pass updates the reconstructed log's `source_plan:` to the leaf's filename — the confirmation is precisely that correspondence.
 
-Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree, which is information, not an error to smooth over.
+Never propose `blocked`, never write `depends_on`, never reorder anything. When one inventory row matches several leaves, or several rows match one leaf, present it as-is and ask — a many-to-many match usually means the decomposition and the history disagree: information, not an error to smooth over.

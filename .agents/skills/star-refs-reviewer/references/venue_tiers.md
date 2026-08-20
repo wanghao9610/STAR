@@ -1,8 +1,8 @@
 # Venue Tiers — the venue component of the impact score
 
-The lookup behind the venue component in `references/refs_rubric.md` (Impact score). Deterministic: take the fetched record's venue field — the transcribed `booktitle` or `journal`, else the search record's venue string — strip braces, and match it case-insensitively against the rows below. An abbreviation matches only as a whole word (`ACL` does not hit `NAACL`); a name fragment matches as a substring, and any one of a row's fragments is enough — the dotted alternatives are there because DBLP's condensed journal forms abbreviate (`IEEE Trans. Pattern Anal. Mach. Intell.`). First tier with a hit wins; no hit and published → 4; preprint-only → 2.
+The lookup behind the venue component in `references/refs_rubric.md` (Impact score). Deterministic: take the fetched record's venue field — the transcribed `booktitle` or `journal`, else the search record's venue string — strip braces, and match it case-insensitively against the rows below. An abbreviation matches only as a whole word (`ACL` does not hit `NAACL`); a name fragment matches as a substring, any one of a row's fragments enough — the dotted alternatives cover DBLP's condensed journal forms (`IEEE Trans. Pattern Anal. Mach. Intell.`). First tier with a hit wins; no hit and published → 4; preprint-only → 2.
 
-The lists are calibrated for CS/AI. A project in another field edits the lists, never the rule — and an unlisted venue that "obviously" deserves a tier gets a row added here, not an exception made mid-run. Judgment never enters a lookup.
+The lists are calibrated for CS/AI. A project in another field edits the lists, never the rule — an unlisted venue that "obviously" deserves a tier gets a row here, not a mid-run exception. Judgment never enters a lookup.
 
 ## Tier 10 — flagship
 

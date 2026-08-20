@@ -1,24 +1,24 @@
 # 依赖解析——来源、映射、生成哪些文件
 
-如何决定装什么、往 `${CODE_NAME}/requirements*` 写什么。先到先用：只有前面的来源全部缺失时才看后一级。
+装什么、往 `${CODE_NAME}/requirements*` 写什么。只有前面的来源全部缺失时才看后一级。
 
 ## 来源优先级（先到先用）
 
 | 优先级 | 信号 | 动作 |
 |---|---|---|
-| 1 | `${CODE_NAME}/requirements/` 目录或 `${CODE_NAME}/requirements.txt` | 按原样采用。绝不改写、重排或"优化"已有布局——它声明什么就装什么。 |
+| 1 | `${CODE_NAME}/requirements/` 目录或 `${CODE_NAME}/requirements.txt` | 按原样采用：绝不改写、重排或"优化"——它声明什么就装什么。 |
 | 2 | `pyproject.toml` 的 `[project.dependencies]`（+ `[project.optional-dependencies]`）、`setup.py` / `setup.cfg` 的 `install_requires` / `extras_require`、`environment.yml` | 转写进下方生成的文件，版本约束逐字保留。 |
 | 3 | import 扫描（见下） | 生成布局；除已知耦合组外不锁版本。 |
 
-优先级 2 的细节：`environment.yml` 的 conda 段条目——在白名单内的（见安装器策略）进 `conda.txt`，否则换成 PyPI 等价物；其 `pip:` 块直接转写。同时存在多个优先级 2 来源 → 合并，取更严格的约束；出现直接冲突时在安装计划确认点上摆出来，不悄悄裁决。
+优先级 2 的细节：`environment.yml` 的 conda 段条目——在白名单内的（见安装器策略）进 `conda.txt`，否则换成 PyPI 等价物；其 `pip:` 块直接转写。多个优先级 2 来源 → 合并，取更严格的约束；出现直接冲突时在安装计划确认点上摆出来，不悄悄裁决。
 
 ## import 扫描
 
-1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与随仓库带进来的第三方目录。**这一遍要用已解析的解释器一次跑完，每行打印一个名字。**绝不要逐个文件去读：进入本次运行的是这一遍的输出，不是源码——一个中等规模的代码库有好几 MB，而它要产出的只是约七十个名字。用 AST 解析而不是 grep：grep 会把 `all`、`input`、`metadata` 当成 import 名，AST 不会。
+1. 收集顶层 import：遍历 `${CODE_NAME}/**/*.py`，AST 解析 `import X` / `from X import …`，取点号分隔的第一段。跳过 `tests/`、`docs/` 与随仓库带进来的第三方目录。**这一遍要用已解析的解释器一次跑完，每行打印一个名字。**绝不要逐个文件去读：进入本次运行的是这一遍的输出，不是源码——中等规模的代码库有好几 MB，产出的只是约七十个名字。用 AST 解析而不是 grep：grep 会把 `all`、`input`、`metadata` 当成 import 名，AST 不会。
 2. 去掉 stdlib：与 `python -c "import sys; print(sorted(sys.stdlib_module_names))"` 对照（任何 ≥ 3.10 的 Python 都能做这一步）。
 3. 去掉本地模块：`${CODE_NAME}/` 内的顶层包目录与 `.py` 文件。
-4. import 名 → 发行名映射（见下表）。未知名要用取字段的方式验证，绝不是把整份文档抓回来——`curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`，没有 jq 时用已解析的解释器跑等价的一行（绝不去装 jq）——验证过再信任同名映射；PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
-5. 带保护的 import 单独归类：`try: … except ImportError` 或 `if TYPE_CHECKING` 之下的 import 天然是可选项 → `optional.txt`。
+4. import 名 → 发行名映射（见下表）。信任同名映射前，未知名要用取字段的方式验证，绝不是把整份文档抓回来——`curl -s https://pypi.org/pypi/<name>/json | jq -r '.info.name // "NOT_FOUND"'`，没有 jq 时用已解析的解释器跑等价的一行（绝不去装 jq）。PyPI 上不存在的名字作为*未解析 import* 提交到确认点上。
+5. 带保护的 import 单独归类：`try: … except ImportError` 或 `if TYPE_CHECKING` 之下的 import 是可选项 → `optional.txt`。
 
 ## import 名 → 发行名（常见分歧）
 

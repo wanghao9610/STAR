@@ -11,7 +11,7 @@ How the main agent coordinates `Task` subagents for this skill. Sibling spec: th
 ## Partitioning migrations
 
 1. Take only the items approved at confirmation point 2.
-2. Group items so that **file ownership is disjoint**: no file may belong to two groups. Compute it rather than assume it — per candidate item, `grep -rln "<the module's dotted import path>" ${CODE_NAME}`; the union of those hits plus the item's moved files **is** that item's ownership set, and intersecting sets merge into one group. Use the dotted path, not a bare module name: over-merging costs parallelism, never correctness. Import-fix sites are exactly what a migrator discovers after dispatch, which is why this cannot wait until then — without it two parallel migrators can edit one file and per-group `git restore` stops working.
+2. Group items so that **file ownership is disjoint**: no file may belong to two groups. Compute it rather than assume it — per candidate item, `grep -rln "<the module's dotted import path>" ${CODE_NAME}`; those hits plus the item's moved files **are** its ownership set, and intersecting sets merge into one group. Use the dotted path, not a bare module name: over-merging costs parallelism, never correctness. A migrator discovers import-fix sites only after dispatch, so this cannot wait — without it two parallel migrators can edit one file and per-group `git restore` stops working.
 3. Groups with no mutual dependencies may run in parallel; groups linked by import chains run serially, upstream first.
 4. Precondition per group: its paths are clean in git (nothing unstaged/uncommitted touching them).
 
@@ -23,7 +23,7 @@ Give each migrator:
 - **Files** — the explicit file list it owns (moves + import-fix sites).
 - **Mechanics** — moves/renames plus the import/path fixes they force; nothing behavioral.
 - **Runtime** — the absolute interpreter path the main agent already resolved, given verbatim; the migrator does not re-read `.env`. `python -m compileall -q` is always available (no deps needed). A missing package is a blocker it returns, never something it installs (conventions §3.5).
-- **Boundary** — light validation only. A STOP-line item is **prepared and returned, never run**; never install or modify the environment (§3.5) — a missing package is a blocker it returns.
+- **Boundary** — light validation only. A STOP-line item is **prepared and returned, never run**; never install or modify the environment (§3.5).
 - **Return** (structured): `changed` — files, one line each; `ran` — commands + outcomes, or `none`; `check` — the group's bound check result, `pass`/`fail` + evidence; `blockers` — or `none`; `handoff` — any STOP-line command prepared for the user, or `none`.
 
 ## After a migrator returns

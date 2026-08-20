@@ -8,7 +8,7 @@ Pull from the plan (do not invent):
 
 - **Task domain** — from §1 (e.g. open-vocabulary detection, time-series forecasting).
 - **Method keywords** — from §3 (architecture family, key techniques, loss/matching names).
-- **Named baselines** — from §2/§4. These are gold: their official repos are usually the best starting candidates.
+- **Named baselines** — from §2/§4. Their official repos are usually the best starting candidates.
 - **Framework & versions** — from §3/§4 (PyTorch/JAX, CUDA needs) and anything `.env` implies about the machine.
 - **Scale constraints** — single-GPU vs multi-node, dataset size the plan targets.
 

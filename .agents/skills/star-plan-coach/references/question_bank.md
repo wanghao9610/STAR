@@ -1,13 +1,13 @@
 # Stage-by-Stage Question Bank (Specialized for CS Research Plans)
 
-How to use: when entering a stage, read only that stage's section. Core questions open the stage (pick 2-3, not all of them); follow-ups probe the weak spots in the user's answers; "When stuck" gives that stage's rescue strategy. Questions are ammunition, not a checklist — use them selectively based on what the user says; do not march through every item.
+How to use: when entering a stage, read only that stage's section. Core questions open the stage (pick 2-3, not all); follow-ups probe the weak spots in the user's answers; "When stuck" gives that stage's rescue strategy. Questions are ammunition, not a checklist — use them selectively, by what the user says.
 
 ---
 
 ## Stage 1: Problem Definition & Motivation (problem)
 
 **Core questions**
-- State your research question in one sentence. If it takes two sentences, it probably needs to be split.
+- State your research question in one sentence. If it takes two, it probably needs splitting.
 - Why is this problem worth doing now? What made it infeasible two years ago?
 - If the research succeeds, what changes in the field? Who will cite you?
 - Are you filling a gap or changing understanding? The two differ in both value and how they are written up.
@@ -25,7 +25,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 ## Stage 2: Related Work & Positioning (related_work)
 
 **Core questions**
-- What are the 3-5 works closest to your idea? Summarize what each one does in a sentence.
+- What are the 3-5 works closest to your idea? Summarize what each does in a sentence.
 - If your research is a conversation, who are you responding to? Are you supporting or challenging the field's mainstream narrative?
 - What is the one thing these works collectively cannot do? — that sentence is your positioning.
 
@@ -65,10 +65,10 @@ How to use: when entering a stage, read only that stage's section. Core question
 **Follow-ups**
 - How will the ablations be designed? Can they attribute the gains to your core contribution rather than engineering and tuning?
 - How many seeds or repeats back each headline result, and how is variance reported (mean ± std, min/max)? A margin that vanishes across seeds is noise — which claims need multi-seed support, and which single-seed runs are acceptable as early runnable checks?
-- Is your compute and time budget enough to run all the experiments? Which experiment is the most expensive? Is it worth it?
+- Is your compute and time budget enough for all the experiments? Which experiment is the most expensive? Is it worth it?
 - What experimental result would make you abandon or substantially revise the method? (This answer also belongs to Stage 5.)
 
-**When stuck**: this is the stage best suited to offering options — based on the user's task type, directly present 2-3 common evaluation setups for that direction (datasets + metrics + representative baselines) and let the user pick one to fine-tune.
+**When stuck**: this is the stage best suited to offering options — based on the user's task type, present 2-3 common evaluation setups for that direction (datasets + metrics + representative baselines) and let the user pick one to fine-tune.
 
 ---
 

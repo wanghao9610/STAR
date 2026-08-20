@@ -10,8 +10,8 @@ Which tool installs what, in what order, and what happens on failure. Every comm
 | pip (second choice) | uv absent and declined, or a package fails under uv | `$ENV_PY -m pip install <pkg>` |
 | conda (whitelist only) | conda backend **and** the package is on the whitelist | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <pkg> -y` |
 
-- uv missing → ask once, with a recommendation: install uv (e.g. `$PYTHON_HOME/bin/python -m pip install --user uv`, or the official standalone installer if the user prefers) / use pip for this run. Declining costs speed, not correctness.
-- Do not mix managers beyond these three: what uv/pip installed, uv/pip upgrades. Never conda-install over pip-managed packages — the whitelist is the only conda territory, and pip never owns it.
+- uv missing → ask once, recommending: install uv (e.g. `$PYTHON_HOME/bin/python -m pip install --user uv`, or the official standalone installer if the user prefers) / use pip for this run. Declining costs speed, not correctness.
+- Do not mix managers beyond these three: what uv/pip installed, uv/pip upgrades. Never conda-install over pip-managed packages — the whitelist is conda's only territory, and pip never owns it.
 
 ## Install order
 
@@ -25,9 +25,9 @@ Which tool installs what, in what order, and what happens on failure. Every comm
 
 `cudatoolkit` / `cuda-toolkit`, `cudnn`, `nccl`, `gcc_linux-64` / `gxx_linux-64` (compilers for source builds), `ffmpeg`, `openmpi` / `mpich` (with `mpi4py`), `faiss-gpu`.
 
-Rationale: these ship native libraries that must be isolated from — or coordinated with — the system; pip wheels for them either do not exist or fight the system copies.
+Rationale: they ship native libraries that must be isolated from — or coordinated with — the system; their pip wheels either do not exist or fight the system copies.
 
-Venv backend needing a whitelist item → do not improvise (no `sudo`, no apt/brew): stop and ask with options — the user installs it system-wide themselves / skip it / a pip alternative where one exists (`faiss-cpu`, `imageio-ffmpeg`).
+Venv backend needing a whitelist item → do not improvise (no `sudo`, no apt/brew): stop and ask with options — the user installs it system-wide / skip it / a pip alternative where one exists (`faiss-cpu`, `imageio-ffmpeg`).
 
 ## Framework wheel selection (CUDA matching)
 

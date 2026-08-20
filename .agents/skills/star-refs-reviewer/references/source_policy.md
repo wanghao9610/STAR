@@ -4,9 +4,9 @@ Every field in `reference.bib` traces to a record fetched during this run. This 
 
 ## The one hard rule
 
-A bib field is legal only if it appears in a machine-fetched record from a source below. Never write a field from model memory. Never "correct" a field the record got wrong. Never fill a missing field by inference — not the year, not the pages, not the publisher. A paper whose record cannot be fetched **never becomes an entry**; it is named as a comment line in the file's `%% Needs manual check` block and detailed in the index's Needs-manual-check section. An entry that is 90% transcribed and 10% remembered is a fabricated entry.
+A bib field is legal only if it appears in a machine-fetched record from a source below. Never write a field from model memory. Never "correct" a field the record got wrong. Never fill a missing field by inference — not the year, not the pages, not the publisher. A paper whose record cannot be fetched **never becomes an entry**: it is a comment line in the file's `%% Needs manual check` block, detailed in the index's Needs-manual-check section. An entry that is 90% transcribed and 10% remembered is a fabricated entry.
 
-Google Scholar is not a source here: it has no API, blocks automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — frequently missing pages, using abbreviated venue strings, and preferring the preprint over the published record. A human may read it; this skill never scrapes it. The databases below are what a Scholar bibtex is generated *from*, so they are both fetchable and closer to the source.
+Google Scholar is not a source here: it has no API, blocks automated queries behind CAPTCHAs, and its exported bibtex is itself machine-generated — frequently missing pages, using abbreviated venue strings, and preferring the preprint over the published record. A human may read it; this skill never scrapes it. The databases below are what a Scholar bibtex is generated *from*: fetchable, and closer to the source.
 
 ## Search order
 
@@ -41,7 +41,7 @@ One or two fields agreeing is not a match — near-duplicate titles across a wor
 
 ## Resolving a title
 
-`add` may name a paper by title alone, so the title is all there is to match on. Resolution uses the search endpoints above (DBLP search, Crossref `query.bibliographic`, Semantic Scholar search) and the matching rule's normalization: case- and punctuation-insensitive. The input resolves when exactly one paper's record title equals it — the full title, or the main title before a subtitle's colon. Several distinct papers matching (a workshop paper and its extension are the classic pair), or best hits that only nearly match → ask, one direct question listing each candidate's title, venue, year, and URL; found nowhere → the `%% Needs manual check` block and the index's Needs-manual-check section. A resolved title is from then on just a paper: its record goes through the search order, the three-field matching rule, and published-over-preprint like any other.
+`add` may name a paper by title alone, so the title is all there is to match on. Resolution uses the search endpoints above (DBLP search, Crossref `query.bibliographic`, Semantic Scholar search) and the matching rule's normalization: case- and punctuation-insensitive. The input resolves when exactly one paper's record title equals it — the full title, or the main title before a subtitle's colon. Several distinct papers matching, or best hits that only nearly match → ask, one direct question listing each candidate's title, venue, year, and URL; found nowhere → the `%% Needs manual check` block and the index's Needs-manual-check section. A resolved title is then just a paper: its record goes through the search order, the three-field matching rule, and published-over-preprint like any other.
 
 ## Published over preprint
 
@@ -56,7 +56,7 @@ Prefer the published record whenever one exists; the arXiv id survives only if t
 - **FirstAuthorSurname** — ASCII, no diacritics, no spaces: `Müller` → `Mueller`, `van den Berg` → `vandenBerg`.
 - Collision → append a lowercase letter (`2021_CLIP_Radforda`). Keys are unique across the file.
 
-The citekey is the only field you author. Everything else is transcribed.
+The citekey is the only field you author.
 
 ## Provenance comment — `% src:`
 
@@ -65,13 +65,13 @@ One line directly above each entry, carrying the same origin the index's Provena
 - A fetched record: `% src: <record URL> (fetched YYYY-MM-DD)` — the URL and the date identical to that entry's index row.
 - An entry the user added by hand, with no fetched record: `% src: user-supplied`.
 
-Strip any `mailto` parameter from the URL before writing it, because no comment in this file may contain `@`. BibTeX scans for that character outside entries too, and reads `@article` inside a `%` line as the start of a new record, silently swallowing the entry beneath it — the bib parses, the key vanishes, and the failure surfaces as an undefined citation far from its cause. Name a type as "an article-type entry", never as the literal.
+Strip any `mailto` parameter from the URL before writing it: no comment in this file may contain `@`. BibTeX scans for that character outside entries too, reading `@article` inside a `%` line as the start of a new record and silently swallowing the entry beneath it — the bib parses, the key vanishes, and the failure surfaces as an undefined citation far from its cause. Name a type as "an article-type entry", never as the literal.
 
 The comment belongs to the entry, not to its place in the file: reclassifying moves the two together, and an entry copied out of here — the writing-side companion STAGE merges these byte for byte — arrives with its origin attached.
 
 ## Needs-manual-check block — `%% Needs manual check`
 
-A paper with no fetchable authoritative record is not written as an entry; it is written as a comment line in this block. The block is last in the file, after every category block:
+A paper with no fetchable authoritative record is a comment line in this block, not an entry. The block is last in the file, after every category block:
 
 ```text
 %% Needs manual check — 2 papers, no authoritative record as of 2026-08-05
@@ -79,9 +79,9 @@ A paper with no fetchable authoritative record is not written as an entry; it is
 % "Prompt Tuning for Dense Prediction" — three near-identical candidate titles, undecidable; candidates and URLs in refs_index.md section 6
 ```
 
-One line per paper: the title, plus what was tried or what it is stuck on. Never a commented-out entry — a `%` line holding `@misc{` is exactly the character the section above warns about, and a commented-out entry is both the form most likely to be reached for and the most expensive one to write. Keep URLs out for the same reason; the detail lives in the index's §6 and the line points there.
+One line per paper: the title, plus what was tried or what it is stuck on. Never a commented-out entry — a `%` line holding `@misc{` is exactly the character the section above warns about. Keep URLs out for the same reason; the detail lives in the index's §6 and the line points there.
 
-Once a record is fetched the paper becomes a real entry and its line leaves the block. It is never in both places.
+Once a record is fetched the paper becomes a real entry and its line leaves the block.
 
 ## Normalization — the closed list
 
@@ -107,7 +107,7 @@ AI-conference templates (NeurIPS / CVPR / ICML / ICLR / ACL) render author, titl
 
 The impact score (`references/refs_rubric.md`, Impact score) is computed from three metrics. None enters `reference.bib`; they live in the index with their fetch dates.
 
-- **Citation counts** ride the Semantic Scholar calls already listed — `citationCount` is in the search, `/references`, and `/citations` field lists, so the full pass pays nothing extra. `score` mode refreshes the whole bib in one call: `POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`, up to 500 ids in the body (`{"ids": ["DOI:…", "ARXIV:…", …]}`), the ids taken from the provenance the index already holds. An entry the batch cannot resolve keeps its old value and date.
+- **Citation counts** ride the Semantic Scholar calls already listed — `citationCount` is in the search, `/references`, and `/citations` field lists, so the full pass pays nothing extra. `score` mode refreshes the whole bib in one call: `POST https://api.semanticscholar.org/graph/v1/paper/batch?fields=citationCount,year,externalIds`, up to 500 ids in the body (`{"ids": ["DOI:…", "ARXIV:…", …]}`), taken from the provenance the index already holds. An entry the batch cannot resolve keeps its old value and date.
 - **Venue tier** is offline: the fetched record's venue field against `references/venue_tiers.md`.
 - **Stars and last push** — `https://api.github.com/repos/<owner>/<repo>` → `stargazers_count`, `pushed_at`. Cache the response as `<citekey>.github.json` before use. Unauthenticated GitHub allows **60 requests/hour** — the binding cap, still several times the ≤15 repos a run should need (core papers, survey deep tier); serialize ~1/s like every host. A 403/429 here usually *is* the hourly cap: back off once, then record the failure and mark the component unfetched — a partial score per the rubric, never a retry loop, never a number from memory.
 
@@ -115,13 +115,13 @@ The impact score (`references/refs_rubric.md`, Impact score) is computed from th
 
 ## Figures — the figures a note carries
 
-A note may carry up to three images: the figures its own paper uses to show what the note's prose cannot. Step 3 decides which figures those are, from the captions and from what the paper is; this section fixes where they may come from and what happens to them after.
+A note may carry up to three images: the figures its own paper uses to show what the note's prose cannot. Step 3 decides which, from the captions and from what the paper is; this section fixes where they may come from and what happens to them after.
 
 - **One source.** The paper's arXiv HTML rendering, `https://arxiv.org/html/<arxiv-id>` — the page Step 3 already reads where it exists. arXiv renders roughly 2024 onward, and only where the submitted LaTeX converted, so many papers have none: that is a fact the note states, never a reason to look elsewhere. The PDF is not rendered here, and no image is ever taken from a project page, a repository README, a blog, or a search result.
 - **Fetched as bytes, kept as fetched.** Download each chosen figure's `<img>`, resolved against the page's own URL, to `metds/refs/figs/<ABBREV>_fig<N>.<ext>` — `<ABBREV>` the note's, `<N>` the paper's figure number, the extension the file's own. Never re-encode, crop, rescale, or merge two images into one. The file is its own cache: no second copy goes under `raw/`.
-- **Provenance travels with it.** The line under each image carries the figure number, the caption's first sentence verbatim, the image URL, and the fetch date — the same origin-beside-the-artifact rule the `% src:` line follows, and the reason a figure copied out of the note can still be traced. An image with no such line is a figure from nowhere: delete it rather than explain it.
-- **The description is sourced too.** The sentences under a figure that say what it shows come from the caption in full and from the passages of that same fetched page which cite the figure by number — nothing else turns a figure into words here, and what neither states is marked `[unverified]`. A figure whose description cannot be written from them is dropped rather than shipped unreadable.
-- **One arXiv request per figure kept.** Each is fetched right after the page it was chosen from, under the ~1 per 3 seconds arXiv asks for — three requests at most, because three is the note's ceiling. A download that fails is recorded and the note goes out without that figure — never a retry loop, and never another paper's figure in its place.
+- **Provenance travels with it.** The line under each image carries the figure number, the caption's first sentence verbatim, the image URL, and the fetch date — the same origin-beside-the-artifact rule the `% src:` line follows. An image with no such line is a figure from nowhere: delete it rather than explain it.
+- **The description is sourced too.** The sentences under a figure come from the caption in full and from that same fetched page's passages citing the figure by number — nothing else turns a figure into words here, and what neither states is marked `[unverified]`. A figure whose description cannot be written from them is dropped rather than shipped unreadable.
+- **One arXiv request per figure kept.** Each is fetched right after the page it was chosen from, under the ~1 per 3 seconds arXiv asks for — three requests at most. A download that fails is recorded and the note goes out without that figure — never a retry loop, and never another paper's figure in its place.
 
 ## Rate limits and failure
 

@@ -1,11 +1,11 @@
 # Sub-plan Naming Convention
 
-Every plan file is named `<prefix>_<slug>_plan.md`. The **prefix** is a string of decimal digits that encodes the plan's position in the decomposition tree.
+Every plan file is named `<prefix>_<slug>_plan.md`. The **prefix** is a string of decimal digits encoding the plan's position in the decomposition tree.
 
 ## The rule
 
-- **Depth = prefix length.** A root plan (from `star-plan-coach`) has a 1-digit prefix — the smallest digit no existing root already uses (`0_` in a fresh project, `1_` for a second root, …). Its children have 2-digit prefixes, grandchildren 3-digit, and so on.
-- **To decompose a plan with prefix `P`**, each sub-plan gets prefix `P` **with one more digit appended**, and that digit is the sub-plan's 0-based index among its siblings.
+- **Depth = prefix length.** A root plan (from `star-plan-coach`) has a 1-digit prefix — the smallest digit no existing root uses (`0_` in a fresh project, `1_` for a second root, …). Its children have 2-digit prefixes, grandchildren 3-digit, and so on.
+- **To decompose a plan with prefix `P`**, each sub-plan gets prefix `P` **with one more digit appended**: that digit is the sub-plan's 0-based index among its siblings.
   - `0_` → `00_`, `01_`, `02_`, …
   - `00_` → `000_`, `001_`, …
   - `3_` → `30_`, `31_`, …
@@ -32,10 +32,10 @@ Files sort naturally in a directory listing (`0`, `00`, `01`, `02`, `020`, `021`
 
 1. **Max 10 siblings per node.** One digit per level means indices only run 0–9. If a node seems to need more than 10 children, do **not** append a second digit (`10_` is ambiguous — see below). Instead: group units, or split in two levels (decompose into ≤10 units now, each still too big to run, then recurse into the heavy ones). This cap is a re-scoping signal, not a bug to engineer around.
 
-2. **Why not two digits per level.** Prefix `10_` could mean "child 0 of plan 1" or "top-level plan 10". With a fixed one-digit-per-level scheme and ≤10 nodes at every level, prefixes stay unambiguous and the parent is always recoverable by dropping one digit. Keep it one digit per level.
+2. **Why not two digits per level.** Prefix `10_` could mean "child 0 of plan 1" or "top-level plan 10". With a fixed one-digit-per-level scheme and ≤10 nodes at every level, prefixes stay unambiguous and the parent is always recoverable by dropping one digit.
 
-3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` gives each new root the smallest free digit, but projects created before that rule may hold two unrelated roots both numbered `0_` (distinguished only by slug), whose children then both start `00_`, etc. The numeric prefix therefore orders and hints the tree for humans, but the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it (not the prefix) when reconstructing which sub-plan belongs to which parent.
+3. **The prefix is a hint; `parent:` is authoritative.** `star-plan-coach` gives each new root the smallest free digit, but projects created before that rule may hold two unrelated roots both numbered `0_` (distinguished only by slug), whose children then both start `00_`, etc. The numeric prefix therefore only orders and hints the tree for humans; the **frontmatter `parent:` field on each sub-plan is the real link**. Always set `parent:` to the exact parent filename, and rely on it, not the prefix, when reconstructing which sub-plan belongs to which parent.
 
-4. **Slugs are independent of the tree.** The `<slug>` is a short, human-readable English name for the unit's content and has nothing to do with the parent's slug. `0_open-vocab-det-seg` can have child `01_mvp-verify`.
+4. **Slugs are independent of the tree.** The `<slug>` is a short, human-readable English name for the unit's content, unrelated to the parent's slug. `0_open-vocab-det-seg` can have child `01_mvp-verify`.
 
-5. **Filling gaps / re-indexing.** Assign indices densely from 0 in the confirmed order. If the user later deletes a middle sub-plan, leave the hole rather than renumbering (renumbering would break every deeper prefix and every `parent:`/`traces_to` reference). If they insert one, give it the next free index even if that puts it out of numeric order; ordering intent lives in the parent's `## Sub-plans` index, not the digits.
+5. **Filling gaps / re-indexing.** Assign indices densely from 0 in the confirmed order. If the user later deletes a middle sub-plan, leave the hole rather than renumbering — that would break every deeper prefix and every `parent:`/`traces_to` reference. If they insert one, give it the next free index even if that puts it out of numeric order; ordering intent lives in the parent's `## Sub-plans` index, not the digits.

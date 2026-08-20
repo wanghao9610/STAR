@@ -1,6 +1,6 @@
 # Plan Write-back Rules — keep the sub-plan true to execution
 
-When execution provably diverges from the sub-plan, the divergence is confirmed with the user and then **written back into the sub-plan** (`metds/plans/<prefix>_<slug>_plan.md`), so the plan a user rereads later matches what was actually executed. This file defines what qualifies, the delta form, the write-back procedure, and the boundary where the write-back must **not** be used.
+When execution provably diverges from the sub-plan, the divergence is confirmed with the user and then **written back into the sub-plan** (`metds/plans/<prefix>_<slug>_plan.md`), so the plan a user rereads later matches what ran. This file defines what qualifies, the delta form, the procedure, and where it must **not** be used.
 
 ## Material (sync) vs detail (don't)
 
@@ -12,11 +12,11 @@ EXEC_PLAN is *supposed* to be more concrete than the sub-plan — extra precisio
 - the §5 done-criterion is **adjusted** (threshold, metric, or check);
 - a value the sub-plan left unstated is **settled by execution** and a method document will cite it (**ENRICHED**, below).
 
-Not material: finer sub-steps inside one §3 step; implementation choices, commands, and paths no method document cites. When unsure, treat it as detail and leave the sub-plan alone.
+Not material: finer sub-steps inside one §3 step; implementation choices, commands, and paths no method document cites. When unsure, treat it as detail.
 
 ## ENRICHED: values execution settled that a document will cite
 
-The sub-plans are also the **source** the method documents compile from — `star-metd-summarize` reads plans and nothing else, so a value that lives only in a run log can never reach them. A value the sub-plan left unstated, execution fixed, and a `metds/*.md` section would cite is therefore not detail: left unsynced it becomes a permanent `TBD` in that document.
+The sub-plans are also the **source** the method documents compile from — `star-metd-summarize` reads plans and nothing else. A value the sub-plan left unstated, execution fixed, and a `metds/*.md` section would cite is therefore not detail: left unsynced it becomes a permanent `TBD` in that document.
 
 In scope — the value must be one a document section cites, and the row must name that section:
 
@@ -29,7 +29,7 @@ In scope — the value must be one a document section cites, and the row must na
 | the split / preprocessing choice actually used | `dataset.md` §3 |
 | the seed values actually run, where §5 states a seed or repeat policy | `training.md` §3 |
 
-Out of scope: anything no document cites — internal flags, scratch paths, environment detail (EXEC_LOG and `freeze.txt` hold those) — and any value the plan already states (changing that is MODIFIED, not ENRICHED). **If you cannot name the document section that would cite it, it is detail.** A sub-plan is not a config dump.
+Out of scope: anything no document cites — internal flags, scratch paths, environment detail (EXEC_LOG and `freeze.txt` hold those) — and any value the plan already states (changing that is MODIFIED, not ENRICHED). **If you cannot name the document section that would cite it, it is detail.**
 
 ## Delta form
 
@@ -44,7 +44,7 @@ Rows found while planning go in EXEC_PLAN's "Divergences from sub-plan" table; r
 
 ## Two sync points, both user-confirmed
 
-1. **The user's approval.** Divergences known at planning time are part of the EXEC_PLAN the user approves — approving the plan approves syncing those rows. Write them back immediately after approval, before executing.
+1. **The user's approval.** Divergences known at planning time are part of the EXEC_PLAN the user approves. Write them back immediately after approval, before executing.
 2. **Finalize.** Deviations that emerge mid-run accumulate under "Pending amendments" — never interrupt the run for them. At finalize, present the batch **once** (*sync all / select which / skip*) and write back only confirmed rows. If a run is abandoned or blocked, unsynced rows stay in the log and are re-offered at the next resume's finalize.
 
 ## Write-back procedure
@@ -53,7 +53,7 @@ For each confirmed row:
 
 1. **Re-read the sub-plan first.** If its §2–§5 changed since the run started (user edit, re-decomposition), report the conflict — do not overwrite blindly.
 2. **Update the affected §2–§5 passages in place** to the confirmed content; the body must read as current truth, not as a patch.
-3. **Append a `## Revision History` entry** — the same append-only section `star-plan-reviser` writes (create it at the end of the file if absent; each new block goes below the previous one; never rewrite past entries). One `###` block per sync event, format-compatible with the reviser's:
+3. **Append a `## Revision History` entry** — the same append-only section `star-plan-reviser` writes (create it at the end of the file if absent; never rewrite past entries). One `###` block per sync event, format-compatible with the reviser's:
 
    ```markdown
    ## Revision History
@@ -65,7 +65,7 @@ For each confirmed row:
    ```
 
 4. **Bump frontmatter `updated`**; touch nothing else in the frontmatter.
-5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). The write-back applies once: a marked row is never applied twice.
+5. **Mark the row synced at its source** (the `synced` column in EXEC_PLAN / the checkbox in EXEC_LOG). A marked row is never applied twice.
 
 Dates come from the user/session context — never invent timestamps.
 

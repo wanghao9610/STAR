@@ -1,6 +1,6 @@
 # Review Spec — evidence collection & report definition
 
-How star-plan-reviser gathers evidence and what each report section must contain. Collectors are **read-only**: they never create, edit, or delete files, and they report facts, not revision opinions. Everything in the report comes from files on disk — never from chat memory.
+How star-plan-reviser gathers evidence and what each report section must contain. Collectors are **read-only**: they never create, edit, or delete files, and report facts, not revision opinions. Everything in the report comes from files on disk — never from chat memory.
 
 ## Evidence sources
 
@@ -9,7 +9,7 @@ How star-plan-reviser gathers evidence and what each report section must contain
 | the plan file itself | intent: §1 objective, §3 tasks, §4 deliverable paths, §5 done-criterion, §6 risks; frontmatter `status` / `exec_status` / `exec_runs` / `depends_on` / `children` / `updated` |
 | `wkdrs/<run>/EXEC_PLAN.md` | the actions the executor committed to, and where the STOP line fell |
 | `wkdrs/<run>/EXEC_LOG.md` | step statuses, the step's own check results, artifact paths, "Awaiting user" commands, Notes/decisions incl. **Plan-level finding** entries |
-| `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` (when present) | star-expt-analyst's results audit: the run verdict, the done-criteria scorecard with each metric's source, log health, and the interpretation incl. kill-criteria hits — a pre-verified evidence base, still cross-checked against disk like any other claim |
+| `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` (when present) | star-expt-analyst's results audit: the run verdict, the done-criteria scorecard with each metric's source, log health, and the interpretation incl. kill-criteria hits — pre-verified, still cross-checked against disk like any other claim |
 | §4 deliverable paths | artifacts on disk: existence, size, mtime, cheap sanity |
 | `${CODE_NAME}/` modules named in §2/§3 | whether promised code exists and plausibly matches the log's claims |
 | children frontmatter (root/internal targets) | per-child section status, `exec_status`, `updated`, `depends_on` |
@@ -34,9 +34,9 @@ Missing evidence is reported as "unknown" or "absent" — never guessed.
 
 **Code collector** — for each named module/entrypoint:
 
-- `path` / `exists` / `consistent` (does the file's state plausibly agree with what the log claims was created/modified?) / `notes`
+- `path` / `exists` / `consistent` (does the file's state plausibly agree with the log's created/modified claims?) / `notes`
 
-All collectors: read-only; return the fields listed above and nothing else; return "unknown" over guessing; no revision proposals; touch nothing under `datas/`, `inits/`, or `wkdrs/` beyond reading. A verdict a collector returns is a lead the main agent confirms before it reaches the user (conventions §6.6).
+All collectors: return the fields above and nothing else; return "unknown" over guessing; no revision proposals; touch nothing under `datas/`, `inits/`, or `wkdrs/` beyond reading. A collector's verdict is a lead the main agent confirms before it reaches the user (conventions §6.6).
 
 ## Verification levels
 
@@ -60,18 +60,18 @@ Never promote `unverifiable` to `met` on the log's word alone.
 ## Scoping by node type
 
 - **Leaf**: all three levels over its own run.
-- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run a log collector only on runs that exist, one run at a time; audit this node's own §1–§6 assumptions against the aggregated signals (a child's plan-level finding is evidence against a parent assumption).
-- **No execution evidence anywhere**: document-only review — the scorecard reads `unverifiable`/absent; divergences and candidates draw on the plan text and on what the user supplies.
+- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run a log collector only on runs that exist, one run at a time; audit this node's own §1–§6 assumptions against the aggregated signals.
+- **No execution evidence anywhere**: document-only review — the scorecard reads `unverifiable`/absent; divergences and candidates draw on the plan text and what the user supplies.
 
 ## Report sections
 
 1. **Intent recap** — the objective in 1–2 lines; a leaf quotes its §5 done-criterion verbatim, a root/internal states its finalized status and the key claims/assumptions it rests on.
-2. **What actually happened** — steps done / blocked / skipped; artifacts verified on disk; commands still under "Awaiting user"; a summary of the children for root/internal targets.
+2. **What actually happened** — steps done / blocked / skipped; artifacts verified on disk; commands still under "Awaiting user"; children summarized for root/internal targets.
 3. **Completion scorecard** — one row per §3 task plus one row for the §5 done-criterion: verdict + evidence pointer.
 4. **Divergences** — planned X but did Y; extra work not in the plan; assumptions the evidence contradicts; kill-criteria hits and quoted plan-level findings.
 5. **Blockers & leftovers** — blocked steps with cause; remaining `[TBD]` / `【待定】`; questions the run raised but did not answer.
 6. **Knock-on effects** — reverse `depends_on` edges (siblings that list this node), children derived from it, and which revision candidates would invalidate what.
-7. **Revision candidates** — numbered; each names the target section, what to change, the evidence, a proposed-edit sketch, and a grade for how far the change reaches.
+7. **Revision candidates** — numbered; each names the target section, what to change, the evidence, a proposed-edit sketch, and how far the change reaches.
 
 **Evidence pointers** are concrete: `path[:line]`, a command plus its output snippet, or a frontmatter field — at least one per claim.
 

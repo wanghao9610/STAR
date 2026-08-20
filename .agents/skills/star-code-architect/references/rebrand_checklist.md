@@ -1,6 +1,6 @@
 # Conservative Rebrand Checklist
 
-Rename the imported codebase to `${CODE_NAME}` without silently breaking it. The rule of thumb: **rename identifiers Python resolves; never rename strings frameworks resolve.**
+Rename the imported codebase to `${CODE_NAME}` without silently breaking it. Rule of thumb: **rename identifiers Python resolves; never rename strings frameworks resolve.**
 
 ## Preconditions
 

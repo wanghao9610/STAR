@@ -1,6 +1,6 @@
 # Stage-by-Stage Question Bank (Specialized for Research Topic Selection)
 
-How to use: when entering a stage, read only that stage's section. Core questions open the stage (pick 2–3, not all of them); follow-ups probe the weak spots in the user's answers; "When stuck" gives that stage's rescue strategy. Questions are ammunition, not a checklist — use them selectively based on what the user says; do not march through every item.
+How to use: when entering a stage, read only that stage's section. Core questions open the stage (pick 2–3, not all); follow-ups probe the weak spots in the user's answers; "When stuck" gives that stage's rescue strategy. Questions are ammunition, not a checklist — use them selectively, by what the user says.
 
 ---
 
@@ -18,19 +18,19 @@ How to use: when entering a stage, read only that stage's section. Core question
 - What would you refuse to work on even if it scored well? Constraints of taste are constraints — record them.
 - Whose attention do you want: reviewers at one venue, one industry, one lab you admire?
 
-**When stuck**: offer 2–3 readings of the seed at different granularities — a task reading, a mechanism reading, a setting reading — and let the user pick or edit one.
+**When stuck**: offer 2–3 readings of the seed at different granularities — task, mechanism, setting — and let the user pick or edit one.
 
 ---
 
 ## Stage 2: Diverge (diverge)
 
 **Generation moves** — use these to draft candidates; aim for directions that differ in problem, bet, or setting, not in wording:
-- **Vary the problem**: keep the mechanism the user cares about, change what it is applied to.
+- **Vary the problem**: keep the mechanism the user cares about, change what it applies to.
 - **Vary the bet**: same problem, a different hypothesis about what makes it tractable now.
 - **Vary the setting**: same problem and bet, moved to the regime where it is hardest or most valuable — low-data, on-device, multilingual, long-context, safety-critical.
 - **Invert**: find what breaks the current best methods and make the failure itself the topic.
 - **Transfer**: name an adjacent field that solved a structurally similar problem; the analogue here is a candidate.
-- **Obsolete**: ask what result would make the seed's whole area irrelevant; working toward that result may be the better topic.
+- **Obsolete**: ask what result would make the seed's whole area irrelevant; working toward it may be the better topic.
 
 **Core questions**
 - Which of these would you still want to work on if you learned someone published it last month? Interest that survives scooping is signal.
@@ -39,7 +39,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 
 **Rules**: 3–5 candidates; each carries a one-line question, the bet, what would be new, and the nearest existing area; the user's own candidates enter the pool on equal terms.
 
-**When stuck**: if the user cannot choose what to keep for scanning, keep the two they rank highest plus the one most distinct from both — distance protects the scan from answering the same question three times.
+**When stuck**: if the user cannot choose what to scan, keep the two they rank highest plus the one most distinct from both — distance protects the scan from answering the same question three times.
 
 ---
 

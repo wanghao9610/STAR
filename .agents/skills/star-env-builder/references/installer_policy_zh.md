@@ -10,8 +10,8 @@
 | pip（次选） | uv 缺失且用户拒装，或某个包在 uv 下失败 | `$ENV_PY -m pip install <包>` |
 | conda（仅白名单） | conda 后端**且**包在白名单上 | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <包> -y` |
 
-- uv 缺失 → 问一次并带推荐：装 uv（如 `$PYTHON_HOME/bin/python -m pip install --user uv`，用户偏好官方独立安装器亦可）/ 本次改用 pip。拒装只损失速度，不损失正确性。
-- 这三者之外不混用管理器：uv/pip 装的由 uv/pip 升级。绝不用 conda 覆盖 pip 管理的包——conda 只管白名单，而白名单 pip 从不涉足。
+- uv 缺失 → 问一次并推荐：装 uv（如 `$PYTHON_HOME/bin/python -m pip install --user uv`，用户偏好官方独立安装器亦可）/ 本次改用 pip。拒装只损失速度，不损失正确性。
+- 这三者之外不混用管理器：uv/pip 装的由 uv/pip 升级。绝不用 conda 覆盖 pip 管理的包——conda 只管白名单，pip 从不涉足。
 
 ## 安装顺序
 
@@ -25,9 +25,9 @@
 
 `cudatoolkit` / `cuda-toolkit`、`cudnn`、`nccl`、`gcc_linux-64` / `gxx_linux-64`（源码构建用的编译器）、`ffmpeg`、`openmpi` / `mpich`（连同 `mpi4py`）、`faiss-gpu`。
 
-理由：这些包携带原生库，必须与系统隔离（或与系统协调）；它们的 pip wheel 要么不存在，要么会和系统副本打架。
+理由：这些包携带原生库，必须与系统隔离或协调；它们的 pip wheel 要么不存在，要么和系统副本打架。
 
-venv 后端需要白名单项 → 不要即兴发挥（不 `sudo`、不 apt/brew）：停下来问，选项是——用户自行系统级安装 / 跳过 / 有 pip 替代品就用替代品（`faiss-cpu`、`imageio-ffmpeg`）。
+venv 后端需要白名单项 → 不要即兴发挥（不 `sudo`、不 apt/brew）：停下来问，选项是——用户系统级安装 / 跳过 / 有 pip 替代品就用替代品（`faiss-cpu`、`imageio-ffmpeg`）。
 
 ## 框架 wheel 选择（CUDA 匹配）
 
