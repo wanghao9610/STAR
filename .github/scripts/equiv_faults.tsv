@@ -21,9 +21,14 @@ f11	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl
 f11b	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl -ni -e 'print unless /^#{2,4} /' "$W/.pi/skills/star-plan-coach/references/question_bank.md"	question_bank.md
 f12	Description length (<= ${DESC_MAX:=1024} characters, SKILL.md spec)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
 f13	Description length in .dsh (<= ${DSH_DESC_MAX:=500}, DSH catalog bound)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
-f14	Skill script parity	printf '# drift\n' >> "$W/.pi/skills/star-flow-status/scripts/scan.sh"	scan.sh
+# f14 drifts .pi's own copy, and that copy is a link into .agents/skills: an
+# append would land on the file every tree shares and drift none of them apart.
+# cp -p then mv gives .pi the file itself, byte for byte, before the append.
+f14	Skill script parity	s="$W/.pi/skills/star-flow-status/scripts/scan.sh"; cp -p "$s" "$s.own" && mv "$s.own" "$s" && printf '# drift\n' >> "$s"	scan.sh
 f15	Manifest section parity (.agents vs .claude)	perl -ni -e 'print unless /^## Dialogue Discipline/' "$W/.agents/skills/star-code-reviewer/SKILL.md"	.agents/skills/star-code-reviewer/SKILL.md
-f16	Grepped literals have a producer	grep -rl -- '[TBD]' "$W/.claude/skills" --include='*.md' | xargs perl -pi -e 's/\[TBD\]/[TBDX]/g'	.claude
+# find -L, because grep's own recursion skips the links .claude carries into
+# .agents/skills and the literals live in files on both sides of that line.
+f16	Grepped literals have a producer	find -L "$W/.claude/skills" -type f -exec grep -l -- '[TBD]' {} + | xargs perl -pi -e 's/\[TBD\]/[TBDX]/g'	.claude
 f17	AGENTS.md section citations	perl -pi -e 's/^## 9\. Project Runtime$/## 9. Project Runtime Environment/' "$W/AGENTS.md"	AGENTS.md
 f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f18b	Conventions document structure	perl -pi -e 's/^## 6\. Delegation$/## 6. Delegating/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
