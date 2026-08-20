@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research Project Adopt"
+  short_description: "Bring an already-started project into STAR without disturbing it"
+  default_prompt: "Use $star-proj-adopt to adopt my existing project into STAR and reflect the work already done."
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,1 @@
-interface:
-  display_name: "Research Env Builder"
-  short_description: "Build, install, and verify the project runtime environment"
-  default_prompt: "Use $star-env-builder to create the project environment and install verified dependencies."
-policy:
-  allow_implicit_invocation: true
+../../../../.codex/skills/star-env-builder/agents/openai.yaml

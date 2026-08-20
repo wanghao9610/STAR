@@ -554,7 +554,8 @@ if [[ "${ADOPT}" == false ]]; then
         # links resolve to nothing without it. A checkout path only — SYNC_PATHS
         # above is what gets copied out, so the Codex tree is still written to the
         # project only when codex is selected.
-        git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}" ".agents/skills/${SKILL_NAME}"
+        git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}" \
+            ".agents/skills/${SKILL_NAME}" ".codex/skills/${SKILL_NAME}"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode, so a single file in SYNC_PATHS arrives through its
@@ -566,7 +567,10 @@ if [[ "${ADOPT}" == false ]]; then
         # It holds the one stored copy of every skill file the trees share, linked
         # from the others, so a run selecting only claude still needs it in the
         # checkout for those links to resolve; it is not thereby installed.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills)
+        # .codex/skills is listed for the same reason from the other side: it
+        # holds the per-skill manifests Codex reads, which .agents/skills links
+        # to at the path Codex scans.
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .codex/skills)
         for tool in ${SELECTED_TOOLS[@]+"${SELECTED_TOOLS[@]}"}; do
             read -ra tool_roots <<<"$(tool_dirs "${tool}")"
             SPARSE_PATHS+=("${tool_roots[@]}")
