@@ -134,11 +134,6 @@ not open is one the main agent reads itself. Keeping them in one list turns a re
 failure into a false hole in the method.
 +++ 1
 `unread` is not a gap. A gap means no plan covers the section, and reaches the delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could not open is one the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
-### star-plan-decomposer/SKILL_zh.md
---- 1
-**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Shell 命令：Shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Shell 只做需要 shell 的事——一次调用，以项目根目录为工作目录，带两行：
-+++ 1
-**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Shell 命令：Shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Shell 只做非它不可的事——一次调用，以项目根目录为工作目录，带两行：
 ### star-plan-executor/SKILL.md
 --- 1
 2. **Plan behind a confirmation point, execute behind an agent.** The executable plan (EXEC_PLAN) is produced in **plan mode** and approved via **`ExitPlanMode`** before anything is written or run. Execution goes to **subagents, one per step / step-group**: the main agent orchestrates and verifies, and never edits code or launches jobs itself. Reference: `references/agent_dispatch_spec.md`.

@@ -16,14 +16,29 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-plan-decomposer PLAN_NAME [DESCRIPTION]`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`). Anything after the plan name is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point, and never the plan name itself: text resolving to no plan leaves the target still to be asked for. An optional `involve=low|medium|high` token may accompany `PLAN_NAME` (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither, and is stripped before either is read.
 
-**Shared conventions.** Load `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) in one message before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. That one message is the whole opening load — every `references/` and `assets/` file waits until the step that names it. The conventions file arrives through its own `read`, never `cat`-ed into a bash command: a bash result past roughly 30 KB is written out to a file that costs a second round trip to read back, and the conventions file is past that limit on its own. `bash` appears in the message only for what needs a shell — one call, with the project root as the working directory, carrying two lines:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What decomposing acts on — §0 vocabulary, §1 git, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. Three sections stay out: §2 the STOP line (it runs nothing itself — its tool allowlist carries no interpreter and no installer, and the one crossing it must know about, a dataset acquisition the executor hands back, is stated where Step 3 drafts a data leaf), §6 delegation (no step dispatches, and its allowlist carries no delegation tool at all), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
+
+Before acting, load it in one message — four bash calls, with the project root as the working directory, sent together.
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|5)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
 bash <this skill's directory>/scripts/scan.sh --slim
 ```
 
-Issued together with the read, none of it costs a round trip of its own. The first line is the run's `.env` lookup. The second is the shared collector, and its digest is what Steps 0 and 1 resolve against: every plan's frontmatter — `parent:`, `children:`, `depends_on`, `finalized:`, `exec_status`, `exec_runs` — its `## Sub-plans` index and its placeholder counts, plus every run log's frontmatter and a depth-1 listing of `metds/` and `wkdrs/`. It gathers, it never judges: no tree, no readiness verdict, no ordering. Read what it prints as raw file content, exactly as if you had opened each plan yourself. `--slim` is what keeps the result under the size limit on a project with history; if it is written out anyway, re-run that line on its own. If the script is missing or fails, fall back to reading `metds/plans/*_plan.md` directly, and say in your reply that the scan fell back.
+One message, four results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 39 KB in total, split 12, 20 and 8 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. The fourth call is the shared collector, and its digest is what Steps 0 and 1 resolve against: every plan's frontmatter — `parent:`, `children:`, `depends_on`, `finalized:`, `exec_status`, `exec_runs` — its `## Sub-plans` index and its placeholder counts, plus every run log's frontmatter and a depth-1 listing of `metds/` and `wkdrs/`. It gathers, it never judges: no tree, no readiness verdict, no ordering. Read what it prints as raw file content, exactly as if you had opened each plan yourself. `--slim` is what keeps the result under the size limit on a project with history; if it is written out anyway, re-run that line on its own. If the script is missing or fails, fall back to reading `metds/plans/*_plan.md` directly, and say in your reply that the scan fell back. Every `references/` and `assets/` file waits until the step that names it.
+
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -152,6 +167,7 @@ Start with the computation rather than the judgement call: rebuild the `depends_
 - A plan body may end with an append-only `## Revision History` section, written by `star-plan-executor` (the user-confirmed write-back of what execution changed) and `star-plan-reviser`. Its §1–§6 already reflect those entries — decompose from the body as it stands, and leave the section untouched.
 - Do not write plan files outside `metds/plans/`.
 - Git: at the end of the run, offer once to commit the sub-plans written plus the parent's updated index — `star-plan-decomposer: <parent slug> — <N> sub-plans` (conventions §1).
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
 
 ## Dialogue Discipline
 

@@ -17,13 +17,25 @@ description: >-
 
 调用方式：`/star-idea-storm [IDEA | IDEA_NAME]`——自由文本作新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。`involve=low|medium|high` 可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），解析前先从 `IDEA` / `IDEA_NAME` 中剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。把这次阅读放进开场那一条装载消息——规约文件单独一次 `read`，Stage 1、2、4 都要用的问题库（`<本 skill 所在目录>/references/question_bank_zh.md`）再单独一次 `read`，外加同一条消息里的一次 `bash` 调用（以项目根目录为工作目录），只跑非 `bash` 不可的那一行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。一次想法生成真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有四节不装载：§2 红线（这里没有重活，状态与文件规则已经划好那条界——不下载模型与数据集、不调付费接口、不做需要登录的抓取）、§5 计划名解析（它从不解析计划名：Step 0 是把 idea 文件对着 `metds/ideas/*_idea.md` 解析的，连重名也在那里处理，没有哪一步读 `metds/plans/`）、§9 项目布局（状态与文件规则把可写范围限定在 `metds/ideas/**` 与扫描缓存，比那一节更严），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——三次 `bash` 调用，以项目根目录为工作目录，外加一次对 Stage 1、2、4 要用的问题库（`<本 skill 所在目录>/references/question_bank_zh.md`）的 `read`，一起发出。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-整份文件走 `read`，绝不 `cat` 进命令里：每份工具结果各有自己的大小上限，`bash` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——那正是"一条消息装齐"本来要省掉的那趟往返，而光规约文件单它一份就已越过这个上限。其余一概不预装：`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+一条消息，四份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 42 KB，分 17、19、6 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。别的都不前置装载：`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
+
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -90,6 +102,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - 文件中每篇论文都带 venue、年份与记录 URL，抓取的原始内容先缓存再写表格行。网络使用仅限搜索元数据与摘要（指明要加深时加该方向 top-3 的 intro），按 `references/scan_policy.md` 串行并退避；不下载模型或数据集、不调付费 API、不做需登录的抓取、不绕过 CAPTCHA。本 skill 没有任何一步越过红线（规约 §2）；若有一步会越过，那一步就不归本 skill 跑。
 - 只写真实日期（规约 §4）。
 - Git：会话结束时（选题定稿，或用户暂停），就本次会话创建或编辑过的 idea 文件提供一次提交提议——`star-idea-storm: <slug> — <里程碑>`（规约 §1）。用户拒绝也没问题。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 
 ## 对话纪律
 

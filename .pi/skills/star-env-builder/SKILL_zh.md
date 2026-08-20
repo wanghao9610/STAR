@@ -19,13 +19,25 @@ description: >-
 
 调用方式：`/star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把包安装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），在参数与描述解析之前先剥离。
 
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线——§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局；本文件只写本 skill 特有的部分，并在更严处生效。动手前，用一条消息把它和每次运行都会用到的两份参考——安装策略（Step 5 与 Step 8）、跑通性检查规范（Step 6 与 Step 8）——一起装载：规约文件、`<本 skill 所在目录>/references/installer_policy_zh.md` 与 `<本 skill 所在目录>/references/runnable_check_spec_zh.md` 各用一次 `read` 读入，外加同一条消息里的一次 `bash` 调用（以项目根目录为工作目录），内容只有：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。搭运行环境真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§6 委派（三层可运行性检查由主 agent 自己跑——原则 6 与 Step 6 都这么写，这里没有哪一步分派）、§9 项目布局（状态与文件规则把它可写的每条路径、不可碰的每棵目录树都列得比那一节更严），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——三次 `bash` 调用，以项目根目录为工作目录，外加对每次运行都会用到的两份参考各一次 `read`：安装器策略（Step 5 与 Step 8）`<本 skill 所在目录>/references/installer_policy_zh.md`，与可运行性检查规范（Step 6 与 Step 8）`<本 skill 所在目录>/references/runnable_check_spec_zh.md`，一起发出。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|2|3|4|5)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-一条消息、四份结果——仍是一趟往返。别把文件 `cat` 进 `bash` 命令：每份工具结果各有自己的大小上限，`bash` 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——一条消息本来要省的正是这趟往返，而光规约一份就已超过这个上限，两份参考还要再叠上去。`bash` 只承担只有 `bash` 能做的事——这里就是上面那行 `.env` 探测。只在单一步骤用到的参考保持按需读取：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的步骤）到步骤时再读，不提前装载。
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+一条消息，五份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 39 KB，分 14、19、6 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。只服务于某一步的参考文件仍旧留到那一步：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的几步）等到各自的步骤再读，不前置。
+
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -126,6 +138,7 @@ grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # r
 - 只写这些位置：环境本身（`$CONDA_HOME/envs/` 之下或 `<项目根>/.venv`）、`${CODE_NAME}/requirements*`（仅在生成缺失布局或补验证过的缺口时）、`wkdrs/env_<ENV_NAME>_<日期>/`，以及——仅经用户明确确认——`.env` 里的 `PYTHON_HOME=` 一行。绝不碰源代码、`metds/plans/*` 或其他 skill 的产物。
 - 绝不删除环境；备份一律用运行时真实日期改名。绝不编造时间戳。
 - Git：每次运行至多一次提交——生成 requirements 文件时，或 add 模式下装包时——只 stage `${CODE_NAME}/requirements*`（规约 §1）。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 - 确认点批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在红线外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
 - 尊重用户镜像配置（`PIP_INDEX_URL`、`UV_DEFAULT_INDEX`）；绝不写 `pip config`、`.condarc` 或 `uv.toml`。
 - 重复调用：已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在 → 优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。

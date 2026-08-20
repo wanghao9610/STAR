@@ -1166,6 +1166,14 @@ LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-28400}
 # A `_zh` suffix is stripped before matching, so one row covers both languages.
 # Checked both ways, like check 15: a row whose citation is gone fails too.
 RESTATED_REGISTRY=(
+    "star-idea-storm|SKILL.md|2"
+    "star-idea-storm|SKILL.md|11"
+    "star-env-builder|SKILL.md|11"
+    "star-proj-adopt|SKILL.md|11"
+    "star-plan-decomposer|SKILL.md|11"
+    "star-code-architect|SKILL.md|11"
+    "star-code-release|SKILL.md|11"
+    "star-plan-coach|SKILL.md|11"
     "star-metd-summarize|SKILL.md|1"
     "star-expt-digest|SKILL.md|1"
     "star-expt-digest|SKILL.md|2"

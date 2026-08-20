@@ -15,14 +15,29 @@ description: >-
 
 调用方式：`/star-plan-decomposer PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了确认点，也定不了计划名本身：解析不到计划的文本，目标照样要问。可选的 `involve=low|medium|high` 可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），两者都不属于，解析两者之前先剥离。
 
-**通用规约。** 动手前用一条消息装载 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。开场要装载的只有这一条消息——`references/` 与 `assets/` 下的每个文件，都等到点名它的那一步再读。规约文件用它自己的一次 `Read` 读入，绝不 `cat` 进 Shell 命令：Shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限。这条消息里 Shell 只做非它不可的事——一次调用，以项目根目录为工作目录，带两行：
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。拆分计划真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§2 红线（它自己什么都不跑——工具白名单里既无解释器也无安装器，而它必须知道的那一处越线，即由执行器交还的数据集获取命令，已写在 Step 3 起草数据叶子的地方）、§6 委派（没有哪一步分派，白名单里根本没有分派工具），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——四次 Shell 调用，以项目根目录为工作目录，一起发出。
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|5)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-与那次读取同在一条消息发出，谁也不再各占一趟往返。第一行是本次运行的 `.env` 查询。第二行是共享采集脚本，它的摘要就是步骤 0 和步骤 1 用来解析的依据：每个计划的 frontmatter——`parent:`、`children:`、`depends_on`、`finalized:`、`exec_status`、`exec_runs`——它的 `## Sub-plans` 索引与占位符计数，外加每份运行日志的 frontmatter 和 `metds/`、`wkdrs/` 的一层目录清单。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在大小上限以内的手段；万一仍然被存成文件，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。
+一条消息，四份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 39 KB，分 12、19、8 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。第四次调用是共享采集脚本，它的摘要就是 Step 0 与 Step 1 判断所依据的全部输入：每个计划的 frontmatter——`parent:`、`children:`、`depends_on`、`finalized:`、`exec_status`、`exec_runs`——它的 `## Sub-plans` 索引与占位符计数，以及每份运行日志的 frontmatter 和 `metds/`、`wkdrs/` 的一层目录清单。脚本只收集，从不判断：不建树、不给就绪结论、不排序。把它打印的内容当作原始文件内容来读，就像你自己逐个打开过每份计划一样。`--slim` 是在有历史的项目上把结果压在大小上限以内的手段；万一仍然被存成文件，把这一行单独重跑一次。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。`references/` 与 `assets/` 下的每个文件都要等到点名它的那一步。
+
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -151,6 +166,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 计划正文末尾可能带有只能追加的 `## Revision History` 一节，由 `star-plan-executor`（经用户确认的执行同步回写）和 `star-plan-reviser` 写入。§1–§6 已反映这些条目——按当前正文拆解即可，该节保持原样不动。
 - 不要把计划文件写到 `metds/plans/` 以外。
 - Git：运行结束时，就本次所写的子计划及父计划索引更新提供一次提交提议——`star-plan-decomposer: <父计划 slug> — <N> 个子计划`（规约 §1）。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 
 ## 对话纪律
 

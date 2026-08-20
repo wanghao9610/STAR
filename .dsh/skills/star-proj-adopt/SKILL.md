@@ -16,13 +16,25 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-proj-adopt [survey | backfill] [DESCRIPTION]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides detection; re-running `survey` on an adopted project re-inspects and updates the record rather than starting over. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7) and is stripped before argument or description is read.
 
-**Shared conventions.** Everything this skill follows unconditionally arrives in one message, issued before acting: one `read` of `docs/mds/star-workflow/research-workflow-conventions.md`, one `read` of `<this skill's directory>/references/adopt_spec.md`, and alongside them one small bash call, run with the project root as the working directory:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What an adoption acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. One section stays out: §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs it.
+
+Before acting, load it in one message — three bash calls with the project root as the working directory, plus a `read` of `<this skill's directory>/references/adopt_spec.md`, all sent together.
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 
-One message, three results: the two whole files each from its own `read`, and the `.env` lookup from bash — the one part of the load only bash can do. Keep the files out of the command: each tool result has its own size limit, and a bash result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is past that limit. `research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares — §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout; this file states what is specific to this one, and wins wherever it is stricter. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the survey recipe, the inventory format, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+One message, four results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 48 KB in total, split 21, 20 and 8 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the survey recipe, the inventory format, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
+
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -100,6 +112,7 @@ On confirmed leaves only, set `exec_status:` and, where a run was recorded in S5
 - Real dates only, from the system clock (conventions §4) — the adoption date, each recorded run's date, the backfill date.
 - STOP line (conventions §2): nothing here trains, evaluates, installs, or deletes. The survey is read-only, the verification is `--list` plus an interpreter version check. Environment repair belongs to `/skill:star-env-builder`; a runtime that cannot run python is a blocker to report, not one to fix.
 - Git: offered once at the end of each phase, staging only the paths this skill wrote — `star-proj-adopt: <phase> — <summary>` (conventions §1). `.env` and the ignored trees stay out of history. A path that already carried uncommitted changes when the run started is never staged — common in an adopted repository: name those paths rather than working around them.
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
 
 ## Dialogue Discipline
 

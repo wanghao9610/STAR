@@ -16,7 +16,25 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/skill:star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]` — a topic seeds a new plan; an idea name (slug or filename against `metds/ideas/*_idea.md`) seeds it from that finalized idea file; a plan name with a section key (`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`) reopens just that section of a finished plan; no argument resumes an existing plan under `metds/plans/`. An `involve=low|medium|high` token may accompany any argument: it sets this run's `involve` level (conventions §7.7), is not part of `TOPIC` or `PLAN_NAME`, and is stripped before resolution.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. This one read is the whole opening load — the question bank, templates, and rubric are each read at the step that uses them, not up front. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Load it in one message, not one bash call: the conventions file arrives as its own `read` — never `cat`-ed into a bash command, because a bash result past roughly 30 KB is written out to a file that costs a second round trip to read back, and the conventions file alone is past that limit — plus one small bash call in the same message, with the project root as the working directory, for the one thing here only bash can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`. Issued together, the whole opening load still costs one round trip.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What coaching acts on — §0 vocabulary, §1 git, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §10 the skill roster — arrives through the opening load below. Three sections stay out: §2 the STOP line (this skill runs nothing — its tool allowlist carries no interpreter, no installer, no delete, and no step prepares a heavy command for anyone), §9 project layout (State & File Rules bound where a plan may be written more strictly than that section states it, and Write and Edit are allowlisted to `metds/plans/**`), and §11 execution branches (it creates, merges and discards no branch and no worktree; that section's one rule for every other skill is restated in State & File Rules beside the commit rule it qualifies). The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
+
+Before acting, load it in one message — three bash calls, with the project root as the working directory, sent together.
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+One message, three results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 44 KB in total, split 19, 20 and 6 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. The question bank, templates, and rubric are each read at the step that uses them, not up front.
+
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -73,6 +91,7 @@ When all sections are `done` (or `skipped`): Before listing anything, send the r
 - Frontmatter shape is in the template. Legal `status` values: `pending` / `in_progress` / `done` / `skipped`.
 - Do not create other intermediate files; do not write plans outside `metds/plans/`.
 - Git: when the session ends (plan finalized, or the user pauses), offer once to commit the plan files this session created or edited — `star-plan-coach: <slug> — <milestone>` (conventions §1). Declining is fine, but these commits are what make `/skill:star-plan-reviser`'s "older versions live in git" true.
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
 
 ## Dialogue Discipline
 

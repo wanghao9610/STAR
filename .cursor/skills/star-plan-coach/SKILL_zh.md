@@ -10,7 +10,25 @@ description: >-
 
 调用方式：`/star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——带主题则起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则以那份定稿的 idea 文件为起点生成新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。`involve=low|medium|high` 写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。这一次读取就是开场装载的全部——问题库、模板、质检表各自到用到它们的步骤再读，不预先装载。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。用一条消息装载，而不是一次 Shell 调用：规约文件单独用一次 `Read` 读入——别把它 `cat` 进 Shell 命令里，因为 Shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件本身就超过这个上限——同一条消息里再发一次小的 Shell 调用（以项目根目录为工作目录），做这里只有 Shell 能做的事，即本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`。两者一起发出，开场装载仍只占一趟往返。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。陪跑写计划真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§2 红线（本 skill 什么都不跑——工具白名单里没有解释器、没有安装器、没有删除，也没有哪一步为谁准备重活命令）、§9 项目布局（状态与文件规则把计划能写到哪里划得比那一节更严，而 Write 与 Edit 的白名单只到 `metds/plans/**`）、§11 执行分支（它不建、不合并、不弃用分支，也不碰 worktree；那一节对其余 skill 的那一条要求，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述）。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——三次 Shell 调用，以项目根目录为工作目录，一起发出。
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 43 KB，分 18、19、6 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。问题库、模板与评分表各自留到用到它的步骤再读，不前置装载。
+
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -67,6 +85,7 @@ description: >-
 - frontmatter 结构见模板。`status` 各键的合法值：`pending` / `in_progress` / `done` / `skipped`。
 - 不要创建其他中间文件，不要把计划写到 `metds/plans/` 以外的位置。
 - Git：会话结束时（计划定稿，或用户暂停），就本次会话创建或编辑过的计划文件提供一次提交提议——`star-plan-coach: <slug> — <里程碑>`（规约 §1）。用户拒绝也没问题，但 `/star-plan-reviser` 依赖的"旧版本存于 git"正是靠这些提交才成立。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 
 ## 对话纪律
 

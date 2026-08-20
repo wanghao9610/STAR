@@ -22,13 +22,25 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `/star-idea-storm [IDEA | IDEA_NAME]` — free text seeds a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none. An `involve=low|medium|high` token may accompany any argument: it sets this run's `involve` level (conventions §7.7) and is stripped from `IDEA` / `IDEA_NAME` before resolution.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. Make that read part of the opening load — one message: the conventions file as its own `read_file`, the question bank Stages 1, 2, and 4 draw on (`<this skill's directory>/references/question_bank.md`) as another `read_file`, plus one `run_shell_command` call in the same message, with the project root as the working directory, for the only line that needs a shell:
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What an idea session acts on — §0 vocabulary, §1 git, §3 `.env` runtime, §4 real dates, §6 delegation, §7 dialogue, §8 the output table, §10 the skill roster — arrives through the opening load below. Four sections stay out: §2 the STOP line (nothing here runs heavy, and State & File Rules already draw that boundary — no model or dataset downloads, no paid API calls, no authenticated scraping), §5 plan-name resolution (it never resolves one: Step 0 resolves an idea file against `metds/ideas/*_idea.md`, collisions included, and no step reads `metds/plans/`), §9 project layout (State & File Rules confine writes to `metds/ideas/**` and the scan cache more strictly than that section states it), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
+
+Before acting, load it in one message — three `run_shell_command` calls with the project root as the working directory, plus a `read_file` of the question bank Stages 1, 2 and 4 draw on (`<this skill's directory>/references/question_bank.md`), all sent together.
 
 ```bash
 grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|3|4|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 
-Whole files go through `read_file`, never `cat`-ed into the `run_shell_command` command: each tool result has its own size limit, and a `run_shell_command` result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions file alone is past that limit on its own. Nothing else is front-loaded: `references/scan_policy.md` and `references/idea_rubric.md` are each read at the stage that uses them (Stages 3 and 4).
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+One message, four results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 43 KB in total, split 18, 20 and 6 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. Nothing else is front-loaded: `references/scan_policy.md` and `references/idea_rubric.md` are each read at the stage that uses them (Stages 3 and 4).
+
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -95,6 +107,7 @@ Check the draft against the rubric's topic-statement test (Part C); put the fail
 - Every paper in the file carries venue, year, and its record URL, the fetched record cached before the row is written. Network use is search metadata and abstracts (plus top-3 intros on a recorded deepening), serialized and backed off per `references/scan_policy.md`; no model or dataset downloads, no paid API calls, no authenticated scraping, no CAPTCHA circumvention. Nothing in this skill crosses the STOP line (conventions §2); if a step would, it is not this skill's to run.
 - Real dates only (conventions §4).
 - Git: when the session ends (topic finalized, or the user pauses), offer once to commit the idea file this session created or edited — `star-idea-storm: <slug> — <milestone>` (conventions §1). Declining is fine.
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
 
 ## Dialogue Discipline
 

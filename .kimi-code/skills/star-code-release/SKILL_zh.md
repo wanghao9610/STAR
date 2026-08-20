@@ -20,7 +20,25 @@ description: >-
 
 调用方式：`/skill:star-code-release [gather | polish | readme | check] [描述]`——不带参数跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
-**通用规约。** 动手前先读 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）：§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局。那是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分；比基线更严的地方，以本文件为准。这份文件就是动手前要装载的全部，用一条消息发出：规约整份走它自己的一次 `Read` 读入——绝不 `cat` 进 Bash 命令，因为 Bash 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而光规约本身就已在这条线之外——同一条消息里再发一次小的 Bash 调用（以项目根目录为工作目录），做这里只有 Bash 能做的事，即本次运行的 `.env` 查询：`grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)`——`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；两者同发一条消息，谁都不必各占一趟往返。动手前没有其他无条件装载，`references/` 下的各份参考由用到它的阶段再装载，绝不提前。
+**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。发布流程真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有一节不装载：§11 执行分支,它那九条本 skill 一条都不做——不建、不合并、不弃用分支,也不碰 worktree——而它对其余 skill 的那一条要求,即签出停在别人的执行分支上时提交会随那个叶子一起合并,已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
+
+动手前把它合成一条消息装载——三次 Bash 调用，以项目根目录为工作目录，一起发出。
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
+```
+
+一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 47 KB，分 20、19、8 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。开场再没有别的无条件装载：`references/` 下的参考文件跟着用到它的阶段到来，绝不前置。
+
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -96,6 +114,7 @@ description: >-
 - 绝不发布：不 `git push`、不改 remote 或分支、不打 tag、不 `gh repo create` / `gh release`、不把权重或数据上传到任何主机。准备好的命令写进报告。
 - 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `/skill:star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
 - Git：每个完成的阶段一次提交，只 stage 该阶段的路径（规约 §1）；Step 0 时就带未提交改动的路径绝不 stage。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 - 本 skill 不设置任何计划 frontmatter，也不创建 run 目录；它的审计线索是 `wkdrs/release/RELEASE_<date>.md`、README 的溯源标记，以及各阶段的提交。
 
 ## 对话纪律

@@ -19,7 +19,25 @@ Match the user's language. For Chinese dialogue, reply in Chinese and switch eve
 
 Invocation: `star-code-release [gather | polish | readme | check] [DESCRIPTION]` — no argument runs the full pass (gather → polish → readme → check); a phase name runs only that phase. `check` is read-only apart from its report. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither argument nor description, and is stripped before either is read.
 
-**Shared conventions.** Read `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) before acting: §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout. It is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. That file is the whole opening load, issued as one message: the conventions arrive as their own file read — never `cat`-ed into a shell command, because a shell result past roughly 30 KB is written out to a file that costs a second round trip to read back, and the conventions alone are past that line — plus one small shell call in the same message, with the project root as the working directory, for the one thing here only the shell can do, the run's `.env` lookup: `grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)` — `STAR_LANG` sets the reply language (§7.6), `INVOLVE` the question level (§7.7); sent together, neither costs a round trip of its own. Nothing else is loaded unconditionally at the start, and the references under `references/` arrive with the phase that uses them, never front-loaded. If this harness has no file-reading tool of its own, put `cat docs/mds/star-workflow/research-workflow-conventions.md` — and the other files named above — back into the shell call and accept that the result is written out.
+**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a release pass acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. One section stays out: §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
+
+Before acting, load it in one message — three shell calls, with the project root as the working directory, sent together.
+
+```bash
+grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+```bash
+awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
+```
+
+One message, three results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 48 KB in total, split 21, 20 and 8 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. Nothing else is loaded unconditionally at the start: the references under `references/` arrive with the phase that uses them, never front-loaded.
+
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
@@ -95,6 +113,7 @@ Run every family in `references/release_checklist.md` over the tracked repositor
 - Never publish: no `git push`, no remote or branch changes, no tag, no `gh repo create` / `gh release`, no upload of weights or data to any host. The prepared commands go in the report.
 - All commands run through `.env`'s interpreter; never install or upgrade anything (`star-env-builder` owns the environment). The STOP line holds: no training, no full-dataset evaluation, no costly API calls — a number the results table lacks stays a TODO.
 - Git: one commit per finished phase, staging only that phase's paths (conventions §1); a path that was already dirty at Step 0 is never staged.
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is `wkdrs/release/RELEASE_<date>.md`, the README's provenance marker, and the per-phase commits.
 
 ## Dialogue Discipline
