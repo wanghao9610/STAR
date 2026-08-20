@@ -72,6 +72,6 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 FAIL  .agents/skills: names a tool this harness does not have:
       .agents/skills/star-plan-coach/SKILL.md:29:2. **One question at a time.** Deliver every coaching question one at a time — through AskUserQue
-      .agents/skills/star-plan-coach/SKILL.md:78:- Ask through AskUserQuestion; fall back to plain text only in a non-interactive run, where human
+      .agents/skills/star-plan-coach/SKILL.md:78:- Ask through AskUserQuestion; fall back to plain text only in a non-interactive run — still one 
 
 1 check(s) failed.

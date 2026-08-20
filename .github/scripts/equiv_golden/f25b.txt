@@ -74,6 +74,6 @@ FAIL  .cursor/skills: names a tool this harness does not have:
       .cursor/skills/star-plan-coach/SKILL.md:31:2. **One question at a time, via AskUserQuestion**: Deliver every coaching question through the A
       .cursor/skills/star-plan-coach/SKILL.md:41:3. If a plan has any section whose `status` is not `done`, ask whether to continue it (via AskUse
       .cursor/skills/star-plan-coach/SKILL.md:61:- At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it,
-      .cursor/skills/star-plan-coach/SKILL.md:80:- If AskUserQuestion is unavailable in the current environment (headless or scripted runs), fall 
+      .cursor/skills/star-plan-coach/SKILL.md:80:- If AskUserQuestion is unavailable (headless or scripted runs), fall back to plain-text question
 
 1 check(s) failed.
