@@ -4,7 +4,7 @@ Pi can discover project skills from two roots here: `.pi/skills/` and `.agents/s
 
 **If that exclusion is ever removed, follow the `.pi/skills/` copy.** `.pi/skills/` is loaded first and wins the name collision, so it is already the copy Pi hands you — but the loser is reported at startup, and the path in that report is where Pi found a copy, not the copy to act on.
 
-The two trees are not interchangeable. `.agents/skills/` is worded for OpenAI Codex: it invokes skills as `$star-<name>`, delegates with `spawn_agent`, gates plans with `update_plan`, and asks through `request_user_input` — none of which exists here. The `.pi/skills/` copies are invoked as `/star-<name>`, name Pi's own built-in tools (`read`, `bash`, `edit`, `write`, `grep`, `find`, `ls`), and reach the four tools below.
+The two trees are not interchangeable. `.agents/skills/` is the root every agent following the `AGENTS.md` convention reads, so it names no tool of any one harness: it calls a skill by its bare name, and says "your question tool", "your plan tool", "a read-only sub-agent" where a tool would be named. The `.pi/skills/` copies are invoked as `/star-<name>`, name Pi's own built-in tools (`read`, `bash`, `edit`, `write`, `grep`, `find`, `ls`), and reach the four tools below — which is the whole difference: acting on the neutral copy costs you every one of them.
 
 Skills are invoked as `/star-<name>`, from the prompt templates in `.pi/prompts/`. `.pi/settings.json` sets `enableSkillCommands: false`, so there is no `/skill:star-<name>` beside it — one command per skill, not two. That makes `.pi/prompts/` load-bearing for the seven slash-only skills: they are hidden from this prompt by `disable-model-invocation`, so deleting those templates would leave no way to reach them.
 

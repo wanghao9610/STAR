@@ -110,8 +110,12 @@ fail() {
 }
 
 # Which tool tree a path belongs to, empty when it belongs to none and every run
-# therefore covers it. Codex owns two directories — .agents/skills for the skills,
-# .codex/ for the hooks — and .cursorignore is Cursor's one path outside .cursor/;
+# therefore covers it. The codex entry covers two directories: .agents, the root
+# the AGENTS.md convention puts skills at and the only project root Codex scans,
+# and .codex, which holds its hooks and its per-skill manifests. Selecting codex
+# is therefore how the shared root is installed today — a project whose agent
+# reads .agents without being Codex takes it the same way.
+# .cursorignore is Cursor's one path outside .cursor/;
 # every other path starts with its tool's own directory, so one added upstream is
 # classified without being listed here.
 path_tool() { # $1 = path relative to the project root
