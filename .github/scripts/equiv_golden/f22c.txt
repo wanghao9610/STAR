@@ -43,9 +43,7 @@ ok    every .dsh description survives DSH's 500-character catalog intact
 ok    skill scripts are byte-identical and executable in all 7 trees
 
 == Manifest section parity (.agents vs .claude) ==
-FAIL  .agents/skills/star-code-reviewer/SKILL.md: ## sections differ from .claude/skills/star-code-reviewer/SKILL.md:
-      2d1
-      < ## dialogue discipline
+ok    .agents manifests carry the same ## sections as .claude (30 files)
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees
@@ -63,7 +61,9 @@ ok    skills guide covers every skill once, links and anchors resolve, conventio
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform
 
 == Selective conventions load ==
-ok    196 selective loads hold: sections printed match sections named, prose matches the selector, excerpts under 28400 bytes with their stated sizes, 22 restatements pinned
+FAIL  .claude/skills/star-flow-status/SKILL.md: the item selector opens §7 but closes at §9; it must close at the very next heading or every section between rides in
+FAIL  RESTATED_REGISTRY row 'star-flow-status|SKILL.md|8' matches no citation in the en files of .claude/skills; drop the row or restore the restatement there
+FAIL  RESTATED_REGISTRY row 'star-flow-status|SKILL.md|11' matches no citation in the en files of .claude/skills; drop the row or restore the restatement there
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
@@ -74,4 +74,4 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 == Harness tool vocabulary ==
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
-1 check(s) failed.
+3 check(s) failed.
