@@ -819,8 +819,8 @@ for rule in "${CITATION_LABELS[@]}"; do
                 cite_errors=1
             fi
         done < <(printf '%s\n' "${text}" | grep -oE "${pattern}")
-    done < <(find -L "${CITATION_SCAN[@]}" -type f -name '*.md' \
-                  -exec grep -nHE "${pattern}" {} + 2>/dev/null | grep -v 'research-workflow-conventions')
+    done < <(mdgrep -nHE "${pattern}" -- "${CITATION_SCAN[@]}" 2>/dev/null \
+             | grep -v 'research-workflow-conventions')
 
     if (( rule_hits == 0 )); then
         fail "citation rule '${pattern}' matches nothing any more; drop the row or restore the citation"
