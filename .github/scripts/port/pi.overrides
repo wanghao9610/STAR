@@ -20,11 +20,6 @@
 3. With no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/star-proj-adopt` routes in from. Otherwise ask: *run `/star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 ### star-code-architect/SKILL.md
 --- 1
-Present the top 3–5 via `star_questionnaire`, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-+++ 1
-Present the top 3–5, one option per candidate: one-line why-it-fits, license, stars, last update, main risk, the highest-scoring one first and marked as recommended. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-### star-code-architect/SKILL.md
---- 1
 Dispatch read-only `star_subagent` subagents (`subagent_type: Explore`), one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — run in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
 +++ 1
 Survey by topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — one read-only `star_subagent` dispatch each (`agent: "star-collector"`), each returning the structured report in `references/survey_spec.md`. Merge them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
@@ -71,11 +66,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 整理既有代码，本就不需要计划，而这正是 `/star-proj-adopt` 转介进来的状态。否则问用户：*先跑 `/star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 ### star-code-architect/SKILL_zh.md
 --- 1
-用 `star_questionnaire` 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-+++ 1
-以普通文本呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-### star-code-architect/SKILL_zh.md
---- 1
 派发只读 `star_subagent` subagent（`subagent_type: Explore`），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——并行派发，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
 +++ 1
 勘察按关注点分——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——每项一次只读的 `star_subagent` 派发（`agent: "star-collector"`），各自按 `references/survey_spec_zh.md` 返回结构化报告。汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
@@ -106,6 +96,16 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 - 两个确认点与所有提问都走 `star_questionnaire`——每次调用只问一题。不可用时（无头/脚本化）改用纯文本，仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
 +++ 1
 - 两个确认点与所有提问都走 `star_questionnaire`——一次调用只问一题：仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
+### star-code-architect/references/branch_a.md
+--- 1
+Present the top 3–5 via `star_questionnaire`, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
++++ 1
+Present the top 3–5, one option per candidate: one-line why-it-fits, license, stars, last update, main risk, the highest-scoring one first and marked as recommended. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
+### star-code-architect/references/branch_a_zh.md
+--- 1
+用 `star_questionnaire` 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
++++ 1
+以普通文本呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 ### star-code-architect/references/orchestration_spec.md
 --- 1
 How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.

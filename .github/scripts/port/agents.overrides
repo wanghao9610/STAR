@@ -45,16 +45,6 @@ Architect; do not implement research features. Feature work belongs to `star-pla
 3. With no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `star-proj-adopt` routes in from. Otherwise ask: *run `star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 ### star-code-architect/SKILL.md
 --- 1
-Present the top 3–5 via your question tool, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-+++ 1
-Present the top 3–5, one line per candidate: one-line why-it-fits, license, stars, last update, main risk. Recommend the highest-scoring one, always offer the escape ("none of these — refine the search / start from scratch"), and ask which to use. If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-### star-code-architect/SKILL.md
---- 1
-Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
-+++ 1
-Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and are done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input the architecture and the migration table.
-### star-code-architect/SKILL.md
---- 1
 Dispatch read-only read-only sub-agents, one per topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — run in parallel, each returning the structured report in `references/survey_spec.md`. The main agent merges them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
 +++ 1
 Work through the topics in `references/survey_spec.md` — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — read-only, sequentially by default; when a bounded area meets the delegation rule, dispatch a read-only sub-agent. Merge the area reports into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
@@ -119,16 +109,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 整理既有代码，本就不需要计划，而这正是 `star-proj-adopt` 转介进来的状态。否则问：*先跑 `star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 ### star-code-architect/SKILL_zh.md
 --- 1
-用 your question tool 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-+++ 1
-呈现 top 3–5，一个候选一行：一句话贴合理由、许可证、stars、最近更新、主要风险。推荐得分最高的一个，始终保留一条退路（"都不合适——细化检索 / 从零起步"），并问用哪个。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-### star-code-architect/SKILL_zh.md
---- 1
-先数这份克隆的 `.py` 文件数。在轻量模式阈值以下：以一次只读扫描补全 Step C1 的仓库地图（`references/survey_spec_zh.md`）——评分阶段已覆盖粗粒度结构，可由主 agent 自己完成。超过阈值：照原样走 Step B1 的各组，或只走 C1 真正需要的三组（结构与依赖、配置系统、训练/评测入口）。参考实现通常远在阈值之上，而这一遍是 C1 定架构和迁移表的唯一输入。
-+++ 1
-先数这份克隆的 `.py` 文件数。在轻量模式阈值以下：以一次只读扫描补全 Step C1 的仓库地图（`references/survey_spec_zh.md`）——评分阶段已覆盖粗粒度结构，直接内联完成。超过阈值：照原样走 Step B1 的各组，或只走 C1 真正需要的三组（结构与依赖、配置系统、训练/评测入口）。参考实现通常远在阈值之上，而这一遍是 C1 定架构和迁移表的唯一输入。
-### star-code-architect/SKILL_zh.md
---- 1
 派发只读 只读子代理，一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——并行派发，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
 +++ 1
 按 `references/survey_spec_zh.md` 的关注点逐条处理——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——默认只读且顺序执行；有边界的关注点满足委派条件时，派一个只读子代理。把各组报告汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
@@ -152,6 +132,26 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 - 两个确认点与所有提问都走 your question tool——每次调用只问一题。不可用时（无头/脚本化）改用纯文本，仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
 +++ 1
 - 一次只问一个问题——使用你的提问工具，仅在非交互运行下改用简洁纯文本——并等待答复。确认点之后每一次写文件、跑命令，都必须先得到明确批准。
+### star-code-architect/references/branch_a.md
+--- 1
+Present the top 3–5 via your question tool, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
++++ 1
+Present the top 3–5, one line per candidate: one-line why-it-fits, license, stars, last update, main risk. Recommend the highest-scoring one, always offer the escape ("none of these — refine the search / start from scratch"), and ask which to use. If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
+### star-code-architect/references/branch_a.md
+--- 1
+Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
++++ 1
+Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and are done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input the architecture and the migration table.
+### star-code-architect/references/branch_a_zh.md
+--- 1
+用 your question tool 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
++++ 1
+呈现 top 3–5，一个候选一行：一句话贴合理由、许可证、stars、最近更新、主要风险。推荐得分最高的一个，始终保留一条退路（"都不合适——细化检索 / 从零起步"），并问用哪个。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
+### star-code-architect/references/branch_a_zh.md
+--- 1
+先数这份克隆的 `.py` 文件数。在轻量模式阈值以下：以一次只读扫描补全 Step C1 的仓库地图（`references/survey_spec_zh.md`）——评分阶段已覆盖粗粒度结构，可由主 agent 自己完成。超过阈值：照原样走 Step B1 的各组，或只走 C1 真正需要的三组（结构与依赖、配置系统、训练/评测入口）。参考实现通常远在阈值之上，而这一遍是 C1 定架构和迁移表的唯一输入。
++++ 1
+先数这份克隆的 `.py` 文件数。在轻量模式阈值以下：以一次只读扫描补全 Step C1 的仓库地图（`references/survey_spec_zh.md`）——评分阶段已覆盖粗粒度结构，直接内联完成。超过阈值：照原样走 Step B1 的各组，或只走 C1 真正需要的三组（结构与依赖、配置系统、训练/评测入口）。参考实现通常远在阈值之上，而这一遍是 C1 定架构和迁移表的唯一输入。
 ### star-code-architect/references/orchestration_spec.md
 --- 1
 How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.

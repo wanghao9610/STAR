@@ -13,11 +13,6 @@
 6. **One spec, short cross-references.** The durable output is `metds/codearc.md` — directory responsibilities, placement rules, naming and style conventions, plan-component map, migration record, the do-not-rename list. `AGENTS.md` gets a ≤10-line summary section pointing to it (edit `AGENTS.md` only — `CLAUDE.md` is a symlink to it), and `.cursor/rules/code-codearc.mdc` gets an always-on pointer. Never fork the spec's content into multiple files.
 ### star-code-architect/SKILL.md
 --- 1
-Present the top 3–5 via AskQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-+++ 1
-Present the top 3–5 via AskQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk, the highest-scoring one first and marked as recommended. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
-### star-code-architect/SKILL.md
---- 1
 Show the architecture summary and the numbered migration table as normal text. Then ask via AskQuestion: with ≤4 items, use allow_multiple over them; with more, offer *approve all* / *approve all except (name numbers in Other)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
 +++ 1
 Show the architecture summary and the numbered migration table as normal text. Then ask via AskQuestion: with ≤4 items, use allow_multiple over them; with more, offer *approve all* / *approve all except (name numbers in Other)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Wait for the explicit answer; only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
@@ -40,11 +35,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 6. **单一规范，一小段指路说明。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划各组件对应的代码路径、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻指路说明。规范内容绝不复制成多份。
 ### star-code-architect/SKILL_zh.md
 --- 1
-用 AskQuestion 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-+++ 1
-用 AskQuestion 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
-### star-code-architect/SKILL_zh.md
---- 1
 以普通文本展示架构摘要与编号迁移表。随后用 AskQuestion 确认：≤4 条时用 allow_multiple 逐条勾选；更多时给 *全部批准* / *全部批准但排除（在 Other 里写编号）* / *先解答我点名的几条* / *重新设计*——规约 §7.13 定的"先摊清单、再一次提问"。只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
 +++ 1
 以普通文本展示架构摘要与编号迁移表。随后用 AskQuestion 确认：≤4 条时用 allow_multiple 逐条勾选；更多时给 *全部批准* / *全部批准但排除（在 Other 里写编号）* / *先解答我点名的几条* / *重新设计*——规约 §7.13 定的"先摊清单、再一次提问"。等到明确答复；只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
@@ -58,6 +48,16 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 2. `AGENTS.md`：追加或更新 `## Code Architecture` 一节——≤10 行：一句话定位、3–5 条放置要点、"写代码前先读 `metds/codearc.md`"。只改 `AGENTS.md`；绝不新建独立的 `AGENTS.md`。
 +++ 1
 2. `AGENTS.md`：追加或更新 `## Code Architecture` 一节——≤10 行：一句话定位、3–5 条放置要点、"写代码前先读 `metds/codearc.md`"。只改 `AGENTS.md`；绝不新建独立的 `CLAUDE.md`。
+### star-code-architect/references/branch_a.md
+--- 1
+Present the top 3–5 via AskQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
++++ 1
+Present the top 3–5 via AskQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk, the highest-scoring one first and marked as recommended. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
+### star-code-architect/references/branch_a_zh.md
+--- 1
+用 AskQuestion 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
++++ 1
+用 AskQuestion 呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 ### star-code-architect/references/orchestration_spec.md
 --- 1
 How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.
