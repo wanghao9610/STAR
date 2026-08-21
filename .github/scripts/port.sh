@@ -19,15 +19,27 @@
 #                     tree genuinely says something else, anchored by the source
 #                     lines themselves
 #
-# A file the trees do not word differently at all — a rubric, a template, a scan
-# script — is stored once, in .agents/skills, and every other tree carries a
-# relative symlink at the same path. .claude included: every edit still goes
-# through .claude/skills, whose own copy of such a file is a link to that text.
-# Nothing lists which files those are — a tree links a file when its generated
-# text and .agents' come out the same, and holds its own when they do not,
-# decided again on every run. Downstream projects never see the links:
-# execs/update.sh writes out what one points at, so an installed tree is real
-# files, self-contained, exactly as before.
+# A wording is stored once and linked to from every tree that carries it. Three
+# cases, and no file lists which is which — the grouping is recomputed on every
+# run from the generated text, so a rewording moves a file between them on its
+# own:
+#
+#   the neutral tree's wording       .agents/skills/<rel>, where such files have
+#                                    always lived; the trees sharing it link there
+#   a wording two or more trees      .agents/shared/<the group's first tree>/<rel>,
+#   share, the neutral tree not      and every member of the group links to it
+#   among them
+#   a wording no other tree shares   that tree's own path, a real file
+#
+# .claude is not exempt: every edit still goes through .claude/skills, whose own
+# copy of a shared file is a link like anyone else's. The middle case is stored
+# under .agents/ rather than inside whichever tree names it because update.sh
+# checks .agents out whichever harnesses were selected, and outside
+# .agents/skills because check_consistency holds that root to naming no
+# harness's invocation prefix — which is exactly what those files carry.
+# Downstream projects never see the links: execs/update.sh writes out what one
+# points at, so an installed tree is real files, self-contained, exactly as
+# before.
 #
 # Frontmatter is not generated. Each harness tunes its own `description` to its own
 # length limit and trigger wording; check_consistency.sh holds those invariants.
@@ -62,14 +74,14 @@ done
 
 command -v perl >/dev/null 2>&1 || { echo "port.sh: perl not found" >&2; exit 2; }
 
-echo "port: ${MODE} — .claude/skills -> ${#TREES[@]} tree(s), shared files in .agents/skills"
+echo "port: ${MODE} — .claude/skills -> ${#TREES[@]} tree(s), shared wordings stored under .agents/"
 PORT_ROOT="${ROOT_DIR}" perl "${ROOT_DIR}/.github/scripts/port/port.pl" "${MODE}" "${TREES[@]}"
 rc=$?
 
 if [[ "${MODE}" == "check" ]]; then
     if [[ ${rc} -eq 0 ]]; then
         echo "ok  every tree is what .claude/skills plus its own vocabulary produces,"
-        echo "    and the files none of them words differently are links into .agents/skills"
+        echo "    and every wording more than one of them carries is stored once, under .agents/"
     else
         cat <<'MSG'
 

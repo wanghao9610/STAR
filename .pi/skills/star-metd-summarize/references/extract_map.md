@@ -80,7 +80,7 @@ Read every row as *source → the document section it fills*. A source that does
 2. **Merge, do not concatenate.** Sections are written in one voice, with no per-plan seams and no "as plan 01 says". A section that reads as a list of excerpts has failed.
 3. **Conflicts: leaf beats parent; newer `updated` beats older.** Leaves are more specific and carry the executor's sync-back from what was run.
 4. **Unresolvable conflicts are printed, not decided.** When two sources of equal standing disagree (two leaves, same level, different learning rate), write both values inline, prefix ⚠, and name both plans and sections. Never silently pick a winner; never average.
-5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks design intent as verified work or the reverse.
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
 
 ## Gaps
 
@@ -140,9 +140,15 @@ unread:                             # a plan in the slice that could not be read
 plans_read: 7
 ```
 
-`target:` is required because a collector holds plans, not a document, and the five templates' section names collide only by accident. `exec_status` is a leaf field the collector omits on strategy nodes rather than filling a plausible value, the rule the sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
+`target:` is required because a collector holds plans, not a document, and the five
+templates' section names collide only by accident. `exec_status` is a leaf field the
+collector omits on strategy nodes rather than filling a plausible value, the rule the
+sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
 
-`unread` is not a gap. A gap means no plan covers the section, and reaches the delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could not open is one the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
+`unread` is not a gap. A gap means no plan covers the section, and reaches the
+delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could
+not open is one the main agent reads itself. Keeping them in one list turns a read
+failure into a false hole in the method.
 
 A collection pass extracts only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile a document. `overview` is compiled last, from the other four documents' compiled content — but its extraction is ordinary work: a collector returns its slice's `overview` rows like any other target's.
 

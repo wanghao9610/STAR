@@ -1,8 +1,1 @@
-# Step 11：刷新评分（仅 score 模式）
-
-用新指标重建 index 的 §5（影响力评分）。其余一概不动：不读论文、不加条目、不改 bib——引用数和星标会漂移，这个模式就是让表跟上的。
-
-1. 读 `refs_index.md` 与 `reference.bib`：citekey、§5 各行及其子指标、以及 §5 或笔记 `links` 里已登记的全部官方仓库。没有 `metds/refs/` → 如实说明并停止。
-2. 重抓全库引用数——Semantic Scholar 的批量端点（`references/source_policy_zh.md`）一次调用收下全部条目的 external id；解析不了的条目保留旧值旧日期。已知官方仓库逐个重抓星标与最近提交，仍在同一份按 host 的预算下串行。绝不为发现新仓库去抓页面——那是完整流程和 `add` 的活。
-3. 按评分表的算式复算全部分数，用新的抓取日期重写 §5，并更新 §2（核心论文）的分数列。每份原始返回照旧缓存到 `wkdrs/refs_<date>/raw/`。
-4. 摘要 ≤200 字：刷新了几条、保留了几条，位次变动——总分跨过整数位的论文——以及失败清单：每条失败保留旧值旧日期，绝不猜。
+../../../../.agents/skills/star-refs-reviewer/references/score_spec_zh.md

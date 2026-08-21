@@ -1,0 +1,61 @@
+# 代码审查 — <scope>（<YYYY-MM-DD>）
+
+<!-- 由 /skill:star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。模式：full | plan | path | diff；目标：<原样的参数>；
+     审查文件数：<n>。问题项编号 F1、F2、…，均引用 file:line、违反的规则和具体修法。
+     无话可说的节收缩为一行——绝不注水。 -->
+
+## 1. 范围与证据基础
+
+<!-- 范围如何解析（计划模式：§2 / §4 交付物 / EXEC_LOG 各贡献了哪些文件）。载入的评判依据
+     （项目守则、metds/codearc.md、计划 §2–§5）及缺失项。静态证据：compileall 结果；
+     ruff/flake8 结果或"未安装"；环境不可用时注明"纯阅读审查"。全树筛查：三项检查各自的结果——它不受范围与环境影响，总要跑。 -->
+
+## 2. 结论
+
+<!-- 2–4 行：整体状态、各严重度问题项数量、符合度小结（计划模式）。
+     具体而诚实——不虚高，也不危言耸听。 -->
+
+## 3. 问题项
+
+<!-- 按严重度分组，按报告顺序编 F 号。只收已确认的问题项；存疑的进 Unconfirmed，
+     绝不计入结论统计。空的严重度组直接省略。 -->
+
+### Blocker
+
+- **F1** `<file>:<line>` — <问题>
+  - Rule: <评判依据> · Evidence: <片段> · Fix: <具体改法>
+
+### Major
+
+### Minor
+
+### Nit
+
+### Unconfirmed
+
+<!-- 值得人看一眼但未核实。每条一行，写明怎样才能确认。 -->
+
+## 4. 计划符合度记分卡
+
+<!-- 仅计划模式；否则一行："非计划范围的审查"。对照磁盘打分，绝不对照 EXEC_LOG 的说法。 -->
+
+| 条目 | 结论 | 证据 |
+| --- | --- | --- |
+| §3.1 <任务> | implemented / partial / missing | <模块/函数，或找过哪里> |
+| §4 <交付物> | present / absent | <路径> |
+| §5 完成判据 | supported / unsupported | <检查它的机制> |
+
+## 5. 好实践
+
+<!-- ≤3 条值得保留或推广的做法；宁可省略这节，不要硬凑。 -->
+
+## 6. 下一步
+
+<!-- 越界问题项的转交去向：功能缺口 → /skill:star-plan-executor <叶子>；计划文本偏差 →
+     /skill:star-plan-reviser <slug>；结构性重组 → /skill:star-code-architect；环境不可用 →
+     /skill:star-env-builder。然后列修复轮候选（例行问题项，按编号）。 -->
+
+## 7. 修复记录
+
+<!-- 由修复轮追加：每条可修问题项一行——F<n>：applied / applied unasked / skipped / reverted（<原因>）
+     ——以及提交修复时的 commit hash。未运行修复轮时写"未运行修复轮"。 -->

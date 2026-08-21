@@ -1745,8 +1745,18 @@ for root in "${SKILL_ROOTS[@]}"; do
             [[ -f "${r}" ]] || continue
             b="$(basename "${r}")"
             base="${b/_zh.md/.md}"
-            grep -qrF "references/${base}" "${d}" --include='*.md' \
-                 --exclude="${base}" --exclude="${base/.md/_zh.md}" && continue
+            # find -L rather than grep -r, for the reason mdgrep gives: a file
+            # this tree shares with another is a symlink into the store, and a
+            # recursive grep walks straight past one — BSD grep needs -S to
+            # follow and GNU grep has no such flag, so neither -r nor -R is
+            # portable here. Without this the file that names a reference goes
+            # unread and a live reference is reported as orphaned. The two
+            # ! -name tests are the excludes: a reference naming only itself
+            # does not count as named.
+            namers="$(find -L "${d}" -type f -name '*.md' \
+                          ! -name "${base}" ! -name "${base/.md/_zh.md}" \
+                          -exec grep -lF -- "references/${base}" {} + 2>/dev/null || true)"
+            [[ -n "${namers}" ]] && continue
             fail "${r}: no file in ${skill} names references/${base}; a moved section left it behind"
             ref_errors=1
         done

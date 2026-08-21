@@ -80,7 +80,7 @@ Read every row as *source → the document section it fills*. A source that does
 2. **Merge, do not concatenate.** Sections are written in one voice, with no per-plan seams and no "as plan 01 says". A section that reads as a list of excerpts has failed.
 3. **Conflicts: leaf beats parent; newer `updated` beats older.** Leaves are more specific and carry the executor's sync-back from what was run.
 4. **Unresolvable conflicts are printed, not decided.** When two sources of equal standing disagree (two leaves, same level, different learning rate), write both values inline, prefix ⚠, and name both plans and sections. Never silently pick a winner; never average.
-5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks design intent as verified work or the reverse.
+5. **Provenance travels with every passage** — `{plan, §, updated, exec_status}` — from extraction through to the `sources:` block. `exec_status` only where the source is a leaf: an invented value on a strategy node marks verified work as design intent or the reverse.
 
 ## Gaps
 

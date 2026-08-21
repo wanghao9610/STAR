@@ -576,7 +576,7 @@ if [[ "${ADOPT}" == false ]]; then
         # above is what gets copied out, so the Codex tree is still written to the
         # project only when codex is selected.
         git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}" \
-            ".agents/skills/${SKILL_NAME}" ".codex/skills/${SKILL_NAME}"
+            ".agents/skills/${SKILL_NAME}" ".codex/skills/${SKILL_NAME}" ".agents/shared"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
         # non-cone mode, so a single file in SYNC_PATHS arrives through its
@@ -591,7 +591,12 @@ if [[ "${ADOPT}" == false ]]; then
         # .codex/skills is listed for the same reason from the other side: it
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .codex/skills)
+        # .agents/shared for the same reason as .agents/skills, from the other
+        # half of the store: a wording two or more harnesses share and the
+        # neutral tree does not is stored there, and every tree carrying it
+        # holds a link. Checked out, never copied out — the tar below
+        # dereferences, so the project receives real files under its own trees.
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/shared .codex/skills)
         for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
             read -ra harness_roots <<<"$(harness_dirs "${harness}")"
             SPARSE_PATHS+=("${harness_roots[@]}")
@@ -742,7 +747,17 @@ if [[ "${ADOPT}" == false ]]; then
         # file the trees share arrives in the project as a real file. Storing the
         # link would install a path into .agents/skills, which a project that did
         # not select codex never receives.
-        tar -C "${SOURCE_DIR}" -chf "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
+        #
+        # Under -h, GNU tar stores the second path it meets to one file as a hard
+        # link to the first — .codex/skills/*/agents/openai.yaml to its .agents
+        # twin — and extracting that calls link(2), which some filesystems refuse
+        # with EPERM. --hard-dereference makes it a full copy instead. GNU tar
+        # only: bsdtar rejects the option and already stores full copies.
+        TAR_CREATE_ARGS=(-ch)
+        if tar --help 2>/dev/null | grep -q -- --hard-dereference; then
+            TAR_CREATE_ARGS+=(--hard-dereference)
+        fi
+        tar -C "${SOURCE_DIR}" "${TAR_CREATE_ARGS[@]}" -f "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
         tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
     fi
 

@@ -15,20 +15,27 @@
 # own length limit and its own trigger wording, and check_consistency.sh already
 # holds the frontmatter invariants. Everything below the closing `---` is generated.
 #
-# A file whose text comes out the same for a tree and for .agents is not written
-# twice. The real file lives in .agents/skills, and the tree carries a relative
-# symlink at the same path. Which files those are is nobody's list: a tree links
-# a file exactly when the body generated for it equals the body generated for
-# .agents and the two carry the same frontmatter. That is why no SKILL.md is
-# ever a link — each harness tunes its own description — and why a rubric that
-# names no tool always is. check and write both decide it fresh, so a rewording
-# that makes a shared file harness-specific turns its links back into files, and
-# one that removes the last tool name from a file turns the files into links.
+# A wording two or more trees arrive at is not written twice. The seven texts of
+# a file are generated first and grouped by (frontmatter, body); each group's
+# text is stored once and every member links to it. Which files those are is
+# nobody's list — the grouping is redone on every run, so a rewording that makes
+# a shared file harness-specific splits it back into files, and one that removes
+# the last tool name from a file merges the files into links. A rubric naming no
+# tool is always shared; a SKILL.md almost never is, since each harness tunes its
+# own description — but "almost", not "never": two harnesses whose descriptions
+# and bodies come out identical share that manifest like any other file.
 #
-# --write always brings .agents/skills up to date first, whatever --tree names,
-# since it is where the shared text physically lives and every link points at it.
+# Where a group's text is stored, in `store_hub` / `store_shared` below:
+# .agents/skills/<rel> for the group the neutral tree is in, and
+# .agents/shared/<the group's first tree>/<rel> for any other group of two or
+# more. A tree whose wording nobody shares keeps a real file at its own path.
+#
+# --write brings the stores up to date first, whatever --tree names, since they
+# are where the shared text physically lives and every link points at one.
 use strict;
 use warnings;
+use File::Basename qw(dirname);
+use File::Path qw(make_path);
 
 binmode(STDOUT, ':encoding(UTF-8)');
 binmode(STDERR, ':encoding(UTF-8)');
@@ -67,6 +74,36 @@ sub write_file {
     print $fh $text;
     close $fh;
     chmod 0755, $path if $rel =~ /\.sh\z/;
+}
+
+# Every file under a directory, and the directories left empty once files go.
+# Used for the shared store alone, which nothing lists: what belongs there is
+# whatever this run's grouping claims, and the rest is last run's leftovers.
+sub stored_files {
+    my ($dir) = @_;
+    return () unless -d $dir;
+    my @out;
+    my @stack = ($dir);
+    while (my $d = pop @stack) {
+        opendir my $dh, $d or next;
+        for my $e (readdir $dh) {
+            next if $e eq '.' or $e eq '..';
+            my $p = "$d/$e";
+            if (-d $p) { push @stack, $p } else { push @out, $p }
+        }
+        closedir $dh;
+    }
+    return @out;
+}
+
+sub prune_empty {
+    my ($dir) = @_;
+    return unless -d $dir;
+    opendir my $dh, $dir or return;
+    my @e = grep { $_ ne '.' and $_ ne '..' } readdir $dh;
+    closedir $dh;
+    prune_empty("$dir/$_") for grep { -d "$dir/$_" } @e;
+    rmdir $dir;                       # fails harmlessly while anything is left
 }
 
 sub rel_list {
@@ -181,15 +218,38 @@ sub generate {
     return $body;
 }
 
-# ---------------------------------------------------------------- the hub
-# Where a shared file physically lives, and the relative path a tree's link to it
-# must hold: out of the file's own directory to the project root, then back down.
-my $HUB = 'agents';
+# ------------------------------------------------- where each text is stored
+# One stored file per distinct text, and every tree that words a file that way
+# carries a relative symlink to it. Three cases, decided per file from the
+# generated text on every run and written down nowhere:
+#
+#   the neutral tree's own wording  ->  .agents/skills/<rel>, where it has always
+#                                       lived; the trees sharing it link there
+#   a wording two or more trees share, the neutral tree not among them
+#                                   ->  .agents/shared/<the group's first tree>/<rel>,
+#                                       and every member of the group links to it
+#   a wording no other tree shares  ->  that tree's own path, a real file as before
+#
+# The middle case is stored under .agents/ rather than inside whichever tree
+# happens to name it for two reasons. update.sh checks .agents out whichever
+# harnesses were named, so a project installing only Qwen still resolves the
+# links; and it stays outside .agents/skills because that root is the one
+# check_consistency holds to naming no harness's invocation prefix, which is
+# exactly what these files carry.
+my $HUB   = 'agents';
+# Which member names a group's store. Order alone, so the path moves only when
+# the naming tree stops wording the file that way.
+my @ORDER = qw(agents claude cursor dsh kimi-code pi qwen);
 
-sub link_target {
-    my ($rel) = @_;
+sub store_hub    { my ($rel) = @_; ".$HUB/skills/$rel" }
+sub store_shared { my ($host, $rel) = @_; ".$HUB/shared/$host/$rel" }
+
+# The link a file at .<tree>/skills/<rel> must hold to reach a stored path:
+# out of its own directory to the project root, then back down.
+sub link_to {
+    my ($rel, $store) = @_;
     my $up = ($rel =~ tr{/}{}) + 2;
-    return ('../' x $up) . ".$HUB/skills/$rel";
+    return ('../' x $up) . $store;
 }
 
 # ---------------------------------------------------------------- modes
@@ -197,26 +257,74 @@ my @rels = rel_list();
 $SRC{$_} = slurp("$ROOT/.claude/skills/$_") for @rels;
 my $bad = 0;
 
-# The hub's own bodies, generated once: every other tree compares against them to
-# decide file-or-link. In write mode the hub is written here rather than in its
-# own pass below, so a --tree run that does not name it still links at current
-# text. Errors go to a sink — the hub reports its own in its pass.
-my (%hub_body, %hub_fm);
+# Every tree's text, generated once and before anything is written: the grouping
+# decides where each file is stored, and no tree can be compared against a store
+# the same run is still rewriting. Errors go to a sink — each tree reports its
+# own in its pass below.
+my (%gen_body, %gen_fm, %disk_body, %store, %own);
 {
-    my $rules = load_rules($HUB);
-    my $ov    = ($mode eq 'regen') ? {} : load_overrides($HUB);
+    my %rules = map { $_ => load_rules($_) } @ORDER;
+    my %ov    = map { $_ => (($mode eq 'regen') ? {} : load_overrides($_)) } @ORDER;
     my @sink;
     for my $rel (@rels) {
-        my $target = "$ROOT/.$HUB/skills/$rel";
-        my $tt = slurp($target);
-        next unless defined $tt;
-        my ($tfm, $tbody) = split_fm($tt);
-        my $gen = generate($rel, $HUB, $rules, $ov, \@sink);
-        next unless defined $gen;
-        $hub_fm{$rel}   = $tfm;
-        $hub_body{$rel} = $gen;
-        next unless $mode eq 'write' && $gen ne $tbody;
-        write_file($target, $rel, $tfm . $gen);
+        my (%key, @present);
+        for my $tree (@ORDER) {
+            my $tt = slurp("$ROOT/.$tree/skills/$rel");
+            next unless defined $tt;
+            my ($tfm, $tbody) = split_fm($tt);
+            my $gen = generate($rel, $tree, $rules{$tree}, $ov{$tree}, \@sink);
+            next unless defined $gen;
+            $gen_fm{$rel}{$tree}   = $tfm;
+            $disk_body{$rel}{$tree} = $tbody;
+            $gen_body{$rel}{$tree} = $gen;
+            $key{$tree} = "$tfm\0$gen";
+            push @present, $tree;
+        }
+        my (%members, @groups);
+        for my $tree (@present) {
+            push @groups, $key{$tree} unless exists $members{$key{$tree}};
+            push @{ $members{$key{$tree}} }, $tree;
+        }
+        for my $k (@groups) {
+            my @g = @{ $members{$k} };
+            if (grep { $_ eq $HUB } @g) {
+                $own{$rel}{$HUB} = 1;
+                $store{$rel}{$_} = store_hub($rel) for @g;
+            } elsif (@g > 1) {
+                my $s = store_shared($g[0], $rel);
+                $store{$rel}{$_} = $s for @g;
+            } else {
+                $own{$rel}{$g[0]} = 1;
+            }
+        }
+    }
+}
+
+# The stores, brought up to date before any tree is compared against one, and
+# whatever --tree named: they are what every link points at. A file left under
+# .agents/shared by a wording that has since moved is deleted here rather than
+# left to rot — nothing lists what belongs there, so anything unclaimed is stale.
+my @store_errs;
+my %store_wanted;
+if ($mode ne 'regen') {
+    for my $rel (@rels) {
+        for my $tree (@ORDER) {
+            my $s = $store{$rel}{$tree} or next;
+            next if $store_wanted{$s}++;
+            my $host = ($s =~ m{^\.\Q$HUB\E/shared/([^/]+)/}) ? $1 : $HUB;
+            my $text = $gen_fm{$rel}{$host} . $gen_body{$rel}{$host};
+            my $path = "$ROOT/$s";
+            my $have = slurp($path);
+            next if defined $have && $have eq $text;
+            if ($mode eq 'write') {
+                make_path(dirname($path));
+                write_file($path, $rel, $text);
+            } else {
+                push @store_errs, sprintf("%s\n      %s", $s,
+                    defined $have ? "stored text is not what the trees sharing it generate"
+                                  : "no such file: the trees sharing this wording link to nothing");
+            }
+        }
     }
 }
 
@@ -231,57 +339,56 @@ for my $tree (@trees) {
 
     for my $rel (@rels) {
         my $target = "$ROOT/.$tree/skills/$rel";
-        my $tt = slurp($target);
-        unless (defined $tt) {
+        # What this tree held when the grouping read it, not what is on disk now:
+        # the stores have been rewritten since, and a file this tree shares
+        # reaches its text through a link into one.
+        unless (defined $gen_fm{$rel} && exists $gen_fm{$rel}{$tree}) {
             $missing++;
             push @errs, sprintf("%s  %s\n      no such file in this tree", $tree, $rel);
             next;
         }
-        my ($tfm, $tbody) = split_fm($tt);
+        my $tfm   = $gen_fm{$rel}{$tree};
+        my $tbody = $disk_body{$rel}{$tree};
         my $gen = generate($rel, $tree, $rules, $ov, \@errs);
 
-        # File or link. The hub holds every shared file itself; any other tree
-        # links at it exactly when its own text comes out the same, frontmatter
-        # included. Both sides are decided from the generated text, so a file
-        # becomes a link and a link becomes a file on their own as the wording
-        # moves — neither is recorded anywhere to fall out of date.
+        # File or link, decided from the generated text alone. A tree holds a
+        # real file only where it is the neutral tree, or where no other tree
+        # words this file the same way; everything else is a link to the one
+        # stored copy of that wording. Both sides come out of the grouping above,
+        # so a file becomes a link and a link becomes a file on their own as the
+        # wording moves — neither is recorded anywhere to fall out of date.
         if ($mode ne 'regen') {
-            my $held  = -l $target ? readlink($target) : undef;
-            if ($tree eq $HUB) {
-                if (defined $held) {
-                    push @errs, sprintf("%s  %s\n      the hub holds the real file; this is a link to %s",
+            my $held = -l $target ? readlink($target) : undef;
+            if ($tree eq $HUB && defined $held) {
+                push @errs, sprintf("%s  %s\n      the neutral tree holds its own file here; this is a link to %s",
+                                    $tree, $rel, $held);
+                next;
+            }
+            my $s = $own{$rel}{$tree} ? undef : $store{$rel}{$tree};
+            if (defined $s) {
+                my $wanted = link_to($rel, $s);
+                if (defined $held && $held eq $wanted) { $linked++; $ok++; next }
+                if ($mode eq 'write') {
+                    unlink $target or die "cannot replace $target\n";
+                    symlink($wanted, $target) or die "cannot link $target\n";
+                    $linked++; $relinked++; $ok++;
+                } else {
+                    push @errs, sprintf("%s  %s\n      %s carries this same text, so this must be a link into it%s",
+                                        $tree, $rel, $s,
+                                        defined $held ? ", not a link to $held" : "");
+                }
+                next;
+            }
+            if (defined $held) {
+                if ($mode eq 'write') {
+                    unlink $target or die "cannot replace $target\n";
+                    write_file($target, $rel, $tfm . $gen);
+                    $unlinked++; $ok++;
+                } else {
+                    push @errs, sprintf("%s  %s\n      a link to %s, but no other tree words it that way now",
                                         $tree, $rel, $held);
-                    next;
                 }
-            } else {
-                my $want = defined $hub_body{$rel}
-                        && $gen eq $hub_body{$rel}
-                        && $tfm eq $hub_fm{$rel};
-                my $wanted = link_target($rel);
-                if ($want && defined $held && $held eq $wanted) { $linked++; $ok++; next }
-                if ($want) {
-                    if ($mode eq 'write') {
-                        unlink $target or die "cannot replace $target\n";
-                        symlink($wanted, $target) or die "cannot link $target\n";
-                        $linked++; $relinked++; $ok++;
-                    } else {
-                        push @errs, sprintf("%s  %s\n      .%s carries this same text, so this must be a link into it%s",
-                                            $tree, $rel, $HUB,
-                                            defined $held ? ", not a link to $held" : "");
-                    }
-                    next;
-                }
-                if (defined $held) {
-                    if ($mode eq 'write') {
-                        unlink $target or die "cannot replace $target\n";
-                        write_file($target, $rel, $tfm . $gen);
-                        $unlinked++; $ok++;
-                    } else {
-                        push @errs, sprintf("%s  %s\n      a link into .%s, but this tree no longer words it the same way",
-                                            $tree, $rel, $HUB);
-                    }
-                    next;
-                }
+                next;
             }
         }
 
@@ -324,8 +431,8 @@ HDR
     }
 
     my $verb = $mode eq 'write' ? 'rewritten' : 'differ';
-    printf "%-11s %3d / %3d reproduced   %3d shared with .%s   %s %d   unanchored %d\n",
-           ".$tree", $ok, scalar(@rels), $linked, $HUB, $verb, scalar(@mismatch), scalar(@errs);
+    printf "%-11s %3d / %3d reproduced   %3d shared   %s %d   unanchored %d\n",
+           ".$tree", $ok, scalar(@rels), $linked, $verb, scalar(@mismatch), scalar(@errs);
     printf "%-11s %d file(s) became links, %d link(s) became files\n", '', $relinked, $unlinked
         if $relinked || $unlinked;
     for my $e (@errs) { print "      ! $e\n"; $bad = 1 }
@@ -342,6 +449,27 @@ HDR
             print "        (", scalar(@h), " differing spans)\n" if @h > 3;
         }
     }
+}
+# Now that every tree points where this run says it should, anything left under
+# the shared store is last run's. Nothing lists what belongs there — whatever the
+# grouping claimed is it, and the rest is swept.
+if ($mode ne 'regen') {
+    for my $path (stored_files("$ROOT/.$HUB/shared")) {
+        my $rel_store = $path;
+        $rel_store =~ s{^\Q$ROOT/\E}{};
+        next if $store_wanted{$rel_store};
+        if ($mode eq 'write') {
+            unlink $path or die "cannot remove stale $path\n";
+        } else {
+            push @store_errs, sprintf("%s\n      stale: no tree words a file this way any more", $rel_store);
+        }
+    }
+    prune_empty("$ROOT/.$HUB/shared") if $mode eq 'write';
+}
+
+if (@store_errs) {
+    printf "%-11s %d stored file(s) out of step\n", ".$HUB/shared", scalar(@store_errs);
+    for my $e (@store_errs) { print "      ! $e\n"; $bad = 1 }
 }
 exit($bad ? 1 : 0);
 
