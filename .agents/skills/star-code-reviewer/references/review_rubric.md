@@ -20,7 +20,7 @@ One entry per finding, in file order:
   confidence: high | low
 ```
 
-Read-only delegates return this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the file count the collector was given is the remainder to re-dispatch (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
+Read-only subagents return this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the file count the collector was given is the remainder to re-dispatch (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
 
 ## The review rule digest
 

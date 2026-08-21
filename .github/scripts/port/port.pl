@@ -15,23 +15,23 @@
 # own length limit and its own trigger wording, and check_consistency.sh already
 # holds the frontmatter invariants. Everything below the closing `---` is generated.
 #
-# A wording two or more trees arrive at is not written twice. The seven texts of
-# a file are generated first and grouped by (frontmatter, body); each group's
-# text is stored once and every member links to it. Which files those are is
-# nobody's list — the grouping is redone on every run, so a rewording that makes
-# a shared file harness-specific splits it back into files, and one that removes
-# the last tool name from a file merges the files into links. A rubric naming no
-# tool is always shared; a SKILL.md almost never is, since each harness tunes its
-# own description — but "almost", not "never": two harnesses whose descriptions
-# and bodies come out identical share that manifest like any other file.
+# The wording the neutral tree carries is not written seven times. The seven
+# texts of a file are generated first and grouped by (frontmatter, body); the
+# group the neutral tree is in has its text stored once, at .agents/skills/<rel>,
+# and every other member of that group reaches it through a link. Every other
+# group is written out as a real file in each tree that words it that way:
+# .agents/skills is the only path a link may point at, so a wording the neutral
+# tree does not carry has nowhere shared to live and each tree keeps its own copy.
 #
-# Where a group's text is stored, in `store_hub` / `store_shared` below:
-# .agents/skills/<rel> for the group the neutral tree is in, and
-# .agents/shared/<the group's first tree>/<rel> for any other group of two or
-# more. A tree whose wording nobody shares keeps a real file at its own path.
+# Which files are links is nobody's list — the grouping is redone on every run,
+# so a rewording that makes a shared file harness-specific splits it back into
+# files, and one that removes the last tool name from a file merges the files into
+# links. A rubric naming no tool is shared; a SKILL.md is not one today, since
+# each harness tunes its own description and none of them comes out reading as the
+# neutral tree's does.
 #
-# --write brings the stores up to date first, whatever --tree names, since they
-# are where the shared text physically lives and every link points at one.
+# --write brings .agents/skills up to date first, whatever --tree names, since
+# that is where the shared text physically lives and every link points at one.
 use strict;
 use warnings;
 use File::Basename qw(dirname);
@@ -74,36 +74,6 @@ sub write_file {
     print $fh $text;
     close $fh;
     chmod 0755, $path if $rel =~ /\.sh\z/;
-}
-
-# Every file under a directory, and the directories left empty once files go.
-# Used for the shared store alone, which nothing lists: what belongs there is
-# whatever this run's grouping claims, and the rest is last run's leftovers.
-sub stored_files {
-    my ($dir) = @_;
-    return () unless -d $dir;
-    my @out;
-    my @stack = ($dir);
-    while (my $d = pop @stack) {
-        opendir my $dh, $d or next;
-        for my $e (readdir $dh) {
-            next if $e eq '.' or $e eq '..';
-            my $p = "$d/$e";
-            if (-d $p) { push @stack, $p } else { push @out, $p }
-        }
-        closedir $dh;
-    }
-    return @out;
-}
-
-sub prune_empty {
-    my ($dir) = @_;
-    return unless -d $dir;
-    opendir my $dh, $dir or return;
-    my @e = grep { $_ ne '.' and $_ ne '..' } readdir $dh;
-    closedir $dh;
-    prune_empty("$dir/$_") for grep { -d "$dir/$_" } @e;
-    rmdir $dir;                       # fails harmlessly while anything is left
 }
 
 sub rel_list {
@@ -219,30 +189,26 @@ sub generate {
 }
 
 # ------------------------------------------------- where each text is stored
-# One stored file per distinct text, and every tree that words a file that way
-# carries a relative symlink to it. Three cases, decided per file from the
-# generated text on every run and written down nowhere:
+# One stored file per text the neutral tree carries, and every tree that words
+# that file the same way holds a relative symlink to it. Two cases, decided per
+# file from the generated text on every run and written down nowhere:
 #
 #   the neutral tree's own wording  ->  .agents/skills/<rel>, where it has always
 #                                       lived; the trees sharing it link there
-#   a wording two or more trees share, the neutral tree not among them
-#                                   ->  .agents/shared/<the group's first tree>/<rel>,
-#                                       and every member of the group links to it
-#   a wording no other tree shares  ->  that tree's own path, a real file as before
+#   any other wording               ->  that tree's own path, a real file, whether
+#                                       or not another tree words it the same way
 #
-# The middle case is stored under .agents/ rather than inside whichever tree
-# happens to name it for two reasons. update.sh checks .agents out whichever
-# harnesses were named, so a project installing only Qwen still resolves the
-# links; and it stays outside .agents/skills because that root is the one
-# check_consistency holds to naming no harness's invocation prefix, which is
-# exactly what these files carry.
+# The second case duplicates: five trees wording a passage the neutral tree does
+# not carry store it five times. That is the price of one link target. A store
+# inside whichever tree happened to name it would leave a project that installs
+# only Qwen with links into a .claude it never checked out, and a store under
+# .agents/skills would fail check_consistency, which holds that root to naming no
+# harness's tools — which is exactly what those wordings carry.
 my $HUB   = 'agents';
-# Which member names a group's store. Order alone, so the path moves only when
-# the naming tree stops wording the file that way.
+# Fixed order, so a tree is compared and written in the same sequence every run.
 my @ORDER = qw(agents claude cursor dsh kimi-code pi qwen);
 
 sub store_hub    { my ($rel) = @_; ".$HUB/skills/$rel" }
-sub store_shared { my ($host, $rel) = @_; ".$HUB/shared/$host/$rel" }
 
 # The link a file at .<tree>/skills/<rel> must hold to reach a stored path:
 # out of its own directory to the project root, then back down.
@@ -290,20 +256,15 @@ my (%gen_body, %gen_fm, %disk_body, %store, %own);
             if (grep { $_ eq $HUB } @g) {
                 $own{$rel}{$HUB} = 1;
                 $store{$rel}{$_} = store_hub($rel) for @g;
-            } elsif (@g > 1) {
-                my $s = store_shared($g[0], $rel);
-                $store{$rel}{$_} = $s for @g;
             } else {
-                $own{$rel}{$g[0]} = 1;
+                $own{$rel}{$_} = 1 for @g;
             }
         }
     }
 }
 
-# The stores, brought up to date before any tree is compared against one, and
-# whatever --tree named: they are what every link points at. A file left under
-# .agents/shared by a wording that has since moved is deleted here rather than
-# left to rot — nothing lists what belongs there, so anything unclaimed is stale.
+# The store, brought up to date before any tree is compared against it, and
+# whatever --tree named: it is what every link points at.
 my @store_errs;
 my %store_wanted;
 if ($mode ne 'regen') {
@@ -311,8 +272,7 @@ if ($mode ne 'regen') {
         for my $tree (@ORDER) {
             my $s = $store{$rel}{$tree} or next;
             next if $store_wanted{$s}++;
-            my $host = ($s =~ m{^\.\Q$HUB\E/shared/([^/]+)/}) ? $1 : $HUB;
-            my $text = $gen_fm{$rel}{$host} . $gen_body{$rel}{$host};
+            my $text = $gen_fm{$rel}{$HUB} . $gen_body{$rel}{$HUB};
             my $path = "$ROOT/$s";
             my $have = slurp($path);
             next if defined $have && $have eq $text;
@@ -450,25 +410,8 @@ HDR
         }
     }
 }
-# Now that every tree points where this run says it should, anything left under
-# the shared store is last run's. Nothing lists what belongs there — whatever the
-# grouping claimed is it, and the rest is swept.
-if ($mode ne 'regen') {
-    for my $path (stored_files("$ROOT/.$HUB/shared")) {
-        my $rel_store = $path;
-        $rel_store =~ s{^\Q$ROOT/\E}{};
-        next if $store_wanted{$rel_store};
-        if ($mode eq 'write') {
-            unlink $path or die "cannot remove stale $path\n";
-        } else {
-            push @store_errs, sprintf("%s\n      stale: no tree words a file this way any more", $rel_store);
-        }
-    }
-    prune_empty("$ROOT/.$HUB/shared") if $mode eq 'write';
-}
-
 if (@store_errs) {
-    printf "%-11s %d stored file(s) out of step\n", ".$HUB/shared", scalar(@store_errs);
+    printf "%-11s %d stored file(s) out of step\n", ".$HUB/skills", scalar(@store_errs);
     for my $e (@store_errs) { print "      ! $e\n"; $bad = 1 }
 }
 exit($bad ? 1 : 0);

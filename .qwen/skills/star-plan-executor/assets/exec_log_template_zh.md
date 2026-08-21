@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-plan-executor/assets/exec_log_template_zh.md
+../../../../.agents/skills/star-plan-executor/assets/exec_log_template_zh.md

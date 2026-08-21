@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-env-builder/references/add_mode_zh.md
+../../../../.agents/skills/star-env-builder/references/add_mode_zh.md

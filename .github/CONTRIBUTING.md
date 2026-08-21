@@ -6,12 +6,14 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 ## The shape of the problem
 
 The fifteen skills exist seven times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 157 markdown files per
-tree, 1099 in all, roughly 92% of the repository. Sixty-one of those files per tree are not copies:
-no tree words them differently, so they are one file under `.agents/skills/` that the rest link to.
-The other 96 are written by `.github/scripts/port.sh` from the one authored copy in `.claude/skills/`,
-through a per-harness substitution table and an override list holding every span a tree genuinely
-words for itself. CI runs the check; a tree edited directly stops being what those produce.
+`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 181 markdown files per
+tree, 1267 in all, roughly 92% of the repository. A hundred and twenty-four of those files per tree
+are not copies: the neutral tree words them the same way, so they are one file under
+`.agents/skills/` that the rest link to. The other 57 are written by `.github/scripts/port.sh` from
+the one authored copy in `.claude/skills/`, through a per-harness substitution table and an override
+list holding every span a tree genuinely words for itself. `.agents/skills/` is the only path a link
+may point at, so a passage several trees share and the neutral one does not is written once in each
+of them. CI runs the check; a tree edited directly stops being what those produce.
 
 `.agents/skills/` is not one of those tools' private tree. It is where the `AGENTS.md` convention puts
 skills, so Codex scans it as its only project root, Cursor scans it as a native root, and Pi and DSH

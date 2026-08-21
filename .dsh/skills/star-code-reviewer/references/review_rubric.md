@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-code-reviewer/references/review_rubric.md
+../../../../.agents/skills/star-code-reviewer/references/review_rubric.md

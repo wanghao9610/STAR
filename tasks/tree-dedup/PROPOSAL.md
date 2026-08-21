@@ -1,6 +1,6 @@
 # 七棵树的剩余重复：按变体分组的共享方案
 
-状态：全部已应用（2026-08-20）。第 6 节九条、第 3 节的变体分组、以及第 2.1 节末尾说的抹平调用前缀，三件都做完了，记在第 7–9 节。
+状态：全部已应用（2026-08-20），随后第 3 节的中间一档又被撤回，记在第 11 节。第 6 节九条、第 3 节的变体分组、以及第 2.1 节末尾说的抹平调用前缀，三件都做完了，记在第 7–9 节。
 写于 2026-08-20。
 
 ## 1. 现状与量化
@@ -232,3 +232,61 @@ goldens 不会因此失效（`equiv_faults.tsv` 与 goldens 也都不提这两�
 验证：`port.sh` 检查全绿；`check_consistency.sh` 25 节全过，且输出与本次改动前**逐字节相同**——
 没有任何计数移动，`equiv_check.sh` 的 goldens 不受影响；模拟只装一个 harness 的下游安装
 （`tar -ch` 解引用），`.dsh/skills` 装出 187 个实体文件、0 个软链，逐字节与树中读到的一致。
+
+## 11. 中间那一档已撤回（2026-08-20）
+
+第 3 节的分组保留，但三档变两档：**只有 `.agents/skills` 能被软链指向**。中性树不带的措辞，
+不再存进 `.agents/shared/<宿主树名>/`，而是在每棵说这话的树里各存一份实体文件。`.agents/shared`
+目录删除。
+
+撤回的理由不是第 3.2 节的三个位置论证错了——那三条今天仍然成立——而是它换来的路径不好读：
+`.qwen/skills/star-plan-executor/references/exec_rubric.md` 指向
+`.agents/shared/cursor/star-plan-executor/references/exec_rubric.md`，读的人要先知道"cursor"
+在这里只是组内第一棵树的名字、不代表归属。一个共享位置换掉这层解释。
+
+### 11.1 先合掉的 5 处
+
+这 5 个文件的差异既不实质、也不树特定，合掉之后七棵树一致，直接进 `.agents/skills`：
+
+1. `star-env-builder/references/add_mode_zh.md`——`.agents` 的中文正文里还写着 "STOP line"，
+   其余六棵已按房内用词写"红线"。删 override 记录。
+2. `star-code-reviewer/references/review_rubric.md`——`.agents` 把 "Read-only subagents" 写成
+   "Read-only delegates"。删 override 记录；`.pi` 另有一套说法（"A collection pass returns…"），
+   仍是它自己的实体文件。
+3. `star-plan-executor/assets/exec_log_template.md` 与 `_zh.md`——`.agents` 的版本更准（同一句
+   开头写 "One row per EXEC_PLAN action"，源里下一句却说 "the step's own check"；"not by the
+   agent's self-report" 也分不清是哪个 agent）。把 `.agents` 的措辞抬进 `.claude` 源文件，
+   删 override 记录，七棵树一起改对。
+4. `star-refs-reviewer/assets/survey_template_zh.md`——正文一处（"压成一行"/"收缩成一行"）删
+   override；frontmatter 三处（`<模型 id>`/`<model id>` 等）port.pl 不生成，六棵树各手改一次，
+   取 `.agents` 的中文写法——同文件上一行本来就写 `<模型 id，…>`。
+
+**没有合**的：`star-metd-summarize/references/extract_map.md`。第 6 节末尾已核过，`.agents` 压掉
+那两句是刻意的，不动。其余 23 个文件差在被禁的工具名（`AskUserQuestion` 等，
+`check_consistency.sh` 第 1639 行禁止 `.agents/skills` 出现）或步骤编号（中性树的执行器只有 8 步，
+其余六棵 10 步），合不了。
+
+### 11.2 改了哪四处
+
+1. `port.pl`——分组判定去掉 `elsif (@g > 1)` 那一支，非中性组的每棵树各写实体文件；
+   `store_shared`、`stored_files`、`prune_empty`、以及末尾清扫 `.agents/shared` 的那一遍一并删掉
+   （没有第二个存储位置，就没有过期存储要扫）。头部说明由"三档"改写为"两档"。
+2. `port.sh`——头部同一段说明。
+3. `execs/update.sh`——两处 sparse-checkout 去掉 `.agents/shared`，连同解释它的那段注释。
+4. `.github/CONTRIBUTING.md`——开头那段的四个计数早就停在旧快照上（157/1099/61/96），
+   一并更新为 181/1267/124/57，并补一句说明为什么第二类会重复。
+
+### 11.3 结果与验证
+
+| | 存储文件数 | 体积 |
+|---|---|---|
+| 方案 A + 抹平前缀（第 10 节） | 488 | 5900 KB |
+| 先合 5 处、再撤回中间档（现在） | **538** | **6168 KB** |
+
+29 个共享文件里 5 个并进 `.agents/skills`，其余 24 个展开成各树实体文件，净增 50 个文件、268 KB。
+每棵树的软链从 125 升到 130（`.pi` 117 → 121），因为合掉的 5 处让更多文件落进中性组。
+
+验证：`port.sh` 检查全绿（七棵树 187/187）；`check_consistency.sh` 25 节全过，输出与改动前
+**逐字节相同**，所以 `equiv_check.sh` 的 goldens 不受影响；七棵树里已无任何指向 `.agents/skills`
+以外的软链，唯一的例外是 `.agents/skills/<skill>/agents/openai.yaml` → `.codex/…`，那是 Codex
+读清单的既有安排，与本节无关。
