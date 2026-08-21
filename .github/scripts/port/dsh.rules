@@ -1,6 +1,5 @@
 # DSH: skills are /skill:<name>; tool names are written bare, without backticks;
 # no per-subagent model hint; plan-mode tools are snake_case.
-/star-(?!workflow)	/skill:star-
 AskUserQuestion	ask_user_question
 `Agent`	`subagent`
 \bBash\b	bash

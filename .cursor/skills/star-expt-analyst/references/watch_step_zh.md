@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-expt-analyst/references/watch_step_zh.md
+../../../../.agents/skills/star-expt-analyst/references/watch_step_zh.md

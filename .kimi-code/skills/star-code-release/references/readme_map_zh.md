@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-code-release/references/readme_map_zh.md
+../../../../.agents/skills/star-code-release/references/readme_map_zh.md

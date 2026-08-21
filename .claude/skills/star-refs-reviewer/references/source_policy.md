@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-refs-reviewer/references/source_policy.md
+../../../../.agents/skills/star-refs-reviewer/references/source_policy.md

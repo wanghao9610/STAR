@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-code-release/references/release_checklist_zh.md
+../../../../.agents/skills/star-code-release/references/release_checklist_zh.md

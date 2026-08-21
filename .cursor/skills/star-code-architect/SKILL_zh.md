@@ -7,7 +7,7 @@ description: >-
   当代码已存在时：改为用只读 Task subagent 勘察代码。两条路径随后汇合：设计目标架构与迁移表，仅执行
   用户批准的迁移项（Task subagent 编排 + 逐组验证 + 每组提交一次），并把架构规范写入
   metds/codearc.md，在 AGENTS.md 与 .cursor/rules/ 留下一小段指路说明。当用户运行
-  /star-code-architect，或想为计划找参考实现或起步代码库、想搭建 ${CODE_NAME}/、或想整理/重构现有
+  star-code-architect，或想为计划找参考实现或起步代码库、想搭建 ${CODE_NAME}/、或想整理/重构现有
   代码库并写下架构规范时，都应使用本 skill。Bilingual (中/英) — also trigger in English whenever
   the user wants a reference implementation or starter codebase for a plan, wants to set up
   or scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase and record
@@ -18,7 +18,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-code-architect [GITHUB_URL | PLAN_NAME] [描述]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`star-code-architect [GITHUB_URL | PLAN_NAME] [描述]`——传 GitHub URL 可跳过检索直接用该仓库；传计划名（slug / 数字前缀 / 文件名）指定由哪份计划驱动本次运行；不带参数则两者都自动解析。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述几种都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 写法可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。架构工作真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有一节不装载：§11 执行分支,它那九条本 skill 一条都不做——不建、不合并、不弃用分支,也不碰 worktree——而它对其余 skill 的那一条要求,即签出停在别人的执行分支上时提交会随那个叶子一起合并,已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -50,7 +50,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 ## 核心原则
 
-1. **计划驱动代码。**先读 `metds/plans/` 下的根计划：检索要素（分支 A）、勘察重点（分支 B）、目标架构都从计划推导。既无计划也无 URL 时，建议先跑 `/star-plan-coach`——或直接收一个主题 / URL 继续。
+1. **计划驱动代码。**先读 `metds/plans/` 下的根计划：检索要素（分支 A）、勘察重点（分支 B）、目标架构都从计划推导。既无计划也无 URL 时，建议先跑 `star-plan-coach`——或直接收一个主题 / URL 继续。
 2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
 3. **上游结构为基线。**克隆库组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
@@ -63,7 +63,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. 解析参数：GitHub URL → 走分支 A 并跳过 A1–A3；`PLAN_NAME`（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配）→ 该计划驱动本次运行；无参数 → 用根计划（单数字前缀 `[0-9]_*_plan.md`；有多份则用 AskQuestion 询问选哪份）。
-3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 整理既有代码，本就不需要计划，而这正是 `/star-proj-adopt` 转介进来的状态。否则用 AskQuestion 问：*先跑 `/star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
+3. 既无计划也无 URL 时：若 `${CODE_NAME}/` 里已有真实代码，跳过这个问题——分支 B 整理既有代码，本就不需要计划，而这正是 `star-proj-adopt` 转介进来的状态。否则用 AskQuestion 问：*先跑 `star-plan-coach`（推荐）* / *直接给 GitHub URL* / *现在口述主题，据此检索*。
 4. 计划存在但未 `finalized`：提醒检索要素与架构会比较浅，给出 *继续* / *先完成计划*。
 5. 选分支：`${CODE_NAME}/` 缺失或实质为空（只有 `.gitkeep` 之类占位）→ **分支 A（搭建）**；已有真实代码 → **分支 B（整理）**；零散几个脚本 → 询问是围绕它们搭建还是整理现状。
 
@@ -105,7 +105,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 #### Step C6：汇报与交棒
 
-≤500 字：选定的仓库（附许可证说明）、落了什么在哪里、完成的改名 + 保留未改的名称数量、迁移完成/受阻、写入的规范、验证证据、待用户执行的命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有代码可改了；`/star-flow-status` 查看每个计划步骤的进展。
+≤500 字：选定的仓库（附许可证说明）、落了什么在哪里、完成的改名 + 保留未改的名称数量、迁移完成/受阻、写入的规范、验证证据、待用户执行的命令。**向下游交棒：**`star-plan-executor <leaf>` 现在有代码可改了；`star-flow-status` 查看每个计划步骤的进展。
 
 ## 状态与文件规则
 

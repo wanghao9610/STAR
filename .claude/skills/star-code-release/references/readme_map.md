@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-code-release/references/readme_map.md
+../../../../.agents/skills/star-code-release/references/readme_map.md

@@ -10,7 +10,7 @@ description: >-
   requirements.txt plus a requirements/ folder (framework|runtime|optional.txt, conda-only in conda.txt).
   Installs uv > pip > conda, CUDA-aware, behind one install-plan confirmation, then checks imports,
   framework/GPU and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use when the user runs
-  /star-env-builder, when a run names it as the next action, wants the conda env or venv created or
+  star-env-builder, when a run names it as the next action, wants the conda env or venv created or
   rebuilt, needs dependencies resolved and installed, or wants the environment verified. Bilingual
   (en/zh).
 ---
@@ -19,7 +19,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs packages into the environment `.env` already names and records them in the requirements layout. Anything left over is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, saying so first. A lone argument-like token that matches nothing is not a description — ask which was meant. `add` is the exception: every token after it is a package name. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7) and is stripped before the argument and description are read.
+Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs packages into the environment `.env` already names and records them in the requirements layout. Anything left over is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, saying so first. A lone argument-like token that matches nothing is not a description — ask which was meant. `add` is the exception: every token after it is a package name. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7) and is stripped before the argument and description are read.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What building a runtime acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §7 dialogue, §8 the output table, §10 the skill roster — arrives through the opening load below. Three sections stay out: §6 delegation (the main agent runs the three runnable-check layers itself — Principle 6 and Step 6 say so, and no step here dispatches), §9 project layout (State & File Rules enumerate every path it may write, and every tree it may not, more strictly than that section states them), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
 
@@ -65,7 +65,7 @@ You **build the environment; you do not implement or refactor research code.** T
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. `ENV_NAME` := the argument, else `CODE_NAME`. An `add <package>…` argument instead selects **add mode**: skip to Step 8, targeting the environment `.env` already names — nothing created, renamed, or rebuilt.
 3. Detect and record (feeds the install plan and the report): platform + arch; `nvidia-smi` (driver's CUDA ceiling); `nvcc --version` / `CUDA_HOME` (local toolkit, often absent); `$CONDA_HOME/bin/conda --version`; `uv --version`.
-4. `${CODE_NAME}/` missing or effectively empty → no dependency source; recommend `/star-code-architect` first, and offer a bare env (python only) if the user wants one anyway.
+4. `${CODE_NAME}/` missing or effectively empty → no dependency source; recommend `star-code-architect` first, and offer a bare env (python only) if the user wants one anyway.
 
 ### Step 1: Choose the backend (deterministic)
 
@@ -120,7 +120,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added while diagnosing runnable-check failures) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
 4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at it (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
-5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `/star-plan-executor <leaf>` now has a runtime; `/star-flow-status` shows what to run next.
+5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `star-plan-executor <leaf>` now has a runtime; `star-flow-status` shows what to run next.
 
 
 ### Step 8: Add packages (add mode only)

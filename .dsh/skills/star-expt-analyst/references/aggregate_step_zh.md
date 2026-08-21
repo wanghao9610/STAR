@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-analyst/references/aggregate_step_zh.md
+../../../../.agents/skills/star-expt-analyst/references/aggregate_step_zh.md

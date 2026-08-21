@@ -9,7 +9,7 @@ description: >-
   scores; an arXiv id, DOI, or URL appends one paper, `add` several. Every bib field is transcribed from
   a record fetched during the run and logged with its source URL in refs_index.md — nothing from memory,
   and a paper with no fetchable record is listed for manual check. Use when the user runs
-  /star-refs-reviewer, when a run names it as the next action, or wants a literature review /
+  star-refs-reviewer, when a run names it as the next action, or wants a literature review /
   related-work survey, per-paper analyses, a reference.bib, or related work scored or organized.
   Bilingual (en/zh).
 ---
@@ -18,7 +18,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | score | add PAPER [PAPER …] | ARXIV_ID | URL]`
+Invocation: `star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | score | add PAPER [PAPER …] | ARXIV_ID | URL]`
 
 - no argument: read the method from `metds/`, run the full pass.
 - plan name (slug / numeric prefix / filename) or free-text topic: scope the search.
@@ -53,7 +53,7 @@ Two sections stay out because this skill never performs what they govern: §1 gi
 
 You are the family's literature analyst. `star-plan-coach` cannot finish its Related Work stage — "3–5 closest works and their limits" — from memory; `star-plan-decomposer` needs to know which baselines exist before it can size the work. You read the field and leave two artifacts the family can cite: analysis notes on how each close paper relates to **this** method, and a `reference.bib` whose every field came from a record you fetched and logged. On demand (`synthesize`), you compile those notes into a third: the related-work narrative a paper's Related Work section is written from. On demand (`survey`), you write a fourth: a standalone field survey, read in tiers and organized by taxonomy, for the moment before any plan exists — `star-idea-storm` and `star-plan-coach` position a topic against it, and its read-next list seeds the full pass. The survey maps a field on its own terms; `related_work.md` positions this method inside one.
 
-You survey and record; you do not set strategy, write or revise plans, implement methods, or run experiments. A finding that changes the research direction goes to the user and to `/star-plan-coach` — §2 (Related Work & Positioning) when it sharpens the positioning, §1 (Problem Definition & Motivation) when what you read already does what §1 calls open — you never edit a plan yourself.
+You survey and record; you do not set strategy, write or revise plans, implement methods, or run experiments. A finding that changes the research direction goes to the user and to `star-plan-coach` — §2 (Related Work & Positioning) when it sharpens the positioning, §1 (Problem Definition & Motivation) when what you read already does what §1 calls open — you never edit a plan yourself.
 
 ## Core Principles
 
@@ -119,11 +119,11 @@ Derive 3–8 categories from what was actually collected — not a taxonomy chos
 
 ### Step 7: Self-audit
 
-Re-fetch 5 entries at random and diff them field by field against the file; any mismatch → correct the file to match the source, then re-check that entry's whole batch. Check key uniqueness, brace balance, empty required fields, and that every entry has a `% src:` line whose URL and date match its index row, and that no paper still named in the `%% Needs manual check` block has since become an entry; parse with `bibtexparser` through the `.env` conda env if it is already installed — never install it (that is `/star-env-builder`'s). Recompute 3 impact scores from the sub-signals logged in the index's §5; a total that does not reproduce means that table is recomputed row by row. Record the audit in the index's §7. In `verify` mode this step covers **every** entry, and the file is corrected only after the diff is shown and confirmed.
+Re-fetch 5 entries at random and diff them field by field against the file; any mismatch → correct the file to match the source, then re-check that entry's whole batch. Check key uniqueness, brace balance, empty required fields, and that every entry has a `% src:` line whose URL and date match its index row, and that no paper still named in the `%% Needs manual check` block has since become an entry; parse with `bibtexparser` through the `.env` conda env if it is already installed — never install it (that is `star-env-builder`'s). Recompute 3 impact scores from the sub-signals logged in the index's §5; a total that does not reproduce means that table is recomputed row by row. Record the audit in the index's §7. In `verify` mode this step covers **every** entry, and the file is corrected only after the diff is shown and confirmed.
 
 ### Step 8: Digest in chat
 
-≤500 words: the method source and profile, notes written (citekey → file, each marked with the figures it carries, or why it has none), the entry count and category table, the score table's top tier — the works related-work prose must engage — with any partial or `new` marks explained, the self-audit result, the Needs-manual-check list, and the routing — the closest-works finding goes to `/star-plan-coach` §2 (Related Work & Positioning) to sharpen it; when a paper read here already does what the plan's §1 calls open, the route is `/star-plan-coach <slug> problem` (§1 Problem Definition & Motivation) instead, and `/star-idea-storm` when that leaves the direction with no question at all; name which of the three this run's reading asks for; one more paper later is `/star-refs-reviewer <arxiv-id>`, several at once — ids, URLs, titles mixed — one `/star-refs-reviewer add …`; `/star-refs-reviewer verify` re-checks the whole bib; `/star-refs-reviewer score` refreshes the metrics once citations and stars have drifted; `/star-refs-reviewer synthesize` compiles the notes into `metds/refs/related_work.md`; `/star-refs-reviewer survey <topic>` maps a field into `metds/refs/<slug>_survey.md`.
+≤500 words: the method source and profile, notes written (citekey → file, each marked with the figures it carries, or why it has none), the entry count and category table, the score table's top tier — the works related-work prose must engage — with any partial or `new` marks explained, the self-audit result, the Needs-manual-check list, and the routing — the closest-works finding goes to `star-plan-coach` §2 (Related Work & Positioning) to sharpen it; when a paper read here already does what the plan's §1 calls open, the route is `star-plan-coach <slug> problem` (§1 Problem Definition & Motivation) instead, and `star-idea-storm` when that leaves the direction with no question at all; name which of the three this run's reading asks for; one more paper later is `star-refs-reviewer <arxiv-id>`, several at once — ids, URLs, titles mixed — one `star-refs-reviewer add …`; `star-refs-reviewer verify` re-checks the whole bib; `star-refs-reviewer score` refreshes the metrics once citations and stars have drifted; `star-refs-reviewer synthesize` compiles the notes into `metds/refs/related_work.md`; `star-refs-reviewer survey <topic>` maps a field into `metds/refs/<slug>_survey.md`.
 
 ### Steps 9–11: the three offline modes
 

@@ -3,14 +3,14 @@ name: star-plan-decomposer
 description: >-
   把 metds/plans/ 下已有的研究计划拆解为具体、可执行的子计划。选定拆分轴（阶段 / 组件 /
   证据），再为每个执行单元起草一份子计划——目标、依赖、任务分解、产出物、完成判据——按能体现其在树中位置的数字前缀写入，并双向链接回父计划。子计划还能继续再拆，深度不限。当用户运行
-  /skill:star-plan-decomposer，或想把计划拆成可执行的子计划时使用。Bilingual（中/英）。
+  star-plan-decomposer，或想把计划拆成可执行的子计划时使用。Bilingual（中/英）。
 ---
 
 # Research Plan Analyse — 计划拆解器
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-plan-decomposer PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了确认点，也定不了计划名本身：解析不到计划的文本，目标照样要问。可选的 `involve=low|medium|high` 可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），两者都不属于，解析两者之前先剥离。
+调用方式：`star-plan-decomposer PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`0`），或完整文件名（`0_open-vocab-det-seg_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了确认点，也定不了计划名本身：解析不到计划的文本，目标照样要问。可选的 `involve=low|medium|high` 可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），两者都不属于，解析两者之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。拆分计划真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§2 红线（它自己什么都不跑——工具白名单里既无解释器也无安装器，而它必须知道的那一处越线，即由执行器交还的数据集获取命令，已写在 Step 3 起草数据叶子的地方）、§6 委派（没有哪一步分派，白名单里根本没有分派工具），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -82,7 +82,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 检查根计划的 `finalized:`——它是"这份总体计划已可供使用"的唯一信号（`star-plan-coach` 只在六节全 `done`/`skipped` 且评分表过关时设上它，任一节重开即清除）。未 finalized → 读它的 `status` 映射与正文，指明哪些章节仍为 `pending`/`in_progress` 或布满 `[TBD]`（尤其是**方法**与**里程碑**），告知用户拆解会偏浅，并用 ask_user_question 提供选项：*仍然拆解（缺口在子计划里记为 `【待定】`）* / *先回到 `star-plan-coach` 把父计划补完*（推荐）。尊重用户选择。
 
-若目标自身带有执行证据（`exec_runs` 非空，或 `exec_status` 超出 `pending`），先暂停再拆：拆解会把一个已执行的叶子变成内部节点——`exec_status` / `exec_runs` 就地冻结为历史，`star-flow-status` 不再把它算作可执行叶子，它的 `wkdrs/` run 也留在一个 executor 不会再回访的节点上。用 ask_user_question 提供选项：*先用 `/skill:star-plan-reviser <slug>` 把执行证据固化进计划文本（推荐）* / *仍然拆解*——若仍然拆解，起草 children 时把已完成的工作反映进它们的 §2 输入与 §3 步骤，而不是重新规划一遍。
+若目标自身带有执行证据（`exec_runs` 非空，或 `exec_status` 超出 `pending`），先暂停再拆：拆解会把一个已执行的叶子变成内部节点——`exec_status` / `exec_runs` 就地冻结为历史，`star-flow-status` 不再把它算作可执行叶子，它的 `wkdrs/` run 也留在一个 executor 不会再回访的节点上。用 ask_user_question 提供选项：*先用 `star-plan-reviser <slug>` 把执行证据固化进计划文本（推荐）* / *仍然拆解*——若仍然拆解，起草 children 时把已完成的工作反映进它们的 §2 输入与 §3 步骤，而不是重新规划一遍。
 
 ### Step 2：选择拆分轴
 
@@ -134,7 +134,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```markdown
 ## Sub-plans
 
-于 <date> 按 <拆分轴> 经 /skill:star-plan-decomposer 拆解。
+于 <date> 按 <拆分轴> 经 star-plan-decomposer 拆解。
 执行顺序：00 → 01 → 02 → 03  （或 DAG：00 → {01, 02} → 03）
 
 - `00_<slug>_plan.md` — <一句话目标>（→ §<n>；依赖：—）
@@ -143,13 +143,13 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **若是经 Step 1 的修复分支到达这里**：所有字段从已存在的子计划文件推导，而非从 Step 3 的清单——拓扑顺序与"依赖"标注取自它们的 `depends_on`，`→ §<n>` 取自它们的 `traces_to`，拆解日期取自它们自身的 frontmatter（绝不编造）。每条一句话目标从该子计划 §1 *浓缩* 而来，不是照抄——所以写入前先把起草好的整节交给用户过目。
 
-同时把 `children:` 列表并入父计划 frontmatter——它与 `## Sub-plans` 索引是你对父计划做的唯一编辑。已丢弃的子计划两者都保留，索引行上带 `— dropped <date>`，它的编号也不回收：下一个单元取下一个空位（规约 §5.6）。然后收束边界（规约 §7.10）：用 2–3 句讲清选了哪个轴、写下哪 N 个文件、由此得到的执行顺序——并点明退路：`/skill:star-plan-decomposer <slug>` 会从 Step 1 的"已拆解"分支重新进入而不是直接覆盖，某个仍粗糙的单元也可用 `/skill:star-plan-decomposer <该单元前缀>` 继续细化（Step 6）。
+同时把 `children:` 列表并入父计划 frontmatter——它与 `## Sub-plans` 索引是你对父计划做的唯一编辑。已丢弃的子计划两者都保留，索引行上带 `— dropped <date>`，它的编号也不回收：下一个单元取下一个空位（规约 §5.6）。然后收束边界（规约 §7.10）：用 2–3 句讲清选了哪个轴、写下哪 N 个文件、由此得到的执行顺序——并点明退路：`star-plan-decomposer <slug>` 会从 Step 1 的"已拆解"分支重新进入而不是直接覆盖，某个仍粗糙的单元也可用 `star-plan-decomposer <该单元前缀>` 继续细化（Step 6）。
 
 ### Step 6：提供递归拆解
 
-告诉用户任何子计划都可用 `/skill:star-plan-decomposer <该子计划的 slug 或前缀>` 继续拆解，生成下一位深度。对仍粗糙的单元，主动提出现在就继续拆。Step 3 里*调细*那一答点名的单元，到这里已定——直接递归进去，而不是再提一次建议。
+告诉用户任何子计划都可用 `star-plan-decomposer <该子计划的 slug 或前缀>` 继续拆解，生成下一位深度。对仍粗糙的单元，主动提出现在就继续拆。Step 3 里*调细*那一答点名的单元，到这里已定——直接递归进去，而不是再提一次建议。
 
-**向下游交棒。** 叶子足够具体后，就用 `/skill:star-plan-executor <叶子 slug 或前缀>` 执行——从执行顺序里的第一个开始（`depends_on` 为空、或其依赖已 `done` 的叶子）。若 `${CODE_NAME}/` 还缺失或为空，先用 `/skill:star-code-architect` 为计划搭建代码库。`/skill:star-flow-status` 展示整棵树并推荐下一个该跑谁。
+**向下游交棒。** 叶子足够具体后，就用 `star-plan-executor <叶子 slug 或前缀>` 执行——从执行顺序里的第一个开始（`depends_on` 为空、或其依赖已 `done` 的叶子）。若 `${CODE_NAME}/` 还缺失或为空，先用 `star-code-architect` 为计划搭建代码库。`star-flow-status` 展示整棵树并推荐下一个该跑谁。
 
 ### Step 7：质检
 

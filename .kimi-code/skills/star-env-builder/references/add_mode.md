@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-env-builder/references/add_mode.md
+../../../../.agents/skills/star-env-builder/references/add_mode.md

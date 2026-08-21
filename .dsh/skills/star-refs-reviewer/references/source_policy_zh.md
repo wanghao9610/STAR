@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/references/source_policy_zh.md
+../../../../.agents/skills/star-refs-reviewer/references/source_policy_zh.md

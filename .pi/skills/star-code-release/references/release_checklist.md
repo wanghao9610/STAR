@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-code-release/references/release_checklist.md
+../../../../.agents/skills/star-code-release/references/release_checklist.md

@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-plan-executor/references/stop_line_rules_zh.md
+../../../../.agents/shared/claude/star-plan-executor/references/stop_line_rules_zh.md

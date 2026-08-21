@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-proj-adopt/assets/adopt_template_zh.md
+../../../../.agents/skills/star-proj-adopt/assets/adopt_template_zh.md

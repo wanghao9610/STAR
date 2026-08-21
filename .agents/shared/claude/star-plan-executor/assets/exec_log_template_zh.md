@@ -60,4 +60,4 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 <!-- 续跑的 session 需要知道的一切:做过的假设、遇到的 blocker 及其解决方式、以及以 `blocked` 收场的步骤其改动的去留(已恢复,或经明确决定保留,两种都写清路径)(子计划层面的实质性
      偏差记到上面"待同步修正",不记这里)。
      若某结果撞上根计划 §5 的 kill-criterion,在此记为 **方向性信号**,并注明推荐的反馈路径
-     (/star-plan-coach 或 /star-plan-decomposer)——执行器本身绝不改父计划。 -->
+     (star-plan-coach 或 star-plan-decomposer)——执行器本身绝不改父计划。 -->

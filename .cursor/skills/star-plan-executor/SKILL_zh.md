@@ -5,7 +5,7 @@ description: >-
   要求"缺口清单；切换到 Cursor plan 模式，把子计划的任务分解细化成一份 可执行 plan，经用户批准后，逐步用 Task 派 subagent（每步一个）去修改代码、跑轻量验证——在重实验
   （长时/多卡训练、大开销 API 调用）前停下，把命令备好交回用户。执行过程的中间工作文件放到 tasks/<plan-name>/，持久执行状态及生成的 run 产物记入
   wkdrs/<run>/，支持跨 session 续跑。经用户确认的偏差、以及执行敲定的值会同步写回子计划并追加一条 Revision History 条目，让计划文件与实际 执行保持一致。只要用户运行
-  /star-plan-executor、一次运行点名它是下一步动作，或想执行 / 实现 / 跑通某个子计划、 把执行计划变成代码和结果、开始做计划描述的工作时，都应使用本
+  star-plan-executor、一次运行点名它是下一步动作，或想执行 / 实现 / 跑通某个子计划、 把执行计划变成代码和结果、开始做计划描述的工作时，都应使用本
   skill。Bilingual（中/英）——用户用英文 描述 "execute / implement / run a sub-plan" 时同样触发。
 ---
 
@@ -13,7 +13,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-plan-executor PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于 `PLAN_NAME` 也不属于描述，两者解析之前先剥离。
+调用方式：`star-plan-executor PLAN_NAME [描述]`。`PLAN_NAME` 可以是 slug（`open-vocab-det-seg`）、数字前缀（`00`），或完整文件名（`00_mvp-three-tier_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于 `PLAN_NAME` 也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的 `Read` 调用读入，绝不 `cat` 进 Shell 命令——Shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 Shell 调用，以项目根目录为工作目录，带两行：
 
@@ -34,7 +34,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ## 核心原则
 
-1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察:读子计划 §2 指向的模块/入口,产出一份"现状 vs §3 要求"的缺口清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划从零搭骨架——更好的做法是先用 `/star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
+1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察:读子计划 §2 指向的模块/入口,产出一份"现状 vs §3 要求"的缺口清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划从零搭骨架——更好的做法是先用 `star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
 2. **规划走审批确认点,执行走 agent**。可执行 plan(EXEC_PLAN)在 **Cursor plan 模式**里产出(`SwitchMode` → `plan`),必须经**用户明确批准**后才允许写文件、跑命令。批准后切回 agent 模式(`SwitchMode` → `agent`),执行**下放给 Task subagent,每步(或每个连贯步骤组)一个**:主 agent 负责编排与验证,绝不自己改代码、启动任务。参见 `references/agent_dispatch_spec_zh.md`。
 3. **重实验前停**。agent 只写代码、跑**轻量验证**(跑通性检查、小规模/不微调的检查,如 MVP 完成判据)。在任何长时/多卡训练或大开销 API 调用前**停下**:把备好的命令写进 EXEC_LOG 的"待用户执行"区、预计开销记进"开销"一节,交回用户;结果带回来时把实际开销补进同一行。规则见 `references/stop_line_rules_zh.md`。
 4. **文件是唯一依据;每步都记录;子计划保持真实**。执行态存在 `wkdrs/<run>/`(`EXEC_PLAN.md` + `EXEC_LOG.md`),中间工作文件存在 `tasks/<plan-name>/`。每验证完一步就更新日志。子计划拿到轻量的 `exec_status` + `exec_runs` 索引——当执行确实偏离了它、或敲定了它留白而某份方法文档会引用的值时,还经**用户确认后同步回写**受影响的 §2–§5 内容并追加 `## Revision History` 条目(`references/plan_sync_rules_zh.md`),让用户日后重读计划时看到的就是实际执行的内容。
@@ -52,7 +52,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 1：就绪检查
 
-1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,说明拆解尚未完成,用 AskQuestion 提供:*先回 `/star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
+1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,说明拆解尚未完成,用 AskQuestion 提供:*先回 `star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
 2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?从已带着每个兄弟 frontmatter 的摘要读它们的状态,不要逐个打开。若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的 blocker:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
 3. **未被丢弃**。带着 `dropped:` 的叶子、或祖先被丢弃的叶子，一律不执行：点名丢弃写在哪个节点上，然后停下。要重新启用它，先用 `star-plan-reviser` 清掉那个字段——照跑一个用户已经否掉的方向，只会把算力花在没有任何东西会去统计的工作上。
 4. **尺寸合适**。能执行的叶子未必是合适的工作单元，而拆完之后没有任何环节再看一眼：这份计划可能是几周前拆的，也可能是手写的。把 decomposer 用在自己草稿上的那条尺寸判据——一块可独立检验的工作（它自己的 `references/subplan_rubric_zh.md` 第 8 条）——拿到这里，对着计划当下的样子再判一次。所有信号都在 Step 0 已经读进来的正文里，这一检查不额外花任何一次调用。
@@ -68,7 +68,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 遵循 `references/orient_checklist_zh.md`:
 
-1. 读 `.env`,解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`(规约 §3)。若这些路径指向的环境缺失或无法运行 python,建议先用 `/star-env-builder` 构建后再执行;run 需要而环境里没有的包,走 `/star-env-builder add <包名>`——本 skill 自己不装任何东西。
+1. 读 `.env`,解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`(规约 §3)。若这些路径指向的环境缺失或无法运行 python,建议先用 `star-env-builder` 构建后再执行;run 需要而环境里没有的包,走 `star-env-builder add <包名>`——本 skill 自己不装任何东西。
 2. 摸清 `${CODE_NAME}/`。若为空,声明 **空代码库（从零起步）**。
 3. 对每个 §3 步骤,判断做它的代码是**已存在 / 需修改 / 需新建**——这个映射就是**缺口清单**。
 
@@ -85,7 +85,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 **发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 `Task` 子代理（`subagent_type: explore`），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 
 1. 呈现 EXEC_PLAN + 预计会做出的改动:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否给每个通过验证的步骤单独提交一次(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>` 或 `worktree: <path>`,这两问都搭在同一个确认点上,措辞照 `references/branch_rules_zh.md` 写(规约 §11、§11.7)。
-2. 批准后,调用 `SwitchMode`, `target_mode_id: agent`——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `/star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
+2. 批准后,调用 `SwitchMode`, `target_mode_id: agent`——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
 3. **把偏差同步回子计划**。若偏差表非空,刚获得的批准已覆盖此事:原地更新受影响的 §2–§5 段落,追加一条 `## Revision History` 条目,更新 `updated`,并给每行标记 `synced`(`references/plan_sync_rules_zh.md`)。
 
 ### Step 5：执行—验证循环（每步一个 Task subagent）
@@ -105,7 +105,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,先把整批落到正文——每条修正一行并编号,写明改哪一节、从什么改成什么、为什么——再用**一次** AskQuestion 提问(*全部同步 / 除我点名的以外全部同步 / 先解答我点名的几行 / 不同步*,标出你推荐的一项——规约 §7.13),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是方向性信号——走下面的向上反馈,绝不同步。
 
-**向上反馈(方向性信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `/star-plan-reviser <slug>`(审计证据并在逐条批准下修订计划)、`/star-plan-coach <slug>`(重审风险/方法)或 `/star-plan-decomposer <slug>`(重新拆分子计划)。
+**向上反馈(方向性信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `star-plan-reviser <slug>`(审计证据并在逐条批准下修订计划)、`star-plan-coach <slug>`(重审风险/方法)或 `star-plan-decomposer <slug>`(重新拆分子计划)。
 
 ### Step 7：进度记录与续跑规则
 
@@ -114,11 +114,11 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 8：简报
 
-验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`)。点出 Step 9 即将启动的那次审查;有命令在红线交回给用户时,把它写在待跑命令之上。说清审查通向哪里:确认的 blocker/major 经 `/star-plan-executor <叶子>` 回来,它重开受影响的步骤、改完验证过,才把命令再交回——在执行分支上,干净的审查也从这里走:再次调用本 skill 就抵达合并确认点(规约 §11)。只要存在分支,就点出这次 run 的分支名及其未合并状态;run 住在 worktree 里时,一并点出树的路径——后续 skill 都在那棵树里工作。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`/star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
+验证了什么(附证据)、产物在哪、哪些命令交回给了用户、哪些修正同步进了子计划、剩余风险。若 Step 6 浮现了方向性信号(撞上根计划 kill-criterion),点明它并给出反馈路径(`star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`)。点出 Step 9 即将启动的那次审查;有命令在红线交回给用户时,把它写在待跑命令之上。说清审查通向哪里:确认的 blocker/major 经 `star-plan-executor <叶子>` 回来,它重开受影响的步骤、改完验证过,才把命令再交回——在执行分支上,干净的审查也从这里走:再次调用本 skill 就抵达合并确认点(规约 §11)。只要存在分支,就点出这次 run 的分支名及其未合并状态;run 住在 worktree 里时,一并点出树的路径——后续 skill 都在那棵树里工作。若有命令在红线交回给了用户,补一句:等它们的输出就位后,`star-expt-analyst <叶子>` 会对照 §5 完成判据给结果打分并说明它意味着什么。控制在约 500 字以内。
 
 ### Step 9：启动审查
 
-**简报不是这一轮的结尾。** 简报文字发出后,在同一轮回复里就把 `star-code-reviewer` 对着这个叶子启动——用这个宿主启动 skill 的方式,参数是这个叶子,和 Step 5 派发 subagent 一样——对照规约与子计划审一遍实现。它属于那八个 agent 可以自己启动的 skill、目标已经定下,所以它是一次运行,而不是一行文字:把 `/star-code-reviewer <叶子>` 打印给 agent 自己,等于转交给了没有人(规约 §10.6)。两种收尾里它都是本次 run 的最后一个动作——完整跑完后,在修订计划或继续推进之前;有命令在红线交回时,在用户跑那条命令之前。
+**简报不是这一轮的结尾。** 简报文字发出后,在同一轮回复里就把 `star-code-reviewer` 对着这个叶子启动——用这个宿主启动 skill 的方式,参数是这个叶子,和 Step 5 派发 subagent 一样——对照规约与子计划审一遍实现。它属于那八个 agent 可以自己启动的 skill、目标已经定下,所以它是一次运行,而不是一行文字:把 `star-code-reviewer <叶子>` 打印给 agent 自己,等于转交给了没有人(规约 §10.6)。两种收尾里它都是本次 run 的最后一个动作——完整跑完后,在修订计划或继续推进之前;有命令在红线交回时,在用户跑那条命令之前。
 
 1. **红线上待跑的命令不改变这一点。** 那条照旧打印出来、归用户(规约 §2);紧挨着一条只有用户能清掉的命令,并不会让审查也变成那样一条。一次收尾同时有两条时,把审查启动起来,才让简报里写的先后真正成立;审查发现连同那条命令一并交回。
 2. **只有一个很窄的例外,问一次。** 探索性叶子、交回的命令本身很便宜时,可以跳过审查直接跑那条命令——把它作为备选说出来而不是替用户决定,推荐项标在审查这一侧,并且在审查启动之前就问。这一步别的都不是问题:审查的代价,比它可能省下的任何一次运行都小。

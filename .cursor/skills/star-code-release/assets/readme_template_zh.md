@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-code-release/assets/readme_template_zh.md
+../../../../.agents/skills/star-code-release/assets/readme_template_zh.md

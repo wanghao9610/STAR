@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-digest/assets/digest_template.md
+../../../../.agents/skills/star-expt-digest/assets/digest_template.md

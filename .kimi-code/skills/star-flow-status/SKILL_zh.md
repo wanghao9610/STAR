@@ -3,7 +3,7 @@ name: star-flow-status
 description: >-
   只读总览整条研究流程。扫描每个 metds/plans/*_plan.md，按 parent/prefix 重建拆解树，读取每个节点的 章节状态、children、depends_on 与
   exec_status（并读 wkdrs/<run>/EXEC_LOG.md 获取步级进度），然后渲染 带状态的树、进度汇总、唯一的下一步动作，以及任何失配。同时检查周边阶段——想法、文献、代码审查、
-  实验分析、方法文档——找出已完成工作里缺失或过期的后续环节。绝不写任何文件。只要用户运行 /skill:star-flow-status、一次运行点名它是下一步动作，或询问研究/计划的状态 / 总览 /
+  实验分析、方法文档——找出已完成工作里缺失或过期的后续环节。绝不写任何文件。只要用户运行 star-flow-status、一次运行点名它是下一步动作，或询问研究/计划的状态 / 总览 /
   进度、接下来该做什么或执行什么、还欠着什么、某计划或 其子计划进展到哪、想看计划树时，都应使用本 skill。Bilingual（中/英）。
 ---
 
@@ -11,7 +11,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-flow-status [PLAN_NAME] [描述]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树与覆盖检查限定到该计划的子树。`PLAN_NAME` 之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。解析不到任何计划的成句文本只是描述，不是漏掉的目标——照常总览整条流程，并在回复第一行说明。形似计划名、却一个都对不上的孤立词不是描述：在同一行点明它没有匹配——本 skill 从不提问。描述引导报告重点看哪里——哪个 unknown 值得再读一遍、哪一行值得原文引用而不是计数、那句理由要回应什么；但报告该给的一样不少，也挪不动「下一步」那条推荐：它由 spec 的优先级顺序连同序时排法一并定死。调用里的 `involve=<level>` 记号先剥离，再读 `PLAN_NAME` 与描述（规约 §7.7）；除此之外在这里不改变任何行为。
+调用方式：`star-flow-status [PLAN_NAME] [描述]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树与覆盖检查限定到该计划的子树。`PLAN_NAME` 之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。解析不到任何计划的成句文本只是描述，不是漏掉的目标——照常总览整条流程，并在回复第一行说明。形似计划名、却一个都对不上的孤立词不是描述：在同一行点明它没有匹配——本 skill 从不提问。描述引导报告重点看哪里——哪个 unknown 值得再读一遍、哪一行值得原文引用而不是计数、那句理由要回应什么；但报告该给的一样不少，也挪不动「下一步」那条推荐：它由 spec 的优先级顺序连同序时排法一并定死。调用里的 `involve=<level>` 记号先剥离，再读 `PLAN_NAME` 与描述（规约 §7.7）；除此之外在这里不改变任何行为。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严处以本文件为准。只读汇报者用得上的部分——§0 词汇表、§5 计划名解析（仅当有 `PLAN_NAME` 要解析时）、§7 的汇报规则（其引言与第 1、4、5、6、11、12 条；第 2–3、7–10、13 条的提问机制管的是会提问的 skill，本 skill 从不提问）、§9 项目布局、§10 skill 名册（本 skill 是 agent 可以不经点名启动的八个之一，约束这种运行的正是 §10）——随 Step 1 那一条装载消息一起到达。其余不装载。§8（产物登记表）就是覆盖检查对账用的那张表，只引用、不装：spec 已逐项复述这些检查要读的文件名与状态字段，而 §8 其余部分——`model_id` / `model_trail`——管的是生产者，本 skill 不是。§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§6 委派管的是会提交、会运行、会写文件的 skill，本 skill 一样都不做。§11 的执行分支，本 skill 只用得上 Step 1 扫描调用带回的清单和 spec 复述的读法——这一节本身留给会开分支的 skill。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。规约摘录合计约 15 KB，Step 1 的四段打印分担 3、1、4、7。真需要其中某节时，再整份读。
 
@@ -23,7 +23,7 @@ description: >-
 
 ## 核心原则
 
-1. **严格只读**。绝不创建、编辑或删除任何文件——不动计划、日志与 frontmatter。不用 AskUserQuestion、不进 plan 模式。用户想据此行动，就指向对应 skill（`/skill:star-proj-adopt`、`/skill:star-idea-storm`、`/skill:star-plan-coach`、`/skill:star-refs-reviewer`、`/skill:star-code-architect`、`/skill:star-env-builder`、`/skill:star-plan-decomposer`、`/skill:star-plan-executor`、`/skill:star-code-reviewer`、`/skill:star-expt-analyst`、`/skill:star-expt-digest`、`/skill:star-plan-reviser`、`/skill:star-metd-summarize`、`/skill:star-code-release`）。
+1. **严格只读**。绝不创建、编辑或删除任何文件——不动计划、日志与 frontmatter。不用 AskUserQuestion、不进 plan 模式。用户想据此行动，就指向对应 skill（`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`、`star-code-architect`、`star-env-builder`、`star-plan-decomposer`、`star-plan-executor`、`star-code-reviewer`、`star-expt-analyst`、`star-expt-digest`、`star-plan-reviser`、`star-metd-summarize`、`star-code-release`）。
 2. **文件是唯一依据**。你报告的一切来自规约 §8 的产物：`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/`、`wkdrs/results/`）。绝不凭对话记忆推断进度。字段缺失就写"未知"，不要猜。
 3. **`parent:` 权威，前缀只是提示**。按每个文件的 `parent:` frontmatter 重建树，而非只看数字（两个不相关的根都可能是 `0_`）。层内顺序用 `depends_on`。
 4. **只有计划树值得走一遍图，覆盖检查很薄**。它的节点有先后次序（`parent`、`depends_on`、`exec_status`）；其它阶段一律按产物登记表做"存在性 + 新鲜度"检查——绝不给本来没有顺序的产物硬造顺序。
@@ -83,10 +83,10 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 把 spec 覆盖表的各条在限定范围内的产物上过一遍：存在性与文件名日期看摘要的文件清单，状态字段看摘要里的产物 frontmatter——想法未立项、文献缺失、代码审查缺失或过期、实验分析缺失、结果汇总表过期、方法文档缺失或过期。只报触发的行，每行一句，并写明能补上它的 skill。一条都没触发则整段省略。
 
 ### Step 7：下一步动作
-按优先顺序选出唯一的下一步：待用户的红线命令（该 run 还没有审查报告时，`/skill:star-code-reviewer <叶子>` 排在这条命令之前）→ 已完成工作的欠账 → 下一个可执行叶子 → 已定稿但未立项的想法。给一句话理由和确切命令。 点名的每一条命令各判各的，审查与待跑命令那一对也不例外：落在那八个 agent 可以自己启动的 skill 上、且目标已经定死的那条，会在本次运行结束后被直接拾起来跑，不是留给用户去敲；紧挨着它的红线命令照旧打印出来，归用户——本 skill 自己不启动任何东西（规约 §10）。若无合格者，写明挡路者。
+按优先顺序选出唯一的下一步：待用户的红线命令（该 run 还没有审查报告时，`star-code-reviewer <叶子>` 排在这条命令之前）→ 已完成工作的欠账 → 下一个可执行叶子 → 已定稿但未立项的想法。给一句话理由和确切命令。 点名的每一条命令各判各的，审查与待跑命令那一对也不例外：落在那八个 agent 可以自己启动的 skill 上、且目标已经定死的那条，会在本次运行结束后被直接拾起来跑，不是留给用户去敲；紧挨着它的红线命令照旧打印出来，归用户——本 skill 自己不启动任何东西（规约 §10）。若无合格者，写明挡路者。
 
 ### Step 8：过期 / 失配检查
-只标记、不修复：任何 `updated` 早于其父计划 `updated` 的叶子（父计划在拆解后可能已变 → 建议重跑 `/skill:star-plan-decomposer`）；任何找不到对应文件的 `children:` 项、或未被父计划 `## Sub-plans` 列出的计划文件；任何解析不到兄弟、或解析到已丢弃节点的 `depends_on` 前缀——后者是一条永远满足不了的依赖；以及任何已丢弃、但其 run 还留着未合并分支、现存 worktree 或未勾选红线命令的节点。
+只标记、不修复：任何 `updated` 早于其父计划 `updated` 的叶子（父计划在拆解后可能已变 → 建议重跑 `star-plan-decomposer`）；任何找不到对应文件的 `children:` 项、或未被父计划 `## Sub-plans` 列出的计划文件；任何解析不到兄弟、或解析到已丢弃节点的 `depends_on` 前缀——后者是一条永远满足不了的依赖；以及任何已丢弃、但其 run 还留着未合并分支、现存 worktree 或未勾选红线命令的节点。
 
 ### Step 9：未识别文件行
 在摘要的文件清单上，数出不匹配产物登记表任何模式的形似报告文件（规则见 spec 里未识别文件行那一段）。报一行：数量 + 至多三个示例路径。数量为 0 则整行省略。这一行的作用是：某个产出方 skill 改了输出命名时，让它被看见，而不是让对应的覆盖检查悄悄失效。

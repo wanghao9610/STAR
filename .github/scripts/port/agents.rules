@@ -2,7 +2,6 @@
 # this root, so it names no harness's tools: roles stand in for names — your
 # question tool, a read-only sub-agent — and the invocation carries no prefix,
 # because each harness spells that its own way and the agent knows its own.
-/star-(?!workflow)	star-
 `Agent` subagents \(`subagent_type: Explore`(, `model: sonnet`)?\)	read-only sub-agents
 `Agent` subagent \(`subagent_type: Explore`(, `model: sonnet`)?\)	a read-only sub-agent
 `Agent` subagents \(`subagent_type: general-purpose`(, `model: sonnet`)?\)	writing sub-agents

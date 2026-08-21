@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/assets/survey_template_zh.md
+../../../../.agents/shared/claude/star-refs-reviewer/assets/survey_template_zh.md

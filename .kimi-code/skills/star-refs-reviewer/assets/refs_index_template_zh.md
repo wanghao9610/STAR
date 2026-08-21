@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/assets/refs_index_template_zh.md
+../../../../.agents/skills/star-refs-reviewer/assets/refs_index_template_zh.md

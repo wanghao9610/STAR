@@ -16,8 +16,8 @@ allowed-tools:
   - Bash(git status:*)
   - Bash(git add:*)
   - Bash(git commit:*)
-  - Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh)
-  - Bash(bash .claude/skills/star-plan-decomposer/scripts/scan.sh:*)
+  - Bash(bash .claude/skillsstar-plan-decomposer/scripts/scan.sh)
+  - Bash(bash .claude/skillsstar-plan-decomposer/scripts/scan.sh:*)
   - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
   - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
   - Edit(metds/plans/**)
@@ -29,7 +29,7 @@ description: >-
   execution sub-plan per unit — objective, dependencies, task breakdown, deliverables,
   and done-criteria — writing each to metds/plans/ under a numeric prefix that shows its place in the tree
   and linking it back to the parent. A sub-plan can be decomposed again, to any depth. Use when
-  the user runs /star-plan-decomposer, or wants to break down / flesh out the concrete
+  the user runs star-plan-decomposer, or wants to break down / flesh out the concrete
   execution details of a plan, turn a plan's method or milestones into actionable tasks,
   or split a plan into sub-plans. Bilingual (en/zh).
 ---
@@ -38,7 +38,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-plan-decomposer PLAN_NAME [DESCRIPTION]`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`). Anything after the plan name is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point, and never the plan name itself: text resolving to no plan leaves the target still to be asked for. An optional `involve=low|medium|high` token may accompany `PLAN_NAME` (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither, and is stripped before either is read.
+Invocation: `star-plan-decomposer PLAN_NAME [DESCRIPTION]`, where `PLAN_NAME` is a slug (`open-vocab-det-seg`), a numeric prefix (`0`), or a filename (`0_open-vocab-det-seg_plan.md`). Anything after the plan name is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point, and never the plan name itself: text resolving to no plan leaves the target still to be asked for. An optional `involve=low|medium|high` token may accompany `PLAN_NAME` (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither, and is stripped before either is read.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What decomposing acts on — §0 vocabulary, §1 git, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. Three sections stay out: §2 the STOP line (it runs nothing itself — its tool allowlist carries no interpreter and no installer, and the one crossing it must know about, a dataset acquisition the executor hands back, is stated where Step 3 drafts a data leaf), §6 delegation (no step dispatches, and its allowlist carries no delegation tool at all), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
 
@@ -110,7 +110,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 Check the root's `finalized:`, the one signal that a top-level plan is ready to consume (`star-plan-coach` sets it only when all six sections are `done`/`skipped` and the rubric passed, and clears it whenever a section reopens). Not finalized → read its `status` map and body, name which sections are `pending`/`in_progress` or `[TBD]`-ridden (especially **method** and **milestones**), tell the user decomposition will be shallow, and offer via AskUserQuestion: *decompose anyway (gaps become `[TBD]` in sub-plans)* / *go back to `star-plan-coach` to finish the parent first* (recommended). Respect the choice.
 
-If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — `exec_status` / `exec_runs` freeze as history, `star-flow-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `/star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
+If the target itself carries execution evidence (`exec_runs` non-empty, or `exec_status` beyond `pending`), pause before splitting: decomposition turns an executed leaf into an internal node — `exec_status` / `exec_runs` freeze as history, `star-flow-status` stops counting it as an executable leaf, and its `wkdrs/` runs stay attached to a node no executor revisits. Offer via AskUserQuestion: *fold the execution evidence into the plan text with `star-plan-reviser <slug>` first (recommended)* / *decompose anyway* — when decomposing anyway, draft the children so already-executed work is reflected in their §2 inputs and §3 steps rather than re-planned.
 
 ### Step 2: Choose the decomposition axis
 
@@ -162,7 +162,7 @@ Add to the parent plan (create the section if absent). List the sub-plans in **t
 ```markdown
 ## Sub-plans
 
-Decomposed by <axis> on <date> via /star-plan-decomposer.
+Decomposed by <axis> on <date> via star-plan-decomposer.
 Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
 
 - `00_<slug>_plan.md` — <one-line objective> (→ §<n>; depends on: —)
@@ -171,13 +171,13 @@ Execution order: 00 → 01 → 02 → 03  (or a DAG: 00 → {01, 02} → 03)
 
 **Reached via the Step 1 repair branch?** Derive every field from the existing child files, not from a Step 3 list: topological order and the `depends on:` annotations from their `depends_on`, the `→ §<n>` reference from their `traces_to`, the decomposition date from their own frontmatter (never invented). Each one-liner is *condensed* from that child's §1 objective, not copied — so show the drafted section for review before writing it.
 
-Also add/merge a `children:` list into the parent frontmatter — with the `## Sub-plans` index, the only edits you make to the parent. A dropped child keeps both, with `— dropped <date>` on its index line, and its number is never recycled: the next unit takes the next free index (conventions §5.6). Close the boundary (conventions §7.10): 2–3 sentences on the axis chosen, the N files written, and the execution order that follows — plus the way back: `/star-plan-decomposer <slug>` re-enters through Step 1's already-decomposed branch rather than overwriting, and a unit still too big to run can be refined with `/star-plan-decomposer <that unit's prefix>` (Step 6).
+Also add/merge a `children:` list into the parent frontmatter — with the `## Sub-plans` index, the only edits you make to the parent. A dropped child keeps both, with `— dropped <date>` on its index line, and its number is never recycled: the next unit takes the next free index (conventions §5.6). Close the boundary (conventions §7.10): 2–3 sentences on the axis chosen, the N files written, and the execution order that follows — plus the way back: `star-plan-decomposer <slug>` re-enters through Step 1's already-decomposed branch rather than overwriting, and a unit still too big to run can be refined with `star-plan-decomposer <that unit's prefix>` (Step 6).
 
 ### Step 6: Offer to recurse
 
-Tell the user any sub-plan can be decomposed further with `/star-plan-decomposer <that sub-plan's slug or prefix>`, producing the next digit of depth. Offer to do it now for any unit still too big to run. A unit named by the *finer* answer in Step 3 arrives here already decided — recurse into it rather than offering to.
+Tell the user any sub-plan can be decomposed further with `star-plan-decomposer <that sub-plan's slug or prefix>`, producing the next digit of depth. Offer to do it now for any unit still too big to run. A unit named by the *finer* answer in Step 3 arrives here already decided — recurse into it rather than offering to.
 
-**Hand off downstream.** Once the leaves are concrete enough, execute one with `/star-plan-executor <leaf slug or prefix>` — start with the first in the execution order (a leaf whose `depends_on` is empty or already `done`). If `${CODE_NAME}/` is still missing or empty, give the code a place to live first with `/star-code-architect`. `/star-flow-status` shows the whole tree and recommends what to run next.
+**Hand off downstream.** Once the leaves are concrete enough, execute one with `star-plan-executor <leaf slug or prefix>` — start with the first in the execution order (a leaf whose `depends_on` is empty or already `done`). If `${CODE_NAME}/` is still missing or empty, give the code a place to live first with `star-code-architect`. `star-flow-status` shows the whole tree and recommends what to run next.
 
 ### Step 7: Rubric pass
 

@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-expt-digest/assets/model_ledger_template.md
+../../../../.agents/skills/star-expt-digest/assets/model_ledger_template.md

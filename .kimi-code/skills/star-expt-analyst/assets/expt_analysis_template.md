@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-analyst/assets/expt_analysis_template.md
+../../../../.agents/skills/star-expt-analyst/assets/expt_analysis_template.md

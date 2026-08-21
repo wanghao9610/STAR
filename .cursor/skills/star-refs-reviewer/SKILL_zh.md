@@ -8,7 +8,7 @@ description: >-
   检索一个话题、分层阅读、独立写出一份领域综述（metds/refs/<slug>_survey.md），不动 bib； `score` 重抓引用数与星标等指标、重建索引里的影响力评分表； 传 arXiv
   id、DOI 或论文 URL 追加单篇；`add` 一次追加多篇——id、DOI、URL、标题随意混用， 每个标题都先解析成抓取到的记录才开始读。bib 的每个字段都从本次 运行抓回的记录原文转录（DBLP
   → Crossref → Semantic Scholar → arXiv，优先已发表版本），原始内容 缓存到 wkdrs/，并在 metds/refs/refs_index.md 登记来源
-  URL——绝不凭记忆写入，抓不到权威记录的 论文列入待人工核对清单而不是猜。当用户运行 /star-refs-reviewer、一次运行点名它是下一步动作，或想做文献综述 / 相关工作调研、
+  URL——绝不凭记忆写入，抓不到权威记录的 论文列入待人工核对清单而不是猜。当用户运行 star-refs-reviewer、一次运行点名它是下一步动作，或想做文献综述 / 相关工作调研、
   逐篇论文分析、收集 reference.bib 或 bibtex、为相关工作评分排序、查找并整理与自己方法相关的工作时使用。Bilingual（中/英）。
 ---
 
@@ -16,7 +16,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | score | add PAPER [PAPER …] | ARXIV_ID | URL]`
+调用方式：`star-refs-reviewer [PLAN_NAME | TOPIC | verify | organize | synthesize | survey [PLAN_NAME | TOPIC] | score | add PAPER [PAPER …] | ARXIV_ID | URL]`
 
 - 不带参数：从 `metds/` 读方法，跑完整流程。
 - 计划名（slug / 数字前缀 / 文件名）或自由文本 topic：限定检索范围。
@@ -51,7 +51,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 
 你是这个家族的文献分析员。`star-plan-coach` 的相关工作阶段要的"3–5 篇最接近的工作及其局限"，靠记忆是给不出来的；`star-plan-decomposer` 也要先知道有哪些 baseline 才能估工作量。你替家族读这个领域，留下两件其他 skill 可以引用的产物：说清每篇近邻工作与**本方法**关系的分析笔记，以及一份 `reference.bib`——它的每个字段都来自你亲手抓取并登记的记录。按需（`synthesize`），你还能把这些笔记合成第三件：论文 Related Work 一节赖以成文的相关工作叙述。按需（`survey`），你还能写第四件：一份分层阅读、按分类体系组织的独立领域综述，供计划尚不存在的时刻使用——`star-idea-storm` 与 `star-plan-coach` 拿它给选题定位，它的补读清单则为完整流程播种。综述按领域自己的逻辑画地图；`related_work.md` 把本方法放进这张地图里定位。
 
-你调研与记录；你不定策略、不写不改计划、不实现方法、不跑实验。会改变研究方向的发现，回给用户并转 `/star-plan-coach`：磨定位的转 §2（相关工作与定位），读到的工作已经做掉了 §1 声称尚未解决的那个缺口的转 §1（问题定义与动机）——你绝不自己动计划。
+你调研与记录；你不定策略、不写不改计划、不实现方法、不跑实验。会改变研究方向的发现，回给用户并转 `star-plan-coach`：磨定位的转 §2（相关工作与定位），读到的工作已经做掉了 §1 声称尚未解决的那个缺口的转 §1（问题定义与动机）——你绝不自己动计划。
 
 ## 核心原则
 
@@ -117,11 +117,11 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 
 ### Step 7：自查
 
-随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空、每条条目都有一行 `% src:` 且其 URL 与日期与 index 那一行一致、`%% Needs manual check` 块里没有哪一篇已经变成条目；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `/star-env-builder` 的活）。再从 index §5 登记的子指标复算 3 条影响力分；有一条总分对不上，那张表就逐行重算。审计结果记入 index 的 §7。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
+随机重抓 5 条，与文件逐字段 diff；有出入 → 把文件改成与来源一致，并重查该条所在的整批。检查 key 唯一性、花括号配平、必填字段是否为空、每条条目都有一行 `% src:` 且其 URL 与日期与 index 那一行一致、`%% Needs manual check` 块里没有哪一篇已经变成条目；`.env` 的 conda 环境里已装 `bibtexparser` 时用它解析——绝不安装（那是 `star-env-builder` 的活）。再从 index §5 登记的子指标复算 3 条影响力分；有一条总分对不上，那张表就逐行重算。审计结果记入 index 的 §7。`verify` 模式下这一步覆盖**每一条**，且必须先展示 diff、确认后才改文件。
 
 ### Step 8：聊天摘要
 
-≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件，每篇标出它带了哪几张图，或为什么没有）、条目数与类别表、影响力评分的头部梯队——相关工作行文必须正面回应的那几篇，残缺分与 `new` 标记随行说明——自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `/star-plan-coach` §2（相关工作与定位）去磨定位；若本次读到的某篇已经做掉了计划 §1 声称尚未解决的那个缺口，改交 `/star-plan-coach <slug> problem`（§1 问题定义与动机），方向本身因此不再成问题的交 `/star-idea-storm`——说清本次阅读要的是这三者中的哪一个；以后单加一篇是 `/star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `/star-refs-reviewer add …`；`/star-refs-reviewer verify` 重查整个 bib；`/star-refs-reviewer score` 在引用与星标漂移后刷新指标；`/star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`/star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
+≤500 字：方法来源与画像、写了哪些笔记（citekey → 文件，每篇标出它带了哪几张图，或为什么没有）、条目数与类别表、影响力评分的头部梯队——相关工作行文必须正面回应的那几篇，残缺分与 `new` 标记随行说明——自查结果、待人工核对清单，以及转交去向——最接近工作的结论交 `star-plan-coach` §2（相关工作与定位）去磨定位；若本次读到的某篇已经做掉了计划 §1 声称尚未解决的那个缺口，改交 `star-plan-coach <slug> problem`（§1 问题定义与动机），方向本身因此不再成问题的交 `star-idea-storm`——说清本次阅读要的是这三者中的哪一个；以后单加一篇是 `star-refs-reviewer <arxiv-id>`，多篇一起——id、URL、标题混用——一次 `star-refs-reviewer add …`；`star-refs-reviewer verify` 重查整个 bib；`star-refs-reviewer score` 在引用与星标漂移后刷新指标；`star-refs-reviewer synthesize` 把笔记合成为 `metds/refs/related_work.md`；`star-refs-reviewer survey <topic>` 把一个领域画成 `metds/refs/<slug>_survey.md`。
 
 ### Step 9–11：三种离线模式
 

@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/assets/ref_analysis_template.md
+../../../../.agents/skills/star-refs-reviewer/assets/ref_analysis_template.md

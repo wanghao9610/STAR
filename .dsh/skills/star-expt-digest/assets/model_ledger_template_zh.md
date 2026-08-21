@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-digest/assets/model_ledger_template_zh.md
+../../../../.agents/skills/star-expt-digest/assets/model_ledger_template_zh.md

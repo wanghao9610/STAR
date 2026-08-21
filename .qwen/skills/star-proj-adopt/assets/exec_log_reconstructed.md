@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-proj-adopt/assets/exec_log_reconstructed.md
+../../../../.agents/skills/star-proj-adopt/assets/exec_log_reconstructed.md

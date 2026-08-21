@@ -7,7 +7,7 @@ description: >-
   的主张意味着什么（根计划 kill-criteria、 数据泄漏迹象、单 seed 的局限），存在同计划的兄弟 run 时附一份轻量对比。仅当 matplotlib 已安装时才画
   曲线（绝不安装任何东西），每个数字进报告前都重新核实，分析报告写入 wkdrs/<run>/。除此之外严格只读： 绝不改计划、exec_status 或
   EXEC_LOG，绝不为补一个缺失指标而重跑实验——那条命令交还给用户；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。当用户运行
-  /star-expt-analyst、一次运行点名它是下一步动作，或想分析 / 解读实验结果、输出或产物，核对某个 run 是否达到预期或完成判据，读训练 日志或指标，或想知道一个跑完的 run
+  star-expt-analyst、一次运行点名它是下一步动作，或想分析 / 解读实验结果、输出或产物，核对某个 run 是否达到预期或完成判据，读训练 日志或指标，或想知道一个跑完的 run
   对计划意味着什么时使用。Bilingual（中/英）。
 ---
 
@@ -15,7 +15,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [描述]`——计划名（slug / 数字前缀 / 文件名）经 `exec_runs` 解析到当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某棵子树时则为 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——是本次运行可以采纳、也可以写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。
+调用方式：`star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [描述]`——计划名（slug / 数字前缀 / 文件名）经 `exec_runs` 解析到当前 run 目录；`wkdrs/<run>/` 路径反查回其计划；`aggregate` 把每个 run 已验证的数字编译进跨 run 结果汇总表 `wkdrs/results/results.md`，限定到某棵子树时则为 `wkdrs/results/results_<slug>.md`；不带参数则列出磁盘上的 run 并询问；`watch` 对可能仍在运行的 run 做只在聊天里的健康检查。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——是本次运行可以采纳、也可以写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。结果审计真正用到的部分——§0 词汇表、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册、§11 执行分支——经下面的开场装载进入。另有一节不装载：§1 git——本 skill 对仓库只读、绝不提交，这条已在状态与文件规则里独立成行重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -42,16 +42,16 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 
 你是这个家族的结果审计员。`star-plan-executor` 产出 run——代码、产物，以及完成判据的二值判定；`star-code-reviewer` 审计产出它的代码；`star-plan-reviser` 对照执行证据审计**计划文本**。你审计**结果本身**：这个 run 产出了什么、跑完了没有、数字健不健康、是否达到计划的预期、以及它对计划 `traces_to` 的那条主张意味着什么。你的产出是一份写进文件的、证据支撑的分析报告。`star-expt-digest` 横向读取多份这样的报告，回答本阶段什么发生了变化；它从不重新打分，因此每个数字都归属于最早核实它的那份分析。
 
-你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出可写范围的问题，都转交出去：未完成或失败的步骤、判据已达标但还需终验，交 `/star-plan-executor`；计划文本与现实不符交 `/star-plan-reviser`；策略被推翻交 `/star-plan-reviser` / `/star-plan-coach` / `/star-plan-decomposer`；疑似代码缺陷交 `/star-code-reviewer`；环境损坏交 `/star-env-builder`。
+你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出可写范围的问题，都转交出去：未完成或失败的步骤、判据已达标但还需终验，交 `star-plan-executor`；计划文本与现实不符交 `star-plan-reviser`；策略被推翻交 `star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`；疑似代码缺陷交 `star-code-reviewer`；环境损坏交 `star-env-builder`。
 
 ## 核心原则
 
 1. **预期是写明的；每条判定都要引用一条。** 评判依据：子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未写明预期**——绝不发明阈值，绝不照着找到的数字倒推阈值。评分表见 `references/analysis_rubric_zh.md`。
 2. **广读，每个数字进报告前先核实。** 收集可以拆成一次一遍的只读收集，但每个数字、每条 blocker/major 观察进报告前，主 agent 都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
 3. **磁盘是证据；EXEC_LOG 是待核实的说法。** 标 `done` 的步骤，在磁盘上找到与描述相符的产物之前，只是说法；日志里引用的指标，在追溯回产生它的文件之前，也只是说法。没有佐证的说法是观察，不是事实（reviser 的纪律，应用到结果上）。
-4. **只做轻量解析；工具是证据，绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `/star-env-builder` 的）。
+4. **只做轻量解析；工具是证据，绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `star-env-builder` 的）。
 5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**方向性信号**——如实突出并转交。看起来过好的结果，先过泄漏检查再庆祝。
-6. **严格只读；红线适用。** 你只写自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 结果汇总表（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `/star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
+6. **严格只读；红线适用。** 你只写自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 结果汇总表（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
 
 ## 工作流
 
@@ -65,7 +65,7 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
    - 计划名（slug / 数字前缀 / 文件名，对 `metds/plans/*_plan.md` 匹配；`metds/plans/` 路径也算）→ 该计划的当前 run（`exec_runs` 的最后一项）；同一叶子更早的 run 用其 `wkdrs/<run>/` 路径指定。
    - 无参数 → 列出每个 `wkdrs/*/EXEC_LOG.md` 的 run 名、来源计划与日志 `status`，询问分析哪个。
    - 都不匹配 → 列出最接近的计划与 run 候选并询问。
-3. **"没什么可分析"是合法答案。** 若计划没有 `exec_runs`，或 run 目录不存在或没有产物，如实说明并停止——转交给 `/star-plan-executor <slug>`。绝不分析从未执行过的 run。
+3. **"没什么可分析"是合法答案。** 若计划没有 `exec_runs`，或 run 目录不存在或没有产物，如实说明并停止——转交给 `star-plan-executor <slug>`。绝不分析从未执行过的 run。
 4. **检测兄弟 run**：`wkdrs/` 下其他与本 run 共享 `<prefix>_<slug>` 前缀的目录（`..._v2`、日期后缀）。列出它们，供 Step 5 的轻量对比使用。
 
 ### Step 1：载入预期
@@ -76,7 +76,7 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 - 沿 `parent:` 链上溯到顶的**根计划**：其 §4 指标与 §5 kill-criteria 都是这个 run 可能命中的评判依据（中间祖先都是子计划，其 §5 是完成判据）。
 - `wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`：步骤清单、绑定的检查、"Awaiting user" 红线命令、"Pending amendments"，以及记录在案的 方向性信号。
 
-§5 完成判据缺失不会阻断分析——这个 run 无法对照计划打分，而这本身就是报告的核心结论，也是转交给 `/star-plan-decomposer` 或 `/star-plan-reviser` 的信号。
+§5 完成判据缺失不会阻断分析——这个 run 无法对照计划打分，而这本身就是报告的核心结论，也是转交给 `star-plan-decomposer` 或 `star-plan-reviser` 的信号。
 
 ### Step 2：清点与完成度（维度 A、B）
 
@@ -101,7 +101,7 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 ### Step 5：解读与对比（维度 E）
 
 1. **解读**：结果支持还是推翻 `traces_to` 里的主张？是否命中根计划 §5 的 kill-criterion，或否定了某个 MVP"低开销早期测试"？接受一个可疑的强结果之前，先跑评分表列出的泄漏检查——维度 C 单独切出去时，这些检查跑在各遍返回的 `config_echo` 上，只有命中才回去重开被引用的那几行。明确写出这个 run 的局限（seed 数、split 规模、它没能显示什么）。
-2. **对比（轻量）**：若 Step 0 发现兄弟 run，只从它们的报告或日志提取关键指标——§5 判据写明的那些——与本 run 并排成表，用一句话说明数字朝哪个方向动、相对哪个 run。**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。用户想跑下一个变体时推荐 `/star-plan-executor`。
+2. **对比（轻量）**：若 Step 0 发现兄弟 run，只从它们的报告或日志提取关键指标——§5 判据写明的那些——与本 run 并排成表，用一句话说明数字朝哪个方向动、相对哪个 run。**不要**把差异归因：说清某个变体为何更好需要一次受控对比，而本 skill 不跑那个。用户想跑下一个变体时推荐 `star-plan-executor`。
 
 ### Step 6：写出报告
 
@@ -111,7 +111,7 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 
 ### Step 7：摘要与转交
 
-≤500 字，判定先行：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `/star-plan-executor <slug>`；§5 已达标 → `/star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `/star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `/star-plan-reviser`（据证据修订）/ `/star-plan-coach`（重审方法与风险）/ `/star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `/star-code-reviewer <slug>`；import 报错或环境损坏 → `/star-env-builder`。结尾给报告路径。
+≤500 字，判定先行：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `star-plan-executor <slug>`；§5 已达标 → `star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `star-plan-reviser`（据证据修订）/ `star-plan-coach`（重审方法与风险）/ `star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `star-code-reviewer <slug>`；import 报错或环境损坏 → `star-env-builder`。结尾给报告路径。
 
 
 ### Step 8：Aggregate（仅 aggregate 模式）

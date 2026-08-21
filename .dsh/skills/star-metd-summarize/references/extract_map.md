@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-metd-summarize/references/extract_map.md
+../../../../.agents/shared/claude/star-metd-summarize/references/extract_map.md

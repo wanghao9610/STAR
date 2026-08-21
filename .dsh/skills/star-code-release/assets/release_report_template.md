@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-code-release/assets/release_report_template.md
+../../../../.agents/skills/star-code-release/assets/release_report_template.md

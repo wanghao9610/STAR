@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-digest/references/scope_spec.md
+../../../../.agents/skills/star-expt-digest/references/scope_spec.md

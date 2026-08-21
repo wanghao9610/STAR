@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-expt-digest/references/digest_rubric.md
+../../../../.agents/skills/star-expt-digest/references/digest_rubric.md

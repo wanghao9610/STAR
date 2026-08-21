@@ -3,14 +3,14 @@ name: star-code-release
 description: >-
   为项目公开发布做准备——但绝不代为发布：不 push、不打 tag、不建仓库、不上传权重。把散落的代码按证据检验收进
   ${CODE_NAME}/，逐项批准地打磨对外可见的部分且不改行为，按成文映射从 metds/ 方法文档编译出 README.md，最后扫一遍密钥凭据、机器本地路径与许可证冲突。当用户运行
-  /skill:star-code-release、想开源项目，或想要一份仓库 README 时使用。Bilingual（中/英）。
+  star-code-release、想开源项目，或想要一份仓库 README 时使用。Bilingual（中/英）。
 ---
 
 # Research Code Release — 收集、打磨、成文
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-code-release [gather | polish | readme | check] [描述]`——不带参数跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`star-code-release [gather | polish | readme | check] [描述]`——不带参数跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。发布流程真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有一节不装载：§11 执行分支,它那九条本 skill 一条都不做——不建、不合并、不弃用分支,也不碰 worktree——而它对其余 skill 的那一条要求,即签出停在别人的执行分支上时提交会随那个叶子一起合并,已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -38,14 +38,14 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 你是这个家族的最后一公里。上游所有 skill 都为项目自己的记忆而写——计划、执行记录、分析报告、方法文档、结果汇总表。你为把仓库 clone 下来的陌生人而写：代码收集到 `metds/codearc.md` 指定的位置，对外发布的部分读起来清楚，README 由项目拥有的东西编译而成。
 
-你收集、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。越出可写文件范围的问题一律转交：缺失的放置规则交 `/skill:star-code-architect`，宽范围的代码质量问题交 `/skill:star-code-reviewer`，缺失的方法文档交 `/skill:star-metd-summarize`，缺失或过期的结果汇总表交 `/skill:star-expt-analyst aggregate`，缺失的文献条目交 `/skill:star-refs-reviewer`，环境不可用交 `/skill:star-env-builder`，因移动而过期的计划文本交 `/skill:star-plan-reviser`。
+你收集、打磨、成文；你不实现功能、不重组代码库、不修订计划、不编译方法文档、不产出结果。越出可写文件范围的问题一律转交：缺失的放置规则交 `star-code-architect`，宽范围的代码质量问题交 `star-code-reviewer`，缺失的方法文档交 `star-metd-summarize`，缺失或过期的结果汇总表交 `star-expt-analyst aggregate`，缺失的文献条目交 `star-refs-reviewer`，环境不可用交 `star-env-builder`，因移动而过期的计划文本交 `star-plan-reviser`。
 
 ## 核心原则
 
 1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，并规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造。
 2. **数字只来自结果汇总表；命令只来自磁盘。** README 里每个数字都连同背后的 run 从 `wkdrs/results/results.md` 抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 自己就写明了），更不来自记忆。README 打印的每条命令都先解析：脚本文件与配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级说法是主张："state-of-the-art"、"outperforms X"、"best" 只在结果汇总表自己的结论支撑时才出现。
-3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是收拾整个仓库的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `/skill:star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
-4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `/skill:star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
+3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是收拾整个仓库的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
+4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
 5. **发布前检查项是阻断性的，且在宣布"就绪"之前就查。** 提交进仓库的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。有未清阻断项的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **你做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，是用户的决定——你把命令交回去。红线原样适用：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里没有的数字就留成 TODO。
 
@@ -102,9 +102,9 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 - 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有产出方；运行动手改自己的输入，就不算编译了。绝不写结果汇总表 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
 - 什么都不删。被移入的文件从原处移走；没移入的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
-- 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未写明的目录——那是 `/skill:star-code-architect` 的。
+- 绝不移动或重命名 `${CODE_NAME}/` 里已有的任何东西，绝不创建任何 `codearc.md` 放置规则未写明的目录——那是 `star-code-architect` 的。
 - 绝不发布：不 `git push`、不改 remote 或分支、不打 tag、不 `gh repo create` / `gh release`、不把权重或数据上传到任何主机。准备好的命令写进报告。
-- 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `/skill:star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
+- 所有命令走 `.env` 的解释器；绝不安装或升级任何东西（环境归 `star-env-builder`）。红线成立：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里缺的数字就留成 TODO。
 - Git：每个完成的阶段一次提交，只 stage 该阶段的路径（规约 §1）；Step 0 时就带未提交改动的路径绝不 stage。
 - 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 - 本 skill 不设置任何计划 frontmatter，也不创建 run 目录；它的审计线索是 `wkdrs/release/RELEASE_<date>.md`、README 的溯源标记，以及各阶段的提交。

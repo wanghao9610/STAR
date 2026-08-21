@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-expt-digest/references/digest_rubric_zh.md
+../../../../.agents/skills/star-expt-digest/references/digest_rubric_zh.md

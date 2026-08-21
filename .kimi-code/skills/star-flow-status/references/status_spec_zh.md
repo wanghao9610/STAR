@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-flow-status/references/status_spec_zh.md
+../../../../.agents/skills/star-flow-status/references/status_spec_zh.md

@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/references/survey_spec_zh.md
+../../../../.agents/shared/claude/star-refs-reviewer/references/survey_spec_zh.md

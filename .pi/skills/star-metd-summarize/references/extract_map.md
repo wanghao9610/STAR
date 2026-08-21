@@ -146,7 +146,7 @@ collector omits on strategy nodes rather than filling a plausible value, the rul
 sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
 
 `unread` is not a gap. A gap means no plan covers the section, and reaches the
-delivered document as a TODO routed to `/star-plan-coach`; a plan the collector could
+delivered document as a TODO routed to `star-plan-coach`; a plan the collector could
 not open is one the main agent reads itself. Keeping them in one list turns a read
 failure into a false hole in the method.
 

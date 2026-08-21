@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-code-reviewer/assets/code_review_template.md
+../../../../.agents/skills/star-code-reviewer/assets/code_review_template.md

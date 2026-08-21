@@ -1,6 +1,5 @@
 # Kimi Code: skills are invoked as /skill:<name>; the context file is AGENTS.md;
 # no per-subagent model hint; the question tool's multi-select field is snake_case.
-/star-(?!workflow)	/skill:star-
 CLAUDE\.md	AGENTS.md
 CLAUDE	AGENTS
 , `model: sonnet`	

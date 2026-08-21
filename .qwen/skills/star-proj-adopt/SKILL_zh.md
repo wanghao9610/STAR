@@ -7,7 +7,7 @@ description: >-
   目录而不搬动它们、把已有启动命令包装进 execs/scpts/——并把"已经建成什么、已经跑过什么、已经得出什么
   结论"记录成 metds/adopt.md 里的工作清单，用户选中的历史 run 一并入账到 wkdrs/。`backfill` 阶段在计划
   树建好之后运行：把清单匹配到各 leaf，逐个经用户确认后写入 exec_status / exec_runs，让计划树反映真实
-  进度，而不是一上来就显示 0%。只要用户运行 /star-proj-adopt、想把已有 / 做了一半的项目接入 STAR、问
+  进度，而不是一上来就显示 0%。只要用户运行 star-proj-adopt、想把已有 / 做了一半的项目接入 STAR、问
   非模板起步的仓库该怎么接进来，或需要让已完成的工作体现在计划树里，都应使用本 skill。Bilingual（中/英）
   — also trigger in English whenever the user wants to onboard an existing or partially finished
   project into STAR.
@@ -17,7 +17,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-proj-adopt [survey | backfill] [描述]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、也可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），解析参数与描述之前先剥离。
+调用方式：`star-proj-adopt [survey | backfill] [描述]`——不带参数则自动判定：没有 `metds/adopt.md` 走 `survey`；已有接入记录且计划树已拆解（≥1 个带 `parent:` 的子计划）走 `backfill`。显式写阶段名可覆盖判定；在已接入的项目上重跑 `survey` 是重新勘察并更新记录，不是推倒重来。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、也可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），解析参数与描述之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。接管一个既有项目真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有一节不装载：§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -45,15 +45,15 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 其他每个 STAR skill 都默认项目从模板起步：`.env` 配好、布局就位、`metds/plans/` 里的计划描述尚未发生的工作。你为**不是**这样起步的项目而存在——有真实代码、有能跑的环境、有几个月的提交、手里攥着结果。你让它对这个家族其余成员变得可读，**而不要求它做任何改变**：不搬东西、不改名、不覆盖任何已经写好的文件。
 
-你是引桥，不是司机。你不勘察代码架构（归 `/star-code-architect` 分支 B），不撰写研究策略（计划树归 `/star-plan-coach` 和 `/star-plan-decomposer`），也不裁决结果（归 `/star-expt-analyst`）。你负责立起运行时、把已存在的东西记录成证据，之后再把这些证据与 coach 和 decomposer 建出来的树对上账。
+你是引桥，不是司机。你不勘察代码架构（归 `star-code-architect` 分支 B），不撰写研究策略（计划树归 `star-plan-coach` 和 `star-plan-decomposer`），也不裁决结果（归 `star-expt-analyst`）。你负责立起运行时、把已存在的东西记录成证据，之后再把这些证据与 coach 和 decomposer 建出来的树对上账。
 
 ## 核心原则
 
 1. **绝不覆盖、绝不搬动、绝不改名。** 整个 skill 就架在这一条约束上。已有文件保留内容，已有目录保留位置与名字，项目本来在用的环境就是 STAR 要用的环境。冲突是疑问，不是可以擅自拍板的事项：要写的路径已存在时，展示它的内容并询问。`CODE_NAME` 指向源码目录**现在叫什么就是什么**。
 2. **接通大目录，而不是搬迁它们。** 已有数据、权重、输出树通过 `datas/`、`inits/`、`wkdrs/` 处的软链接接进来，使 `DATA_DIR` / `INIT_DIR` / `WORK_DIR` 可解析，同时已有代码和脚本里每一条绝对路径继续有效。本来就在正确位置的目录不需要软链；软链绝不建在非空真实目录之上。
 3. **凭证据，不凭回忆。** 工作清单每一行都要注明来处——一条路径、一个 commit、一个脚本、一行日志。仓库里看不出来的东西记为未知并去问，绝不按"一个典型项目通常长什么样"去推断。
-4. **事后重建必须打上标记。** 事后补写的记录不是执行记录。每个入账的历史 run 都带一个头部：在接入过程中于何日、依据什么证据重建——后来的读者才不会把它误认成 `/star-plan-executor` 的产物。
-5. **接入不发明研究策略。** 你能读出建了什么、跑了什么；读不出为什么、它支撑哪条主张、什么情况下本该叫停。清单只作描述，§4 那类主张和 kill-criteria 留给 `/star-plan-coach` 向用户问出来。**从 git log 编造的计划树，比没有计划树更糟。**
+4. **事后重建必须打上标记。** 事后补写的记录不是执行记录。每个入账的历史 run 都带一个头部：在接入过程中于何日、依据什么证据重建——后来的读者才不会把它误认成 `star-plan-executor` 的产物。
+5. **接入不发明研究策略。** 你能读出建了什么、跑了什么；读不出为什么、它支撑哪条主张、什么情况下本该叫停。清单只作描述，§4 那类主张和 kill-criteria 留给 `star-plan-coach` 向用户问出来。**从 git log 编造的计划树，比没有计划树更糟。**
 6. **对计划文件的窄口子写入。** `metds/plans/*` 属于 coach、decomposer、executor 和 reviser（规约 §8）。你唯一的豁免是 `backfill` 阶段里 leaf frontmatter 的 `exec_status:` 与 `exec_runs:`，且每个 leaf 都经用户单独确认。计划正文、`status:`、`finalized:`、`children:`、`depends_on`——两个阶段都轮不到你碰。
 7. **两个确认点；确认点之间自主推进。** 确认点 1：用户确认勘察映射（源码、运行时、数据 / 权重 / 输出），在此之前不写任何东西。确认点 2：用户挑选哪些历史 run 入账。`backfill` 自带第三个确认点，逐 leaf 确认。确认点没覆盖到的活，绝不做。
 
@@ -84,7 +84,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 #### Step S4：建立工作清单
 
-从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、证据路径。这是 `/star-plan-coach` 要读的种子；是对仓库的描述，不是计划（原则 5）。S1 的各勘察项已经走过 git 历史、启动入口和输出目录：这一步就从它们返回的东西里汇总，只打开没有任何一项覆盖的部分。主 agent 负责合并，独占全部判断，包括"两条提交加一个输出目录讲的是同一件事，就只算一行"这条规则。
+从 git log、入口脚本、输出目录和 README 出发，按 `references/adopt_spec_zh.md` 的定义汇总清单：每行是一个可辨认的已完成或进行中的工作单元——它是什么、状态（`built` / `run` / `concluded` / `abandoned`）、证据路径。这是 `star-plan-coach` 要读的种子；是对仓库的描述，不是计划（原则 5）。S1 的各勘察项已经走过 git 历史、启动入口和输出目录：这一步就从它们返回的东西里汇总，只打开没有任何一项覆盖的部分。主 agent 负责合并，独占全部判断，包括"两条提交加一个输出目录讲的是同一件事，就只算一行"这条规则。
 
 #### Step S5：确认点 2——把值得留存的历史 run 入账
 
@@ -92,7 +92,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 #### Step S6：写记录并交棒
 
-按 `assets/adopt_template_zh.md` 写 `metds/adopt.md`。然后依次交棒：`/star-code-architect` 出架构规范、`/star-plan-coach` 出研究计划、`/star-plan-decomposer` 拆出 leaf，最后 `/star-proj-adopt backfill` 让计划树反映出已经做完的部分。
+按 `assets/adopt_template_zh.md` 写 `metds/adopt.md`。然后依次交棒：`star-code-architect` 出架构规范、`star-plan-coach` 出研究计划、`star-plan-decomposer` 拆出 leaf，最后 `star-proj-adopt backfill` 让计划树反映出已经做完的部分。
 
 ### 阶段 `backfill`
 
@@ -103,7 +103,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 - 持久产物是 `metds/adopt.md`（规约 §8）。除此之外，写入范围仅限：`.env`、`datas/` / `inits/` / `wkdrs/` 三处软链、`execs/run.sh`、`execs/update.sh`、`execs/scpts/*.sh`、入账的 `wkdrs/<run>/` 链接及其重建版 `EXEC_LOG.md`，以及**仅在** `backfill` 阶段、获确认 leaf 上的那两个 frontmatter 字段。
 - 两个阶段都绝不触碰：`${CODE_NAME}/` 及其下一切、项目自己的启动器 / 配置 / CI、`metds/ideas/**`、`metds/refs/**`、`metds/codearc.md`、编译出的 `metds/*.md`，以及计划文件中那两个字段之外的任何部分。
 - 只用真实日期，取自系统时钟（规约 §4）——接入日期、每个入账 run 的日期、回填日期。
-- 红线（规约 §2）：这里没有任何训练、评测、安装或删除。勘察是只读的，验证只有 `--list` 加一次解释器版本检查。环境修复归 `/star-env-builder`；运行时跑不了 python 是要上报的 blocker，不是要在这里修的问题。
+- 红线（规约 §2）：这里没有任何训练、评测、安装或删除。勘察是只读的，验证只有 `--list` 加一次解释器版本检查。环境修复归 `star-env-builder`；运行时跑不了 python 是要上报的 blocker，不是要在这里修的问题。
 - Git：每个阶段结束时提议一次，只暂存本 skill 写过的路径——`star-proj-adopt: <phase> — <summary>`（规约 §1）。`.env` 和被忽略的目录树不入历史。运行开始时就带着未提交改动的路径绝不暂存；在被接入的仓库里这很常见：把那些路径列出来，而不是绕开它们。
 - 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
 

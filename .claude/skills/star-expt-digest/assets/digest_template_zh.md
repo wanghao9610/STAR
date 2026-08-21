@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-expt-digest/assets/digest_template_zh.md
+../../../../.agents/skills/star-expt-digest/assets/digest_template_zh.md

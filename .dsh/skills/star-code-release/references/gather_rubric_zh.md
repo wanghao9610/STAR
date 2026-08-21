@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-code-release/references/gather_rubric_zh.md
+../../../../.agents/skills/star-code-release/references/gather_rubric_zh.md

@@ -3,7 +3,7 @@ name: star-metd-summarize
 description: >-
   把 metds/plans/
   下的计划树凝练成可直接用于论文的方法文档：overview、dataset、framework、training、evaluation；不带参数按依赖顺序编译全部五个。按读者需要的维度而非计划结构合并，来自未执行叶子的内容标注尚未验证，无计划覆盖的小节转为
-  TODO。计划是唯一信息源——不读代码、日志或对话；结果数字归 star-expt-analyst。当所有实验完成、计划定稿，用户运行 /skill:star-metd-summarize
+  TODO。计划是唯一信息源——不读代码、日志或对话；结果数字归 star-expt-analyst。当所有实验完成、计划定稿，用户运行 star-metd-summarize
   时使用。Bilingual（中/英）。
 ---
 
@@ -11,7 +11,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/skill:star-metd-summarize [OPT] [描述]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、可以写进产物的线索，替代不了任何一个确认点。对不上任何参数的成句文本就只是描述：照不带参数那样跑，并先说明。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
+调用方式：`star-metd-summarize [OPT] [描述]`——`OPT` 为 `overview` / `dataset` / `framework` / `training` / `evaluation` 之一，各自编译 `metds/<OPT>.md`；不带参数则按依赖顺序编译全部五个（`dataset` → `framework` → `training` → `evaluation` → `overview`）。剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、可以写进产物的线索，替代不了任何一个确认点。对不上任何参数的成句文本就只是描述：照不带参数那样跑，并先说明。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。编译方法文档真正用到的部分——§0 词汇表（它定义了 `finalized:`、`exec_status:`、`dropped:` 与 `traces_to`，正是 Step 1 就绪门槛所依据的字段）、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有四节不装载，每一节都是因为本 skill 自己的文件已在用到它的地方写清了所需内容：§1 git（本 skill 从不提交，状态与文件规则原话如此）、§2 红线（本 skill 什么都不跑：不跑 python、不训练、不评测、不安装，同样见状态与文件规则）、§9 项目布局（状态与文件规则把可写路径与不可碰的目录列得比 §9 更严）、§11 执行分支（本 skill 只读 `metds/plans/`，从不进入某次运行的目录树；某个叶子因分支未合并而 `exec_status` 不可信时，它按未完成上报并路由给执行器，这也正是 §11 会给出的读法）。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -42,7 +42,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 你是这个家族的方法编译器。`star-plan-coach` 与 `star-plan-decomposer` 撰写计划；`star-plan-executor` 让计划与实际执行保持一致；`star-plan-reviser` 依证据订正计划。你把它们编译起来：计划树按拆解与执行顺序组织，你把同一批事实沿**读者**需要的维度重新组织——方法是什么、吃什么数据、怎么训练、怎么判定。你的产出是 `metds/` 下的五份文档，也就是论文方法部分赖以起草的素材。你在这些循环都走完之后运行——每个叶子已执行、每个总体计划已定稿、方法已确定：方法还在变动时，交付物是计划，不是这些文档。
 
-你编译与重组；你不决定方法、不改计划、不读代码、不解读结果。编译中浮现的越界问题转交出去：缺失的策略答案交 `/skill:star-plan-coach`，缺失的执行细节交 `/skill:star-plan-decomposer`，某个已执行 run 敲定、但计划从未记录的值交 `/skill:star-plan-executor`（ENRICHED 同步回写），与现实不符的计划文本交 `/skill:star-plan-reviser`，结果数字及其含义交 `/skill:star-expt-analyst`，引文与相关工作细节交 `/skill:star-refs-reviewer`（其 `synthesize` 模式把笔记合成为 `metds/refs/related_work.md`）。
+你编译与重组；你不决定方法、不改计划、不读代码、不解读结果。编译中浮现的越界问题转交出去：缺失的策略答案交 `star-plan-coach`，缺失的执行细节交 `star-plan-decomposer`，某个已执行 run 敲定、但计划从未记录的值交 `star-plan-executor`（ENRICHED 同步回写），与现实不符的计划文本交 `star-plan-reviser`，结果数字及其含义交 `star-expt-analyst`，引文与相关工作细节交 `star-refs-reviewer`（其 `synthesize` 模式把笔记合成为 `metds/refs/related_work.md`）。
 
 ## 核心原则
 
@@ -59,15 +59,15 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 1. 读 `.env`，解析 `CODE_NAME`（规约 §3）——`framework.md` 与 `training.md` 要引用 `${CODE_NAME}/` 路径。
 2. 解释参数：五个 OPT 之一 → 该文档；无参数 → 按依赖顺序全部五个（`overview` 最后：它要链接其余四个）；其他 → 列出五个合法 OPT，经 ask_user_question 询问指的是哪个。
-3. **计划树为空是一个合法答案。** 没有 `metds/plans/*_plan.md` → 如实说明并停止，转交给 `/skill:star-plan-coach`。绝不凭空编译方法文档。
+3. **计划树为空是一个合法答案。** 没有 `metds/plans/*_plan.md` → 如实说明并停止，转交给 `star-plan-coach`。绝不凭空编译方法文档。
 
 ### Step 1：扫描计划树
 
-每个计划的 **frontmatter** 已随开场装载的摘要到手——本步骤要记录的每个字段都在那里，计划正文是步骤 2 的输入，所以这一步不再打开任何计划文件。按 `parent:` 重建树——`parent:` 权威，缺失或有歧义时用该计划的 `## Sub-plans` 索引定位它（摘要里同样带着）。数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`/skill:star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
+每个计划的 **frontmatter** 已随开场装载的摘要到手——本步骤要记录的每个字段都在那里，计划正文是步骤 2 的输入，所以这一步不再打开任何计划文件。按 `parent:` 重建树——`parent:` 权威，缺失或有歧义时用该计划的 `## Sub-plans` 索引定位它（摘要里同样带着）。数字前缀只是提示，因为两个不相关的根都可能是 `0_`（`star-flow-status` 的规则）。逐节点记录：根 / 中间 / 叶子、`updated`、`language`、`status:` 映射，叶子上的 `exec_status` 与 `traces_to`。
 
 - **输出语言跟随计划**：取根计划的 `language:`；多根时取多数；打平时用对话语言。
 - **一套文档描述一个方法。** 树里有多个互不相关的根时，如实说明，并经 ask_user_question 询问这套文档描述的是哪个根的子树；答案决定整轮的范围。
-- **就绪门槛——只编译已确定的方法。** 圈定范围内的树，只有当每个总体计划都带 `finalized:`、且每个活着的叶子都处于终态——`exec_status: done`，或被自身 kill-criterion 判死的 `abandoned`——时才算就绪。带 `dropped:` 的节点连同其下的一切、以及任何 `abandoned` 叶子，都不向任何文档贡献内容——被关掉的方向不属于最终确定下来的方法，它的负结果留在那次 run 的分析报告里。两者也都不会卡住这道门槛。差一项都不行：什么也不编译，列出未完成项（每个尚未进入终态的叶子及其 `exec_status`、每个缺 `finalized:` 的总体计划）并转交——未执行或阻塞的叶子交 `/skill:star-plan-executor`，未定稿的总体计划交 `/skill:star-plan-coach`，全局状况看 `/skill:star-flow-status`——然后停止。越过门槛只有一条路：把未完成项摆到用户面前，经 ask_user_question 询问是否照样编译一份草稿；用户显式选择编译——此时来自未完成叶子的每一段内容都按 Step 3 标注尚未验证。
+- **就绪门槛——只编译已确定的方法。** 圈定范围内的树，只有当每个总体计划都带 `finalized:`、且每个活着的叶子都处于终态——`exec_status: done`，或被自身 kill-criterion 判死的 `abandoned`——时才算就绪。带 `dropped:` 的节点连同其下的一切、以及任何 `abandoned` 叶子，都不向任何文档贡献内容——被关掉的方向不属于最终确定下来的方法，它的负结果留在那次 run 的分析报告里。两者也都不会卡住这道门槛。差一项都不行：什么也不编译，列出未完成项（每个尚未进入终态的叶子及其 `exec_status`、每个缺 `finalized:` 的总体计划）并转交——未执行或阻塞的叶子交 `star-plan-executor`，未定稿的总体计划交 `star-plan-coach`，全局状况看 `star-flow-status`——然后停止。越过门槛只有一条路：把未完成项摆到用户面前，经 ask_user_question 询问是否照样编译一份草稿；用户显式选择编译——此时来自未完成叶子的每一段内容都按 Step 3 标注尚未验证。
 - **相关小节仍是 `pending` 的计划**只贡献一个缺口——现在就记下，好让汇报写明它，而不是让文档悄悄变薄。
 
 ### Step 2：提取
@@ -101,12 +101,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 6：汇报
 
-≤500 字：逐文档——已写 / 跳过 / 未变、路径、缺口数与"尚未验证"数。然后是研究者真正要据以行动的三样：**缺口**（各自要哪个计划小节，最要紧的在前）、**⚠ 冲突**（两处来源都写明）、以及转交——策略缺口交 `/skill:star-plan-coach`，执行细节交 `/skill:star-plan-decomposer`，某个已执行 run 敲定的值交 `/skill:star-plan-executor`，与现实矛盾的计划文本交 `/skill:star-plan-reviser`，结果交 `/skill:star-expt-analyst`，引文交 `/skill:star-refs-reviewer`。绝不把文档称为"可直接投稿"；它是编译出的素材，缺口正是它还不是成品的原因。草稿编译（就绪门槛豁免）要在汇报第一行注明。
+≤500 字：逐文档——已写 / 跳过 / 未变、路径、缺口数与"尚未验证"数。然后是研究者真正要据以行动的三样：**缺口**（各自要哪个计划小节，最要紧的在前）、**⚠ 冲突**（两处来源都写明）、以及转交——策略缺口交 `star-plan-coach`，执行细节交 `star-plan-decomposer`，某个已执行 run 敲定的值交 `star-plan-executor`，与现实矛盾的计划文本交 `star-plan-reviser`，结果交 `star-expt-analyst`，引文交 `star-refs-reviewer`。绝不把文档称为"可直接投稿"；它是编译出的素材，缺口正是它还不是成品的原因。草稿编译（就绪门槛豁免）要在汇报第一行注明。
 
 ## 状态与文件规则
 
 - 唯一的写入是 `metds/overview.md`、`metds/dataset.md`、`metds/framework.md`、`metds/training.md`、`metds/evaluation.md`——五个 OPT 目标。
-- 绝不碰 `metds/plans/*`——计划文本属于 `/skill:star-plan-coach`、`/skill:star-plan-decomposer`、`/skill:star-plan-executor`、`/skill:star-plan-reviser`；缺口或错误表述只汇报与转交，绝不就地修改。绝不碰 `metds/codearc.md`（`/skill:star-code-architect` 的）、`metds/refs/*`（`/skill:star-refs-reviewer` 的）、`wkdrs/*`（含 `/skill:star-expt-analyst` 的结果汇总表 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
+- 绝不碰 `metds/plans/*`——计划文本属于 `star-plan-coach`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser`；缺口或错误表述只汇报与转交，绝不就地修改。绝不碰 `metds/codearc.md`（`star-code-architect` 的）、`metds/refs/*`（`star-refs-reviewer` 的）、`wkdrs/*`（含 `star-expt-analyst` 的结果汇总表 `wkdrs/results/`）、`${CODE_NAME}/`、`datas/`、`inits/`、`.env`。
 - 读取范围是 `metds/plans/*_plan.md`、`.env` 与五个目标文档。`wkdrs/` 是刻意不读的：如果某个 run 的细节在这里缺失，该修的是计划回写，而不是扩大读取范围。
 - 本 skill 不跑任何东西：不跑 python、不训练、不评测、不安装。
 - Git：只读；本 skill 绝不提交（规约 §1）。

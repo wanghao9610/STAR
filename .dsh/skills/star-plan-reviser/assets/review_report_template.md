@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-plan-reviser/assets/review_report_template.md
+../../../../.agents/skills/star-plan-reviser/assets/review_report_template.md

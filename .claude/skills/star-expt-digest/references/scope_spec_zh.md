@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-expt-digest/references/scope_spec_zh.md
+../../../../.agents/skills/star-expt-digest/references/scope_spec_zh.md

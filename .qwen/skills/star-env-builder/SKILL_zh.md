@@ -8,7 +8,7 @@ description: >-
   requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
   requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道 安装计划确认点，按 uv >
   pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 做跑通性检查（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本清单写入
-  wkdrs/。只要用户运行 /star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
+  wkdrs/。只要用户运行 star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
   Bilingual (中/英) — also trigger in English whenever the user wants the project's conda env or venv
   created or rebuilt, needs dependencies resolved and installed, or wants the runtime environment
   verified.
@@ -18,7 +18,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`/star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把包安装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），在参数与描述解析之前先剥离。
+调用方式：`star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把包安装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），在参数与描述解析之前先剥离。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。搭运行环境真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§6 委派（三层可运行性检查由主 agent 自己跑——原则 6 与 Step 6 都这么写，这里没有哪一步分派）、§9 项目布局（状态与文件规则把它可写的每条路径、不可碰的每棵目录树都列得比那一节更严），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
 
@@ -64,7 +64,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
 2. `ENV_NAME` := 参数，否则 `CODE_NAME`。参数为 `add <包名>…` 则进入 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的环境——不创建、不改名、不重建。
 3. 探测并记录（供安装计划与报告用）：平台 + 架构；`nvidia-smi`（驱动支持的 CUDA 上限）；`nvcc --version` / `CUDA_HOME`（本机 toolkit，常缺失）；`$CONDA_HOME/bin/conda --version`；`uv --version`。
-4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `/star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
+4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
 
 ### Step 1：选择后端（确定性）
 
@@ -119,7 +119,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
 3. 本次生成的 requirements 文件（含跑通性检查排错时补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
 4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向它（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
-5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`/star-plan-executor <leaf>` 现在有运行时了；`/star-flow-status` 查看下一步。
+5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`star-plan-executor <leaf>` 现在有运行时了；`star-flow-status` 查看下一步。
 
 
 ### Step 8：新增依赖（仅 add 模式）

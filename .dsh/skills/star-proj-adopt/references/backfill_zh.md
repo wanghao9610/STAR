@@ -8,11 +8,11 @@
 
 ## Step B2：确认点 3——逐 leaf 确认
 
-用户通过 ask_user_question 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`/skill:star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
+用户通过 ask_user_question 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
 
 ## Step B3：写入、记录、汇报
 
-只在获确认的 leaf 上写 `exec_status:`，以及在 S5 已入账 run 时写 `exec_runs:`——只碰 frontmatter 字段，文件里别的一律不动（原则 6）。对获确认且 run 已入账的匹配，同时把那份重建版 `EXEC_LOG.md` 的 `source_plan:` 改为该 leaf 的文件名——用户刚刚确认的正是这层对应关系，日志里留着 `(none)` 会让状态 skill 的 orphaned-run 检查在每个接入 run 上误报。向 `metds/adopt.md` 追加一段带日期的回填记录，写明每个被改动的 leaf 及其证据，并把 frontmatter 的 `backfilled:` 设为今天的日期——哪怕一个 leaf 都没获确认，这个阶段也跑过了，记录里写明即可。状态 skill 的覆盖行读的正是这个字段；不设它，那一行会在健康的项目上一直触发。汇报后交棒 `/skill:star-flow-status`，那是接入后的项目第一次拿到诚实的全景图。
+只在获确认的 leaf 上写 `exec_status:`，以及在 S5 已入账 run 时写 `exec_runs:`——只碰 frontmatter 字段，文件里别的一律不动（原则 6）。对获确认且 run 已入账的匹配，同时把那份重建版 `EXEC_LOG.md` 的 `source_plan:` 改为该 leaf 的文件名——用户刚刚确认的正是这层对应关系，日志里留着 `(none)` 会让状态 skill 的 orphaned-run 检查在每个接入 run 上误报。向 `metds/adopt.md` 追加一段带日期的回填记录，写明每个被改动的 leaf 及其证据，并把 frontmatter 的 `backfilled:` 设为今天的日期——哪怕一个 leaf 都没获确认，这个阶段也跑过了，记录里写明即可。状态 skill 的覆盖行读的正是这个字段；不设它，那一行会在健康的项目上一直触发。汇报后交棒 `star-flow-status`，那是接入后的项目第一次拿到诚实的全景图。
 
 ## 对账规则
 
@@ -27,6 +27,6 @@ leaf 与清单行只在**证据重叠**时才算匹配：leaf 的 §4 交付路�
 | `built` | `in_progress` |
 | `abandoned` | 不提议——报告出来交给用户决定 |
 
-`exec_runs` 只在该行的 run 已于确认点 2 入账时才写；`done` 但没有入账 run 的 leaf 只写 `exec_status`，并在报告中标出——`/skill:star-flow-status` 会把它列在 done-with-no-run 之下。对获确认且 run 已入账的匹配，同一趟把重建日志的 `source_plan:` 更新为该 leaf 的文件名——用户确认的正是这层对应关系。
+`exec_runs` 只在该行的 run 已于确认点 2 入账时才写；`done` 但没有入账 run 的 leaf 只写 `exec_status`，并在报告中标出——`star-flow-status` 会把它列在 done-with-no-run 之下。对获确认且 run 已入账的匹配，同一趟把重建日志的 `source_plan:` 更新为该 leaf 的文件名——用户确认的正是这层对应关系。
 
 绝不提议 `blocked`，绝不写 `depends_on`，绝不重排任何东西。当一条清单行匹配到多个 leaf、或多条清单行匹配到同一个 leaf 时，如实呈现并询问——多对多的匹配通常意味着拆解与历史彼此对不上：是信息，不是需要抹平的错误。

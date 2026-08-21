@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-env-builder/assets/env_report_template.md
+../../../../.agents/skills/star-env-builder/assets/env_report_template.md

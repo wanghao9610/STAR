@@ -1,1 +1,1 @@
-../../../../.agents/shared/dsh/star-refs-reviewer/references/synthesize_spec.md
+../../../../.agents/skills/star-refs-reviewer/references/synthesize_spec.md

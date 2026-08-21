@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-flow-status/references/status_spec.md
+../../../../.agents/skills/star-flow-status/references/status_spec.md

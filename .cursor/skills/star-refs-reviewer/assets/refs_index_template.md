@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-refs-reviewer/assets/refs_index_template.md
+../../../../.agents/skills/star-refs-reviewer/assets/refs_index_template.md

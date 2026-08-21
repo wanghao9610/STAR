@@ -1,1 +1,1 @@
-../../../../.agents/shared/claude/star-env-builder/assets/env_report_template_zh.md
+../../../../.agents/skills/star-env-builder/assets/env_report_template_zh.md

@@ -32,7 +32,7 @@
 
 ## Step A7：运行时跑通性检查（含红线）
 
-若 `.env` 指向的 conda 环境可用，通过它跑 `python -c "import <package>"`。建环境与装依赖通常是重操作：准备好确切命令（`conda create …`、`pip install -r …`）；纯 Python 轻量安装需用户当场明确同意才执行；涉及 CUDA 编译或超过约 1 GB 下载一律移交用户（红线，见 `references/orchestration_spec_zh.md`）。记录哪些已跑、哪些待用户执行。整套环境构建可交棒给 `/star-env-builder`——后端选择、依赖解析、按优先顺序安装与跑通性检查都由它在自己的安装计划确认点下完成。
+若 `.env` 指向的 conda 环境可用，通过它跑 `python -c "import <package>"`。建环境与装依赖通常是重操作：准备好确切命令（`conda create …`、`pip install -r …`）；纯 Python 轻量安装需用户当场明确同意才执行；涉及 CUDA 编译或超过约 1 GB 下载一律移交用户（红线，见 `references/orchestration_spec_zh.md`）。记录哪些已跑、哪些待用户执行。整套环境构建可交棒给 `star-env-builder`——后端选择、依赖解析、按优先顺序安装与跑通性检查都由它在自己的安装计划确认点下完成。
 
 ## Step A8：勘察这份克隆
 

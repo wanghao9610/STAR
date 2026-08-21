@@ -10,7 +10,7 @@ description: >-
   a read-only survey instead. Both paths then design a target architecture plus a migration table,
   execute only user-approved migrations one group at a time with verification and a commit per
   group, and write the spec to metds/codearc.md, cross-referenced in AGENTS.md.
-  Use when the user runs /star-code-architect, wants a reference implementation or starter codebase for a
+  Use when the user runs star-code-architect, wants a reference implementation or starter codebase for a
   plan, wants to set up / scaffold ${CODE_NAME}/, or wants to organize / refactor the existing codebase.
   Bilingual (en/zh).
 ---
@@ -19,7 +19,7 @@ description: >-
 
 Match the user's language. For Chinese dialogue, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Non-Chinese dialogue loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
 
-Invocation: `/star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither the argument nor the description, and is stripped before either is read.
+Invocation: `star-code-architect [GITHUB_URL | PLAN_NAME] [DESCRIPTION]` — pass a GitHub URL to skip the search and use that repo, a plan name (slug / numeric prefix / filename) to choose which plan drives the search, or no argument to auto-resolve both. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7), belongs to neither the argument nor the description, and is stripped before either is read.
 
 **Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What an architect acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. One section stays out: §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
 
@@ -51,7 +51,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 ## Core Principles
 
-1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer `/star-plan-coach` first — or take a topic / URL directly and proceed without one.
+1. **The plan drives the code.** Read the root plan under `metds/plans/` first: the search profile (Branch A), the survey focus (Branch B), and the target architecture all derive from it. With no plan and no URL, offer `star-plan-coach` first — or take a topic / URL directly and proceed without one.
 2. **Two confirmation points; autonomous between them.** Confirmation point 1: the user picks the reference repo from a scored shortlist. Confirmation point 2: the user approves the target architecture and migration table. Everything between and after runs autonomously with bounded retries. Never do work a confirmation point did not cover.
 3. **Upstream layout is the baseline.** A cloned repo's organization is battle-tested; do not restructure it wholesale. Improvements happen as small, individually-approved, individually-verified migration items — for a fresh clone the migration table is often short or empty, and "no migrations" is a fine outcome.
 4. **Conservative rebrand, full provenance.** Rename only what is safe and necessary (top-level package, imports, packaging metadata, entry points, README title), verifying after each rename. Registry strings, config type keys, and checkpoint-coupled names go **untouched** into the do-not-rename list. Strip `.git`, keep upstream `LICENSE` / `CITATION` files, and record source URL + commit + license in `${CODE_NAME}/UPSTREAM.md` before the import commit. Checklist: `references/rebrand_checklist.md`.
@@ -64,7 +64,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
 2. Interpret the argument: a GitHub URL → Branch A with Steps A1–A3 skipped; a `PLAN_NAME` (slug / numeric prefix / filename, matched against `metds/plans/*_plan.md`) → that plan drives the run; none → use the root plan (single-digit prefix `[0-9]_*_plan.md`; if several, ask which).
-3. With no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `/star-proj-adopt` routes in from. Otherwise ask: *run `/star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
+3. With no plan and no URL: when `${CODE_NAME}/` already holds real code, skip this question — Branch B organizes what exists and needs no plan, and this is the state `star-proj-adopt` routes in from. Otherwise ask: *run `star-plan-coach` first (recommended)* / *provide a GitHub URL* / *describe the topic now and search from that*.
 4. If the plan exists but is not `finalized`, warn that the search profile and architecture will be shallow and offer: *continue anyway* / *finish the plan first*.
 5. Choose the branch: `${CODE_NAME}/` missing or effectively empty (only placeholders like `.gitkeep`) → **Branch A (start from a reference)**. Real code present → **Branch B (organize)**. A handful of stray scripts → ask whether to build around them or organize what exists.
 
@@ -106,7 +106,7 @@ When these already exist, update in place — never append duplicates.
 
 #### Step C6: Report & hand off
 
-≤500 words: repo chosen (with license note), what ended up where, renames done + how many names went unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `/star-plan-executor <leaf>` now has a place for the code to live; `/star-flow-status` shows where each plan step stands.
+≤500 words: repo chosen (with license note), what ended up where, renames done + how many names went unchanged, migrations done / blocked, specs written, verification evidence, commands awaiting the user. **Hand off downstream:** `star-plan-executor <leaf>` now has a place for the code to live; `star-flow-status` shows where each plan step stands.
 
 ## State & File Rules
 
