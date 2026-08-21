@@ -34,7 +34,7 @@ ok    all three hooks present, executable, registered in all seven harnesses, ea
 ok    heading structure matches across the 6 trees (181 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
-FAIL  .cursor/skills/star-flow-status/SKILL.md: description is 1043 characters, over the 1024-character SKILL.md limit
+FAIL  .cursor/skills/star-flow-status/SKILL.md: description is 1042 characters, over the 1024-character SKILL.md limit
 
 == Description length in .dsh (<= 500, DSH catalog bound) ==
 ok    every .dsh description survives DSH's 500-character catalog intact

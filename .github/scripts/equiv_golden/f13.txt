@@ -37,7 +37,7 @@ ok    heading structure matches across the 6 trees (181 files)
 ok    all descriptions within 1024 characters in all 7 trees
 
 == Description length in .dsh (<= 500, DSH catalog bound) ==
-FAIL  .dsh/skills/star-flow-status/SKILL.md: description is 692 characters; DSH truncates its catalog at 500, cutting the trailing trigger clause
+FAIL  .dsh/skills/star-flow-status/SKILL.md: description is 685 characters; DSH truncates its catalog at 500, cutting the trailing trigger clause
 
 == Skill script parity ==
 ok    skill scripts are byte-identical and executable in all 7 trees
