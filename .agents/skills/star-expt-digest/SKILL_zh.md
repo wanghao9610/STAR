@@ -96,7 +96,7 @@ bash <本 skill 所在目录>/scripts/scan.sh
 
 ### Step 6：写 digest
 
-填 `assets/digest_template_zh.md`（英文：`assets/digest_template.md`；digest 跟随对话语言，或范围内计划一致时跟随它们的语言），写到 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`。只用系统时钟取的真实日期（规约 §4）。同一天再写一次覆盖当天的文件；换一天则各写各的——这个目录就是时间线。
+填 `assets/digest_template_zh.md`（英文：`assets/digest_template.md`；digest 的语言取 `STAR_LANG`；未设则跟随对话语言，或范围内计划一致时跟随它们的语言），写到 `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`。只用系统时钟取的真实日期（规约 §4）。同一天再写一次覆盖当天的文件；换一天则各写各的——这个目录就是时间线。
 
 **只有覆盖区间截止到今天的 digest 才推进上次覆盖到的日期。** 回溯性的窗口（`2026-05-01`，或一次 plan 家族 digest）照常写文件，但不动序列的续接点：把它的 `covers.through` 写成实际覆盖到的日期，别让一次向后看的阅读导致下一次增量运行漏掉工作。`references/scope_spec_zh.md` 里写了精确规则。
 

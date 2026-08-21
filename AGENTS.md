@@ -49,7 +49,7 @@ The test: Every changed line should trace directly to the user's request.
 
 **`.env` `STAR_LANG` sets the language of chat replies and newly generated workflow documents (plans, reports).**
 
-- Set (`en` or `zh`) → use it, whatever the chat's language. Unset or empty → follow the user's dialogue language.
+- Set (`en` or `zh`) → use it, whatever the chat's language, and whatever produced the text: a reply drafted in a forked skill run or by a subagent and relayed back to the user is still a chat reply. Unset or empty → follow the user's dialogue language; a run with no user turn behind it has none, so fall back to the language of the invocation's own words.
 - An explicit in-conversation request overrides it; an existing document keeps the language declared in its frontmatter. Full rule: `docs/mds/star-workflow/research-workflow-conventions.md` §7.6.
 - Code comments are always English, whatever `STAR_LANG` or the dialogue language says.
 

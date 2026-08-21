@@ -742,7 +742,7 @@ Read and narrate; do not execute, analyze runs, score criteria, revise plans, or
 --- 3
 - Ask via your question tool only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). If it is unavailable (headless / scripted), fall back to plain text and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
 - Never present a provisional number as a result in chat either. If the digest tagged it unverified, the reply says so too.
-- Reply in the user's language; load `*_zh.md` resources for Chinese dialogue. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.
+- Reply in the language the paragraph at the top of this file resolved — `STAR_LANG` where it is set, the dialogue otherwise — and load the `*_zh.md` resources when that language is Chinese. This run is forked: its reply reaches the user through whatever invoked it, which changes nothing about the language it is written in. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.
 +++ 2
 - Ask one direct question at a time where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan) and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that a plan, a status, a report, or the results table was changed.
 - Never present a provisional number as a result in chat either. If the digest tagged it unverified, the reply says so too. Keep technical terms — metric names, log keys, file paths, run names — in English inside Chinese digests.
@@ -785,7 +785,7 @@ Read and narrate; do not execute, analyze runs, score criteria, revise plans, or
 --- 3
 - 只在工作流要求处用 your question tool 提问（计划名有歧义、参数既解析不成窗口也解析不成计划）。若它不可用（无人值守 / 脚本化），改用纯文本并要求明确回答。因为本 skill 不在自己的 digest 之外写任何东西，所以没有审批确认点——也正因如此，绝不声称或暗示你改动了计划、状态、报告或结果汇总表。
 - 在对话里同样绝不把未核实数字当作结果陈述。digest 里标了未核实，回复里也要标。
-- 用用户的语言回复；中文对话加载 `*_zh.md` 资源。中文 digest 里保持技术术语、指标名、日志键、文件路径、run 名为英文。
+- 用本文件开头那段解析出的语言回复——`STAR_LANG` 设了就用它，未设才跟随对话——该语言是中文时加载 `*_zh.md` 资源。本次运行在独立上下文里跑，回复要经由调用方转交给用户，但这不改变它该用哪种语言。中文 digest 里保持技术术语、指标名、日志键、文件路径、run 名为英文。
 +++ 2
 - 仅在工作流要求处提问（计划名有歧义、参数既解析不成窗口也解析不成计划），一次一问并要求明确答复。因为本 skill 不在自己的 digest 之外写任何东西，所以没有审批确认点——也正因如此，绝不声称或暗示计划、状态、报告或结果汇总表被改动过。
 - 在对话里同样绝不把未核实数字当作结果陈述。digest 里标了未核实，回复里也要标。中文 digest 里保持技术术语、指标名、日志键、文件路径、run 名为英文。

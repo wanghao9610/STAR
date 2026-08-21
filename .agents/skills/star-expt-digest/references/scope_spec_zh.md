@@ -62,7 +62,7 @@ type: digest
 language: <en|zh>
 generated: <YYYY-MM-DD>          # 系统时钟取的真实日期；绝不编造
 mode: <incremental|window|plan|all>
-scope: <all plan trees | family of <prefix>_<slug>>
+scope: <全部计划树，或 <prefix>_<slug> 所在家族>
 covers:
   from: <YYYY-MM-DD 或 "—">      # 仅当周期起点无界时写 "—"
   through: <YYYY-MM-DD>
