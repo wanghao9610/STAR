@@ -198,11 +198,10 @@ while IFS= read -r skill; do
 done < <(printf '%s\n' "${SKILLS}")
 (( guard_errors == 0 )) && note "conventions and shared /star router list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
-# 4b. Codex gets the generic router through one plugin owned entirely by
-#     .codex. .agents exposes only the marketplace file the host discovers;
-#     linking the directory would leak every Codex-private plugin into a shared
-#     namespace and turn future harness support there into a collision.
-section "Codex STAR plugin layout"
+# 4b. Codex, Kimi and DSH need harness-owned packages for the generic router.
+#     Codex alone exposes one marketplace file through .agents; the other two
+#     packages remain entirely inside their harness trees.
+section "Harness-owned STAR router packages"
 plugin_errors=0
 MARKETPLACE=".codex/plugins/marketplace.json"
 PLUGIN_ROOT=".codex/plugins/star"
@@ -228,7 +227,107 @@ if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
     fail "${PLUGIN_ROOT}/skills/star is not the explicit-only wrapper around the shared router"
     plugin_errors=1
 fi
-(( plugin_errors == 0 )) && note "Codex owns one star plugin; .agents exposes only its marketplace file"
+if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" ]] || \
+   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" "name: star" || \
+   ! grep -qF '.agents/commands/star.md' "${PLUGIN_ROOT}/skills/star/SKILL_zh.md"; then
+    fail "${PLUGIN_ROOT}/skills/star lacks its Chinese wrapper around the shared router"
+    plugin_errors=1
+fi
+KIMI_MARKETPLACE=".kimi-code/plugins/marketplace.json"
+KIMI_PLUGIN_ROOT=".kimi-code/plugins/star"
+if ! python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); e=m["plugins"]; assert m["version"] == "2" and len(e) == 1 and e[0]["id"] == "star" and e[0]["source"] == "./.kimi-code/plugins/star"; assert p["name"] == "star" and p["skills"] == "./skills/"' "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json"; then
+    fail "Kimi STAR plugin or marketplace metadata is invalid"
+    plugin_errors=1
+fi
+if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" "name: star" || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" "disableModelInvocation: true" || \
+   ! grep -qF 'Read `.agents/commands/star.md`' "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md"; then
+    fail "${KIMI_PLUGIN_ROOT}/skills/star is not the explicit-only wrapper around the shared router"
+    plugin_errors=1
+fi
+if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" ]] || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" "name: star" || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" "disableModelInvocation: true" || \
+   ! grep -qF '.agents/commands/star.md' "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md"; then
+    fail "${KIMI_PLUGIN_ROOT}/skills/star lacks its Chinese explicit-only wrapper"
+    plugin_errors=1
+fi
+for skill_file in \
+    "${PLUGIN_ROOT}/skills/star/SKILL.md" \
+    "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" \
+    "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" \
+    "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md"; do
+    if ! grep -qF 'STAR_LANG=zh' "${skill_file}" || \
+       ! grep -qF '.agents/commands/star.zh-CN.md' "${skill_file}"; then
+        fail "${skill_file} does not apply STAR's Chinese router wording"
+        plugin_errors=1
+    fi
+done
+
+DSH_PLUGIN_ROOT=".dsh/commands/star"
+if ! python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["name"] == "star" and p["main"] == "lib/index.js" and p["dsh"]["bundle"]["patch"] == "./cordis.patch.yml"' "${DSH_PLUGIN_ROOT}/package.json"; then
+    fail "DSH STAR package metadata is invalid"
+    plugin_errors=1
+fi
+if ! grep -qF -- '- id: star' "${DSH_PLUGIN_ROOT}/cordis.patch.yml" || \
+   ! grep -qF "name: 'star'" "${DSH_PLUGIN_ROOT}/cordis.patch.yml" || \
+   ! grep -qF 'const name = "star";' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'const inject = ["commands"];' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'ctx.commands.register({' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'agent.followup({' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'Read `.agents/commands/star.md`' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'export { apply, inject, name };' "${DSH_PLUGIN_ROOT}/lib/index.js"; then
+    fail "${DSH_PLUGIN_ROOT} is not an injected /star command forwarding to the shared router"
+    plugin_errors=1
+fi
+for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins"; do
+    if [[ "$(grep -Fxc "        \"${router_tree}\"" execs/update.sh)" -ne 2 ]]; then
+        fail "execs/update.sh must carry ${router_tree} in both adopt and full-update paths"
+        plugin_errors=1
+    fi
+done
+for optional_tree in ".dsh/commands" ".kimi-code/plugins"; do
+    if ! grep -qF "\"${optional_tree}\")" execs/update.sh; then
+        fail "execs/update.sh does not allow an older ref to omit ${optional_tree}"
+        plugin_errors=1
+    fi
+done
+if ! grep -qF 'if is_optional_path "${tree}"; then' execs/update.sh; then
+    fail "execs/update.sh --adopt does not skip router packages absent from an older ref"
+    plugin_errors=1
+fi
+for readme in README.md README.zh-CN.md; do
+    for command in \
+        'codex plugin marketplace add .' \
+        'codex plugin add star@star' \
+        '/plugins install ./.kimi-code/plugins/star' \
+        '/reload' \
+        'dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star' \
+        'dsh --profile YOUR_PROFILE --dump-config'; do
+        if ! grep -qF "${command}" "${readme}"; then
+            fail "${readme} omits router setup step: ${command}"
+            plugin_errors=1
+        fi
+    done
+    for shared_topic in \
+        'STAR_LANG' \
+        'STAR_HARNESSES' \
+        'INVOLVE=low' \
+        '.star/memory/MEMORY.md' \
+        'bash execs/update.sh --diff' \
+        'bash execs/update.sh TAG_OR_BRANCH' \
+        'bash execs/update.sh --harnesses claude' \
+        'bash execs/update.sh --skill star-flow-status' \
+        '--adopt' \
+        '--force'; do
+        if ! grep -qF -- "${shared_topic}" "${readme}"; then
+            fail "${readme} omits shared setup or update topic: ${shared_topic}"
+            plugin_errors=1
+        fi
+    done
+done
+(( plugin_errors == 0 )) && note "Codex, Kimi and DSH router packages all delegate to the shared /star roster"
 
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
@@ -303,13 +402,18 @@ while IFS= read -r skill; do
     done
 done < <(printf '%s\n' "${SKILLS}")
 
-# The complete router is authored once under .agents/commands. These four files
-# are runtime-discovered by their harnesses and must stay thin wrappers around it.
-for wrapper in .claude/commands/star.md .cursor/commands/star.md .qwen/commands/star.md .pi/prompts/star.md; do
+# The complete router is authored once under .agents/commands. These eight files
+# are the English and Chinese runtime-discovered wrappers; the three package-
+# based hosts are checked in section 4b above.
+for wrapper in \
+    .claude/commands/star.md .claude/commands/star.zh-CN.md \
+    .cursor/commands/star.md .cursor/commands/star.zh-CN.md \
+    .qwen/commands/star.md .qwen/commands/star.zh-CN.md \
+    .pi/prompts/star.md .pi/prompts/star.zh-CN.md; do
     if [[ ! -f "${wrapper}" ]]; then
         fail "${wrapper} is missing"
         token_errors=1
-    elif ! grep -qF 'Read `.agents/commands/star.md`' "${wrapper}"; then
+    elif ! grep -qF '.agents/commands/star.md' "${wrapper}"; then
         fail "${wrapper} does not delegate to the shared .agents/commands/star.md router"
         token_errors=1
     fi
@@ -328,7 +432,7 @@ if [[ -n "${mangled_paths}" ]]; then
     token_errors=1
 fi
 
-(( token_errors == 0 )) && note "invocation tokens are consistent per tree; every harness command delegates to the shared /star router"
+(( token_errors == 0 )) && note "invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router"
 
 # 8. Workflow docs ship as en/zh pairs.
 section "Bilingual twins in docs/mds/star-workflow"

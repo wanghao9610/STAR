@@ -92,6 +92,7 @@ star-ai-research/
 ├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
 ├── .dsh/commands/star/     # DSH 仓库内的 /star 分流包
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
+├── .kimi-code/plugins/     # Kimi Code 仓库内的 /star 分流插件与 marketplace
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
 ├── .codex/skills/          # Codex 每个技能一份的清单，由 .agents/skills/ 用软链接指过来
@@ -281,7 +282,9 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 | Pi | `/star-<名>` | `/star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
-Codex 还把共享分流器打包成仓库内的 `star` 插件。在仓库根目录注册并安装一次，然后新开会话：
+Claude Code、Cursor、Pi 与 Qwen Code 直接从项目文件提供 `/star [你想做什么]`。命令把请求交给 `.agents/commands/star.md`；空请求选择 `star-flow-status`，匹配到七个只能显式调用的 skill 之一时，则返回准确的 `/star-<name> <argument>` 命令并等待。
+
+Codex 把共享分流器打包成仓库内的 `star` 插件。在仓库根目录注册并安装一次，然后新开会话：
 
 ```bash
 codex plugin marketplace add .
@@ -290,10 +293,20 @@ codex plugin add star@star
 
 不带参数的 `$star` 显示当前研究状态，也可以传入描述，例如 `$star 审查 030 计划的实现`。插件读取的仍是其他宿主 `/star` 薄包装共用的 `.agents/commands/star.md` 名册，不会再维护第二份分流表。
 
-DSH 把同一个分流器放在 `.dsh/commands/star/`。在仓库根目录为每个将运行 STAR 的 profile 安装一次，然后重启该 profile：
+Kimi Code 把同一个分流器作为用户级插件打包在 `.kimi-code/plugins/star/`。请从仓库根目录启动 Kimi Code，在输入框依次运行下面两条命令；也可以用 `/new` 代替 `/reload`：
+
+```text
+/plugins install ./.kimi-code/plugins/star
+/reload
+```
+
+不带参数的 `/star` 显示当前研究状态，也可以传入描述；`/skill:star` 是同一个外部 skill 的完整写法。Kimi 会把本地插件复制进用户级托管目录，所以 STAR 更新了该插件后，需要重新执行安装命令。
+
+DSH 把同一个分流器放在 `.dsh/commands/star/`；安装时要求 `PATH` 上有 `pnpm`。在仓库根目录为每个将运行 STAR 的 profile 安装一次，检查组合后的配置，再重启该 profile：
 
 ```bash
 dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star
+dsh --profile YOUR_PROFILE --dump-config
 ```
 
 不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流。
@@ -442,6 +455,7 @@ bash execs/update.sh
 - `.agents/skills/`——共享根目录——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
 - `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
+- `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 分流包，各自只在选中对应宿主时更新
 - `.agents/commands/`——唯一共享的 `/star` 分流名册——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
@@ -463,10 +477,18 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-命令的通用形式为 `bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]`：
+命令的两种通用形式为 `bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]` 与 `bash execs/update.sh [ref] [--harnesses LIST] --adopt`：
+
+```bash
+bash execs/update.sh --diff
+bash execs/update.sh TAG_OR_BRANCH
+bash execs/update.sh --harnesses claude
+bash execs/update.sh --skill star-flow-status
+```
 
 - `--diff` 不改动任何文件地预览更新，有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”。
 - `ref` 把更新固定到某个 tag 或分支。
+- 如果固定的 ref 早于 `.dsh/commands/` 或 `.kimi-code/plugins/`，普通更新与 `--adopt` 都会报告并跳过这个尚不存在的可选包；缺少其他必需路径仍会中止。
 - `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 或 `.agents/commands/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
 - `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
@@ -507,7 +529,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)**（2026-08-23）—— DeepSeek Harness 新增仓库级 `/star` 包，把共享的 STAR 分流器放在 `.dsh/commands/star/`，通过 `dsh plugin` 为每个 profile 安装一次。它的 Cordis bundle 会先显式注入 `commands` 服务，再注册斜杠命令；无参数的状态请求与带描述的任务都会经唯一的 `.agents/commands/star.md` 名册发起后续轮次。包、bundle、导出的插件与用户看到的命令统一命名为 `star`；README 写明了按 profile 安装及使用方法。
+- **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)**（2026-08-23）—— Kimi Code 与 DeepSeek Harness 分别在 `.kimi-code/plugins/star/` 和 `.dsh/commands/star/` 新增仓库级 STAR 通用分流器。Kimi 通过 `/plugins install` 安装外部 skill，并以 `/star` 调用、`/skill:star` 作为完整写法；DSH 通过 `dsh plugin` 为每个 profile 安装一次，显式注入 `commands` 服务，再为共享的 `.agents/commands/star.md` 名册发起后续轮次。`execs/update.sh` 只随对应宿主安装和刷新各自的分流包，README 与 CI 同时覆盖安装、命名、注入和共享路由。
 - **[v0.2.10](https://github.com/wanghao9610/STAR/tree/v0.2.10)**（2026-08-23）—— Codex 新增仓库级 `$star` 插件，用同一个入口分流 STAR 请求。插件与 marketplace 实体归 `.codex/plugins/` 所有；`.agents/plugins/` 只放一个指向 `marketplace.json` 的相对软链接，不把整个 Codex 私有目录暴露给未来可能采用该位置的其他宿主。`execs/update.sh` 仅在选择 Codex 时安装和刷新两者，不支持软链接的环境退化为普通发现文件。README 写明 marketplace 注册、插件安装和 `$star` 用法，CI 则固定归属与链接结构。
 - **[v0.2.9](https://github.com/wanghao9610/STAR/tree/v0.2.9)**（2026-08-23）—— `/star` 的完整分流名册现在只在 `.agents/commands/` 维护一份；Claude、Cursor、Pi 与 Qwen 只保留薄包装，更新器会安装并刷新共享来源，CI 则保证所有包装和名册中英两版始终对应同一组十五个 skill 与 † 标记。面向人的项目与维护说明新增中文对照版——`AGENTS.zh-CN.md`、`CLAUDE.zh-CN.md`、`.github/CONTRIBUTING.zh-CN.md` 和架构师的上游模板——其中项目级文件会随更新器进入接入后的仓库。`STAR_LANG` 现在也约束在 fork 或 subagent 中起草、再转交给用户的回复；背后没有用户消息且未设置该值时，运行改用调用参数本身的语言。
 - **[v0.2.8](https://github.com/wanghao9610/STAR/tree/v0.2.8)**（2026-08-20）—— 一个 skill 现在只装载这次运行真正会用到的部分：规约按该技能实际依据的那几节到达，而不是整份文档；文档本身用少 8.8% 的字节说出同样的规则；而某次运行根本不会进入的流程——`aggregate`、`watch`、`ledger`、`add`、`backfill`、丢弃一份计划、架构师从参考实现起步的那条分支、执行器的续跑规则、文献评审的三个离线模式——各自留在自己的文件里，等那条路真的被走到才读，原地只留一句桩子写明是哪个文件、什么时候读、哪些运行完全不读它。十五个技能在第一步之前装载的文本合计从约 44.6 万词元降到约 38.0 万（−15%），一次实测的英文 `/star-plan-coach` 会话开局装载从 27265 词元降到 14944；两条新校验守着这件事不走样——技能文本里写出的 `references/…` 路径必须存在，随技能发布的参考文件必须有某个步骤会去读它——同时共享记忆区只保留模板抬头，条目一律迁往 git 忽略的 `local/`。技能正文里调用一个技能现在只有一种写法，光名字 `star-plan-executor`：`/` 与 `/skill:` 这两个前缀，正是各棵树各留一份副本的那批文件里唯一的差别——技能交还给你的名字由你自己补前缀，定义调用的斜杠命令本身不动——再加上按措辞存一份、而不是按树各存一份，七棵树的存储文件从 859 个降到 538 个，软链接一律只指向 `.agents/skills/`；已安装的项目看不到这些变化，`execs/update.sh` 复制时会把软链接指向的内容写成实文件。

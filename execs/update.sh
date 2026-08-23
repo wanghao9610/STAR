@@ -98,6 +98,17 @@ INSTRUCTION_FILES=(
     "CLAUDE.zh-CN.md"
     ".cursor/rules/agent-instructions.mdc"
 )
+# Paths introduced after the harness trees they belong to. A pinned older ref
+# may legitimately omit them; both update and adopt skip those paths while
+# retaining fatal errors for every other missing managed path.
+is_optional_path() {
+    case "$1" in
+        .*/hooks*)              return 0 ;;
+        ".dsh/commands")        return 0 ;;
+        ".kimi-code/plugins")   return 0 ;;
+    esac
+    return 1
+}
 # The harness trees --harnesses and STAR_HARNESSES name, one entry per agent harness. Which paths
 # belong to which is decided by path_harness below, not by a list here, so a path added
 # upstream reaches the right tree without being registered anywhere.
@@ -288,8 +299,9 @@ are updated whichever trees are selected, and .agents/skills is written first. I
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
-The $star plugin lives under .codex/plugins and its one discovery link under .agents/plugins is
-updated only when codex is selected.
+The generic router packages live under .codex/plugins, .dsh/commands and .kimi-code/plugins;
+each is updated only when its harness is selected. Codex's one discovery link under
+.agents/plugins follows the same selection.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -458,6 +470,10 @@ if [[ "${ADOPT}" == true ]]; then
         # The Codex-only $star router plugin. Its .agents discovery entry is a
         # single file in ADOPT_FILES, not a link over the whole directory.
         ".codex/plugins"
+        # Kimi and DSH also need host-owned packages for their generic /star
+        # entry points; installation into the host remains a per-machine step.
+        ".dsh/commands"
+        ".kimi-code/plugins"
         "${SKILL_ROOTS[@]:1}"
         "${HOOK_TREES[@]}"
         "${EXTENSION_TREES[@]}"
@@ -532,6 +548,10 @@ else
         # file is exposed through the exact .agents path the host discovers.
         ".codex/plugins"
         ".agents/plugins/marketplace.json"
+        # Kimi's /star skill plugin and DSH's /star command bundle stay private
+        # to their own trees and are installed into each host separately.
+        ".dsh/commands"
+        ".kimi-code/plugins"
         # Which skill root each harness owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
@@ -541,8 +561,8 @@ else
         # /star, which routes a described request to a skill, in the three hosts
         # that read commands from project files. One command each and no more:
         # all three already expose every skill as /star-<name>, so unlike Pi
-        # there is nothing per-skill left to supply. Kimi, DSH and Codex have no
-        # such directory — their commands are built in or registered in code.
+        # there is nothing per-skill left to supply. Kimi and DSH use the
+        # harness-owned packages listed above; Codex uses its $star plugin.
         ".claude/commands"
         ".cursor/commands"
         ".qwen/commands"
@@ -644,7 +664,7 @@ if [[ "${ADOPT}" == false ]]; then
     for path in "${SYNC_PATHS[@]}"; do
         if [[ -e "${SOURCE_DIR}/${path}" ]]; then
             SYNCED+=("${path}")
-        elif [[ "${path}" == .*/hooks* ]]; then
+        elif is_optional_path "${path}"; then
             log "Skipping ${path}: not present in ref '${STAR_REF}'."
         else
             fail "Upstream ref is missing ${path}."
@@ -883,7 +903,13 @@ install_file() {
 }
 
 for tree in "${ADOPT_TREES[@]}"; do
-    [[ -d "${SOURCE_DIR}/${tree}" ]] || fail "Upstream ref is missing ${tree}."
+    if [[ ! -d "${SOURCE_DIR}/${tree}" ]]; then
+        if is_optional_path "${tree}"; then
+            log "Skipping ${tree}: not present in ref '${STAR_REF}'."
+            continue
+        fi
+        fail "Upstream ref is missing ${tree}."
+    fi
     # -L for the same reason as the diff walks above: the shared skill files are
     # links to the one copy under .agents/skills, and this walk has to list them
     # to install them. The cp in install_file follows the link and writes a real
