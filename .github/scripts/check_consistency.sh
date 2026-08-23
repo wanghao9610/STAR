@@ -1500,12 +1500,13 @@ done
 # The other direction, per tree: a registry row whose citation is gone is as
 # misleading as an unregistered citation, and asking each tree separately also
 # catches the restatement dropped from one tree and left in the other six.
+registry_hit_text="$(printf '%s\n' "${registry_hit[@]:-}")"
 for row in "${RESTATED_REGISTRY[@]}"; do
     for root in "${SKILL_ROOTS[@]}"; do
         skill_of_row="${row%%|*}"
         [[ -d "${root}/${skill_of_row}" ]] || continue
         for lang in en zh; do
-            if ! printf '%s\n' "${registry_hit[@]:-}" | grep -qxF "${root}|${lang}|${row}"; then
+            if ! grep -qxF "${root}|${lang}|${row}" <<< "${registry_hit_text}"; then
                 fail "RESTATED_REGISTRY row '${row}' matches no citation in the ${lang} files of ${root}; drop the row or restore the restatement there"
                 sel_errors=1
             fi
