@@ -452,7 +452,7 @@ for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh \
          docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md \
-         .star/memory/MEMORY.md; do
+         .star/memory/MEMORY.md .star/memory/MEMORY.zh-CN.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
 done

@@ -474,6 +474,7 @@ if [[ "${ADOPT}" == true ]]; then
         ".agents/plugins/marketplace.json"
         ".pi/APPEND_SYSTEM.md"
         ".star/memory/MEMORY.md"
+        ".star/memory/MEMORY.zh-CN.md"
         ".env.example"
         ".gitignore"
         ".cursorignore"

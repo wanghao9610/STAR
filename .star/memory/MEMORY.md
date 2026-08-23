@@ -1,5 +1,7 @@
 # Project Memory — index
 
+**Language:** English | [简体中文](MEMORY.zh-CN.md)
+
 What earlier sessions in this repository learned, one line per memory, newest
 first. The session hooks under `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`,
 `.dsh/hooks/`, `.kimi-code/hooks/`, `.qwen/hooks/` and `.pi/extensions/star-hooks/`
