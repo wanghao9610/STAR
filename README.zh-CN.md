@@ -17,6 +17,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 ## 目录
 
 - [目录](#目录)
+- [STAR · STAGE · STORY](#star-·-stage-·-story)
 - [主要特性](#主要特性)
 - [项目结构](#项目结构)
 - [快速开始](#快速开始)
@@ -38,6 +39,16 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - [更新日志](#更新日志)
 - [引用](#引用)
 - [许可证](#许可证)
+
+## STAR · STAGE · STORY
+
+三个项目覆盖研究者工作的不同尺度。它们可以各自独立使用，也可以通过带指纹的证据彼此衔接。
+
+| 项目 | 范围 | 链接 |
+| --- | --- | --- |
+| **STAR** — Systematic Toolchain for AI Research | 推进一个研究项目：从想法出发，经可复现实验，产出可直接用于论文的证据。 | **当前项目** · [官网](https://wanghao9610.github.io/STAR/) · [GitHub](https://github.com/wanghao9610/STAR) |
+| **STAGE** — Systematic Toolchain for Authoring, Guiding, and Editing | 把一项研究贡献写成可追溯的论文，贯穿评审、回复与投稿打包。 | [官网](https://wanghao9610.github.io/STAGE/) · [GitHub](https://github.com/wanghao9610/STAGE) |
+| **STORY** — Systematic Toolchain for Organizing Research over Years | 把多年研究与论文综合成可答辩、可归档的完整博士学位论文。 | [官网](https://wanghao9610.github.io/STORY/) · [GitHub](https://github.com/wanghao9610/STORY) |
 
 ## 主要特性
 

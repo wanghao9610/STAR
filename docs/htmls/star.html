@@ -343,6 +343,60 @@
     font-size: 1.02rem;
   }
 
+  /* ---------- STAR family ---------- */
+  .family-grid {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .family-grid .family-card { min-height: 280px; display: flex; flex-direction: column; grid-column: auto; }
+  .family-card.current {
+    border-color: rgba(255, 216, 107, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(255, 216, 107, 0.08);
+  }
+  .family-card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .family-step {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    color: var(--card-c);
+  }
+  .family-current {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid rgba(255, 216, 107, 0.35);
+    border-radius: 999px;
+    color: var(--gold);
+    background: rgba(255, 216, 107, 0.07);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .family-card h3 { margin-top: 1.15rem; font-size: 1.45rem; letter-spacing: 0.08em; }
+  .family-full {
+    margin-top: 0.25rem;
+    min-height: 2.6rem;
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+  .family-card > p:last-of-type { margin-top: 1rem; color: var(--text-dim); font-size: 0.92rem; }
+  .family-links { margin-top: auto; padding-top: 1.4rem; display: flex; gap: 0.65rem; flex-wrap: wrap; }
+  .family-links a {
+    padding: 0.42rem 0.78rem;
+    border: 1px solid var(--line-hi);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+  .family-links a:hover { border-color: var(--card-c); color: var(--card-c); }
+  @media (max-width: 760px) {
+    .family-grid { grid-template-columns: 1fr; }
+    .family-card, .family-full { min-height: 0; }
+  }
+
+
+
   /* scroll reveal */
   .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .reveal.visible { opacity: 1; transform: none; }
@@ -695,6 +749,7 @@
     STAR
   </a>
   <div class="nav-links">
+    <a href="#family">Family</a>
     <a href="#pillars">Why STAR</a>
     <a href="#structure">Structure</a>
     <a href="#workflow">Workflow</a>
@@ -734,8 +789,58 @@
     <div class="stat"><b>2</b><span>Languages · EN 中文</span></div>
     <div class="stat"><b>MIT</b><span>Open Source</span></div>
   </div>
-  <a class="scroll-hint" href="#pillars" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a>
+  <a class="scroll-hint" href="#family" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a>
 </header>
+
+<!-- ==================== STAR FAMILY ==================== -->
+<section id="family">
+  <div class="wrap">
+    <p class="kicker reveal">The STAR family</p>
+    <h2 class="reveal">One research life cycle.<br>Three focused toolchains.</h2>
+    <p class="section-lead reveal">
+      Each works independently. Connect them when you want upstream work to flow downstream as fingerprinted, read-only evidence.
+    </p>
+    <div class="family-grid">
+      <article class="card family-card reveal current" style="--card-c: #ffd86b; --card-glow: rgba(255,216,107,0.18)">
+        <div class="family-card-head">
+          <span class="family-step">01 · RESEARCH</span>
+          <span class="family-current">Current</span>
+        </div>
+        <h3>STAR</h3>
+        <p class="family-full">Systematic Toolchain for AI Research</p>
+        <p>Runs one research project from idea through reproducible experiments to paper-ready evidence.</p>
+        <div class="family-links">
+          <a href="https://wanghao9610.github.io/STAR/" target="_blank" rel="noopener">Website ↗</a>
+          <a href="https://github.com/wanghao9610/STAR" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </article>
+      <article class="card family-card reveal" style="--card-c: #8b93ff; --card-glow: rgba(139,147,255,0.18)">
+        <div class="family-card-head">
+          <span class="family-step">02 · PAPER</span>
+        </div>
+        <h3>STAGE</h3>
+        <p class="family-full">Systematic Toolchain for Authoring, Guiding, and Editing</p>
+        <p>Turns one contribution into a traceable paper, review cycle, and submission package.</p>
+        <div class="family-links">
+          <a href="https://wanghao9610.github.io/STAGE/" target="_blank" rel="noopener">Website ↗</a>
+          <a href="https://github.com/wanghao9610/STAGE" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </article>
+      <article class="card family-card reveal" style="--card-c: #4cc3ff; --card-glow: rgba(76,195,255,0.18)">
+        <div class="family-card-head">
+          <span class="family-step">03 · DISSERTATION</span>
+        </div>
+        <h3>STORY</h3>
+        <p class="family-full">Systematic Toolchain for Organizing Research over Years</p>
+        <p>Synthesizes years of research and papers into a defensible dissertation, defense, and deposit.</p>
+        <div class="family-links">
+          <a href="https://wanghao9610.github.io/STORY/" target="_blank" rel="noopener">Website ↗</a>
+          <a href="https://github.com/wanghao9610/STORY" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 
 <!-- ==================== PILLARS ==================== -->
 <section id="pillars">

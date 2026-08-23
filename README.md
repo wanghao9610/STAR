@@ -17,6 +17,7 @@ When the research is ready to be written up, [STAGE](https://github.com/wanghao9
 ## Contents
 
 - [Contents](#contents)
+- [STAR · STAGE · STORY](#star-·-stage-·-story)
 - [What STAR provides](#what-star-provides)
 - [Project structure](#project-structure)
 - [Quick start](#quick-start)
@@ -38,6 +39,16 @@ When the research is ready to be written up, [STAGE](https://github.com/wanghao9
 - [Change log](#change-log)
 - [Citation](#citation)
 - [License](#license)
+
+## STAR · STAGE · STORY
+
+The three projects cover successive scales of a researcher's work. Use any one independently, or connect them through fingerprinted evidence.
+
+| Project | Scope | Links |
+| --- | --- | --- |
+| **STAR** — Systematic Toolchain for AI Research | Runs one research project from idea through reproducible experiments and paper-ready evidence. | **Current project** · [Website](https://wanghao9610.github.io/STAR/) · [GitHub](https://github.com/wanghao9610/STAR) |
+| **STAGE** — Systematic Toolchain for Authoring, Guiding, and Editing | Turns one research contribution into a traceable paper, review cycle, and submission package. | [Website](https://wanghao9610.github.io/STAGE/) · [GitHub](https://github.com/wanghao9610/STAGE) |
+| **STORY** — Systematic Toolchain for Organizing Research over Years | Synthesizes years of research and papers into a defensible dissertation, defense, and deposit. | [Website](https://wanghao9610.github.io/STORY/) · [GitHub](https://github.com/wanghao9610/STORY) |
 
 ## What STAR provides
 
