@@ -90,6 +90,7 @@ STAR/
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
 ├── .dsh/skills/            # Research workflow skills for DeepSeek Harness
+├── .dsh/commands/star/     # DSH's repo-local /star router package
 ├── .kimi-code/skills/      # Research workflow skills for Kimi Code
 ├── .pi/skills/             # Research workflow skills for Pi
 ├── .qwen/skills/           # Research workflow skills for Qwen Code
@@ -183,7 +184,7 @@ unchanged.
 
 ### 2. Configure the local runtime
 
-**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, falling back to `python3`, then to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH is the one harness needing a further tool, `zstd` (see [Per-harness setup (optional)](#per-harness-setup-optional)).
+**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, falling back to `python3`, then to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH additionally needs `zstd` for model-id recovery (see [Per-harness setup (optional)](#per-harness-setup-optional)); installing its repo-local `/star` router through `dsh plugin` needs `pnpm` on `PATH`.
 
 Copy the example environment file:
 
@@ -296,6 +297,14 @@ codex plugin add star@star
 ```
 
 Use `$star` with no argument for the current research status, or pass a request such as `$star review the implementation for plan 030`. The plugin reads the same `.agents/commands/star.md` roster as the other harnesses' `/star` wrappers; it adds no second copy of that routing table.
+
+DSH packages the same router under `.dsh/commands/star/`. Install it once into every profile that will run STAR, from the repository root, then restart that profile:
+
+```bash
+dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star
+```
+
+Use `/star` with no argument for the current research status, or pass a request such as `/star review the implementation for plan 030`. The command starts one follow-up turn against the shared `.agents/commands/star.md` roster, so DSH and the other harnesses route from the same source.
 
 Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works. Which seven, and why, is [conventions §10](docs/mds/star-workflow/research-workflow-conventions.md) (the skill roster); that table is the source of truth and this list follows it.
 
@@ -506,6 +515,7 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Highlights by release, newest first. Each release is a git tag, so `bash execs/update.sh v0.1.0` pins an update to that version.
 
+- **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)** (2026-08-23) — DeepSeek Harness gains the shared STAR router as a repo-local `/star` package under `.dsh/commands/star/`, installed once per profile through `dsh plugin`. Its Cordis bundle explicitly injects the `commands` service before registering the slash command, and both empty status requests and described tasks start a follow-up turn through the single `.agents/commands/star.md` roster. The package, bundle, exported plugin, and user-facing command are all named `star`; the README records the profile installation and use.
 - **[v0.2.10](https://github.com/wanghao9610/STAR/tree/v0.2.10)** (2026-08-23) — Codex gains the generic STAR router as a repo-local `$star` plugin. The plugin and canonical marketplace live under `.codex/plugins/`; `.agents/plugins/` exposes only `marketplace.json` as a relative symlink, avoiding a directory-level link that could collide with future harness plugins. `execs/update.sh` installs and refreshes both only when Codex is selected, and falls back to a real discovery file where symlinks are unavailable. The README documents marketplace registration, plugin installation, and `$star` usage, while CI locks the ownership and link layout.
 - **[v0.2.9](https://github.com/wanghao9610/STAR/tree/v0.2.9)** (2026-08-23) — `/star` now has one tool-neutral routing roster under `.agents/commands/`; Claude, Cursor, Pi, and Qwen keep only thin wrappers, the updater installs and refreshes the shared source, and CI holds every wrapper and both roster languages to the same fifteen-skill and † sets. Human-facing project and maintainer instructions gain Chinese counterparts—`AGENTS.zh-CN.md`, `CLAUDE.zh-CN.md`, `.github/CONTRIBUTING.zh-CN.md`, and the architect's upstream template—with the updater carrying the project-level copies into adopted repositories. `STAR_LANG` now also binds replies drafted in a fork or sub-agent and relayed back to the user; a run with no user turn falls back to the invocation's language when the setting is absent.
 - **[v0.2.8](https://github.com/wanghao9610/STAR/tree/v0.2.8)** (2026-08-20) — A skill now loads only what a run of it uses: the conventions arrive as the sections that skill acts on rather than the whole document, the document itself says the same thirteen dialogue rules and every other rule in 8.8% fewer bytes, and the procedure a run never enters — `aggregate`, `watch`, `ledger`, `add`, `backfill`, dropping a plan, the architect's reference-implementation branch, the executor's resume rules, the reference reviewer's three offline modes — waits in its own file until that path is taken, behind a stub naming the file, the trigger, and the runs that read none of it. Across the fifteen skills the text pulled in before the first step falls from about 446k tokens to about 380k (-15%), and a measured English `/star-plan-coach` session now loads 14944 tokens before its first step where it loaded 27265; two new invariants keep that honest — a `references/…` path a skill names has to exist, and a reference file it ships has to be named by some step — and the shared memory store now keeps only its template header, every entry moving to a git-ignored `local/`. A skill is named one way in that text now, the bare `star-plan-executor`, because the `/` and `/skill:` prefixes were the only difference in most of the files each tree kept its own copy of — a name a skill hands you is yours to prefix, and the slash commands that define the invocation are unchanged — which, with one stored copy per wording rather than one per tree, takes the seven trees from 859 stored files to 538, every link pointing into `.agents/skills/` and nowhere else; an installed project sees none of this, since `execs/update.sh` writes out what a link points at.

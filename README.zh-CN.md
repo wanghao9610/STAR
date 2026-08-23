@@ -90,6 +90,7 @@ star-ai-research/
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
+├── .dsh/commands/star/     # DSH 仓库内的 /star 分流包
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
@@ -175,7 +176,7 @@ bash /tmp/star-update.sh --adopt
 
 ### 2. 配置本地运行环境
 
-**环境依赖。** STAR 需要 `git` 与 `bash`；`execs/update.sh` 还需要 `curl`。会话钩子解析 JSON 载荷时优先用 `jq`，退回 `python3`，再退回 `grep` / `sed`，所以两个解析器都没有的机器照样能拿到项目记忆、提交守卫和模型 id。DSH 是唯一还需要另一个工具 `zstd` 的宿主（见[分宿主配置（可选）](#分宿主配置可选)）。
+**环境依赖。** STAR 需要 `git` 与 `bash`；`execs/update.sh` 还需要 `curl`。会话钩子解析 JSON 载荷时优先用 `jq`，退回 `python3`，再退回 `grep` / `sed`，所以两个解析器都没有的机器照样能拿到项目记忆、提交守卫和模型 id。DSH 还需要 `zstd` 才能恢复模型 id（见[分宿主配置（可选）](#分宿主配置可选)）；通过 `dsh plugin` 安装仓库内的 `/star` 分流包时，`PATH` 上还须有 `pnpm`。
 
 复制环境配置示例文件：
 
@@ -288,6 +289,14 @@ codex plugin add star@star
 ```
 
 不带参数的 `$star` 显示当前研究状态，也可以传入描述，例如 `$star 审查 030 计划的实现`。插件读取的仍是其他宿主 `/star` 薄包装共用的 `.agents/commands/star.md` 名册，不会再维护第二份分流表。
+
+DSH 把同一个分流器放在 `.dsh/commands/star/`。在仓库根目录为每个将运行 STAR 的 profile 安装一次，然后重启该 profile：
+
+```bash
+dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star
+```
+
+不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流。
 
 七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（skill 名册）那张表为准，本节只是跟随它。
 
@@ -498,6 +507,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)**（2026-08-23）—— DeepSeek Harness 新增仓库级 `/star` 包，把共享的 STAR 分流器放在 `.dsh/commands/star/`，通过 `dsh plugin` 为每个 profile 安装一次。它的 Cordis bundle 会先显式注入 `commands` 服务，再注册斜杠命令；无参数的状态请求与带描述的任务都会经唯一的 `.agents/commands/star.md` 名册发起后续轮次。包、bundle、导出的插件与用户看到的命令统一命名为 `star`；README 写明了按 profile 安装及使用方法。
 - **[v0.2.10](https://github.com/wanghao9610/STAR/tree/v0.2.10)**（2026-08-23）—— Codex 新增仓库级 `$star` 插件，用同一个入口分流 STAR 请求。插件与 marketplace 实体归 `.codex/plugins/` 所有；`.agents/plugins/` 只放一个指向 `marketplace.json` 的相对软链接，不把整个 Codex 私有目录暴露给未来可能采用该位置的其他宿主。`execs/update.sh` 仅在选择 Codex 时安装和刷新两者，不支持软链接的环境退化为普通发现文件。README 写明 marketplace 注册、插件安装和 `$star` 用法，CI 则固定归属与链接结构。
 - **[v0.2.9](https://github.com/wanghao9610/STAR/tree/v0.2.9)**（2026-08-23）—— `/star` 的完整分流名册现在只在 `.agents/commands/` 维护一份；Claude、Cursor、Pi 与 Qwen 只保留薄包装，更新器会安装并刷新共享来源，CI 则保证所有包装和名册中英两版始终对应同一组十五个 skill 与 † 标记。面向人的项目与维护说明新增中文对照版——`AGENTS.zh-CN.md`、`CLAUDE.zh-CN.md`、`.github/CONTRIBUTING.zh-CN.md` 和架构师的上游模板——其中项目级文件会随更新器进入接入后的仓库。`STAR_LANG` 现在也约束在 fork 或 subagent 中起草、再转交给用户的回复；背后没有用户消息且未设置该值时，运行改用调用参数本身的语言。
 - **[v0.2.8](https://github.com/wanghao9610/STAR/tree/v0.2.8)**（2026-08-20）—— 一个 skill 现在只装载这次运行真正会用到的部分：规约按该技能实际依据的那几节到达，而不是整份文档；文档本身用少 8.8% 的字节说出同样的规则；而某次运行根本不会进入的流程——`aggregate`、`watch`、`ledger`、`add`、`backfill`、丢弃一份计划、架构师从参考实现起步的那条分支、执行器的续跑规则、文献评审的三个离线模式——各自留在自己的文件里，等那条路真的被走到才读，原地只留一句桩子写明是哪个文件、什么时候读、哪些运行完全不读它。十五个技能在第一步之前装载的文本合计从约 44.6 万词元降到约 38.0 万（−15%），一次实测的英文 `/star-plan-coach` 会话开局装载从 27265 词元降到 14944；两条新校验守着这件事不走样——技能文本里写出的 `references/…` 路径必须存在，随技能发布的参考文件必须有某个步骤会去读它——同时共享记忆区只保留模板抬头，条目一律迁往 git 忽略的 `local/`。技能正文里调用一个技能现在只有一种写法，光名字 `star-plan-executor`：`/` 与 `/skill:` 这两个前缀，正是各棵树各留一份副本的那批文件里唯一的差别——技能交还给你的名字由你自己补前缀，定义调用的斜杠命令本身不动——再加上按措辞存一份、而不是按树各存一份，七棵树的存储文件从 859 个降到 538 个，软链接一律只指向 `.agents/skills/`；已安装的项目看不到这些变化，`execs/update.sh` 复制时会把软链接指向的内容写成实文件。
