@@ -1,0 +1,6 @@
+interface:
+  display_name: "STAR"
+  short_description: "Route a request to one STAR research workflow"
+  default_prompt: "Use $star to choose and run the right STAR research workflow."
+policy:
+  allow_implicit_invocation: false

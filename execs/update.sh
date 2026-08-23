@@ -112,20 +112,45 @@ fail() {
     exit 1
 }
 
+# Keep Codex's repo marketplace at the path its host discovers while leaving
+# the canonical file under .codex. Filesystems that cannot create symlinks get
+# a real copy so the plugin remains usable.
+link_codex_marketplace() {
+    local dst="${ROOT_DIR}/.agents/plugins/marketplace.json"
+    local src="${ROOT_DIR}/.codex/plugins/marketplace.json"
+
+    [[ -f "${src}" ]] || fail "Missing Codex marketplace: .codex/plugins/marketplace.json."
+    mkdir -p "$(dirname -- "${dst}")"
+    if [[ -L "${dst}" ]] && [[ "$(readlink "${dst}")" == "../../.codex/plugins/marketplace.json" ]]; then
+        return 0
+    fi
+    if [[ -e "${dst}" || -L "${dst}" ]]; then
+        rm -f -- "${dst}"
+    fi
+    if ! ln -s "../../.codex/plugins/marketplace.json" "${dst}" 2>/dev/null; then
+        cp -p "${src}" "${dst}"
+        log "NOTE: symlinks are unavailable; installed .agents/plugins/marketplace.json as a real file."
+    fi
+}
+
 # Which harness tree a path belongs to, empty when it belongs to none and every run
-# therefore covers it. .agents belongs to none on purpose: it is where the
-# AGENTS.md convention puts skills, so every agent that follows the convention
-# reads it — Codex has no other project root, Cursor scans it natively, Pi and
-# DSH read it beside their own — and a project that has it can be handed to a
-# harness STAR ships no tree for at all. It is part of the shared skeleton now,
-# updated whichever trees --harnesses names, and updated first. .codex stays Codex's:
-# its hooks and its per-skill manifests. .cursorignore is Cursor's one path
+# therefore covers it. .agents belongs to none on purpose, except for Codex's
+# single marketplace discovery file: it is where the AGENTS.md convention puts
+# skills, so every agent that follows the convention reads it — Codex has no
+# other project root, Cursor scans it natively, Pi and DSH read it beside their
+# own — and a project that has it can be handed to a harness STAR ships no tree
+# for at all. It is part of the shared skeleton now, updated whichever trees
+# --harnesses names, and updated first. .codex stays Codex's: its hooks,
+# per-skill manifests, and plugins. .cursorignore is Cursor's one path
 # outside .cursor/; every other path starts with its harness's own directory, so one
 # added upstream is classified without being listed here.
 path_harness() { # $1 = path relative to the project root
     case "$1" in
+        # This one .agents entry only exposes Codex's private marketplace. Keep
+        # the rest of .agents shared so future harness conventions can grow
+        # there without inheriting Codex's plugin tree.
+        .agents/plugins/marketplace.json|.codex/*) printf 'codex' ;;
         .agents/*)               printf '' ;;
-        .codex/*)                printf 'codex' ;;
         .claude/*)               printf 'claude' ;;
         .cursor/*|.cursorignore) printf 'cursor' ;;
         .dsh/*)                  printf 'dsh' ;;
@@ -235,9 +260,9 @@ Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
        bash execs/update.sh --diff [ref] [--harnesses LIST] [--skill NAME] [--force]
        bash update.sh [ref] [--harnesses LIST] --adopt
 
-Overwrite STAR-managed skills, session hooks (model-id provenance, project memory), the slash
-commands each harness tree defines, research workflow documentation, the stock experiment launcher
-execs/run.sh, and this script itself with files from upstream.
+Overwrite STAR-managed skills, the Codex $star plugin, session hooks (model-id provenance, project
+memory), the slash commands each harness tree defines, research workflow documentation, the stock
+experiment launcher execs/run.sh, and this script itself with files from upstream.
 The default ref is main; a branch or tag may be supplied instead. By default all of them are
 updated, so local edits to execs/run.sh are replaced along with everything else; the experiment
 scripts run.sh launches, under execs/scpts/, are the project's own and are never touched.
@@ -263,6 +288,8 @@ are updated whichever trees are selected, and .agents/skills is written first. I
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
+The $star plugin lives under .codex/plugins and its one discovery link under .agents/plugins is
+updated only when codex is selected.
 
 --diff previews an update without changing anything: it lists upstream files that are new
 or differ from the local copies, plus project-local files an update would keep. It exits 0
@@ -428,6 +455,9 @@ if [[ "${ADOPT}" == true ]]; then
         # Codex's own half of it — the per-skill manifests .agents/skills links
         # to upstream — installed with the rest of the Codex tree and only then.
         ".codex/skills"
+        # The Codex-only $star router plugin. Its .agents discovery entry is a
+        # single file in ADOPT_FILES, not a link over the whole directory.
+        ".codex/plugins"
         "${SKILL_ROOTS[@]:1}"
         "${HOOK_TREES[@]}"
         "${EXTENSION_TREES[@]}"
@@ -441,6 +471,7 @@ if [[ "${ADOPT}" == true ]]; then
     )
     ADOPT_FILES=(
         "AGENTS.md"
+        ".agents/plugins/marketplace.json"
         ".pi/APPEND_SYSTEM.md"
         ".star/memory/MEMORY.md"
         ".env.example"
@@ -496,6 +527,10 @@ else
         ".agents/commands"
         # Codex's own half of it, installed and updated with the Codex tree.
         ".codex/skills"
+        # Codex's $star plugin stays private to its tree. Only the marketplace
+        # file is exposed through the exact .agents path the host discovers.
+        ".codex/plugins"
+        ".agents/plugins/marketplace.json"
         # Which skill root each harness owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
@@ -596,7 +631,7 @@ if [[ "${ADOPT}" == false ]]; then
         # .codex/skills is listed for the same reason from the other side: it
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/commands .codex/skills)
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/commands .agents/plugins .codex/skills)
         for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
             read -ra harness_roots <<<"$(harness_dirs "${harness}")"
             SPARSE_PATHS+=("${harness_roots[@]}")
@@ -737,6 +772,10 @@ if [[ "${ADOPT}" == false ]]; then
     for path in "${SYNCED[@]}"; do
         if [[ "${path}" == "${SELF_PATH}" ]]; then
             SELF_SYNCED=true
+        elif [[ "${path}" == ".agents/plugins/marketplace.json" ]]; then
+            # tar -h intentionally dereferences shared skill links, but this
+            # link must remain the one narrow .agents discovery entry.
+            continue
         else
             TAR_PATHS+=("${path}")
         fi
@@ -759,6 +798,10 @@ if [[ "${ADOPT}" == false ]]; then
         fi
         tar -C "${SOURCE_DIR}" "${TAR_CREATE_ARGS[@]}" -f "${ARCHIVE_FILE}" "${TAR_PATHS[@]}"
         tar -C "${ROOT_DIR}" -xf "${ARCHIVE_FILE}"
+    fi
+
+    if [[ -z "${SKILL_NAME}" ]] && is_selected codex; then
+        link_codex_marketplace
     fi
 
     SELF_REPLACED=false
@@ -824,6 +867,12 @@ install_file() {
     if [[ -e "${dst}" || -L "${dst}" ]]; then
         printf '  kept    %s (already present)\n' "${rel}"
         skipped=$(( skipped + 1 ))
+        return 0
+    fi
+    if [[ "${rel}" == ".agents/plugins/marketplace.json" ]]; then
+        link_codex_marketplace
+        printf '  added   %s -> %s\n' "${rel}" "../../.codex/plugins/marketplace.json"
+        installed=$(( installed + 1 ))
         return 0
     fi
     mkdir -p "$(dirname -- "${dst}")"

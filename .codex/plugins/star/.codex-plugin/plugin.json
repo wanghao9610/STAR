@@ -1,0 +1,20 @@
+{
+  "name": "star",
+  "version": "0.1.0",
+  "description": "Route STAR requests to the project's research workflow skills.",
+  "author": {
+    "name": "STAR"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "STAR",
+    "shortDescription": "Route a request to one STAR research workflow.",
+    "longDescription": "Adds the $star router for choosing and running one STAR research workflow skill in the current project.",
+    "developerName": "STAR",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use $star to show the current research status."
+    ]
+  }
+}

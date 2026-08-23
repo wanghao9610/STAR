@@ -1,0 +1,20 @@
+{
+  "name": "star",
+  "interface": {
+    "displayName": "STAR"
+  },
+  "plugins": [
+    {
+      "name": "star",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/star"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

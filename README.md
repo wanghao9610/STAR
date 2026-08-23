@@ -83,6 +83,7 @@ STAR/
 ├── .pi/skills/             # Research workflow skills for Pi
 ├── .qwen/skills/           # Research workflow skills for Qwen Code
 ├── .codex/skills/          # Codex's per-skill manifests, linked from .agents/skills/
+├── .codex/plugins/         # Codex's $star router plugin and canonical marketplace
 ├── .claude/hooks/          # Hooks for Claude: model-id provenance, project memory, involve gate
 ├── .codex/hooks/           # Hooks for Codex: model-id provenance, project memory, involve gate
 ├── .cursor/hooks/          # Session hooks for Cursor
@@ -92,6 +93,7 @@ STAR/
 ├── .qwen/hooks/            # Hooks for Qwen Code: model-id provenance, project memory, involve gate
 ├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
 ├── .agents/commands/       # Shared /star router read by each harness-owned command
+├── .agents/plugins/        # Codex marketplace discovery: one file link into .codex/plugins/
 ├── .claude/commands/       # Claude Code slash command: /star, routing a request to a skill
 ├── .cursor/commands/       # The same /star command for Cursor
 ├── .qwen/commands/         # The same /star command for Qwen Code
@@ -275,6 +277,15 @@ STAR ships fifteen skills covering the way from a vague interest to a written-up
 | Pi | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 
+Codex also packages the shared router as the repo-local `star` plugin. Register and install it once from the repository root, then start a new session:
+
+```bash
+codex plugin marketplace add .
+codex plugin add star@star
+```
+
+Use `$star` with no argument for the current research status, or pass a request such as `$star review the implementation for plan 030`. The plugin reads the same `.agents/commands/star.md` roster as the other harnesses' `/star` wrappers; it adds no second copy of that routing table.
+
 Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works. Which seven, and why, is [conventions §10](docs/mds/star-workflow/research-workflow-conventions.md) (the skill roster); that table is the source of truth and this list follows it.
 
 <div align="center">
@@ -418,6 +429,7 @@ By default, the command updates these paths from STAR's `main` branch — every 
 - `.cursor/rules/skill-roots.mdc` and `.pi/APPEND_SYSTEM.md` — which skill root each harness owns, and which copy Cursor and Pi must follow
 - `.agents/skills/` — the shared root — then `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
 - `.codex/skills/` — the per-skill manifests Codex reads, installed with the rest of its tree; upstream `.agents/skills/` links to them, and a project receives both as real files
+- `.codex/plugins/` — the Codex-only `$star` router plugin and canonical marketplace; `.agents/plugins/marketplace.json` is only a file link to that marketplace, never a link over the directory
 - `.agents/commands/` — the single shared `/star` routing roster — then the thin harness wrappers in `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/`, plus Pi's one prompt per skill, `/star-<name>`
 - `.pi/agents/`, `.pi/extensions/star-plan-mode/`, `.pi/extensions/star-subagent/`, `.pi/extensions/star-permission-gate.ts`, and `.pi/extensions/star-questionnaire.ts` — the sub-agents, plan mode, and structured questions Pi's core does not ship; your project's own extensions sit beside them and are kept
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.dsh/hooks/`, `.kimi-code/hooks/`, `.pi/extensions/star-hooks/`, `.qwen/hooks/`, and the files that register them where registration is not automatic — `.dsh/hooks.json` with `.dsh/cordis.patch.yml`, `.kimi-code/hooks.example.toml`, and `.pi/extensions/star-hooks/index.ts` — the model-id provenance, project memory, and involve-gate hooks

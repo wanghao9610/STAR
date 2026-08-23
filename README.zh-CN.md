@@ -83,6 +83,7 @@ star-ai-research/
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
 ├── .codex/skills/          # Codex 每个技能一份的清单，由 .agents/skills/ 用软链接指过来
+├── .codex/plugins/         # Codex 的 $star 分流插件与 marketplace 实体
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
@@ -92,6 +93,7 @@ star-ai-research/
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
 ├── .agents/commands/       # 各宿主命令共同读取的 /star 分流规则
+├── .agents/plugins/        # Codex marketplace 发现入口：仅一个指向 .codex/plugins/ 的文件链接
 ├── .claude/commands/       # Claude Code 的斜杠命令 /star：把描述出来的需求分流到某个技能
 ├── .cursor/commands/       # 同一个 /star 命令，Cursor 版
 ├── .qwen/commands/         # 同一个 /star 命令，Qwen Code 版
@@ -267,6 +269,15 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 | Pi | `/star-<名>` | `/star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
+Codex 还把共享分流器打包成仓库内的 `star` 插件。在仓库根目录注册并安装一次，然后新开会话：
+
+```bash
+codex plugin marketplace add .
+codex plugin add star@star
+```
+
+不带参数的 `$star` 显示当前研究状态，也可以传入描述，例如 `$star 审查 030 计划的实现`。插件读取的仍是其他宿主 `/star` 薄包装共用的 `.agents/commands/star.md` 名册，不会再维护第二份分流表。
+
 七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（skill 名册）那张表为准，本节只是跟随它。
 
 <div align="center">
@@ -410,6 +421,7 @@ bash execs/update.sh
 - `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个宿主所有，以及 Cursor 和 Pi 该跟随哪一份副本
 - `.agents/skills/`——共享根目录——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
+- `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
 - `.agents/commands/`——唯一共享的 `/star` 分流名册——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子

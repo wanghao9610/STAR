@@ -198,6 +198,38 @@ while IFS= read -r skill; do
 done < <(printf '%s\n' "${SKILLS}")
 (( guard_errors == 0 )) && note "conventions and shared /star router list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
+# 4b. Codex gets the generic router through one plugin owned entirely by
+#     .codex. .agents exposes only the marketplace file the host discovers;
+#     linking the directory would leak every Codex-private plugin into a shared
+#     namespace and turn future harness support there into a collision.
+section "Codex STAR plugin layout"
+plugin_errors=0
+MARKETPLACE=".codex/plugins/marketplace.json"
+PLUGIN_ROOT=".codex/plugins/star"
+DISCOVERY=".agents/plugins/marketplace.json"
+if [[ ! -L "${DISCOVERY}" ]]; then
+    fail "${DISCOVERY} is not a file symlink"
+    plugin_errors=1
+elif [[ "$(readlink "${DISCOVERY}")" != "../../.codex/plugins/marketplace.json" ]]; then
+    fail "${DISCOVERY} does not point to ../../.codex/plugins/marketplace.json"
+    plugin_errors=1
+elif ! cmp -s "${DISCOVERY}" "${MARKETPLACE}"; then
+    fail "${DISCOVERY} does not resolve to ${MARKETPLACE}"
+    plugin_errors=1
+fi
+if ! python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); e=m["plugins"]; assert m["name"] == "star" and len(e) == 1 and e[0]["name"] == "star" and e[0]["source"] == {"source": "local", "path": "./.codex/plugins/star"}; assert p["name"] == "star" and p["skills"] == "./skills/"' "${MARKETPLACE}" "${PLUGIN_ROOT}/.codex-plugin/plugin.json"; then
+    fail "Codex STAR plugin or marketplace metadata is invalid"
+    plugin_errors=1
+fi
+if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
+   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star/SKILL.md" "name: star" || \
+   ! grep -qF 'Read `.agents/commands/star.md`' "${PLUGIN_ROOT}/skills/star/SKILL.md" || \
+   ! grep -qF 'allow_implicit_invocation: false' "${PLUGIN_ROOT}/skills/star/agents/openai.yaml"; then
+    fail "${PLUGIN_ROOT}/skills/star is not the explicit-only wrapper around the shared router"
+    plugin_errors=1
+fi
+(( plugin_errors == 0 )) && note "Codex owns one star plugin; .agents exposes only its marketplace file"
+
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
 # states upstream_template.md has no _zh version (UPSTREAM.md is always English).
