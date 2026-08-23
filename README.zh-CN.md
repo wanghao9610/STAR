@@ -91,6 +91,7 @@ star-ai-research/
 ├── .pi/extensions/         # Pi 的扩展：STAR 的会话钩子，外加子代理、计划模式、结构化提问
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
+├── .agents/commands/       # 各宿主命令共同读取的 /star 分流规则
 ├── .claude/commands/       # Claude Code 的斜杠命令 /star：把描述出来的需求分流到某个技能
 ├── .cursor/commands/       # 同一个 /star 命令，Cursor 版
 ├── .qwen/commands/         # 同一个 /star 命令，Qwen Code 版
@@ -404,12 +405,12 @@ bash .dsh/hooks/install.sh         # DSH
 bash execs/update.sh
 ```
 
-该命令默认从 STAR 的 `main` 分支更新以下路径——七棵宿主树全在其中，除非 `STAR_HARNESSES` 或 `--harnesses` 收窄范围。`.agents/skills/` 不受收窄影响：`AGENTS.md` 约定把 skill 放在这里，所以无论点名哪几棵树，每次运行都更新它，而且排在最前面。
+该命令默认从 STAR 的 `main` 分支更新以下路径——七棵宿主树全在其中，除非 `STAR_HARNESSES` 或 `--harnesses` 收窄范围。共享的 `.agents/skills/` 与 `.agents/commands/` 不受收窄影响，所以无论点名哪几棵树，每次运行都会更新它们。
 
 - `.cursor/rules/skill-roots.mdc` 与 `.pi/APPEND_SYSTEM.md`——各个 skill 根目录归哪个宿主所有，以及 Cursor 和 Pi 该跟随哪一份副本
 - `.agents/skills/`——共享根目录——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
-- `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/`——把描述出来的需求分流到某个 skill 的 `/star` 斜杠命令，外加 Pi 那份每个 skill 一条的 `/star-<名>`
+- `.agents/commands/`——唯一共享的 `/star` 分流名册——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
@@ -420,7 +421,7 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 
 拉取来源由 `STAR_REPOSITORY` 指定，取值顺序为：环境变量、`.env`、内置默认值 `https://github.com/wanghao9610/STAR.git`。想长期跟随某个 fork，就写进 `.env`；只想临时改一次，在命令前加变量即可——`STAR_REPOSITORY=… bash execs/update.sh`。
 
-七棵宿主树里动哪几棵，由 `STAR_HARNESSES` 指定，取值顺序相同：环境变量、`.env`、默认全部。在 `.env` 里写 `STAR_HARNESSES=claude,pi` 就只维护这两棵；另外两个取值是 `all` 和 `none`，`none` 表示这次更新只剩共享骨架——现在共享骨架里也包含 `.agents/skills/`——工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：不安装、不更新、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来；七棵都留着的项目不设这个键，行为和从前一样。收窄过的运行还只拉取它将要写入的那几棵，未提交改动的拦截也只覆盖这几棵。
+七棵宿主树里动哪几棵，由 `STAR_HARNESSES` 指定，取值顺序相同：环境变量、`.env`、默认全部。在 `.env` 里写 `STAR_HARNESSES=claude,pi` 就只维护这两棵；另外两个取值是 `all` 和 `none`，`none` 表示这次更新只剩共享骨架——`.agents/skills/`、`.agents/commands/`、工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：不安装、不更新、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来；七棵都留着的项目不设这个键，行为和从前一样。收窄过的运行还只拉取它将要写入的那几棵，未提交改动的拦截也只覆盖这几棵。
 
 钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。
 
@@ -434,7 +435,7 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 - `--diff` 不改动任何文件地预览更新，有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”。
 - `ref` 把更新固定到某个 tag 或分支。
-- `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
+- `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 或 `.agents/commands/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
 - `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
 
@@ -474,12 +475,13 @@ curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.2.9](https://github.com/wanghao9610/STAR/tree/v0.2.9)**（2026-08-23）—— `/star` 的完整分流名册现在只在 `.agents/commands/` 维护一份；Claude、Cursor、Pi 与 Qwen 只保留薄包装，更新器会安装并刷新共享来源，CI 则保证所有包装和名册中英两版始终对应同一组十五个 skill 与 † 标记。面向人的项目与维护说明新增中文对照版——`AGENTS.zh-CN.md`、`CLAUDE.zh-CN.md`、`.github/CONTRIBUTING.zh-CN.md` 和架构师的上游模板——其中项目级文件会随更新器进入接入后的仓库。`STAR_LANG` 现在也约束在 fork 或 subagent 中起草、再转交给用户的回复；背后没有用户消息且未设置该值时，运行改用调用参数本身的语言。
 - **[v0.2.8](https://github.com/wanghao9610/STAR/tree/v0.2.8)**（2026-08-20）—— 一个 skill 现在只装载这次运行真正会用到的部分：规约按该技能实际依据的那几节到达，而不是整份文档；文档本身用少 8.8% 的字节说出同样的规则；而某次运行根本不会进入的流程——`aggregate`、`watch`、`ledger`、`add`、`backfill`、丢弃一份计划、架构师从参考实现起步的那条分支、执行器的续跑规则、文献评审的三个离线模式——各自留在自己的文件里，等那条路真的被走到才读，原地只留一句桩子写明是哪个文件、什么时候读、哪些运行完全不读它。十五个技能在第一步之前装载的文本合计从约 44.6 万词元降到约 38.0 万（−15%），一次实测的英文 `/star-plan-coach` 会话开局装载从 27265 词元降到 14944；两条新校验守着这件事不走样——技能文本里写出的 `references/…` 路径必须存在，随技能发布的参考文件必须有某个步骤会去读它——同时共享记忆区只保留模板抬头，条目一律迁往 git 忽略的 `local/`。技能正文里调用一个技能现在只有一种写法，光名字 `star-plan-executor`：`/` 与 `/skill:` 这两个前缀，正是各棵树各留一份副本的那批文件里唯一的差别——技能交还给你的名字由你自己补前缀，定义调用的斜杠命令本身不动——再加上按措辞存一份、而不是按树各存一份，七棵树的存储文件从 859 个降到 538 个，软链接一律只指向 `.agents/skills/`；已安装的项目看不到这些变化，`execs/update.sh` 复制时会把软链接指向的内容写成实文件。
 - **[v0.2.7](https://github.com/wanghao9610/STAR/tree/v0.2.7)**（2026-08-20）—— 全部自撰文档改用更精简的说法表达同一件事——十五个 skill 及其 references 的中英两版、工作流文档、两份 README 正文——删掉复述与脚手架，每一条主张、条件、禁令和引用都留着：正文词数从 33.4 万降到 32.2 万，每次运行都装载的 `SKILL.md` 短了 4.7%。指定 `execs/update.sh` 安装哪几棵宿主树的键改名为 `STAR_HARNESSES`、开关改为 `--harnesses`，因为在本仓库里 `tool` 指的是代理调用的工具，不是装树的那个宿主。旧名不是弃用而是直接取消，`.env` 里仍写 `STAR_TOOLS` 的项目会被忽略，那次更新会把七棵树全装上。
-- **[v0.2.6](https://github.com/wanghao9610/STAR/tree/v0.2.6)**（2026-08-20）—— `.agents/skills/` 是凡遵循 `AGENTS.md` 约定的 agent 都会读的共享根目录，不是某一家宿主自己的私有目录，因此其中十五个 skill 的正文不再点名任何一家自有的工具——一律改用角色指代，读者统称 agent——也不再带任何一家的调用前缀，因为前缀各家写法不同，而各家自己清楚该怎么写。Codex 自己那份每个技能一份的清单——显示名、默认提示词，以及决定一个技能是否只在被点名时才跑的那个开关——迁到 `.codex/skills/<skill>/agents/openai.yaml`，再由 Codex 扫描的那个路径上的相对软链接指过去，因为 Codex 只会从技能目录内部读这份清单。`execs/update.sh` 现在每次运行都同步 `.agents/skills/`，排在最前，且不受 `--tools` 点名范围影响——它是 STAR 没有为其准备工具树的那类 agent 会读的那一份，所以删掉它会被下一次更新装回来，工具树则不会；`--tools codex` 现在只收窄到 `.codex`，项目拿到的仍是实文件，软链接在复制时被写成实文件。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.2.6](https://github.com/wanghao9610/STAR/tree/v0.2.6)**（2026-08-20）—— `.agents/skills/` 是凡遵循 `AGENTS.md` 约定的 agent 都会读的共享根目录，不是某一家宿主自己的私有目录，因此其中十五个 skill 的正文不再点名任何一家自有的工具——一律改用角色指代，读者统称 agent——也不再带任何一家的调用前缀，因为前缀各家写法不同，而各家自己清楚该怎么写。Codex 自己那份每个技能一份的清单——显示名、默认提示词，以及决定一个技能是否只在被点名时才跑的那个开关——迁到 `.codex/skills/<skill>/agents/openai.yaml`，再由 Codex 扫描的那个路径上的相对软链接指过去，因为 Codex 只会从技能目录内部读这份清单。`execs/update.sh` 现在每次运行都同步 `.agents/skills/`，排在最前，且不受 `--tools` 点名范围影响——它是 STAR 没有为其准备工具树的那类 agent 会读的那一份，所以删掉它会被下一次更新装回来，工具树则不会；`--tools codex` 现在只收窄到 `.codex`，项目拿到的仍是实文件，软链接在复制时被写成实文件。
 - **[v0.2.5](https://github.com/wanghao9610/STAR/tree/v0.2.5)**（2026-08-19）—— 七棵工具树里措辞完全一致的那批文件改为只存一份，落在 `.agents/skills/` 下，其余六棵在相同路径上放一条相对软链接；每个 `SKILL.md`，以及凡是写了某家自有内置工具名的参考文档与模板，仍是各棵树各自的实文件。接入与更新不受影响：`execs/update.sh` 复制时会把软链接指向的内容写成实文件，项目拿到的仍是每棵树一份独立完整的副本。只有直接克隆本仓库才带着软链接，此时先用 `tar -chf - .claude/skills | tar -xf -` 把要留的那棵变成独立副本，再把 `.agents/` 放到最后删掉。
 - **[v0.2.4](https://github.com/wanghao9610/STAR/tree/v0.2.4)**（2026-08-19）—— 一次运行拟出一张要你逐条接受或否决的清单时，不再一条一条问：规约 [§7.13](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 把整张清单定成一个问题——编号行连同"改什么、依据是什么"先摊在页面上，然后只问一次：*全部按清单采纳* / *除我点名的以外全部采纳* / *先解答我点名的几项* / *一项都不采纳*，被点出来的行进第二轮，形状照旧。`star-plan-reviser` 的修订候选与 `star-code-reviewer` 要问的那批修复就此不再逐条走；`star-code-architect`、`star-code-release`、`star-plan-executor`、`star-metd-summarize` 那几个本来就成批问的问题，补上了"先解释这几项"这条从来没有过的路；而必须单独问的仍旧单独问——红线上的一切、每一次删除与覆盖，以及放弃一个计划。引导式提问不受影响，因为每个答案决定下一个问什么的辅导连问没有拟好的东西可以摊开；`involve=high` 会把任何一张清单重新拆回一行一问。
 - **[v0.2.3](https://github.com/wanghao9610/STAR/tree/v0.2.3)**（2026-08-19）—— `execs/update.sh` 不再把七棵工具树当成不可分的一整块：`--tools claude,pi` 把这次运行限定在点名的那几棵上，`.env` 里的 `STAR_TOOLS` 让这个选择长期生效，另外两个取值是 `all` 与 `none`——`none` 表示这次更新只剩共享骨架：工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：`--adopt` 不装、更新不写、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来。收窄过的运行只拉取它将要写入的那几棵，未提交改动的拦截也只针对这几棵。

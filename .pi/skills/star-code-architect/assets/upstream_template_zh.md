@@ -1,0 +1,1 @@
+../../../../.agents/skills/star-code-architect/assets/upstream_template_zh.md

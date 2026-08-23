@@ -99,7 +99,8 @@ done < <(printf '%s\n' "${SKILLS}")
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
 #    pick up. Both failures are silent in use, which is what this check is for.
-#    The roster itself is held to the trees and to its own translation: it must
+#    The conventions roster and the shared /star router are held to the trees
+#    and to their own translations: each must
 #    list exactly the skills that exist — a † row for a skill that does not is
 #    never iterated by the per-skill loop, so without this it passed and was
 #    even counted — and the zh edition must carry the same rows and the same
@@ -138,6 +139,28 @@ if [[ "${SLASH_ONLY_ZH}" != "${SLASH_ONLY}" ]]; then
     diff <(printf '%s\n' "${SLASH_ONLY}") <(printf '%s\n' "${SLASH_ONLY_ZH}") | sed 's/^/      /'
     guard_errors=1
 fi
+ROUTER=".agents/commands/star.md"
+ROUTER_ZH=".agents/commands/star.zh-CN.md"
+ROUTER_DAGGER='s/^\| `(star-[a-z-]+)` \| † \|.*/\1/p'
+ROUTER_ANY='s/^\| `(star-[a-z-]+)` \|.*$/\1/p'
+router_rows() { # $1 = router file, $2 = row regex -> matching skill names, sorted
+    sed -nE "$2" "$1" | sort
+}
+for router in "${ROUTER}" "${ROUTER_ZH}"; do
+    if [[ ! -f "${router}" ]]; then
+        fail "${router} is missing"
+        guard_errors=1
+        continue
+    fi
+    if [[ "$(router_rows "${router}" "${ROUTER_ANY}")" != "${ROSTER_ALL}" ]]; then
+        fail "${router}: the shared /star router does not list exactly the convention roster"
+        guard_errors=1
+    fi
+    if [[ "$(router_rows "${router}" "${ROUTER_DAGGER}")" != "${SLASH_ONLY}" ]]; then
+        fail "${router}: the shared /star router's † set differs from the convention roster"
+        guard_errors=1
+    fi
+done
 while IFS= read -r skill; do
     want_guarded=false
     grep -qxF "${skill}" <<< "${SLASH_ONLY}" && want_guarded=true
@@ -173,7 +196,7 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "roster lists all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
+(( guard_errors == 0 )) && note "conventions and shared /star router list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
 # 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
 # Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
@@ -248,6 +271,18 @@ while IFS= read -r skill; do
     done
 done < <(printf '%s\n' "${SKILLS}")
 
+# The complete router is authored once under .agents/commands. These four files
+# are runtime-discovered by their harnesses and must stay thin wrappers around it.
+for wrapper in .claude/commands/star.md .cursor/commands/star.md .qwen/commands/star.md .pi/prompts/star.md; do
+    if [[ ! -f "${wrapper}" ]]; then
+        fail "${wrapper} is missing"
+        token_errors=1
+    elif ! grep -qF 'Read `.agents/commands/star.md`' "${wrapper}"; then
+        fail "${wrapper} does not delegate to the shared .agents/commands/star.md router"
+        token_errors=1
+    fi
+done
+
 # The rewrite that retokenizes a ported skill targets "/star-*", and the one
 # repo path carrying that substring is docs/mds/star-workflow/. A hand-run
 # rewrite once turned its separator into "docs/mds$star-workflow/" in .agents,
@@ -261,7 +296,7 @@ if [[ -n "${mangled_paths}" ]]; then
     token_errors=1
 fi
 
-(( token_errors == 0 )) && note "invocation tokens are consistent per tree"
+(( token_errors == 0 )) && note "invocation tokens are consistent per tree; every harness command delegates to the shared /star router"
 
 # 8. Workflow docs ship as en/zh pairs.
 section "Bilingual twins in docs/mds/star-workflow"

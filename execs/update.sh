@@ -88,12 +88,14 @@ INSTALL_CONFIGS=(
     "${HOOK_CONFIGS[@]}"
     "${PROJECT_CONFIGS[@]}"
 )
-# The agent instructions, in both copies a project carries: agent-instructions.mdc
-# is the AGENTS.md body verbatim, so they belong to the project together. Handled
-# like the configs above — a project that has written its own keeps them, and one
-# that has none gets them from upstream.
+# The agent instructions and their human-readable Chinese counterparts.
+# agent-instructions.mdc is the AGENTS.md body verbatim, so they belong to the
+# project together. Handled like the configs above — a project that has written
+# its own keeps them, and one that has none gets them from upstream.
 INSTRUCTION_FILES=(
     "AGENTS.md"
+    "AGENTS.zh-CN.md"
+    "CLAUDE.zh-CN.md"
     ".cursor/rules/agent-instructions.mdc"
 )
 # The harness trees --harnesses and STAR_HARNESSES name, one entry per agent harness. Which paths
@@ -256,8 +258,8 @@ kimi, pi or qwen — or all, which is the default, or none for the shared skelet
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
 keeps whatever it already has there. Without the flag the list comes from STAR_HARNESSES
 (environment first, then .env), and from every harness when that is unset too. The shared paths —
-.agents/skills, the workflow documentation, execs/run.sh, this script, AGENTS.md — are updated
-whichever trees are selected, and .agents/skills is written first. It is in that list rather
+.agents/skills, .agents/commands, the workflow documentation, execs/run.sh, this script, AGENTS.md —
+are updated whichever trees are selected, and .agents/skills is written first. It is in that list rather
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
@@ -422,6 +424,7 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         # The shared root first: every project gets it, whichever harnesses it picks.
         ".agents/skills"
+        ".agents/commands"
         # Codex's own half of it — the per-skill manifests .agents/skills links
         # to upstream — installed with the rest of the Codex tree and only then.
         ".codex/skills"
@@ -489,6 +492,8 @@ else
     SYNC_PATHS=(
         # The shared root first: every run syncs it, whichever harnesses were named.
         ".agents/skills"
+        # The one neutral /star router every harness-owned command delegates to.
+        ".agents/commands"
         # Codex's own half of it, installed and updated with the Codex tree.
         ".codex/skills"
         # Which skill root each harness owns, for the two hosts that discover more
@@ -591,7 +596,7 @@ if [[ "${ADOPT}" == false ]]; then
         # .codex/skills is listed for the same reason from the other side: it
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .codex/skills)
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/commands .codex/skills)
         for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
             read -ra harness_roots <<<"$(harness_dirs "${harness}")"
             SPARSE_PATHS+=("${harness_roots[@]}")

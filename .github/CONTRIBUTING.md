@@ -6,8 +6,8 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 ## The shape of the problem
 
 The fifteen skills exist seven times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 181 markdown files per
-tree, 1267 in all, roughly 92% of the repository. A hundred and twenty-four of those files per tree
+`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 182 markdown files per
+tree, 1274 in all, roughly 92% of the repository. A hundred and twenty-five of those files per tree
 are not copies: the neutral tree words them the same way, so they are one file under
 `.agents/skills/` that the rest link to. The other 57 are written by `.github/scripts/port.sh` from
 the one authored copy in `.claude/skills/`, through a per-harness substitution table and an override
@@ -390,11 +390,12 @@ nothing enforces that judgement.
 2. Frontmatter `name:` matches the directory name.
 3. Per-skill file inventory is identical across trees (`.agents`' `agents/` links to Codex's
    manifests aside).
-4. Slash-only guards match the conventions §10 roster in both directions, in all six trees, and the roster itself lists exactly the skills that exist, with the same rows and † set in the zh edition.
+4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and both Chinese editions list exactly the same skills and † set.
 5. Every `.md` has its `_zh.md` twin.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no prefix at all in `.agents`, `/star-*` in `.claude`,
-   `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code`.
+   `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code` — and every harness's
+   `/star` entry point remains a thin wrapper around `.agents/commands/star.md`.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are

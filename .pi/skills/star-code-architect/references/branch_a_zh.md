@@ -23,7 +23,7 @@
 1. 浅克隆到临时目录；记下 URL、commit SHA、commit 日期、许可证。
 2. 若实现只是某个大仓库的子目录，与用户确认子路径，只取该部分。
 3. 删除 `.git`；内容移入 `${CODE_NAME}/`；上游 `LICENSE` 与 `CITATION*` 文件原位保留。
-4. 按 `assets/upstream_template.md` 写 `${CODE_NAME}/UPSTREAM.md`（该文件一律英文，无 `_zh` 版本）。
+4. 按 `assets/upstream_template.md` 写 `${CODE_NAME}/UPSTREAM.md`（该文件一律英文；`assets/upstream_template_zh.md` 只供对照阅读）。
 5. 提交 import（只暂存 `${CODE_NAME}/`）：`star-code-architect: import <repo> @ <short-sha>`。
 
 ## Step A6：保守改名
@@ -37,4 +37,3 @@
 ## Step A8：勘察这份克隆
 
 先数这份克隆的 `.py` 文件数。在轻量模式阈值以下：以一次只读扫描补全 Step C1 的仓库地图（`references/survey_spec_zh.md`）——评分阶段已覆盖粗粒度结构，可由主 agent 自己完成。超过阈值：照原样走 Step B1 的各组，或只走 C1 真正需要的三组（结构与依赖、配置系统、训练/评测入口）。参考实现通常远在阈值之上，而这一遍是 C1 定架构和迁移表的唯一输入。
-
