@@ -390,12 +390,12 @@ nothing enforces that judgement.
 2. Frontmatter `name:` matches the directory name.
 3. Per-skill file inventory is identical across trees (`.agents`' `agents/` links to Codex's
    manifests aside).
-4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and both Chinese editions list exactly the same skills and † set.
+4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and both Chinese editions list exactly the same skills and † set, while the Codex, Kimi and DSH router packages point back to that source.
 5. Every `.md` has its `_zh.md` twin.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no prefix at all in `.agents`, `/star-*` in `.claude`,
    `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code` — and every harness's
-   `/star` entry point remains a thin wrapper around `.agents/commands/star.md`.
+   `/star` entry point remains a thin wrapper around `.agents/commands/star.md`; Codex, Kimi and DSH additionally have their plugin or command metadata checked.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are

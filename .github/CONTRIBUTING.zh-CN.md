@@ -153,10 +153,10 @@ Pi 自带一个子代理*示例*扩展（`examples/extensions/subagent/`）和�
 1. 六个根目录拥有相同的 skill 目录集合。
 2. Frontmatter 的 `name:` 与目录名一致。
 3. 各目录树中逐 skill 文件清单一致（`.agents` 下指向 Codex manifest 的 `agents/` 链接除外）。
-4. 六棵树中的仅限斜杠调用守卫与规约 §10 名册双向一致；共享的 `.agents/commands/star.md` 路由和两份中文版本都列出完全相同的 skill 与 † 集合。
+4. 六棵树中的仅限斜杠调用守卫与规约 §10 名册双向一致；共享的 `.agents/commands/star.md` 路由和两份中文版本都列出完全相同的 skill 与 † 集合，Codex、Kimi 与 DSH 的分流包都指回这一来源。
 5. 每个 `.md` 都有对应的 `_zh.md` 文件。
 6. 每个 `SKILL.md` 都引用规约文档。
-7. 调用 token 适合所在目录树——`.agents` 完全没有前缀；`.claude`、`.cursor`、`.pi`、`.qwen` 使用 `/star-*`；`.dsh` 和 `.kimi-code` 使用 `/skill:star-*`；每个宿主的 `/star` 入口都保持为 `.agents/commands/star.md` 的薄包装。
+7. 调用 token 适合所在目录树——`.agents` 完全没有前缀；`.claude`、`.cursor`、`.pi`、`.qwen` 使用 `/star-*`；`.dsh` 和 `.kimi-code` 使用 `/skill:star-*`；每个宿主的 `/star` 入口都保持为 `.agents/commands/star.md` 的薄包装，Codex、Kimi 与 DSH 的插件或命令元数据另行校验。
 8. 工作流文档以中英文对照形式发布。
 9. `.cursor/rules/agent-instructions.mdc` 与 `AGENTS.md` 正文逐字节一致。
 10. 两类会话钩子——模型 ID 来源记录与项目记忆——在六种宿主中均存在、可执行且已在各自注册文件中登记。
