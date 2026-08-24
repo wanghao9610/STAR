@@ -8,16 +8,17 @@
 # a throwaway copy of HEAD and compares the output byte for byte against a
 # recorded golden run.
 #
-#   bash .github/scripts/equiv_check.sh --regen   record the goldens (do this
-#                                                 BEFORE touching the checker)
+#   bash .github/scripts/equiv_check.sh --regen   record local ignored goldens
+#                                                 (do this BEFORE touching the checker)
 #   bash .github/scripts/equiv_check.sh           compare against them
 #
 # Exit 0 when every case matches, 1 when any diverges, 2 on a harness error.
 #
 # Work copies come from `git archive HEAD`, so an uncommitted edit in the real
-# tree is invisible here on purpose: the goldens describe a commit, not a
-# working tree. Faults use perl -i rather than sed -i, whose BSD and GNU forms
-# disagree about the backup-suffix argument.
+# tree is invisible here on purpose: the local goldens describe a commit, not a
+# working tree. They are generated test state and are intentionally not tracked.
+# Faults use perl -i rather than sed -i, whose BSD and GNU forms disagree about
+# the backup-suffix argument.
 
 set -u
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
@@ -31,6 +32,11 @@ REGEN=false
 command -v perl >/dev/null || { echo "perl is required" >&2; exit 2; }
 git -C "${ROOT}" rev-parse HEAD >/dev/null 2>&1 || { echo "not a git repo" >&2; exit 2; }
 mkdir -p "${GOLDEN}"
+if [[ "${REGEN}" == false ]] &&
+   ! find "${GOLDEN}" -maxdepth 1 -type f -name '*.txt' -print -quit | grep -q .; then
+    echo "no local equivalence goldens; run equiv_check.sh --regen on the clean baseline first" >&2
+    exit 2
+fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "${TMP}"' EXIT
