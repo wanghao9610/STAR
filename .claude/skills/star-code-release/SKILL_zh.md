@@ -86,6 +86,8 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 ### Step 3 —— `readme`：编译 README
 
+起草前读 `docs/mds/star-workflow/human-writing-guide.zh-CN.md`（英文：`docs/mds/star-workflow/human-writing-guide.md`）。把它用于 README 行文，同时保留实测数字、run 名、命令、路径、出处、技术区别、负面结果、未确定性和 `TODO` 标记；不得把证据缺口写成宣传话术或没有依据的最高级。
+
 1. 从 `references/readme_map_zh.md` 选定小节集合：必备节始终出现（来源缺失时带一条写明产出方 skill 的 `TODO`），空则省略的节直接删掉，不注水。
 2. 填 `assets/readme_template_zh.md`，按映射表的原样转录规则——数字连同 run 从结果汇总表原样抄，命令从解析过的脚本原样抄，图片路径只在文件存在时写。
 3. 处理 `README.md` 已有内容，三种情况：

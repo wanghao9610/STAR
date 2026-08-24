@@ -96,6 +96,8 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 4：填模板
 
+起草前读 `docs/mds/star-workflow/human-writing-guide.zh-CN.md`（英文：`docs/mds/star-workflow/human-writing-guide.md`）。计划出处、实测数值、路径、`TODO` 标记、验证标签、未消解冲突、未确定性和负面结果都是受保护内容；行文调整可以合并、排序，但不得拔高或杜撰结论。
+
 填 `assets/<OPT>_template_zh.md`（英文：`assets/<OPT>_template.md`）。保持模板的小节与顺序；没有覆盖的小节保留标题并写 `TODO`——既不删掉，也不注水。frontmatter 记录 `type`、`language`、`generated`（真实日期，绝不编造）与 `sources:`——每个输入给本文档的计划，以及读取时它所带的 `updated` 日期——下次重跑靠它检测过期。
 
 ### Step 5：写入，先与现有内容比对

@@ -122,6 +122,8 @@ Compare this run set against the previous digest's `sources:` list: runs appeari
 
 ### Step 6: Write the digest
 
+Before drafting, read `docs/mds/star-workflow/human-writing-guide.md` (Chinese: `docs/mds/star-workflow/human-writing-guide.zh-CN.md`). Protect the covered window, source tiers, numbers, verdicts, provisional labels, commands, negative results, and plan findings; the style pass may clarify relationships but may not infer causality or soften an adverse result.
+
 Fill `assets/digest_template.md` (Chinese: `assets/digest_template_zh.md`; the digest's language is `STAR_LANG` where it is set, else the dialogue language, else the language the in-scope plans carry when they agree) and write it to `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`. Real dates only, from the system clock (conventions §4). A second digest the same day overwrites that day's file; a later day writes its own — the directory is the timeline.
 
 **The last covered date is only advanced by a digest that covers a period ending today.** A retrospective window (`2026-05-01`, or a plan-family digest) writes its file but leaves the series' resume point alone: set its `covers.through` to what it actually covered, so a backward-looking read never makes the next incremental run skip work. `references/scope_spec.md` states this precisely.

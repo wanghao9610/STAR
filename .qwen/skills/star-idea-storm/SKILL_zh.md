@@ -35,7 +35,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 38 KB，分 16、17、5 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。别的都不前置装载：`references/question_bank_zh.md` 每次只读一个阶段的那一节，进入用它的阶段时才读（Stage 1、2、4）；`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
+一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 40 KB，分 16、17、5 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。别的都不前置装载：`references/question_bank_zh.md` 每次只读一个阶段的那一节，进入用它的阶段时才读（Stage 1、2、4）；`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
 
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
@@ -80,6 +80,8 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 读 `references/idea_rubric.md`（中文对话读 `references/idea_rubric_zh.md`）。给每个扫描过的方向打分：六行判断——novelty、impact、feasibility、crowdedness/scoop-risk、personal fit、evaluability——每行注明证据（§1 的某条约束或 §3 的论文）；然后每方向一个裁决：**Pursue / Refine / 搁置**，附一行理由。呈现对比表与你的推荐，再一次一问地讨论（问题库 Stage 4，那一节在进入本阶段时读）。用户可以选定胜者；打磨某方向（按指出的缺陷修补，重打一次分）；合并两个方向（合并后必须回答同一个问题——否则是两个选题钉在一起）；或补一个新方向，回 Stage 3 走一遍——这样的循环最多一轮，需要第二轮就说明种子本身动了：如实说出来，重开 Stage 1。决定权在用户（原则 6）。写入 §4——表、理由、决定——并为未选中的方向填 §6 搁置的方向（名称、裁决理由、何时复活）。
 
 ### Stage 5：定稿选题（`frame`）
+
+起草前读 `docs/mds/star-workflow/human-writing-guide.zh-CN.md`（英文：`docs/mds/star-workflow/human-writing-guide.md`）。把已选研究问题、有来源支撑的缺口、约束、点名论文、风险和 kill-condition 当作受保护内容：行文调整可以重组它们，但不得削弱、拔高或杜撰。
 
 综合以上起草 §5，150–400 字成文：
 

@@ -86,6 +86,8 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 ### Step 3 — `readme`: compile the README
 
+Before drafting, read `docs/mds/star-workflow/human-writing-guide.md` (Chinese: `docs/mds/star-workflow/human-writing-guide.zh-CN.md`). Apply it to README prose while preserving measured numbers, run names, commands, paths, provenance, technical distinctions, negative results, uncertainty, and `TODO` markers; do not turn missing evidence into sales copy or unsupported superlatives.
+
 1. Choose the section set from `references/readme_map.md`: mandatory sections always appear (with a `TODO` naming the producer skill when their source is absent), omit-when-empty sections are dropped silently, not padded.
 2. Fill `assets/readme_template.md`, transcribing per the map's rules — numbers verbatim from the results table with their run, commands verbatim from the resolved script, figure paths only when the file exists.
 3. Handle what is already at `README.md`, three cases:

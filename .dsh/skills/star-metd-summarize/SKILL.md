@@ -89,6 +89,8 @@ Where Step 2 fanned out, reconcile before merging: every plan dispatched comes b
 
 ### Step 4: Fill the template
 
+Before drafting, read `docs/mds/star-workflow/human-writing-guide.md` (Chinese: `docs/mds/star-workflow/human-writing-guide.zh-CN.md`). Treat plan provenance, measured values, paths, `TODO` markers, verification labels, unresolved conflicts, uncertainty, and negative results as protected content; the prose pass may merge and order them, but may not strengthen or invent a conclusion.
+
 Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), and `sources:` — every plan that fed this document with the `updated` date it carried when read, making staleness detectable on the next run.
 
 ### Step 5: Write, comparing against what is already there

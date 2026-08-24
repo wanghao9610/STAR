@@ -94,6 +94,8 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 
 ### Step 3：精读并写笔记
 
+写第一篇笔记前，读 `docs/mds/star-workflow/human-writing-guide.zh-CN.md`（英文：`docs/mds/star-workflow/human-writing-guide.md`）。把它用于笔记行文，同时保留源材料中的事实、引文、引用、阅读深度、未确定性、负面结果，以及“论文声称了什么”和“本项目如何判断”之间的边界。
+
 逐篇：抓论文页（arXiv abs/HTML、ACL Anthology、CVF open access 或项目主页），至少读摘要、intro、方法和主结果表，填 `assets/ref_analysis_template_zh.md`（英文：`assets/ref_analysis_template.md`），**立刻写入** `metds/refs/<缩写>.md`。`<缩写>` 用论文自己的缩写（`CLIP.md`、`DETR.md`），没有就自拟一个紧凑的 CamelCase 名（在 index 里标注为自拟），冲突时加 `_<年份>` 后缀。`depth:` 写你真正读到的深度。论文自己的页面挂出了仓库时——即笔记 `links.code` 记下的那个——顺手抓它的星标与最近提交日期：一个仓库一次 GitHub API 调用，按 `references/source_policy_zh.md` 的上限与缓存规则执行，把这篇的影响力分补齐。主 agent 写笔记时自己做这次调用，绝不交给收集器。不是论文自己页面给出的仓库一律记 `unofficial`——登记，不计分。
 
 **配图。** arXiv 把这篇渲染成 HTML 时（见 `references/source_policy_zh.md` 的"配图"一节），笔记最多带三张图，每张放在它所画内容所属的那一节——讲问题与设定的放 §2，讲方法的放 §3，讲结果的放 §4。哪几张由图注和论文本身的性质决定，绝不由编号决定。整体展示方法的那一张优先占位：它的图注说这张画的是本文自己的方法：架构、框架、流水线或总览；多张都合格就取方法一节最先引用的那张。方法类论文多数到此为止，一张就够。第二张、第三张只在它带来笔记正文带不动的东西时才留：数据集论文的贡献本身就是那条数据构造流水线，分析类论文的主张就压在那张图上，定性对比图上的东西指标根本报不出来。正文已经讲清的事再配一张图只是装饰，不留；把结果曲线塞进缺失的方法图位置，比 §3 空着更糟。一张都不合格，或论文没有 HTML 渲染版 → 笔记用一句话说明是哪一种，什么都不下载：理论、数据集、分析类论文常常本就没有方法图。选哪几张、去抓、写清每张在说什么，都由主 agent 自己做，与上面那次 GitHub 调用一样。
@@ -126,7 +128,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 
 ### Step 9–11：三种离线模式
 
-这三种模式各自的做法写在自己的文件里，轮到哪个模式跑就读哪一个，不提前读：`synthesize` 读 `references/synthesize_spec_zh.md`（Step 9——把笔记合成 `metds/refs/related_work.md`），`survey` 读 `references/survey_spec_zh.md`（Step 10——分层读一个领域，写成 `metds/refs/<slug>_survey.md`），`score` 读 `references/score_spec_zh.md`（Step 11——对每一条重新取引用数与仓库星标）。完整流程与 `add`、`verify`、`organize` 都不进这三种模式，也不读这三个文件。
+这三种模式各自的做法写在自己的文件里，轮到哪个模式跑就读哪一个，不提前读：`synthesize` 读 `references/synthesize_spec_zh.md`（Step 9——把笔记合成 `metds/refs/related_work.md`），`survey` 读 `references/survey_spec_zh.md`（Step 10——分层读一个领域，写成 `metds/refs/<slug>_survey.md`），`score` 读 `references/score_spec_zh.md`（Step 11——对每一条重新取引用数与仓库星标）。`synthesize` 和 `survey` 起草叙述性产物前读取并应用自然写作指南；`score` 改的是记录，不是正文。完整流程与 `add`、`verify`、`organize` 都不进这三种模式，也不读这三个文件。
 
 ## 状态与文件规则
 

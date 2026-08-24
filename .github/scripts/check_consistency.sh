@@ -357,7 +357,22 @@ for root in "${SKILL_ROOTS[@]}"; do
         }
     done < <(printf '%s\n' "${SKILLS}")
 done
-(( conv_errors == 0 )) && note "every SKILL.md references the conventions document"
+
+human_writing_errors=0
+HUMAN_WRITING_SKILLS=(star-idea-storm star-plan-coach star-refs-reviewer star-expt-digest star-metd-summarize star-code-release)
+for root in "${SKILL_ROOTS[@]}"; do
+    for skill in "${HUMAN_WRITING_SKILLS[@]}"; do
+        for manifest in SKILL.md SKILL_zh.md; do
+            for guide in human-writing-guide.md human-writing-guide.zh-CN.md; do
+                grep -q "${guide}" "${root}/${skill}/${manifest}" || {
+                    fail "${root}/${skill}/${manifest} does not reference ${guide}"
+                    human_writing_errors=1
+                }
+            done
+        done
+    done
+done
+(( conv_errors == 0 && human_writing_errors == 0 )) && note "every SKILL.md references the conventions document"
 
 # 7. Invocation tokens are tree-appropriate: none at all in .agents, which is
 #    the root every agent following the AGENTS.md convention reads and so spells
