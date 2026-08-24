@@ -196,7 +196,7 @@ metds/adopt.md
 - 只记录那些数字你日后还会引用的 run。其余的属于清单里的证据，不属于 `wkdrs/`。
 - 哪怕只覆盖两个 leaf，`backfill` 也值得跑。三分之一的工作已经做完、树却显示 0%，这样的树没人会信。
 
-完整定义见 [`star-proj-adopt/SKILL_zh.md`](../../../.claude/skills/star-proj-adopt/SKILL_zh.md)。
+完整定义见 [`star-proj-adopt/SKILL_zh.md`](../../../.agents/skills/star-proj-adopt/SKILL_zh.md)。
 
 ## 4. `star-idea-storm`：收敛出研究选题
 
@@ -257,7 +257,7 @@ idea 文件依次保存种子与约束、全部候选方向、各方向扫描表
 - 扫描为方向标价，不替方向判死刑。拥挤但有真切入角的领域照样可以选，文件会把这个选择连同理由记下来。
 - 这是选题，不是调研：产出是摘要和一张地图，不是逐篇分析。对胜出方向的深读属于 `star-refs-reviewer`。
 
-完整定义见 [`star-idea-storm/SKILL_zh.md`](../../../.claude/skills/star-idea-storm/SKILL_zh.md)。
+完整定义见 [`star-idea-storm/SKILL_zh.md`](../../../.agents/skills/star-idea-storm/SKILL_zh.md)。
 
 ## 5. `star-plan-coach`：编写研究计划
 
@@ -334,7 +334,7 @@ metds/plans/0_open-vocab-det-seg_plan.md
 - 关键章节未确认时不要急着拆解，否则下游子计划会出现较多 `【待定】`。
 - 没跑 `star-idea-storm`、最近也没读过文献就直接进来的，先跑一次 `star-refs-reviewer survey <topic>`，让 §1 的缺口对着领域地图写，而不是凭记忆写。
 
-完整定义见 [`star-plan-coach/SKILL_zh.md`](../../../.claude/skills/star-plan-coach/SKILL_zh.md)。
+完整定义见 [`star-plan-coach/SKILL_zh.md`](../../../.agents/skills/star-plan-coach/SKILL_zh.md)。
 
 ## 6. `star-refs-reviewer`：调研相关工作
 
@@ -401,7 +401,7 @@ Google Scholar 是有意不作为来源的：它没有 API，自动查询会被 
 - 「与本项目的关系」一节才是笔记比论文摘要更值钱的地方——写计划定位前先读。
 - 影响力分定详略、不定去留：最接近的论文星标为零也是核心；相关工作行文先写审稿人预期的高分作。领域不是 CS/AI 时，改 skill 自带的 venue 档位表和分档常数。
 
-完整定义见 [`star-refs-reviewer/SKILL_zh.md`](../../../.claude/skills/star-refs-reviewer/SKILL_zh.md)。
+完整定义见 [`star-refs-reviewer/SKILL_zh.md`](../../../.agents/skills/star-refs-reviewer/SKILL_zh.md)。
 
 ## 7. `star-code-architect`：搭建或整理代码库
 
@@ -457,7 +457,7 @@ AGENTS.md                            # ≤10 行的 Code Architecture 摘要 + �
 - 在确认点 1 仔细看许可证一栏——它也决定了你日后能以什么方式发布自己的代码。
 - 迁移保持小步。上游布局经受过真实训练的检验；对不熟悉的科研代码做整体重排很少有好下场。
 
-完整定义见 [`star-code-architect/SKILL_zh.md`](../../../.claude/skills/star-code-architect/SKILL_zh.md)。
+完整定义见 [`star-code-architect/SKILL_zh.md`](../../../.agents/skills/star-code-architect/SKILL_zh.md)。
 
 ## 8. `star-env-builder`：构建运行环境
 
@@ -508,7 +508,7 @@ wkdrs/env_<ENV_NAME>_<日期>/freeze.txt        # 精确版本清单
 - 之后重复运行是安全的：选*原地验证修复*可不重建就修好环境，选*备份重建*可干净重来。
 - 遇到 CUDA 不匹配时 skill 会停下来给出具体选项而不是猜——心里先想好目标 torch/CUDA 组合。
 
-完整定义见 [`star-env-builder/SKILL_zh.md`](../../../.claude/skills/star-env-builder/SKILL_zh.md)。
+完整定义见 [`star-env-builder/SKILL_zh.md`](../../../.agents/skills/star-env-builder/SKILL_zh.md)。
 
 ## 9. `star-plan-decomposer`：拆解执行子计划
 
@@ -576,7 +576,7 @@ star-plan-decomposer 01
 - 不要手工重排已使用的数字前缀，否则会破坏更深层计划和已有依赖引用。
 - 根 §4 写明、而 `datas/` 尚未持有的数据集，要有属于自己的**数据就绪叶子**——§3 负责获取，§5 的完成判据是一次完整性校验（文件清单、文件数、校验和），每个使用它的叶子都依赖它。获取命令跨过红线，会交回给你来跑。没有这个叶子，执行会卡在没有任何计划负责的缺失输入上。
 
-完整定义见 [`star-plan-decomposer/SKILL_zh.md`](../../../.claude/skills/star-plan-decomposer/SKILL_zh.md)。
+完整定义见 [`star-plan-decomposer/SKILL_zh.md`](../../../.agents/skills/star-plan-decomposer/SKILL_zh.md)。
 
 ## 10. `star-plan-executor`：执行一个叶子计划
 
@@ -657,7 +657,7 @@ wkdrs/01_mvp-verify/
 
 实际执行很少与写好的计划完全一致。当出入在计划自身粒度上是实质性的——步骤被增、删或替换，依赖与现实不符，产出路径变了，完成判据被调整——skill 把它记为 ADDED / MODIFIED / REMOVED 形式的变更项并向你确认：规划期发现的偏差随可执行计划一并确认，执行中冒出的在收尾时一次性批量确认。确认后的变更项写回子计划——受影响的 §2–§5 段落就地更新，并追加一条 `## Revision History` 记录日期、run、变更和原因——你日后重读计划时看到的就是实际执行的内容。第四种类型 ENRICHED，覆盖计划留白、而执行敲定了的值——某个 learning rate、backbone、复现命令——但仅限某份方法文档会引用它的情况：方法文档是 `star-metd-summarize` 从计划编译出来的，所以只留在 run 日志里的值，会在 `metds/training.md` 里变成永久 TODO。目标级或总体计划级的偏差绝不这样同步，而是交给 `star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`。
 
-完整定义见 [`star-plan-executor/SKILL_zh.md`](../../../.claude/skills/star-plan-executor/SKILL_zh.md)。
+完整定义见 [`star-plan-executor/SKILL_zh.md`](../../../.agents/skills/star-plan-executor/SKILL_zh.md)。
 
 ## 11. `star-code-reviewer`：对照规范与计划审查代码
 
@@ -708,7 +708,7 @@ wkdrs/reviews/code_<范围>_<日期>.md       # 其他模式
 - `diff` 模式是最便宜的习惯：趁改动还没提交，先审一遍刚写的代码。在执行分支上跑完的 run，按它相对基础分支的 diff 来审（规约 §11）——合并确认点等着这份结论。
 - 不认同的问题项在修复轮里跳过即可；报告无论如何都留下记录，直接改的 minor 也记在里面——提交之前 `git diff` 都看得到。
 
-完整定义见 [`star-code-reviewer/SKILL_zh.md`](../../../.claude/skills/star-code-reviewer/SKILL_zh.md)。
+完整定义见 [`star-code-reviewer/SKILL_zh.md`](../../../.agents/skills/star-code-reviewer/SKILL_zh.md)。
 
 ## 12. `star-expt-analyst`：分析一个 run 的结果
 
@@ -767,7 +767,7 @@ wkdrs/results/results.md              # 仅 aggregate 模式：跨 run 的结果
 - run 判定故意说得直白。`inconclusive` 是证据不在——通常某条红线命令从没跑过。`invalid` 是数字在但不可信，这时重跑比解读便宜。
 - 命中根计划 kill-criterion 的负结果，是这个 skill 能给出的最有价值的东西：趁证据新鲜，把它转交给 `star-plan-reviser`。
 
-完整定义见 [`star-expt-analyst/SKILL_zh.md`](../../../.claude/skills/star-expt-analyst/SKILL_zh.md)。
+完整定义见 [`star-expt-analyst/SKILL_zh.md`](../../../.agents/skills/star-expt-analyst/SKILL_zh.md)。
 
 ## 13. `star-expt-digest`：按时间轴汇总阶段进展
 
@@ -836,7 +836,7 @@ digest 是**报告级、而非重新核实**的：与 `aggregate` 不同，它�
 - 里程碑评审前用 plan 模式，这时你要的是一个家族的完整故事，而不是一个日期区间。
 - `wkdrs/` 下除 `*.md` 外都被 git 忽略，因此 digest 序列**可以**进入仓库历史——但没有任何 skill 会替你提交：它本身只读。digest 可以从分析报告重新生成，未提交的那份丢了也能恢复。
 
-完整定义见 [`star-expt-digest/SKILL_zh.md`](../../../.claude/skills/star-expt-digest/SKILL_zh.md)。
+完整定义见 [`star-expt-digest/SKILL_zh.md`](../../../.agents/skills/star-expt-digest/SKILL_zh.md)。
 
 ## 14. `star-plan-reviser`：审查并修订一个计划
 
@@ -892,7 +892,7 @@ metds/plans/<prefix>_<slug>_plan.md   # 就地修订，并带一条 Revision His
 - 修订父计划会更新其 `updated`，`star-flow-status` 随即把 children 标为过期；这正是提示你重新拆解它们的信号。
 - 只想看进度总览用 `star-flow-status`；reviser 是对单个计划的深度审计，且有写权限。
 
-完整定义见 [`star-plan-reviser/SKILL_zh.md`](../../../.claude/skills/star-plan-reviser/SKILL_zh.md)。
+完整定义见 [`star-plan-reviser/SKILL_zh.md`](../../../.agents/skills/star-plan-reviser/SKILL_zh.md)。
 
 ## 15. `star-flow-status`：查看整条流程的状态
 
@@ -931,7 +931,7 @@ star-flow-status 01
 
 这是一个**严格只读**的 skill：只扫描规约 §8 登记在册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/`、`wkdrs/results/`）——不创建也不修改任何文件。作为整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，它输出的那些规则仍留在 skill 里。
 
-完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.claude/skills/star-flow-status/SKILL_zh.md)。
+完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 
 ## 16. `star-metd-summarize`：把计划编译成方法文档
 
@@ -989,7 +989,7 @@ star-metd-summarize
 - 把这些文档当作生成物。要改某份，就去改它的来源计划再重新编译——手工编辑会在下次运行时被覆盖；不是它生成的文件，覆盖之前一定先问你。
 - 重新生成时若所有小节都没变化，就什么都不写，重跑的成本只是再读一遍。
 
-完整定义见 [`star-metd-summarize/SKILL_zh.md`](../../../.claude/skills/star-metd-summarize/SKILL_zh.md)。
+完整定义见 [`star-metd-summarize/SKILL_zh.md`](../../../.agents/skills/star-metd-summarize/SKILL_zh.md)。
 
 ## 17. `star-code-release`：把仓库准备到可发布
 
@@ -1044,7 +1044,7 @@ README 的第一行是一条 HTML 注释形式的溯源标记——不是 frontm
 - `tasks/` 里多数文件应该回到 `keep in place`。那是移入检验在起作用，不是失灵——草稿文件本来就该可丢弃。
 - 结果汇总表或方法文档一动就重跑 `readme`。手改过的小节能挺过重新生成，靠的正是那条标记。
 
-完整定义见 [`star-code-release/SKILL_zh.md`](../../../.claude/skills/star-code-release/SKILL_zh.md)。
+完整定义见 [`star-code-release/SKILL_zh.md`](../../../.agents/skills/star-code-release/SKILL_zh.md)。
 
 ## 18. 一套完整的使用示例
 
@@ -1249,11 +1249,11 @@ STAR 定义流程、文件位置与验证记录；不附带模型栈、追踪器
 
 ## 20. Skill 文件位置
 
-每个工具都有一份适配过的权威 skill 副本。`.agents/skills/` 是共享的那份——`AGENTS.md` 约定把 skill 放在这里，它是 Codex 唯一的项目根目录，Cursor、Pi 与 DSH 也在自己那份之外读它——所以它不写前缀，前缀由各工具自己提供。不要跨这些根目录混用工具特定的调用或控制说明：
+`.agents/skills/` 是唯一作者源：工具中立、不带调用前缀，也是 `AGENTS.md` 约定要求的共享根目录。六套生成的 harness 技能树把它适配为各自原生的调用与控制机制；仅属于某个 harness 的行为放在显式适配 rules 或带锚点的 overrides 中。运行时，有本工具自己的生成副本就读那一份。不要跨这些根目录混用工具特定的调用或控制说明：
 
-七个根的每个 skill 目录结构相同：英文入口位于 `SKILL.md`，中文完整定义位于 `SKILL_zh.md`——随英文版同步维护、供人阅读的中文对照版。运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例不带前缀（§1），“完整定义”链接指向 `.claude/skills/`——其他六套都由这一基准树移植而来。涉及工具机制的差异，请以下表中你所用工具自己的那份为准。
+七个根的每个 skill 目录结构相同：运行时英文入口位于 `SKILL.md`，`SKILL_zh.md` 是随之维护、供人阅读的中文对照版。运行时入口始终是 `SKILL.md`——中文对话用中文回复并改用 `*_zh.md` / `.zh-CN` 资源——若中英文定义冲突，以入口 `SKILL.md` 为准。本指南的调用示例不带前缀（§1），“完整定义”链接指向 `.agents/skills/` 下的作者源。适配层改变工具机制时，请以下表中你所用工具自己的运行时副本为准。
 
-| 工具 | 权威目录 | 调用形式 |
+| 工具 | 运行时目录 | 调用形式 |
 | --- | --- | --- |
 | 任何遵循 `AGENTS.md` 的 agent | `.agents/skills/` | 各工具自己的 |
 | Claude | `.claude/skills/` | `/star-*` |

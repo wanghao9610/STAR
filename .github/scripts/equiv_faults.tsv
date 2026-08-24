@@ -27,7 +27,7 @@ f13	Description length in .dsh (<= ${DSH_DESC_MAX:=500}, DSH catalog bound)	perl
 # append would land on the file every tree shares and drift none of them apart.
 # cp -p then mv gives .pi the file itself, byte for byte, before the append.
 f14	Skill script parity	s="$W/.pi/skills/star-flow-status/scripts/scan.sh"; cp -p "$s" "$s.own" && mv "$s.own" "$s" && printf '# drift\n' >> "$s"	scan.sh
-f15	Manifest section parity (.agents vs .claude)	perl -ni -e 'print unless /^## Dialogue Discipline/' "$W/.agents/skills/star-code-reviewer/SKILL.md"	.agents/skills/star-code-reviewer/SKILL.md
+f15	Manifest section parity (.agents vs .claude)	perl -ni -e 'print unless /^## Dialogue Discipline/' "$W/.agents/skills/star-code-reviewer/SKILL.md"	.claude/skills/star-code-reviewer/SKILL.md
 # find -L, because grep's own recursion skips the links .claude carries into
 # .agents/skills and the literals live in files on both sides of that line.
 f16	Grepped literals have a producer	find -L "$W/.claude/skills" -type f -exec grep -l -- '[TBD]' {} + | xargs perl -pi -e 's/\[TBD\]/[TBDX]/g'	.claude
@@ -35,7 +35,7 @@ f17	AGENTS.md section citations	perl -pi -e 's/^## 9\. Project Runtime$/## 9. Pr
 f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f18b	Conventions document structure	perl -pi -e 's/^## 6\. Delegation$/## 6. Delegating/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f19	Skills guide coverage	perl -pi -e 's/star-expt-digest/star-expt-digestX/g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
-f20	complete definition	perl -pi -e 's{\.claude/skills/star-flow-status}{.claude/skills/star-flow-statusX}g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
+f20	complete definition	perl -pi -e 's{\.agents/skills/star-flow-status}{.agents/skills/star-flow-statusX}g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
 f21	Opening-load invariants	perl -pi -e "s/^Match the user's language\./Match the user language./" "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
 f21b	Opening-load invariants	perl -pi -e "s/grep -sE '\^\(STAR_LANG\|INVOLVE\)=' \.env/grep -sE 'STAR_LANG' .env/" "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md
 f22	Selective conventions load	perl -pi -e 's/\(0\|3\|5\|6\)/(0|3|5|6|9)/' "$W/.claude/skills/star-expt-digest/SKILL.md"	.claude/skills/star-expt-digest/SKILL.md

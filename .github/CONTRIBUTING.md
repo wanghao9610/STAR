@@ -5,15 +5,12 @@ For people changing STAR itself. **Not** for projects built from STAR — `.gith
 
 ## The shape of the problem
 
-The fifteen skills exist seven times, in `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`,
-`.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and `.qwen/skills/` — 182 markdown files per
-tree, 1274 in all, roughly 92% of the repository. A hundred and twenty-five of those files per tree
-are not copies: the neutral tree words them the same way, so they are one file under
-`.agents/skills/` that the rest link to. The other 57 are written by `.github/scripts/port.sh` from
-the one authored copy in `.claude/skills/`, through a per-harness substitution table and an override
-list holding every span a tree genuinely words for itself. `.agents/skills/` is the only path a link
-may point at, so a passage several trees share and the neutral one does not is written once in each
-of them. CI runs the check; a tree edited directly stops being what those produce.
+The fifteen skills have one authored source, `.agents/skills/`, and six generated harness trees:
+`.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/` and
+`.qwen/skills/`. `.github/scripts/port.sh` adapts the neutral source through ordered vocabulary rules
+and anchored override records. A generated file whose complete bytes equal the source is a relative
+link back to `.agents/skills/`; harness-specific output is a real file in that tree. CI runs the
+generator in check mode, so a generated tree edited outside this workflow stops matching.
 
 `.agents/skills/` is not one of those tools' private tree. It is where the `AGENTS.md` convention puts
 skills, so Codex scans it as its only project root, Cursor scans it as a native root, and Pi and DSH
@@ -34,30 +31,26 @@ So the cost of changing one shared rule is measured in files, not lines. Recent 
 (English and Chinese). `877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
 rather than 24. Prefer this whenever the rule is not harness-specific.
 
-## `.claude/skills/` is the baseline
+## `.agents/skills/` is the authoring baseline
 
-Edit there first, then port outward.
+Edit neutral semantics there first, then run `bash .github/scripts/port.sh --write`. Do not make a
+shared wording change in a generated tree: it will either fail `--check` or be overwritten by the
+next write.
 
-This is not because the other trees resemble it most — they do not. After normalizing the invocation
-token and the `disable-model-invocation` line, each tree is about equally far from it:
+Harness-specific behavior has two explicit homes under `.github/scripts/port/`:
 
-Sixty-one of the 157 Markdown files are not copies at all — no tree words them
-differently, so they are one file under `.agents/skills/` that the rest link to.
-Of the 96 each tree does word for itself:
+- `<tree>.rules` for an ordered vocabulary substitution that applies broadly;
+- `<tree>.overrides` for a local structural or behavioral difference anchored to source-derived lines.
 
-| Tree | Byte-identical to `.claude` |
-|---|---|
-| `.agents` | 43 / 96 |
-| `.cursor` | 51 / 96 |
-| `.dsh` | 52 / 96 |
-| `.kimi-code` | 56 / 96 |
-| `.pi` | 48 / 96 |
-| `.qwen` | 52 / 96 |
+To add an override, make the intended change in that harness tree and run
+`bash .github/scripts/port.sh --regen --tree <tree>` once, then inspect the recorded span and run
+`--check`. `--regen` is a deliberate capture step, never a way to accept unexplained drift.
+Frontmatter remains harness-owned and is preserved rather than generated.
 
-The reason is completeness, which is measurable: **`.claude` never has fewer headings than any other
-tree, in any of the 157 files.** Where trees diverge structurally, `.claude` is the superset. Porting
-from the longest version means adapting text down, which is safer than reconstructing text that was
-dropped — the failure mode in "What the checks do not catch" below.
+The adapters retain a two-stage implementation so the established mappings remain reviewable:
+`claude.rules` and `claude.overrides` first derive Claude wording from the neutral source; a
+non-Claude harness then applies its existing Claude-to-harness rules and overrides. This is an
+implementation layer only. `.claude/skills/` is generated and has no authoring authority.
 
 ## What must differ, and what must not
 
@@ -247,17 +240,19 @@ Pi ships a sub-agent *example* extension (`examples/extensions/subagent/`) and a
 is built in, and STAR does not install them; if a project adds them, the `.pi` tree still reads
 correctly, because §6.1's local fill is a floor rather than a prohibition.
 
-## `.agents` is a declared variant
+## `.agents` is the authored neutral form
 
-`.agents` is a genuine adaptation, not a copy: its executor has 7 steps where the others have 9. Its
-heading structure differs from `.claude` in 8 files — four under `star-plan-executor` (the manifest and
+The neutral source is not required to mirror one harness's control structure: its executor has 7
+steps where the generated harnesses have 9. Its heading structure differs from `.claude` in 8 files — four under `star-plan-executor` (the manifest and
 `agent_dispatch_spec.md`, each in both languages), four under `star-code-architect`
 (`orchestration_spec.md` and `survey_spec.md`, likewise) — and those differences are not simple
 omissions: it restructures. `stop_line_rules.md` was the ninth and tenth until the tree stopped naming
 a harness: it was titled "what **Codex** runs", and now says "what the agent runs", which is what
 `.claude` says, so those two files agree heading for heading.
 
-It is therefore **exempt from the structural check**, and that exemption is a known hole: see below.
+It is therefore **exempt from the six-output structural check**. Claude remains that check's internal
+comparison baseline only because the other five harness adapters preserve its expanded structure;
+this does not make Claude an authored source. The exemption is still a known hole: see below.
 
 ## Skill frontmatter does not port
 
@@ -384,7 +379,9 @@ nothing enforces that judgement.
 
 ## What the checks catch
 
-`.github/scripts/check_consistency.sh`, run by `.github/workflows/consistency.yml` on push and PR:
+`.github/scripts/port.sh --check` first proves that the six harness trees reproduce from
+`.agents/skills/`. `.github/scripts/check_consistency.sh`, also run by
+`.github/workflows/consistency.yml` on push and PR, then checks semantic invariants:
 
 1. The six roots carry the same set of skill directories.
 2. Frontmatter `name:` matches the directory name.
@@ -409,8 +406,9 @@ nothing enforces that judgement.
     the spec is not checkable here.
 13. **Skill helper scripts are byte-identical across the six trees, and executable.** A script names no
     harness, so it has nothing to adapt; a copy that has drifted is a bug, not a variant.
-14. **`.agents` manifests carry the same `##` sections as `.claude`** — the set, not the sequence, since
-    check 11 exempts `.agents` and content had already been lost through that gap.
+14. **Claude manifests carry the same `##` sections as the authored `.agents` source** — the set, not
+    the sequence, since check 11 compares only generated harnesses and content had already been lost
+    through that gap.
 15. **Shared scripts parse, and the strings they match byte-exactly still have a producer.** Check 13
     compares the six copies against each other, so a break introduced into all six at once — which is
     how these files are normally edited — passes it. This one runs `bash -n` on each copy, and holds a
@@ -525,6 +523,8 @@ Be honest with yourself about this list; it is where the real drift lives.
 
 ## Before you commit
 
+- Edit shared skill semantics only under `.agents/skills/`, then run
+  `bash .github/scripts/port.sh --write` and `bash .github/scripts/port.sh --check`.
 - Run `bash .github/scripts/check_consistency.sh`. It exits non-zero on failure and is fast.
 - Editing `AGENTS.md` means editing `.cursor/rules/agent-instructions.mdc` in the same commit — check 9
   compares their bodies directly.

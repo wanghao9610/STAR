@@ -1,4 +1,3 @@
-# Claude Code is the tree the others are generated from, so it has no
-# substitutions of its own: its vocabulary is the one the rules below rewrite.
-# The file exists so .claude is handled like any other tree when deciding which
-# of its files are links into .agents/skills.
+# Claude-specific wording is recorded in claude.overrides. This ordered table is
+# available for broad neutral-to-Claude vocabulary substitutions when one is
+# preferable to repeating the same anchored override.

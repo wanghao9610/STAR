@@ -44,7 +44,7 @@ FAIL  .pi/skills/star-flow-status/scripts/scan.sh differs from .agents/skills/st
 FAIL  .pi/skills/star-flow-status/scripts/scan.sh differs from .agents/skills/star-expt-digest/scripts/scan.sh; same-named skill scripts must be one shared file
 
 == Manifest section parity (.agents vs .claude) ==
-ok    .agents manifests carry the same ## sections as .claude (30 files)
+ok    .claude manifests carry the same ## sections as the authored .agents source (30 files)
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees

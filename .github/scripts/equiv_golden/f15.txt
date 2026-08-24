@@ -43,9 +43,9 @@ ok    every .dsh description survives DSH's 500-character catalog intact
 ok    skill scripts are byte-identical and executable in all 7 trees
 
 == Manifest section parity (.agents vs .claude) ==
-FAIL  .agents/skills/star-code-reviewer/SKILL.md: ## sections differ from .claude/skills/star-code-reviewer/SKILL.md:
-      2d1
-      < ## dialogue discipline
+FAIL  .claude/skills/star-code-reviewer/SKILL.md: ## sections differ from .agents/skills/star-code-reviewer/SKILL.md:
+      1a2
+      > ## dialogue discipline
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees

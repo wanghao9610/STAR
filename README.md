@@ -160,7 +160,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` holds the generator that writes STAR's seven skill trees from one authored copy, and the consistency check that keeps them in step — for maintaining STAR itself, not your project: left in place it runs on every push to your `main` and fails the first time you edit `AGENTS.md` or delete a harness directory you do not use. The adopt path in step 1b never installs it.
+`.github/` holds the generator that writes six harness skill trees from the neutral authored source in `.agents/skills/`, and the consistency check that keeps all seven roots in step — for maintaining STAR itself, not your project. Harness-only behavior is recorded in that tree's adapter rules or anchored overrides. Left in place, the checks run on every push to your `main` and fail the first time you edit a generated tree directly, edit `AGENTS.md` without its mirror, or delete a harness directory you do not use. The adopt path in step 1b never installs `.github/`.
 
 If `YOUR_CODE_NAME/` was cloned from another Git repository and its files belong directly in this project, remove its nested Git metadata with `rm -rf YOUR_CODE_NAME/.git` before `git add .`.
 

@@ -589,9 +589,11 @@ grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
 #     "Step 4: Approval gate (`ExitPlanMode`)" and "Step 4：审批门（退出 Plan 模式）"
 #     compare equal to their siblings. What remains must match exactly.
 #
-#     .agents is deliberately excluded: it is an adapted variant, not a copy (7-step
-#     executor against the others' 9), and its headings differ in 8 files under
-#     this check's own normalization. That is a known gap — see .github/CONTRIBUTING.md, "What the checks do not catch".
+#     .agents is deliberately excluded because it is the neutral authored source,
+#     while the six generated harnesses may add native control structure (7-step
+#     executor in the source against the harnesses' 9). Claude is only the
+#     comparison baseline inside this six-output invariant; it is not the authoring
+#     baseline. See .github/CONTRIBUTING.md, "What the checks do not catch".
 section "Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)"
 STRUCT_ROOTS=(.claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
 
@@ -788,9 +790,9 @@ done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; |
 
 (( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all ${#SKILL_ROOTS[@]} trees"
 
-# 14. Top-level section parity between .agents and .claude manifests.
-#     Check 11 excludes .agents on purpose: it is an adapted variant, not a copy,
-#     and its ### sequence and reference-file headings carry their own vocabulary
+# 14. Top-level section parity between the authored source and Claude manifests.
+#     Check 11 excludes .agents on purpose: it is the neutral source, not a
+#     harness output, and its ### sequence and reference-file headings carry neutral vocabulary
 #     (7-step executor against the others' 9; "return format per area" for "return format
 #     per surveyor"). But a SKILL.md's ## sections are its shape, not its wording
 #     — Role, Core Principles, Workflow, State & File Rules, Dialogue Discipline —
@@ -820,8 +822,8 @@ section_errors=0
 section_files=0
 while IFS= read -r skill; do
     for manifest in SKILL.md SKILL_zh.md; do
-        baseline=".claude/skills/${skill}/${manifest}"
-        other=".agents/skills/${skill}/${manifest}"
+        baseline=".agents/skills/${skill}/${manifest}"
+        other=".claude/skills/${skill}/${manifest}"
         [[ -f "${baseline}" && -f "${other}" ]] || continue   # checks 3 and 5 own missing files
         section_files=$(( section_files + 1 ))
         if ! diff -q <(norm_sections "${baseline}") <(norm_sections "${other}") > /dev/null; then
@@ -831,7 +833,7 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( section_errors == 0 )) && note ".agents manifests carry the same ## sections as .claude (${section_files} files)"
+(( section_errors == 0 )) && note ".claude manifests carry the same ## sections as the authored .agents source (${section_files} files)"
 
 # 15. The shared scripts parse, and every string they match byte-exactly still has
 #     a producer. Check 13 compares the seven copies against each other, so a script
@@ -1142,7 +1144,7 @@ for guide_row in "${GUIDES[@]}"; do
     fi
 
     # every relative link target exists (the per-section "complete definition"
-    # links point into .claude/skills/, four directory levels up)
+    # links point into the authored .agents/skills/, four directory levels up)
     while IFS= read -r target; do
         [[ -n "${target}" ]] || continue
         if [[ ! -e "$(dirname "${guide}")/${target}" ]]; then

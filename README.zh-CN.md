@@ -160,7 +160,7 @@ git add .
 git commit -m "First commit."
 ```
 
-`.github/` 里是 STAR 用来从同一份原稿生成七套 skill 树的生成器，以及保持它们同步的一致性检查——服务于 STAR 自身的维护，而非你的项目：保留下来，它会在你每次推送到 `main` 时运行，并在你第一次修改 `AGENTS.md` 或删掉用不到的某套宿主目录时失败。步骤 1b 的接入方式不会安装它。
+`.github/` 里是 STAR 用来从 `.agents/skills/` 下工具中立作者源生成六套 harness skill 树的生成器，以及保持七个根目录同步的一致性检查——服务于 STAR 自身的维护，而非你的项目。仅属于某个 harness 的行为记录在该树的适配 rules 或带锚点的 overrides 中。保留下来，这些检查会在每次推送到 `main` 时运行，并在你直接编辑生成树、修改 `AGENTS.md` 却未同步镜像，或删掉用不到的某套宿主目录时失败。步骤 1b 的接入方式不会安装 `.github/`。
 
 如果 `YOUR_CODE_NAME/` 是从另一个 Git 仓库克隆而来，其文件又要直接纳入当前项目，请在 `git add .` 前先运行 `rm -rf YOUR_CODE_NAME/.git` 删除内层 Git 元数据。
 

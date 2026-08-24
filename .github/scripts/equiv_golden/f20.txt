@@ -43,7 +43,7 @@ ok    every .dsh description survives DSH's 500-character catalog intact
 ok    skill scripts are byte-identical and executable in all 7 trees
 
 == Manifest section parity (.agents vs .claude) ==
-ok    .agents manifests carry the same ## sections as .claude (30 files)
+ok    .claude manifests carry the same ## sections as the authored .agents source (30 files)
 
 == Grepped literals have a producer ==
 ok    42 shared scripts parse; 8 grepped literals still produced in all 7 trees
@@ -55,7 +55,7 @@ ok    AGENTS.md heading map pinned; 136 labelled citations resolve
 ok    conventions headings and item counts pinned; workflow docs line-aligned en/zh
 
 == Skills guide coverage ==
-FAIL  docs/mds/star-workflow/research-workflow-skills.md: link target ../../../.claude/skills/star-flow-statusX/SKILL.md does not exist
+FAIL  docs/mds/star-workflow/research-workflow-skills.md: link target ../../../.agents/skills/star-flow-statusX/SKILL.md does not exist
 
 == Opening-load invariants ==
 ok    opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform

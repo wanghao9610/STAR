@@ -54,7 +54,7 @@ FAIL  .claude/skills/star-plan-executor/scripts/scan.sh differs from .agents/ski
 FAIL  .claude/skills/star-plan-reviser/scripts/scan.sh differs from .agents/skills/star-expt-digest/scripts/scan.sh; same-named skill scripts must be one shared file
 
 == Manifest section parity (.agents vs .claude) ==
-ok    .agents manifests carry the same ## sections as .claude (30 files)
+ok    .claude manifests carry the same ## sections as the authored .agents source (30 files)
 
 == Grepped literals have a producer ==
 FAIL  '[TBD]' is matched byte-exactly by a shared script but no longer produced in .claude/skills (expected in: star-plan-decomposer/SKILL.md)
