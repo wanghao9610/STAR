@@ -51,7 +51,6 @@ Rewrite at paragraph scale when several signals accumulate, one template recurs,
 Do not ban a word, transition, passive construction, first person, long sentence, list, or dash in isolation.
 Keep a form when it carries a real relation, preserves technical meaning, matches the author, or exposes required structure.
 Never rewrite quotations, titles, code, data, or literal fields merely because they match a watched pattern.
-Do not assign a numerical “human score.”
 
 ## 4. Rewrite and verify
 
