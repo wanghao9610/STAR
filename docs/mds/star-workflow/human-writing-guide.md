@@ -3,27 +3,27 @@
 **Language:** English | [简体中文](human-writing-guide.zh-CN.md)
 
 STAR does not produce one isolated essay. It builds a research record that moves from an idea, through plans and runs, into analyses, method documents, and a release README.
-Natural writing in STAR must make that chain easier to read without making it harder to audit.
+Natural writing in this project must make that chain easier to read without making it harder to audit.
 This guide governs prose and replies; [research-workflow-conventions.md](research-workflow-conventions.md) still governs evidence, state, ownership, execution, and provenance.
 
-## 1. The STAR test for a style edit
+## 1. The test for a style edit
 
-Every durable statement in STAR is either recorded evidence, an inference from recorded evidence, or an open item owned by a later workflow step.
+Every durable statement in the project is either recorded evidence, an inference from recorded evidence, or an open item owned by a later workflow step.
 A style edit may improve the expression of any of the three, but it may not move a statement from one class to another.
 
 Use one controlling test:
 
-> After the rewrite, can the next STAR skill recover the same fact, status, uncertainty, and decision from the file?
+> After the rewrite, can the next workflow skill recover the same fact, status, uncertainty, and decision from the file?
 
 If not, the edit changed the research record rather than its language.
 This is stricter than merely “preserve the meaning”: a dropped citekey, softened negative result, hidden `[TBD]`, changed command, or missing run name may leave the broad meaning intact while breaking the workflow.
 
-## 2. Where STAR applies the full guide
+## 2. Where the full guide applies
 
 All replies inherit the compact rule in `AGENTS.md`: answer first; skip praise, staged introductions, service offers, and generic positive endings.
 Six prose-producing skills load this full guide at the point where they draft narrative text:
 
-| STAR moment | Skill and writing surface | What the prose must do | Content the style pass must not move |
+| Workflow moment | Skill and writing surface | What the prose must do | Content the style pass must not move |
 |---|---|---|---|
 | Converge on a topic | `star-idea-storm` → `metds/ideas/<slug>_idea.md` | State one question, the scanned gap, why now, first validation, and risks | Seed, source-backed gap, named works, constraints, verdicts, kill-condition |
 | Turn the topic into a plan | `star-plan-coach` → `metds/plans/<digit>_<slug>_plan.md` | Make six confirmed sections usable by later planning and execution | Section status, decisions, citations, thresholds, `[TBD]`, technical distinctions |
@@ -32,7 +32,7 @@ Six prose-producing skills load this full guide at the point where they draft na
 | Compile the method | `star-metd-summarize` → five `metds/*.md` method documents | Reorganize plan-backed method content without designing the method | Plan provenance, values, paths, `TODO`, verification labels, conflicts |
 | Compile the release surface | `star-code-release` → `README.md` and optional Chinese twin | Explain what the repository verifiably contains and how to run it | Commands, paths, runs, result conditions, provenance, absent-source `TODO`s |
 
-Other STAR skills use the compact contract in the shared conventions.
+Other skills use the compact contract in the shared conventions.
 They need not load this full file when their output is primarily code, structured state, a rubric verdict, or a bounded execution record.
 
 ## 3. Separate the record layer from the prose layer
@@ -62,7 +62,7 @@ Neither is a stale plan, an analysis absent from a run, a citation that has not 
 Keep the explicit gap and route it to the skill that owns the missing record.
 Do not add a plausible detail, personality, anecdote, or “reasonable” conclusion to make the paragraph feel complete.
 
-## 4. Failure modes specific to STAR artifacts
+## 4. Failure modes specific to workflow artifacts
 
 ### Ideas and plans
 
@@ -72,7 +72,7 @@ Keep `not scanned`, `[TBD]`, parked directions, fallback conditions, and kill-co
 
 ### Literature notes and synthesis
 
-Avoid “existing studies show” when STAR has a citekey and a verified record.
+Avoid “existing studies show” when a citekey and a verified record are already available.
 Do not use venue prestige or citation count as a substitute for direct overlap with the project.
 Keep paper claims, collector returns, and the main agent's project-specific judgment distinguishable.
 A paragraph may synthesize several papers, but every mapped limitation must remain recoverable from its notes.
@@ -102,10 +102,10 @@ When a mandatory section lacks a source, name the producer in a `TODO`; when the
 
 Lead with the answer, change, finding, or blocker.
 Write the action and its consequence instead of announcing a phase name the reader must decode.
-Name a STAR label such as `finalized:` or `§4` only with the meaning needed at that point.
+Name a workflow label such as `finalized:` or `§4` only with the meaning needed at that point.
 End with the last useful fact, decision, command, file, or blocker; do not append praise or an offer to continue.
 
-## 5. Draft and revise in the order STAR needs
+## 5. Draft and revise in workflow order
 
 For a long reply or durable prose artifact:
 
@@ -127,7 +127,7 @@ These are review signals, not banned forms and not evidence of AI authorship.
 Review a paragraph when several accumulate, or when a clear chatbot residue appears.
 
 - **Inflated significance:** importance, transformation, or broad impact appears without a mapped claim and evidence.
-- **Vague attribution:** “experts”, “industry reports”, or “已有研究” replaces the citation or record STAR already holds.
+- **Vague attribution:** “experts”, “industry reports”, or “已有研究” replaces a citation or record the project already holds.
 - **Unsupported analytical tail:** “thereby demonstrating”, “highlighting”, “从而彰显”, or “进而说明” adds a consequence the evidence did not establish.
 - **Staged contrast:** repeated “not only X but Y”, forced threes, or rejected alternatives create drama without carrying a technical distinction.
 - **Terminology cycling:** synonyms replace a canonical method, dataset, metric, status, or component name and quietly change its scope.
@@ -143,7 +143,7 @@ Vary cadence because the reasoning changes, never by injecting random irregulari
 ## 7. Acceptance checks before writing the file
 
 Do not assign a numerical “human score”.
-Use checks that correspond to STAR's downstream risks:
+Use checks that correspond to downstream workflow risks:
 
 | Check | Question to answer |
 |---|---|
@@ -152,7 +152,7 @@ Use checks that correspond to STAR's downstream risks:
 | Causal discipline | Does the prose distinguish observation, comparison, and causal conclusion at the same strength as the evidence? |
 | Ownership | Did the edit stay inside the producing skill's read/write boundary and route missing records instead of inventing them? |
 | Terminology | Do plan, code, experiment, and prose use the same canonical names for the same things? |
-| Voice | Does the result match the user's sample or STAR's restrained technical default without decorative personality? |
+| Voice | Does the result match the user's sample or the project's restrained technical default without decorative personality? |
 | Handoff | Can the next skill identify the decision, remaining uncertainty, and exact file or command it needs? |
 
 Claim and state fidelity are release conditions.
