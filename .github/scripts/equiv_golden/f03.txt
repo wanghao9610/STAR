@@ -8,12 +8,15 @@ ok    every SKILL.md name matches its directory
 
 == File inventory parity (ignoring .agents agents/ manifests) ==
 FAIL  .dsh/skills/star-expt-digest file set differs from .agents/skills/star-expt-digest:
-      6a7,8
-      > ./references/extra_zh.md
+      8a9,10
       > ./references/extra.md
+      > ./references/extra_zh.md
 
 == Slash-only guards match the conventions roster ==
-ok    roster lists all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+ok    conventions and shared /star router list all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+
+== Harness-owned STAR router packages ==
+ok    Codex, Kimi and DSH router packages all delegate to the shared /star roster
 
 == Bilingual twins in skill trees ==
 ok    every skill .md file has its bilingual twin
@@ -22,7 +25,7 @@ ok    every skill .md file has its bilingual twin
 ok    every SKILL.md references the conventions document
 
 == Invocation-token hygiene ==
-ok    invocation tokens are consistent per tree
+ok    invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router
 
 == Bilingual twins in docs/mds/star-workflow ==
 ok    workflow docs are paired en/zh
@@ -34,7 +37,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (181 files)
+ok    heading structure matches across the 6 trees (182 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -76,7 +79,7 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
 == Reference paths a skill names ==
-FAIL  .dsh/skills/star-expt-digest/references/extra_zh.md: no file in star-expt-digest names references/extra.md; a moved section left it behind
 FAIL  .dsh/skills/star-expt-digest/references/extra.md: no file in star-expt-digest names references/extra.md; a moved section left it behind
+FAIL  .dsh/skills/star-expt-digest/references/extra_zh.md: no file in star-expt-digest names references/extra.md; a moved section left it behind
 
 3 check(s) failed.

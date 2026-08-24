@@ -8,11 +8,14 @@ ok    every SKILL.md name matches its directory
 
 == File inventory parity (ignoring .agents agents/ manifests) ==
 FAIL  .pi/skills/star-flow-status file set differs from .agents/skills/star-flow-status:
-      0a1
+      2a3
       > ./references/orphan.md
 
 == Slash-only guards match the conventions roster ==
-ok    roster lists all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+ok    conventions and shared /star router list all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+
+== Harness-owned STAR router packages ==
+ok    Codex, Kimi and DSH router packages all delegate to the shared /star roster
 
 == Bilingual twins in skill trees ==
 FAIL  .pi/skills/star-flow-status/references/orphan.md has no _zh.md counterpart
@@ -21,7 +24,7 @@ FAIL  .pi/skills/star-flow-status/references/orphan.md has no _zh.md counterpart
 ok    every SKILL.md references the conventions document
 
 == Invocation-token hygiene ==
-ok    invocation tokens are consistent per tree
+ok    invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router
 
 == Bilingual twins in docs/mds/star-workflow ==
 ok    workflow docs are paired en/zh
@@ -33,7 +36,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (181 files)
+ok    heading structure matches across the 6 trees (182 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees

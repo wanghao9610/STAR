@@ -10,7 +10,10 @@ ok    every SKILL.md name matches its directory
 ok    file sets match across all 7 trees
 
 == Slash-only guards match the conventions roster ==
-ok    roster lists all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+ok    conventions and shared /star router list all 15 skills en/zh; 7 slash-only skills guarded identically in all 7 trees
+
+== Harness-owned STAR router packages ==
+ok    Codex, Kimi and DSH router packages all delegate to the shared /star roster
 
 == Bilingual twins in skill trees ==
 ok    every skill .md file has its bilingual twin
@@ -19,7 +22,7 @@ ok    every skill .md file has its bilingual twin
 ok    every SKILL.md references the conventions document
 
 == Invocation-token hygiene ==
-ok    invocation tokens are consistent per tree
+ok    invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router
 
 == Bilingual twins in docs/mds/star-workflow ==
 ok    workflow docs are paired en/zh
@@ -31,7 +34,7 @@ ok    .cursor/rules/agent-instructions.mdc matches the AGENTS.md body
 ok    all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule
 
 == Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen) ==
-ok    heading structure matches across the 6 trees (181 files)
+ok    heading structure matches across the 6 trees (182 files)
 
 == Description length (<= 1024 characters, SKILL.md spec) ==
 ok    all descriptions within 1024 characters in all 7 trees
@@ -63,6 +66,7 @@ ok    opening loads hold: one lookup line per file, no conventions cat outside t
 == Selective conventions load ==
 FAIL  .claude/skills/star-expt-digest/SKILL.md: the block says §0, §3, §5, §6, §7, §8 arrives but the selector loads §0, §3, §5, §6, §7, §8, §9
 FAIL  .claude/skills/star-expt-digest/SKILL.md: the block names §1, §2, §4, §9, §10, §11 as staying out; the sections it does not load are §1, §2, §4, §10, §11
+FAIL  .claude/skills/star-expt-digest/SKILL.md: the block says the excerpt is 31 KB; it is 33276 bytes (33 KB)
 
 == Reuse-an-earlier-load paragraph ==
 ok    every manifest carries the reuse paragraph, uniform per language, inside the opening-load block
@@ -74,6 +78,6 @@ ok    the neutral tree names no delegation tool or type key, and no tree carries
 ok    each tree names only its own harness's file reader, terminal, and question tool
 
 == Reference paths a skill names ==
-ok    1004 reference paths resolve, and every reference file is named by the skill that ships it
+ok    1011 reference paths resolve, and every reference file is named by the skill that ships it
 
-2 check(s) failed.
+3 check(s) failed.
