@@ -36,7 +36,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、产物和范围受限检查。用你的计划工具跟踪它——一个 action 一个步骤，同时只保持一个 `in_progress`——并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
 3. **该委派的就委派。** 怎么切分由主 agent 自己定。协作工具可用、且有边界、相互独立的工作确实能从委派中受益时就委派——这是常态，不是例外。满足条件时，调用你的子代理工具：实现工作使用可写子代理，只读勘察使用只读子代理。绝不为每个琐碎顺序步骤创建一个 subagent。给每个受委派者 `references/agent_dispatch_spec_zh.md` 中那份范围很窄的交办说明；主 agent 始终负责集成和重新运行检查。那份文件里的树状态纪律——动作开始前它名下的文件在 git 里是干净的、重试前先恢复、以 `blocked` 收场的动作其改动去留要有明确决定——同样约束本地执行：两条路径上被放弃的改动是同一批改动。
 4. **在重型或不可逆工作前停止。** 长时间或多 GPU 训练、全数据集评估、高成本 API 调用、无边界任务、覆盖有价值产物都会跨越 STOP line。准备可复现命令并交给用户；不要启动。遵循 `references/stop_line_rules_zh.md`。
-5. **记录已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；此外，仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。
+5. **记录已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。
 6. **使用项目运行时和布局。** 从 `.env` 读取 `CONDA_HOME`、`PYTHON_HOME`、`CODE_NAME`；绝不猜本地路径或使用系统 Python。若项目入口是 `execs/run.sh`，就使用它。创建 `tasks/<plan-name>/` 存放执行该计划时所需中间文件；可复用运行脚本放 `execs/scpts/`；生成输出和持久执行记录放 `wkdrs/<run>/`；数据放 `datas/`；权重放 `inits/`；代码放 `${CODE_NAME}/`。遵循 `AGENTS.md`。
 
 ## 工作流
@@ -60,7 +60,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 遵循 `references/orient_checklist_zh.md`：
 
 1. 读取 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。若这些路径指定的环境缺失或无法运行 Python，推荐执行前先用 `star-env-builder` 构建。
-2. 映射 `${CODE_NAME}/`；若其中没有实现则声明 空代码库（从零起步），或先用 `star-code-architect` 引入参考代码库。
+2. 映射 `${CODE_NAME}/`；若其中没有实现则声明空代码库（从零起步），或先用 `star-code-architect` 引入参考代码库。
 3. 把每个 §3 步骤追踪到真实文件，并分类为 exists / modify / create。
 4. 确认实际 run 入口和测试入口。
 
@@ -80,7 +80,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 对每个未完成 action：
 
 1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理（只读勘察用只读子代理），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
-2. 只做该 action 必需的修改，并通过项目环境运行其窄范围范围受限检查。
+2. 只做该 action 必需的修改，并通过项目环境运行其范围受限检查。
 3. 在主 agent 中重跑或独立验证范围受限检查。通过后，记录证据和产物路径；若逐 action 提交已获批准，则提交该 action 的文件——在执行分支上，这次提交连同本 action 更新过的运行记录一起暂存，因为只有提交才会被合并（规约 §11.2）。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
 4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，并在 `开销` 一节记一行预计开销（GPU 数 × 小时，或调用次数与费用），不运行并停止。用户带结果回来时把实际开销补进那一行——根计划 §4 算力预算唯一的对账处；拿不到实际值就写 `未记`，绝不留空。
 5. 若重试或 blocker 在子计划粒度改变了方法（新增/删除/替换步骤，交付物路径或完成判据变化），在 EXEC_LOG 的 `Pending amendments` 下记录变更项行并继续——这些在 finalize 时同步，而不是运行中同步。

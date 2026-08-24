@@ -144,7 +144,7 @@ Keep this section short and omit it entirely when nothing is flagged.
 
 ## Unrecognized-files line (the check that catches a renamed output)
 
-The follow-up checks match artifacts by name. If a producer skill changes what it writes, the checks would quietly stop firing that row — a silent under-report. This line flips that failure into a visible one. Count only **report-shaped** files, so run artifacts (checkpoints, figures, raw logs) never enter:
+The follow-up checks match artifacts by name. If a producer skill changes what it writes, the checks would stop firing that row — a silent under-report. This line flips that failure into a visible one. Count only **report-shaped** files, so run artifacts (checkpoints, figures, raw logs) never enter:
 
 - a `*.md` directly inside a `wkdrs/<run>/` dir whose name is not `EXEC_PLAN.md`, `EXEC_LOG.md`, `CODE_REVIEW_<date>.md`, `EXPT_ANALYSIS_<date>.md`, or `REVIEW_<date>.md`;
 - a `*.md` directly inside one of the four listed non-run `wkdrs/` dirs, under a name §8 does not list there — `wkdrs/reviews/` (the shared no-run fallback) lists `code_<scope>_<date>.md` and `<prefix>_<slug>_<date>.md` (numeric prefix); a `wkdrs/env_<name>_<date>/` dir lists `ENV_REPORT.md`; `wkdrs/digests/` lists `EXPT_DIGEST_<date>.md` and `MODEL_LEDGER.md`; `wkdrs/results/` lists `results.md` and `results_<slug>.md`. Any other `wkdrs/` subdir is audited as a run dir under the previous bullet;

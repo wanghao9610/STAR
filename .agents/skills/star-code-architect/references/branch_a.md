@@ -36,5 +36,5 @@ If a usable conda env from `.env` exists, run `python -c "import <package>"` thr
 
 ## Step A8: Survey the clone
 
-Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and are done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input the architecture and the migration table.
+Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and it is done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
 

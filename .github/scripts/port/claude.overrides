@@ -152,7 +152,7 @@ Present the top 3–5, one line per candidate: one-line why-it-fits, license, st
 Present the top 3–5 via AskUserQuestion, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
 ### star-code-architect/references/branch_a.md
 --- 1
-Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and are done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input the architecture and the migration table.
+Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and it is done inline. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
 +++ 1
 Count the clone's `.py` files first. Under the light-mode threshold: complete Step C1's repo map with a single read-only pass (`references/survey_spec.md`) — the scoring pass already covered the broad structure, and the main agent may do this itself. Above it: run the Step B1 areas unchanged, or the three C1 actually needs (structure & dependencies, config system, train/eval entrypoints). A reference implementation is usually well past the threshold, and this pass is C1's only input for the architecture and the migration table.
 ### star-code-architect/references/branch_a_zh.md
@@ -211,7 +211,7 @@ The **main agent re-runs the verification itself** — never trust a self-report
 The **main agent re-runs the verification itself** — never trust a self-reported `pass`:
 ### star-code-architect/references/orchestration_spec_zh.md
 --- 1
-本 skill 如何组织勘察与迁移工作。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。协作工具可用、且委派确有帮助时就委派有边界的分组或组；没有这个条件才本地执行。委派时调用你的子代理工具：勘察分组使用只读子代理，迁移组使用可写子代理。两个确认点、验证、提交与失败后的恢复始终由主 agent 负责。
+本 skill 如何组织勘察与迁移工作。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。协作工具可用、且委派确有帮助时就委派有边界的勘察分组或迁移组；没有这个条件才本地执行。委派时调用你的子代理工具：勘察分组使用只读子代理，迁移组使用可写子代理。两个确认点、验证、提交与失败后的恢复始终由主 agent 负责。
 +++ 1
 本 skill 的主 agent 如何调度 subagent。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。主 agent 负责编排、复核、提交；它自己不改代码。
 ### star-code-architect/references/orchestration_spec_zh.md
@@ -757,7 +757,7 @@ Lead with the verdict, under about 500 words: the run verdict and the §5 scorec
 你阅读与解读；你不执行步骤、不修代码、不改计划、不翻计划状态。分析发现超出可写范围的问题，都转交出去：未完成或失败的步骤、判据已达标但还需终验，交 `star-plan-executor`；计划文本与现实不符交 `star-plan-reviser`；策略被推翻交 `star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`；疑似代码缺陷交 `star-code-reviewer`；环境损坏交 `star-env-builder`。
 ### star-expt-analyst/SKILL_zh.md
 --- 1
-2. **广读，每个数字进报告前先核实。** 对许多或超大日志开展有边界、彼此独立、只读的读取确有实质帮助时就委派收集——派几个由主 agent 定——并派一个只读子代理。每个受委派方遵循 `references/analysis_rubric_zh.md` 的观察格式约定，绝不写入，也绝不给 run 的判定打分。每个数字、每条 blocker/major 观察进报告前，都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
+2. **广读，每个数字进报告前先核实。** 对许多或超大日志的有边界、彼此独立、只读的读取确有实质帮助时就委派收集——派几个由主 agent 定——并派一个只读子代理。每个受委派方遵循 `references/analysis_rubric_zh.md` 的观察格式约定，绝不写入，也绝不给 run 的判定打分。每个数字、每条 blocker/major 观察进报告前，都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
 +++ 1
 2. **广读，每个数字进报告前先核实。** 收集可以并行分派给只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），但每个数字、每条 blocker/major 观察进报告前，主 agent 都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
 ### star-expt-analyst/SKILL_zh.md
@@ -978,9 +978,9 @@ Before acting, load it in one message — three Bash calls with the project root
 3. No argument → if an unfinished idea file exists, ask whether to continue it (via AskUserQuestion: continue that storm / start a new one); otherwise ask for the seed in plain text (no forced options).
 ### star-idea-storm/SKILL.md
 --- 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 +++ 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one AskUserQuestion (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one AskUserQuestion (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 ### star-idea-storm/SKILL.md
 --- 1
 Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a note on how crowded the area is (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scan with delegation where it helps — when several kept directions can be scanned independently and read-only. For each selected direction, dispatch a read-only sub-agent, one direction per agent, each returning the collector format in `references/scan_policy.md` — the briefing, and each agent's share of the rate budget, are built by the main agent, never by the agent. Write the file from the main agent, which also owns every judgment line. Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are reported the moment they are found, not at stage end. A failed search is reported as failed, never padded.
@@ -1043,7 +1043,7 @@ Before acting, load this skill's unconditional opening reads in one message — 
 Before acting, load this skill's unconditional opening reads in one message — four Bash calls, with the project root as the working directory, sent together.
 ### star-metd-summarize/SKILL.md
 --- 1
-Serve as the family's method compiler. `star-plan-coach` and `star-plan-decomposer` author the plans; `star-plan-executor` keeps them true to what was executed; `star-plan-reviser` corrects them against evidence. This skill compiles them: the plan tree is organized by decomposition and execution order; it reorganizes the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. The product is the five documents under `metds/`, the material a paper's method section is written from. This skill runs once the loop has closed — every leaf executed, every top-level plan finalized, the method determined: while the method is still moving, the plans are the deliverable, not these documents.
+You are the family's method compiler. `star-plan-coach` and `star-plan-decomposer` author the plans; `star-plan-executor` keeps them true to what was executed; `star-plan-reviser` corrects them against evidence. This skill compiles them: the plan tree is organized by decomposition and execution order; it reorganizes the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. The product is the five documents under `metds/`, the material a paper's method section is written from. This skill runs once the loop has closed — every leaf executed, every top-level plan finalized, the method determined: while the method is still moving, the plans are the deliverable, not these documents.
 +++ 1
 You are the family's method compiler. `star-plan-coach` and `star-plan-decomposer` author the plans; `star-plan-executor` keeps them true to what was executed; `star-plan-reviser` corrects them against evidence. You compile them: the plan tree is organized by decomposition and execution order; you reorganize the same facts along the axis a **reader** needs — what the method is, what data it eats, how it is trained, how it is judged. Your product is the five documents under `metds/`, the material a paper's method section is written from. You run once the loop has closed — every leaf executed, every top-level plan finalized, the method determined: while the method is still moving, the plans are the deliverable, not these documents.
 ### star-metd-summarize/SKILL.md
@@ -1235,9 +1235,9 @@ When all sections are `done` (or `skipped`): Before listing anything, send the r
 阶段 2 的衔接：最接近的工作及其局限应当是读出来的，不是回忆出来的。分档来读：若 `metds/refs/related_work.md` 已存在，它本身就是编译好的叙述——读它加上 refs 索引的 §2，到此为止。否则，笔记 ≤ ~6 篇时直接读它们的 §5。只有超过这个数，才值得派一个有界的收集器；它返回的是 citekey、笔记路径和**逐字照录**的 §5 引文——绝不是转述，因为 §5 本身就是 `star-refs-reviewer` 主 agent 的综述。无论走哪一档，都要拿你引用的 citekey 去 grep 一遍 `reference.bib`：文件里没有的 citekey 是一处断掉的引用，不是排版细节。若 `metds/refs/` 什么都没有，建议**先**抽身去跑 `star-refs-reviewer`，再用 `star-plan-coach <slug> related_work` 回来续写——凭记忆写定位，正是这一阶段要防的失败。用户若不愿意，就基于他已知的内容继续，并标出日后需要调研确认的部分。计划据 idea 文件起草时，其 §3 的扫描表为这一阶段点出首批候选——但只读到摘要深度：它们为调研指路，不能替代调研。
 ### star-plan-coach/SKILL_zh.md
 --- 1
-全部章节 `done`（或 `skipped`）后：在列出任何东西之前，派一个只读子代理，做一次"不知情"的只读评分表复核，交办材料正好两个文件——写完的计划，和 `references/plan_rubric.md`（计划 frontmatter 写着 `language: zh` 时改点名 `_zh` 那份；子代理绝不自己选）——范围逐字写明："只看这两个文件。产生这份计划的那场对话你没有参与。不要排序，不要下结论。"它逐条返回：`item`、`verdict: pass | fail | unclear`、`evidence`（引用的那一行，或者把"缺了什么"确切写出来）、`fix`，别的都不返回。交给它的只有这两个文件路径：把计划是怎么想出来的一并贴给它，它就不再"不知情"了。这一个子代理为什么值得派（conventions §6.7）：评分表最锋利的几条都是缺失检查——每条主张都有对应实验、有明确的改进阈值、有 seed 与方差的说明——而页面上没有任何东西会跟一句没写下的话矛盾，作者对此是结构性看不见的；而 `finalized:` 又是下游四个 skill 用来信任这份计划的信号。主 agent 对每条它准备提出的 `fail` 重读被引用的那一行——缺失型的 `fail` 没有行可引，就把该条目所属的整节重读一遍，再决定接受还是丢掉——然后排序、询问，并独自写下 `finalized:`。子代理只负责打分：主 agent 确认不了的 `fail` 直接丢掉；这份计划算不算完成，仍然是用户说了算。没有受托者可用时，就照原样自己跑一遍评分表（conventions §6.1）。然后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。**先把发现落到正文，再提问**：最多 5 条，按重要性排序，每条一行——评分项、裁定、被引的那一行（缺失型的把“缺了什么”确切写出来）、建议改法。`fail` 排在前面；`pass` 但复核仍提了 `fix` 的条目进同一份清单并标 `pass`。列完再询问是否回到对应章节补强。问题只负责处置这份清单，绝不承载它：选项里可以点名候选，但发现是用户没见过的证据，正文上什么都没有却问“上述三处怎么处置”，就是让用户闭着眼睛拍板。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个：六节全部 `done` 或 `skipped`，且评分表跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
+全部章节 `done`（或 `skipped`）后：在列出任何东西之前，派一个只读子代理，做一次"不知情"的只读评分表复核，交办材料正好两个文件——写完的计划，和 `references/plan_rubric.md`（计划 frontmatter 写着 `language: zh` 时改点名 `_zh` 那份；子代理绝不自己选）——范围逐字写明："只看这两个文件。产生这份计划的那场对话你没有参与。不要排序，不要下结论。"它逐条返回：`item`、`verdict: pass | fail | unclear`、`evidence`（引用的那一行，或者把"缺了什么"确切写出来）、`fix`，别的都不返回。交给它的只有这两个文件路径：把计划是怎么想出来的一并贴给它，它就不再"不知情"了。这一个子代理为什么值得派（conventions §6.7）：评分表最锋利的几条都是缺失检查——每条主张都有对应实验、有明确的改进阈值、有 seed 与方差的说明——而页面上没有任何东西会跟一句没写下的话矛盾，作者对此是结构性看不见的；而 `finalized:` 又是下游四个 skill 用来信任这份计划的信号。主 agent 对每条它准备提出的 `fail` 重读被引用的那一行——缺失型的 `fail` 没有行可引，就把该条目所属的整节重读一遍，再决定接受还是丢掉——然后排序、询问，并独自写下 `finalized:`。子代理只负责打分：主 agent 确认不了的 `fail` 直接丢掉；这份计划算不算完成，仍然是用户说了算。没有受托者可用时，就照原样自己跑一遍评分表（conventions §6.1）。然后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。**先把发现落到正文，再提问**：最多 5 条，按重要性排序，每条一行——评分项、裁定、被引的那一行（缺失型的把"缺了什么"确切写出来）、建议改法。`fail` 排在前面；`pass` 但复核仍提了 `fix` 的条目进同一份清单并标 `pass`。列完再询问是否回到对应章节补强。问题只负责处置这份清单，绝不承载它：选项里可以点名候选，但发现是用户没见过的证据，正文上什么都没有却问"上述三处怎么处置"，就是让用户闭着眼睛拍板。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个：六节全部 `done` 或 `skipped`，且评分表跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
 +++ 1
-全部章节 `done`（或 `skipped`）后：在列出任何东西之前，先把评分表交出去做一次"不知情"的复核：一个只读 `Agent` 子代理（`subagent_type: Explore`），交办材料正好两个文件——写完的计划，和 `references/plan_rubric.md`（计划 frontmatter 写着 `language: zh` 时改点名 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这两个文件。产生这份计划的那场对话你没有参与。不要排序，不要下结论。"它逐条返回：`item`、`verdict: pass | fail | unclear`、`evidence`（引用的那一行，或者把"缺了什么"确切写出来）、`fix`，别的都不返回。交给它的只有这两个文件路径：把计划是怎么想出来的一并贴给它，它就不再"不知情"了。这一个受托者为什么值得派（conventions §6.7）：评分表最锋利的几条都是缺失检查——每条主张都有对应实验、有明确的改进阈值、有 seed 与方差的说明——而页面上没有任何东西会跟一句没写下的话矛盾，作者对此是结构性看不见的；而 `finalized:` 又是下游四个 skill 用来信任这份计划的信号。主 agent 对每条它准备提出的 `fail` 重读被引用的那一行——缺失型的 `fail` 没有行可引，就把该条目所属的整节重读一遍，再决定接受还是丢掉——然后排序、询问，并独自写下 `finalized:`。子代理只负责打分：主 agent 确认不了的 `fail` 直接丢掉；这份计划算不算完成，仍然是用户说了算。没有受托者可用时，就照原样自己跑一遍评分表（conventions §6.1）。然后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。**先把发现落到正文，再提问**：最多 5 条，按重要性排序，每条一行——评分项、裁定、被引的那一行（缺失型的把“缺了什么”确切写出来）、建议改法。`fail` 排在前面；`pass` 但复核仍提了 `fix` 的条目进同一份清单并标 `pass`。列完再询问是否回到对应章节补强。问题只负责处置这份清单，绝不承载它：选项里可以点名候选，但发现是用户没见过的证据，正文上什么都没有却问“上述三处怎么处置”，就是让用户闭着眼睛拍板。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个：六节全部 `done` 或 `skipped`，且评分表跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
+全部章节 `done`（或 `skipped`）后：在列出任何东西之前，先把评分表交出去做一次"不知情"的复核：一个只读 `Agent` 子代理（`subagent_type: Explore`），交办材料正好两个文件——写完的计划，和 `references/plan_rubric.md`（计划 frontmatter 写着 `language: zh` 时改点名 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这两个文件。产生这份计划的那场对话你没有参与。不要排序，不要下结论。"它逐条返回：`item`、`verdict: pass | fail | unclear`、`evidence`（引用的那一行，或者把"缺了什么"确切写出来）、`fix`，别的都不返回。交给它的只有这两个文件路径：把计划是怎么想出来的一并贴给它，它就不再"不知情"了。这一个受托者为什么值得派（conventions §6.7）：评分表最锋利的几条都是缺失检查——每条主张都有对应实验、有明确的改进阈值、有 seed 与方差的说明——而页面上没有任何东西会跟一句没写下的话矛盾，作者对此是结构性看不见的；而 `finalized:` 又是下游四个 skill 用来信任这份计划的信号。主 agent 对每条它准备提出的 `fail` 重读被引用的那一行——缺失型的 `fail` 没有行可引，就把该条目所属的整节重读一遍，再决定接受还是丢掉——然后排序、询问，并独自写下 `finalized:`。子代理只负责打分：主 agent 确认不了的 `fail` 直接丢掉；这份计划算不算完成，仍然是用户说了算。没有受托者可用时，就照原样自己跑一遍评分表（conventions §6.1）。然后，读 `references/plan_rubric.md`（中文对话读 `references/plan_rubric_zh.md`），逐项检查计划质量。**先把发现落到正文，再提问**：最多 5 条，按重要性排序，每条一行——评分项、裁定、被引的那一行（缺失型的把"缺了什么"确切写出来）、建议改法。`fail` 排在前面；`pass` 但复核仍提了 `fix` 的条目进同一份清单并标 `pass`。列完再询问是否回到对应章节补强。问题只负责处置这份清单，绝不承载它：选项里可以点名候选，但发现是用户没见过的证据，正文上什么都没有却问"上述三处怎么处置"，就是让用户闭着眼睛拍板。用户表示满意后，在 frontmatter 加 `finalized: <日期>`——重开过的计划替换旧日期，不要两个并存。`finalized:` 的含义就是这个：六节全部 `done` 或 `skipped`，且评分表跑过并给出了答复。它是下游 skill 用来判断这份计划能否驱动它们工作的唯一信号，所以除此之外没有任何东西会设上它，重开一节则清除它。
 ### star-plan-coach/SKILL_zh.md
 --- 1
 - 始终通过你的提问工具提问；仅在非交互运行下改用纯文本——仍一次只问一题。
@@ -1345,12 +1345,12 @@ Four lines a unit, and each stays one line: this is the sketch Step 4 expands in
 - 若当前环境无法使用 AskUserQuestion（无头 / 脚本化），改用纯文本提问——仍一次只问一题。 **问题所指的内容装不进选项时**——子计划清单、某份子计划草稿、回写父计划的索引草稿、评分表不达标项——就写在同一条消息的正文里、排在这次调用之前，选项只装答案。两种形式下内容与问题都同来同止，中间不隔别的：用户收到的若是一排光选项，那是内容丢了，不是被压缩了。
 ### star-plan-decomposer/references/decomposition_axes.md
 --- 1
-An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes in one concise question via your question tool,, recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
+An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes in one concise question via your question tool, recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
 +++ 1
 An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes via AskUserQuestion, recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
 ### star-plan-decomposer/references/decomposition_axes_zh.md
 --- 1
-拆分轴指*用什么方式*把父计划切成子计划。选一个（允许混合，但要确认）。用一个简洁问题通过你的提问工具提出这些轴，推荐项放第一位。先完整读父计划，以及根计划的 §3（方法）、§4（实验）、§6（里程碑）——下面各轴切的是根计划的总体方向，父计划只决定这一层切它的哪一部分。
+拆分轴指*用什么方式*把父计划切成子计划。选一个（允许混合，但要确认）。通过你的提问工具用一个简洁问题提出这些轴，推荐项放第一位。先完整读父计划，以及根计划的 §3（方法）、§4（实验）、§6（里程碑）——下面各轴切的是根计划的总体方向，父计划只决定这一层切它的哪一部分。
 +++ 1
 拆分轴指*用什么方式*把父计划切成子计划。选一个（允许混合，但要确认）。用 AskUserQuestion 提出这些轴，推荐项放第一位。先完整读父计划，以及根计划的 §3（方法）、§4（实验）、§6（里程碑）——下面各轴切的是根计划的总体方向，父计划只决定这一层切它的哪一部分。
 ### star-plan-executor/SKILL.md
@@ -1634,7 +1634,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、产物和范围受限检查。用你的计划工具跟踪它——一个 action 一个步骤，同时只保持一个 `in_progress`——并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
 3. **该委派的就委派。** 怎么切分由主 agent 自己定。协作工具可用、且有边界、相互独立的工作确实能从委派中受益时就委派——这是常态，不是例外。满足条件时，调用你的子代理工具：实现工作使用可写子代理，只读勘察使用只读子代理。绝不为每个琐碎顺序步骤创建一个 subagent。给每个受委派者 `references/agent_dispatch_spec_zh.md` 中那份范围很窄的交办说明；主 agent 始终负责集成和重新运行检查。那份文件里的树状态纪律——动作开始前它名下的文件在 git 里是干净的、重试前先恢复、以 `blocked` 收场的动作其改动去留要有明确决定——同样约束本地执行：两条路径上被放弃的改动是同一批改动。
 4. **在重型或不可逆工作前停止。** 长时间或多 GPU 训练、全数据集评估、高成本 API 调用、无边界任务、覆盖有价值产物都会跨越 STOP line。准备可复现命令并交给用户；不要启动。遵循 `references/stop_line_rules_zh.md`。
-5. **记录已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；此外，仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。
+5. **记录已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。
 6. **使用项目运行时和布局。** 从 `.env` 读取 `CONDA_HOME`、`PYTHON_HOME`、`CODE_NAME`；绝不猜本地路径或使用系统 Python。若项目入口是 `execs/run.sh`，就使用它。创建 `tasks/<plan-name>/` 存放执行该计划时所需中间文件；可复用运行脚本放 `execs/scpts/`；生成输出和持久执行记录放 `wkdrs/<run>/`；数据放 `datas/`；权重放 `inits/`；代码放 `${CODE_NAME}/`。遵循 `AGENTS.md`。
 
 ## 工作流
@@ -1658,7 +1658,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 遵循 `references/orient_checklist_zh.md`：
 
 1. 读取 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。若这些路径指定的环境缺失或无法运行 Python，推荐执行前先用 `star-env-builder` 构建。
-2. 映射 `${CODE_NAME}/`；若其中没有实现则声明 空代码库（从零起步），或先用 `star-code-architect` 引入参考代码库。
+2. 映射 `${CODE_NAME}/`；若其中没有实现则声明空代码库（从零起步），或先用 `star-code-architect` 引入参考代码库。
 3. 把每个 §3 步骤追踪到真实文件，并分类为 exists / modify / create。
 4. 确认实际 run 入口和测试入口。
 
@@ -1678,7 +1678,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 对每个未完成 action：
 
 1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理（只读勘察用只读子代理），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
-2. 只做该 action 必需的修改，并通过项目环境运行其窄范围范围受限检查。
+2. 只做该 action 必需的修改，并通过项目环境运行其范围受限检查。
 3. 在主 agent 中重跑或独立验证范围受限检查。通过后，记录证据和产物路径；若逐 action 提交已获批准，则提交该 action 的文件——在执行分支上，这次提交连同本 action 更新过的运行记录一起暂存，因为只有提交才会被合并（规约 §11.2）。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
 4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，并在 `开销` 一节记一行预计开销（GPU 数 × 小时，或调用次数与费用），不运行并停止。用户带结果回来时把实际开销补进那一行——根计划 §4 算力预算唯一的对账处；拿不到实际值就写 `未记`，绝不留空。
 5. 若重试或 blocker 在子计划粒度改变了方法（新增/删除/替换步骤，交付物路径或完成判据变化），在 EXEC_LOG 的 `Pending amendments` 下记录变更项行并继续——这些在 finalize 时同步，而不是运行中同步。
@@ -2004,7 +2004,7 @@ The **main agent — not the agent — re-runs the step's own check**, then reco
 EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `Agent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`、`model: sonnet`）。主 agent 负责编排与验证;agent 只做这一步的改/跑——只管一小块,以便失败可定位、上下文短。
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 1
-**在这个偏好之内,模型仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少:派 your sub-agent tool subagents（writing）,因为这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——不指定模型,随会话的模型走。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
+**在这个偏好之内,模型仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少:用你的子代理工具派可写子代理,因为这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——不指定模型,随会话的模型走。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
 +++ 1
 **在这个偏好之内,模型仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少:派 `Agent` subagents（`subagent_type: general-purpose`、`model: sonnet`）,因为这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——不指定模型,随会话的模型走。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
@@ -2030,14 +2030,14 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `Agent` subagent（
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 5
 - **范围**——EXEC_PLAN 中一个内聚目标及其绑定检查。明确写：「只做这个范围，不要继续后续动作。」
-- **可写文件范围**——此外一律不碰：`${CODE_NAME}/` 下允许新建或修改的确切文件/模块；`wkdrs/<run>/` 下的产物；`tasks/<plan-name>/` 下的中间文件，绝不碰别的计划的；以及仅限红线动作的那份备用启动脚本 `execs/scpts/<run>.sh`——写它是轻的，跑它不是。要求遵循 `AGENTS.md` 做 精准克制 changes。
+- **可写文件范围**——此外一律不碰：`${CODE_NAME}/` 下允许新建或修改的确切文件/模块；`wkdrs/<run>/` 下的产物；`tasks/<plan-name>/` 下的中间文件，绝不碰别的计划的；以及仅限红线动作的那份备用启动脚本 `execs/scpts/<run>.sh`——写它是轻的，跑它不是。要求遵循 `AGENTS.md` 做精准克制的修改。
 - **上下文**——相关的原始计划章节、缺口清单事实和现有接口。若委派用于独立验证，不要泄露预期答案。
-- **运行环境**——主 agent 已经解析好的解释器绝对路径，逐字给它。受托者不再自己去读 `.env`。缺包是它要返回的 blocker，绝不是它自己去装的东西（conventions §3.5）。
+- **运行环境**——主 agent 已经解析好的解释器绝对路径，逐字给它。受托者不再自己去读 `.env`。缺包是它要返回的 blocker，绝不是它自己去装的东西（规约 §3.5）。
 - **边界**——只跑轻量验证。若动作位于红线，只准备命令并返回，不得执行。
 +++ 4
 - **范围**——该步目标,逐字取自 EXEC_PLAN,加上它绑定的 check。明确写:"**只**做这一步;不要推进到后续步骤。"
-- **可写文件范围**——此外一律不碰:`${CODE_NAME}/` 下要新建或修改的确切文件/模块(取自缺口清单);`wkdrs/<run>/` 下的产物;`tasks/<plan-name>/` 下的中间文件,绝不碰别的计划的;以及仅限红线步骤的那份备用启动脚本 `execs/scpts/<run>.sh`——写它是轻的,跑它不是(`stop_line_rules_zh.md`)。匹配既有代码风格,只碰这一步需要的地方(CLAUDE.md §3,精准克制 changes)。
-- **运行环境**——主 agent 已经解析好的解释器绝对路径,逐字给它。agent 不再自己去读 `.env`:它的工作目录未必是项目根。缺包是它要返回的 blocker,绝不是它自己去装的东西(conventions §3.5)。
+- **可写文件范围**——此外一律不碰:`${CODE_NAME}/` 下要新建或修改的确切文件/模块(取自缺口清单);`wkdrs/<run>/` 下的产物;`tasks/<plan-name>/` 下的中间文件,绝不碰别的计划的;以及仅限红线步骤的那份备用启动脚本 `execs/scpts/<run>.sh`——写它是轻的,跑它不是(`stop_line_rules_zh.md`)。匹配既有代码风格,只碰这一步需要的地方(CLAUDE.md §3,精准克制的修改)。
+- **运行环境**——主 agent 已经解析好的解释器绝对路径,逐字给它。agent 不再自己去读 `.env`:它的工作目录未必是项目根。缺包是它要返回的 blocker,绝不是它自己去装的东西(规约 §3.5)。
 - **边界**——它**只能跑轻量验证**。若它的步骤在红线上,必须**备好命令并返回,不要跑**(`stop_line_rules_zh.md`)。
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 1
@@ -2070,11 +2070,11 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `Agent` subagent（
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 3
 - 通过 → 记录产物与检查证据，将动作标为 `done`。
-- 失败 → 把失败记进 EXEC_LOG，并在重试之前把这个动作名下的文件恢复回去——已点名的既有改动除外。恢复到这个动作开始时的样子，不是恢复到 `HEAD`：逐 action 提交可能已经被拒绝，那时更早的已验证动作同样没提交，重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复时绝不越出这个动作自己的文件。只有存在具体修正方案时才重试，最多两次。否则该动作标 `blocked`：那些做了一半的改动，恢复之前先问（conventions §7.7——这是把关删除的），记下最终怎么处理的，无论哪种都把路径写清楚，然后停止。没有哪个动作可以留下无人认领的改动。
+- 失败 → 把失败记进 EXEC_LOG，并在重试之前把这个动作名下的文件恢复回去——已点名的既有改动除外。恢复到这个动作开始时的样子，不是恢复到 `HEAD`：逐 action 提交可能已经被拒绝，那时更早的已验证动作同样没提交，重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复时绝不越出这个动作自己的文件。只有存在具体修正方案时才重试，最多两次。否则该动作标 `blocked`：那些做了一半的改动，恢复之前先问（规约 §7.7——这是把关删除的），记下最终怎么处理的，无论哪种都把路径写清楚，然后停止。没有哪个动作可以留下无人认领的改动。
 - 有 handoff → 记入「待用户执行」，不得运行，随后停止。
 +++ 3
 - **通过** → 在 EXEC_LOG 把该步标 `done`,附产物路径 + 检查结果;更新子计划 `exec_status` / `updated`。
-- **失败** → 把失败记进 EXEC_LOG。重试之前先把这一步名下的文件恢复回去——已写明的既有改动除外。恢复到这一步派发时的样子,不是恢复到 `HEAD`:确认点可能拒绝了逐步提交,那时更早的已验证步骤同样没提交,重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复动作绝不越出这一步自己的文件;最多重试 2 次,把失败信息回传给下一次派发。仍失败 → 该步标 `blocked`:那些做了一半的改动,恢复之前先问(conventions §7.7——这是把关删除的),记下最终怎么处理的,无论哪种都把路径写清楚,带日志停下。没有哪一步可以留下无人认领的改动:后面某一步提交时 stage 的是"这一步碰过的文件",它分不出来。
+- **失败** → 把失败记进 EXEC_LOG。重试之前先把这一步名下的文件恢复回去——已写明的既有改动除外。恢复到这一步派发时的样子,不是恢复到 `HEAD`:确认点可能拒绝了逐步提交,那时更早的已验证步骤同样没提交,重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复动作绝不越出这一步自己的文件;最多重试 2 次,把失败信息回传给下一次派发。仍失败 → 该步标 `blocked`:那些做了一半的改动,恢复之前先问(规约 §7.7——这是把关删除的),记下最终怎么处理的,无论哪种都把路径写清楚,带日志停下。没有哪一步可以留下无人认领的改动:后面某一步提交时 stage 的是"这一步碰过的文件",它分不出来。
 - **有 handoff** → 把命令移到 EXEC_LOG"待用户执行"并停下;不要跑它。
 ### star-plan-executor/references/branch_rules.md
 --- 1
@@ -2194,9 +2194,9 @@ Run before calling a run done (Step 6). Report failing items (≤5, ranked by im
 2. **每一步都有真实检查结果**——EXEC_LOG 里不存在标了 `done` 却没有**主 agent**通过记录的步骤(只有 agent 自报不算)。
 ### star-plan-executor/references/exec_rubric_zh.md
 --- 1
-7. **改动是 精准克制 的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(`AGENTS.md` §3)。
+7. **改动是精准克制的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(`AGENTS.md` §3)。
 +++ 1
-7. **改动是 精准克制 的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(CLAUDE.md §3)。
+7. **改动是精准克制的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(CLAUDE.md §3)。
 ### star-plan-executor/references/sizing_check.md
 --- 1
 The split preview goes in the text above the call: 2–5 cards, each a slug, a one-line objective, and the done-criterion that unit would own, then the execution order in one line. Name it a preview and say what that means — no file written, no prefix assigned, no `depends_on` drawn, and `star-plan-decomposer` still picks its own axis and confirms its own list. Its cut lines are the signals that fired (one unit per done-criterion, per STOP-line crossing, per kind of work), not a fresh axis analysis. Needing more than 5 cards is itself the finding — say so in a line instead of listing them. Then ask via your question tool: *split it first* (recommended once a strong signal fired) — the run ends here having written nothing, the command goes back as `star-plan-decomposer <leaf> <the preview in one clause>` with the sketch carried as a lead (conventions §7.12), and execution resumes at `star-plan-executor <the leaf it produces>` — or *execute it as it stands*, which costs: every STOP-line crossing stops and resumes the run, one `blocked` step holds up everything behind it, and a failure re-runs the leaf entire. Executing part of the leaf is not offered — narrowing the scope is a decision nobody made (conventions §10.4).
@@ -2204,7 +2204,7 @@ The split preview goes in the text above the call: 2–5 cards, each a slug, a o
 The split preview goes in the text above the call: 2–5 cards, each a slug, a one-line objective, and the done-criterion that unit would own, then the execution order in one line. Name it a preview and say what that means — no file written, no prefix assigned, no `depends_on` drawn, and `star-plan-decomposer` still picks its own axis and confirms its own list. Its cut lines are the signals that fired (one unit per done-criterion, per STOP-line crossing, per kind of work), not a fresh axis analysis. Needing more than 5 cards is itself the finding — say so in a line instead of listing them. Then ask via AskUserQuestion: *split it first* (recommended once a strong signal fired) — the run ends here having written nothing, the command goes back as `star-plan-decomposer <leaf> <the preview in one clause>` with the sketch carried as a lead (conventions §7.12), and execution resumes at `star-plan-executor <the leaf it produces>` — or *execute it as it stands*, which costs: every STOP-line crossing stops and resumes the run, one `blocked` step holds up everything behind it, and a failure re-runs the leaf entire. Executing part of the leaf is not offered — narrowing the scope is a decision nobody made (conventions §10.4).
 ### star-plan-executor/references/sizing_check_zh.md
 --- 1
-拆分预览写在提问那条消息的正文里、问题之上：2–5 张卡片，每张给 slug、一句话目标、以及这个单元会拥有的那条完成判据，再用一行写出执行顺序。要说明它是预览，也要说明预览意味着什么——不写文件、不分配前缀、不画 `depends_on`，`star-plan-decomposer` 仍然自己选轴、自己确认列表。预览的切口就是命中的那几条信号（一条完成判据一个单元、一次越过红线一个单元、一类活一个单元），不是重新做一次轴分析。需要超过 5 张卡片，这本身就是结论——用一行说掉，不要列出来。然后用 your question tool 提问：*先拆分*（有强信号命中时标为推荐）——本次运行到此为止，一个文件也不写，命令以 `star-plan-decomposer <叶子> <一句话的预览>` 交回，描述那一段把草图作为线索带过去（规约 §7.12），执行则在 `star-plan-executor <它产出的叶子>` 继续——或 *照原样执行*，代价是：每一次越过红线都要整个运行停下再恢复，一个 `blocked` 步骤会挡住它后面的全部工作，失败则整片叶子重跑。不提供"只执行叶子的一部分"——收窄范围是一个没有人做过的决定（规约 §10.4）。
+拆分预览写在提问那条消息的正文里、问题之上：2–5 张卡片，每张给 slug、一句话目标、以及这个单元会拥有的那条完成判据，再用一行写出执行顺序。要说明它是预览，也要说明预览意味着什么——不写文件、不分配前缀、不画 `depends_on`，`star-plan-decomposer` 仍然自己选轴、自己确认列表。预览的切口就是命中的那几条信号（一条完成判据一个单元、一次越过红线一个单元、一类活一个单元），不是重新做一次轴分析。需要超过 5 张卡片，这本身就是结论——用一行说掉，不要列出来。然后用你的提问工具发问：*先拆分*（有强信号命中时标为推荐）——本次运行到此为止，一个文件也不写，命令以 `star-plan-decomposer <叶子> <一句话的预览>` 交回，描述那一段把草图作为线索带过去（规约 §7.12），执行则在 `star-plan-executor <它产出的叶子>` 继续——或 *照原样执行*，代价是：每一次越过红线都要整个运行停下再恢复，一个 `blocked` 步骤会挡住它后面的全部工作，失败则整片叶子重跑。不提供"只执行叶子的一部分"——收窄范围是一个没有人做过的决定（规约 §10.4）。
 +++ 1
 拆分预览写在提问那条消息的正文里、问题之上：2–5 张卡片，每张给 slug、一句话目标、以及这个单元会拥有的那条完成判据，再用一行写出执行顺序。要说明它是预览，也要说明预览意味着什么——不写文件、不分配前缀、不画 `depends_on`，`star-plan-decomposer` 仍然自己选轴、自己确认列表。预览的切口就是命中的那几条信号（一条完成判据一个单元、一次越过红线一个单元、一类活一个单元），不是重新做一次轴分析。需要超过 5 张卡片，这本身就是结论——用一行说掉，不要列出来。然后用 AskUserQuestion 提问：*先拆分*（有强信号命中时标为推荐）——本次运行到此为止，一个文件也不写，命令以 `star-plan-decomposer <叶子> <一句话的预览>` 交回，描述那一段把草图作为线索带过去（规约 §7.12），执行则在 `star-plan-executor <它产出的叶子>` 继续——或 *照原样执行*，代价是：每一次越过红线都要整个运行停下再恢复，一个 `blocked` 步骤会挡住它后面的全部工作，失败则整片叶子重跑。不提供"只执行叶子的一部分"——收窄范围是一个没有人做过的决定（规约 §10.4）。
 ### star-plan-executor/references/stop_line_rules.md
@@ -2344,11 +2344,11 @@ Lead with the outcome, under about 500 words: the evidence base (what was read a
 ### star-plan-reviser/SKILL_zh.md
 --- 3
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线同样生效）。这是把项目的 Verification 规则（AGENTS.md §11）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **广收集；判断留在主 agent。** 对多个 run 或产物集合进行有边界、相互独立、只读的检查确有帮助时就委派收集；满足条件时派一个只读子代理。受委派者必须遵守 `references/review_spec_zh.md` 的收集器格式约定，绝不写入或提出修订。综合与判断留在主 agent 。
+2. **广收集；判断留在主 agent。** 对多个 run 或产物集合进行有边界、相互独立、只读的检查确有帮助时就委派收集；满足条件时派一个只读子代理。受委派者必须遵守 `references/review_spec_zh.md` 的收集器格式约定，绝不写入或提出修订。综合与判断留在主 agent。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次**直接提问把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
 +++ 3
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线对你同样生效）。这是把项目的 Verification 规则（CLAUDE.md §11）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: Explore`、`model: sonnet`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
+2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: Explore`、`model: sonnet`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次** AskUserQuestion 把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
 ### star-plan-reviser/SKILL_zh.md
 --- 1
@@ -2367,9 +2367,9 @@ Lead with the outcome, under about 500 words: the evidence base (what was read a
 ### Step 2：收集证据（只读 subagent）
 ### star-plan-reviser/SKILL_zh.md
 --- 1
-规模超过这个的：依据 `references/review_spec_zh.md` 中的收集器格式约定收集：**日志证据**（步骤状态、声称的检查、"Awaiting user"命令、方向性信号）、**产物证据**（每个 §4 交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及在 §2–§3 写明代码时的**代码证据**（承诺模块是否存在，是否与日志声称的修改一致）。按核心原则 2 收集；委派有帮助时，对每个选中的证据集合派一个只读子代理。
+规模超过这个的：依据 `references/review_spec_zh.md` 中的收集器格式约定收集：**日志证据**（步骤状态、声称的检查、"Awaiting user"命令、方向性信号）、**产物证据**（每个 §4 交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及在 §2–§3 写明代码时的**代码证据**（承诺模块是否存在，是否与日志声称的修改一致）。按核心原则 2 收集；委派有帮助时，对每个选中的证据集合派一个只读子代理。
 +++ 1
-规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销 合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
+规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 ### star-plan-reviser/SKILL_zh.md
 --- 1
 交叉核对分歧——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查照样复跑；重的一律不跑。

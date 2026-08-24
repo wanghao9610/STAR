@@ -70,7 +70,7 @@ Establish what really drives the interest and what the topic must fit inside: mo
 
 ### Stage 2: Diverge (`diverge`)
 
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then ask in one direct question which 2–4 to keep for scanning (the user may keep several); mark the ones you recommend. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 
 ### Stage 3: Landscape scan (`scan`)
 

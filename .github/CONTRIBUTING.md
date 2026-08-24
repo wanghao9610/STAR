@@ -392,7 +392,7 @@ nothing enforces that judgement.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no prefix at all in `.agents`, `/star-*` in `.claude`,
    `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code` — and every harness's
-   `/star` entry point remains a thin wrapper around `.agents/commands/star.md`; Codex, Kimi and DSH additionally have their plugin or command metadata checked.
+   `/star` entry point remains a thin wrapper around `.agents/commands/star.md`; Codex, Kimi and DSH also have their plugin or command metadata checked.
 8. Workflow docs ship as en/zh pairs.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are

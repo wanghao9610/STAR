@@ -50,7 +50,7 @@ awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-con
 2. **广读，每个数字进报告前先核实。** 收集可以并行分派给只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），但每个数字、每条 blocker/major 观察进报告前，主 agent 都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
 3. **磁盘是证据；EXEC_LOG 是待核实的说法。** 标 `done` 的步骤，在磁盘上找到与描述相符的产物之前，只是说法；日志里引用的指标，在追溯回产生它的文件之前，也只是说法。没有佐证的说法是观察，不是事实（reviser 的纪律，应用到结果上）。
 4. **只做轻量解析；工具是证据，绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `star-env-builder` 的）。
-5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**方向性信号**——如实突出并转交。看起来过好的结果，先过泄漏检查再庆祝。
+5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**方向性信号**——如实写明并转交。看起来过好的结果，先过泄漏检查再庆祝。
 6. **严格只读；红线适用。** 你只写自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 结果汇总表（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
 
 ## 工作流

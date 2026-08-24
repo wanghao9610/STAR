@@ -206,7 +206,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-此外可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用宿主的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+还可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用宿主的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
@@ -382,7 +382,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、DSH、Kimi Code 和 Pi 没有这个钩子：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因是它自己的：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。Claude、Codex 和 Qwen Code 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Cursor、DSH、Kimi Code 和 Pi 没有这个钩子：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因在它自己身上：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
 用 **Kimi Code** 或 **DSH** 驱动 STAR 时，每台机器运行一次对应的安装脚本，把钩子注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
@@ -435,7 +435,7 @@ bash .dsh/hooks/install.sh         # DSH
 
 一次会话学到、又没有任何计划、日志或报告认领的事实——某个 build 必须先 load 一个 module 才过、你的某项长期偏好、一个不值得再跑的实验——记在项目里的 `.star/memory/`，而不是你当时在用的那个宿主里。一事一文件，每条在 `.star/memory/MEMORY.md` 里占一行；会话钩子在每次会话开始时把这份索引送到 agent 面前，七个宿主都是如此。
 
-两条规则让它不会变成与真相竞争的第二个源头：
+两条规则让它不会变成与仓库文件竞争的第二个"事实来源"：
 
 - **只有当项目里没有任何文件已经认领这条事实时，它才被记进去。** 结果属于那次运行的 `EXEC_LOG.md`，关于研究的决定属于它的计划，论文属于 `metds/refs/`。记忆装的是残余。
 - **记忆与仓库里的文件冲突时，以文件为准**，随后把这条记忆改正或删掉。

@@ -47,7 +47,7 @@ One message, four results. `STAR_LANG` sets the reply language, `INVOLVE` the qu
 
 ## Role
 
-You take a **strategic** research plan and turn its concrete implementation into smaller **executable** sub-plans, each with steps a researcher can actually run and verify. The sibling skill `star-plan-coach` produces the strategy (one root plan: problem → related work → method → experiments → risks → milestones).
+You take a **strategic** research plan and turn its concrete implementation into smaller **executable** sub-plans, each with steps a researcher can run and verify. The sibling skill `star-plan-coach` produces the strategy (one root plan: problem → related work → method → experiments → risks → milestones).
 
 You **decompose, you do not re-strategize.** Pull execution detail out of the parent; do not re-derive the research question, novelty, or method from scratch.
 
@@ -55,7 +55,7 @@ You **decompose, you do not re-strategize.** Pull execution detail out of the pa
 
 1. **Decompose, don't re-strategize.** The parent is the source of truth for *why* and *what*; your job is *how*: sub-goals, ordered steps, dependencies, deliverables, and a check that proves each is done. If you start questioning the research question or method, stop — that belongs in `star-plan-coach`, not here.
 2. **Confirm the shape with its content in view, then auto-draft the rest.** Two decisions are confirmed, one at a time and each with a recommendation: the **decomposition axis**, then the **sub-plan list** — one card per unit (objective, steps, deliverables, done-criterion), never a row of titles. Both are asked through the question tool; the axis fits its options and the list does not, so the cards go in that same message's text, above the call (Dialogue Discipline). Then draft each sub-plan autonomously from the parent, marking genuine gaps `[TBD]`; ask a targeted follow-up **only** when a step is undecidable without the user.
-3. **Incremental writes.** Write each sub-plan file the moment it is drafted. Prefer writing files over leaving results in chat — chats end, files do not.
+3. **Incremental writes.** Write each sub-plan file the moment it is drafted. Prefer writing files over leaving results in chat — chat content does not survive the conversation.
 4. **Every sub-plan is verifiable.** It is not done until it has concrete, verb-specific steps, a **done-criterion** (a test / metric / output that proves completion), and deliverables placed per the project layout (`datas/`, `inits/`, `code/`, `wkdrs/<run>`, and `tasks/<plan-name>/` for the plan's own tool scripts). This mirrors the project's Goal-Driven Execution and Verification rules.
 5. **Traceability both ways.** Every sub-plan names the root section or claim it traces to (`traces_to`). The parent gets a `## Sub-plans` index and a `children:` frontmatter list. The numeric prefix orders the tree for humans; the frontmatter `parent:` field is the authoritative link.
 6. **Dependencies are a field, not prose only.** Each sub-plan carries a `depends_on:` frontmatter list — the sibling prefixes that must finish before it can start. The executor and `star-flow-status` read that machine-readable order to answer "what's runnable next". Keep it a **DAG** (no cycles) and consistent with the `## Sub-plans` index order.

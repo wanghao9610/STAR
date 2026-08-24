@@ -35,7 +35,7 @@ A fresh session should be able to use — or rebuild — this environment from t
 
 ## Install results
 
-<!-- One row per category actually processed. Failed = count, details under Failures. -->
+<!-- One row per category this run processed. Failed = count, details under Failures. -->
 
 | Category | File | Requested | Installed | Failed | Route |
 |---|---|---|---|---|---|

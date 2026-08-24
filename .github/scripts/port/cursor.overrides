@@ -239,9 +239,9 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)用 `Task` 派一个 subagent
 ### Step 2: Collect evidence (read-only Task subagents)
 ### star-plan-reviser/SKILL_zh.md
 --- 1
-2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 `Task` subagent**（`subagent_type: explore`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
+2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `Task` subagent**（`subagent_type: explore`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
 +++ 1
-2. **收集靠分散，判断在主 agent 。** 证据收集委派给并行的**只读 `Task` subagent**（`subagent_type: explore`）——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent 。
+2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `Task` subagent**（`subagent_type: explore`）——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
 ### star-plan-reviser/SKILL_zh.md
 --- 1
 ### Step 2：收集证据（只读 subagent）

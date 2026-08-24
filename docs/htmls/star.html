@@ -773,7 +773,7 @@
   <h1>STAR</h1>
   <p class="hero-sub">Every <a class="inline-link" href="https://wanghao9610.github.io/STAGE/" target="_blank" rel="noopener">STAGE</a> needs a STAR</p>
   <p class="hero-desc">
-    A reusable foundation for <strong>reproducible, well-structured AI research</strong> —
+    A reusable foundation for <strong>reproducible, well-structured AI research</strong>:
     one predictable layout, one experiment entrypoint, and a fifteen-skill workflow that
     carries a vague idea all the way to a released repository, with every decision on file.
     When the results are ready to write up, <strong><a class="inline-link" href="https://wanghao9610.github.io/STAGE/" target="_blank" rel="noopener">STAGE</a></strong> picks them up as
@@ -855,7 +855,7 @@
       <div class="card reveal" style="--card-glow: rgba(255,216,107,0.14); --card-c: #ffd86b">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="13" height="13" rx="2"/><path d="M8 20h11a2 2 0 0 0 2-2V8"/></svg></div>
         <h3>A consistent layout</h3>
-        <p>Code, data, weights, outputs, and methodology notes each have one predictable home — <code>code/</code>, <code>datas/</code>, <code>inits/</code>, <code>wkdrs/</code>, <code>metds/</code>.</p>
+        <p>Code, data, weights, outputs, and methodology notes each have one predictable home: <code>code/</code>, <code>datas/</code>, <code>inits/</code>, <code>wkdrs/</code>, <code>metds/</code>.</p>
       </div>
       <div class="card reveal" style="--card-glow: rgba(139,147,255,0.16); --card-c: #8b93ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3"/><path d="M15 7V3"/><path d="M7 7h10v4a5 5 0 0 1-10 0V7z"/><path d="M12 16v5"/></svg></div>
@@ -870,17 +870,17 @@
       <div class="card wide reveal" style="--card-glow: rgba(62,230,192,0.14); --card-c: #3ee6c0">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></div>
         <h3>A traceable, resumable research process</h3>
-        <p>Plans live in <code>metds/plans/</code>, execution intermediates in <code>tasks/</code>, run artifacts in <code>wkdrs/</code>. Key decisions, task dependencies, and validation records persist in project files — not in chat history — so any session, human or agent, can pick up exactly where the last one stopped. What a session learns that no plan or report owns — an environment quirk, a standing preference, a dead end — is recorded in <code>.star/memory/</code>, and a session hook puts it in front of the next agent.</p>
+        <p>Plans live in <code>metds/plans/</code>, execution intermediates in <code>tasks/</code>, run artifacts in <code>wkdrs/</code>. Key decisions, task dependencies, and validation records persist in project files (not in chat history), so any session, human or agent, can pick up exactly where the last one stopped. What a session learns that no plan or report owns (an environment quirk, a standing preference, a dead end) is recorded in <code>.star/memory/</code>, and a session hook puts it in front of the next agent.</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(255,126,182,0.14); --card-c: #ff7eb6">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="11" rx="2"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.2"/><path d="M2.5 14v2"/><path d="M21.5 14v2"/><path d="M9.5 13.5v2"/><path d="M14.5 13.5v2"/></svg></div>
         <h3>AI-agent native</h3>
-        <p>Shared instructions and identical skill sets ship for <strong>Codex</strong>, <strong>Claude</strong>, <strong>Kimi</strong>, <strong>Cursor</strong>, <strong>DSH</strong>, <strong>Pi</strong>, and <strong>Qwen Code</strong> — in English and Chinese. Your agents follow the same conventions you do, and two dials in <code>.env</code> set the terms: <code>INVOLVE</code> decides how much a run asks you before it decides, <code>STAR_LANG</code> which language it writes. STAR stays framework-agnostic underneath: bring your own model stack, dependency manager, and experiment tracker.</p>
+        <p>Shared instructions and identical skill sets ship for <strong>Codex</strong>, <strong>Claude</strong>, <strong>Kimi</strong>, <strong>Cursor</strong>, <strong>DSH</strong>, <strong>Pi</strong>, and <strong>Qwen Code</strong>, all in English and Chinese. Your agents follow the same conventions you do, and two dials in <code>.env</code> set the terms: <code>INVOLVE</code> decides how much a run asks you before it decides, <code>STAR_LANG</code> which language it writes. STAR stays framework-agnostic underneath: bring your own model stack, dependency manager, and experiment tracker.</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(245,166,35,0.14); --card-c: #f5a623">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 11.5l2 2 4-4"/></svg></div>
         <h3>Safe defaults for large artifacts</h3>
-        <p>Local data, model weights, generated outputs, and environment settings are excluded from version control out of the box. Adopt an existing project with symlinks — nothing gets moved, nothing gets overwritten. A commit guard declines what is expensive to undo: blanket staging, history rewrites, and any commit that would put a checkpoint into your history.</p>
+        <p>Local data, model weights, generated outputs, and environment settings are excluded from version control out of the box. Adopt an existing project with symlinks; nothing gets moved, nothing gets overwritten. A commit guard declines what is expensive to undo: blanket staging, history rewrites, and any commit that would put a checkpoint into your history.</p>
       </div>
       <div class="card wide reveal" style="--card-glow: rgba(139,147,255,0.14); --card-c: #8b93ff">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
@@ -898,7 +898,7 @@
     <h2 class="reveal">Eight directories.<br>Zero guessing.</h2>
     <p class="section-lead reveal">
       The abbreviated names are deliberate: short to type, unambiguous to search,
-      and identical across every STAR project you will ever open.
+      and identical across every STAR project.
     </p>
     <div class="structure-grid">
       <div class="tree-window reveal">
@@ -925,13 +925,13 @@
 └── <span class="file">AGENTS.md</span>    <span class="cm"># shared human + agent instructions</span></div>
       </div>
       <div class="legend reveal">
-        <div class="legend-row"><code>datas/</code><span><strong>Data</strong> — raw, processed, or generated datasets</span></div>
-        <div class="legend-row"><code>inits/</code><span><strong>Initializations</strong> — pretrained weights and checkpoints</span></div>
-        <div class="legend-row"><code>metds/</code><span><strong>Methodologies</strong> — plans, design notes, research records</span></div>
-        <div class="legend-row"><code>execs/</code><span><strong>Executions</strong> — launchers and experiment scripts</span></div>
-        <div class="legend-row"><code>scpts/</code><span><strong>Scripts</strong> — individual runnable experiment definitions</span></div>
-        <div class="legend-row"><code>tasks/</code><span><strong>Tasks</strong> — each plan's tool scripts and working files</span></div>
-        <div class="legend-row"><code>wkdrs/</code><span><strong>Work directories</strong> — logs, metrics, predictions, artifacts</span></div>
+        <div class="legend-row"><code>datas/</code><span><strong>Data</strong>: raw, processed, or generated datasets</span></div>
+        <div class="legend-row"><code>inits/</code><span><strong>Initializations</strong>: pretrained weights and checkpoints</span></div>
+        <div class="legend-row"><code>metds/</code><span><strong>Methodologies</strong>: plans, design notes, research records</span></div>
+        <div class="legend-row"><code>execs/</code><span><strong>Executions</strong>: launchers and experiment scripts</span></div>
+        <div class="legend-row"><code>scpts/</code><span><strong>Scripts</strong>: individual runnable experiment definitions</span></div>
+        <div class="legend-row"><code>tasks/</code><span><strong>Tasks</strong>: each plan's tool scripts and working files</span></div>
+        <div class="legend-row"><code>wkdrs/</code><span><strong>Work directories</strong>: logs, metrics, predictions, artifacts</span></div>
       </div>
     </div>
   </div>
@@ -943,8 +943,8 @@
     <p class="kicker reveal">Research workflow</p>
     <h2 class="reveal">Fifteen skills.<br>One constellation.</h2>
     <p class="section-lead reveal">
-      From a vague interest to a released repository — each skill writes its evidence into
-      project files, so the whole research programme is auditable and resumable at any point.
+      Each skill writes its evidence into project files,
+      so the whole research programme is auditable and resumable at any point.
     </p>
 
     <div class="phases">
@@ -954,7 +954,7 @@
           <h3>Shape<small>Converge on a topic and turn it into verifiable plans.</small></h3>
         </div>
         <div class="skills">
-          <div class="skill"><code>$star-proj-adopt</code><p>Adopt an already-started project without disturbing it — survey, symlink, record.</p></div>
+          <div class="skill"><code>$star-proj-adopt</code><p>Adopt an already-started project without disturbing it: survey, symlink, record.</p></div>
           <div class="skill"><code>$star-idea-storm</code><p>Converge a vague interest into a defensible research topic, scored on six dimensions.</p></div>
           <div class="skill"><code>$star-plan-coach</code><p>Clarify the idea through staged questions into a strategic research plan.</p></div>
           <div class="skill"><code>$star-refs-reviewer</code><p>Survey related work into analysis notes and a verified, classified bibliography.</p></div>
@@ -980,7 +980,7 @@
         </div>
         <div class="skills">
           <div class="skill"><code>$star-plan-executor</code><p>Implement and lightly validate one executable leaf plan, logging every run.</p></div>
-          <div class="skill"><code>$star-code-reviewer</code><p>Review code against project conventions and the plan's promised implementation, then apply mechanical fixes — minor ones unasked, major ones as approved.</p></div>
+          <div class="skill"><code>$star-code-reviewer</code><p>Review code against project conventions and the plan's promised implementation, then apply mechanical fixes: minor ones unasked, major ones as approved.</p></div>
           <div class="skill"><code>$star-expt-analyst</code><p>Audit a run against what the plan expected: artifacts, logs, metrics, meaning.</p></div>
         </div>
       </div>
@@ -992,7 +992,7 @@
         </div>
         <div class="skills">
           <div class="skill"><code>$star-plan-reviser</code><p>Revise a plan in place against its execution evidence, with a revision history.</p></div>
-          <div class="skill"><code>$star-expt-digest</code><p>Summarize what the programme has done lately — verdicts, movement, gaps.</p></div>
+          <div class="skill"><code>$star-expt-digest</code><p>Summarize what the programme has done lately: verdicts, movement, gaps.</p></div>
           <div class="skill"><code>$star-flow-status</code><p>Report progress across the whole flow and the single next action to take.</p></div>
         </div>
       </div>
@@ -1011,7 +1011,7 @@
 
     <figure class="workflow-map reveal">
       <img src="./srcs/star-research-workflow.svg" alt="STAR research workflow: thirteen skills in running order plus two that read across them, what each writes, and how the per-leaf loop closes" loading="lazy">
-      <figcaption>The full workflow map — running order, outputs, and how the per-leaf loop closes.</figcaption>
+      <figcaption>The full workflow map: running order, outputs, and how the per-leaf loop closes.</figcaption>
     </figure>
   </div>
 </section>
@@ -1022,7 +1022,7 @@
     <p class="kicker reveal">Quick start</p>
     <h2 class="reveal">Six commands to liftoff.</h2>
     <p class="section-lead reveal">
-      Start fresh from the template — or run <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>
+      Start fresh from the template, or run <code style="font-family:var(--mono);color:var(--gold)">update.sh --adopt</code>
       inside an existing repository and STAR installs itself around your work without moving a single file.
     </p>
     <div class="term reveal">

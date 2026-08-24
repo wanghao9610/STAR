@@ -10,7 +10,7 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 | `wkdrs/<run>/EXEC_PLAN.md` | executor 当时承诺的动作，以及红线划在哪 |
 | `wkdrs/<run>/EXEC_LOG.md` | 步骤状态、绑定检查的结果、产物路径、"待用户执行"命令、Notes/decisions（含 **方向性信号** 记录） |
 | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`（若存在） | star-expt-analyst 的结果审计：run 判定、带每个指标来源的完成判据记分卡、日志健康，以及含 kill-criteria 命中的解读——已预先核实，但仍要和其他声明一样对照磁盘复核 |
-| §4 交付物路径 | 磁盘上的产物：是否存在、大小、修改时间、低开销 合理性检查 |
+| §4 交付物路径 | 磁盘上的产物：是否存在、大小、修改时间、低开销合理性检查 |
 | §2/§3 写明的 `${CODE_NAME}/` 模块 | 承诺的代码是否真的写出来了、与日志声称的改动是否吻合 |
 | children 的 frontmatter（根/内部目标） | 每个子计划的章节状态、`exec_status`、`updated`、`depends_on` |
 | 已执行后代的日志（根/内部目标） | 与本节点假设相关的 kill-criteria 命中与方向性信号 |
@@ -30,7 +30,7 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 
 - `path` / `exists` / `size` / `mtime`
 - `sanity`——一项低开销内容检查（非空、可解析、行数/键数符合预期），或 `not cheaply checkable`
-- `verdict`——`found` / `missing` / `suspect`（存在但通不过 合理性检查，或早于声称产出它的步骤）
+- `verdict`——`found` / `missing` / `suspect`（存在但通不过合理性检查，或早于声称产出它的步骤）
 
 **代码收集器**——针对写明的每个模块/入口：
 

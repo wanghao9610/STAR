@@ -67,7 +67,7 @@ Establish what really drives the interest and what the topic must fit inside: mo
 
 ### Stage 2: Diverge (`diverge`)
 
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage, — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one ask_user_question (multi_select, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one ask_user_question (multi_select, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
 
 ### Stage 3: Landscape scan (`scan`)
 

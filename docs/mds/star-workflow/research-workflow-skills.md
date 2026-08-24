@@ -755,7 +755,7 @@ wkdrs/results/results.md              # aggregate mode only: the cross-run resul
 
 ### The results table (`aggregate`)
 
-`$star-expt-analyst aggregate [PLAN_NAME]` answers what a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in, and compiles `wkdrs/results/results.md` — `wkdrs/results/results_<slug>.md` when scoped to a subtree, so a scoped run never overwrites the project results table. One table per claim and per ablation, taken from the root's §4 claim→experiment map, not from the plan tree; every number carries its run, source, and verdict. Runs verdicted `invalid` or `inconclusive`, and numbers that fail re-verification, move to an excluded section naming them and why; a `not met` run stays in its table. The table reports numbers, never explains them: *why* a variant won needs a controlled comparison this skill does not run. With `metds/evaluation.md`, which defines the protocol and carries no scores, it is the pair a paper's results section is written from.
+`star-expt-analyst aggregate [PLAN_NAME]` answers what a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in, and compiles `wkdrs/results/results.md` — `wkdrs/results/results_<slug>.md` when scoped to a subtree, so a scoped run never overwrites the project results table. One table per claim and per ablation, taken from the root's §4 claim→experiment map, not from the plan tree; every number carries its run, source, and verdict. Runs verdicted `invalid` or `inconclusive`, and numbers that fail re-verification, move to an excluded section naming them and why; a `not met` run stays in its table. The table reports numbers, never explains them: *why* a variant won needs a controlled comparison this skill does not run. With `metds/evaluation.md`, which defines the protocol and carries no scores, it is the pair a paper's results section is written from.
 
 The report records the scope and evidence base, a run verdict, the done-criteria scorecard, the artifact inventory and completion, log health, metrics with their sources, any cross-run comparison, the interpretation, and the routing.
 
@@ -833,7 +833,7 @@ This skill is **read-only apart from its own digest**. It never edits plans, `ex
 
 ### Practical guidance
 
-- Run it regularly — weekly is natural. The value compounds: each digest's "what moved" section is only as good as the previous digest it diffs against.
+- Run it regularly — weekly is natural. Each digest's "what moved" section is only as good as the previous digest it diffs against.
 - A digest full of provisional rows is a signal, not a failure: runs are finishing faster than they are analyzed. Clear it with `star-expt-analyst` on the named runs.
 - Use plan mode before a milestone review, when you want a family's whole story rather than a date range.
 - Under `wkdrs/` everything is git-ignored **except `*.md`**, so the digest series can enter the repository history — but no skill commits it for you: this one is read-only. Digests regenerate from the analysis reports, so losing an uncommitted one is recoverable.

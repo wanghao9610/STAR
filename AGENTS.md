@@ -40,10 +40,10 @@ The test: Every changed line should trace directly to the user's request.
 **This project uses the STAR research workflow. Its records are files, not chat history.**
 
 - Plans live in `metds/plans/`; each leaf's execution record is under `wkdrs/<run>/` (`EXEC_PLAN.md`, `EXEC_LOG.md`).
-- Run the status skill first when you do not know where things stand — it reads the plan tree and the reports on disk and names the single next action.
+- Run the status skill first when you do not know where things stand: it reads the plan tree and the reports on disk and names the single next action.
 - The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
 - A skill step whose written procedure dispatches subagents already carries the user's request to run it: dispatch without asking, even where a host instruction allows delegation only when the user has asked. An outright ban, or a host offering no delegation, still stops it; the grant covers the dispatch itself, not what a delegate may write.
-- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/` — `execs/update.sh` overwrites it.
+- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/`: `execs/update.sh` overwrites it.
 
 ## 6. Reply Language
 
@@ -72,7 +72,7 @@ The test: Every changed line should trace directly to the user's request.
 - Methodology notes in `metds/`, research plans in `metds/plans/`.
 - A plan's own tool scripts and its execution intermediate files belong in `tasks/<plan-name>/`; the scripts are durable, the rest is disposable scratch.
 - `execs/` holds launcher scripts only: `run.sh` and `update.sh` at its root, per-run scripts in `execs/scpts/<run>.sh`. Anything that is not a launcher does not go there at all.
-- `docs/` holds project documentation: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh` — do not edit it.
+- `docs/` holds project documentation: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh`; do not edit it.
 - Output names must distinguish tasks, experiments, or runs.
 
 ## 9. Project Runtime
@@ -88,7 +88,7 @@ Before running Python, tests, or dependency checks:
 
 **What a session learns goes to `.star/memory/` in the project, not to your own memory store.**
 
-- Record a fact there only when no file in the project already owns it — a plan, a log, a report, or a reference entry is the better home. Memory holds the residue.
+- Record a fact there only when no file in the project already owns it: a plan, a log, a report, or a reference entry is the better home. Memory holds the residue.
 - Offer, never assume: at most two offers per session, and write only after the user agrees. `INVOLVE=low` records unasked and says so.
 - A fact true only of this machine goes to `.star/memory/local/`, which git ignores.
 - Where a memory disagrees with a file in the repository, the file wins.
