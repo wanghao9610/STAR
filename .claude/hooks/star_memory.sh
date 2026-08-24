@@ -34,7 +34,9 @@ cutoff="$(date -v-180d +%Y-%m-%d 2>/dev/null || date -d '180 days ago' +%Y-%m-%d
 entries() { # $1 = index file -> its entry lines, aged `env` ones marked
     [ -r "$1" ] || return 0
     awk -v cutoff="${cutoff}" '
-        /^- / {
+        # Entry lines live outside the fenced block that documents their format.
+        /^```/ { infence = !infence; next }
+        !infence && /^- / {
             if (split($0, f, " · ") >= 4 && cutoff != "" &&
                 substr(f[1], 3) == "env" && f[3] < cutoff)
                 print $0 "  [stale: verify before relying on it]"
