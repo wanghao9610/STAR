@@ -61,6 +61,8 @@ The test: Every changed line should trace directly to the user's request.
 - Exception: strings matched literally — field values, field names, paths — stay verbatim. Explain beside one, never in place of it.
 - A pointer that says nothing on its own — `§4`, `C4`, `Step B1`, a run or plan name — stays verbatim and takes a few words of what it points at, in parentheses: `§4 (the experiments section)`. First use in every reply, not once per conversation; the reader does not scroll back. Where a label has no room, the line under it.
 - Technical prose, no filler and no emoji. Plain does not mean chatty.
+- Lead with the answer. Skip praise, staged introductions, service offers, and generic positive endings; end on the last useful fact, decision, command, or blocker.
+- Replies and generated prose follow `docs/mds/star-workflow/human-writing-guide.md`: preserve research claims and the user's voice, diagnose formulaic prose from pattern clusters rather than isolated words, and never add facts or personality merely to sound human.
 
 ## 8. Project Layout
 

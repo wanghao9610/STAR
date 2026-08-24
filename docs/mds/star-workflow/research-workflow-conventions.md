@@ -138,6 +138,12 @@ The operational form of `AGENTS.md` §9.
 
 The tool-neutral half. **How** to ask — a structured question tool where the agent has one, plain text where it does not — is per-tool and stays in each `SKILL.md`.
 
+### Human-writing contract
+
+Chat replies and workflow prose state the substantive point without praise, staged introductions, service offers, inflated significance, vague attribution, or generic positive endings. They follow the [human-writing guide](human-writing-guide.md): use an author-confirmed sample where one exists, review patterns in clusters rather than banning isolated words or constructions, and rewrite at paragraph scale when needed. A style edit never changes a fact, number, date, quotation, citation, source URL, path, command, literal field, status, done-criterion, technical distinction, uncertainty boundary, negative result, or attribution. It never adds personality or concrete detail without authorial and evidential support.
+
+A formulaic-prose finding is an advisory review signal. It neither establishes that AI produced the text nor authorizes changing the research record to make the wording appear human.
+
 1. **Keep each chat reply under about 500 words.** Files the run writes do not count. Detail belongs in the artifact; the reply is the digest. **One exception**: a reply whose length is set by what it must enumerate — `star-flow-status`'s tree — is bounded by shape instead, stated by that skill (one line per node), never unbounded.
 2. **Ask one question at a time and wait for an explicit answer** before acting on it. Never bundle-approve, never assume a yes. **This holds in headless and scripted runs**: a skill reaching a confirmation point stops and waits. A drafted list the user reviews in one pass is *one* question, not one per row — item 13 gives its shape.
 3. **Every question carries 2–4 concrete options with the recommendation marked**, and the user may always answer freely outside them. **Each option states its consequence, not its label again**: what it produces or changes, what it rules out, and — where the answer is not plainly undoable — what reverting costs. "Phase axis" is a label; "splits by the root's §6 stages; re-running the split overwrites the sub-plan files" is a consequence. Genuinely open questions (an initial research topic) may be asked without options.

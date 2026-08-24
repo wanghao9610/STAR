@@ -50,6 +50,8 @@ Two skills sit outside that order: `star-flow-status` reads the whole tree at an
 
 Plan state lives in project files, so work continues across conversations and sessions.
 
+Idea framing, plan sections, literature notes and synthesis, experiment digests, method documents, and release README prose all apply the shared [human-writing guide](human-writing-guide.md) at the point where narrative text is drafted. It removes formulaic patterns at paragraph scale while preserving the evidence record: facts, citations, numbers, dates, paths, commands, status values, uncertainty, and negative results do not move with the style pass.
+
 ## Contents
 
 - [1. Invoking the skills](#1-invoking-the-skills)

@@ -59,9 +59,10 @@ The three projects cover successive scales of a researcher's work. Use any one i
 - **A research process you can retrace and resume**: plans under `metds/plans/`, each plan's execution intermediates under `tasks/`, and what a run generated under `wkdrs/` — so picking the work back up reads files rather than chat history.
 - **A memory the project owns**: what a session learns that no plan or report holds — an environment quirk, a standing preference, a dead end — is recorded under `.star/memory/` and put in front of the next session by a hook, in whichever harness you drive STAR with.
 - **AI-friendly project guidance and research workflows** shared across Codex, Claude, DSH, Kimi Code, Cursor, Pi, and Qwen Code, with support for both English and Chinese.
+- **Evidence-bound natural prose** in replies, plans, literature notes, digests, method documents, and release README files: formulaic patterns are revised without changing facts, citations, numbers, uncertainty, or negative results.
 - **What is too big or too local to commit stays out of Git**: local data, weights, outputs, and environment settings are excluded from version control.
 
-See [Research workflow](#research-workflow) for the fifteen skills grouped by research stage — what each is responsible for, what it writes, and how to invoke it in your harness. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting.
+See [Research workflow](#research-workflow) for the fifteen skills grouped by research stage — what each is responsible for, what it writes, and how to invoke it in your harness. The [Research Workflow Skills Guide](docs/mds/star-workflow/research-workflow-skills.md) adds a worked end-to-end example, the generated files, and troubleshooting. The [human-writing guide](docs/mds/star-workflow/human-writing-guide.md) defines the shared prose standard and its evidence-preservation boundary.
 
 ## Project structure
 
