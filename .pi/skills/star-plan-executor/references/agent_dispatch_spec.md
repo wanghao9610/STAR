@@ -6,7 +6,7 @@ One `star_subagent` dispatch per step (or coherent step-group) in EXEC_PLAN. Use
 
 **A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is taken once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not finish leaves every row un-done, so a resume never reads it as finished. Split a group at any STOP-line boundary.
 
-**Steps are serial.** Never leave two steps in flight: they would race on the single `EXEC_LOG.md`, and "stage only the files that step touched" has no meaning with two writers. `star-code-architect`'s parallel rule is for independent migration groups; an ordered plan is not one — do not import it.
+**Step order and concurrency are the main agent's call.** Orchestrate freely from EXEC_PLAN's step order and dependencies: a step that consumes an earlier step's output starts after that step's check passes; independent steps may be in flight together or run one by one, whichever the main agent judges best — no fixed cap, no imposed order beyond the dependencies themselves. Concurrent steps never share a file (conventions §6.2), and `EXEC_LOG.md` has one writer — the main agent records, and commits, each step as it verifies that step's returned result — so "stage only the files that step touched" keeps its meaning at any concurrency.
 
 **Before a step starts**, its files are clean in git. A path already dirty when the run started is named as pre-existing and excluded from every restore below: it is not this run's to revert.
 

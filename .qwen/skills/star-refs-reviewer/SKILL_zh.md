@@ -108,7 +108,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 
 从核心集向外长：核心论文的参考文献表（Semantic Scholar `/references`）、引用它们的后续工作（`/citations`，按引用数从高到低）、它们自己的相关工作章节，以及针对池子薄弱子话题的补充检索。与已有 citekey 去重。已发表优先于预印本；只有在没有正式发表版时才留预印本。约 60 条候选即止。若不注水就到不了 50，**如实报真实数字**——评分表宁要 43 条实的，不要 50 条注水的。
 
-扩展可以按核心论文分派,**一个收集器一篇**——默认用单个串行收集器就好,因为 `source_policy_zh.md` 里的请求预算是**按 host** 算的、不是按 agent 算的,三个并发收集器会把本 skill 承诺要礼貌相待的每个 host 的真实速率翻三倍。要用就引那份文件,不要复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
+扩展可以按核心论文分派,**一个收集器一篇**——同时跑几个收集器(串行还是并发)由主 agent 自主决定,唯一的硬约束:`source_policy_zh.md` 里的请求预算是**按 host** 算的、不是按 agent 算的,并发分派就把每个 host 的预算按收集器拆开,在各自交办说明里写成具体数字(规约 §6.9)。要用就引那份文件,不要复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
 
 ### Step 5：抓取与转录
 

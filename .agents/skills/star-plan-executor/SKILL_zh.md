@@ -33,7 +33,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **先读后写。** 规划修改前，检查 `.env`、写明的输入、相关代码和实际运行界面。列出当前状态与所需状态的差距。遵循 `references/orient_checklist_zh.md`。
-2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、产物和范围受限检查。用你的计划工具跟踪它——一个 action 一个步骤，同时只保持一个 `in_progress`——并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
+2. **让计划可见，然后在范围内推进。** 把子计划转成 `EXEC_PLAN`，其中每个 action 都写明文件、命令、产物和范围受限检查。用你的计划工具跟踪它——一个 action 一个步骤，进行中的 action 都标为 `in_progress`——并在 commentary 中总结计划。调用 executor 即授权普通的范围内实现与轻量验证；只有决定会实质改变范围或需要新授权时，才请求新方向。
 3. **该委派的就委派。** 怎么切分由主 agent 自己定。协作工具可用、且有边界、相互独立的工作确实能从委派中受益时就委派——这是常态，不是例外。满足条件时，调用你的子代理工具：实现工作使用可写子代理，只读勘察使用只读子代理。绝不为每个琐碎顺序步骤创建一个 subagent。给每个受委派者 `references/agent_dispatch_spec_zh.md` 中那份范围很窄的交办说明；主 agent 始终负责集成和重新运行检查。那份文件里的树状态纪律——动作开始前它名下的文件在 git 里是干净的、重试前先恢复、以 `blocked` 收场的动作其改动去留要有明确决定——同样约束本地执行：两条路径上被放弃的改动是同一批改动。
 4. **在重型或不可逆工作前停止。** 长时间或多 GPU 训练、全数据集评估、高成本 API 调用、无边界任务、覆盖有价值产物都会跨越 STOP line。准备可复现命令并交给用户；不要启动。遵循 `references/stop_line_rules_zh.md`。
 5. **记录已验证状态——并保持子计划真实。** 把 `EXEC_PLAN.md` 和 `EXEC_LOG.md` 存在 `wkdrs/<run>/`。每次范围受限检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；仅当执行确实偏离子计划，或确定了计划留空而 method 文档会引用的值时，才对受影响 §2–§5 做一次**用户确认的回同步**并添加 `## Revision History`（`references/plan_sync_rules_zh.md`），使用户日后重读的计划与实际执行一致。
@@ -77,7 +77,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 **发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 ### Step 4：执行与验证
 
-对每个未完成 action：
+主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。对每个 action：
 
 1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理（只读勘察用只读子代理），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其范围受限检查。

@@ -35,10 +35,10 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察:读子计划 §2 指向的模块/入口,产出一份"现状 vs §3 要求"的缺口清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划从零搭骨架——更好的做法是先用 `star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
-2. **规划走审批确认点,执行交给子代理**。可执行 plan(EXEC_PLAN)必须经**用户明确批准**后才允许写文件、跑命令。`star-plan` 是用户手上的开关,不是本 agent 能调用的工具,所以 Step 3 仍是本 skill 自己守住的那个模式:从它开始到批准到手,不写任何文件、不跑任何命令。执行派给 `star_subagent`(`agent: "star-implementer"`),**一步(或一个连贯步骤组)一个**:主 agent 编排并逐步复核,验完一步再开下一步。参见 `references/agent_dispatch_spec_zh.md`。
+2. **规划走审批确认点,执行交给子代理**。可执行 plan(EXEC_PLAN)必须经**用户明确批准**后才允许写文件、跑命令。`star-plan` 是用户手上的开关,不是本 agent 能调用的工具,所以 Step 3 仍是本 skill 自己守住的那个模式:从它开始到批准到手,不写任何文件、不跑任何命令。执行派给 `star_subagent`(`agent: "star-implementer"`),**一步(或一个连贯步骤组)一个**:主 agent 自主编排——按步骤依赖自行决定派发顺序与并发——并亲自复核每个返回结果。参见 `references/agent_dispatch_spec_zh.md`。
 3. **重实验前停**。agent 只写代码、跑**轻量验证**(跑通性检查、小规模/不微调的检查,如 MVP 完成判据)。在任何长时/多卡训练或大开销 API 调用前**停下**:把备好的命令写进 EXEC_LOG 的"待用户执行"区、预计开销记进"开销"一节,交回用户;结果带回来时把实际开销补进同一行。规则见 `references/stop_line_rules_zh.md`。
 4. **文件是唯一依据;每步都记录;子计划保持真实**。执行态存在 `wkdrs/<run>/`(`EXEC_PLAN.md` + `EXEC_LOG.md`),中间工作文件存在 `tasks/<plan-name>/`。每验证完一步就更新日志。子计划拿到轻量的 `exec_status` + `exec_runs` 索引——当执行确实偏离了它、或敲定了它留白而某份方法文档会引用的值时,还经**用户确认后同步回写**受影响的 §2–§5 内容并追加 `## Revision History` 条目(`references/plan_sync_rules_zh.md`),让用户日后重读计划时看到的就是实际执行的内容。
-5. **每步以检查收尾;整轮以完成判据收尾**。每步先做窄验证,通过才派下一步;以子计划 §5 完成判据结束。相关处复用项目的 `/verify`、`/run` skill。这就是 Goal-Driven Execution(AGENTS.md §4)和 Verification(§11)的具体做法。
+5. **每步以检查收尾;整轮以完成判据收尾**。每步先做窄验证,通过后才派发依赖它的后续步骤;以子计划 §5 完成判据结束。相关处复用项目的 `/verify`、`/run` skill。这就是 Goal-Driven Execution(AGENTS.md §4)和 Verification(§11)的具体做法。
 6. **用项目运行环境与运行入口**。存在运行入口时,运行命令经项目入口 `execs/run.sh` 调用。为本计划执行过程的中间工作文件新建 `tasks/<plan-name>/`,可复用的启动脚本(含备好的红线命令)放到 `execs/scpts/<run>.sh`。
 
 ## 工作流
@@ -90,7 +90,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 5：执行—验证循环（一次一步 / 一个步骤组）
 
-对 EXEC_PLAN 的每个步骤,依次:
+对 EXEC_PLAN 的步骤,主 agent 按依赖关系自主调度——独立步骤并发还是串行由它自行判断(`references/agent_dispatch_spec_zh.md`)。对每个步骤:
 
 1. 动手之前,先按 `references/agent_dispatch_spec_zh.md` 的格式约定把本步的交办说明写出来:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;结果按 changed / ran / check / blockers / handoff 陈述"。交办说明就是交给受托方的那份东西,也是防止这一步越做越宽的东西(规约 §6.1)。
 2. agent 返回后,**主 agent 重跑绑定的 check**(没有证据就绝不轻信自报的通过)。通过 → 记入 `EXEC_LOG.md`、更新子计划轻量状态,并在确认点批准了逐步提交时,提交本步触碰的文件;在执行分支上,这次提交连同本步更新过的运行记录一起暂存,因为只有提交才会被合并(规约 §11.2)。失败 → 主 agent 自己那次重跑就是证据:读失败点名的 `file:line`;只有在要判 `blocked`、或失败看起来是子计划粒度的问题时(第 4 条),才展开 agent 的完整 diff。重试之前先恢复这一步名下的文件;有限重试(≤2)并把失败信息回传;仍失败 → 该步标 `blocked`,定下它那些改动怎么处理(`agent_dispatch_spec_zh.md`),带日志停下。

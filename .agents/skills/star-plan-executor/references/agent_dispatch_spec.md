@@ -6,7 +6,7 @@ Delegate whenever collaboration tools are available and the work is bounded, ind
 
 **A coherent scope** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate actions. A scope is delegated once, checked once, and written to EXEC_LOG as one row per member action carrying the scope id — a scope that did not return leaves every row un-done, so a resume never reads it as finished. Split at any STOP-line boundary.
 
-**Delegation here is serial.** Never run two file-writing delegates at once: they would race on the single `EXEC_LOG.md`, and "stage only the files that action touched" has no meaning with two writers. `star-code-architect`'s parallel migration groups are independent of one another; an ordered plan is not — do not import that rule.
+**Delegation order and concurrency are the main agent's call.** Orchestrate freely from EXEC_PLAN's action order and dependencies: an action that consumes an earlier action's output is delegated after that action's check passes; independent actions may go out concurrently or serially, whichever the main agent judges best — no fixed cap, no imposed order beyond the dependencies themselves. Concurrent file-writing delegates never share a file (conventions §6.2), and `EXEC_LOG.md` has one writer — the main agent records, and commits, each action as it verifies that action's returned result — so "stage only the files that action touched" keeps its meaning at any concurrency.
 
 **Before delegating**, this action's files are clean in git. A path already dirty when the run started is named as pre-existing and excluded from every restore below: it is not this run's to revert.
 
