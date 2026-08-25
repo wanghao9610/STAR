@@ -19,7 +19,7 @@ STAR 研究工作流中每个 skill 都遵守的规则。十五个 skill（§10 
 | kill-criterion | 根计划的 §5：出现即表明这个方向该停的结果 | `star-plan-coach` |
 | `finalized:` | 六节全 `done` 时由 coach 设置；三个 skill 没有它就不往下走——`star-plan-decomposer`、`star-code-architect`、`star-metd-summarize` | §8 |
 | `exec_status:` | 叶子的执行状态；`done` 与 `abandoned` 是最终态：这个叶子上不再需要做别的 | `status_spec_zh.md` |
-| `dropped:` | 已被放弃的计划节点；只写在做决定的那个节点上，由整棵子树继承：不进任何计数、不进任何推荐，记录保留 | `status_spec_zh.md` |
+| `dropped:` | 已被放弃的计划节点；只写在做决定的那个节点上，由整棵子树继承：不进任何计数、不进任何推荐，记录保留——文件搬到旁边的 `dropped/` 目录（§9） | `status_spec_zh.md` |
 | `traces_to` | 这份子计划支撑根计划里的哪条主张 | `star-plan-decomposer` |
 | 太大跑不动 | 照现状无法执行的计划——§3/§5 基本还是 `[TBD]` / `【待定】`，或已定稿却从未拆解 | `status_spec_zh.md` |
 | 概要单元 | 父计划 `## Sub-plans` 里只占一行的单元——行首标 `- （概要）` / `- (outline)`——没有文件也没有前缀，执行推进到它才被展开 | `star-plan-decomposer` |
@@ -116,7 +116,7 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 
 ## 5. 计划名解析
 
-1. **`PLAN_NAME` 用来匹配 `metds/plans/*_plan.md`**：按 slug（`open-vocab-det-seg`）、按数字前缀（`00`）或按完整文件名；`metds/plans/…` 路径也算。
+1. **`PLAN_NAME` 用来匹配 `metds/plans/*_plan.md`**：按 slug（`open-vocab-det-seg`）、按数字前缀（`00`）或按完整文件名；`metds/plans/…` 路径也算。已丢弃的计划按同样方式从 `metds/plans/dropped/` 匹配——丢弃把它搬到了那里（§9）。
 2. **不存在或有歧义 → 列出最接近的候选**（前缀 + slug + 一行状态），问一个直接的问题。绝不猜用户指的是哪份计划。
 3. **`parent:` 才权威；前缀只是提示。** 整棵树用各文件的 `parent:` frontmatter 重建。数字前缀只供人类排序与提示——在"根取最小空闲数字"规则之前创建的项目里，两个无关的根可能共用一个数字。
 4. **叶子 = `children:` 为空或缺失的计划。** 只有叶子可执行。
@@ -233,6 +233,8 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 1. **编译文档上的 `sources:` 记录的是“读取当时”各源计划的 `updated` 值。** 它让过期判断靠精确比对完成，不必依赖文件 mtime。
 2. **没有任何机制强制这张表。** `star-flow-status` 在报告末尾统计“形似报告、却不匹配此表任何一行”的文件数。
 
+已丢弃子树的产物保留这张表里的每一个名字；变的只是目录，去 §9 列出的 `dropped/` 位置。
+
 ## 9. 项目布局
 
 skill 写出的东西各归其位。每个去处互斥——文件属于哪一个，由它**是什么**决定，而不是由哪一步产生了它。
@@ -243,13 +245,14 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 | 数据 | `datas/` |
 | 模型权重 | `inits/` |
 | 某次 run 的产物、执行记录、报告 | `wkdrs/<run>/` |
-| 跨 run 的汇编产物 | `wkdrs/` 下的保留子树：`reviews/`、`results/`、`digests/`、`release/`、`env_*`、`ideas_*`、`refs_*`——不要拿这些当 run 名 |
+| 跨 run 的汇编产物 | `wkdrs/` 下的保留子树：`reviews/`、`results/`、`digests/`、`release/`、`env_*`、`ideas_*`、`refs_*`——不要拿这些、以及 `dropped/`，当 run 名 |
 | 计划、笔记、方法文档 | `metds/` |
 | 先前会话学到、又没有别的文件认领的事实 | `.star/memory/`；只对本机成立的放 `.star/memory/local/`，git 忽略（`memory_spec.zh-CN.md`） |
 | 项目文档 | `docs/mds/<topic>/`、`docs/htmls/`、`docs/srcs/`（`docs/mds/star-workflow/` 由上游管理） |
 | 计划自有工具脚本、计划执行期草稿 | `tasks/<plan-name>/` |
 | 运行入口 | `execs/run.sh` |
 | 可复用启动脚本 | `execs/scpts/<run>.sh` |
+| 已丢弃子树的文件 | 同名搬到一边，`star-plan-reviser` 的丢弃搬过去、恢复搬回来：`metds/plans/dropped/`、`wkdrs/dropped/<run>/`、`tasks/dropped/<plan-name>/`、`execs/scpts/dropped/` |
 
 这张表装不下的两条规则：
 
@@ -297,6 +300,6 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 6. **弃用之前，先抢救记录。** 删除一个未合并的分支之前，其 `wkdrs/<run>/*.md` 记录——连同子计划里这次 run 的条目、以及判它出局的结论——先提交到基础分支：负结果也是证据，删分支绝不能连证据一起删。删除本身任何档位都要问。
 7. **worktree 回答的是另一个问题：checkout 正忙。** 分支隔离的是历史——哪些提交属于这个 run；worktree 隔离的是磁盘——同一时刻存在几套文件。要修改既有文件 → 分支（第 1 条）；当前 checkout 此刻腾不出来 → worktree。忙碌信号：HEAD 停在别的 run 的执行分支上；未提交改动的路径归属别的 run；某个 run 的日志记着命令已交回用户、结果还没回收——可能有任务正在跑，这探测不了，向用户确认；或用户明说要并行。一个信号都没有 → run 留在被调用的 checkout，本节其余照旧。创建 worktree 是裁量题（§7.7），在分支那个确认点上一并问，推荐项由信号给出；移除会把树里全部未跟踪文件一并删掉，所以移除是删除，任何档位都要问。
 8. **进树的 run 一律带分支；树、分支、run 目录同用 run 名。** 树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出，所以缺口清单本来判 `branch: none` 的计划，一进树就改为 `branch: <run>`。创建是一条命令，在被调用的 checkout 里跑：`git worktree add ../<根目录名>--wt/<run> -b <run> <base>`——树、分支、起点一步成型；树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`，后续会话靠这个字段找到 run 的家。git 只把被跟踪的文件放进新树，所以建树后从主 checkout 链入 `.env`、`datas/`、`inits/`（`.star/memory/local/` 有则一并链）——绝不链 `wkdrs/` 与 `tasks/`：它们含被跟踪文件，整目录一链，在 git 眼里就成了一个符号链接。合并在检出着基础分支的那棵树里做——通常就是被调用的 checkout；用户把它切走了，就说明情况并发问。
-9. **移除之前，先把产物挪出来。** 树里 `wkdrs/<run>/` 与 `tasks/<plan-name>/` 下非 md 的未跟踪产物只存在于这棵树，`git worktree remove` 会连树带它们一起删。次序固定：合并（或第 6 条的记录抢救）→ 把这些产物挪到主 checkout 的相同路径 → `git worktree remove` 且绝不带 `--force`——树里还剩零散文件时 git 自己会拒绝，这道拒绝是安全网，不是要绕过的障碍 → 分支删不删再单独问。树的目录被人工删掉是要上报的 blocker；`git worktree prune` 清理过期元数据，绝不无声重建。
+9. **移除之前，先把产物挪出来。** 树里 `wkdrs/<run>/` 与 `tasks/<plan-name>/` 下非 md 的未跟踪产物只存在于这棵树，`git worktree remove` 会连树带它们一起删。次序固定：合并（或第 6 条的记录抢救）→ 把这些产物挪到主 checkout 的相同路径——期间计划已被丢弃的 run，路径以它的 `dropped/` 位置为准（§9），被暂缓的丢弃搬移跟在这次抢救之后 → `git worktree remove` 且绝不带 `--force`——树里还剩零散文件时 git 自己会拒绝，这道拒绝是安全网，不是要绕过的障碍 → 分支删不删再单独问。树的目录被人工删掉是要上报的 blocker；`git worktree prune` 清理过期元数据，绝不无声重建。
 
 对其余 skill 的要求很小。checkout 停在不属于自己目标的执行分支上时，要提交的 skill 先说明并提议切回去——在那里做下的无关提交会跟着那个叶子一起被合并。谁都不切一个还有东西在跑的 checkout：跑着的任务会中途重读被切换的文件。worktree 只由 `star-plan-executor` 创建与移除，各在自己的具名确认点上；用户自备一棵、在里面调用 executor 依旧受支持——skill 作用于被调用时所在的 checkout。一个 run 的家记在它 frontmatter 的 `worktree:` 字段里；对着这个 run 工作的 skill（审查、分析）以那棵树为根。

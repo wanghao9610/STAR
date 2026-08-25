@@ -19,7 +19,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | kill-criterion | a root plan's §5: the result that says stop pursuing this direction | `star-plan-coach` |
 | `finalized:` | set by the coach when all six sections are `done`; three skills wait on it — `star-plan-decomposer`, `star-code-architect`, `star-metd-summarize` | §8 |
 | `exec_status:` | a leaf's execution state; `done` and `abandoned` are final: nothing more is needed on that leaf | `status_spec.md` |
-| `dropped:` | a plan node given up on, written once where the decision was made and inherited by its whole subtree: outside every count and every recommendation, its record kept | `status_spec.md` |
+| `dropped:` | a plan node given up on, written once where the decision was made and inherited by its whole subtree: outside every count and every recommendation, its record kept — its files moved aside under `dropped/` directories (§9) | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
 | too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
 | outline unit | a unit the parent's `## Sub-plans` keeps as one marked line — `- (outline)` / `- （概要）` — with no file and no prefix until execution reaches it and it is expanded | `star-plan-decomposer` |
@@ -116,7 +116,7 @@ The operational form of `AGENTS.md` §9.
 
 ## 5. Plan-name resolution
 
-1. **`PLAN_NAME` matches `metds/plans/*_plan.md`** by slug (`open-vocab-det-seg`), by numeric prefix (`00`), or by full filename; a `metds/plans/…` path counts.
+1. **`PLAN_NAME` matches `metds/plans/*_plan.md`** by slug (`open-vocab-det-seg`), by numeric prefix (`00`), or by full filename; a `metds/plans/…` path counts. A dropped plan matches the same way from `metds/plans/dropped/`, where its drop moved it (§9).
 2. **Absent or ambiguous → list the nearest candidates** (prefix + slug + one-line state) and ask one direct question. Never guess which plan was meant.
 3. **`parent:` is authoritative; the prefix only hints.** Rebuild the tree from each file's `parent:` frontmatter. The numeric prefix orders and hints the tree for humans — and in projects created before roots took the smallest free digit, two unrelated roots can share a digit.
 4. **A leaf is a plan with empty or absent `children:`.** Only leaves are executable.
@@ -233,6 +233,8 @@ Two properties of this table matter more than its contents:
 1. **`sources:` on a compiled document records each source plan's `updated` as it was when read.** It makes staleness detectable by exact comparison rather than by file mtime.
 2. **Nothing enforces this table.** `star-flow-status` ends its report with a count of report-shaped files matching no row here.
 
+A dropped subtree's artifacts keep every name in this table; only the directory changes, to the `dropped/` locations §9 lists.
+
 ## 9. Project layout
 
 Where a skill puts what it writes. Each destination is exclusive — a file belongs to exactly one, chosen by what the file *is*, not by which step produced it.
@@ -243,13 +245,14 @@ Where a skill puts what it writes. Each destination is exclusive — a file belo
 | Data | `datas/` |
 | Model weights | `inits/` |
 | A run's artifacts, execution records, reports | `wkdrs/<run>/` |
-| Cross-run compilations | reserved `wkdrs/` subtrees: `reviews/`, `results/`, `digests/`, `release/`, `env_*`, `ideas_*`, `refs_*` — never reuse these as a run name |
+| Cross-run compilations | reserved `wkdrs/` subtrees: `reviews/`, `results/`, `digests/`, `release/`, `env_*`, `ideas_*`, `refs_*` — never reuse these, or `dropped/`, as a run name |
 | Plans, notes, method docs | `metds/` |
 | What earlier sessions learned, owned by no other file | `.star/memory/`; machine-specific facts in `.star/memory/local/`, which git ignores (`memory_spec.md`) |
 | Project documentation | `docs/mds/<topic>/`, `docs/htmls/`, `docs/srcs/` (`docs/mds/star-workflow/` is upstream-managed) |
 | Plan-owned tool scripts, plan-execution scratch | `tasks/<plan-name>/` |
 | Run entrypoint | `execs/run.sh` |
 | Reusable launch scripts | `execs/scpts/<run>.sh` |
+| A dropped subtree's files | the same names moved aside by `star-plan-reviser`'s drop, back by a revival: `metds/plans/dropped/`, `wkdrs/dropped/<run>/`, `tasks/dropped/<plan-name>/`, `execs/scpts/dropped/` |
 
 Two rules the table alone does not carry:
 
@@ -297,6 +300,6 @@ The one exception to §1.3's no-branch-switches rule. A leaf whose execution wou
 6. **A discard rescues the records first.** Before an unmerged branch is deleted, its `wkdrs/<run>/*.md` records — and the sub-plan's run entry, with the verdict that ended it — are committed to the base branch: a negative result is evidence, and deleting a branch must never delete it. The deletion itself is asked at every level.
 7. **A worktree answers a different question: the checkout is busy.** The branch isolates history — which commits belong to this run; a worktree isolates disk — how many file trees exist at one moment. Modifying pre-existing files calls for the branch (item 1); a checkout not free right now calls for a worktree. The busy signals: HEAD on another run's execution branch; uncommitted changes on paths belonging to another run; a run's log recording commands handed back whose results are not yet collected — a job may be running, which no command can check, so ask the user; or the user naming parallel work outright. No signal → the run stays in the invoking checkout and nothing else here changes. Creating the worktree is a discretionary question (§7.7) asked at the branch's confirmation point, with the signals giving the recommendation; removing one deletes every untracked file inside it, so removal is a deletion, asked at every level.
 8. **A run in a worktree always carries a branch; tree, branch, and run directory share the run's name.** Commits made in the tree need a home while the base branch stays checked out elsewhere, so a plan whose gap list said `branch: none` switches to `branch: <run>` on moving into a tree. Creation is one command, run from the invoking checkout: `git worktree add ../<root-dirname>--wt/<run> -b <run> <base>` — tree, branch, and fork point in one step; the tree's absolute path is recorded as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter, the field by which any later session finds the run's home. Git creates only tracked files in it, so afterwards link `.env`, `datas/`, `inits/` (and `.star/memory/local/` where present) from the main checkout — and never link `wkdrs/` or `tasks/`: they contain tracked files, and linking the directory replaces them with a single symlink in git's eyes. The merge happens in whichever tree has the base branch checked out — normally the invoking checkout; if the user has switched it away, say so and ask.
-9. **Before removal, move the artifacts out.** Non-md untracked artifacts under the tree's `wkdrs/<run>/` and `tasks/<plan-name>/` exist nowhere else, and `git worktree remove` deletes them with the tree. The order is fixed: merge (or the record rescue of item 6) → move those artifacts to the same paths in the main checkout → `git worktree remove` without `--force` — git refuses while stray files remain, and that refusal is the safety net, not an obstacle to override → the branch's deletion is then its own question. A tree directory deleted by hand is a blocker to report; `git worktree prune` clears the stale metadata, and the tree is never silently rebuilt.
+9. **Before removal, move the artifacts out.** Non-md untracked artifacts under the tree's `wkdrs/<run>/` and `tasks/<plan-name>/` exist nowhere else, and `git worktree remove` deletes them with the tree. The order is fixed: merge (or the record rescue of item 6) → move those artifacts to the same paths in the main checkout — a run whose plan was dropped meanwhile owns the `dropped/` paths (§9), and its deferred drop move follows this rescue → `git worktree remove` without `--force` — git refuses while stray files remain, and that refusal is the safety net, not an obstacle to override → the branch's deletion is then its own question. A tree directory deleted by hand is a blocker to report; `git worktree prune` clears the stale metadata, and the tree is never silently rebuilt.
 
 What this asks of everyone else is small. A skill about to commit while the checkout sits on an execution branch not its own target says so and offers to switch back first — an unrelated commit made there rides into that leaf's merge. Nobody switches a checkout something is still running from: a live job re-reads its files mid-run. Worktrees are created and removed only by `star-plan-executor`, each at its named confirmation point; a user who prepares one themselves and invokes the executor inside it stays supported — skills act on the checkout they are invoked in. A run's home is its frontmatter's `worktree:` field, and a skill working on that run (review, analysis) works in that tree.

@@ -36,7 +36,7 @@ awk '/^## /{k=/^## (10|11)\./} k' docs/mds/star-workflow/research-workflow-conve
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-一条消息、六份结果：规约来自前三次 Shell 调用（`.env` 那一行搭第一次的车），`references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式）各自来自单独的一次 `Read`，共享采集脚本的摘要来自最后一次调用。各次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那趟往返——而规约摘录合计约 48 KB，三次调用分担 19、17、11，每次 `Read` 的结果则各占自己的额度、整份直达；采集那次调用单独发，因为它的摘要是整套装载里唯一随历史增长的部分——真被存成文件，也只重跑它这一行。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把摘要压在大小上限以内的手段。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
+一条消息、六份结果：规约来自前三次 Shell 调用（`.env` 那一行搭第一次的车），`references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式）各自来自单独的一次 `Read`，共享采集脚本的摘要来自最后一次调用。各次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那趟往返——而规约摘录合计约 49 KB，三次调用分担 19、19、11，每次 `Read` 的结果则各占自己的额度、整份直达；采集那次调用单独发，因为它的摘要是整套装载里唯一随历史增长的部分——真被存成文件，也只重跑它这一行。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把摘要压在大小上限以内的手段。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 
@@ -100,7 +100,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 1. 依据证据和用户的答复起草新的章节文本；给出简洁的改前 → 改后摘要；写入文件。
 2. 让章节 `status` 映射保持诚实：引入 `[TBD]` / `【待定】` 的修改把该节翻回 `in_progress`；经确认的重写保持 `done`。
 
-最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法、里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；若某条采纳的候选丢弃了本节点，就在此写入 `dropped:`、并在父计划索引行上加 `— dropped <date>` 标记，别的一概不动——子树靠继承跟上；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
+最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法、里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；若某条采纳的候选丢弃了本节点，就在此写入 `dropped:`、在父计划索引行上加 `— dropped <date>` 标记，再按 `references/drop_rules_zh.md` 第 4 步把子树的文件搬到一边，别的一概不动——子树靠继承变暗；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
 
 ### Step 6：一致性检查
 
@@ -114,12 +114,12 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### 丢弃一份计划，以及把它收回来
 
-这条路用它自己的四步替换 Steps 1–6——读清哪些会随之熄灭、问一次、写三处、汇报——它的规则（包括 `dropped:` 写在哪里、继承对后代意味着什么）在 `references/drop_rules_zh.md`，本次运行是丢弃或恢复时才读，之前不读。评审运行完全不读它。
+这条路用它自己的五步替换 Steps 1–6——读清哪些会随之熄灭、问一次、写三处、把子树的文件搬到一边、汇报——它的规则（包括 `dropped:` 写在哪里、文件搬到哪里、继承对后代意味着什么）在 `references/drop_rules_zh.md`，本次运行是丢弃或恢复时才读，之前不读。评审运行完全不读它。
 
 ## 状态与文件规则
 
 - 审查报告放 `wkdrs/`，绝不放 `metds/plans/`。
-- 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
+- 你只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行；仅在已批准的丢弃或恢复中，再加上把子树文件在活跃位置与 `dropped/` 位置之间搬移（`references/drop_rules_zh.md`）。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到一条被单独批准的候选；`## Revision History` 只追加、不改写。
 - Git：有写入修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划）——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
 - 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。`dropped:` 是一行「日期 + 原因」，只写在本节点上——所有 skill 都按整棵子树继承来读它——设置与清除只走 `references/revision_rules_zh.md` 的丢弃规则。

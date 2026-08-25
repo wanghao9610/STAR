@@ -74,6 +74,7 @@ The test: Every changed line should trace directly to the user's request.
 - Core code in `${CODE_NAME}/`, as defined in `.env`; data and data-related files in `datas/`; model weights and weight-related files in `inits/`; generated output files in `wkdrs/`.
 - Methodology notes in `metds/`, research plans in `metds/plans/`.
 - A plan's own tool scripts and its execution intermediate files belong in `tasks/<plan-name>/`; the scripts are durable, the rest is disposable scratch.
+- A dropped plan's files move aside, names unchanged, to `metds/plans/dropped/`, `wkdrs/dropped/<run>/`, `tasks/dropped/<plan-name>/`, and `execs/scpts/dropped/` — `star-plan-reviser`'s drop does the move, a revival reverses it.
 - `execs/` holds launcher scripts only: `run.sh` and `update.sh` at its root, per-run scripts in `execs/scpts/<run>.sh`. Anything that is not a launcher does not go there at all.
 - `docs/` holds project documentation: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh`; do not edit it.
 - Output names must distinguish tasks, experiments, or runs.

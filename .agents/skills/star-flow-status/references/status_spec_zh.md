@@ -12,16 +12,16 @@
 - 参数命中**多于一份**计划文件时，每一份都各占一个根行渲染；回复第一行点明歧义，并给出每份对应的无歧义命令。
 - 参数一份都没命中时，不渲染任何树：列出最接近的候选（前缀 + slug + 一句话状态），到此为止。
 
-解析定下来之后，范围管整条回复：树只渲染这棵子树，三个计数在它上面算，覆盖检查只查它的产物，下一步也只在它里面挑。范围之外的计划只是被读到——没有它们 `parent:` 解析不出来——读完搁下。有两样东西仍覆盖全项目，并在各自定义处写明：未识别文件行，以及必须点名子树之外父计划的失配标记。`PLAN_NAME` 点名已丢弃（见下）的节点时，照常解析、照常渲染：这个字段收走推荐，不是主动查看。
+解析定下来之后，范围管整条回复：树只渲染这棵子树，三个计数在它上面算，覆盖检查只查它的产物，下一步也只在它里面挑。范围之外的计划只是被读到——没有它们 `parent:` 解析不出来——读完搁下。有两样东西仍覆盖全项目，并在各自定义处写明：未识别文件行，以及必须点名子树之外父计划的失配标记。`PLAN_NAME` 点名已丢弃（见下）的节点时，照常解析、照常渲染——它的文件在 `metds/plans/dropped/` 下，解析连同活跃目录一起读：这个字段收走推荐，不是主动查看。
 
 ## 每个文件读什么
 
-每个 `metds/plans/<prefix>_<slug>_plan.md` 的 frontmatter 可能带：
+每个计划文件的 frontmatter——`metds/plans/<prefix>_<slug>_plan.md`，以及丢弃搬移后 `metds/plans/dropped/` 下的同名文件——可能带：
 
 - 总体计划（来自 coach）：六节的 `status:` 映射、可选的 `finalized:`、`updated:`，以及（拆解后）`children:` + 正文的 `## Sub-plans` 索引。索引里可能有**概要行**——`- （概要）` / `- (outline)`（规约 §0），还没展开成文件的单元：逐节点数一数，它们是叶子计数看不见的既定工作；预期顺序也从索引读（概要单元没有前缀，不在任何 `depends_on` 里）。
 - 子计划（来自 decomposer）：`parent:`、`prefix:`、`traces_to:`、`depends_on:`、六个执行章节的 `status:` 映射、`updated:`。
-- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`abandoned`）——`done` 与 `abandoned` 都是**终态**：这样的叶子不再欠任何东西，也不会卡住下游的确认点。`skipped`——这个取值已经没有任何 skill 会写——同样读作终态，这里是它唯一还被认得的地方。`abandoned` 记录被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让负结果留存；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。此字段出现前写的计划带单个 `exec_run:`；当作只有一项的列表读——executor 下次写入时会迁移它。
-- 任何节点，在 `star-plan-reviser` 丢弃它之后：`dropped: <YYYY-MM-DD> — <一句话原因>`——这个方向已经放弃。**它靠继承生效，绝不向下复制**：一个节点算作已丢弃，是因为它自己带这个字段**或任一祖先带**，所以这个决定只写一次，写在做出决定的节点上；日后在已丢弃节点下新增的子节点也一并算已丢弃。完整交代在该计划的 `## Revision History`；父计划保留其 `children:` 条目与 `## Sub-plans` 索引行，并在那一行加 `— dropped <date>` 标记。
+- 已执行的叶子（来自 executor）：`exec_status:`（`pending`/`in_progress`/`done`/`blocked`/`abandoned`）——`done` 与 `abandoned` 都是**终态**：这样的叶子不再欠任何东西，也不会卡住下游的确认点。`skipped`——这个取值已经没有任何 skill 会写——同样读作终态，这里是它唯一还被认得的地方。`abandoned` 记录被自身 kill-criterion 判死的方向；理由写进计划的 `## Revision History`，让负结果留存；`exec_runs:`——一个只追加的 `wkdrs/<run>/` 目录列表，最新的在最后，**最后一项就是当前 run**；更早的条目是重跑（换个 seed、修掉一个 bug），留作记录。**run 名先在 `wkdrs/` 解析，再在 `wkdrs/dropped/` 解析**——丢弃把子树的 run 目录搬到一边而不改写这份列表，所以只有两处都找不到的条目才算孤儿。此字段出现前写的计划带单个 `exec_run:`；当作只有一项的列表读——executor 下次写入时会迁移它。
+- 任何节点，在 `star-plan-reviser` 丢弃它之后：`dropped: <YYYY-MM-DD> — <一句话原因>`——这个方向已经放弃。**它靠继承生效，绝不向下复制**：一个节点算作已丢弃，是因为它自己带这个字段**或任一祖先带**，所以这个决定只写一次，写在做出决定的节点上；日后在已丢弃节点下新增的子节点也一并算已丢弃。完整交代在该计划的 `## Revision History`；父计划保留其 `children:` 条目与 `## Sub-plans` 索引行，并在那一行加 `— dropped <date>` 标记。丢弃同时把子树的文件搬到了一边，文件名不变——计划文件搬到 `metds/plans/dropped/`，run 目录搬到 `wkdrs/dropped/<run>/`，`tasks/<plan-name>/` 搬到 `tasks/dropped/`，启动脚本搬到 `execs/scpts/dropped/`——任何指针都没改写：`exec_runs`、`children:` 和每一条被引用的路径保持原文，按上面的两处解析规则找到实际位置。
 
 对带 `exec_runs` 的叶子，另读当前 run 的 `wkdrs/<run>/EXEC_LOG.md`：步骤状态表（数 `done` / 总数、注意任何 `blocked`）、"待用户执行（红线）"清单、以及 Notes 里的任何"方向性信号"。加了 `--slim` 时，超过六行的表已经数好了——`[tally] 8 data rows | c3: done×7, blocked×1` 一行里就是这个计数和这个提醒；写成 `N distinct` 的列装步骤名或日期，不会是状态。无论表怎么处理，未勾选的待办项与方向性信号都原样打印，所以红线规则和 Step 3 需要的东西不会藏在计数后面。日志 frontmatter 的 `branch:` / `merged:` 随这次读取一并带回（规约 §11）。
 
@@ -132,7 +132,7 @@
 - **可能过期的子计划** —— 某子计划 `updated` 早于其父计划 `updated`（父计划在拆解后被改）。建议 `star-plan-decomposer <父计划>` 对账。
 - **悬挂链接** —— 某 `children:` 项找不到对应文件，或某计划文件的 `parent:` 指向不存在的文件、或未被其父计划 `## Sub-plans` 索引列出。
 - **坏依赖** —— 某 `depends_on` 前缀解析不到现存兄弟，或依赖图里有环。
-- **孤儿 run** —— 某个 `exec_runs` 条目指向不存在的 `wkdrs/<run>/` 目录，或某 EXEC_LOG 的 `source_plan` 与叶子不符。
+- **孤儿 run** —— 某个 `exec_runs` 条目的 run 目录在 `wkdrs/` 与 `wkdrs/dropped/` 两处都不存在，或某 EXEC_LOG 的 `source_plan` 与叶子不符。
 - **done 但没有 run** —— 某叶子 `exec_status: done` 却没有 `exec_runs`（或其 run 目录已不在）。覆盖检查第 3、5 行都要求 run 目录存在，所以这样的叶子对下游悄悄什么都不欠；改在这里标出来——手工标成 done 的叶子要么是记账疏漏，要么是 run 被删了。
 - **终态但红线命令未清** —— 某叶子处于终态 `exec_status`，其当前 run 却还带着未勾选的「待用户执行」命令。要么是命令跑过没勾，要么是叶子带着它被关掉。图例把这个叶子渲染成 `✔` 或 `✖`，所以这一行是读者唯一能知道那条命令还挂在案上的地方，优先顺序里的待用户那一档也就不再挑它。
 - **finalized 之后又被改过** —— 某总体计划节点的 `updated` 晚于其 `finalized:`：那个 `✔` 已经不再有评分表背书。建议 `star-plan-coach <slug>` 重新关闭它。
@@ -141,7 +141,8 @@
 - **worktree 遗留** —— 列出的某棵树，其 run 的日志已带 `merged:`（移除被拒或被推迟——只标记）；某次 run 的记录点名 `worktree:`，这棵树却已不存在（树从 run 底下被删——executor 把这当作 blocker）；或列出的某棵树既没有叶子、也没有 run 记录认领——不是本项目的，别动它（§11.9）。
 
 - **活着的叶子依赖了已丢弃的节点** —— 某个 `depends_on` 前缀解析到的节点已被丢弃。这条依赖永远满足不了，于是这个叶子会一直读作 `⊘` 受阻，而优先顺序一声不响地从它旁边走过去。两边都点名，把这条边交给 `star-plan-decomposer <父计划>` 重画——若这个依赖方本来也该一起丢弃，则交给 `star-plan-reviser <叶子>`。
-- **已丢弃，但活儿还在磁盘上** —— 某个已丢弃节点的当前 run 还记录着未合并的 `branch:`、现存的 `worktree:`，或未勾选的「待用户执行」命令。丢弃收走的是推荐，不是资源：这些东西放着不管仍然有代价。答案不再是合并——抢救记录、废弃分支走 `star-plan-executor`（规约 §11.6）。
+- **已丢弃，但活儿还在磁盘上** —— 某个已丢弃节点的当前 run 还记录着未合并的 `branch:`、现存的 `worktree:`，或未勾选的「待用户执行」命令。丢弃收走的是推荐，不是资源：这些东西放着不管仍然有代价。答案不再是合并——抢救记录、废弃分支走 `star-plan-executor`（规约 §11.6）。这样的 run 留在活跃路径上也是正当的：丢弃把它的搬移暂缓到这些了结之后。
+- **已丢弃，文件却不在该在的地方** —— 某个已丢弃节点或后代，其计划文件仍直接躺在 `metds/plans/`，或其 run 目录、`tasks/<plan-name>/`、`execs/scpts/<run>.sh` 仍在活跃路径上——搬移规则出现之前丢弃的项目，或一次中断的丢弃；被上一条暂缓搬移的 run 属于上一条，不算这里。反向同样触发：`metds/plans/dropped/` 下有计划自己和任何祖先都不带 `dropped:`。把补完搬移的命令原样打印出来——`git mv metds/plans/<文件> metds/plans/dropped/`、`mv wkdrs/<run> wkdrs/dropped/`，存在时再加 `tasks/`、`execs/scpts/` 两处的对应命令——反向的则转交 `star-plan-reviser <节点>`；本 skill 从不动手。
 
 本段保持简短；无任何标记时整段省略。
 
@@ -150,7 +151,7 @@
 上面的覆盖检查按文件名匹配产物。如果某个产出方 skill 改了写出来的东西，覆盖检查会悄悄不再触发那一行——这是一次漏报。这一行把那种失败翻转成看得见的。只数**报告形**文件，让 run 产物（权重、图、原始日志）绝不进来：
 
 - 直接位于某个 `wkdrs/<run>/` 目录下的 `*.md`，且文件名不是 `EXEC_PLAN.md`、`EXEC_LOG.md`、`CODE_REVIEW_<date>.md`、`EXPT_ANALYSIS_<date>.md`、`REVIEW_<date>.md`；
-- 直接位于 `wkdrs/` 下四个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（没有 run 时走的那条共用退路目录）登记 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记 `ENV_REPORT.md`；`wkdrs/digests/` 登记 `EXPT_DIGEST_<date>.md` 与 `MODEL_LEDGER.md`；`wkdrs/results/` 登记 `results.md` 与 `results_<slug>.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计；
+- 直接位于 `wkdrs/` 下四个已登记非 run 目录里的 `*.md`，且用了 §8 未在该处登记的名字：`wkdrs/reviews/`（没有 run 时走的那条共用退路目录）登记 `code_<scope>_<date>.md` 与 `<prefix>_<slug>_<date>.md`（数字前缀）；`wkdrs/env_<name>_<date>/` 目录登记 `ENV_REPORT.md`；`wkdrs/digests/` 登记 `EXPT_DIGEST_<date>.md` 与 `MODEL_LEDGER.md`；`wkdrs/results/` 登记 `results.md` 与 `results_<slug>.md`。其余任何 `wkdrs/` 子目录一律按上一条当作 run 目录审计——`wkdrs/dropped/` 除外，它本身不是 run 目录：审计的是它里面的每个 `wkdrs/dropped/<run>/`；
 - `metds/` 顶层的 `*.md`，其主名不属于 `overview`、`framework`、`dataset`、`training`、`evaluation`、`codearc`、`adopt`，**且**带有 `type:`、`generated:`、`sources:` 三者之一。这三个字段合起来是"编译文档"的指纹：按三者取并、而不是只认 `type:`，能抓到既改了输出名又丢掉 `type:` 的产出方；而 `metds/` 下手写的笔记三者皆无，保持沉默。
 
 不要递归进入子目录（`analysis/`、`raw/`、`refs/`）——各产出方自己的工作空间，本就不在产物登记表内。报一行：`⚠ N 个未识别的报告文件` + 至多三个路径。N 为 0 时整行省略。这是命名不一致，不是对文件本身的判断：规约 §8 的产物登记表和磁盘上的实际情况已经分叉，两者之一需要更新。

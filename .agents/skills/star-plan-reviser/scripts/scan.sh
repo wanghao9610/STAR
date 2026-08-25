@@ -36,9 +36,10 @@
 #                 findings. And an artifact sitting inside a run
 #                 directory prints no frontmatter, because LISTING already carries
 #                 its name and the date in it; how many were left out is printed,
-#                 never dropped silently. A run directory here is a wkdrs/ subdir
-#                 holding an EXEC_LOG.md, which is the same thing the RUNS sweep
-#                 globs for — no new knowledge of the output table enters the script.
+#                 never dropped silently. A run directory here is a wkdrs/ or
+#                 wkdrs/dropped/ subdir holding an EXEC_LOG.md, which is the same
+#                 set the RUNS sweep globs for — no new knowledge of the output
+#                 table enters the script.
 #                 Frontmatter, dates, plans, LISTING and DIRS are untouched, and
 #                 --trails keeps every artifact, since a provenance read wants the
 #                 writers this would drop.
@@ -63,7 +64,9 @@
 #                 depth-2 sweep stays frontmatter-only, as before.
 #
 #   --runs DIR,DIR  restrict the per-run body index and dates line, and any
-#                 --bodies sections, to these run directories. Frontmatter is still
+#                 --bodies sections, to these run directories. A name matches its
+#                 run wherever the run sits — wkdrs/ or, once the plan is
+#                 dropped, wkdrs/dropped/. Frontmatter is still
 #                 printed for every run and every artifact, and PLANS, LISTING and
 #                 DIRS stay project-wide: a subtree question still needs every
 #                 plan's parent:, and the drift check counts report-shaped files
@@ -370,9 +373,12 @@ function sections_by_number(n, want,   i, j, parts, sel, line, num, inside, prin
 }
 
 # Is this run directory inside the --runs scope? Empty scope means every run.
+# A dropped run lives one level deeper (wkdrs/dropped/<run>/); folding that
+# prefix away first lets one name match its run wherever the run sits.
 function in_runs_scope(path,   d) {
     if (scope == "") return 1
-    d = path; sub(/^wkdrs\//, "", d); sub(/\/.*$/, "", d)
+    d = path; sub(/^wkdrs\/dropped\//, "wkdrs/", d)
+    sub(/^wkdrs\//, "", d); sub(/\/.*$/, "", d)
     return index("," scope ",", "," d ",") > 0
 }
 
@@ -422,6 +428,7 @@ function do_artifact(path,   n, i, tmp, slashes, d) {
     # read that wants more, so it keeps them.
     if (slim == 1 && trails == 0) {
         d = path
+        sub(/^wkdrs\/dropped\//, "wkdrs/", d)
         if (sub(/^wkdrs\//, "", d) && sub(/\/.*$/, "", d) && index("," rundirs ",", "," d ",") > 0) {
             skipped++
             return
@@ -493,11 +500,12 @@ if [ ! -d metds ] && [ ! -d wkdrs ]; then
 fi
 
 # Which wkdrs/ subdirs --slim treats as run directories: the ones holding an
-# EXEC_LOG.md, which is the same set the RUNS sweep globs. wkdrs/digests/,
+# EXEC_LOG.md, which is the same set the RUNS sweep globs — wkdrs/dropped/<run>/
+# included, since a dropped run is still a run directory. wkdrs/digests/,
 # wkdrs/results/ and wkdrs/env_*/ hold no log, so their frontmatter is never
 # skipped — and the script still has no list of what the output table expects.
 RUN_DIRS=""
-[ "$SLIM" = 0 ] || RUN_DIRS=$(find_md wkdrs 2 'EXEC_LOG.md' | sed 's|^wkdrs/||; s|/EXEC_LOG\.md$||' | tr '\n' ',')
+[ "$SLIM" = 0 ] || RUN_DIRS=$({ find_md wkdrs 2 'EXEC_LOG.md'; find_md wkdrs/dropped 2 'EXEC_LOG.md'; } | sed 's|^wkdrs/dropped/||; s|^wkdrs/||; s|/EXEC_LOG\.md$||' | tr '\n' ',')
 
 say "# STAR flow scan — $(pwd -P)"
 say "# today: $(date +%Y-%m-%d)"
@@ -507,13 +515,19 @@ say "# Apply your skill's own rules to what follows."
 
 # ---------------------------------------------------------------- plans
 say ""
-say "## PLANS — metds/plans/*_plan.md"
-find_md metds/plans 1 '*_plan.md' | sweep plans "(none)"
+say "## PLANS — metds/plans/*_plan.md, dropped ones under metds/plans/dropped/"
+{
+    find_md metds/plans 1 '*_plan.md'
+    find_md metds/plans/dropped 1 '*_plan.md'
+} | sweep plans "(none)"
 
 # ---------------------------------------------------------------- runs
 say ""
-say "## RUNS — wkdrs/*/EXEC_LOG.md"
-find_md wkdrs 2 'EXEC_LOG.md' | sweep runs "(none)"
+say "## RUNS — wkdrs/*/EXEC_LOG.md, dropped ones under wkdrs/dropped/"
+{
+    find_md wkdrs 2 'EXEC_LOG.md'
+    find_md wkdrs/dropped 2 'EXEC_LOG.md'
+} | sweep runs "(none)"
 
 # ---------------------------------------------------------------- other artifacts
 # Every other listed-area .md, one depth level down as the self-audit rule
@@ -528,6 +542,7 @@ artifact_files() {
     find_md metds 1 '*.md'
     find_md metds/ideas 1 '*.md'
     find_md wkdrs 2 '*.md'
+    find_md wkdrs/dropped 2 '*.md'
     [ "$TRAILS" = 0 ] || find_md metds/refs 1 '*.md'
 }
 artifact_files | sweep artifacts "(none with frontmatter)"
@@ -542,8 +557,10 @@ listing=$(
     find_md metds/ideas 1 '*.md'
     find_md metds/refs 1 '*.md'
     find_md metds/plans 1 '*.md'
+    find_md metds/plans/dropped 1 '*.md'
     find_md wkdrs 1 '*.md'
     find_md wkdrs 2 '*.md'
+    find_md wkdrs/dropped 2 '*.md'
 )
 if [ -n "$listing" ]; then
     printf '%s\n' "$listing" | sort

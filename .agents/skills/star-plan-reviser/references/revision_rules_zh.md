@@ -12,10 +12,11 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 | 目标 frontmatter `depends_on` | 允许——仅作为已批准候选；必须保持为无环的兄弟前缀列表 |
 | 目标 frontmatter `exec_status` | 允许——仅按下方重置规则、经明确批准 |
 | 目标 frontmatter `dropped:` | 允许——仅作为已批准候选，按下方丢弃规则 |
+| 已丢弃子树在磁盘上的文件（计划文件、`tasks/<plan-name>/`、`wkdrs/<run>/` 目录、`execs/scpts/<run>.sh`） | 允许——仅限已批准的丢弃或恢复所带的、搬进或搬出 `dropped/` 位置的那次移动（`drop_rules_zh.md`）；内容绝不编辑 |
 | 父计划 `## Sub-plans` 中目标对应行 | 允许——仅当目标的标题 / 一行目标发生变化，或为它加上、去掉丢弃标记 |
 | 目标 `## Sub-plans` 里的概要行（还没展开的单元——规约 §0） | 允许——作为已批准候选：改写、重排、增删概要行；已展开子计划文件的条目仍归 star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | 绝不——run 属于 executor；审查报告写在日志*旁边*，不写进日志 |
-| 数字前缀 / 文件名 | 绝不——不重编号、不改名、不分叉 `_v2`、不删除 |
+| 数字前缀 / 文件名 | 绝不——不重编号、不改名、不分叉 `_v2`、不删除（丢弃的搬移保留每个文件名，变的只是目录） |
 | 兄弟或子计划的正文 | 本次会话绝不——对那个文件单独运行 reviser，或转给 star-plan-decomposer |
 | 目标的 `## Revision History` | 只追加——新条目加在最后一条之下；绝不改写既有条目 |
 

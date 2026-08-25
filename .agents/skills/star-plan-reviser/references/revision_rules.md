@@ -12,10 +12,11 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 | target frontmatter `depends_on` | yes — only as an approved candidate; must remain an acyclic list of sibling prefixes |
 | target frontmatter `exec_status` | yes — only via the reset rule below, with explicit approval |
 | target frontmatter `dropped:` | yes — only as an approved candidate, under the drop rule below |
+| the dropped subtree's files on disk (plan files, `tasks/<plan-name>/`, `wkdrs/<run>/` dirs, `execs/scpts/<run>.sh`) | yes — only the move to or from their `dropped/` locations that an approved drop or revival carries (`drop_rules.md`); their contents are never edited |
 | parent `## Sub-plans` line for the target | yes — only when the target's title / one-line objective changed, or to add or remove its drop marker |
 | target `## Sub-plans` outline lines (units not yet expanded — conventions §0) | yes — as approved candidates: reword, reorder, add or remove outline lines; entries for expanded child files stay with star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | never — runs belong to the executor; reviews are written *next to* logs, not into them |
-| numeric prefixes / filenames | never — no renumbering, no renaming, no `_v2` forks, no deletion |
+| numeric prefixes / filenames | never — no renumbering, no renaming, no `_v2` forks, no deletion (a drop's move keeps every filename; only the directory changes) |
 | sibling or child plan bodies | never in this session — run the reviser on that file separately, or route to star-plan-decomposer |
 | `## Revision History` (target) | append-only — a new entry goes below the last one; never rewrite past entries |
 
