@@ -52,7 +52,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. **收集靠分散，判断在主 agent。** 证据收集拆成**只读收集遍**，一次一遍——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次**提问把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
-5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `star-plan-decomposer`；研究问题或方法级转向转给 `star-plan-coach`。边界见 `references/revision_rules_zh.md`。
+5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `star-plan-decomposer`；研究问题或方法级转向转给 `star-plan-coach`——而目标自己的概要行，即还没展开成文件的单元（规约 §0），只是文字，仍属 local 候选。边界见 `references/revision_rules_zh.md`。
 6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `star-flow-status` 浮现。
 
 ## 工作流

@@ -13,6 +13,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 | 目标 frontmatter `exec_status` | 允许——仅按下方重置规则、经明确批准 |
 | 目标 frontmatter `dropped:` | 允许——仅作为已批准候选，按下方丢弃规则 |
 | 父计划 `## Sub-plans` 中目标对应行 | 允许——仅当目标的标题 / 一行目标发生变化，或为它加上、去掉丢弃标记 |
+| 目标 `## Sub-plans` 里的概要行（还没展开的单元——规约 §0） | 允许——作为已批准候选：改写、重排、增删概要行；已展开子计划文件的条目仍归 star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | 绝不——run 属于 executor；审查报告写在日志*旁边*，不写进日志 |
 | 数字前缀 / 文件名 | 绝不——不重编号、不改名、不分叉 `_v2`、不删除 |
 | 兄弟或子计划的正文 | 本次会话绝不——对那个文件单独运行 reviser，或转给 star-plan-decomposer |
@@ -20,7 +21,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 
 ## 该转交的不要编辑
 
-- **structural**——增删子计划、调整粒度、跨兄弟重画依赖边 → 建议 star-plan-decomposer。（编辑*目标自己*的 `depends_on` 列表属于 local、可批准的候选。）
+- **structural**——增删子计划、调整粒度、跨兄弟重画依赖边 → 建议 star-plan-decomposer。（编辑*目标自己*的 `depends_on` 列表属于 local、可批准的候选——修目标的概要行也是：还没展开成文件的单元只是文字，不是结构。把某条展开成文件才归 decomposer。）
 - **strategic**——研究问题、核心方法关键假设或方向本身被推翻 → 建议 star-plan-coach。
 
 对总体计划章节做范围受限的文本修订仍属 local、是允许的：收紧一条 kill-criterion、给里程碑改期、记录某假设已被验证或已失败。"方法已死，换一个"不是一次编辑——那是一场重新做计划的对话。

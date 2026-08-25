@@ -22,6 +22,7 @@ Terms this file and every `SKILL.md` use without re-explaining. Each is defined 
 | `dropped:` | a plan node given up on, written once where the decision was made and inherited by its whole subtree: outside every count and every recommendation, its record kept | `status_spec.md` |
 | `traces_to` | which claim in the root plan this sub-plan supports | `star-plan-decomposer` |
 | too big to run | a plan that cannot be executed as it stands — §3/§5 largely `[TBD]` / `【待定】`, or finalized but never decomposed | `status_spec.md` |
+| outline unit | a unit the parent's `## Sub-plans` keeps as one marked line — `- (outline)` / `- （概要）` — with no file and no prefix until execution reaches it and it is expanded | `star-plan-decomposer` |
 | backfill | `star-proj-adopt`'s second phase, recording work finished before any plan existed | §8 |
 | follow-up checks | `star-flow-status`'s checks on finished work whose review, analysis, or write-up is missing or out of date | `status_spec.md` |
 | summary counts | a parent's progress counted up from its children | `status_spec.md` |
@@ -119,7 +120,7 @@ The operational form of `AGENTS.md` §9.
 2. **Absent or ambiguous → list the nearest candidates** (prefix + slug + one-line state) and ask one direct question. Never guess which plan was meant.
 3. **`parent:` is authoritative; the prefix only hints.** Rebuild the tree from each file's `parent:` frontmatter. The numeric prefix orders and hints the tree for humans — and in projects created before roots took the smallest free digit, two unrelated roots can share a digit.
 4. **A leaf is a plan with empty or absent `children:`.** Only leaves are executable.
-5. **`depends_on` holds sibling prefixes** and is the machine-readable execution order the executor and `star-flow-status` consume. It stays acyclic and consistent with the parent's `## Sub-plans` index.
+5. **`depends_on` holds sibling prefixes** and is the machine-readable execution order the executor and `star-flow-status` consume. It stays acyclic and consistent with the parent's `## Sub-plans` index. An outline unit (§0) has no prefix and never appears in `depends_on`: it enters the graph only once expanded into a file.
 6. **Never renumber a prefix.** Every deeper prefix and every `parent:` / `traces_to` reference is built on it.
 
 ## 6. Delegation

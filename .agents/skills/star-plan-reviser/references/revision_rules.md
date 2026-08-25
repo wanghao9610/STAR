@@ -13,6 +13,7 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 | target frontmatter `exec_status` | yes — only via the reset rule below, with explicit approval |
 | target frontmatter `dropped:` | yes — only as an approved candidate, under the drop rule below |
 | parent `## Sub-plans` line for the target | yes — only when the target's title / one-line objective changed, or to add or remove its drop marker |
+| target `## Sub-plans` outline lines (units not yet expanded — conventions §0) | yes — as approved candidates: reword, reorder, add or remove outline lines; entries for expanded child files stay with star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | never — runs belong to the executor; reviews are written *next to* logs, not into them |
 | numeric prefixes / filenames | never — no renumbering, no renaming, no `_v2` forks, no deletion |
 | sibling or child plan bodies | never in this session — run the reviser on that file separately, or route to star-plan-decomposer |
@@ -20,7 +21,7 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 
 ## Routing, not editing
 
-- **structural** — adding/removing sub-plans, changing granularity, redrawing dependency edges across siblings → recommend star-plan-decomposer. (Editing the *target's own* `depends_on` list is a local, approvable candidate.)
+- **structural** — adding/removing sub-plans, changing granularity, redrawing dependency edges across siblings → recommend star-plan-decomposer. (Editing the *target's own* `depends_on` list is a local, approvable candidate — and so is amending the target's outline lines, units not yet expanded into files: they are text, not structure. Expanding one into a file is the decomposer's.)
 - **strategic** — the research question, the core method bet, or the direction itself is overturned → recommend star-plan-coach.
 
 A bounded text edit of a strategy section is still local and allowed: tightening a kill-criterion, re-dating a milestone, recording that an assumption was validated or failed. "The method is dead, replace it" is not an edit — it is a coaching conversation.

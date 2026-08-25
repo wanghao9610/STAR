@@ -535,9 +535,9 @@ With no argument, or an ambiguous match, the skill lists candidate plans for sel
 The skill first checks whether the parent plan is ready, then confirms two decisions in order:
 
 1. **Decomposition axis:** phase/milestone, component/module, or experiment/evidence;
-2. **Sub-plan list:** one card per unit — objective, steps, deliverables, done-criterion — plus dependencies and execution order, all shown in the reply before the question is put.
+2. **Sub-plan list:** one card per unit expanding now — objective, steps, deliverables, done-criterion — and one line per unit kept in outline, plus dependencies and execution order, all shown in the reply before the question is put.
 
-After confirmation, the skill generates a sub-plan per unit. Each contains:
+After confirmation, the skill by default expands only the next runnable unit(s) into sub-plan files; later units stay outline lines in the parent plan and are expanded, by re-invoking the skill on the parent, as execution reaches them — the outline checked against the newest results first. Each expanded sub-plan contains:
 
 - Objective and non-goals;
 - Inputs and upstream dependencies;
@@ -563,7 +563,7 @@ metds/plans/
 
 The indentation above represents the logical tree; all files still live in one directory. Each deeper level appends one digit to the prefix. A node may have at most ten direct children; larger task sets decompose across two levels.
 
-A sub-plan's frontmatter `parent` field is the authoritative parent link; `depends_on` defines execution order. The skill also maintains `children` and a `## Sub-plans` index in the parent plan.
+A sub-plan's frontmatter `parent` field is the authoritative parent link; `depends_on` defines execution order. The skill also maintains `children` and a `## Sub-plans` index in the parent plan. An outline unit lives only in that index — no file, no prefix — so `children` and `depends_on` list expanded units alone.
 
 To decompose a sub-plan still too big to run:
 
