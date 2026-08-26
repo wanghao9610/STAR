@@ -258,6 +258,12 @@ missing_hooks() { # $1 = registration config path
         */.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
+    # The plan gate answers the plan-approval prompt raised before execution,
+    # which only Claude exposes to a hook (PermissionRequest on ExitPlanMode).
+    case "$1" in
+        */.claude/settings.json)
+            grep -q 'star_plan_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }plan gate" ;;
+    esac
     # The commit guard declines a shell command before it runs, which every
     # harness can express — Claude, Codex and Kimi on PreToolUse, Cursor on
     # beforeShellExecution — so every config carries it.

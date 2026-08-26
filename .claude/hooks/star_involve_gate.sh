@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Skip Claude's permission prompt for file edits while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7). Confirmation points are
-# untouched: the STOP line, deletions and plan approval are questions a skill
-# asks, not permission prompts a hook can answer.
+# untouched: the STOP line and deletions are questions a skill asks, not
+# permission prompts a hook can answer. Plan approval is the one prompt with a
+# gate of its own, star_plan_gate.sh.
 #
 # Silence means "no decision", so every other level, every path this declines,
 # and a project with no .env fall through to the normal permission flow. INVOLVE
