@@ -32,7 +32,11 @@
             "type": "command",
             "command": ".codex/hooks/star_model_id.sh",
             "statusMessage": "Recording session model id for STAR provenance"
-          },
+          }
+        ]
+      },
+      {
+        "hooks": [
           {
             "type": "command",
             "command": ".codex/hooks/star_memory.sh",
