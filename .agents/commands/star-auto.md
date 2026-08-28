@@ -16,12 +16,12 @@ Read `STAR_LANG` and `INVOLVE` from `.env` in one grep (§7.6, §7.7). Turn the 
 
 ## The loop
 
-1. Run `star-flow-status` through the harness's native skill mechanism and take its single next action.
+1. Run `star-flow-status` through the harness's native skill mechanism and take its single next action. An action that does not advance the goal's check is not taken: say so in one line, leave it for a later invocation, and take the next action that does.
 2. Start what it names:
    - One of the eight the agent may pick up — the harness's native mechanism, exactly as §10.2–10.6 say, with this run's resolved level appended as an `involve=` token: each started run resolves its own level (§7.7), so a start that carries no token would fall back to `.env`, not to this run's default.
    - One of the seven explicit-only — the grant covers it: announce one line first (what matched, which target), then dispatch one subagent that reads that skill's harness-owned `SKILL.md` in full and follows it, this run's resolved level passed in the brief as the same `involve=` token; when it ends, one line in the decisions record, `what matched → what ran → what it wrote` (§10.5).
    - A prepared STOP-line command — the stop-line rule above: launch and log, then wait for it to finish, collect the output its handoff named so the criterion can be checked, and continue at step 1; a command that cannot be waited on ends the run, the report naming what it is waiting on. When the user's stop line stops the launch — print the command, stop, and report.
-3. Everything a user-named run asks, this one asks. An unsettled target names the candidates and waits (§5.2, §10.3); a mandatory confirmation point asks and waits (§7.2), and where nobody can answer — a headless run — it stops there and reports rather than assumes; one unit of work per start (§10.4).
+3. Everything a user-named run asks, this one asks. An unsettled target names the candidates and waits (§5.2, §10.3); a mandatory confirmation point asks and waits (§7.2), and where nobody can answer — a headless run — it stops there and reports rather than assumes; one unit of work per start (§10.4). A question a started run hands back is triaged the same way, at this run's resolved level (§7.7): a judgment call the level takes unasked is answered with its marked recommendation and logged; anything that must be asked goes to the user, never answered by this loop.
 4. After each run ends, take the next action it names — under this grant the seven are taken as the eight are (§10.6) — and where none is named, run `star-flow-status` again.
 5. An action that failed is not retried on the same target. The routing a failure earns — a reviser pass, a fix run — is itself a next action, taken once; when it too fails, stop and report.
 
