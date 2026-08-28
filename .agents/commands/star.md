@@ -22,4 +22,6 @@ Use the roster below to route a research-workflow request to exactly one STAR sk
 
 The seven skills marked † are explicit-only because each controls a researcher-owned decision. This generic `/star` router never starts one: ask for explicit confirmation, give the exact `/star-<name> <argument>` command, and wait. The other eight may be selected when the request plainly matches.
 
+A request to pursue a goal autonomously — keep running whatever the plan tree needs next until something is reached — is not routed to one skill: give the exact `/star-auto <goal>` command and wait. Typing it is the grant that lets that run start the marked skills itself (conventions §10.7).
+
 If the request is empty, select `star-flow-status`. Otherwise, name the chosen skill, give the one-line reason, and pass through the request as its argument. Start an unmarked skill through the active harness's native skill mechanism and use that harness's owned copy. If two skills are equally plausible, ask one concise question instead of blending their scopes. Never bypass a skill by producing its owned artifact from general knowledge.

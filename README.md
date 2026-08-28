@@ -91,13 +91,13 @@ STAR/
 ├── .claude/skills/         # Research workflow skills for Claude
 ├── .cursor/skills/         # Research workflow skills for Cursor
 ├── .dsh/skills/            # Research workflow skills for DeepSeek Harness
-├── .dsh/commands/star/     # DSH's repo-local /star router package
+├── .dsh/commands/star/     # DSH's repo-local /star and /star-auto command package
 ├── .kimi-code/skills/      # Research workflow skills for Kimi Code
-├── .kimi-code/plugins/     # Kimi Code's repo-local /star router plugin and marketplace
+├── .kimi-code/plugins/     # Kimi Code's repo-local /star and /star-auto plugin and marketplace
 ├── .pi/skills/             # Research workflow skills for Pi
 ├── .qwen/skills/           # Research workflow skills for Qwen Code
 ├── .codex/skills/          # Codex's per-skill manifests, linked from .agents/skills/
-├── .codex/plugins/         # Codex's $star router plugin and canonical marketplace
+├── .codex/plugins/         # Codex's $star / $star-auto plugin and canonical marketplace
 ├── .claude/hooks/          # Hooks for Claude: model-id provenance, project memory, involve gate
 ├── .codex/hooks/           # Hooks for Codex: model-id provenance, project memory, involve gate
 ├── .cursor/hooks/          # Session hooks for Cursor
@@ -106,14 +106,14 @@ STAR/
 ├── .pi/extensions/         # Pi extensions: STAR's session hooks, plus sub-agents, plan mode, questions
 ├── .qwen/hooks/            # Hooks for Qwen Code: model-id provenance, project memory, involve gate
 ├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
-├── .agents/commands/       # Shared /star router read by each harness-owned command
+├── .agents/commands/       # Shared /star router and /star-auto procedure, read by each harness-owned command
 ├── .agents/plugins/        # Codex marketplace discovery: one file link into .codex/plugins/
-├── .claude/commands/       # Claude Code slash command: /star, routing a request to a skill
-├── .cursor/commands/       # The same /star command for Cursor
-├── .qwen/commands/         # The same /star command for Qwen Code
+├── .claude/commands/       # Claude Code slash commands: /star to route a request, /star-auto to pursue a goal
+├── .cursor/commands/       # The same /star and /star-auto commands for Cursor
+├── .qwen/commands/         # The same /star and /star-auto commands for Qwen Code
 ├── .cursor/rules/          # Always-on project rules for Cursor
 ├── .pi/agents/             # Roster star_subagent dispatches to: collector, implementer, auditor
-├── .pi/prompts/            # Pi slash commands: /star-<name> per skill, /star to route
+├── .pi/prompts/            # Pi slash commands: /star-<name> per skill, /star to route, /star-auto to pursue a goal
 ├── .pi/settings.json       # Pi project settings: keeps skill discovery off .agents/skills
 ├── .pi/APPEND_SYSTEM.md    # Always-on project rule for Pi: which skill root to follow
 ├── .vscode/                # Editor and debugging defaults
@@ -291,7 +291,7 @@ STAR ships fifteen skills covering the way from a vague interest to a written-up
 | Pi | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach open-vocabulary detection` |
 
-Claude Code, Cursor, Pi, and Qwen Code expose `/star [what you want to do]` directly from project files. The command sends the request through `.agents/commands/star.md`; an empty request selects `star-flow-status`, and a match to one of the seven explicit-only skills returns the exact `/star-<name> <argument>` command and waits.
+Claude Code, Cursor, Pi, and Qwen Code expose `/star [what you want to do]` directly from project files. The command sends the request through `.agents/commands/star.md`; an empty request selects `star-flow-status`, and a match to one of the seven explicit-only skills returns the exact `/star-<name> <argument>` command and waits. The same trees expose `/star-auto <goal> [stop=<stop line>]`, which pursues the typed goal autonomously under the grant [conventions §10.7](docs/mds/star-workflow/research-workflow-conventions.md) defines.
 
 Codex packages the shared router as the repo-local `star` plugin. Register and install it once from the repository root, then start a new session:
 
@@ -300,7 +300,7 @@ codex plugin marketplace add .
 codex plugin add star@star
 ```
 
-Use `$star` with no argument for the current research status, or pass a request such as `$star review the implementation for plan 030`. The plugin reads the same `.agents/commands/star.md` roster as the other harnesses' `/star` wrappers; it adds no second copy of that routing table.
+Use `$star` with no argument for the current research status, or pass a request such as `$star review the implementation for plan 030`. The plugin reads the same `.agents/commands/star.md` roster as the other harnesses' `/star` wrappers; it adds no second copy of that routing table. `$star-auto <goal>` from the same plugin pursues a typed goal autonomously.
 
 Kimi Code packages the same router as a user-installed plugin under `.kimi-code/plugins/star/`. Start Kimi Code from the repository root and run these commands in its prompt; `/new` may replace `/reload`:
 
@@ -309,7 +309,7 @@ Kimi Code packages the same router as a user-installed plugin under `.kimi-code/
 /reload
 ```
 
-Use `/star` with no argument for the current research status, or pass a described task; `/skill:star` is the explicit spelling of the same external skill. Kimi copies a local plugin into its user-level managed directory, so repeat the install command after STAR updates this plugin.
+Use `/star` with no argument for the current research status, or pass a described task; `/skill:star` is the explicit spelling of the same external skill, and `/star-auto <goal>` (`/skill:star-auto`) pursues a typed goal autonomously. Kimi copies a local plugin into its user-level managed directory, so repeat the install command after STAR updates this plugin — picking up `/star-auto` needs that reinstall once.
 
 DSH packages the same router under `.dsh/commands/star/`; installation requires `pnpm` on `PATH`. From the repository root, install it once into every profile that will run STAR, inspect the composed configuration, then restart that profile:
 
@@ -318,7 +318,7 @@ dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star
 dsh --profile YOUR_PROFILE --dump-config
 ```
 
-Use `/star` with no argument for the current research status, or pass a request such as `/star review the implementation for plan 030`. The command starts one follow-up turn against the shared `.agents/commands/star.md` roster, so DSH and the other harnesses route from the same source.
+Use `/star` with no argument for the current research status, or pass a request such as `/star review the implementation for plan 030`. The command starts one follow-up turn against the shared `.agents/commands/star.md` roster, so DSH and the other harnesses route from the same source; `/star-auto <goal>` from the same package pursues a typed goal autonomously.
 
 Seven skills are slash-only — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release`: they run only when named, because each sits on a decision that belongs to you. The agent may start the other eight itself when the task plainly matches and the target is unambiguous; naming any skill explicitly always works. Which seven, and why, is [conventions §10](docs/mds/star-workflow/research-workflow-conventions.md) (the skill roster); that table is the source of truth and this list follows it.
 
@@ -464,8 +464,8 @@ By default, the command updates these paths from STAR's `main` branch — every 
 - `.agents/skills/` — the shared root — then `.claude/skills/`, `.cursor/skills/`, `.dsh/skills/`, `.kimi-code/skills/`, `.pi/skills/`, `.qwen/skills/`
 - `.codex/skills/` — the per-skill manifests Codex reads, installed with the rest of its tree; upstream `.agents/skills/` links to them, and a project receives both as real files
 - `.codex/plugins/` — the Codex-only `$star` router plugin and canonical marketplace; `.agents/plugins/marketplace.json` is only a file link to that marketplace, never a link over the directory
-- `.dsh/commands/` and `.kimi-code/plugins/` — the DSH and Kimi `/star` router packages, updated only when their respective harness is selected
-- `.agents/commands/` — the single shared `/star` routing roster — then the thin harness wrappers in `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/`, plus Pi's one prompt per skill, `/star-<name>`
+- `.dsh/commands/` and `.kimi-code/plugins/` — the DSH and Kimi `/star` and `/star-auto` command packages, updated only when their respective harness is selected
+- `.agents/commands/` — the single shared `/star` routing roster and the `/star-auto` procedure — then the thin harness wrappers in `.claude/commands/`, `.cursor/commands/`, `.qwen/commands/`, and `.pi/prompts/`, plus Pi's one prompt per skill, `/star-<name>`
 - `.pi/agents/`, `.pi/extensions/star-plan-mode/`, `.pi/extensions/star-subagent/`, `.pi/extensions/star-permission-gate.ts`, and `.pi/extensions/star-questionnaire.ts` — the sub-agents, plan mode, and structured questions Pi's core does not ship; your project's own extensions sit beside them and are kept
 - `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/`, `.dsh/hooks/`, `.kimi-code/hooks/`, `.pi/extensions/star-hooks/`, `.qwen/hooks/`, and the files that register them where registration is not automatic — `.dsh/hooks.json` with `.dsh/cordis.patch.yml`, `.kimi-code/hooks.example.toml`, and `.pi/extensions/star-hooks/index.ts` — the model-id provenance, project memory, and involve-gate hooks
 - `docs/mds/star-workflow/`, and `docs/srcs/` — the workflow documentation, and the icon and workflow diagram STAR's own pages use
@@ -538,12 +538,13 @@ Keep only the structure that remains useful—STAR should support the research, 
 
 Highlights by release, newest first. Each release is a git tag, so `bash execs/update.sh v0.1.0` pins an update to that version.
 
+- **[v0.2.16](https://github.com/wanghao9610/STAR/tree/v0.2.16)** (2026-08-27) — `/star-auto <goal> [stop=<stop line>]` drives the workflow toward a stated goal: status first, then the next action each run names — the seven explicit-only skills included, because typing the command is the researcher's decision, made once for the pursuit. Prepared heavy commands launch by default, halted only by the natural-language line a `stop=` token draws; mandatory confirmation points still ask, and deletions and overwrites never auto-run. Conventions [§2 and §10.7](docs/mds/star-workflow/research-workflow-conventions.md) record the grant, and all seven harness entry points carry the command, from one shared procedure under `.agents/commands/star-auto.md`.
 - **[v0.2.15](https://github.com/wanghao9610/STAR/tree/v0.2.15)** (2026-08-26) — `INVOLVE=low` now reaches the plan approval: `.claude/hooks/star_plan_gate.sh` answers `PermissionRequest` for `ExitPlanMode` with an allow that also sets the session to auto mode (`acceptEdits`), so `star-plan-executor`'s plan-mode confirmation point is presented in full but not waited on, the questions riding it taking their recommended answers. Claude only, by capability: no other harness raises plan approval as a prompt a hook can answer. Conventions [§7.7](docs/mds/star-workflow/research-workflow-conventions.md) records the carve-out — the one confirmation point `low` moves — and `execs/update.sh` warns when a kept `.claude/settings.json` lacks the registration.
 - **[v0.2.14](https://github.com/wanghao9610/STAR/tree/v0.2.14)** (2026-08-25) — `star-plan-executor`'s delegation is no longer serial: the main agent orchestrates from EXEC_PLAN's step order and dependencies, dispatching independent steps concurrently or one by one as it judges — no cap, no order imposed beyond the dependencies themselves. Concurrent writers still never share a file, and `EXEC_LOG.md` keeps one writer: the main agent records each step as it verifies that step's returned result. `star-refs-reviewer`'s candidate collectors open the same way, bounded only by the per-host request budget, each concurrent collector's share written into its brief.
-- **[v0.2.13](https://github.com/wanghao9610/STAR/tree/v0.2.13)** (2026-08-25) — `star-plan-decomposer` now expands lazily by default: only the next runnable unit becomes a sub-plan file, while later units stay one-line outline units in the parent's `## Sub-plans` — no file, no prefix — expanded on a re-invocation as execution reaches them, the outline checked against the newest results first. The conventions pin the `- (outline)` / `- （概要）` marker, `star-flow-status` counts unexpanded units and recommends the next expansion, `star-plan-reviser` amends outline lines as local candidates, and `star-metd-summarize`'s readiness gate waits until none remain.
 <details>
 <summary>Earlier releases</summary>
 
+- **[v0.2.13](https://github.com/wanghao9610/STAR/tree/v0.2.13)** (2026-08-25) — `star-plan-decomposer` now expands lazily by default: only the next runnable unit becomes a sub-plan file, while later units stay one-line outline units in the parent's `## Sub-plans` — no file, no prefix — expanded on a re-invocation as execution reaches them, the outline checked against the newest results first. The conventions pin the `- (outline)` / `- （概要）` marker, `star-flow-status` counts unexpanded units and recommends the next expansion, `star-plan-reviser` amends outline lines as local candidates, and `star-metd-summarize`'s readiness gate waits until none remain.
 - **[v0.2.12](https://github.com/wanghao9610/STAR/tree/v0.2.12)** (2026-08-24) — The fifteen skills are now authored once under `.agents/skills/`, with the six harness trees generated from it by `port.sh` — per-tree rules and anchored overrides replace seven-times hand porting, CI proves each tree reproduces byte for byte, and an anchor that no longer matches fails the port before it fails the tree. A STAR-tailored human writing guide lands in `docs/mds/star-workflow/`, and a repository-wide pass against the Humanizer and Humanizer-zh pattern lists rewords both READMEs, the AGENTS pair, the landing pages, the workflow documents and the skills' authoring copies — commands, pinned strings and citations untouched — while `star_memory.sh` learns to index entry lines outside fenced blocks.
 - **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)** (2026-08-23) — Kimi Code and DeepSeek Harness gain repo-local generic STAR routers under `.kimi-code/plugins/star/` and `.dsh/commands/star/`. Kimi installs its external skill through `/plugins install` and exposes `/star` with `/skill:star` as the explicit spelling; DSH installs once per profile through `dsh plugin`, injects its `commands` service, and starts a follow-up turn for the shared `.agents/commands/star.md` roster. All seven harness entry points now carry English and Chinese wrappers, applying `STAR_LANG` to user-facing routing while keeping `.agents/commands/star.md` authoritative. `execs/update.sh` installs and refreshes each package only with its harness, while the README and CI cover installation, naming, injection, bilingual wording, and shared routing.
 - **[v0.2.10](https://github.com/wanghao9610/STAR/tree/v0.2.10)** (2026-08-23) — Codex gains the generic STAR router as a repo-local `$star` plugin. The plugin and canonical marketplace live under `.codex/plugins/`; `.agents/plugins/` exposes only `marketplace.json` as a relative symlink, avoiding a directory-level link that could collide with future harness plugins. `execs/update.sh` installs and refreshes both only when Codex is selected, and falls back to a real discovery file where symlinks are unavailable. The README documents marketplace registration, plugin installation, and `$star` usage, while CI locks the ownership and link layout.

@@ -265,6 +265,47 @@ for skill_file in \
     fi
 done
 
+# The star-auto entry point rides the same two packages: an explicit-only skill
+# per host, wrapping the shared .agents/commands/star-auto.md procedure.
+if [[ ! -f "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
+   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" "name: star-auto" || \
+   ! grep -qF 'Read `.agents/commands/star-auto.md`' "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" || \
+   ! grep -qF 'allow_implicit_invocation: false' "${PLUGIN_ROOT}/skills/star-auto/agents/openai.yaml"; then
+    fail "${PLUGIN_ROOT}/skills/star-auto is not the explicit-only wrapper around the shared auto procedure"
+    plugin_errors=1
+fi
+if [[ ! -f "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" ]] || \
+   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "name: star-auto" || \
+   ! grep -qF '.agents/commands/star-auto.md' "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; then
+    fail "${PLUGIN_ROOT}/skills/star-auto lacks its Chinese wrapper around the shared auto procedure"
+    plugin_errors=1
+fi
+if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" "name: star-auto" || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" "disableModelInvocation: true" || \
+   ! grep -qF 'Read `.agents/commands/star-auto.md`' "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md"; then
+    fail "${KIMI_PLUGIN_ROOT}/skills/star-auto is not the explicit-only wrapper around the shared auto procedure"
+    plugin_errors=1
+fi
+if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" ]] || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "name: star-auto" || \
+   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "disableModelInvocation: true" || \
+   ! grep -qF '.agents/commands/star-auto.md' "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; then
+    fail "${KIMI_PLUGIN_ROOT}/skills/star-auto lacks its Chinese explicit-only wrapper"
+    plugin_errors=1
+fi
+for skill_file in \
+    "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" \
+    "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" \
+    "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" \
+    "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; do
+    if [[ -f "${skill_file}" ]] && { ! grep -qF 'STAR_LANG=zh' "${skill_file}" || \
+       ! grep -qF '.agents/commands/star-auto.zh-CN.md' "${skill_file}"; }; then
+        fail "${skill_file} does not apply STAR's Chinese auto wording"
+        plugin_errors=1
+    fi
+done
+
 DSH_PLUGIN_ROOT=".dsh/commands/star"
 if ! python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["name"] == "star" and p["main"] == "lib/index.js" and p["dsh"]["bundle"]["patch"] == "./cordis.patch.yml"' "${DSH_PLUGIN_ROOT}/package.json"; then
     fail "DSH STAR package metadata is invalid"
@@ -279,6 +320,11 @@ if ! grep -qF -- '- id: star' "${DSH_PLUGIN_ROOT}/cordis.patch.yml" || \
    ! grep -qF 'Read `.agents/commands/star.md`' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
    ! grep -qF 'export { apply, inject, name };' "${DSH_PLUGIN_ROOT}/lib/index.js"; then
     fail "${DSH_PLUGIN_ROOT} is not an injected /star command forwarding to the shared router"
+    plugin_errors=1
+fi
+if ! grep -qF 'name: "star-auto",' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
+   ! grep -qF 'Read `.agents/commands/star-auto.md`' "${DSH_PLUGIN_ROOT}/lib/index.js"; then
+    fail "${DSH_PLUGIN_ROOT} does not also register /star-auto forwarding to the shared auto procedure"
     plugin_errors=1
 fi
 for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins"; do
@@ -430,6 +476,28 @@ for wrapper in \
         token_errors=1
     elif ! grep -qF '.agents/commands/star.md' "${wrapper}"; then
         fail "${wrapper} does not delegate to the shared .agents/commands/star.md router"
+        token_errors=1
+    fi
+done
+
+# The star-auto command ships the same way: eight wrappers over the shared
+# .agents/commands/star-auto.md procedure, and the Claude pair stays user-only.
+for wrapper in \
+    .claude/commands/star-auto.md .claude/commands/star-auto.zh-CN.md \
+    .cursor/commands/star-auto.md .cursor/commands/star-auto.zh-CN.md \
+    .qwen/commands/star-auto.md .qwen/commands/star-auto.zh-CN.md \
+    .pi/prompts/star-auto.md .pi/prompts/star-auto.zh-CN.md; do
+    if [[ ! -f "${wrapper}" ]]; then
+        fail "${wrapper} is missing"
+        token_errors=1
+    elif ! grep -qF '.agents/commands/star-auto.md' "${wrapper}"; then
+        fail "${wrapper} does not delegate to the shared .agents/commands/star-auto.md procedure"
+        token_errors=1
+    fi
+done
+for wrapper in .claude/commands/star-auto.md .claude/commands/star-auto.zh-CN.md; do
+    if [[ -f "${wrapper}" ]] && ! grep -qF 'disable-model-invocation: true' "${wrapper}"; then
+        fail "${wrapper} allows implicit invocation; typing the command is the grant, so only the user may start it"
         token_errors=1
     fi
 done
@@ -1054,7 +1122,7 @@ CONV_HEADINGS=(
     '10. The skill roster'
     '11. Execution branches and worktrees'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|13" "10|6" "11|9")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|13" "10|7" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
 # against it, and check 20d derives the stay-out complement from it, so adding
 # a section here is all it takes to make one citable and load-accounted.

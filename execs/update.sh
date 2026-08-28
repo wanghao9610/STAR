@@ -564,9 +564,10 @@ else
         # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
         ".pi/APPEND_SYSTEM.md"
-        # /star, which routes a described request to a skill, in the three hosts
-        # that read commands from project files. One command each and no more:
-        # all three already expose every skill as /star-<name>, so unlike Pi
+        # /star, which routes a described request to a skill, and /star-auto,
+        # which drives the workflow toward a typed goal, in the three hosts
+        # that read commands from project files. These two and no more: all
+        # three already expose every skill as /star-<name>, so unlike Pi
         # there is nothing per-skill left to supply. Kimi and DSH use the
         # harness-owned packages listed above; Codex uses its $star plugin.
         ".claude/commands"

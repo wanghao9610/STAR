@@ -1,0 +1,6 @@
+interface:
+  display_name: "STAR Auto"
+  short_description: "Drive the STAR workflow toward a stated goal"
+  default_prompt: "Use $star-auto <goal> to run the workflow toward that goal."
+policy:
+  allow_implicit_invocation: false

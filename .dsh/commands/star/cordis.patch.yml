@@ -1,9 +1,10 @@
 # STAR's /star command bundle patch. Applied when this package is a profile
 # bundle: one row inserting the host-only command plugin that registers the
-# `/star` slash command. The plugin is a zero-dependency shim — the routing
-# logic lives in <project>/.agents/commands/star.md and the skills it routes
-# to live in <project>/.dsh/skills/, both discovered relative to the project
-# dsh is launched in.
+# `/star` and `/star-auto` slash commands. The plugin is a zero-dependency
+# shim — the routing logic lives in <project>/.agents/commands/star.md, the
+# auto procedure in star-auto.md beside it, and the skills they start live in
+# <project>/.dsh/skills/, all discovered relative to the project dsh is
+# launched in.
 - insert:
     - id: star
       name: 'star'

@@ -98,6 +98,8 @@ star-code-release
 
 七个 skill——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`——是 slash-only：只有被显式点名时才运行，因为每一个都坐在一个属于研究者的决定上（[规约 §10](research-workflow-conventions.zh-CN.md)）。这由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，以及 Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`。用自然语言描述其中一个（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标没有歧义时 agent 可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。
 
+名册之外还有一条命令：`star-auto <目标> [stop=<停止线>] [involve=<档位>]` 朝给定目标自动推进工作流——先看状态，然后接着跑每次运行点名的下一步，slash-only 的七个也在内，因为敲下这条命令就是研究者的决定，为整场追逐一次做出。每次被启动的运行都与你亲手点名时行为一致，备好的重命令默认直接启动，以完成目标为先。`stop=` 用你自己的话（从该 token 到调用末尾）画出运行不得越过的线——如 `stop=单次训练超过 4 小时、或任何付费 API 调用就停`——越线的命令、或无法对照判断的，打印出来、运行停在那里。必问确认点照问，删除与覆盖永不自动执行。没有 `involve=` token、`.env` 里也没有 `INVOLVE` 时，自动运行解析为 `low`。完整规则：[规约 §10.7](research-workflow-conventions.zh-CN.md)；流程：[`.agents/commands/star-auto.zh-CN.md`](../../../.agents/commands/star-auto.zh-CN.md)。
+
 需要指定计划时，`PLAN_NAME` 支持三种形式：
 
 | 形式 | 示例 | 适用场景 |
@@ -1225,13 +1227,13 @@ star-code-release
 
 ### 哪些环节可以无人值守？
 
-这是两个不同的问题，本节只回答第二个。**谁可以启动一个 skill**，看名册（[规约 §10](research-workflow-conventions.zh-CN.md)）：七个只能你点名，另外八个 agent 可以自行拾起——包括一次跑完的运行点名它是下一步动作的情形。**一次运行在需要你之前能走多远**，才是下面这份清单，两种启动方式毫无区别：agent 自己启动的 skill，停在你亲手点名时它同样会停的地方。审批确认点在无人值守 / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
+这是两个不同的问题，本节只回答第二个。**谁可以启动一个 skill**，看名册（[规约 §10](research-workflow-conventions.zh-CN.md)）：七个只能你点名，另外八个 agent 可以自行拾起——包括一次跑完的运行点名它是下一步动作的情形——而你亲手敲下的 `star-auto <目标>` 调用，会把这种拾起在其追逐期间扩展到全部十五个（§1，调用方式一节）。**一次运行在需要你之前能走多远**，才是下面这份清单，两种启动方式毫无区别：agent 自己启动的 skill，停在你亲手点名时它同样会停的地方——在 `star-auto` 授权之下 skill 仍停在那里，是 auto 循环接着启动它备好的命令，除非你的 `stop=` 停止线拦下。审批确认点在无人值守 / 脚本化运行下不会放松——skill 走到提问处会停下等答复，而不是默认同意。实践中：
 
 - **可以挂定时任务**：`star-flow-status`（只读、无提问）；带明确目标的 `star-expt-analyst <叶子 | run 目录>`，以及 `star-expt-analyst watch <叶子>`（只在聊天里）；重编译的 `star-metd-summarize`——没就绪的树停在就绪门槛上，来源没动的文档原样不动，实质性覆写停在变更清单的提问上，不会直接盖掉。
 - **跑到确认点会停**：`star-refs-reviewer` 停在必答的核心集确认，其 `verify` 遇到不一致就停到 diff 被确认，其 `survey` 只问一个判断型问题（画像、分类轴、分层阅读清单），`involve=low` 按推荐项代答——剩下会停的只有覆盖已有综述文件那一问；`wkdrs/results/results.md` 已存在时，`star-expt-analyst aggregate` 停在变更清单提问；`star-code-release check` 除报告外只读，可以挂定时任务，另外三个阶段则停在各自的确认点。
 - **跑起来之后需要你在场**：`star-idea-storm`、`star-plan-coach`、`star-plan-decomposer`、`star-code-architect`、`star-env-builder`、`star-plan-executor`、`star-code-reviewer`、`star-plan-reviser`、`star-code-release`（它的 gather、polish、readme 三个阶段）——它们的提问与确认点就是设计本身；用脚本替它们答"是"，毁掉的正是这些确认点要保护的审计链。其中三个——环境构建、执行器、代码审查——agent 仍可自己启动：把一次运行开起来，和让它无人值守地跑完，是两回事。
 
-参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一个确认点。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。永远不会安静的是：红线、删除与覆盖、对计划的同步回写、各个审批确认点、真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。提交提议不再在其列：`low` 档下运行会把自己写的东西提交掉，并在回复里点出这些提交（§1.5）。`high` 反向拨动：skill 本会打包进一个确认点、或在确认点之间自行决定的裁量题，逐条单独问出。
+参与度档位（规约 §7.7–7.8）挪动的是这些边界，从不越过任何一个确认点。在 `.env` 里设 `INVOLVE=low`——或在单次调用里加 `involve=low`——skill 便不再问裁量题：取本会标为推荐的那一项，并把选择记录在案。运行走得更远才需要你：`star-plan-decomposer` 的拆分轴与子计划清单确认不再出声，`star-plan-executor` 指向父计划时会自己启动第一个就绪的叶子。在 `star-auto` 授权（§1，调用方式一节）之外，永远不会安静的是：红线、删除与覆盖、对计划的同步回写、各个审批确认点、真正的开放题——`low` 拉长无人值守的跨度，但不会让任何 skill 完全无人值守。提交提议不再在其列：`low` 档下运行会把自己写的东西提交掉，并在回复里点出这些提交（§1.5）。`high` 反向拨动：skill 本会打包进一个确认点、或在确认点之间自行决定的裁量题，逐条单独问出。
 
 一个实用的无人值守组合：启动红线交回的训练命令，训练期间定时跑 `star-expt-analyst watch <叶子>`，打分与修订留到你回来再做。
 

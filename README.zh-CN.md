@@ -91,13 +91,13 @@ star-ai-research/
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
-├── .dsh/commands/star/     # DSH 仓库内的 /star 分流包
+├── .dsh/commands/star/     # DSH 仓库内的 /star 与 /star-auto 命令包
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
-├── .kimi-code/plugins/     # Kimi Code 仓库内的 /star 分流插件与 marketplace
+├── .kimi-code/plugins/     # Kimi Code 仓库内的 /star 与 /star-auto 插件与 marketplace
 ├── .pi/skills/             # Pi 使用的研究工作流技能
 ├── .qwen/skills/           # Qwen Code 使用的研究工作流技能
 ├── .codex/skills/          # Codex 每个技能一份的清单，由 .agents/skills/ 用软链接指过来
-├── .codex/plugins/         # Codex 的 $star 分流插件与 marketplace 实体
+├── .codex/plugins/         # Codex 的 $star / $star-auto 插件与 marketplace 实体
 ├── .claude/hooks/          # Claude 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .codex/hooks/           # Codex 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .cursor/hooks/          # Cursor 的会话钩子
@@ -106,14 +106,14 @@ star-ai-research/
 ├── .pi/extensions/         # Pi 的扩展：STAR 的会话钩子，外加子代理、计划模式、结构化提问
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
 ├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
-├── .agents/commands/       # 各宿主命令共同读取的 /star 分流规则
+├── .agents/commands/       # 各宿主命令共同读取的 /star 分流规则与 /star-auto 流程
 ├── .agents/plugins/        # Codex marketplace 发现入口：仅一个指向 .codex/plugins/ 的文件链接
-├── .claude/commands/       # Claude Code 的斜杠命令 /star：把描述出来的需求分流到某个技能
-├── .cursor/commands/       # 同一个 /star 命令，Cursor 版
-├── .qwen/commands/         # 同一个 /star 命令，Qwen Code 版
+├── .claude/commands/       # Claude Code 的斜杠命令：/star 分流需求，/star-auto 朝目标推进
+├── .cursor/commands/       # 同一对 /star、/star-auto 命令，Cursor 版
+├── .qwen/commands/         # 同一对 /star、/star-auto 命令，Qwen Code 版
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
 ├── .pi/agents/             # star_subagent 的派发花名册：收集者、执行者、复核者
-├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star
+├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star 与朝目标推进的 /star-auto
 ├── .pi/settings.json       # Pi 的项目设置：让技能发现不扫 .agents/skills
 ├── .pi/APPEND_SYSTEM.md    # Pi 常驻的项目规则：该按哪个技能根目录执行
 ├── .vscode/                # 编辑器与调试配置
@@ -283,7 +283,7 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 | Pi | `/star-<名>` | `/star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
-Claude Code、Cursor、Pi 与 Qwen Code 直接从项目文件提供 `/star [你想做什么]`。命令把请求交给 `.agents/commands/star.md`；空请求选择 `star-flow-status`，匹配到七个只能显式调用的 skill 之一时，则返回准确的 `/star-<name> <argument>` 命令并等待。
+Claude Code、Cursor、Pi 与 Qwen Code 直接从项目文件提供 `/star [你想做什么]`。命令把请求交给 `.agents/commands/star.md`；空请求选择 `star-flow-status`，匹配到七个只能显式调用的 skill 之一时，则返回准确的 `/star-<name> <argument>` 命令并等待。同一批目录树还提供 `/star-auto <目标> [stop=<停止线>]`，在[规约 §10.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)定义的授权下朝敲下的目标自主推进。
 
 Codex 把共享分流器打包成仓库内的 `star` 插件。在仓库根目录注册并安装一次，然后新开会话：
 
@@ -292,7 +292,7 @@ codex plugin marketplace add .
 codex plugin add star@star
 ```
 
-不带参数的 `$star` 显示当前研究状态，也可以传入描述，例如 `$star 审查 030 计划的实现`。插件读取的仍是其他宿主 `/star` 薄包装共用的 `.agents/commands/star.md` 名册，不会再维护第二份分流表。
+不带参数的 `$star` 显示当前研究状态，也可以传入描述，例如 `$star 审查 030 计划的实现`。插件读取的仍是其他宿主 `/star` 薄包装共用的 `.agents/commands/star.md` 名册，不会再维护第二份分流表。同一插件的 `$star-auto <目标>` 朝敲下的目标自主推进。
 
 Kimi Code 把同一个分流器作为用户级插件打包在 `.kimi-code/plugins/star/`。请从仓库根目录启动 Kimi Code，在输入框依次运行下面两条命令；也可以用 `/new` 代替 `/reload`：
 
@@ -301,7 +301,7 @@ Kimi Code 把同一个分流器作为用户级插件打包在 `.kimi-code/plugin
 /reload
 ```
 
-不带参数的 `/star` 显示当前研究状态，也可以传入描述；`/skill:star` 是同一个外部 skill 的完整写法。Kimi 会把本地插件复制进用户级托管目录，所以 STAR 更新了该插件后，需要重新执行安装命令。
+不带参数的 `/star` 显示当前研究状态，也可以传入描述；`/skill:star` 是同一个外部 skill 的完整写法，`/star-auto <目标>`（`/skill:star-auto`）朝敲下的目标自主推进。Kimi 会把本地插件复制进用户级托管目录，所以 STAR 更新了该插件后，需要重新执行安装命令——要用上 `/star-auto` 也得先重装一次。
 
 DSH 把同一个分流器放在 `.dsh/commands/star/`；安装时要求 `PATH` 上有 `pnpm`。在仓库根目录为每个将运行 STAR 的 profile 安装一次，检查组合后的配置，再重启该 profile：
 
@@ -310,7 +310,7 @@ dsh plugin --profile YOUR_PROFILE add ./.dsh/commands/star
 dsh --profile YOUR_PROFILE --dump-config
 ```
 
-不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流。
+不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流；同一命令包的 `/star-auto <目标>` 朝敲下的目标自主推进。
 
 七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（skill 名册）那张表为准，本节只是跟随它。
 
@@ -456,8 +456,8 @@ bash execs/update.sh
 - `.agents/skills/`——共享根目录——然后是 `.claude/skills/`、`.cursor/skills/`、`.dsh/skills/`、`.kimi-code/skills/`、`.pi/skills/`、`.qwen/skills/`
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
 - `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
-- `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 分流包，各自只在选中对应宿主时更新
-- `.agents/commands/`——唯一共享的 `/star` 分流名册——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
+- `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 与 `/star-auto` 命令包，各自只在选中对应宿主时更新
+- `.agents/commands/`——唯一共享的 `/star` 分流名册与 `/star-auto` 流程——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
@@ -530,12 +530,13 @@ bash execs/update.sh --skill star-flow-status
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.2.16](https://github.com/wanghao9610/STAR/tree/v0.2.16)**（2026-08-27）—— `/star-auto <目标> [stop=<停止线>]` 朝给定目标自动推进工作流：先看状态，再接着跑每次运行点名的下一步——只许显式调用的七个 skill 也在内，因为敲下这条命令就是研究者的决定，为整场追逐一次做出。备好的重命令默认直接启动，只被 `stop=` 用自然语言画出的停止线拦下；必问确认点照问，删除与覆盖永不自动执行。规约[§2 与 §10.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)记下这份授权，七个宿主入口都带上这条命令，共享流程只有 `.agents/commands/star-auto.md` 一份。
 - **[v0.2.15](https://github.com/wanghao9610/STAR/tree/v0.2.15)**（2026-08-26）—— `INVOLVE=low` 现在也管到计划审批：`.claude/hooks/star_plan_gate.sh` 应答 `ExitPlanMode` 的 `PermissionRequest`，放行的同时把会话切进 auto 模式（`acceptEdits`），`star-plan-executor` 的 plan 模式确认点材料照常完整呈现但不再停下等回答，搭在其上的几问取各自推荐项。仅 Claude 生效，按能力划界：其余 harness 没有把计划审批做成 hook 能应答的提示。规约 [§7.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 记下这条例外——`low` 档唯一移动的确认点——`execs/update.sh` 则在保留的 `.claude/settings.json` 缺这条注册时给出提醒。
 - **[v0.2.14](https://github.com/wanghao9610/STAR/tree/v0.2.14)**（2026-08-25）—— `star-plan-executor` 的委派不再强制串行：主 agent 按 EXEC_PLAN 的步骤顺序与依赖自由编排，相互独立的步骤并发还是逐个派发由它自行判断——不设并发上限，依赖之外不强加顺序。并发写文件的受托者之间文件仍互不重叠，`EXEC_LOG.md` 只有主 agent 一个写手：每验完一步的返回结果就记录那一步。`star-refs-reviewer` 的候选收集者同样放开，唯一硬约束是按主机的请求预算，并发时把各收集者的份额写进其简报。
-- **[v0.2.13](https://github.com/wanghao9610/STAR/tree/v0.2.13)**（2026-08-25）—— `star-plan-decomposer` 默认改为懒展开：只把下一个可执行单元落成子计划文件，其余单元以概要行留在父计划 `## Sub-plans` 里——没有文件、没有前缀——执行推进到它时再次调用展开，展开前先拿最新结果核对概要。规约钉死 `- (outline)` / `- （概要）` 标记，`star-flow-status` 统计未展开单元并把展开推荐为下一步，`star-plan-reviser` 把概要行修订当作 local 级候选，`star-metd-summarize` 的就绪门槛等到概要行清空才放行。
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.2.13](https://github.com/wanghao9610/STAR/tree/v0.2.13)**（2026-08-25）—— `star-plan-decomposer` 默认改为懒展开：只把下一个可执行单元落成子计划文件，其余单元以概要行留在父计划 `## Sub-plans` 里——没有文件、没有前缀——执行推进到它时再次调用展开，展开前先拿最新结果核对概要。规约钉死 `- (outline)` / `- （概要）` 标记，`star-flow-status` 统计未展开单元并把展开推荐为下一步，`star-plan-reviser` 把概要行修订当作 local 级候选，`star-metd-summarize` 的就绪门槛等到概要行清空才放行。
 - **[v0.2.12](https://github.com/wanghao9610/STAR/tree/v0.2.12)**（2026-08-24）—— 十五个 skill 改为在 `.agents/skills/` 下只撰写一份，六棵 harness 树由 `port.sh` 从中生成：逐树词表替换加锚定 override 取代了七遍手工移植，CI 证明每棵树逐字节复现，锚点一旦失配会先在移植环节报错。`docs/mds/star-workflow/` 新增为 STAR 裁定的写作指南，随后全仓库按 Humanizer 与 Humanizer-zh 的模式清单改写两份 README、AGENTS 双语版、落地页、工作流文档与 skill 撰写副本——命令、钉死字符串与引用一律未动；`star_memory.sh` 也学会了索引围栏代码块之外的条目行。
 - **[v0.2.11](https://github.com/wanghao9610/STAR/tree/v0.2.11)**（2026-08-23）—— Kimi Code 与 DeepSeek Harness 分别在 `.kimi-code/plugins/star/` 和 `.dsh/commands/star/` 新增仓库级 STAR 通用分流器。Kimi 通过 `/plugins install` 安装外部 skill，并以 `/star` 调用、`/skill:star` 作为完整写法；DSH 通过 `dsh plugin` 为每个 profile 安装一次，显式注入 `commands` 服务，再为共享的 `.agents/commands/star.md` 名册发起后续轮次。七个宿主入口现在都带中英文包装，按 `STAR_LANG` 选择面向用户的分流措辞，同时仍以 `.agents/commands/star.md` 为权威名册。`execs/update.sh` 只随对应宿主安装和刷新各自的分流包，README 与 CI 同时覆盖安装、命名、注入、双语措辞和共享路由。
 - **[v0.2.10](https://github.com/wanghao9610/STAR/tree/v0.2.10)**（2026-08-23）—— Codex 新增仓库级 `$star` 插件，用同一个入口分流 STAR 请求。插件与 marketplace 实体归 `.codex/plugins/` 所有；`.agents/plugins/` 只放一个指向 `marketplace.json` 的相对软链接，不把整个 Codex 私有目录暴露给未来可能采用该位置的其他宿主。`execs/update.sh` 仅在选择 Codex 时安装和刷新两者，不支持软链接的环境退化为普通发现文件。README 写明 marketplace 注册、插件安装和 `$star` 用法，CI 则固定归属与链接结构。
