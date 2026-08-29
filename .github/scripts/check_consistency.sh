@@ -463,14 +463,14 @@ while IFS= read -r skill; do
     done
 done < <(printf '%s\n' "${SKILLS}")
 
-# The complete router is authored once under .agents/commands. These eight files
-# are the English and Chinese runtime-discovered wrappers; the three package-
-# based hosts are checked in section 4b above.
+# The complete router is authored once under .agents/commands. These four files
+# are the runtime-discovered wrappers; the three package-based hosts are checked
+# in section 4b above.
 for wrapper in \
-    .claude/commands/star.md .claude/commands/star.zh-CN.md \
-    .cursor/commands/star.md .cursor/commands/star.zh-CN.md \
-    .qwen/commands/star.md .qwen/commands/star.zh-CN.md \
-    .pi/prompts/star.md .pi/prompts/star.zh-CN.md; do
+    .claude/commands/star.md \
+    .cursor/commands/star.md \
+    .qwen/commands/star.md \
+    .pi/prompts/star.md; do
     if [[ ! -f "${wrapper}" ]]; then
         fail "${wrapper} is missing"
         token_errors=1
@@ -480,13 +480,13 @@ for wrapper in \
     fi
 done
 
-# The star-auto command ships the same way: eight wrappers over the shared
-# .agents/commands/star-auto.md procedure, and the Claude pair stays user-only.
+# The star-auto command ships the same way: four wrappers over the shared
+# .agents/commands/star-auto.md procedure, and the Claude one stays user-only.
 for wrapper in \
-    .claude/commands/star-auto.md .claude/commands/star-auto.zh-CN.md \
-    .cursor/commands/star-auto.md .cursor/commands/star-auto.zh-CN.md \
-    .qwen/commands/star-auto.md .qwen/commands/star-auto.zh-CN.md \
-    .pi/prompts/star-auto.md .pi/prompts/star-auto.zh-CN.md; do
+    .claude/commands/star-auto.md \
+    .cursor/commands/star-auto.md \
+    .qwen/commands/star-auto.md \
+    .pi/prompts/star-auto.md; do
     if [[ ! -f "${wrapper}" ]]; then
         fail "${wrapper} is missing"
         token_errors=1
@@ -495,7 +495,7 @@ for wrapper in \
         token_errors=1
     fi
 done
-for wrapper in .claude/commands/star-auto.md .claude/commands/star-auto.zh-CN.md; do
+for wrapper in .claude/commands/star-auto.md; do
     if [[ -f "${wrapper}" ]] && ! grep -qF 'disable-model-invocation: true' "${wrapper}"; then
         fail "${wrapper} allows implicit invocation; typing the command is the grant, so only the user may start it"
         token_errors=1

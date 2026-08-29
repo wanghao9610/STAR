@@ -1,6 +1,6 @@
 ---
 description: Drive the STAR workflow toward a stated goal, starting each next skill itself
-argument-hint: "[goal] [stop=<stop line>] [involve=<level>]"
+argument-hint: "[goal] [stop=<stop line>] [involve=low]"
 ---
 
 Read `.agents/commands/star-auto.md` and follow it with this invocation: [$@]
