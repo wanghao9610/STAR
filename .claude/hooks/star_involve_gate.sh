@@ -5,21 +5,23 @@
 # permission prompts a hook can answer. Plan approval is the one prompt with a
 # gate of its own, star_plan_gate.sh.
 #
+# The level comes from star_involve_level.sh: the `involve=` token of the
+# session's most recent STAR command, or `.env`'s INVOLVE when it carried none.
 # Silence means "no decision", so every other level, every path this declines,
-# and a project with no .env fall through to the normal permission flow. INVOLVE
-# is read on each call, so editing .env takes effect without a restart.
+# and a project that sets none fall through to the normal permission flow. The
+# level is resolved on each call, so a new invocation — or an edit to .env —
+# takes effect without a restart.
 set -uo pipefail
 
 root="${CLAUDE_PROJECT_DIR:-${PWD}}"
 
-# The payload is read before the level is tested: the runtime writes it to this
-# hook's stdin, and a hook that exits without reading leaves that write to fail.
+# The payload is read before the level is tested: it carries the transcript path
+# the level is resolved from, and a hook that exits without reading stdin leaves
+# the runtime's write to fail.
 input=$(cat)
 
-line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-value="${line#INVOLVE=}"
-value="${value%%#*}"
-involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/star_involve_level.sh"
+involve="$(star_involve_level "${input}" "${root}")"
 [[ "${involve}" == "low" ]] || exit 0
 
 # The edited path, from Edit/Write (file_path) or NotebookEdit (notebook_path).
@@ -45,4 +47,4 @@ esac
 # paths. Their contents are project machinery, not the code a run is editing.
 [[ "${path#"${root}"/}" == .* ]] && exit 0
 
-printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"INVOLVE=low"}}\n'
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"involve=low"}}\n'

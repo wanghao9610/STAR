@@ -15,20 +15,22 @@
 # quoting, and does not match redirection — `> file` overwrites pass, since the
 # skills write logs and reports through them. Silence means "no decision", so
 # every red line, every other level, a payload it cannot read, and a project
-# with no .env all fall through to the normal permission flow. INVOLVE is read
-# on each call, so editing .env takes effect without a restart.
+# that sets no level all fall through to the normal permission flow. The level
+# comes from star_involve_level.sh — the `involve=` token of the session's most
+# recent STAR command, or `.env`'s INVOLVE when it carried none — and is
+# resolved on each call, so a new invocation, or an edit to .env, takes effect
+# without a restart.
 set -uo pipefail
 
 root="${CLAUDE_PROJECT_DIR:-${PWD}}"
 
-# The payload is read before the level is tested: the runtime writes it to this
-# hook's stdin, and a hook that exits without reading leaves that write to fail.
+# The payload is read before the level is tested: it carries the transcript path
+# the level is resolved from, and a hook that exits without reading stdin leaves
+# the runtime's write to fail.
 input=$(cat)
 
-line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-value="${line#INVOLVE=}"
-value="${value%%#*}"
-involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/star_involve_level.sh"
+involve="$(star_involve_level "${input}" "${root}")"
 [[ "${involve}" == "low" ]] || exit 0
 
 # The shell command, from Bash's tool_input.
@@ -162,4 +164,4 @@ while IFS= read -r segment; do
     esac
 done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n')
 
-printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"INVOLVE=low (star_bash_gate.sh); red-line commands keep their prompt"}}\n'
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"involve=low (star_bash_gate.sh); red-line commands keep their prompt"}}\n'

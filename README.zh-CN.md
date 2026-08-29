@@ -206,7 +206,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 两者都不设置则报错。
 
-还可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用宿主的前缀。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
+还可以加上 `INVOLVE=low|medium|high`，设定 STAR skills 在决策前询问的程度：`low` 在需要判断的地方直接采用推荐项并记录下来，在 Claude Code、Codex 和 Qwen Code 里还会跳过每次文件编辑前的权限弹窗——Cursor、DSH、Kimi Code 和 Pi 没有这样的弹窗可供档位回答，那里档位只管 skill 自己会问的问题；`medium`（默认）按文档提问；`high` 每一步都先确认。红线、每一次删除与覆盖、以及对你意图的任何歧义，这些强制确认点在任何档位都会询问；提交提议属于裁量题，`low` 档不问就提交，并在回复里点出每一次提交。只对单次运行生效时，调用 skill 时附带同一参数即可，如 `star-plan-executor 00 involve=low`，前面加上你所用宿主的前缀——在 Claude Code 里这个 token 连权限弹窗一并作数：钩子从会话里最近一条 STAR 命令读它，一直有效到你敲下一条命令为止；别的宿主的弹窗只认 `.env`。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.7。
 
 另一个可选键 `STAR_LANG=en|zh` 给两件事固定同一种语言：agents 的对话回复，以及新生成的工作流文档（计划、报告）。未设时二者都跟随对话语言。无论设与未设，对话中明确提出时都以对话要求为准；已有文档则保持其 frontmatter 声明的语言不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#7-对话纪律) §7.6。
 
