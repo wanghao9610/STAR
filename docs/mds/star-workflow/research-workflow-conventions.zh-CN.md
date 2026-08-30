@@ -215,6 +215,8 @@ skill 可以改代码、跑**轻量验证**。任何**重的、贵的、不可�
 
 **每份产物都记录写它的模型。** 每个产出方把 `model_id` 写进自己创建的产物——产物有 frontmatter 就作为 frontmatter 键，没有就写在文件首行里（`CODE_REVIEW`、`REVIEW`、`refs_index.md`、`UPSTREAM.md`，以及 `README.md`——它的文件首行是一条 HTML 注释）。取值是运行时为当次写入会话报出的模型 id，原样抄录——而运行时确实会报：它就写在你的会话上下文里，由 STAR 的 `SessionStart` 钩子注入，Claude Code 还会写进系统提示。那一行缺失、或带来的是一条恢复命令而不是 id 时，各运行时的退路在 `model_id_spec.zh-CN.md`——写 `unrecorded` 之前先按它执行；`unrecorded` 只留给会话里任何地方都没写明模型的情况。绝不凭行为推断，绝不去想"这大概是哪个模型"，也绝不把一份产物的值抄到另一份上。
 
+写入前的解析必须配上写入后的检查。每个产出方 skill——包括所有写报告的 skill——在最后一次写入之后、报告完成或提议及执行提交之前，对本次写过的每份产物各运行一次会话上下文给出的溯源检查。Codex 上填好参数的命令形如：`bash .codex/hooks/star_model_id.sh --check <artifact> <rollout> <session_model>`。期望值依次取 resolver 输出、`SessionStart` 的精确模型、`unrecorded`；实际值取产物里的 `model_id`。非零退出就是阻断：先修正溯源值并重新检查；检查失败时既不能报告完成，也不能提交。这同样不允许从 "GPT-5 family" 这类家族描述恢复取值——描述不是 id。
+
 两条限制要说明，因为这个字段会用来横向比较不同模型的产出：
 
 1. **它是自报的，不是核实过的。** 会话中途换过模型时，取值可能仍停留在切换前。把它当作出处的证据，而不是出处的证明。

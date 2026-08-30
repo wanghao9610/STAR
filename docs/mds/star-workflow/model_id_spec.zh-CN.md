@@ -9,7 +9,7 @@
 | 运行时 | 钩子 | 事件 | 注入什么 | 值在何时读取 |
 |---|---|---|---|---|
 | Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 transcript 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
-| Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 rollout 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
+| Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | 精确的 `session_model_id`、读取本次会话 rollout 的命令，以及写后检查 | 写入当刻，再在写入后检查 |
 | Cursor | `.cursor/hooks/star_model_id.sh` | `SessionStart` | id | 会话开始时 |
 | DSH | `.dsh/hooks/star_model_id.sh` | `SessionStart`，经 Claude Code 钩子桥接 | 一条读取本次会话日志的命令 | 写入当刻 |
 | Kimi | `.kimi-code/hooks/star_model_id.sh` | `UserPromptSubmit` | `~/.kimi-code/config.toml` 里的 `default_model` | 取自配置，从来不是会话 |
@@ -20,7 +20,7 @@
 
 ## Claude Code、Codex 与 Qwen Code：为什么 id 要在写入当刻才读
 
-`model` 字段只挂在 `SessionStart` 上：Claude Code 与 Codex 在 `/clear`、resume、compact、fork 之后不带它，Qwen Code 则对它报出的每一种启动原因（startup、resume、clear、compact）都带；即便有，描述的也只是会话开启那一刻——之后 `/model` 换模型不触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的就是开始时那个。三个运行时都保有逐回合的实际记录，因此只要 payload 里给出了它，注入行带来的就是命令而不是 id。记录该值的当刻跑它：
+`model` 字段只挂在 `SessionStart` 上：Claude Code 与 Codex 在 `/clear`、resume、compact、fork 之后不带它，Qwen Code 则对它报出的每一种启动原因（startup、resume、clear、compact）都带；即便有，描述的也只是会话开启那一刻——之后 `/model` 换模型不触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的就是开始时那个。三个运行时都保有逐回合的实际记录，所以注入行都带着读取它的命令。Codex 即使拿到了 rollout，也会同时把 `SessionStart` 的精确值直接写成 `session_model_id`；skill 漏掉动态读取时仍能保住精确 id，却不会假装这个快照看见了后来的模型切换。记录该值的当刻运行 resolver：
 
 ```bash
 bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
@@ -29,6 +29,14 @@ bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path
 ```
 
 参数用那行已填好的，把打印出来的值原样记录。Claude Code 这版读的是本次会话主循环 assistant 轮次上的 `message.model`，委派出去的子 agent 轮次跳过——要问的是哪个模型在写这份产物；Codex 这版读的是 rollout 里 `turn_context` 记录上的 `payload.model`，无需跳过：Codex 的子 agent 自带独立 rollout；Qwen Code 这版读的是 transcript 里 `type: "assistant"` 记录上的顶层 `model`，同样无需跳过：Qwen 的子 agent 写的是自己那份 transcript——payload 里以 `agent_transcript_path` 另行指明。三者都是运行时的记录，不是猜测。`session_model` 是 `SessionStart` 报出的那个：逐回合记录还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住记录丢掉的后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那不同就是会话中途换过模型，看见它的是逐回合记录。
+
+Codex 的同一条注入信息还给出写后命令：
+
+```bash
+bash .codex/hooks/star_model_id.sh --check <artifact> <rollout> <session_model>
+```
+
+每份产物在最后一次写入之后、报告完成或提交之前各运行一次。它把产物的 `model_id` 与 rollout resolver 的输出比较；resolver 无输出时依次退回 `SessionStart` 的精确值和 `unrecorded`。不一致就非零退出，修正并重新检查前既不能报告完成，也不能提交。resolver 和检查都不得从 "GPT-5 family" 这类描述性标签推导 id。
 
 ## Kimi：一行都没注入时
 

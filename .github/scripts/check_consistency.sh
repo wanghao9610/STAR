@@ -660,6 +660,56 @@ grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
     { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
 grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
     { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
+
+#     Codex closes provenance with a write-after check. Three cases pin its
+#     precedence and failure boundary; more cases would duplicate the resolver's
+#     own simple contract rather than protect another behavior.
+model_check_dir="$(mktemp -d "${TMPDIR:-/tmp}/star-model-id-check.XXXXXX")" || {
+    fail "could not create the model-id check fixture directory"
+    hook_errors=1
+    model_check_dir=""
+}
+if [[ -n "${model_check_dir}" ]]; then
+    model_rollout="${model_check_dir}/rollout.jsonl"
+    model_artifact="${model_check_dir}/report.md"
+    printf '%s\n' '{"type":"turn_context","payload":{"model":"gpt-5.6-sol"}}' > "${model_rollout}"
+
+    # 1. Exact rollout, degraded artifact: must fail.
+    printf '%s\n' '---' 'model_id: gpt-5' '---' > "${model_artifact}"
+    model_check_output="$(bash .codex/hooks/star_model_id.sh --check \
+        "${model_artifact}" "${model_rollout}" "gpt-5.6-sol" 2>&1)"
+    model_check_rc=$?
+    if (( model_check_rc == 0 )); then
+        fail "model-id check accepted gpt-5 against rollout gpt-5.6-sol"
+        hook_errors=1
+    elif ! grep -qF "expected 'gpt-5.6-sol', found 'gpt-5'" <<< "${model_check_output}"; then
+        fail "model-id mismatch failed without the expected diagnostic: ${model_check_output}"
+        hook_errors=1
+    else
+        note "model-id check rejects gpt-5 against rollout gpt-5.6-sol"
+    fi
+
+    # 2. Exact rollout, exact artifact: must pass.
+    printf '%s\n' '---' 'model_id: gpt-5.6-sol' '---' > "${model_artifact}"
+    if bash .codex/hooks/star_model_id.sh --check \
+        "${model_artifact}" "${model_rollout}" "gpt-5.6-sol"; then
+        note "model-id check accepts gpt-5.6-sol against rollout gpt-5.6-sol"
+    else
+        fail "model-id check rejected gpt-5.6-sol against rollout gpt-5.6-sol"
+        hook_errors=1
+    fi
+
+    # 3. No rollout and no SessionStart model: unrecorded must pass.
+    printf '%s\n' '---' 'model_id: unrecorded' '---' > "${model_artifact}"
+    if bash .codex/hooks/star_model_id.sh --check "${model_artifact}" "" ""; then
+        note "model-id check accepts unrecorded when rollout and session model are absent"
+    else
+        fail "model-id check rejected unrecorded with no rollout or session model"
+        hook_errors=1
+    fi
+
+    rm -rf "${model_check_dir}"
+fi
 (( hook_errors == 0 )) && note "all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the six trees that share it.

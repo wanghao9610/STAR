@@ -9,7 +9,7 @@ The per-runtime detail behind the `model_id` rule in [`research-workflow-convent
 | Runtime | Hook | Event | What it injects | When the value is read |
 |---|---|---|---|---|
 | Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart` | a command reading the session transcript; the id itself when none was named | as you write it |
-| Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | a command reading the session rollout; the id itself when none was named | as you write it |
+| Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | the exact `session_model_id`, a command reading the session rollout, and a post-write check | as you write it, then after the write |
 | Cursor | `.cursor/hooks/star_model_id.sh` | `SessionStart` | the id | at session start |
 | DSH | `.dsh/hooks/star_model_id.sh` | `SessionStart`, through the Claude Code hook bridge | a command reading the session log | as you write it |
 | Kimi | `.kimi-code/hooks/star_model_id.sh` | `UserPromptSubmit` | `default_model` from `~/.kimi-code/config.toml` | from config, never the session |
@@ -20,7 +20,7 @@ The last column is the difference that matters. A value read as you write it can
 
 ## Claude Code, Codex and Qwen Code, why the id is read at the moment it is written
 
-The `model` field rides on `SessionStart` alone: Claude Code and Codex omit it after `/clear`, resume, compact, or fork, Qwen Code carries one for every start reason it reports (startup, resume, clear, compact), and where present it describes the moment the session opened — `/model` changes the model afterwards with no hook firing, so a session that starts on one model and writes with another records the one it started on. All three keep a per-turn record of what actually ran, so whenever the payload names one the injected line carries a command instead of an id. Run it as you record the value:
+The `model` field rides on `SessionStart` alone: Claude Code and Codex omit it after `/clear`, resume, compact, or fork, Qwen Code carries one for every start reason it reports (startup, resume, clear, compact), and where present it describes the moment the session opened — `/model` changes the model afterwards with no hook firing, so a session that starts on one model and writes with another records the one it started on. All three keep a per-turn record of what actually ran, so their injected lines carry a command that reads it. Codex also states the exact `SessionStart` value directly as `session_model_id`, even when a rollout exists; that preserves the precise id when a skill misses the dynamic read, without pretending the snapshot saw a later model switch. Run the resolver as you record the value:
 
 ```bash
 bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
@@ -29,6 +29,14 @@ bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path
 ```
 
 with the arguments that line already fills in, and record what it prints verbatim. Claude Code's reader takes `message.model` off this session's own main-loop assistant turns, skipping a delegated subagent's — the question is which model is writing the artifact. Codex's takes `payload.model` off the rollout's `turn_context` records and skips nothing: a Codex subagent gets its own rollout. Qwen Code's takes the top-level `model` off the transcript's `type: "assistant"` records and skips nothing either: a Qwen subagent writes its own transcript, named `agent_transcript_path` in the payload. In every case it is the runtime's record, not a guess. `session_model` is what `SessionStart` reported: it stands in when the record names nothing yet, and wins over an identical id to keep a suffix the record drops (`claude-opus-5[1m]` over `claude-opus-5`), but never over a different one — that difference is a mid-session switch, and the per-turn record saw it.
+
+Codex's same injected line supplies the post-write command:
+
+```bash
+bash .codex/hooks/star_model_id.sh --check <artifact> <rollout> <session_model>
+```
+
+Run it once per artifact after the last write and before reporting completion or committing. It compares the artifact's `model_id` with the rollout resolver's output, falling back first to the exact `SessionStart` value and then to `unrecorded`. A mismatch exits nonzero and blocks both completion and commit until corrected and re-checked. Neither the resolver nor this check derives an id from a descriptive label such as "GPT-5 family".
 
 ## Kimi, when no line was injected at all
 
