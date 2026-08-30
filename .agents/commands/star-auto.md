@@ -16,7 +16,7 @@ Read `STAR_LANG` and `INVOLVE` from `.env` in one grep (§7.6, §7.7). Turn the 
 
 ## The loop
 
-1. When a launch marker on disk names a command still running — left by this invocation or an earlier one — resume the wait in "Waiting on a launched command" below instead; the status pass runs after the exit event. Otherwise run `star-flow-status` through the harness's native skill mechanism and take its single next action. An action that does not advance the goal's check is not taken: say so in one line, leave it for a later invocation, and take the next action that does.
+1. When a launch marker on disk names a command whose exit file has not appeared — left by this invocation or an earlier one — resume the wait in "Waiting on a launched command" below instead; the status pass runs after the exit event. Otherwise run `star-flow-status` through the harness's native skill mechanism and take its single next action. An action that does not advance the goal's check is not taken: say so in one line, leave it for a later invocation, and take the next action that does.
 2. Start what it names:
    - One of the eight the agent may pick up — the harness's native mechanism, exactly as §10.2–10.6 say, with this run's resolved level appended as an `involve=` token: each started run resolves its own level (§7.7), so a start that carries no token would fall back to `.env`, not to this run's default. When the named skill is `star-plan-executor` or `star-code-reviewer` and the resolved level is `low`, append `auto=unattended` too; that token transmits this invocation's grant and is stripped before the skill reads its target or description.
    - One of the seven explicit-only — the grant covers it: announce one line first (what matched, which target), then dispatch one subagent that reads that skill's harness-owned `SKILL.md` in full and follows it, this run's resolved level passed in the brief as the same `involve=` token; when it ends, one line in the decisions record, `what matched → what ran → what it wrote` (§10.5).
@@ -29,21 +29,20 @@ Read `STAR_LANG` and `INVOLVE` from `.env` in one grep (§7.6, §7.7). Turn the 
 
 The wait is event-driven: the run comes back when the command exits, not on a clock. Monitoring by refresh — re-reading the log, re-running the status skill, a watch pass to see how it is going — is what this section exists to prevent: every refresh spends a full model turn, and one training run outlives thousands of them.
 
-- **Launch detached, leave a marker.** Start the command in the background, immune to the session ending (`nohup … &`), its output redirected to a log file under that run's `wkdrs/<run>/` (keeping any redirection the handoff already wrote), and in the same shell call write the marker `wkdrs/<run>/.await`: line 1 the process id, line 2 the log path, line 3 the output the handoff named. The marker is launch state this command owns — neither plan nor report — and is removed when the wait ends.
+- **Launch detached, leave a marker.** Start the command in the background, immune to the session ending, wrapped so its exit code lands in a file — `nohup bash -c '<command>; echo $? > wkdrs/<run>/.await.exit' > <log> 2>&1 &` — with the log under that run's `wkdrs/<run>/` (keeping any redirection the handoff already wrote), and in the same shell call write the marker `wkdrs/<run>/.await`: line 1 the process id, line 2 the log path, line 3 the output the handoff named. The exit file, not the process id, is what the wait watches: a sandboxed harness is often denied `kill -0` and `ps` on a process it did not start — a denial that mimics an exit — while a file is readable from any sandbox. The marker pair is launch state this command owns — neither plan nor report — and both files are removed when the wait ends.
 - **Hold the turn shell-side.** On a harness whose shell itself announces a detached command's completion, launch through that mechanism and let the announcement return the turn. Everywhere else, wait inside one blocking shell call — sleep and re-check in the shell, where iterations cost nothing:
 
   ```bash
-  pid=$(sed -n 1p wkdrs/<run>/.await); log=$(sed -n 2p wkdrs/<run>/.await)
+  run=wkdrs/<run>; log=$(sed -n 2p "$run/.await")
   deadline=$((SECONDS + 550))    # stay inside the harness's per-call time limit
-  while kill -0 "$pid" 2>/dev/null && (( SECONDS < deadline )); do sleep 20; done
-  kill -0 "$pid" 2>/dev/null \
-      && echo "running — log last written $(date -r "$log" '+%H:%M:%S' 2>/dev/null || echo '(no log yet)')" \
-      || echo "exited"
+  while [ ! -f "$run/.await.exit" ] && (( SECONDS < deadline )); do sleep 20; done
+  if [ -f "$run/.await.exit" ]; then echo "exited $(cat "$run/.await.exit")"
+  else echo "running — log last written $(date -r "$log" '+%H:%M:%S' 2>/dev/null || echo '(no log yet)')"; fi
   ```
 
-  `running` re-issues the same call with nothing in between — no log read, no status pass, no watch, at most one line of text. `exited` ends the wait: read the log's tail once, collect what the handoff named, remove the marker.
+  `running` re-issues the same call with nothing in between — no log read, no status pass, no watch, at most one line of text. `exited` ends the wait: read the log's tail once, collect what the handoff named, remove the marker pair. A missing exit file with a long-stalled log is the one case the process id settles — and where the harness denies even that probe, the log's silence is the verdict, reported as a stall, never as a clean exit.
 - **A stall is an event too.** The `running` line carries the log's last write time; a diagnostic read — `star-expt-analyst watch` is its shape — happens only when that time stops moving for longer than the command's own logging rhythm makes plausible, or on `exited`. Never on a timer, never to check in.
-- **Across invocations.** Nothing carries between invocations except what is on disk — and the marker is on disk. A fresh invocation that finds `.await` naming a live process resumes this wait directly (step 1), so an outer driver that re-invokes this command spends one turn per redrive, not a monitoring pass.
+- **Across invocations.** Nothing carries between invocations except what is on disk — and the marker is on disk. A fresh invocation that finds `.await` with no `.await.exit` beside it resumes this wait directly (step 1), so an outer driver that re-invokes this command spends one turn per redrive, not a monitoring pass.
 
 ## Where it ends
 
