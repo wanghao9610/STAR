@@ -16,18 +16,38 @@ Read `STAR_LANG` and `INVOLVE` from `.env` in one grep (§7.6, §7.7). Turn the 
 
 ## The loop
 
-1. Run `star-flow-status` through the harness's native skill mechanism and take its single next action. An action that does not advance the goal's check is not taken: say so in one line, leave it for a later invocation, and take the next action that does.
+1. When a launch marker on disk names a command still running — left by this invocation or an earlier one — resume the wait in "Waiting on a launched command" below instead; the status pass runs after the exit event. Otherwise run `star-flow-status` through the harness's native skill mechanism and take its single next action. An action that does not advance the goal's check is not taken: say so in one line, leave it for a later invocation, and take the next action that does.
 2. Start what it names:
    - One of the eight the agent may pick up — the harness's native mechanism, exactly as §10.2–10.6 say, with this run's resolved level appended as an `involve=` token: each started run resolves its own level (§7.7), so a start that carries no token would fall back to `.env`, not to this run's default. When the named skill is `star-plan-executor` or `star-code-reviewer` and the resolved level is `low`, append `auto=unattended` too; that token transmits this invocation's grant and is stripped before the skill reads its target or description.
    - One of the seven explicit-only — the grant covers it: announce one line first (what matched, which target), then dispatch one subagent that reads that skill's harness-owned `SKILL.md` in full and follows it, this run's resolved level passed in the brief as the same `involve=` token; when it ends, one line in the decisions record, `what matched → what ran → what it wrote` (§10.5).
-   - A prepared STOP-line command — the stop-line rule above: launch and log, then wait for it to finish, collect the output its handoff named so the criterion can be checked, and continue at step 1; a command that cannot be waited on ends the run, the report naming what it is waiting on. When the user's stop line stops the launch — print the command, stop, and report.
+   - A prepared STOP-line command — the stop-line rule above: launch and log as "Waiting on a launched command" below says — detached, marker written, the wait held on the exit event rather than on refreshes — then collect the output its handoff named so the criterion can be checked, and continue at step 1; a command that cannot be waited on this way — no local process to hold, no file its progress would touch — ends the run, the report naming what it is waiting on. When the user's stop line stops the launch — print the command, stop, and report.
 3. An unsettled target names the candidates and waits (§5.2, §10.3), and one unit of work runs per start (§10.4). At `low`, operations carried by `auto=unattended` take the guarded behavior above without asking. Every other mandatory confirmation point still asks and waits (§7.2); where nobody can answer — a headless run — it stops there and reports rather than assumes. A question a started run hands back is triaged the same way: a judgment call the level takes unasked is answered with its marked recommendation and logged, while ambiguity or an operation outside the unattended grant goes to the user.
 4. After each run ends, take the next action it names — under this grant the seven are taken as the eight are (§10.6) — and where none is named, run `star-flow-status` again.
 5. An action that failed is not retried on the same target. The routing a failure earns — a reviser pass, a fix run — is itself a next action, taken once; when it too fails, stop and report.
 
+## Waiting on a launched command
+
+The wait is event-driven: the run comes back when the command exits, not on a clock. Monitoring by refresh — re-reading the log, re-running the status skill, a watch pass to see how it is going — is what this section exists to prevent: every refresh spends a full model turn, and one training run outlives thousands of them.
+
+- **Launch detached, leave a marker.** Start the command in the background, immune to the session ending (`nohup … &`), its output redirected to a log file under that run's `wkdrs/<run>/` (keeping any redirection the handoff already wrote), and in the same shell call write the marker `wkdrs/<run>/.await`: line 1 the process id, line 2 the log path, line 3 the output the handoff named. The marker is launch state this command owns — neither plan nor report — and is removed when the wait ends.
+- **Hold the turn shell-side.** On a harness whose shell itself announces a detached command's completion, launch through that mechanism and let the announcement return the turn. Everywhere else, wait inside one blocking shell call — sleep and re-check in the shell, where iterations cost nothing:
+
+  ```bash
+  pid=$(sed -n 1p wkdrs/<run>/.await); log=$(sed -n 2p wkdrs/<run>/.await)
+  deadline=$((SECONDS + 550))    # stay inside the harness's per-call time limit
+  while kill -0 "$pid" 2>/dev/null && (( SECONDS < deadline )); do sleep 20; done
+  kill -0 "$pid" 2>/dev/null \
+      && echo "running — log last written $(date -r "$log" '+%H:%M:%S' 2>/dev/null || echo '(no log yet)')" \
+      || echo "exited"
+  ```
+
+  `running` re-issues the same call with nothing in between — no log read, no status pass, no watch, at most one line of text. `exited` ends the wait: read the log's tail once, collect what the handoff named, remove the marker.
+- **A stall is an event too.** The `running` line carries the log's last write time; a diagnostic read — `star-expt-analyst watch` is its shape — happens only when that time stops moving for longer than the command's own logging rhythm makes plausible, or on `exited`. Never on a timer, never to check in.
+- **Across invocations.** Nothing carries between invocations except what is on disk — and the marker is on disk. A fresh invocation that finds `.await` naming a live process resumes this wait directly (step 1), so an outer driver that re-invokes this command spends one turn per redrive, not a monitoring pass.
+
 ## Where it ends
 
-Report and stop at the first of: the goal's check passes; a mandatory question outside the unattended grant has no one to answer it; a command crosses the user's stop line, or a launched one cannot be waited on; a guarded Git operation finds a dirty tree, a conflict, or another precondition failure; a full pass leaves the goal check no closer than the pass before it; step 5 runs out of moves. The final reply names what ran, what each run wrote, the goal check's result, and — when the run stopped short — the exact command, question, or failed guard it is waiting on. Nothing carries between invocations: re-typing the command resumes from the tree as the runs left it, and the stop line is read fresh from the new invocation.
+Report and stop at the first of: the goal's check passes; a mandatory question outside the unattended grant has no one to answer it; a command crosses the user's stop line, or a launched one cannot be waited on; a guarded Git operation finds a dirty tree, a conflict, or another precondition failure; a full pass leaves the goal check no closer than the pass before it; step 5 runs out of moves. The final reply names what ran, what each run wrote, the goal check's result, and — when the run stopped short — the exact command, question, or failed guard it is waiting on. Nothing carries between invocations: re-typing the command resumes from the tree as the runs left it — a live launch marker included — and the stop line is read fresh from the new invocation.
 
 ## What this command never does
 
