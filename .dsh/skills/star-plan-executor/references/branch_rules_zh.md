@@ -2,17 +2,25 @@
 
 规约 §11 背后的操作程序。Step 4 决定并创建；Step 5 把提交落在分支上；Step 7 了结分支——合并或弃用——连同安置它的 worktree。这里的每条 git 命令都归 executor 自己运行，写明交给用户的除外。
 
+生效档位为 `low` 且带合法 `auto=unattended` token 时，就是 `star-auto` 的授权；只有下文逐项写明、带守卫的推荐路径会从提问变成有记录的决定。
+
 ## 何时推荐开分支
 
 依据 Step 2 的缺口清单：只要有动作要**修改** `${CODE_NAME}/` 下已存在且被跟踪的文件 → 推荐 `branch: <run>`。只有"需新建"条目、或写入只落在 `tasks/<plan-name>/` 与 `wkdrs/<run>/` → `branch: none`。空代码库从不开分支。改动量、入口影响面、有多少其他计划碰同一批文件，只用来把推荐语说得更准，绝不取代这条规则。Step 4 由用户定夺——两个方向都正当——答案写进 EXEC_PLAN 的 `branch:`。
+
+无人值守 auto 在 Step 3 直接采用推荐并记录，不发问。
 
 ## 何时推荐进 worktree
 
 分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是被调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了，所以要问用户；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`。进树的 run 一律带分支，即便缺口清单判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。两行都在 Step 4 确认点上一并定夺。
 
+无人值守 auto 把尚未回收的交回命令记录本身当作忙碌信号，不触碰那个 checkout；两项推荐都直接采用并记录，不发问。
+
 ## 确认点上的两问（Step 4）
 
 两问都搭在批准 EXEC_PLAN 的那个确认点上，绝不单独发起一次调用。
+
+无人值守 auto 仍展示同样材料，但直接采用两项推荐并记录，不发问题。
 
 - **分支**，当 Step 3 定了 `branch: <run>`（规约 §11）:点明它从哪个基础分支分出,选它就同时选了逐步提交——只有提交才会被合并——以及唯一前置条件:当前 checkout 上没有正在运行的任务;不选则照旧在基础分支上执行。
 - **worktree**，当 Step 3 定了 `worktree: <path>`（§11.7）:点明推荐它的那个忙碌信号、路径、要补的链(`.env`、`datas/`、`inits/`),以及整个 run——提交、记录、后续 skill——从此都住在那棵树里,当前 checkout 原地不动;不选则在这里执行,等 checkout 忙完。
@@ -25,6 +33,8 @@
 4. 进 worktree：在被调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净地建出来。
 5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——派发、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
 6. 选了分支就同时选了逐步提交：没有提交的分支没有东西可合并。
+
+无人值守 auto 以已记录的决定代替批准；带尚未回收任务记录的 checkout 视为正忙，因此绝不切换它。
 
 ## 分支上的提交（Step 5）
 
@@ -44,6 +54,8 @@
 1. **合并（推荐）。** 先把分支上还散着的运行记录提交掉。基础分支越过了 `base:` 就先把它 merge **进**执行分支——绝不 rebase（规约 §1.3）——在分支上重跑该叶子的轻量检查，冲突则停下：列出冲突文件，解法由用户定夺。squash 在检出着 `<base>` 的那棵树里跑——只开了分支的 run 先 `git switch <base>`；进了 worktree 的 run，主 checkout 本来就站在那里。然后 `git merge --squash <run>`，一次提交，信息为 `star-plan-executor: <run> — merge (squash), <N> steps, review <报告文件>`；用户想把逐步提交留在基础分支上时改用 `--no-ff`。合并之后：在基础分支上重跑该叶子的轻量检查（仅限 §2 允许的），在运行记录里填上 `merged:`。进了 worktree 的 run 接着了结那棵树——移除是删除，任何档位都问，因为未跟踪文件随树一起死：答应了就先把树里 `wkdrs/<run>/` 与 `tasks/<plan-name>/` 下非 md 的未跟踪产物挪到主 checkout 的相同路径，再 `git worktree remove <path>` 且绝不带 `--force`——git 因残留文件而拒绝，说明有东西漏挪了：去查，绝不硬闯（§11.9）。最后才是分支那一道——`<run>` 留还是删，和任何删除一样对待。
 2. **暂不合并。** 分支留着；`star-flow-status` 会持续把合并列为这个叶子的待办后续。进了 worktree 的 run，树也跟着留。其余一切不变。
 3. **弃用。** 在基础分支上 `git checkout <run> -- wkdrs/<run>/`，把这些记录连同子计划里这次 run 的条目、判它出局的结论一起提交（`exec_status: abandoned`，或改回 `pending` 等重跑——用户挑）。进了 worktree 的 run，先照上面把非 md 产物挪出来——负结果的产出也是证据——然后树的移除、分支的删除各问一道，任何档位都问。记录回到基础分支；代码不回。
+
+无人值守 auto 绝不豁免审查。条件满足后直接采用选项 1，不发问；只用 squash，绝不改用 `--no-ff`；基础分支变动无法干净合入、出现冲突或检查失败时就停止。对于 worktree，先移动上述产物，再检查 `git -C <path> status --porcelain`；仅为空时执行不带 `--force` 的移除，否则保留并报告确切路径或拒绝原因。已合并执行分支保留，因为 squash 后删除它需要强制操作。选项 1 的守卫通过时，绝不选择或授权暂不合并、弃用。
 
 ## 其余 skill 看到什么
 

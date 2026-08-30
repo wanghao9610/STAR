@@ -2,17 +2,25 @@
 
 The operating procedure behind conventions §11. Step 3 decides and creates; Step 4 commits onto the branch; the State & File Rules end the branch — merge or discard — and the worktree that housed it. Every git command here is the executor's to run, except where a line hands it to the user.
 
+A valid `auto=unattended` token with effective `involve=low` is the `star-auto` grant; only the guarded recommended path explicitly named below changes from a question to a logged decision.
+
 ## When to recommend a branch
 
 From Step 2's gap list: any action that **modifies** an existing tracked file under `${CODE_NAME}/` → recommend `branch: <run>`. Only needs-creating entries, or writes confined to `tasks/<plan-name>/` and `wkdrs/<run>/` → `branch: none`. An empty codebase never branches. Diff size, entrypoint reach, and how many other plans touch the same files sharpen the wording, never replace the rule. The user settles it at Step 3 — either direction is valid — and the answer lands in EXEC_PLAN's `branch:`.
+
+Under unattended auto, take the recommendation and log it instead of asking at Step 3.
 
 ## When to recommend a worktree
 
 The branch asks whether this run's history needs isolating (above); the worktree asks whether the invoking checkout is free right now (conventions §11.7). Check the signals while orienting in Step 2: HEAD sits on another run's execution branch; uncommitted changes sit on paths another run's records claim; an EXEC_LOG records handed-back commands whose results are not collected — a job may be running, which no command can check, so ask the user; or the user has named parallel work. Any signal → recommend `worktree: ../<root-dirname>--wt/<run>`; none → `worktree: none`. A run in a worktree always carries a branch, even where the gap list said `branch: none` — its commits need a home while the base branch stays checked out elsewhere (§11.8). Both lines are settled together at Step 3's pause.
 
+Under unattended auto, an unresolved handed-back command is itself enough to take the worktree recommendation without touching that checkout; take and log both recommendations without asking.
+
 ## The two questions at the Step 4 confirmation point
 
 Both ride the confirmation point that approves EXEC_PLAN, never a call of their own.
+
+Under unattended auto, show the same material, take both recommended answers, and record them instead of emitting the questions.
 
 - **Branch**, where Step 3 set `branch: <run>` (conventions §11): name the base branch it forks from, that taking it takes the per-step commits with it — only commits merge — and its one precondition, that nothing is currently running from this checkout; declining executes on the base branch as before.
 - **Worktree**, where Step 3 set `worktree: <path>` (§11.7): name the busy signal that recommends it, the path, the symlinks it will get (`.env`, `datas/`, `inits/`), and that the whole run — commits, records, follow-on skills — then lives in that tree while this checkout stays put; declining executes here, waiting on whatever made the checkout busy.
@@ -25,6 +33,8 @@ Both ride the confirmation point that approves EXEC_PLAN, never a call of their 
 4. Worktree: from the invoking checkout, `git worktree add <path> -b <run> <base>` — tree, branch, and fork point in one step, and no checkout switches. Pre-run uncommitted changes stay behind with their checkout; the tree starts out clean from `base:`.
 5. Worktree: git creates only tracked files in it, so link the runtime in from the main checkout — `.env`, `datas/`, `inits/`, and `.star/memory/local/` where present, absolute-path symlinks — then re-run the §3 resolution against the tree's `.env` to prove the interpreter still resolves. Never link `wkdrs/` or `tasks/` (§11.8). Record the tree's absolute path as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter; from here, every part of this run — delegations, checks, commits, records — happens inside the tree, and each delegate's dispatch brief names the tree root (`agent_dispatch_spec.md`).
 6. Choosing the branch chooses per-action commits with it: a branch with nothing committed has nothing to merge.
+
+Under unattended auto, the logged decision supplies the approval; a checkout with an unresolved job record is treated as busy and therefore is never switched.
 
 ## Commits on the branch (Step 5)
 
@@ -44,6 +54,8 @@ Reached when every action is `done`, the §5 done-criterion is verified, and the
 1. **Merge (recommended).** Commit any run records still loose on the branch first. If the base branch moved past `base:`, merge it *into* the execution branch — never rebase (conventions §1.3) — re-run the leaf's light checks there, and on conflict stop: name the conflicted files; resolution is the user's to direct. The squash runs in whichever tree has `<base>` checked out — `git switch <base>` first on a branch-only run; on a worktree run the main checkout already stands there. Then `git merge --squash <run>`, one commit, message `star-plan-executor: <run> — merge (squash), <N> steps, review <report-file>`; use `--no-ff` instead when the user wants the step commits kept on the base branch. After the merge: re-run the leaf's light checks on the base branch (§2-legal only), set `merged:` in the run's records. On a worktree run, then settle the tree — its removal is a deletion asked at every level, because untracked files die with it: on yes, first move the non-md untracked artifacts under the tree's `wkdrs/<run>/` and `tasks/<plan-name>/` to the same paths in the main checkout, then `git worktree remove <path>` without `--force` — git refusing over stray files means something was missed; investigate, never override (§11.9). Last, the branch question — keep or delete `<run>`, a deletion like any other.
 2. **Not yet.** The branch stays; `star-flow-status` keeps naming the merge as this leaf's outstanding follow-up. On a worktree run the tree stays with it. Nothing else changes.
 3. **Discard.** On the base branch, `git checkout <run> -- wkdrs/<run>/` and commit those records together with the sub-plan's run entry and the verdict that ended it (`exec_status: abandoned`, or back to `pending` for a re-run — the user picks). On a worktree run, move the non-md artifacts out of the tree as above — a negative result's outputs are still evidence — then the tree's removal and the branch's deletion are each their own question, asked at every level. The records reach the base branch; the code does not.
+
+Unattended auto never waives review. Once the conditions hold, take option 1 without asking; use squash, never `--no-ff`; and stop on a moved base that cannot be merged cleanly, a conflict, or any failed check. For a worktree, move the named artifacts, inspect `git -C <path> status --porcelain`, and remove it without `--force` only when empty; otherwise retain it and report the exact paths or refusal. Retain the merged execution branch because deleting it after a squash requires force. Never select or authorize Not yet or Discard while option 1's guards pass.
 
 ## What the other skills see
 
