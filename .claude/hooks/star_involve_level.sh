@@ -12,10 +12,11 @@
 # payload carries the tool call, never the words that started the run. What the
 # payload does carry is `transcript_path`, and the transcript records a slash
 # command as <command-name>/star-auto</command-name> beside a <command-args>
-# block holding what was typed after it. That block is the only place read here.
-# Plain chat text is ignored on purpose: a message *about* the level — "set
-# involve=low for star-auto" — is discussion, and a grep over loose text would
-# take it for a setting.
+# block holding what was typed after it, and a skill dispatched through the Skill
+# tool as a tool_use block carrying that skill's `args`. Those two blocks are the
+# only places read here. Plain chat text is ignored on purpose: a message *about*
+# the level — "set involve=low for star-auto" — is discussion, and a grep over
+# loose text would take it for a setting.
 #
 # Scope. The most recent STAR command wins for as long as it is the most recent:
 # answering a question mid-run leaves it in force, and the next STAR command
@@ -48,18 +49,47 @@ star__payload_field() { # $1 = payload JSON, $2 = top-level field name
     fi
 }
 
-# The <command-args> of the last STAR command in the transcript. Sidechain turns
-# are skipped: a delegated subagent's invocation is not the user's.
+# The <command-args> of the last STAR invocation in the transcript, read from
+# two forms and taking whichever comes last in the file:
+#
+#   - a command the user typed, recorded as a user entry whose
+#     <command-name> starts with star, its token read from <command-args>;
+#   - a Skill tool call dispatching a star skill, recorded as a tool_use block
+#     in an assistant entry, its token read from the call's `args`.
+#
+# The second form exists because a skill often reaches the model wrapped in
+# another command — `/goal /star-auto … involve=low` records <command-name>/goal
+# and nothing else — and because star-auto forwards the token when it dispatches
+# star-plan-executor. Both are the user's token travelling on; neither shows up
+# as a STAR <command-name>.
+#
+# The two forms count differently, on purpose. A typed STAR command always
+# counts, token or none, so a bare `/star-plan-executor` falls back to .env — the
+# user retracting the level by not repeating it. A Skill call counts only when
+# its args carry an involve token: the model dispatching a skill on its own is
+# not the user speaking, and a mid-run `star-flow-status` with no args must not
+# reset a level the user set.
+#
+# Sidechain turns are skipped in both: a delegated subagent's invocation, and
+# whatever it dispatches, is not the user's.
 star__latest_star_command_args() { # $1 = transcript path
     local transcript="$1"
     [ -n "${transcript}" ] && [ -r "${transcript}" ] || return 0
     if command -v jq >/dev/null 2>&1; then
-        jq -r 'select(.type == "user" and (.isSidechain | not))
-               | (.message.content) as $c
-               | (if ($c | type) == "string" then $c
-                  else ([$c[]? | select(.type? == "text") | .text] | join(" ")) end)
-               | select(test("<command-name>[[:space:]]*/?star"))
-               | capture("<command-args>(?<a>.*?)</command-args>"; "s").a' \
+        jq -r 'select(.isSidechain | not)
+               | if .type == "user" then
+                   ((.message.content) as $c
+                    | (if ($c | type) == "string" then $c
+                       else ([$c[]? | select(.type? == "text") | .text] | join(" ")) end)
+                    | select(test("<command-name>[[:space:]]*/?star"))
+                    | capture("<command-args>(?<a>.*?)</command-args>"; "s").a)
+                 elif .type == "assistant" then
+                   (.message.content[]?
+                    | select(.type? == "tool_use" and .name? == "Skill")
+                    | select((.input.skill // "") | test("^star"))
+                    | (.input.args // "")
+                    | select(test("involve=(low|medium|high)")))
+                 else empty end' \
             "${transcript}" 2>/dev/null | tail -1
     elif command -v python3 >/dev/null 2>&1; then
         python3 - "${transcript}" <<'PY' 2>/dev/null
@@ -67,6 +97,7 @@ import json, re, sys
 
 name = re.compile(r"<command-name>\s*/?star")
 args = re.compile(r"<command-args>(.*?)</command-args>", re.S)
+token = re.compile(r"involve=(low|medium|high)")
 last = ""
 with open(sys.argv[1], errors="replace") as fh:
     for line in fh:
@@ -74,21 +105,32 @@ with open(sys.argv[1], errors="replace") as fh:
             entry = json.loads(line)
         except Exception:
             continue
-        if entry.get("type") != "user" or entry.get("isSidechain"):
+        if entry.get("isSidechain"):
             continue
         content = (entry.get("message") or {}).get("content")
-        if isinstance(content, str):
-            text = content
-        elif isinstance(content, list):
-            text = " ".join(b.get("text", "") for b in content
-                            if isinstance(b, dict) and b.get("type") == "text")
-        else:
-            continue
-        if not name.search(text):
-            continue
-        found = args.search(text)
-        if found:
-            last = found.group(1)
+        if entry.get("type") == "user":
+            if isinstance(content, str):
+                text = content
+            elif isinstance(content, list):
+                text = " ".join(b.get("text", "") for b in content
+                                if isinstance(b, dict) and b.get("type") == "text")
+            else:
+                continue
+            if not name.search(text):
+                continue
+            found = args.search(text)
+            if found:
+                last = found.group(1)
+        elif entry.get("type") == "assistant" and isinstance(content, list):
+            for block in content:
+                if not (isinstance(block, dict)
+                        and block.get("type") == "tool_use"
+                        and block.get("name") == "Skill"):
+                    continue
+                params = block.get("input") or {}
+                if (str(params.get("skill") or "").startswith("star")
+                        and token.search(str(params.get("args") or ""))):
+                    last = str(params.get("args") or "")
 print(last)
 PY
     fi
