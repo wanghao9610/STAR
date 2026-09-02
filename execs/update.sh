@@ -258,21 +258,6 @@ missing_hooks() { # $1 = registration config path
         */.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
-    # The plan gate answers the plan-approval prompt raised before execution,
-    # which only Claude exposes to a hook. It ships on two mounts —
-    # PermissionRequest for older and headless paths, PreToolUse(ExitPlanMode)
-    # for a dialog that honors it; the interactive dialog of Claude Code 2.1.25x
-    # honors neither, and there the executor's own text skips plan mode at
-    # `low` instead — so a config registering the script once predates the
-    # second mount and is reported.
-    case "$1" in
-        */.claude/settings.json)
-            if ! grep -q 'star_plan_gate\.sh' "$1" 2>/dev/null; then
-                out="${out:+${out}, }plan gate"
-            elif [[ "$(grep -c 'star_plan_gate\.sh' "$1" 2>/dev/null)" -lt 2 ]]; then
-                out="${out:+${out}, }plan gate PreToolUse mount"
-            fi ;;
-    esac
     # The commit guard declines a shell command before it runs, which every
     # harness can express — Claude, Codex and Kimi on PreToolUse, Cursor on
     # beforeShellExecution — so every config carries it.

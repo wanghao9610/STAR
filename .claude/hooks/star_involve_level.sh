@@ -3,7 +3,7 @@
 # token of the session's most recent STAR command, or `.env`'s INVOLVE when that
 # invocation carried none (workflow conventions §7.7, §7.12).
 #
-# Sourced by star_plan_gate.sh, star_involve_gate.sh and star_bash_gate.sh; it
+# Sourced by star_involve_gate.sh and star_bash_gate.sh; it
 # decides nothing itself. Prints one of low / medium / high, or nothing at all —
 # and nothing means "no level set", which every caller reads as no decision.
 #

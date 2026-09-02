@@ -2,8 +2,9 @@
 # Skip Claude's permission prompt for file edits while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7). Confirmation points are
 # untouched: the STOP line and deletions are questions a skill asks, not
-# permission prompts a hook can answer. Plan approval is the one prompt with a
-# gate of its own, star_plan_gate.sh.
+# permission prompts a hook can answer. Plan approval at low is the executor's
+# own text, which stays out of plan mode there: Claude Code's plan dialog
+# answers to no hook.
 #
 # The level comes from star_involve_level.sh: the `involve=` token of the
 # session's most recent STAR command, or `.env`'s INVOLVE when it carried none.
