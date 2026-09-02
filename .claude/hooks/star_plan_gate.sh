@@ -4,15 +4,20 @@
 # as it stands, taken for the user. The confirmation point is still presented in
 # full; the skill's decisions record logs that it was taken unasked.
 #
-# Two mount points, one script. Interactive sessions since Claude Code ~2.1.25x
-# run plan approval through a dialog that no longer consults PermissionRequest
-# hooks, so settings.json also mounts this script on PreToolUse(ExitPlanMode):
-# an allow there bypasses the dialog, and the exit flow itself restores the mode
-# the session held before plan mode (auto stays auto). The PermissionRequest
-# mount stays for harness paths that still route plan approval through it; that
-# older flow moves the mode only via the answer, so there the reply still sets
-# acceptEdits — the dialog's then-first option. The payload's hook_event_name
-# says which mount invoked us.
+# Two mount points, one script — and on an interactive Claude Code 2.1.25x
+# session neither one clears the plan dialog. PermissionRequest is not consulted
+# for it at all; PreToolUse(ExitPlanMode) fires and its allow is accepted as a
+# permission decision, yet the dialog is not a permission prompt and still
+# renders and waits for a keypress (every ExitPlanMode call in this machine's
+# 2.1.245–2.1.257 transcripts waited on one). What moves the approval at `low`
+# on those versions is the executor's own text: it stays out of plan mode there,
+# so ExitPlanMode is never called. Both mounts stay for the paths that do consult
+# a hook — an older or headless harness raising the approval as a
+# PermissionRequest, or a later dialog that honors PreToolUse. That older flow
+# moves the mode only via the answer, so the PermissionRequest reply still sets
+# acceptEdits — the dialog's then-first option; the PreToolUse reply leaves the
+# mode alone, since the exit flow itself restores the mode the session held
+# before plan mode. The payload's hook_event_name says which mount invoked us.
 #
 # The level comes from star_involve_level.sh: the `involve=` token of the
 # session's most recent STAR command, or `.env`'s INVOLVE when it carried none.
