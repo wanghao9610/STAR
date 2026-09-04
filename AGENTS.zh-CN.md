@@ -43,6 +43,7 @@
 - 不清楚当前进展时，先运行展示研究状态的 skill——它会读取磁盘上的计划树和报告，并指出唯一的下一步行动。
 - 所有工作流 skill 共同遵循的规则位于 `docs/mds/star-workflow/research-workflow-conventions.md`；各 skill 的职责位于 `research-workflow-skills.md`。
 - 若某个 skill 步骤的书面流程要求派发子代理，该流程本身已获用户对这次运行的授权：无需另行询问即可派发，即使宿主指令只允许在用户提出时委派。明确禁止委派，或宿主完全不提供委派能力时，仍不得派发；该授权只覆盖派发动作，不扩大被委派者可写入的范围。
+- `.env` 的 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定一次 skill 运行、以及它派出的每个 delegate 该跑在哪个模型上——分别对应研究判断、产出实现、只读工作。哪次运行归哪一档、运行何时把自己迁到该档的模型上，见 `docs/mds/star-workflow/research-workflow-conventions.md` §10.8；键为空则什么都不变。
 - 不要手工编辑 `wkdrs/` 下生成的报告，也不要编辑 `docs/mds/star-workflow/`——`execs/update.sh` 会覆盖它。
 
 ## 6. 回复语言

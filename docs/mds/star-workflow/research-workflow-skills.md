@@ -114,6 +114,8 @@ Any invocation also accepts an optional `involve=low|medium|high` token setting 
 
 Every skill also takes an optional description — free text after the argument, in your own words, what this run is for: `star-plan-reviser 01 this one is finished, 02 replaces it`. It is a lead, not a command: it can route a run down one of that skill's own paths and supply words the run records — the example both drops the plan and becomes the reason written into it — but never replaces a confirmation point, never settles an ambiguous plan name, never authorizes anything on the STOP line. A description-routed run says which path it took before it writes, so a misreading costs one line rather than one wrong edit. Where a skill's first argument is already free text — `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer` — that argument is the description. Full rule: [conventions §7.12](research-workflow-conventions.md).
 
+Which model a run uses is set in `.env`, in three tiers: `STAR_PLAN_MODEL` for research judgment — plans, reviews, analyses, and the blind reads that check them — `STAR_EXEC_MODEL` for implementation and production, and `STAR_READ_MODEL` for read-only scans, collectors and summaries. The roster in [conventions §10](research-workflow-conventions.md) carries each skill's tier; a few modes take a different one, and two runs change tier partway through, each named in that skill's section below. Where a harness can name the model a delegate runs on, a run whose tier points at a model the session is not already using hands itself to one delegate on that model and relays the reply unchanged — the files stay the run's, and the provenance recorded in them is the model that wrote them. A run that still owes you a confirmation point stays where it is, which is why `star-idea-storm` and `star-plan-coach`, asking at every stage, never relocate at all. The three keys ship empty, and an empty key changes nothing: the run stays where it started. Full rule: [conventions §10.8](research-workflow-conventions.md).
+
 ## 2. Before you start
 
 Which stage in the table above you enter at is decided by three facts about the work in front of you, not by the workflow:
@@ -162,7 +164,7 @@ star-proj-adopt survey       # inspect the repository and land the setup
 star-proj-adopt backfill     # make the plan tree reflect finished work
 ```
 
-With no argument the phase is detected: no `metds/adopt.md` yet → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. Re-running `survey` on an adopted project re-inspects and updates the record, never starts over.
+With no argument the phase is detected: no `metds/adopt.md` yet → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. Re-running `survey` on an adopted project re-inspects and updates the record, never starts over. `backfill` decides which finished work each leaf covers, which is judgment rather than production, so that mode runs on PLAN while the rest of the skill runs on EXEC (conventions §10.8).
 
 ### What it does
 
@@ -365,7 +367,7 @@ star-refs-reviewer synthesize             # compile the notes into metds/refs/re
 star-refs-reviewer survey <topic>         # map a field into metds/refs/<slug>_survey.md
 ```
 
-With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, then asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain. `add` splits its list on newlines and commas — quoted text is a title, resolved to a fetched record before anything is read: a clean single match proceeds, several candidates get asked about, an unfindable one goes to the manual-check list rather than a guess. A list of nothing but ids and URLs works without the keyword; a bare title without `add` is a topic.
+With no argument the skill looks for the method in `metds/*.md`, falls back to the root plan under `metds/plans/`, then asks you for a topic. Once `metds/refs/` exists, runs are incremental: gaps get filled, verified entries left alone. `survey` resolves its own trailing text the same way — a plan name, free text, or with neither the same fallback chain. `add` splits its list on newlines and commas — quoted text is a title, resolved to a fetched record before anything is read: a clean single match proceeds, several candidates get asked about, an unfindable one goes to the manual-check list rather than a guess. A list of nothing but ids and URLs works without the keyword; a bare title without `add` is a topic. `synthesize` writes the related-work narrative out of notes already on disk, so that mode runs on PLAN rather than the skill's own EXEC (conventions §10.8).
 
 ### What it does
 
@@ -438,6 +440,8 @@ When `${CODE_NAME}/` is missing or empty (set up):
 When code already exists (organize): surveys it read-only, concern by concern, into a repo map.
 
 Both paths then design a target architecture with a numbered migration table — the current layout is the baseline, so migrations stay minimal. **Confirmation point 2:** you approve migration items individually. Approved ones run as disjoint groups, verified and committed per group; a failed group has its paths restored and is marked blocked.
+
+**The record is written at approval, and the migrations can run on another model.** Approving the table writes `metds/codearc.md` straight away, its migration record carrying one row per approved item as `pending` — until then that table lived only in the conversation, and a run interrupted before the spec was finished lost it. The file is also what makes the rest resumable: where `STAR_EXEC_MODEL` names a model, executing the approved groups goes to one delegate on it, which reads the rows still `pending`, runs those groups, moves each item to `done` or `blocked` as its group verifies, and returns. Designing the architecture and finishing the spec stay on PLAN with the run that dispatched it. With the key empty, or on a harness with no delegate to hand the phase to, the migrations run in place as before — and either way, a run picking the work up later starts from the rows still `pending`.
 
 ### Main outputs
 
@@ -626,6 +630,8 @@ A leaf can pass every other check and still be too big for one run — split wee
 
 Ordinary in-scope implementation and light validation proceed under the active tool's permission model. The skill stops for direction when a choice would materially change the scope.
 
+**The execute-and-verify phase can run on another model.** Items 4 and 5 above are where the run implements rather than judges, so where `STAR_EXEC_MODEL` names a model that phase goes to one delegate on it: the delegate picks the run up at the first unfinished action and returns when the loop ends, while everything around it — the gap list, the `EXEC_PLAN` and its approval, finalization, and the write-back into the sub-plan — stays on PLAN. It is kept narrow on purpose: it may not edit `EXEC_PLAN.md`, an action it cannot do as written stops and comes back rather than being improvised, a STOP-line command is recorded in `EXEC_LOG.md` and ends its turn there, and finalizing is never its to do. The dispatching run re-reads the log and carries on. With the key empty, or on a harness with no delegate to hand the phase to, the loop runs in place exactly as before; the hand-over is not a question at any involve level, since it changes which model executes the step and not what the step does.
+
 ### The STOP line
 
 The skill never starts these on its own:
@@ -734,7 +740,7 @@ star-expt-analyst                                # list the runs on disk and pic
 star-expt-analyst watch 01                       # health read of a possibly still-running run
 ```
 
-A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkdrs/<run>/` path back-resolves to its plan. `watch` (same argument forms) is a chat-only health read for a run that may still be executing — log health and liveness, no verdict, no files — for while a long training job the STOP line handed back is still going.
+A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkdrs/<run>/` path back-resolves to its plan. `watch` (same argument forms) is a chat-only health read for a run that may still be executing — log health and liveness, no verdict, no files — for while a long training job the STOP line handed back is still going. Both `watch` and `aggregate` run on READ rather than the analyst's own PLAN: one reads a live log for health, the other compiles and re-checks numbers the individual reports have already interpreted (conventions §10.8).
 
 ### What it does
 
@@ -831,7 +837,7 @@ The digest is **report-level, not re-verified**: unlike `aggregate`, it copies a
 
 ### What it may write
 
-This skill is **read-only apart from its own digest**. It never edits plans, `exec_status`, `EXEC_LOG.md`, an analysis report, or the results table, and never runs anything to fill a gap — every gap is a listed line with the command that closes it. It never says *why* a variant won either: like the results table, it reports the direction of a change and routes the interpretation.
+This skill is **read-only apart from its own digest**. It never edits plans, `exec_status`, `EXEC_LOG.md`, an analysis report, or the results table, and never runs anything to fill a gap — every gap is a listed line with the command that closes it. It never says *why* a variant won either: like the results table, it reports the direction of a change and routes the interpretation. Being read-only end to end is what puts this skill and `star-flow-status` on the READ tier — the pair whose model a harness may fix in the manifest itself, stamped there from `.env` (conventions §10.8).
 
 ### Practical guidance
 
@@ -933,7 +939,7 @@ star-flow-status 01
 - Drift such as a child older than its parent, dangling links, invalid dependencies, or orphaned runs;
 - An unrecognized-files line counting report-shaped files that match no known artifact pattern, so a producer skill's renamed output is noticed rather than silently dropping out of the follow-up checks.
 
-This skill is **strictly read-only**. It scans the artifacts listed in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, `wkdrs/digests/`, `wkdrs/results/`) — creating or modifying nothing. Being the most-run skill in the flow, its whole input — the conventions excerpts, its spec, the digest from one read-only scan script (`scripts/scan.sh` in its own directory) — arrives in a single opening message instead of one read per file; the script only gathers, so every rule it feeds stays in the skill.
+This skill is **strictly read-only**. It scans the artifacts listed in §8 of the conventions — `metds/ideas/`, `metds/plans/`, `metds/refs/`, the compiled `metds/*.md`, the logs and reports under `wkdrs/` (run dirs, plus `wkdrs/reviews/`, `wkdrs/env_<name>_<date>/`, `wkdrs/digests/`, `wkdrs/results/`) — creating or modifying nothing. Being the most-run skill in the flow, its whole input — the conventions excerpts, its spec, the digest from one read-only scan script (`scripts/scan.sh` in its own directory) — arrives in a single opening message instead of one read per file; the script only gathers, so every rule it feeds stays in the skill. Reading and nothing else also puts it, with `star-expt-digest`, on the READ tier: those two are the only runs whose model a harness may fix in the skill's own manifest instead of at dispatch, and `bash execs/update.sh --models` stamps `STAR_READ_MODEL` into those manifests from `.env`, offline (conventions §10.8).
 
 See the complete definition in [`star-flow-status/SKILL.md`](../../../.agents/skills/star-flow-status/SKILL.md).
 
@@ -1043,7 +1049,7 @@ It prepares a release; it never publishes one. No `git push`, no remote or branc
 
 ### Practical guidance
 
-- Run `check` early and often — long before you intend to release. A `/home/<you>/` path found in month two costs a `sed`; found the day before submission it costs a scramble.
+- Run `check` early and often — long before you intend to release. A `/home/<you>/` path found in month two costs a `sed`; found the day before submission it costs a scramble. It is also the one mode that runs on READ rather than the skill's own EXEC, writing nothing but its report (conventions §10.8).
 - Run the producers first when the readiness table is mostly red. A README compiled from four missing method documents is a list of TODOs: honest but not useful.
 - Most of `tasks/` should come back `keep in place`. That is the promotion test working, not failing — scratch is meant to be disposable.
 - Re-run `readme` whenever the results table or the method documents move. Hand edits to a section survive regeneration; the marker is what makes that possible.
