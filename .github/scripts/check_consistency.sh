@@ -198,6 +198,49 @@ while IFS= read -r skill; do
 done < <(printf '%s\n' "${SKILLS}")
 (( guard_errors == 0 )) && note "conventions and shared /star router list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
+# 4a. The roster's second column, and the one part of the tier mechanism that is
+#     static. Conventions §10.8 sends a run to the model named by the tier this
+#     column carries, so a row that lost its tier quietly leaves that skill on
+#     whichever model happened to be running, and a zh row disagreeing with its
+#     en twin puts the same skill on two different models depending on which
+#     edition the project reads. Neither failure prints anything in use: the run
+#     works, on the wrong model. Both are checked here because nothing else
+#     reads this column.
+#     The second half holds a producer/consumer pair. The .claude manifests that
+#     fork in frontmatter are exactly the manifests `execs/update.sh --models`
+#     stamps a `model:` line into; add one to either side alone and it either
+#     forks on the model it shipped with and never sees .env, or gets stamped
+#     with a model nothing forks it on. There is deliberately no check that
+#     `context: fork` implies the read tier — the read tier is strictly larger
+#     than those two skills, since §10.8's mode exceptions run `aggregate`,
+#     `watch` and `check` there from skills the roster tiers elsewhere, so
+#     pinning the two together would assert an invariant the design does not hold.
+section "Roster run tiers"
+tier_errors=0
+TIER_NAME='s/^\| `(star-[a-z-]+)`( †)? \| (plan|exec|read) \|.*/\1/p'
+TIER_PAIR='s/^\| `(star-[a-z-]+)`( †)? \| (plan|exec|read) \|.*/\1 \3/p'
+TIERED="$(roster_rows "${CONVENTIONS}" "${TIER_NAME}")"
+if [[ "${TIERED}" != "${ROSTER_ALL}" ]]; then
+    fail "${CONVENTIONS}: not every §10 roster row carries a tier in {plan, exec, read}:"
+    diff <(printf '%s\n' "${ROSTER_ALL}") <(printf '%s\n' "${TIERED}") | sed 's/^/      /'
+    tier_errors=1
+fi
+TIERS_EN="$(roster_rows "${CONVENTIONS}" "${TIER_PAIR}")"
+TIERS_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${TIER_PAIR}")"
+if [[ "${TIERS_EN}" != "${TIERS_ZH}" ]]; then
+    fail "${CONVENTIONS_ZH}: the zh §10 roster does not give each skill the tier the en roster gives it:"
+    diff <(printf '%s\n' "${TIERS_EN}") <(printf '%s\n' "${TIERS_ZH}") | sed 's/^/      /'
+    tier_errors=1
+fi
+FORKED_MANIFESTS="$(grep -l '^context: fork' .claude/skills/*/SKILL.md .claude/skills/*/SKILL_zh.md 2>/dev/null | sort)"
+STAMPED_MANIFESTS="$(grep -oE '\.claude/skills/[a-z-]+/SKILL(_zh)?\.md' execs/update.sh | sort -u)"
+if [[ "${FORKED_MANIFESTS}" != "${STAMPED_MANIFESTS}" ]]; then
+    fail "the .claude manifests carrying 'context: fork' are not the ones execs/update.sh names for its --models stamp:"
+    diff <(printf '%s\n' "${FORKED_MANIFESTS}") <(printf '%s\n' "${STAMPED_MANIFESTS}") | sed 's/^/      /'
+    tier_errors=1
+fi
+(( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, en and zh agree on every one, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/update.sh stamps"
+
 # 4b. Codex, Kimi and DSH need harness-owned packages for the generic router.
 #     Codex alone exposes one marketplace file through .agents; the other two
 #     packages remain entirely inside their harness trees.
@@ -1172,7 +1215,7 @@ CONV_HEADINGS=(
     '10. The skill roster'
     '11. Execution branches and worktrees'
 )
-CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|9" "7|13" "10|7" "11|9")
+CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|10" "7|13" "10|8" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
 # against it, and check 20d derives the stay-out complement from it, so adding
 # a section here is all it takes to make one citable and load-accounted.
