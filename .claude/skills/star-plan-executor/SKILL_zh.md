@@ -82,7 +82,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 ### Step 4：审批确认点（`ExitPlanMode`）
 
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 `Agent` 子代理（`subagent_type: Explore`），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 `Agent` 子代理（`subagent_type: Explore`、`model:` 取开场装载返回的 PLAN 档值，该键为空时不带这个参数），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 
 1. `ExitPlanMode` 呈现 EXEC_PLAN + 预计会做出的改动:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否给每个通过验证的步骤单独提交一次(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>` 或 `worktree: <path>`,这两问都搭在同一个确认点上,措辞照 `references/branch_rules_zh.md` 写(规约 §11、§11.7)。`low` 档不发起这次调用:同样的材料完整写进回复正文,搭在其上的几问取各自推荐项,这次未经询问的放行记入决策记录,随即不等回答进入第 2 项。
 2. 批准后——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
@@ -94,7 +94,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 对 EXEC_PLAN 的步骤,主 agent 按依赖关系自主调度——独立步骤并发还是串行由它自行判断(`references/agent_dispatch_spec_zh.md`)。带 `tier=exec` 的受托者只跑这个循环:从第一个未完成的步骤接手,循环一结束就返回,Step 6 留给派它出来的那次运行。对每个步骤:
 
-1. 按 `references/agent_dispatch_spec_zh.md` 的交办说明派一个 `Agent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`、`model: sonnet`）:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
+1. 按 `references/agent_dispatch_spec_zh.md` 的交办说明派一个 `Agent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`；`model:` 取开场装载返回的 EXEC 档值，只读勘察那种情况取 READ 档值，键为空时不带这个参数）:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
 2. agent 返回后,**主 agent 重跑绑定的 check**(没有证据就绝不轻信自报的通过)。通过 → 记入 `EXEC_LOG.md`、更新子计划轻量状态,并在确认点批准了逐步提交时,提交本步触碰的文件;在执行分支上,这次提交连同本步更新过的运行记录一起暂存,因为只有提交才会被合并(规约 §11.2)。失败 → 主 agent 自己那次重跑就是证据:读失败点名的 `file:line`;只有在要判 `blocked`、或失败看起来是子计划粒度的问题时(第 4 条),才展开 agent 的完整 diff。重试之前先恢复这一步名下的文件;有限重试(≤2)并把失败信息回传;仍失败 → 该步标 `blocked`,定下它那些改动怎么处理(`agent_dispatch_spec_zh.md`),带日志停下。
 3. **若该步在红线上**(重实验)→ **不**派它执行;把备好的命令写进 EXEC_LOG 的"待用户执行"区,连同预计开销(GPU 数 × 小时,或调用次数与费用)在"开销"一节记一行,停下交回用户。用户带着结果回来时,把实际开销补进那一行——根计划 §4 算力预算唯一的对账处;拿不到实际值就写 `未记`,绝不留空。
 4. 若重试或 blocker 导致做法在子计划粒度上变了(步骤增/删/替换、产出路径或完成判据移位),在 EXEC_LOG 的"待同步修正"区记一行变更项后继续——这些留到 Step 6 同步,不在执行中途处理。

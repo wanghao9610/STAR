@@ -53,7 +53,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 2. **两个确认点，确认点之间自主。**确认点 1：用户从打分候选中选定参考库。确认点 2：用户批准目标架构与迁移表。两个确认点之间和之后的工作自主推进、有限次重试。确认点没有覆盖的事不做。
 3. **上游结构为基线。**克隆库组织经过实战检验，不做整体重排。改进以小步迁移项推进——逐项批准、逐项验证；新克隆的库迁移表往往很短甚至为空，"零迁移"也是合法结果。
 4. **保守改名，完整溯源。**只改安全且必要的名称（顶层包、全部 import、打包元数据、命令行入口、README 标题），每改一处验证一次。注册表字符串、配置 `type:` 键、与 checkpoint 耦合的名称**一律不动**，进入残留清单。去除 `.git`，保留上游 `LICENSE` / `CITATION` 文件，并在 import 提交前把源 URL + commit + 许可证写入 `${CODE_NAME}/UPSTREAM.md`。清单见 `references/rebrand_checklist_zh.md`。
-5. **主 agent 编排与复核，`Agent` subagent 执行。**勘察交给只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`）；迁移交给 `Agent` subagent（`subagent_type: general-purpose`），其写入仅限本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就提交一次，重试 ≤2 次，仍失败则恢复该组文件。规范见 `references/orchestration_spec_zh.md`。
+5. **主 agent 编排与复核，`Agent` subagent 执行。**勘察交给只读 `Agent` subagent（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数）；迁移交给 `Agent` subagent（`subagent_type: general-purpose`、`model:` 取开场装载返回的 EXEC 档值，该键为空时不带这个参数），其写入仅限本组自己的文件。两者都是文件所有权互不相交、返回结构化结果。主 agent 亲自重跑每项检查（不信任自报的 pass），每验证完一组就提交一次，重试 ≤2 次，仍失败则恢复该组文件。规范见 `references/orchestration_spec_zh.md`。
 6. **单一规范，一小段指路说明。**持久产物是 `metds/codearc.md`——目录职责、放置规则、命名与风格约定、计划各组件对应的代码路径、迁移记录、改名残留。`AGENTS.md` 加一节 ≤10 行摘要并指向它（只改 `AGENTS.md`——`CLAUDE.md` 是它的软链），`.cursor/rules/code-codearc.mdc` 放一条常驻指路说明。规范内容绝不复制成多份。
 
 ## 工作流
@@ -74,7 +74,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 #### Step B1：勘察
 
-派发只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——并行派发，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
+派发只读 `Agent` subagent（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数），一个关注点一组——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——并行派发，各自按 `references/survey_spec_zh.md` 返回结构化报告。主 agent 汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
 
 ### 汇合：架构、迁移、规范
 
@@ -92,7 +92,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 #### Step C3：执行迁移
 
-把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组并行派发，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: general-purpose`），交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
+把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组并行派发，有依赖的组串行。每组派发一个 `Agent` subagent（`subagent_type: general-purpose`、`model:` 取开场装载返回的 EXEC 档值，该键为空时不带这个参数），交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 
 #### Step C4：写出规范
 

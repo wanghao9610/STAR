@@ -49,7 +49,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 ## 核心原则
 
 1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线对你同样生效）。这是把项目的 Verification 规则（CLAUDE.md §11）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: Explore`、`model: sonnet`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
+2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `Agent` subagent**（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
 3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次** AskUserQuestion 把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `star-plan-decomposer`；研究问题或方法级转向转给 `star-plan-coach`——而目标自己的概要行，即还没展开成文件的单元（规约 §0），只是文字，仍属 local 候选。边界见 `references/revision_rules_zh.md`。
@@ -73,7 +73,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径、§2–§3 没有点名任何代码模块——通常由主 agent 自己读更省事：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
 
-规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
+规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `Agent` subagent（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 

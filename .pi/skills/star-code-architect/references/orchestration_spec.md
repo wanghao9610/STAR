@@ -8,7 +8,7 @@ How the main agent coordinates subagents for this skill. Sibling spec: the execu
 - **Survey passes** — read-only, one area each (`survey_spec.md`).
 - **Migration passes** — one per migration group, writing only that group's files.
 
-A delegated migration group runs on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
+A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
 
 ## Partitioning migrations
 

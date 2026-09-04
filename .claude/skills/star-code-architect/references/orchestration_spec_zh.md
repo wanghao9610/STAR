@@ -5,10 +5,10 @@
 ## 角色
 
 - **主 agent（架构师）**——制定方案、执行两个确认点、划分工作、亲自重跑检查、每组提交一次、恢复失败的组。
-- **勘察者**——只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），一组一个（`survey_spec_zh.md`）。
-- **迁移者**——`Agent` subagent（`subagent_type: general-purpose`），每组一个，写权限仅限本组文件。
+- **勘察者**——只读 `Agent` subagent（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数），一组一个（`survey_spec_zh.md`）。
+- **迁移者**——`Agent` subagent（`subagent_type: general-purpose`、`model:` 取开场装载返回的 EXEC 档值，该键为空时不带这个参数），每组一个，写权限仅限本组文件。
 
-委派出去的迁移组跑在 EXEC 档的模型上——前提是这个 harness 能指定受托者用哪个模型（规约 §10.8）；键为空、或 harness 指定不了，这里别的什么都不变。
+委派出去的勘察分组跑在 READ 档的模型上，委派出去的迁移组跑在 EXEC 档的模型上——前提是这个 harness 能指定受托者用哪个模型（规约 §10.8）；键为空、或 harness 指定不了，这里别的什么都不变。
 
 ## 迁移分组
 

@@ -8,7 +8,7 @@ How this skill structures survey and migration work. Sibling spec: the executor'
 - **Survey areas** — read-only (`survey_spec.md`); sequential locally, or delegated when bounded and independent.
 - **Migration groups** — one unit of work each; writes limited to the group's files, whether executed locally or delegated.
 
-A delegated migration group runs on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
+A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
 
 ## Partitioning migrations
 

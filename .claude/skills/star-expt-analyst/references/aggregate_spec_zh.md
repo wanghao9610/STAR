@@ -40,7 +40,7 @@
 
 ## 规模
 
-一次汇总涉及 ≤ ~6 份报告时通常由主 agent 直接读更省事。多于这个数,就把**报告路径**切分给只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`）,并行派发,每个拿到确切清单和下面这份返回格式:
+一次汇总涉及 ≤ ~6 份报告时通常由主 agent 直接读更省事。多于这个数,就把**报告路径**切分给只读 `Agent` subagent（`subagent_type: Explore`、`model:` 取开场装载返回的 READ 档值，该键为空时不带这个参数）,并行派发,每个拿到确切清单和下面这份返回格式:
 
 ```yaml
 - run: <slug>

@@ -1,10 +1,15 @@
 # Pi: the question tool is the vendored star_questionnaire, sub-agents go through
-# star_subagent, the shell is bash and the reader is read.
+# star_subagent, the shell is bash and the reader is read. star_subagent takes no
+# model parameter, so the tier clause is dropped (conventions §10.8).
 AskUserQuestion	`star_questionnaire`
 `Agent`	`star_subagent`
 \bBash\b	`bash`
 `Read`	`read`
 CLAUDE\.md	AGENTS.md
 CLAUDE	AGENTS
-, `model: sonnet`	
-、`model: sonnet`	
+, `model:` the (?:READ|EXEC|PLAN) tier value the opening load returned, omitted when that key is empty	
+、`model:` 取开场装载返回的 (?:READ|EXEC|PLAN) 档值，该键为空时不带这个参数	
+; `model:` the EXEC tier value the opening load returned, the READ tier value for that read-only case, omitted when the key is empty	
+；`model:` 取开场装载返回的 EXEC 档值，只读勘察那种情况取 READ 档值，键为空时不带这个参数	
+, unless the EXEC tier value the opening load returned is non-empty, in which case it names that	
+;开场装载返回的 EXEC 档值非空时改为指定那个值	

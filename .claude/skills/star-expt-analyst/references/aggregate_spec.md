@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers: that is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `Agent` subagents (`subagent_type: Explore`, `model: sonnet`), run in parallel, each given its exact list and this return format:
+A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value the opening load returned, omitted when that key is empty), run in parallel, each given its exact list and this return format:
 
 ```yaml
 - run: <slug>

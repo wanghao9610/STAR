@@ -74,14 +74,14 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 6. 先按 `references/branch_rules_zh.md` 的“创建”建起获批的分支或树，让下面的一切都生在它上面。`<plan-name>` 取所选文件名去掉 `_plan.md`，为计划中间文件创建 `tasks/<plan-name>/`。**run 名为 `<prefix>_<slug>`**；重跑时追加用户给的后缀（`_v2`、某个日期）以示区分，该目录已存在但不是此 leaf 可恢复的 run 时，问一个后缀——绝不自行编造。从匹配语言的模板创建 `wkdrs/<run>/EXEC_PLAN.md`，并在同目录初始化 `EXEC_LOG.md`。把子计划 frontmatter 更新为 `exec_status: in_progress`，并将本 run **追加**到 `exec_runs`，不能替换最后一项——这段历史使 `star-expt-analyst aggregate` 能看到该 leaf 的每次运行。仍使用单个 `exec_run:` 的计划先迁移为 `exec_runs: [<that run>]`。此时把已确认的偏差行同步进子计划：原地更新受影响的 §2–§5 段落，追加 `## Revision History` 条目，更新 `updated`，并把每行标为 `synced`。
 
 
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理跑在 PLAN 档的模型上（规约 §10.8，前提是这个 harness 能指定受托者用哪个模型：重读一遍已完成的工作属于研究判断），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 
 **把 Step 4 交给 EXEC 档。** EXEC_PLAN 与 EXEC_LOG 已经落盘、批准也已记下之后，若开场装载取回的 `STAR_EXEC_MODEL` 非空，且本 run 自身不是已经带着 `tier=exec` token 的受托者：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完，按 `references/resume_rules_zh.md` 从 Step 4 接着跑这次运行，带上 `involve=<level> tier=exec`，本 run 手上有 `auto=unattended` 授权时一并带上。它不得修改 EXEC_PLAN；照原样做不了的 action 就停下返回，绝不自行发挥；STOP line 上的命令照 Step 4 的写法写进 EXEC_LOG，然后返回；Step 4 一结束它就返回，不碰 Step 5。它返回后重读 EXEC_LOG，再从 Step 5 接着走。键为空、或这个 harness 派不出受托者时，Step 4 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则；这里只写本 skill 怎么把这个阶段交出去。
 ### Step 4：执行与验证
 
 主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。带 `tier=exec` 的受托者只跑这一步：从第一个未完成的 action 接手，本步一结束就返回，Step 5 留给派它出来的那次运行。对每个 action：
 
-1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理（只读勘察用只读子代理），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
+1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理、跑在 EXEC 档的模型上（只读勘察用只读子代理，跑在 READ 档的模型上），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其范围受限检查。
 3. 在主 agent 中重跑或独立验证范围受限检查。通过后，记录证据和产物路径；若逐 action 提交已获批准，则提交该 action 的文件——在执行分支上，这次提交连同本 action 更新过的运行记录一起暂存，因为只有提交才会被合并（规约 §11.2）。失败后，主 agent 自己那次重跑就是证据：读失败点名的 `file:line`；只有在要判 `blocked`、或失败看起来是子计划粒度的问题时，才展开受托者的完整 diff。重试之前先恢复这个动作名下的文件；若有具体修复可做，诊断并最多重试两次；否则把 action 标为 `blocked`，按 `agent_dispatch_spec_zh.md` 定下它那些改动的去留，然后停止。
 4. action 跨越 STOP line 时，准备准确命令（还可选写入 `execs/scpts/<run>.sh`），记录到 `Awaiting user`，并在 `开销` 一节记一行预计开销（GPU 数 × 小时，或调用次数与费用），不运行并停止。用户带结果回来时把实际开销补进那一行——根计划 §4 算力预算唯一的对账处；拿不到实际值就写 `未记`，绝不留空。

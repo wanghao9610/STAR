@@ -1,14 +1,18 @@
 # Qwen Code: shell is run_shell_command, reader is read_file, questions are
 # ask_user_question; plan-mode tools are snake_case; AGENTS.md is the context file.
+# No per-subagent model hint, so the tier clause is dropped (conventions §10.8).
 AskUserQuestion	`ask_user_question`
 `Agent`	`agent`
 \bBash\b	`run_shell_command`
 `Read`	`read_file`
 CLAUDE\.md	AGENTS.md
 CLAUDE	AGENTS
-, `model: sonnet`	
-、`model: sonnet`	
-with `model: sonnet` 	
+, `model:` the (?:READ|EXEC|PLAN) tier value the opening load returned, omitted when that key is empty	
+、`model:` 取开场装载返回的 (?:READ|EXEC|PLAN) 档值，该键为空时不带这个参数	
+; `model:` the EXEC tier value the opening load returned, the READ tier value for that read-only case, omitted when the key is empty	
+；`model:` 取开场装载返回的 EXEC 档值，只读勘察那种情况取 READ 档值，键为空时不带这个参数	
+, unless the EXEC tier value the opening load returned is non-empty, in which case it names that	
+;开场装载返回的 EXEC 档值非空时改为指定那个值	
 `ExitPlanMode`	`exit_plan_mode`
 ExitPlanMode	exit_plan_mode
 EnterPlanMode	enter_plan_mode

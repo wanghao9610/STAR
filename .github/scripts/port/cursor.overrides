@@ -139,7 +139,7 @@ Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, r
 ### Step 5: Execute–verify loop (one Task subagent per step / step-group)
 ### star-plan-executor/SKILL.md
 --- 1
-1. Dispatch an `Task` subagent (`subagent_type: explore`, or `Explore` with `model: sonnet` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
+1. Dispatch an `Task` subagent (`subagent_type: explore`, or `Explore` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
 +++ 1
 1. Dispatch a `Task` subagent (no `subagent_type` set, or `subagent_type: explore` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
 ### star-plan-executor/SKILL.md
@@ -211,7 +211,7 @@ Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, r
 # Agent Dispatch Brief (Cursor Task)
 ### star-plan-executor/references/agent_dispatch_spec.md
 --- 1
-One `Task` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: explore`; use `Explore` with `model: sonnet` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
+One `Task` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: explore`; use `Explore` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
 +++ 1
 One `Task` subagent per step (or coherent step-group) in EXEC_PLAN. A step that edits or runs is dispatched with no `subagent_type` set; use `subagent_type: explore` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
 ### star-plan-executor/references/agent_dispatch_spec_zh.md

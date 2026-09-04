@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers: that is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, selectively per the executor's Core Principle 3, partition the **report paths** and dispatch a read-only sub-agent for each selected read-only partition, run in parallel, each given its exact list and this return format:
+A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, selectively per the executor's Core Principle 3, partition the **report paths** and dispatch a read-only sub-agent on the READ tier's model for each selected read-only partition, run in parallel, each given its exact list and this return format:
 
 ```yaml
 - run: <slug>

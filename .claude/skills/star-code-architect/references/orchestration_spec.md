@@ -5,10 +5,10 @@ How the main agent coordinates subagents for this skill. Sibling spec: the execu
 ## Roles
 
 - **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits each verified group, restores what failed.
-- **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`, `model: sonnet`), one area each (`survey_spec.md`).
-- **Migrators** — `Agent` subagents (`subagent_type: general-purpose`), one per migration group, write access limited to their group's files.
+- **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value the opening load returned, omitted when that key is empty), one area each (`survey_spec.md`).
+- **Migrators** — `Agent` subagents (`subagent_type: general-purpose`, `model:` the EXEC tier value the opening load returned, omitted when that key is empty), one per migration group, write access limited to their group's files.
 
-A delegated migration group runs on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
+A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
 
 ## Partitioning migrations
 
