@@ -1402,7 +1402,7 @@ done
 #     rather than on Bash carrying any conventions text.
 section "Opening-load invariants"
 open_errors=0
-LOOKUP_LINE="grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'"
+LOOKUP_LINE="grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'"
 lang_seen="$(mktemp)"
 bq_seen="$(mktemp)"
 

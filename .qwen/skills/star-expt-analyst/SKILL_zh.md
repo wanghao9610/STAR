@@ -23,7 +23,7 @@ description: >-
 动手前把它合成一条消息装载——三次 `run_shell_command` 调用，以项目根目录为工作目录，一起发出；完整分析路径上，同一条消息里再加一次 `read_file`：`<本 skill 所在目录>/references/analysis_rubric_zh.md`，即 Step 2–5 遵循的评分表；aggregate 与 watch 模式去掉评分表那次读取，各自的参考文件到点名它的步骤再装。
 
 ```bash
-grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
 awk '/^## /{k=/^## (0|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
@@ -35,7 +35,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-一条消息，三个 `run_shell_command` 结果——完整分析路径上，外加那次 `read_file` 拿到的评分表。三次调用分开发，是因为每个工具结果各有自己的尺寸上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那次往返——而规约摘录合计约 54 KB，三次调用分担 16、20、18。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。
+一条消息，三个 `run_shell_command` 结果——完整分析路径上，外加那次 `read_file` 拿到的评分表。`.env` 那一行搭第一次调用的车：回复语言、提问档位，以及本次运行与它派出的每个子代理取模型所依据的三个模型键（§10.8）。三次调用分开发，是因为每个工具结果各有自己的尺寸上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那次往返——而规约摘录合计约 54 KB，三次调用分担 16、20、18。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

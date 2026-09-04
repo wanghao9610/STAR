@@ -34,7 +34,7 @@ description: >-
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，更严之处以本文件为准。文献分析者真正据以行事的部分——§0 词汇表、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表——就是本 skill 的开场装载，动手前以项目根目录为工作目录、用同一条消息里的两次 `run_shell_command` 调用取来：
 
 ```bash
-grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
 awk '/^## /{k=/^## (0|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
@@ -42,7 +42,7 @@ awk '/^## /{k=/^## (0|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-c
 awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
-`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7）；探测与前半各节同在第一次调用里；同一条消息里的多次调用之间只算一趟往返，不是各占一趟。每行 `awk` 只打印它上面点名的那几节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。规约摘录合计约 34 KB——两次调用各约 14 KB 与 20 KB——因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而整份挤在一次调用里现在正好会这样。
+`STAR_LANG` 定回复语言（§7.6）、`INVOLVE` 定提问档位（§7.7），三个模型键则是本次运行与它派出的每个子代理取模型的来源（§10.8）；探测与前半各节同在第一次调用里；同一条消息里的多次调用之间只算一趟往返，不是各占一趟。每行 `awk` 只打印它上面点名的那几节，别的都不打印；若打印出来的内容里少了其中任何一节——下游同步的规约副本可能过旧、条号不同——就改为整份读入。规约摘录合计约 34 KB——两次调用各约 14 KB 与 20 KB——因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而整份挤在一次调用里现在正好会这样。
 
 有两节不装载，是因为本 skill 从不做它们管的事：§1 git——本 skill 从不提交，状态与文件规则已写明；§2 红线——本 skill 不跑重活，全部联网行为由核心原则 6 与 `references/source_policy_zh.md` 划定边界，而 §2 本会触发的那些确认另有归属，且都在装载范围内（§7.7 自己的"删除与覆盖"一类、§3.5 的禁装规定）。另有两处不装载，是因为本 skill 需要的部分已经在手：§9 项目布局——它要裁定的放置问题，状态与文件规则裁得比 §9 更严；以及规约的前言——它那条优先级规则（基线与更严者的关系）就是本段开头写的那一条。还有 §10 skill 名册不装载——这次运行能不能不经点名启动，在本文件打开之前就已定夺，这种运行随身的义务在对话纪律一节有复述。§11 执行分支随 §1 一同不装载：开分支属于会写项目代码的 skill，而本 skill 根本从不提交。哪次运行真需要其中某节，再整份读回。开场装载只有这份规约摘录：其余资源——`references/source_policy_zh.md`、`references/refs_rubric_zh.md`、`assets/` 模板——各属于特定模式与步骤，工作流引到哪一步才读，不预先装载。
 

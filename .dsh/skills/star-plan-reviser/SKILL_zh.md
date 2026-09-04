@@ -17,7 +17,7 @@ description: >-
 动手前把它合成一条消息装载——四次 bash 调用（以项目根目录为工作目录）一起发出，外加两次 `read`：`<本 skill 所在目录>/references/review_spec_zh.md` 与 `<本 skill 所在目录>/references/revision_rules_zh.md`，每份文件各占一次。
 
 ```bash
-grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
 awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
 ```
 
@@ -33,7 +33,7 @@ awk '/^## /{k=/^## (10|11)\./} k' docs/mds/star-workflow/research-workflow-conve
 bash <本 skill 所在目录>/scripts/scan.sh --slim
 ```
 
-一条消息、六份结果：规约来自前三次 bash 调用（`.env` 那一行搭第一次的车），`references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式）各自来自单独的一次 `read`，共享采集脚本的摘要来自最后一次调用。各次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那趟往返——而规约摘录合计约 57 KB，三次调用分担 20、20、16，每次 `read` 的结果则各占自己的额度、整份直达；采集那次调用单独发，因为它的摘要是整套装载里唯一随历史增长的部分——真被存成文件，也只重跑它这一行。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把摘要压在大小上限以内的手段。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
+一条消息、六份结果：规约来自前三次 bash 调用（`.env` 那一行搭第一次的车），`references/review_spec_zh.md`（证据来源、收集器格式约定、报告各节的定义）与 `references/revision_rules_zh.md`（权限表、转交边界、Revision History 条目格式）各自来自单独的一次 `read`，共享采集脚本的摘要来自最后一次调用。`.env` 那一行取的是回复语言、提问档位，以及本次运行与它派出的每个子代理取模型所依据的三个模型键（§10.8）。各次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——恰是这条消息要省掉的那趟往返——而规约摘录合计约 57 KB，三次调用分担 20、20、16，每次 `read` 的结果则各占自己的额度、整份直达；采集那次调用单独发，因为它的摘要是整套装载里唯一随历史增长的部分——真被存成文件，也只重跑它这一行。每个 `awk` 只打印它上面点名的节；若打印结果缺了哪一节——同步下来的旧规约可能节号不同——就退回整份读。采集脚本的摘要正是 Step 0 用来解析、Step 1 用来圈定证据的依据：每个计划的 frontmatter（`parent:`、`children:`、`depends_on`、`status`、`exec_status`、`exec_runs`、`updated`）、它的 `## Sub-plans` 索引，以及每份运行日志的 frontmatter——目标计划的兄弟节点、内部节点的 children，都不必再逐个打开。脚本只收集，从不判断：不建树、不给结论、不排序；把它打印的内容当作原始文件内容来读，就像你自己逐个打开过一样。`--slim` 是在有历史的项目上把摘要压在大小上限以内的手段。若脚本缺失或执行失败，退回直接读 `metds/plans/*_plan.md`，并在回复里说明这次走了退路。`references/` 下这两份文件从收集证据的第一步到最后一处写入都在生效，所以随开头这条消息到达，而不是等到流程中途；后文引用到其中任一份时，内容已经在这条消息里拿到——不要再打开一遍。`assets/` 下的报告模板不进这条消息：填哪个变体跟随计划的 `language`，要等 Step 0 解析出目标计划才知道。
 
 **复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的 `STAR_LANG` / `INVOLVE` 取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
 

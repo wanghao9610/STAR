@@ -25,7 +25,7 @@ Invocation: `star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | wa
 Before acting, load it in one message — three Shell calls with the project root as the working directory, sent together, plus — on the full-analysis path — `<this skill's directory>/references/analysis_rubric.md` as its own `Read` in the same message, the rubric Steps 2–5 follow; aggregate and watch modes drop the rubric read and load their own references at the step that names them.
 
 ```bash
-grep -sE '^(STAR_LANG|INVOLVE)=' .env || echo 'STAR_LANG / INVOLVE: unset'   # reply language, question level (§7.6, §7.7)
+grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
 awk '/^## /{k=/^## (0|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 
@@ -37,7 +37,7 @@ awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-convent
 awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
 ```
 
-One message, three Shell results — and, on the full-analysis path, the rubric from its `Read`. The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 56 KB in total, split 17, 21 and 19 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead.
+One message, three Shell results — and, on the full-analysis path, the rubric from its `Read`. The `.env` line rides the first call: the reply language, the question level, and the three model keys this run and every delegate it dispatches take their model from (§10.8). The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 56 KB in total, split 17, 21 and 19 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead.
 
 **Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and the `.env` lookup's `STAR_LANG` / `INVOLVE` values. Read whatever you cannot see, in the one message described above. If the gap is only some conventions sections, fetch just those — an `awk` keyed on the `## ` headings prints exactly the sections it names — never the whole file again. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
 
