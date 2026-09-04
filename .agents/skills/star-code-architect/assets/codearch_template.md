@@ -51,11 +51,11 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## 6. Migration record
 
-<!-- Append-only log of structural migrations executed (or blocked) by star-code-architect. -->
+<!-- Append-only log of the structural migrations star-code-architect had approved. A row is written `pending` when the migration table is approved, and moves to `done` or `blocked` as its group verifies. -->
 
 | Date | Item | From → To | Confirmed at | Status | Verified by |
 |---|---|---|---|---|---|
-| <YYYY-MM-DD> | M1 | `<old>` → `<new>` | `<path:line>` | done / blocked | <check> |
+| <YYYY-MM-DD> | M1 | `<old>` → `<new>` | `<path:line>` | pending / done / blocked | <check> |
 
 ## 7. Names left unchanged on purpose
 

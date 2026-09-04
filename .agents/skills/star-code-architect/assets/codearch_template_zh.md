@@ -51,11 +51,11 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 ## 6. 迁移记录
 
-<!-- star-code-architect 执行（或受阻）的结构迁移，只增不删。 -->
+<!-- star-code-architect 批准过的结构迁移，只增不删。迁移表获批时先记一行 `pending`，各组验证后改成 `done` 或 `blocked`。 -->
 
 | 日期 | 条目 | 从 → 到 | 确认位置 | 状态 | 验证方式 |
 |---|---|---|---|---|---|
-| <YYYY-MM-DD> | M1 | `<旧>` → `<新>` | `<path:line>` | done / blocked | <检查> |
+| <YYYY-MM-DD> | M1 | `<旧>` → `<新>` | `<path:line>` | pending / done / blocked | <检查> |
 
 ## 7. 改名残留
 

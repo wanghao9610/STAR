@@ -79,6 +79,10 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 以普通文本展示架构摘要与编号迁移表。随后用 ask_user_question 确认：≤4 条时用 multi_select 逐条勾选；更多时给 *全部批准* / *全部批准但排除（在 Other 里写编号）* / *先解答我点名的几条* / *重新设计*——规约 §7.13 定的"先摊清单、再一次提问"。只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
 
+**先落盘，再迁移。** 拿到答复之后——包括"零迁移"这个答复——现在就按 `assets/codearch_template_zh.md` 写出 `metds/codearc.md`：C1 定下的全部内容，以及 §6（迁移记录）里每个获批条目一行、状态都写 `pending`。这个文件不存在之前，获批的迁移表只活在本轮对话里，运行在 C4 之前中断就把它丢了；C4 仍然负责补完这个文件——补那些只有迁移与验证才拿得到的内容。
+
+**把迁移交给 EXEC 档。** §6 里有 `pending` 条目、开场装载取回的 `STAR_EXEC_MODEL` 非空，且本 run 自身不是已经带着 `tier=exec` token 的受托者时：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完，按 `references/orchestration_spec_zh.md` 从这些条目续跑，带上 `involve=<level> tier=exec`。它完全照那份规范跑 C3 的分组，每组验证通过就把对应条目在 §6 改成 `done` 或 `blocked`，最后一组了结之后返回；它不写别的规范，也不往下做 C4。C4 归主 run：受托者返回后，主 run 从 §6 接着做。键为空、或这个 harness 派不出受托者时，C3 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则；这里只写本 skill 怎么把这个阶段交出去。
+
 #### Step C3：执行迁移
 
 把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组并行派发，有依赖的组串行。每组派发一个 `subagent`，交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。

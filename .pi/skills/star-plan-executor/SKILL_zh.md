@@ -88,9 +88,11 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 2. 批准之后才开始改动——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
 3. **把偏差同步回子计划**。若偏差表非空,刚获得的批准已覆盖此事:原地更新受影响的 §2–§5 段落,追加一条 `## Revision History` 条目,更新 `updated`,并给每行标记 `synced`(`references/plan_sync_rules_zh.md`)。
 
+**把 Step 5 交给 EXEC 档。** EXEC_PLAN 与 EXEC_LOG 已经落盘、批准也已记下之后,若开场装载取回的 `STAR_EXEC_MODEL` 非空,且本 run 自身不是已经带着 `tier=exec` token 的受托者:派一个可写子代理跑在那个模型上,交办说明为——把本 skill 的说明文件整份读完,按 `references/resume_rules_zh.md` 从 Step 5 接着跑这次运行,带上 `involve=<level> tier=exec`,本 run 手上有 `auto=unattended` 授权时一并带上。它不得修改 EXEC_PLAN;照原样做不了的步骤就停下返回,绝不自行发挥;STOP line 上的命令照 Step 5 的写法写进 EXEC_LOG,然后返回;Step 5 一结束它就返回,不碰 Step 6。它返回后重读 EXEC_LOG,再从 Step 6 接着走。键为空、或这个 harness 派不出受托者时,Step 5 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则;这里只写本 skill 怎么把这个阶段交出去。
+
 ### Step 5：执行—验证循环（一次一步 / 一个步骤组）
 
-对 EXEC_PLAN 的步骤,主 agent 按依赖关系自主调度——独立步骤并发还是串行由它自行判断(`references/agent_dispatch_spec_zh.md`)。对每个步骤:
+对 EXEC_PLAN 的步骤,主 agent 按依赖关系自主调度——独立步骤并发还是串行由它自行判断(`references/agent_dispatch_spec_zh.md`)。带 `tier=exec` 的受托者只跑这个循环:从第一个未完成的步骤接手,循环一结束就返回,Step 6 留给派它出来的那次运行。对每个步骤:
 
 1. 动手之前,先按 `references/agent_dispatch_spec_zh.md` 的格式约定把本步的交办说明写出来:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;结果按 changed / ran / check / blockers / handoff 陈述"。交办说明就是交给受托方的那份东西,也是防止这一步越做越宽的东西(规约 §6.1)。
 2. agent 返回后,**主 agent 重跑绑定的 check**(没有证据就绝不轻信自报的通过)。通过 → 记入 `EXEC_LOG.md`、更新子计划轻量状态,并在确认点批准了逐步提交时,提交本步触碰的文件;在执行分支上,这次提交连同本步更新过的运行记录一起暂存,因为只有提交才会被合并(规约 §11.2)。失败 → 主 agent 自己那次重跑就是证据:读失败点名的 `file:line`;只有在要判 `blocked`、或失败看起来是子计划粒度的问题时(第 4 条),才展开 agent 的完整 diff。重试之前先恢复这一步名下的文件;有限重试(≤2)并把失败信息回传;仍失败 → 该步标 `blocked`,定下它那些改动怎么处理(`agent_dispatch_spec_zh.md`),带日志停下。
@@ -138,4 +140,4 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - EXEC_PLAN 通过 `star_questionnaire` 交给用户,写任何文件、跑任何命令前都要一次明确批准(`low` 档不问就放行——见下面参与度档位一条)——仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
 - **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——待同步修正整批、交付批准的 EXEC_PLAN。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过了、不是被压缩了。
 - 子计划正文语言以其 `language` 为准;中文计划中专业术语保留英文。
-- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:Step 4 审批确认点(含逐步提交、执行分支与 worktree 三问)、红线(Step 5)、合并确认点与分支或 worktree 的弃用、移除或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会、以及 blocked 步骤那些改动的去留(两者都把关一次删除——`references/agent_dispatch_spec_zh.md`)。其中一项在 `low` 档不问就放行:Step 4 的审批确认点——跳过 Step 3 要说的那句,材料照常完整写进回复,搭在这个确认点上的几问取各自推荐项,这次未经询问的放行记入决策记录。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退与尺寸检查(取推荐项:送回 decomposer 并停下)、以及 Step 9 那个探索性叶子命令便宜时的跳过备选(取推荐项:启动审查)。启动审查本身在任何档位都不是一个问题——理由写在 Step 9。`high` 档:Step 5 每一步开工前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:Step 4 审批确认点(含逐步提交、执行分支与 worktree 三问)、红线(Step 5)、合并确认点与分支或 worktree 的弃用、移除或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会、以及 blocked 步骤那些改动的去留(两者都把关一次删除——`references/agent_dispatch_spec_zh.md`)。其中一项在 `low` 档不问就放行:Step 4 的审批确认点——跳过 Step 3 要说的那句,材料照常完整写进回复,搭在这个确认点上的几问取各自推荐项,这次未经询问的放行记入决策记录。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退与尺寸检查(取推荐项:送回 decomposer 并停下)、以及 Step 9 那个探索性叶子命令便宜时的跳过备选(取推荐项:启动审查)。启动审查本身在任何档位都不是一个问题——理由写在 Step 9;Step 4 把 Step 5 交给 EXEC 档同样不是问题:它换的是跑这个循环的模型,不是这个循环要做的事。`high` 档:Step 5 每一步开工前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。

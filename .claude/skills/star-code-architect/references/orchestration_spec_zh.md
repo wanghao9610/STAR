@@ -8,6 +8,8 @@
 - **勘察者**——只读 `Agent` subagent（`subagent_type: Explore`、`model: sonnet`），一组一个（`survey_spec_zh.md`）。
 - **迁移者**——`Agent` subagent（`subagent_type: general-purpose`），每组一个，写权限仅限本组文件。
 
+委派出去的迁移组跑在 EXEC 档的模型上——前提是这个 harness 能指定受托者用哪个模型（规约 §10.8）；键为空、或 harness 指定不了，这里别的什么都不变。
+
 ## 迁移分组
 
 1. 只取确认点 2 批准的条目。
@@ -35,6 +37,10 @@
 1. `python -m compileall -q ${CODE_NAME}`；环境可用时再做 import 扫描与快速测试。
 2. **通过** → 提交 `star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径；更新迁移记录。
 3. **失败** → 把失败信息回传，有限次重试（≤2）。仍失败 → 恢复该组路径（`git restore` / `git checkout -- <paths>`），在 `codearc.md` §6 把其条目标 `blocked` 并记下 blocker，继续其他组。
+
+## 续跑
+
+迁移表一获批，`codearc.md` §6（迁移记录）就写出来，每个获批条目一行、状态都是 `pending`。这个文件就是续跑点：中断之后接手的运行——换了一个会话，或者由受托者接下迁移这一阶段——读 §6，把仍然是 `pending` 的条目做完，并按上面的分组规则重新分组，而不是去猜一份自己看不到的分组。已经 `done` 的条目不重跑；已经 `blocked` 的保持 blocked，直到它记下的那个 blocker 有了答复。接下这一阶段的受托者，每组验证通过就更新对应条目，最后一条了结之后返回——规范与最终验证仍归派它出来的那次运行。
 
 ## 红线（本 skill 版本）
 

@@ -8,6 +8,8 @@ How the main agent coordinates subagents for this skill. Sibling spec: the execu
 - **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`, `model: sonnet`), one area each (`survey_spec.md`).
 - **Migrators** — `Agent` subagents (`subagent_type: general-purpose`), one per migration group, write access limited to their group's files.
 
+A delegated migration group runs on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
+
 ## Partitioning migrations
 
 1. Take only the items approved at confirmation point 2.
@@ -35,6 +37,10 @@ The **main agent re-runs the verification itself** — never trust a self-report
 1. `python -m compileall -q ${CODE_NAME}`; import sweep and quick tests when the env is usable.
 2. **Pass** → commit `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths; update the migration record.
 3. **Fail** → feed the failure back, bounded retry (≤2). Still failing → restore the group's paths (`git restore` / `git checkout -- <paths>`), mark its items `blocked` in `codearc.md` §6 with the blocker, continue with other groups.
+
+## Resume
+
+`codearc.md` §6 (the migration record) is written as soon as the migration table is approved, one row per approved item, each `pending`. That file is the resume point: a run picking the work up after an interruption — a new session, or a delegate taking the migration phase — reads §6 and works the items still `pending`, regrouping them by the partitioning rule above rather than trusting a grouping it cannot see. An item already `done` is not re-run; one already `blocked` stays blocked until the blocker it records is answered. A delegate that took the phase updates each item as its group verifies and returns when the last one is settled — the specs and the final verification stay with the run that dispatched it.
 
 ## STOP line (this skill's version)
 

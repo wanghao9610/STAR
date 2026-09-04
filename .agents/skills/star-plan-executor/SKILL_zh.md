@@ -75,9 +75,11 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 
 **发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理，交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+
+**把 Step 4 交给 EXEC 档。** EXEC_PLAN 与 EXEC_LOG 已经落盘、批准也已记下之后，若开场装载取回的 `STAR_EXEC_MODEL` 非空，且本 run 自身不是已经带着 `tier=exec` token 的受托者：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完，按 `references/resume_rules_zh.md` 从 Step 4 接着跑这次运行，带上 `involve=<level> tier=exec`，本 run 手上有 `auto=unattended` 授权时一并带上。它不得修改 EXEC_PLAN；照原样做不了的 action 就停下返回，绝不自行发挥；STOP line 上的命令照 Step 4 的写法写进 EXEC_LOG，然后返回；Step 4 一结束它就返回，不碰 Step 5。它返回后重读 EXEC_LOG，再从 Step 5 接着走。键为空、或这个 harness 派不出受托者时，Step 4 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则；这里只写本 skill 怎么把这个阶段交出去。
 ### Step 4：执行与验证
 
-主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。对每个 action：
+主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。带 `tier=exec` 的受托者只跑这一步：从第一个未完成的 action 接手，本步一结束就返回，Step 5 留给派它出来的那次运行。对每个 action：
 
 1. 决定本地执行还是委派。委派时调用你的子代理工具，实现工作使用可写子代理（只读勘察用只读子代理），遵循 `references/agent_dispatch_spec_zh.md`，并保持文件所有权不重叠。
 2. 只做该 action 必需的修改，并通过项目环境运行其范围受限检查。
@@ -118,4 +120,4 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 - 在非交互运行中（你的提问工具不可用），回退：把 EXEC_PLAN 以纯文本呈现，并在写任何文件、跑任何命令之前要求一次明确的纯文本批准（`low` 档不问就放行——见下面参与度档位一条）——仍然重实验前停，在任何同步回写子计划前仍需纯文本确认。
 - **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——待同步修正整批、交付批准的 EXEC_PLAN。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过了、不是被压缩了。
 - 匹配用户的对话语言，同时保留计划正文 frontmatter 的 `language`；中文计划中的技术术语保留英文。
-- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、合并确认点与分支或 worktree 的弃用、移除或删除（规约 §11）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。其中一项在 `low` 档不问就放行：Step 3 的那次暂停——逐 action 提交、执行分支与 worktree 三问及偏差行确认（它回写计划 §2–§5）——材料照常完整写进回复，各问取推荐项，这次未经询问的放行记入决策记录。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退与尺寸检查（取推荐项：送回 decomposer 并停下）、以及 Step 7 那个探索性叶子命令便宜时的跳过备选（取推荐项：启动审查）。启动审查本身在任何档位都不是一个问题——理由写在 Step 7。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+- 参与度档位（规约 §7.7）。本 skill 中不受档位影响：STOP line（Step 4）、合并确认点与分支或 worktree 的弃用、移除或删除（规约 §11）、Step 5 的 Pending amendments 整批同步、删草稿文件的提议（它把关一次删除），以及 blocked action 那些改动的去留（它同样把关一次删除——`references/agent_dispatch_spec_zh.md`）。其中一项在 `low` 档不问就放行：Step 3 的那次暂停——逐 action 提交、执行分支与 worktree 三问及偏差行确认（它回写计划 §2–§5）——材料照常完整写进回复，各问取推荐项，这次未经询问的放行记入决策记录。`low` 档不再问：Step 0 的选 leaf（按依赖序取第一个就绪的 leaf；目标缺失或有歧义仍要问，规约 §5.2）、Step 1 的就绪回退与尺寸检查（取推荐项：送回 decomposer 并停下）、以及 Step 7 那个探索性叶子命令便宜时的跳过备选（取推荐项：启动审查）。启动审查本身在任何档位都不是一个问题——理由写在 Step 7；Step 3 把 Step 4 交给 EXEC 档同样不是问题：它换的是跑这一步的模型，不是这一步要做的事。`high` 档：Step 4 每个 action 执行前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
