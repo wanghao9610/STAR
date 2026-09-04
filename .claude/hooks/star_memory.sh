@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# STAR SessionStart hook — inject the project's memory index into session context
-# so a session starts knowing what earlier sessions in this repository learned.
+# STAR SessionStart and SubagentStart hook — inject the project's memory index
+# into context so a run starts knowing what earlier sessions in this repository
+# learned.
 #
 # The store is .star/memory/ in the project, not the harness's own memory: one
 # file per fact, listed one line each in MEMORY.md, with machine-specific facts
@@ -12,8 +13,14 @@
 # nothing: the rule that creates the first memory is AGENTS.md section 10, which
 # is loaded anyway.
 #
-# Registered under hooks.SessionStart in .claude/settings.json. Prints one JSON
-# object whose additionalContext is added to context before the first prompt.
+# Registered under hooks.SessionStart (no argument) and, on Claude Code, under
+# hooks.SubagentStart (--subagent) in .claude/settings.json. A delegate is a run
+# in a context of its own that SessionStart never fires for, and the index is
+# worth as much to it as to the session that dispatched it. What is injected is
+# the same either way — the index does not depend on who is reading it — so the
+# argument settles nothing but the event name the output has to declare.
+event="SessionStart"
+[ "${1:-}" = "--subagent" ] && event="SubagentStart"
 
 # The payload is not read, but it is consumed: the runtime writes it to this
 # hook's stdin and a hook that never reads leaves that write to fail.
@@ -62,12 +69,14 @@ ${machine}"
 # than assumed quote-free; the last branch sanitizes instead, having no encoder
 # to hand, and joins the lines itself because a raw newline is invalid in JSON.
 if command -v jq >/dev/null 2>&1; then
-    jq -cn --arg c "${ctx}" \
-        '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
+    jq -cn --arg e "${event}" --arg c "${ctx}" \
+        '{hookSpecificOutput: {hookEventName: $e, additionalContext: $c}}'
 elif command -v python3 >/dev/null 2>&1; then
     python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": sys.argv[1]}}))' "${ctx}"
+print(json.dumps({"hookSpecificOutput": {"hookEventName": sys.argv[1], "additionalContext": sys.argv[2]}}))' \
+        "${event}" "${ctx}"
 else
-    printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
+    printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
+        "${event}" \
         "$(printf '%s' "${ctx}" | tr -d '"\\' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')"
 fi

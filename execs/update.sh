@@ -7,6 +7,7 @@ REF_SET=false
 ADOPT=false
 DIFF=false
 FORCE=false
+MODELS=false
 HARNESSES_ARG=""
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -262,6 +263,18 @@ missing_hooks() { # $1 = registration config path
     # harness can express — Claude, Codex and Kimi on PreToolUse, Cursor on
     # beforeShellExecution — so every config carries it.
     grep -q 'star_commit_guard\.sh' "$1" 2>/dev/null || out="${out:+${out}, }commit guard"
+    # A delegate starts with none of the session context the two SessionStart
+    # hooks inject, and SessionStart does not fire for one. Claude Code is the
+    # only harness here with an event that does — SubagentStart — so it is the
+    # only config that can be missing it, and a config written before the event
+    # existed registers the two scripts against SessionStart alone. Nothing else
+    # reports that: the delegate simply records "unrecorded" and works without
+    # the project's memory index.
+    case "$1" in
+        */.claude/settings.json)
+            grep -q 'SubagentStart' "$1" 2>/dev/null || \
+                out="${out:+${out}, }SubagentStart delegate context" ;;
+    esac
     printf '%s' "${out}"
 }
 
@@ -269,6 +282,7 @@ usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
        bash execs/update.sh --diff [ref] [--harnesses LIST] [--skill NAME] [--force]
+       bash execs/update.sh --models
        bash update.sh [ref] [--harnesses LIST] --adopt
 
 Overwrite STAR-managed skills, the Codex $star plugin, session hooks (model-id provenance, project
@@ -319,6 +333,13 @@ It runs against the current working directory, which must be a git repository ro
 never overwrites a file that is already there: every existing path is left alone and
 reported. Run /star-proj-adopt afterwards to wire the project up.
 
+--models stamps STAR_READ_MODEL from .env into the two skill manifests Claude Code forks
+into a context of their own, star-flow-status and star-expt-digest, in both languages. It
+reaches nothing else and no network: every other skill is given its model when the run
+starts it, which a manifest cannot express. An empty key stamps nothing and leaves the
+manifests as they shipped. An ordinary update ends with the same step, so the stamp
+survives one. Which model each tier gets is workflow conventions §10.8.
+
 The upstream repository is STAR_REPOSITORY (environment first, then .env);
 default https://github.com/wanghao9610/STAR.git.
 
@@ -331,6 +352,7 @@ Examples:
   bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
   bash execs/update.sh --harnesses claude
   bash execs/update.sh --harnesses claude,pi --diff
+  bash execs/update.sh --models
 
   cd /path/to/my-existing-project
   curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
@@ -372,6 +394,9 @@ while (( $# > 0 )); do
         --diff)
             DIFF=true
             ;;
+        --models)
+            MODELS=true
+            ;;
         --force)
             FORCE=true
             ;;
@@ -396,6 +421,67 @@ ENV_DIR="${ROOT_DIR}"
 env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
     [[ -f "${ENV_DIR}/.env" ]] || return 0
     sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
+}
+
+# The two skills Claude Code runs in a context of their own take their model from
+# `model:` in their manifest, and a manifest is a static file: it cannot read .env.
+# Every other skill is handed a model when the run starts it, so this is the one
+# tier value that has to be written into the tree. Both are read tier (workflow
+# conventions §10.8), so STAR_READ_MODEL is the only key with a manifest to reach.
+# An empty key writes nothing, leaving the value the manifests shipped with.
+READ_TIER_MANIFESTS=(
+    ".claude/skills/star-flow-status/SKILL.md"
+    ".claude/skills/star-flow-status/SKILL_zh.md"
+    ".claude/skills/star-expt-digest/SKILL.md"
+    ".claude/skills/star-expt-digest/SKILL_zh.md"
+)
+
+stamp_read_model() {
+    # A tree this run does not cover is left alone here too, so a project that
+    # excluded Claude keeps whatever its .claude holds, stamp included.
+    is_selected claude || return 0
+
+    local value path tmp
+    value="$(env_value STAR_READ_MODEL)"
+    [[ -n "${value}" ]] || return 0
+
+    for path in "${READ_TIER_MANIFESTS[@]}"; do
+        [[ -f "${ROOT_DIR}/${path}" ]] || continue
+        tmp="${ROOT_DIR}/${path}.star-model"
+        # Only the first frontmatter block, where `model:` is the manifest key
+        # this stamps; a line reading that way below it belongs to the body and
+        # is left alone. Written out and renamed rather than edited in place,
+        # because sed -i differs between GNU and BSD and a rename cannot leave
+        # half a manifest behind.
+        awk -v v="${value}" '
+            NR == 1 { print; stage = ($0 == "---") ? 1 : 3; next }
+            stage == 1 && $0 == "---" {
+                for (i = 1; i <= n; i++) {
+                    print buf[i]
+                    if (!stamped && !placed && buf[i] ~ /^name:[[:space:]]/) {
+                        print "model: " v
+                        placed = 1
+                    }
+                }
+                if (!stamped && !placed) print "model: " v
+                stage = 3
+                print
+                next
+            }
+            stage == 1 && /^model:[[:space:]]/ { buf[++n] = "model: " v; stamped = 1; next }
+            stage == 1 { buf[++n] = $0; next }
+            { print }
+        ' "${ROOT_DIR}/${path}" > "${tmp}" || {
+            rm -f -- "${tmp}"
+            fail "Could not stamp the read tier model into ${path}."
+        }
+        if cmp -s "${tmp}" "${ROOT_DIR}/${path}"; then
+            rm -f -- "${tmp}"
+        else
+            mv -f -- "${tmp}" "${ROOT_DIR}/${path}"
+            log "Stamped model: ${value} into ${path}"
+        fi
+    done
 }
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,
@@ -444,6 +530,14 @@ if (( ${#SELECTED_HARNESSES[@]} < ${#ALL_HARNESSES[@]} )); then
     (( ${#SELECTED_HARNESSES[@]} == 0 )) || selected_label="${SELECTED_HARNESSES[*]}"
     log "Harnesses (${HARNESSES_SOURCE}): ${selected_label}."
     log "Left alone, neither written nor deleted: ${untouched[*]}."
+fi
+
+# --models does one offline edit and exits, so it shares nothing with a mode that
+# fetches, previews, or installs.
+if [[ "${MODELS}" == true ]]; then
+    [[ "${ADOPT}" == false ]] || fail "--models cannot be combined with --adopt."
+    [[ "${DIFF}" == false ]] || fail "--models cannot be combined with --diff."
+    [[ -z "${SKILL_NAME}" ]] || fail "--models cannot be combined with --skill."
 fi
 
 if [[ "${ADOPT}" == true ]]; then
@@ -594,6 +688,20 @@ fi
 if [[ "${ADOPT}" == false ]]; then
     [[ -f "${ROOT_DIR}/execs/run.sh" ]] || \
         fail "${ROOT_DIR} is not a STAR project (no execs/run.sh). This script updates the project it lives in: copy it to <project>/execs/update.sh and run it there, or pass --adopt to install STAR into the current directory."
+fi
+
+# --models is the whole run when it is given: the stamp reads .env and the tree
+# already on disk, so nothing below it — the clone, the archive, the installs —
+# has anything to contribute.
+if [[ "${MODELS}" == true ]]; then
+    stamp_read_model
+    read_model="$(env_value STAR_READ_MODEL)"
+    if [[ -n "${read_model}" ]]; then
+        log "STAR_READ_MODEL in .env: ${read_model}. A manifest already at it was left alone."
+    else
+        log "STAR_READ_MODEL is empty in .env, so nothing was stamped and the manifests keep the model they shipped with."
+    fi
+    exit 0
 fi
 
 # Upstream resolution: environment wins, then .env, then the public default.
@@ -867,6 +975,11 @@ if [[ "${ADOPT}" == false ]]; then
         done
     fi
 
+    # After the extract, not before: an update replaces the manifests with the
+    # upstream copies, which carry the shipped value, so a stamp made earlier
+    # would be undone by the very run that made it.
+    stamp_read_model
+
     log "Updated: ${SYNCED[*]}"
     if [[ "${SELF_REPLACED}" == true ]]; then
         log "NOTE: ${SELF_PATH} itself changed, and this run used the copy it started with."
@@ -943,6 +1056,10 @@ elif [[ -e "${ROOT_DIR}/AGENTS.md" ]]; then
     printf '  added   CLAUDE.md -> AGENTS.md\n'
     installed=$(( installed + 1 ))
 fi
+
+# The project may have no .env yet — the last line below is what tells the user to
+# make one — in which case this reads no key and stamps nothing.
+stamp_read_model
 
 log "Adopted into ${ROOT_DIR}: ${installed} added, ${skipped} left alone."
 if (( skipped > 0 )); then

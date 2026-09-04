@@ -55,6 +55,22 @@
           }
         ]
       }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/star_model_id.sh --subagent",
+            "statusMessage": "Handing the delegate its STAR provenance command"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/star_memory.sh --subagent",
+            "statusMessage": "Loading STAR project memory for the delegate"
+          }
+        ]
+      }
     ]
   }
 }

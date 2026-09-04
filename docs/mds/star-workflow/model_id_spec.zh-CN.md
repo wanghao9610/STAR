@@ -8,7 +8,7 @@
 
 | 运行时 | 钩子 | 事件 | 注入什么 | 值在何时读取 |
 |---|---|---|---|---|
-| Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart` | 一条读取本次会话 transcript 的命令；没有可指的记录时才是 id 本身 | 写入当刻 |
+| Claude Code | `.claude/hooks/star_model_id.sh` | `SessionStart`，委派运行另加 `SubagentStart` | 一条读取本次会话 transcript 的命令，委派运行则读它自己那份；没有可指的记录时才是 id 本身 | 写入当刻 |
 | Codex | `.codex/hooks/star_model_id.sh` | `SessionStart` | 精确的 `session_model_id`、读取本次会话 rollout 的命令，以及写后检查 | 写入当刻，再在写入后检查 |
 | Cursor | `.cursor/hooks/star_model_id.sh` | `SessionStart` | id | 会话开始时 |
 | DSH | `.dsh/hooks/star_model_id.sh` | `SessionStart`，经 Claude Code 钩子桥接 | 一条读取本次会话日志的命令 | 写入当刻 |
@@ -28,7 +28,9 @@ bash .codex/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 ```
 
-参数用那行已填好的，把打印出来的值原样记录。Claude Code 这版读的是本次会话主循环 assistant 轮次上的 `message.model`，委派出去的子 agent 轮次跳过——要问的是哪个模型在写这份产物；Codex 这版读的是 rollout 里 `turn_context` 记录上的 `payload.model`，无需跳过：Codex 的子 agent 自带独立 rollout；Qwen Code 这版读的是 transcript 里 `type: "assistant"` 记录上的顶层 `model`，同样无需跳过：Qwen 的子 agent 写的是自己那份 transcript——payload 里以 `agent_transcript_path` 另行指明。三者都是运行时的记录，不是猜测。`session_model` 是 `SessionStart` 报出的那个：逐回合记录还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住记录丢掉的后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那不同就是会话中途换过模型，看见它的是逐回合记录。
+参数用那行已填好的，把打印出来的值原样记录。Claude Code 这版读的是本次会话主循环 assistant 轮次上的 `message.model`，标为 sidechain 的轮次跳过——要问的是哪个模型在写这份产物，而委派运行要写产物时读的是它自己那份 transcript，见下；Codex 这版读的是 rollout 里 `turn_context` 记录上的 `payload.model`，无需跳过：Codex 的子 agent 自带独立 rollout；Qwen Code 这版读的是 transcript 里 `type: "assistant"` 记录上的顶层 `model`，同样无需跳过：Qwen 的子 agent 写的是自己那份 transcript——payload 里以 `agent_transcript_path` 另行指明。三者都是运行时的记录，不是猜测。`session_model` 是 `SessionStart` 报出的那个：逐回合记录还没有内容时由它顶上；与解析结果是同一个 id 时以它为准，好保住记录丢掉的后缀（取 `claude-opus-5[1m]` 而非 `claude-opus-5`）；但 id 不同时绝不用它——那不同就是会话中途换过模型，看见它的是逐回合记录。
+
+委派运行有它自己的记录，得有人告诉它记录在哪。Claude Code 把子 agent 的轮次写到 `<会话 transcript 所在目录>/<session_id>/subagents/agent-<agent_id>.jsonl`，会话 transcript 里一条都不留，所以在委派运行里对会话 transcript 跑 `--resolve`，答出来的是派它出来的那个模型。补上这个缺口的是 `SubagentStart`：`SessionStart` 不为子 agent 触发，它触发，而且 payload 里带着拼出那条路径所需的 `session_id`、`transcript_path` 与 `agent_id`——唯独没有 `model` 字段，所以这里注入的同样是一条命令。路径落在 `subagents/` 下时读取端不再套 sidechain 过滤：委派运行自己那份文件里没有一条轮次带这个标记，套上去会把全部轮次都跳过。命令后面也不跟 session model：会话的那个不是委派运行的。
 
 Codex 的同一条注入信息还给出写后命令：
 
