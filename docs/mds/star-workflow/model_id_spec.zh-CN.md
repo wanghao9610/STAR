@@ -23,7 +23,7 @@
 `model` 字段只挂在 `SessionStart` 上：Claude Code 与 Codex 在 `/clear`、resume、compact、fork 之后不带它，Qwen Code 则对它报出的每一种启动原因（startup、resume、clear、compact）都带；即便有，描述的也只是会话开启那一刻——之后 `/model` 换模型不触发任何钩子，于是以某个模型开始、用另一个模型写入的会话，记下的就是开始时那个。三个运行时都保有逐回合的实际记录，所以注入行都带着读取它的命令。Codex 即使拿到了 rollout，也会同时把 `SessionStart` 的精确值直接写成 `session_model_id`；skill 漏掉动态读取时仍能保住精确 id，却不会假装这个快照看见了后来的模型切换。记录该值的当刻运行 resolver：
 
 ```bash
-bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
+bash .claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash .codex/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 ```

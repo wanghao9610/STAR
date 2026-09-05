@@ -23,7 +23,7 @@ The last column is the difference that matters. A value read as you write it can
 The `model` field rides on `SessionStart` alone: Claude Code and Codex omit it after `/clear`, resume, compact, or fork, Qwen Code carries one for every start reason it reports (startup, resume, clear, compact), and where present it describes the moment the session opened — `/model` changes the model afterwards with no hook firing, so a session that starts on one model and writes with another records the one it started on. All three keep a per-turn record of what actually ran, so their injected lines carry a command that reads it. Codex also states the exact `SessionStart` value directly as `session_model_id`, even when a rollout exists; that preserves the precise id when a skill misses the dynamic read, without pretending the snapshot saw a later model switch. Run the resolver as you record the value:
 
 ```bash
-bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
+bash .claude/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash .codex/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 bash "$QWEN_PROJECT_DIR"/.qwen/hooks/star_model_id.sh --resolve <transcript_path> [session_model]
 ```

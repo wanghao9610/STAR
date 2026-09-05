@@ -144,7 +144,14 @@ print(json.dumps({"hookSpecificOutput": {"hookEventName": sys.argv[1], "addition
     fi
 }
 
-self="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/star_model_id.sh"
+# The path the injected command carries is relative to the project root, not
+# absolute: `permissions.allow` in .claude/settings.json matches a command by
+# its literal prefix, and an absolute path is machine-specific, so no committed
+# allow entry could ever match one. A delegate cannot answer a permission
+# prompt, so an unmatched command is simply denied and the run has no id to
+# record. Every STAR skill already runs its opening Bash calls from the project
+# root, which is what makes the relative form resolve.
+self=".claude/hooks/star_model_id.sh"
 
 if [ "${event}" = "SubagentStart" ]; then
     session_id=$(payload_field session_id)
