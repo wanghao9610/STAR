@@ -18,8 +18,8 @@ allowed-tools:
   - Bash(date:*)
   - Bash(git branch --list:*)
   - Bash(git worktree list:*)
-  - Bash(bash .claude/skillsstar-flow-status/scripts/scan.sh)
-  - Bash(bash .claude/skillsstar-flow-status/scripts/scan.sh:*)
+  - Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)
+  - Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)
   - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh)
   - Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh:*)
 description: >-
