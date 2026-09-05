@@ -12,7 +12,7 @@ Invocation shape: `star-auto <GOAL> [stop=<STOP-LINE>] [involve=<level>]`.
 
 ## Before the loop
 
-Read `STAR_LANG` and `INVOLVE` from `.env` in one grep (§7.6, §7.7). Turn the goal into a check the run can verify — the `exec_status` a leaf must reach, the file that must exist, the metric a report must show — and open with one line stating that check, the stop line (or that none was set), and the resolved involve level. A goal that cannot be turned into a check is asked about, not pursued.
+Read `STAR_LANG`, `INVOLVE` and the three model keys from `.env` in one grep (§7.6, §7.7, §10.8), and — where this harness can name the model a delegate runs on — the model this session is running, once, through the resolver command the session context's provenance line supplies (§8), so each start below can tell whether its tier's model is an alias of it. Turn the goal into a check the run can verify — the `exec_status` a leaf must reach, the file that must exist, the metric a report must show — and open with one line stating that check, the stop line (or that none was set), and the resolved involve level. A goal that cannot be turned into a check is asked about, not pursued.
 
 ## The loop
 

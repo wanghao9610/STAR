@@ -11,7 +11,7 @@ description: >-
 
 > 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
 
-调用方式：`star-plan-executor PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-three-tier_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于 `PLAN_NAME` 也不属于描述，两者解析之前先剥离。
+调用方式：`star-plan-executor PLAN_NAME [描述]`，其中 `PLAN_NAME` 是 slug（`open-vocab-det-seg`）、数字前缀（`00`）或文件名（`00_mvp-three-tier_plan.md`）。计划名之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可以采纳、也可以写进产物的线索，替代不了任何一个确认点。它定不了计划名本身：解析不到计划的文本只是描述，目标照样要问。可选的 `involve=low|medium|high` 这个写法可与 `PLAN_NAME` 一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于 `PLAN_NAME` 也不属于描述，两者解析之前先剥离。迁移出去的运行派出的受托者会带着 `tier=<档位名>` 令牌（规约 §10.8）；它与 `involve=` 一样在读取其他内容之前剥离，既不是参数也不是描述。
 
 **通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，并在更严处生效。读它就是本 skill 的全部开场装载——一条消息，动手前完成：规约文件经它自己的文件读取调用读入，绝不 `cat` 进 shell 命令——shell 结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来，而规约文件单独就超过这个上限——同一条消息里再附一次 shell 调用，以项目根目录为工作目录，带两行：
 
@@ -40,6 +40,10 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 6. **使用项目运行时和布局。** 从 `.env` 读取 `CONDA_HOME`、`PYTHON_HOME`、`CODE_NAME`；绝不猜本地路径或使用系统 Python。若项目入口是 `execs/run.sh`，就使用它。创建 `tasks/<plan-name>/` 存放执行该计划时所需中间文件；可复用运行脚本放 `execs/scpts/`；生成输出和持久执行记录放 `wkdrs/<run>/`；数据放 `datas/`；权重放 `inits/`；代码放 `${CODE_NAME}/`。遵循 `AGENTS.md`。
 
 ## 工作流
+
+**本次运行在哪里执行。** 在下面第一步开始之前一次性决定：本次运行留在这里跑，还是迁到它所属档位的模型上（规约 §10.8；名册的档位列写明档位，那里列为例外的模式则压过它）。四条同时成立才迁。开场装载取回的 `STAR_<TIER>_MODEL` 值非空。该值不是本次运行已经所在模型的别名——别名指模型 id 里的系列名，如 `opus` 之于 `claude-opus-5[1m]`，或 id 本身，上下文窗口后缀不计——所在模型以会话上下文里那条溯源提示给出的解析命令在此运行一次所打印的为准，打印不出就取那条提示写明的 id；两者都没有，运行留在原地。本次运行自己不是带着 `tier=` 令牌的受托者——该令牌与 `involve=` 一样，在读取调用里任何其他内容之前剥离。以及本次运行里不再剩下任何还会问到用户的问题——本清单在每个档位都要问的确认点，或解析出的档位仍会问的裁量题——此刻按本次运行的模式、档位和磁盘上的文件判断，因为受托者无法向用户提问：哪怕只有运行中的发现才会引出的确认点，也算仍然存在；STOP line 的交还算返回而不算提问；档位不问就取推荐项的裁量题不算。迁移的做法：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完并照它执行，原样带上收到的调用文本，再加 `involve=<档位> tier=<档位名>`，`STAR_LANG` 为空时用一行写明对话语言，本 run 手上有 `auto=unattended` 授权时一并带上；等它返回，把回复原样转达，它写下的文件算本次运行的产物，其中的溯源是它的模型。键为空则什么都不变、也不提；键已设而运行留在这里，就用一行说明原因。无法为受托者指定模型的 harness 一律留在原地。
+
+本 skill 第四条永远不成立——合并确认点、收尾时的待定修正批次、临时文件的处置、以及 blocked 步骤改动的去留，每个档位都要问，且取决于运行中的发现——所以运行留在这里；它的换档是下面那次在执行与验证那一步之前交给 EXEC 档的交接。
 
 ### Step 0：解析目标
 
@@ -76,7 +80,7 @@ bash <本 skill 所在目录>/scripts/scan.sh --slim
 
 **发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：派一个只读子代理跑在 PLAN 档的模型上（规约 §10.8，前提是这个 harness 能指定受托者用哪个模型：重读一遍已完成的工作属于研究判断），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行；确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
 
-**把 Step 4 交给 EXEC 档。** EXEC_PLAN 与 EXEC_LOG 已经落盘、批准也已记下之后，若开场装载取回的 `STAR_EXEC_MODEL` 非空，且本 run 自身不是已经带着 `tier=exec` token 的受托者：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完，按 `references/resume_rules_zh.md` 从 Step 4 接着跑这次运行，带上 `involve=<level> tier=exec`，本 run 手上有 `auto=unattended` 授权时一并带上。它不得修改 EXEC_PLAN；照原样做不了的 action 就停下返回，绝不自行发挥；STOP line 上的命令照 Step 4 的写法写进 EXEC_LOG，然后返回；Step 4 一结束它就返回，不碰 Step 5。它返回后重读 EXEC_LOG，再从 Step 5 接着走。键为空、或这个 harness 派不出受托者时，Step 4 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则；这里只写本 skill 怎么把这个阶段交出去。
+**把 Step 4 交给 EXEC 档。** EXEC_PLAN 与 EXEC_LOG 已经落盘、批准也已记下之后，若开场装载取回的 `STAR_EXEC_MODEL` 非空、也不是本 run 已经所在模型的别名（规约 §10.8），解析出的档位不是 `high`——那一档每个 action 执行前都要确认，这一步留在这里——且本 run 自身不是已经带着 `tier=exec` token 的受托者：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完，按 `references/resume_rules_zh.md` 从 Step 4 接着跑这次运行，带上 `involve=<level> tier=exec`，本 run 手上有 `auto=unattended` 授权时一并带上。它不得修改 EXEC_PLAN；它无法向用户提出的确认——blocked 步骤改动的去留——同样让它就此返回：把停在哪里记进 EXEC_LOG 后返回，派它的这次运行问过用户，再从第一个未完成的 action 起重新派发这个循环；照原样做不了的 action 就停下返回，绝不自行发挥；STOP line 上的命令照 Step 4 的写法写进 EXEC_LOG，然后返回；Step 4 一结束它就返回，不碰 Step 5。它返回后重读 EXEC_LOG，再从 Step 5 接着走。键为空、该值是本 run 所在模型的别名、或这个 harness 派不出受托者时，Step 4 就照旧在这里跑。哪一档跑哪一种运行是规约 §10.8 的规则；这里只写本 skill 怎么把这个阶段交出去。
 ### Step 4：执行与验证
 
 主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。带 `tier=exec` 的受托者只跑这一步：从第一个未完成的 action 接手，本步一结束就返回，Step 5 留给派它出来的那次运行。对每个 action：

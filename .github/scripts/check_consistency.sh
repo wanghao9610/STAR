@@ -2114,6 +2114,91 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( ref_errors == 0 )) && note "${ref_checked} reference paths resolve, and every reference file is named by the skill that ships it"
 
+# 25. The where-this-run-executes paragraph: present once in every manifest that
+#     may relocate, absent from the two coaching skills that never do, uniform per
+#     language, and at the head of Workflow — after that heading, before its first
+#     step — so it runs before anything the skill resolves. Conventions §10.8
+#     states the rule, and this paragraph is the only place a manifest implements
+#     it: a tree that lost it silently leaves that skill on the session's model
+#     with the keys set, and a reworded copy has the trees disagree about when a
+#     run moves. The four exempt names are the ones §10.8 lists — the two
+#     coaching skills, which always owe the user a question, and the two READ-tier
+#     skills a harness may fork on their manifest's model, where a fork cannot
+#     dispatch; a skill that joins or leaves that list changes both places in the
+#     same commit.
+section "Relocation paragraph"
+reloc_errors=0
+reloc_en="$(mktemp)"
+reloc_zh="$(mktemp)"
+RELOCATE_NEVER="star-plan-coach star-idea-storm star-flow-status star-expt-digest"
+
+for root in "${SKILL_ROOTS[@]}"; do
+    while IFS= read -r skill; do
+        for f in SKILL.md SKILL_zh.md; do
+            path="${root}/${skill}/${f}"
+            [[ -f "${path}" ]] || continue   # check 3 owns missing files
+            if [[ "${f}" == SKILL_zh.md ]]; then
+                lead='^\*\*本次运行在哪里执行。\*\*'
+                workflow='^## 工作流'
+                seen="${reloc_zh}"
+            else
+                lead='^\*\*Where this run executes\.\*\*'
+                workflow='^## Workflow'
+                seen="${reloc_en}"
+            fi
+
+            n="$(grep -cE "${lead}" "${path}")"
+            if grep -qw "${skill}" <<< "${RELOCATE_NEVER}"; then
+                if (( n != 0 )); then
+                    fail "${path}: carries the relocation paragraph, but conventions §10.8 says this skill never relocates itself"
+                    reloc_errors=1
+                fi
+                continue
+            fi
+            if (( n != 1 )); then
+                fail "${path}: ${n} relocation paragraphs, expected exactly 1"
+                reloc_errors=1
+                continue
+            fi
+            grep -E "${lead}" "${path}" >> "${seen}"
+
+            if [[ "${f}" == SKILL_zh.md ]]; then
+                stated="$(grep -oE '^本 skill 的名册档位是 `(plan|exec|read)`' "${path}" | grep -oE '(plan|exec|read)' | head -n 1)"
+            else
+                stated="$(grep -oE "^This skill's roster tier is \`(plan|exec|read)\`" "${path}" | grep -oE '(plan|exec|read)' | head -n 1)"
+            fi
+            if [[ -n "${stated}" ]]; then
+                roster_tier="$(awk -v s="${skill}" '$1 == s {print $2}' <<< "${TIERS_EN}")"
+                if [[ "${stated}" != "${roster_tier}" ]]; then
+                    fail "${path}: states its roster tier as ${stated}, but the §10 roster says ${roster_tier:-nothing}"
+                    reloc_errors=1
+                fi
+            fi
+
+            wf_at="$(grep -nE "${workflow}" "${path}" | head -n 1 | cut -d: -f1)"
+            at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
+            first_step="$(awk -v s="${wf_at:-0}" 'NR>s && /^### /{print NR; exit}' "${path}")"
+            if [[ -z "${wf_at}" ]] || (( at < wf_at )) || { [[ -n "${first_step}" ]] && (( at > first_step )); }; then
+                fail "${path}: the relocation paragraph is not at the head of Workflow (after its heading, before its first step)"
+                reloc_errors=1
+            fi
+        done
+    done < <(printf '%s\n' "${SKILLS}")
+done
+
+for pair in "en:${reloc_en}" "zh:${reloc_zh}"; do
+    lang="${pair%%:*}"
+    file="${pair#*:}"
+    if (( $(sort -u "${file}" | wc -l) > 1 )); then
+        fail "the ${lang} relocation paragraph differs across manifests; it is uniform by design:"
+        sort -u "${file}" | cut -c1-80 | sed 's/^/      /'
+        reloc_errors=1
+    fi
+done
+rm -f "${reloc_en}" "${reloc_zh}"
+
+(( reloc_errors == 0 )) && note "every relocating manifest carries the relocation paragraph, uniform per language, at the head of Workflow; the two coaching and the two forked READ skills carry none"
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"
