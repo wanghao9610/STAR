@@ -476,7 +476,7 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 
 钩子注册配置——`.claude/settings.json`、`.codex/hooks.json` 与 `.cursor/hooks.json`——仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子，命令会打印提示。
 
-因此已有项目要手动补两件事，都是 v0.2.18 新增的。三个模型键：`.env.example` 只在 `--adopt` 时进入项目，更新不带它，何况你的 `.env` 本来就归你自己，所以请自行把 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 加进去——[上游的 `.env.example`](.env.example) 里有解释这三个键的注释。子代理注册：早于它写下的 `.claude/settings.json` 没有 `SubagentStart` 块，上面那条提示会把它点名为缺失的 `SubagentStart delegate context` 钩子，修法是把上游文件里那个块的两条钩子命令抄进你自己的配置。
+因此已有项目要手动补两件事，都是 v0.2.18 新增的。三个模型键：`.env.example` 只在 `--adopt` 时进入项目，更新不带它，何况你的 `.env` 本来就归你自己，所以请自行把 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 加进去——[上游的 `.env.example`](.env.example) 里有解释这三个键的注释。子代理注册：早于它写下的 `.claude/settings.json` 没有 `SubagentStart` 块，上面那条提示会把它点名为缺失的 `SubagentStart delegate context` 钩子，修法是把上游文件里那个块的两条钩子命令抄进你自己的配置。第三件是 `AGENTS.md` 里那条档位说明：写过自己那份指令的项目拥有它，更新会保留而不覆盖，且不作声，所以这一条也请自行抄过去。
 
 更新脚本自己也在更新范围内，于是它同步的清单会跟着上游长，而不是停在你项目创建时的那一份——斜杠命令和 Pi 的那几个扩展能到达更早创建的项目，靠的就是这一条。替换方式是改名而非就地覆盖：做替换的这一次运行仍用它启动时的那份副本跑完，新版本从下一次运行起生效；命令替换了自己时会明说，再跑一次就能收到新版更新器新增的路径。若项目的更新脚本比这条改动还早——它的 `Updated:` 那一行里没有 `execs/update.sh`——需要先手动刷新一次，这个循环才转得起来：
 
