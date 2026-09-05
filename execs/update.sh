@@ -54,6 +54,20 @@ EXTENSION_TREES=(
     ".pi/extensions/star-plan-mode"
     ".pi/extensions/star-subagent"
 )
+# Cursor and Qwen load named subagents from their project trees. These three
+# dispatch roles are STAR-owned like Pi's roster: a model stamp can change their
+# frontmatter, but a normal update replaces their prompt bodies from upstream.
+MODEL_AGENT_TREES=(
+    ".cursor/agents"
+    ".qwen/agents"
+)
+# A Pi skill's whole-run hand-off needs the generic runner and the extension
+# that understands its per-dispatch model field. Skill-only sync otherwise
+# replaces the prose that calls them without installing either runtime asset.
+PI_SKILL_RUNTIME_PATHS=(
+    ".pi/agents"
+    ".pi/extensions/star-subagent"
+)
 EXTENSION_FILES=(
     ".pi/extensions/star-permission-gate.ts"
     ".pi/extensions/star-questionnaire.ts"
@@ -105,8 +119,11 @@ INSTRUCTION_FILES=(
 is_optional_path() {
     case "$1" in
         .*/hooks*)              return 0 ;;
+        ".cursor/agents")      return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
+        ".pi/extensions/star-subagent") return 0 ;;
+        ".qwen/agents")        return 0 ;;
     esac
     return 1
 }
@@ -333,12 +350,13 @@ It runs against the current working directory, which must be a git repository ro
 never overwrites a file that is already there: every existing path is left alone and
 reported. Run /star-proj-adopt afterwards to wire the project up.
 
---models stamps STAR_READ_MODEL from .env into the two skill manifests Claude Code forks
-into a context of their own, star-flow-status and star-expt-digest, in both languages. It
-reaches nothing else and no network: every other skill is given its model when the run
-starts it, which a manifest cannot express. An empty key stamps nothing and leaves the
-manifests as they shipped. An ordinary update ends with the same step, so the stamp
-survives one. Which model each tier gets is workflow conventions §10.8.
+--models stamps the configured tier model into the static files whose hosts read it: the two
+Claude Code READ manifests, plus Cursor and Qwen's named plan, exec and read agents. It is
+offline. A key naming no model for that harness — empty, or carrying <harness>:<model>
+entries with neither its tag nor an untagged value — leaves that file unchanged. An ordinary
+update ends with the same step, so the stamps survive one; start a new Cursor or Qwen session
+afterward so it reloads the agent definition. Which model each tier gets is workflow
+conventions §10.8.
 
 The upstream repository is STAR_REPOSITORY (environment first, then .env);
 default https://github.com/wanghao9610/STAR.git.
@@ -423,12 +441,43 @@ env_value() { # $1 = key; its last assignment in the target .env, empty when it 
     sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
 }
 
-# The two skills Claude Code runs in a context of their own take their model from
-# `model:` in their manifest, and a manifest is a static file: it cannot read .env.
-# Every other skill is handed a model when the run starts it, so this is the one
-# tier value that has to be written into the tree. Both are read tier (workflow
-# conventions §10.8), so STAR_READ_MODEL is the only key with a manifest to reach.
-# An empty key writes nothing, leaving the value the manifests shipped with.
+# A tier key holds one model name, or comma-separated <harness>:<model> entries so
+# one .env serves every tree (workflow conventions §10.8). Reduce a raw value to what
+# one harness gets: its own tagged entry, else an untagged one, else nothing. A tag
+# no harness in ALL_HARNESSES answers to is skipped, which is what leaves an entry
+# written for a harness this version does not ship unread instead of misapplied.
+tier_model_for() { # $1 = harness token, $2 = the raw key value
+    awk -v want="$1" -v known="${ALL_HARNESSES[*]}" -v raw="$2" '
+        BEGIN {
+            n = split(known, k, " ")
+            for (i = 1; i <= n; i++) is_tag[k[i]] = 1
+            n = split(raw, entry, ",")
+            for (i = 1; i <= n; i++) {
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", entry[i])
+                if (entry[i] == "") continue
+                p = index(entry[i], ":")
+                tag = (p > 1) ? substr(entry[i], 1, p - 1) : ""
+                if (tag != "" && is_tag[tag]) {
+                    if (tag == want) {
+                        value = substr(entry[i], p + 1)
+                        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+                        print value
+                        exit
+                    }
+                    continue
+                }
+                if (tag != "") continue          # a tag no tree answers to
+                if (bare == "") bare = entry[i]
+            }
+            print bare
+        }'
+}
+
+# Some hosts need a static file to select a delegate's model. Claude Code reads
+# its READ-tier model from these two forked-skill manifests; Cursor and Qwen read
+# their plan, exec, and read models from named agents below. The files cannot read
+# `.env` themselves, so the updater stamps them after install. An empty key writes
+# nothing, leaving each shipped value in place (workflow conventions §10.8).
 READ_TIER_MANIFESTS=(
     ".claude/skills/star-flow-status/SKILL.md"
     ".claude/skills/star-flow-status/SKILL_zh.md"
@@ -436,52 +485,114 @@ READ_TIER_MANIFESTS=(
     ".claude/skills/star-expt-digest/SKILL_zh.md"
 )
 
+yaml_model_line() { # $1 = model name, writes a YAML double-quoted model line
+    local value="$1"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    printf 'model: "%s"' "${value}"
+}
+
+stamp_frontmatter_model() { # $1 = project-relative path, $2 = model name
+    local path="$1" value="$2" tmp
+    [[ -f "${ROOT_DIR}/${path}" ]] || return 0
+    tmp="${ROOT_DIR}/${path}.star-model"
+    # Only the first frontmatter block is changed. The model line is supplied
+    # through the environment so an id containing backslashes is not re-parsed
+    # as an awk -v escape sequence.
+    MODEL_LINE="$(yaml_model_line "${value}")" awk '
+        NR == 1 { print; stage = ($0 == "---") ? 1 : 3; next }
+        stage == 1 && $0 == "---" {
+            for (i = 1; i <= n; i++) {
+                print buf[i]
+                if (!stamped && !placed && buf[i] ~ /^name:[[:space:]]/) {
+                    print ENVIRON["MODEL_LINE"]
+                    placed = 1
+                }
+            }
+            if (!stamped && !placed) print ENVIRON["MODEL_LINE"]
+            stage = 3
+            print
+            next
+        }
+        stage == 1 && /^model:[[:space:]]/ { buf[++n] = ENVIRON["MODEL_LINE"]; stamped = 1; next }
+        stage == 1 { buf[++n] = $0; next }
+        { print }
+    ' "${ROOT_DIR}/${path}" > "${tmp}" || {
+        rm -f -- "${tmp}"
+        fail "Could not stamp the tier model into ${path}."
+    }
+    if cmp -s "${tmp}" "${ROOT_DIR}/${path}"; then
+        rm -f -- "${tmp}"
+    else
+        mv -f -- "${tmp}" "${ROOT_DIR}/${path}"
+        log "Stamped model: ${value} into ${path}"
+    fi
+}
+
 stamp_read_model() {
     # A tree this run does not cover is left alone here too, so a project that
     # excluded Claude keeps whatever its .claude holds, stamp included.
     is_selected claude || return 0
 
-    local value path tmp
-    value="$(env_value STAR_READ_MODEL)"
+    local value path
+    value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
     [[ -n "${value}" ]] || return 0
 
     for path in "${READ_TIER_MANIFESTS[@]}"; do
-        [[ -f "${ROOT_DIR}/${path}" ]] || continue
-        tmp="${ROOT_DIR}/${path}.star-model"
-        # Only the first frontmatter block, where `model:` is the manifest key
-        # this stamps; a line reading that way below it belongs to the body and
-        # is left alone. Written out and renamed rather than edited in place,
-        # because sed -i differs between GNU and BSD and a rename cannot leave
-        # half a manifest behind.
-        awk -v v="${value}" '
-            NR == 1 { print; stage = ($0 == "---") ? 1 : 3; next }
-            stage == 1 && $0 == "---" {
-                for (i = 1; i <= n; i++) {
-                    print buf[i]
-                    if (!stamped && !placed && buf[i] ~ /^name:[[:space:]]/) {
-                        print "model: " v
-                        placed = 1
-                    }
-                }
-                if (!stamped && !placed) print "model: " v
-                stage = 3
-                print
-                next
-            }
-            stage == 1 && /^model:[[:space:]]/ { buf[++n] = "model: " v; stamped = 1; next }
-            stage == 1 { buf[++n] = $0; next }
-            { print }
-        ' "${ROOT_DIR}/${path}" > "${tmp}" || {
-            rm -f -- "${tmp}"
-            fail "Could not stamp the read tier model into ${path}."
-        }
-        if cmp -s "${tmp}" "${ROOT_DIR}/${path}"; then
-            rm -f -- "${tmp}"
-        else
-            mv -f -- "${tmp}" "${ROOT_DIR}/${path}"
-            log "Stamped model: ${value} into ${path}"
-        fi
+        stamp_frontmatter_model "${path}" "${value}"
     done
+}
+
+tier_model_key() { # $1 = plan, exec, or read
+    case "$1" in
+        plan) printf 'STAR_PLAN_MODEL' ;;
+        exec) printf 'STAR_EXEC_MODEL' ;;
+        read) printf 'STAR_READ_MODEL' ;;
+        *) fail "Unknown model tier '$1'." ;;
+    esac
+}
+
+stamp_named_models() { # $1 = cursor or qwen
+    local harness="$1" tier key value path
+    is_selected "${harness}" || return 0
+
+    for tier in plan exec read; do
+        key="$(tier_model_key "${tier}")"
+        value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
+        [[ -n "${value}" ]] || continue
+        path=".${harness}/agents/star-${tier}.md"
+        stamp_frontmatter_model "${path}" "${value}"
+    done
+}
+
+stamp_models() {
+    stamp_read_model
+    stamp_named_models cursor
+    stamp_named_models qwen
+}
+
+model_stamp_summary() {
+    local harness tier key value any=false
+    for harness in claude cursor qwen; do
+        is_selected "${harness}" || continue
+        if [[ "${harness}" == claude ]]; then
+            value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
+            if [[ -n "${value}" ]]; then
+                log "STAR_READ_MODEL in .env gives Claude Code: ${value}."
+                any=true
+            fi
+            continue
+        fi
+        for tier in plan exec read; do
+            key="$(tier_model_key "${tier}")"
+            value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
+            if [[ -n "${value}" ]]; then
+                log "${key} in .env gives ${harness}: ${value}."
+                any=true
+            fi
+        done
+    done
+    [[ "${any}" == true ]] || log "No selected Claude Code, Cursor, or Qwen tier key names a model in .env; nothing was stamped."
 }
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,
@@ -569,6 +680,7 @@ if [[ "${ADOPT}" == true ]]; then
         ".dsh/commands"
         ".kimi-code/plugins"
         "${SKILL_ROOTS[@]:1}"
+        "${MODEL_AGENT_TREES[@]}"
         "${HOOK_TREES[@]}"
         "${EXTENSION_TREES[@]}"
         ".claude/commands"
@@ -620,6 +732,10 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     for root in "${SKILL_ROOTS[@]}"; do
         SYNC_PATHS+=("${root}/${SKILL_NAME}")
     done
+    # A skill-only update still needs the named model agent the harness will
+    # dispatch for its complete run or phase.
+    SYNC_PATHS+=("${MODEL_AGENT_TREES[@]}")
+    SYNC_PATHS+=("${PI_SKILL_RUNTIME_PATHS[@]}")
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
     (( ${#SYNC_PATHS[@]} > 0 )) || \
@@ -666,6 +782,7 @@ else
         # argument-hint is a prompt-template field there and not a skill field.
         ".pi/prompts"
         "${SKILL_ROOTS[@]:1}"
+        "${MODEL_AGENT_TREES[@]}"
         "${EXTENSION_TREES[@]}"
         "${EXTENSION_FILES[@]}"
         "${HOOK_TREES[@]}"
@@ -694,13 +811,8 @@ fi
 # already on disk, so nothing below it — the clone, the archive, the installs —
 # has anything to contribute.
 if [[ "${MODELS}" == true ]]; then
-    stamp_read_model
-    read_model="$(env_value STAR_READ_MODEL)"
-    if [[ -n "${read_model}" ]]; then
-        log "STAR_READ_MODEL in .env: ${read_model}. A manifest already at it was left alone."
-    else
-        log "STAR_READ_MODEL is empty in .env, so nothing was stamped and the manifests keep the model they shipped with."
-    fi
+    stamp_models
+    model_stamp_summary
     exit 0
 fi
 
@@ -978,7 +1090,7 @@ if [[ "${ADOPT}" == false ]]; then
     # After the extract, not before: an update replaces the manifests with the
     # upstream copies, which carry the shipped value, so a stamp made earlier
     # would be undone by the very run that made it.
-    stamp_read_model
+    stamp_models
 
     log "Updated: ${SYNCED[*]}"
     if [[ "${SELF_REPLACED}" == true ]]; then
@@ -1059,7 +1171,7 @@ fi
 
 # The project may have no .env yet — the last line below is what tells the user to
 # make one — in which case this reads no key and stamps nothing.
-stamp_read_model
+stamp_models
 
 log "Adopted into ${ROOT_DIR}: ${installed} added, ${skipped} left alone."
 if (( skipped > 0 )); then

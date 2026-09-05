@@ -1,6 +1,7 @@
 # Cursor: the terminal is Shell, sub-agents are Task, questions are AskQuestion,
 # and plan mode is entered by switching modes rather than by a dedicated tool.
-# Task names no model per dispatch, so the tier clause is dropped (conventions §10.8).
+# Named STAR agents carry the tier model. The dispatch paragraph selects them;
+# drop Claude's per-call model field, which Task does not document.
 AskUserQuestion	AskQuestion
 `Agent`	`Task`
 \bBash\b	Shell

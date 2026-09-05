@@ -16,3 +16,5 @@ jobs:
         run: bash .github/scripts/port.sh
       - name: Run consistency checks
         run: bash .github/scripts/check_consistency.sh
+      - name: Check offline model routing
+        run: bash .github/scripts/check_model_routing.sh

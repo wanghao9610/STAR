@@ -1,5 +1,6 @@
 # Kimi Code: skills are invoked as /skill:<name>; the context file is AGENTS.md;
-# no per-subagent model hint, so the tier clause is dropped (conventions §10.8); the
+# The dispatch paragraph supplies model only when the secondary-model pool exposes
+# it, instead of unconditionally carrying Claude's field at each call site. The
 # question tool's multi-select field is snake_case.
 CLAUDE\.md	AGENTS.md
 CLAUDE	AGENTS

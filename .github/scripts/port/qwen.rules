@@ -1,6 +1,7 @@
 # Qwen Code: shell is run_shell_command, reader is read_file, questions are
 # ask_user_question; plan-mode tools are snake_case; AGENTS.md is the context file.
-# No per-subagent model hint, so the tier clause is dropped (conventions §10.8).
+# Named STAR agents carry actual model ids. The dispatch paragraph selects them;
+# drop Claude's per-call field because Qwen's model parameter names model grades.
 AskUserQuestion	`ask_user_question`
 `Agent`	`agent`
 \bBash\b	`run_shell_command`

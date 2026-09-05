@@ -16,10 +16,10 @@
  *
  * 1. The tool is star_subagent, not subagent, so a user-level copy of the same example
  *    can stay installed — pi refuses to start on a duplicate tool name.
- * 2. A subagent inherits the parent session's model and thinking level unless its own
- *    .md declares a model. Upstream falls back to pi's default model, which would put a
- *    model in a STAR record that no session ran on (conventions §8, the model_id /
- *    model_trail fields).
+ * 2. A subagent inherits the parent session's model and thinking level unless its
+ *    dispatch or its own .md declares a model. Upstream falls back to pi's default
+ *    model, which would put a model in a STAR record that no session ran on
+ *    (conventions §8, the model_id / model_trail fields).
  * 3. agentScope defaults to "project", not "user", because the roster this tool exists
  *    to reach is the one this repository ships in .pi/agents/. On the upstream default a
  *    fresh clone finds no agents at all.
@@ -167,6 +167,7 @@ interface SingleResult {
 	messages: Message[];
 	stderr: string;
 	usage: UsageStats;
+	requestedModel?: string;
 	model?: string;
 	stopReason?: string;
 	errorMessage?: string;
@@ -288,6 +289,7 @@ async function runSingleAgent(
 	agents: AgentConfig[],
 	agentName: string,
 	task: string,
+	requestedModel: string | undefined,
 	cwd: string | undefined,
 	step: number | undefined,
 	signal: AbortSignal | undefined,
@@ -311,8 +313,8 @@ async function runSingleAgent(
 	}
 
 	const args: string[] = ["--mode", "json", "-p", "--no-session"];
-	const inheritsDispatchConfig = !agent.model;
-	const model = agent.model ?? dispatchDefaults.model;
+	const inheritsDispatchConfig = !requestedModel && !agent.model;
+	const model = requestedModel ?? agent.model ?? dispatchDefaults.model;
 	if (model) args.push("--model", model);
 	if (inheritsDispatchConfig && dispatchDefaults.thinkingLevel) {
 		args.push("--thinking", dispatchDefaults.thinkingLevel);
@@ -330,7 +332,7 @@ async function runSingleAgent(
 		messages: [],
 		stderr: "",
 		usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, contextTokens: 0, turns: 0 },
-		model,
+		requestedModel: model,
 		step,
 	};
 
@@ -387,7 +389,7 @@ async function runSingleAgent(
 							currentResult.usage.cost += usage.cost?.total || 0;
 							currentResult.usage.contextTokens = usage.totalTokens || 0;
 						}
-						if (!currentResult.model && msg.model) currentResult.model = msg.model;
+						if (msg.model) currentResult.model = msg.model;
 						if (msg.stopReason) currentResult.stopReason = msg.stopReason;
 						if (msg.errorMessage) currentResult.errorMessage = msg.errorMessage;
 					}
@@ -455,12 +457,14 @@ async function runSingleAgent(
 const TaskItem = Type.Object({
 	agent: Type.String({ description: "Name of the agent to invoke" }),
 	task: Type.String({ description: "Task to delegate to the agent" }),
+	model: Type.Optional(Type.String({ description: "Model to use for this task" })),
 	cwd: Type.Optional(Type.String({ description: "Working directory for the agent process" })),
 });
 
 const ChainItem = Type.Object({
 	agent: Type.String({ description: "Name of the agent to invoke" }),
 	task: Type.String({ description: "Task with optional {previous} placeholder for prior output" }),
+	model: Type.Optional(Type.String({ description: "Model to use for this step" })),
 	cwd: Type.Optional(Type.String({ description: "Working directory for the agent process" })),
 });
 
@@ -472,6 +476,7 @@ const AgentScopeSchema = StringEnum(["user", "project", "both"] as const, {
 const SubagentParams = Type.Object({
 	agent: Type.Optional(Type.String({ description: "Name of the agent to invoke (for single mode)" })),
 	task: Type.Optional(Type.String({ description: "Task to delegate (for single mode)" })),
+	model: Type.Optional(Type.String({ description: "Model to use (for single mode)" })),
 	tasks: Type.Optional(Type.Array(TaskItem, { description: "Array of {agent, task} for parallel execution" })),
 	chain: Type.Optional(Type.Array(ChainItem, { description: "Array of {agent, task} for sequential execution" })),
 	agentScope: Type.Optional(AgentScopeSchema),
@@ -584,6 +589,7 @@ export default function (pi: ExtensionAPI) {
 						agents,
 						step.agent,
 						taskWithContext,
+						step.model,
 						step.cwd,
 						i + 1,
 						signal,
@@ -657,6 +663,7 @@ export default function (pi: ExtensionAPI) {
 						agents,
 						t.agent,
 						t.task,
+						t.model,
 						t.cwd,
 						undefined,
 						signal,
@@ -700,6 +707,7 @@ export default function (pi: ExtensionAPI) {
 					agents,
 					params.agent,
 					params.task,
+					params.model,
 					params.cwd,
 					undefined,
 					signal,

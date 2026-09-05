@@ -1,6 +1,6 @@
 # Pi: the question tool is the vendored star_questionnaire, sub-agents go through
-# star_subagent, the shell is bash and the reader is read. star_subagent takes no
-# model parameter, so the tier clause is dropped (conventions §10.8).
+# star_subagent, the shell is bash and the reader is read. The dispatch paragraph
+# supplies model in single/tasks/chain form instead of Claude's per-call clause.
 AskUserQuestion	`star_questionnaire`
 `Agent`	`star_subagent`
 \bBash\b	`bash`
