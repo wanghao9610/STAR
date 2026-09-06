@@ -12,6 +12,7 @@ note() { printf 'ok    %s\n' "$*"; }
 expect_model() { grep -Fqx "model: \"$2\"" "$1" || fail "$1 should have model $2"; }
 expect_effort() { grep -Fqx "effort: \"$2\"" "$1" || fail "$1 should have effort $2"; }
 run_models() { (cd "${PROJECT}" && bash execs/update.sh --models "$@") >/dev/null; }
+models_output() { (cd "${PROJECT}" && bash execs/update.sh --models "$@") 2>&1; }
 
 mkdir -p "${PROJECT}/execs"
 cp "${ROOT_DIR}/execs/update.sh" "${PROJECT}/execs/update.sh"
@@ -82,6 +83,79 @@ fi
 expect_model "${PROJECT}/.cursor/agents/star-exec.md" cursor-exec
 expect_model "${PROJECT}/.qwen/agents/star-read.md" qwen-read@keep
 note "a depth suffix reaches Claude Code's manifests and leaves every model name clean"
+
+# Codex consumes both halves at dispatch rather than through a static manifest.
+# This checks the parsed summary and instruction contracts, not a live dispatch.
+write_env \
+	'STAR_PLAN_MODEL=codex:gpt-6-astra@xhigh' \
+	'STAR_EXEC_MODEL=codex:gpt-6-astra@high' \
+	'STAR_READ_MODEL=codex:gpt-6-astra@low'
+codex_output="$(models_output --harnesses codex)"
+for expected in \
+	'STAR_PLAN_MODEL in .env gives Codex at dispatch: model gpt-6-astra, requested reasoning effort xhigh' \
+	'STAR_EXEC_MODEL in .env gives Codex at dispatch: model gpt-6-astra, requested reasoning effort high' \
+	'STAR_READ_MODEL in .env gives Codex at dispatch: model gpt-6-astra, requested reasoning effort low'; do
+	grep -Fq "${expected}" <<<"${codex_output}" || fail "Codex model/depth summary lacks: ${expected}"
+done
+for file in \
+	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL.md" \
+	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL_zh.md"; do
+	grep -Fq 'reasoning_effort' "${file}" || fail "${file} does not pass Codex effort per dispatch"
+	grep -Fq 'fork_turns' "${file}" || fail "${file} does not preserve fresh-context routing"
+done
+grep -Fq 'even when the model is unchanged' \
+	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL.md" ||
+	fail "Codex star-auto does not route an explicit same-model depth"
+grep -Fq '即使不换模型也会触发' \
+	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL_zh.md" ||
+	fail "Chinese Codex star-auto does not route an explicit same-model depth"
+grep -Fq 'or the harness can apply its depth per dispatch' \
+	"${ROOT_DIR}/.agents/skills/star-plan-executor/SKILL.md" ||
+	fail "star-plan-executor does not route a same-model EXEC depth"
+grep -Fq 'or a depth this harness can apply per dispatch' \
+	"${ROOT_DIR}/.agents/skills/star-code-architect/SKILL.md" ||
+	fail "star-code-architect does not route a same-model EXEC depth"
+grep -Fq 'passes it explicitly as `reasoning_effort`' \
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
+	fail "workflow conventions do not define Codex per-dispatch effort"
+grep -Fq '显式传给 `reasoning_effort`' \
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.zh-CN.md" ||
+	fail "Chinese workflow conventions do not define Codex per-dispatch effort"
+grep -Fq 'Codex passes a supported named depth per dispatch as `reasoning_effort`' \
+	"${ROOT_DIR}/AGENTS.md" ||
+	fail "AGENTS.md does not expose Codex per-dispatch effort"
+for skill in star-flow-status star-expt-digest; do
+	entry="$(grep -F '**READ-tier entry on this harness.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md")"
+	grep -Fq 'or the harness can apply its depth per dispatch' <<<"${entry}" ||
+		fail "${skill} READ entry omits a same-model depth"
+	grep -Fq 'with that model and supported depth' <<<"${entry}" ||
+		fail "${skill} READ entry does not pass its depth"
+	if grep -Fq 'differs from the known current model' <<<"${entry}"; then
+		fail "${skill} READ entry still requires a different model"
+	fi
+	entry="$(grep -F '**本宿主的 READ 档入口。**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md")"
+	grep -Fq '或宿主能逐次应用其深度' <<<"${entry}" ||
+		fail "Chinese ${skill} READ entry omits a same-model depth"
+	grep -Fq '传入该模型与受支持的深度' <<<"${entry}" ||
+		fail "Chinese ${skill} READ entry does not pass its depth"
+	if grep -Fq '不同于已知当前模型' <<<"${entry}"; then
+		fail "Chinese ${skill} READ entry still requires a different model"
+	fi
+done
+note "Codex summaries parse three efforts; auto, EXEC, and direct READ instructions carry depth routing"
+
+# Only positive numeric suffixes are depths. Zero and unknown suffixes belong to
+# the model name; leading zeros on a positive number do not change its validity.
+for suffix in 0 00 keep 1 001 2048; do
+	write_env "STAR_PLAN_MODEL=codex:gpt-6-astra@${suffix}" 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+	case "${suffix}" in
+		0|00|keep) expected="model gpt-6-astra@${suffix}, requested reasoning effort default" ;;
+		*) expected="model gpt-6-astra, requested reasoning effort ${suffix}" ;;
+	esac
+	codex_output="$(models_output --harnesses codex)"
+	grep -Fq "${expected}" <<<"${codex_output}" || fail "incorrect Codex suffix parsing: @${suffix}"
+done
+note "positive integer depths parse; zero and unknown suffixes remain model text"
 
 # An entry with no depth changes no depth: the stamps above stay as they are.
 write_env 'STAR_PLAN_MODEL=claude:claude-plan' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='

@@ -353,7 +353,9 @@ reported. Run /star-proj-adopt afterwards to wire the project up.
 --models stamps the configured tier model, and the thinking depth an entry may carry after it,
 into the static files whose hosts read them: the two Claude Code READ manifests take the READ
 model, every Claude Code manifest takes its tier's depth, and Cursor and Qwen's named plan, exec
-and read agents take their model. It is offline. A key naming neither for that harness — empty,
+and read agents take their model. Codex reads its model and supported reasoning effort at dispatch,
+so this command reports those values without stamping a file or requiring a restart. It is offline.
+A key naming neither for that harness — empty,
 or carrying <harness>:<model> entries with neither its tag nor an untagged value — leaves that
 file unchanged. An ordinary update ends with the same step, so the stamps survive one; start a
 new Cursor or Qwen session afterward so it reloads the agent definition. Which model and which
@@ -482,7 +484,8 @@ is_tier_depth() { # $1 = the candidate suffix
     case "$1" in
         low|medium|high|xhigh|max) return 0 ;;
         ''|*[!0-9]*) return 1 ;;
-        *) return 0 ;;
+        *[1-9]*) return 0 ;;
+        *) return 1 ;;
     esac
 }
 
@@ -655,7 +658,7 @@ stamp_models() {
 
 model_stamp_summary() {
     local harness tier key value depth any=false
-    for harness in claude cursor qwen; do
+    for harness in claude codex cursor qwen; do
         is_selected "${harness}" || continue
         if [[ "${harness}" == claude ]]; then
             value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
@@ -673,6 +676,17 @@ model_stamp_summary() {
             done
             continue
         fi
+        if [[ "${harness}" == codex ]]; then
+            for tier in plan exec read; do
+                key="$(tier_model_key "${tier}")"
+                value="$(tier_model_for codex "$(env_value "${key}")")"
+                [[ -n "${value}" ]] || continue
+                depth="$(tier_depth_for codex "$(env_value "${key}")")"
+                log "${key} in .env gives Codex at dispatch: model ${value}, requested reasoning effort ${depth:-default}; no file stamp is required."
+                any=true
+            done
+            continue
+        fi
         for tier in plan exec read; do
             key="$(tier_model_key "${tier}")"
             value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
@@ -682,7 +696,7 @@ model_stamp_summary() {
             fi
         done
     done
-    [[ "${any}" == true ]] || log "No selected Claude Code, Cursor, or Qwen tier key names a model or a depth in .env; nothing was stamped."
+    [[ "${any}" == true ]] || log "No selected Claude Code, Codex, Cursor, or Qwen tier key names a model or a depth in .env; nothing was stamped."
 }
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,

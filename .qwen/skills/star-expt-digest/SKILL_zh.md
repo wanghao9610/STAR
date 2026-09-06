@@ -35,7 +35,7 @@ description: >-
 
 ## 工作流
 
-**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：解析出的 READ 模型非空、不同于已知当前模型、委派接口可指定该模型，且没有待用户决定时，把完整运行一次性交给一个全新 READ 档受托者，带原始调用、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过此门。否则留在这里，仅在模型已配置时说明一条原因。digest 与 `ledger` 只写各自摘要文件，不接续写入型后续。
+**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：配置的 READ override 可用——模型与本 run 不同，或宿主能逐次应用其深度——时，把完整运行一次性交给一个全新 READ 档受托者，传入该模型与受支持的深度，带原始调用、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过此门。否则留在这里，仅在模型已配置时说明一条原因。digest 与 `ledger` 只写各自摘要文件，不接续写入型后续。
 
 先解析模式。`ledger` 运行 `scripts/scan.sh --trails`，取得全部 `model_trail`、计划 `## Revision History` 与无 frontmatter 文件头的 `model_id`，然后只做 Step 8。其他模式先按 `references/scope_spec_zh.md` 定时间窗，再运行默认扫描并读取未合并执行分支；其输出包含计划与产物 frontmatter、run 日志状态/步骤/待用户项/方向性信号/日期，以及 `metds/` 与 `wkdrs/` 清单。把它当作原始输入，脚本不判断范围或证据层。
 

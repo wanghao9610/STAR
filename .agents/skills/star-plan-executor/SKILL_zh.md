@@ -69,7 +69,7 @@ description: >-
 
 **实现前先跑设计检查。** 把 `references/design_check_zh.md` 交出去做一次“不知情”的复核：派一个只读子代理跑在 PLAN 档的模型上（规约 §10.8，前提是宿主能指定），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——范围逐字写明：“只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。”它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。每条 `fail` 都重开所引证据；在已授权计划内纠正执行计划缺陷，只有发现留下研究范围、验收、关键输入或成本未定时才询问。没有受托者可用时，本地跑一次清单并记录缺少独立读者；不反复询问宿主没有的工具。
 
-**把 Step 4 交给 EXEC 档。** EXEC_PLAN、EXEC_LOG 与当前所需决定都已记下，宿主支持且配置了不同的 EXEC 模型、本 run 又不是 `tier=exec` 受托者时，派一个可写子代理读取本说明并从 Step 4 恢复，带上 `involve=<level> tier=exec` 与合法的 `auto=unattended` 授权。它不得修改 EXEC_PLAN，也不得绕过计划级缺口自行发挥。STOP-line 命令或 blocked 编辑仍未决定时，记入日志并返回可与用户交互的运行；已有适用决定直接沿用。返回后重读 EXEC_LOG，从 Step 5 继续。没有可用 override 或委派路线时就在本地跑 Step 4，不为宿主缺少的机制反复询问。
+**把 Step 4 交给 EXEC 档。** EXEC_PLAN、EXEC_LOG 与当前所需决定都已记下，配置的 EXEC override 可用——模型与本 run 不同，或宿主能逐次应用其深度——且本 run 不是 `tier=exec` 受托者时，派一个可写子代理。按规约 §10.8 传入 EXEC 模型与受支持的深度，并让它读取本说明、从 Step 4 恢复，带上 `involve=<level> tier=exec` 与合法的 `auto=unattended` 授权。它不得修改 EXEC_PLAN，也不得绕过计划级缺口自行发挥。STOP-line 命令或 blocked 编辑仍未决定时，记入日志并返回可与用户交互的运行；已有适用决定直接沿用。返回后重读 EXEC_LOG，从 Step 5 继续。没有可用 override 或委派路线时就在本地跑 Step 4，不为宿主缺少的机制反复询问。
 ### Step 4：执行与验证
 
 主 agent 按依赖关系自主调度未完成的 action——独立 action 并发还是逐个由它自行判断（`references/agent_dispatch_spec_zh.md`）。带 `tier=exec` 的受托者只跑这一步：从第一个未完成的 action 接手，本步一结束就返回，Step 5 留给派它出来的那次运行。对每个 action：

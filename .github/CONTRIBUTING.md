@@ -150,8 +150,10 @@ trees and a `.claude/agents/` directory that Cursor would also read. It stays av
 read-only sub-agent** for collection, **a writing sub-agent** for implementation. What decides whether
 one is dispatched is the same everywhere — the bounded / independent / materially helpful test of
 conventions §6.1 — so the shared root states the test and leaves the call to whoever reads it. Codex's
-own call is `spawn_agent` with `agent_type: explorer` or `worker`; its built-in `default` type has no
-use here, because every STAR delegation is one of those two roles.
+own call is `spawn_agent` with `agent_type: explorer` or `worker`; when the current interface exposes
+it, STAR also passes the tier's supported `reasoning_effort`, and an explicit depth may therefore
+trigger a same-model dispatch. Its built-in `default` type has no use here, because every STAR
+delegation is one of those two roles.
 
 **A term appearing in the wrong tree is the actual defect.** Two real cases: 25 `.cursor` asset
 templates told users "Claude Code injects it at session start" (`e149ae0`), and `.kimi-code` names

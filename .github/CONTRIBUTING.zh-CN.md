@@ -65,7 +65,7 @@ Qwen Code 接受四个 STAR 钩子：在 `SessionStart` 上运行模型 ID 来�
 
 Cursor 公开三个内置子代理：`explore`、`bash` 和 `browser`，所以这棵树只能点名 `explore`，实际也只点名了它。十处文件写入派发曾使用当前文档没有列出的 `generalPurpose`；三个内置代理都不是它所代表的写入迁移器，因此这些位置如今完全不设类型，并说明允许写什么——派发简报本来已经给出这项信息。另一种方案是点名自定义子代理：Cursor 从 `.cursor/agents/*.md` 装载它们，也为兼容读取 `.claude/agents/` 和 `.codex/agents/`，名称冲突时 `.cursor/` 获胜。frontmatter 中的 `name` 是 `Task` 工具提示使用的标识符，`readonly: true` 会禁止文件编辑和改变状态的 shell 命令。这会让只读规则成为机制而非指令，但代价是要在六棵目录树维护一个产物，并增加 Cursor 也会读取的 `.claude/agents/` 目录。该方案保留为可能性，但目前不用。
 
-`.agents` 按委派者所做之事命名，因为这棵树不能点名调用：收集用**只读子代理**，实现用**写入子代理**。是否派发的判断在各处相同——规约 §6.1 的“有界、独立、实质有益”测试——因此共享根目录说明测试条件，具体调用留给读取它的宿主。Codex 自己通过 `spawn_agent` 调用，并用 `agent_type: explorer` 或 `worker`；内置 `default` 类型在这里无用，因为 STAR 的委派总属于上述两类角色之一。
+`.agents` 按委派者所做之事命名，因为这棵树不能点名调用：收集用**只读子代理**，实现用**写入子代理**。是否派发的判断在各处相同——规约 §6.1 的“有界、独立、实质有益”测试——因此共享根目录说明测试条件，具体调用留给读取它的宿主。Codex 自己通过 `spawn_agent` 调用，并用 `agent_type: explorer` 或 `worker`；当前接口提供时，STAR 还逐次传入该档受支持的 `reasoning_effort`，所以显式深度可以触发同模型派发。内置 `default` 类型在这里无用，因为 STAR 的委派总属于上述两类角色之一。
 
 **术语出现在错误的目录树中才是真缺陷。**两个真实案例：25 个 `.cursor` 资源模板曾告诉用户“Claude Code 在会话开始时注入它”（`e149ae0`）；`.kimi-code` 在 36 处把 `CLAUDE.md` 写成项目规则文档，而其他目录树写 `AGENTS.md`（`6f37f77`）。
 

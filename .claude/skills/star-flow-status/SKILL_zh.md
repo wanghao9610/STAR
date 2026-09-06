@@ -34,7 +34,7 @@ description: >-
 
 ## 工作流
 
-**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：解析出的 READ 模型非空、不同于已知当前模型、委派接口可指定该模型，且没有待用户决定时，把完整运行一次性交给一个全新 READ 档受托者，带原始调用、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过此门。否则留在这里，仅在模型已配置时说明一条原因。全程严格只读。状态、覆盖与优先级见 `references/status_spec_zh.md`（英文：`references/status_spec.md`）。
+**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：配置的 READ override 可用——模型与本 run 不同，或宿主能逐次应用其深度——时，把完整运行一次性交给一个全新 READ 档受托者，传入该模型与受支持的深度，带原始调用、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过此门。否则留在这里，仅在模型已配置时说明一条原因。全程严格只读。状态、覆盖与优先级见 `references/status_spec_zh.md`（英文：`references/status_spec.md`）。
 
 ### Step 1：扫描
 运行 `scripts/scan.sh --slim`，并读取实时执行分支与 worktree 清单。把扫描当作原始输入：每份计划的 frontmatter、`## Sub-plans` 索引、§3/§5 占位符计数、run 日志 frontmatter 与正文计数、原样保留的待用户复选框和方向性信号、产物 frontmatter，以及 `metds/` / `wkdrs/` 深度 1 清单。脚本只收集，不判状态或优先级。
