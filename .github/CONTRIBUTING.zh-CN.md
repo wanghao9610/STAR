@@ -53,7 +53,7 @@
 
 如果不确定某个差异究竟是适配还是漂移，可用实际分布做合理性检查：提问工具按名称分布——`AskUserQuestion` 在 `.claude` 和 `.kimi-code` 中各出现 32 个文件，`AskQuestion` 在 `.cursor` 中出现 32 个，`ask_user_question` 在 `.qwen` 中出现 32 个；`SwitchMode` 在 `.cursor` 的 2 个文件中出现，其他地方为 0；子代理工具 `Agent` 在 `.claude` 和 `.kimi-code` 中各出现 28 个文件，`Task` 在 `.cursor` 的 28 个文件中出现，`agent` 在 `.qwen` 相同的 28 个文件中出现（其中两个 `exec_plan` 模板把裸词用作角色而非工具，所以普通 grep 会得到 30）。四者都带 `subagent_type`。终端工具 `Bash` 在 `.claude` 和 `.kimi-code` 中各出现 30 个文件，`Shell` 在 `.cursor` 的 30 个文件中出现，`run_shell_command` 在 `.qwen` 的 30 个文件中出现；文件读取器 `Read` 在 `.claude`、`.cursor` 和 `.kimi-code` 中各出现 28 个文件，`read_file` 在 `.qwen` 的 28 个文件中出现。某个词只集中在真正拥有该词的宿主目录树中时，几乎总是正确的。
 
-**`.agents` 在上述各行中的出现次数都是零**，由检查 23 保持这一点：其禁用列表是其余目录树的并集——包含每种宿主的文件读取器、终端、提问工具和计划工具，也包括 Codex 自身的工具。在这棵树中，装载写成“读取文件”，终端调用把 `shell` 当作普通英语词而非名称；它仍保留带标记的后备方案，用 shell 调用 `cat` 文件并接受结果被写到磁盘，因为到达这里的宿主可能没有读文件工具：Codex 只有这个项目根目录，而且没有独立读文件工具。
+**`.agents` 在上述各行中的出现次数都是零**，由检查 23 保持这一点：其禁用列表是其余目录树的并集——包含每种宿主的文件读取器、终端、提问工具和计划工具，也包括 Codex 自身的工具。在这棵树中，装载写成“读取文件”，终端调用把 `shell` 当作普通英语词而非名称；具体读取器、shell 调用与输出预算由当前宿主决定，中性技能不规定固定的调用顺序。
 
 六棵具名目录树中的每个名称都依据各自宿主的工具列表检查，而不是依据其他目录树的写法：Anthropic 的 Agent Skills 文档、Cursor 的工具界面、[Kimi Code CLI 内置工具参考](https://moonshotai.github.io/kimi-code/en/reference/tools.html)，以及 Qwen Code 自身源码和捆绑 skill。Codex 的列表来自 `openai/codex` 的工具处理器（`codex-rs/core/src/tools/`），注册名称是 `shell_command`、`apply_patch`、`update_plan`、`request_user_input` 和 `spawn_agent`——这是修改 `.codex/` 时仍要核对的列表，也是 `.agents` 仍使用 Codex 措辞时的核对依据。曾有一棵树需要纠正：`.cursor` 继承了 Claude 的 `Bash`。`.kimi-code` 不需纠正——Kimi Code CLI 的文件工具就是 `Read`、`Write`、`Edit`、`Grep`、`Glob` 和 `ReadMediaFile`，终端就是 `Bash`，与 Claude 公布的名称相同——它需要的委派也成立：`Agent` 工具接受 `subagent_type`，内置值为 `coder`（默认）、`explore` 和 `plan`；其问题参数用 `multi_select`，而 Claude 写 `multiSelect`。
 
@@ -134,17 +134,11 @@ Pi 自带一个子代理*示例*扩展（`examples/extensions/subagent/`）和�
 
 ## Description 长度限制
 
-**六棵目录树中，`SKILL.md` frontmatter 的 description 都以 1024 个字符为上限。**这不是逐宿主预算：[agentskills.io `SKILL.md` 规范](https://agentskills.io/specification)、Anthropic Agent Skills 文档和 Kimi CLI 文档都规定 `description` 长度为 1–1024。只限制 `SKILL.md`——它是平台注册并显示 description 的 manifest；`SKILL_zh.md` 作为资源装载，可以超过 1300 个字符。
+技能发现应简短明确：说明能力、适用条件，以及能防止误选的必要排除条件。模式语法、操作流程、输出结构和详细保证放在正文或引用中；只读评审、准备发布但不发布等真实边界应保留。
 
-本文曾长期把它记作仅适用于 `.kimi-code` 的 1050 **字节**预算，因为只有那棵树被人压缩过，数值也是从现有数据（最大 1041）逆向猜出的，不是从规范读取。这个猜测足够接近，以至于掩盖了检查 12 后来修复的两个度量错误：awk 的 `length()` 计算字节，而 description 含 `§`、`—` 和 `→`，所以字节数可比字符数多 8；`description: >-` 还把折叠块标志 `>-` 留在被测文本中，令每个折叠文件虚增 3。`1024 + 3 + 多字节余量 ≈ 1047`，正是 1050 长期通过的原因。
+仓库检查器限制 description 不超过 1024 个字符，DSH 则采用更严的 500 字符限制。这些是上限，不是目标。frontmatter 仍由宿主维护；修改共同的发现语义时，同步六棵生成树的描述，但不替换其 model、context 或调用策略字段。中文对照版保持语义一致，即使它不作为运行时入口加载。
 
-**宿主可能远早于规范上限就截断，而仓库无法检测。**在三个 `.agents` description 仍长达 2108、1665 和 1559 字符时，Cursor 都在第 1536 个字符处从词中间截断（`star-metd-summarize`、`star-refs-reviewer`、`star-expt-analyst`；如今三者都在上限内），所以长 description 的尾部会静默地无法进入代理用于匹配的列表。两个数字都重要：1024 是规范许可值，约 1500 是 description 在实践中开始丢失结尾的位置。
-
-**Codex 的截断比两个数字都严格得多，而且可以度量。**`codex debug prompt-input` 会显示模型可见输入；每个 skill——包括 Codex 自带 skill——在那里都只有一行 `name: <description 前约 100 个字符> (file: <path>)`，从词中间截断且没有省略号。十五个 `.agents` description 长 504–947 字符，因此**模型只能看到约 10%，而十五个中没有任何一个能让“Use when the user invokes `star-*`, or wants …”触发子句到达模型。**该子句是 description 获得主动调用的全部机制，对 Codex 而言却是死文本。skill 被调用后仍会装载完整 `SKILL.md`，所以损失的是发现而非执行——但发现正是 description 的用途。
-
-**十五个 `.agents` description 如今针对该窗口编写**：每个都以用户语言写成的触发子句开头，并在前约 90 个字符内结束，机制、路由和保证随后再写。应按发现问题的原方法复查——运行 `codex debug prompt-input` 并阅读 `- <name>: …` 行——因为**这里没有任何检查能看到它**。编辑时遵循两条规则：窗口从 description 的*开头*计量，所以在前面添加任何内容都会把触发信息推出窗口；为了腾出空间，仍不能删掉关于 skill 不会做什么的保证（见上文），只能把它后移。这是唯一一棵让 description 顺序承载功能而非风格的目录树。中文对照版有意不改：`SKILL_zh.md` 不是已注册 manifest，Codex 从不装载它，因此无需针对截断窗口编写。
-
-压缩会静默丢失内容，这才是真实成本。英文 description 中曾丢掉两处子句，后来恢复：`star-code-release` 的“准备发布但绝不发布”，以及 `star-expt-analyst` 的只读保证和 `watch` 模式。两者本可容纳在上限内——对应 description 当时分别为 890 和 593 个字符——所以删除没有换来任何收益。中文 description 一直保留这些子句，才使英文缺口显现。**为满足长度限制而缩短 description 时：删细节，绝不能删关于 skill 不会做什么的保证。**检查 12 约束长度，没有检查能替你做这项判断。
+目录截断取决于宿主和安装版本。历史测量不能当成永久提示预算；诊断发现问题时检查当前模型可见目录，避免继续堆触发词，或把关键边界挤到长描述的末尾。
 
 ## 检查能够捕捉什么
 
@@ -168,9 +162,9 @@ Pi 自带一个子代理*示例*扩展（`examples/extensions/subagent/`）和�
 16. **`AGENTS.md` 章节编号引用仍指向其声称的章节。**16a 固定标题映射，因此章节重新编号或改名会在其他地方察觉前先让此处失败。16b 重新检查带标签的引用——如 `§8 layout`、`布局符合度（§8）`——是否仍符合实时映射。它防范的漂移曾发布两次：布局与运行时移到 §8 和 §9 后，`star-code-reviewer` 与 `star-expt-analyst` 仍引用 §5 和 §6，CI 仍为绿，因为此前从未有检查查看引用。
 17. **规约文档的编号结构被固定，中英文工作流文档保持逐行对齐。**Skill 会引用到该文件的子节级别——§7.7 出现 280 次，§6.3 出现 50 次——所以在章节中间插入一项会让之后每个引用重新指向其他内容。标题被固定；有被引用项目的章节（§1、§3、§4、§5、§6、§7）项目数被固定，且两种语言都计数，因为同一个 §n 在不同语言中含义不同也是同一个 bug。逐行对齐规则也通过行数相等强制执行。
 18. **Skill 指南和两个 README 与其描述的 skill 保持连接。**指南约 69% 的内容改述十五个 `SKILL.md`，后者权威且变化更频繁。该检查在四个文档间约束脚本可见的连接：每个相对链接目标都存在（包括指南逐节的“完整定义”链接）；每个 `conventions §n.m` 引用都落到现存章节和项目；每个页内锚点仍匹配一个标题。Skill 覆盖有两种形态——指南必须且只能为每个 skill 提供一个编号章节，README 只需点名每个 skill，因为那里使用表格行。没有检查判断章节*说了什么*。
-19. **每棵树的开场装载形态保持不变。**每个文件只有一行 `.env` 查询；Bash 块中不允许 `cat` 整份规约（只有 `.agents` 标记为“accept that the result is written out”/“接受结果被存成文件”的后备句可例外）；运行时从不装载 `SKILL_zh.md`；全部九十对文件中有意统一的两段——语言段落与 `SKILL_zh.md` 开头的引用块——仍完全相同，因此部分重改会显现。检查固定查询行和这两个开头的原文；集中重写时必须在同一提交更新检查。
-20. **只装载部分规约的 skill 会准确说明范围，并保持在大小上限内。**两个 skill（`star-expt-digest`、`star-refs-reviewer`）用 `awk` 截取实际操作的章节，而不是读取整个文件。对每个文件，检查确保：截取结果恰好包含正则点名的章节，因此上游重编号会失败；读取本语言的规约文件；大小不超过 `LOAD_EXCERPT_MAX`（28000 字节），这是唯一可发现超限的位置，因为 `execs/update.sh` 会把整份规约复制到下游项目，文件只能在这里增长；正文装载列表等于正则集合，不装载列表等于其补集；正文引用的大小与选择器产出相同。若 skill 引用不再装载的章节，必须在 `RESTATED_REGISTRY` 中登记，并按目录树和语言双向检查，因此未登记引用和孤立登记都会失败。固定字符串包括选择器形态，以及正文中分隔两份列表的短语（“stay out”“不装载”）。有意保留的缺口：`star-flow-status` 也只装载部分规约，但它使用 `sed` 范围并对 §7 做项目级筛选，章节级解析器无法验证。
-21. **每个 manifest 的开场装载块内都带有复用早前装载的段落，且每种语言内部统一。**这段话允许同一对话中的第二个 skill 跳过仍能逐字看到的装载内容，让多 skill 会话只支付一次装载成本，而不是 N 次。上文检查无法发现三种丢失方式：从一棵树删除，因为检查 1–3 只比较文件集合不比较内容；只在一棵树重写，导致六棵树对可跳过内容意见不一；移到第一个 `##` 标题之后，使它不再属于读者做装载决定时看到的开场块。该段也不能含裸 `§n`——检查 20d 会把同一块中的每个 `§n` 当成 skill 装载哪些章节的声明。
+19. **共享环境控制仍可发现。** 每个入口说明 `.env`、`STAR_LANG`、`INVOLVE` 与模型分档。检查确认这些控制存在，不固定段落原文或工具调用次数。
+20. **按任务读取上下文。** 工具输出限制以当前接口为准。引用路径与生成适配器另有检查，不强制固定摘录大小或开场读取流程。
+21. **行为需要任务级验证。** 修改授权或路由后，以独立的代表性场景检验局部修改、只读状态、已有授权和成本边界；静态措辞检查不能证明模型会正确决策。
 22. **委派调用保持宿主原生，共享根目录不点名任何调用。**`.agents` 完全不得包含委派工具或类型键——`spawn_agent`、`star_subagent`、`Agent`、`Task`、`agent_type:`、`subagent_type:`——因为那里按委派者所做的工作命名。反方向上，Codex 的 `spawn_agent` 和 `agent_type:` 不得出现在 `.claude`、`.cursor`、`.kimi-code` 或 `.qwen` 中。
 23. **每棵树只点名本宿主的文件读取器、终端、提问工具和子代理类型，`.agents` 则一个也不点名。**Pi 的名称为小写（`read`、`bash`），且不得出现任何 `subagent_type`。Claude Code 与 Kimi Code 公开 `Read` 和 `Bash`；Cursor 的终端是 `Shell`；Qwen Code 使用 snake_case 标识符 `read_file` 和 `run_shell_command`，其显示标签 `ReadFile` 与 `Shell` 同 Claude 名称一起被禁止。共享根目录的禁用列表是上述列表的并集：包含每种宿主的文件读取器、终端、提问工具和计划工具，也包括 Codex 自身。`subagent_type` 值按目录树固定——Claude 为 `Explore` / `general-purpose`，Cursor 只有 `explore`，Kimi 为 `explore` / `coder`，Qwen Code 为 `Explore` / `general-purpose` / `fork`；`.agents` 不得点名任何类型键，这部分由检查 22 负责。该检查存在是因为未适配名称的反向错误真的发布过：`.kimi-code` 从正确的 `Read` 和 `Bash` 改到 Kimi 从未有过的名称，而所有检查都通过。`.cursor` 的两个名称最初只是本仓库的描述性选择，如今已有出处——Cursor 的 hooks 和 CLI 权限页面公开 `Shell` 与 `Read`——因此六棵树都固定在供应商列表上，而不是猜测上。
 

@@ -1134,8 +1134,6 @@ CITATION_LABELS=(
     "Simplicity First|§[0-9]+ 简洁"
     "Surgical Changes|§[0-9]+ surgical"
     "Surgical Changes|§[0-9]+ 外科手术"
-    "Goal-Driven Execution|Goal-Driven Execution ?(\(|（)((AGENTS|CLAUDE)\.md )?§[0-9]+"
-    "Verification|Verification ?(\(|（)§[0-9]+"
 )
 
 CITATION_SCAN=("${SKILL_ROOTS[@]}" docs/mds/star-workflow)
@@ -1217,8 +1215,7 @@ CONV_HEADINGS=(
 )
 CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|10" "7|13" "10|8" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation
-# against it, and check 20d derives the stay-out complement from it, so adding
-# a section here is all it takes to make one citable and load-accounted.
+# against it; adding a section here makes it citable.
 CONV_MAX_SECTION="${CONV_HEADINGS[$(( ${#CONV_HEADINGS[@]} - 1 ))]%%.*}"
 
 conv_items() { # $1 = file, $2 = section number -> top-level numbered items in it
@@ -1380,528 +1377,27 @@ done
 
 (( guide_errors == 0 )) && note "skills guide covers every skill once, links and anchors resolve, conventions citations land"
 
-# 19. Opening-load invariants.
-#     Three passes built the skills' opening load (10dd4da, e5841a2, bfe6c03):
-#     one message per run — whole files through the harness's file-reading
-#     tool, Bash carrying only the .env lookup and the scripts only Bash can
-#     run — and SKILL_zh.md kept as a human-readable edition, never a runtime
-#     load. Nothing above guards any of that: an edit could cat the
-#     conventions back into a Bash block (guaranteeing the >30 KB result the
-#     shape exists to avoid), re-add the SKILL_zh runtime read, or drop the
-#     .env lookup from one tree, and every check above would stay green. The
-#     literals pinned here — the lookup line, the language-paragraph opening,
-#     the zh blockquote opening — are the strings the load discipline rides
-#     on; rewording any of them centrally means updating this check in the
-#     same commit.
-#
-#     Two skills carry conventions text in that Bash call on purpose:
-#     star-expt-digest and star-refs-reviewer load a bounded awk excerpt of
-#     the sections they act on (about 26-27 KB) instead of the whole file,
-#     which is what lets it ride in Bash at all. That is why the ban below is
-#     on `cat`-ing the *whole* conventions file — 35 KB, guaranteed to be written out —
-#     rather than on Bash carrying any conventions text.
-section "Opening-load invariants"
-open_errors=0
-LOOKUP_LINE="grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'"
-lang_seen="$(mktemp)"
-bq_seen="$(mktemp)"
-
-for root in "${SKILL_ROOTS[@]}"; do
-    while IFS= read -r skill; do
-        for f in SKILL.md SKILL_zh.md; do
-            path="${root}/${skill}/${f}"
-            [[ -f "${path}" ]] || continue   # check 3 owns missing files
-            n="$(grep -cF -- "${LOOKUP_LINE}" "${path}")"
-            if (( n != 1 )); then
-                fail "${path}: ${n} .env lookup lines, expected exactly 1"
-                open_errors=1
-            fi
-            # Only the .agents fallback sentence may cat the conventions, and
-            # that sentence is marked by "accept that the result is written out" / "接受结果被存成文件".
-            while IFS= read -r hit; do
-                [[ -n "${hit}" ]] || continue
-                printf '%s' "${hit}" | grep -q 'accept that the result is written out\|接受结果被存成文件' && continue
-                fail "${path}:${hit%%:*}: cats the conventions inside Bash outside the marked fallback sentence"
-                open_errors=1
-            done < <(grep -n 'cat docs/mds/star-workflow/research-workflow-conventions' "${path}" 2>/dev/null)
-        done
-
-        en="${root}/${skill}/SKILL.md"
-        if [[ -f "${en}" ]]; then
-            n="$(grep -c "^Match the user's language\." "${en}")"
-            if (( n != 1 )); then
-                fail "${en}: ${n} language paragraphs, expected exactly 1"
-                open_errors=1
-            elif ! grep "^Match the user's language\." "${en}" | grep -qF 'not loaded at runtime'; then
-                fail "${en}: language paragraph no longer says SKILL_zh.md is not loaded at runtime"
-                open_errors=1
-            else
-                grep "^Match the user's language\." "${en}" >> "${lang_seen}"
-            fi
-        fi
-        zh="${root}/${skill}/SKILL_zh.md"
-        if [[ -f "${zh}" ]]; then
-            n="$(grep -c '^> 本文件是 `SKILL\.md` 的中文对照版' "${zh}")"
-            if (( n != 1 )); then
-                fail "${zh}: ${n} header blockquotes of the documentation-edition form, expected exactly 1"
-                open_errors=1
-            else
-                grep '^> 本文件是 `SKILL\.md` 的中文对照版' "${zh}" >> "${bq_seen}"
-            fi
-        fi
-    done < <(printf '%s\n' "${SKILLS}")
-done
-
-# Both passages are uniform across all 105 file pairs by design, so a
-# partial re-edit — one tree reworded, the rest left behind — shows up here.
-if (( $(sort -u "${lang_seen}" | wc -l) > 1 )); then
-    fail "the language paragraph differs across SKILL.md files; it is uniform by design:"
-    sort -u "${lang_seen}" | cut -c1-80 | sed 's/^/      /'
-    open_errors=1
-fi
-if (( $(sort -u "${bq_seen}" | wc -l) > 1 )); then
-    fail "the zh header blockquote differs across SKILL_zh.md files; it is uniform by design"
-    open_errors=1
-fi
-rm -f "${lang_seen}" "${bq_seen}"
-
-stale_reads="$(find -L "${SKILL_ROOTS[@]}" -type f \
-    -exec grep -nH 'in full before acting\|与读取本文件\|issue its read together' {} + || true)"
-if [[ -n "${stale_reads}" ]]; then
-    fail "SKILL_zh runtime-read phrasing has returned:"
-    printf '%s\n' "${stale_reads}" | sed 's/^/      /'
-    open_errors=1
-fi
-
-(( open_errors == 0 )) && note "opening loads hold: one lookup line per file, no conventions cat outside the fallback, SKILL_zh not a runtime load, language paragraph and blockquote uniform"
-
-# 20. The section-selective conventions load stays honest.
-#     Two skills load only the conventions sections they act on, as an awk
-#     excerpt in their opening Bash call (b698f49). That buys ~25% per run and
-#     costs two invariants nothing else holds.
-#
-#     Each call's excerpt has to stay under the Bash size limit, which is why a
-#     load may be split across several calls in one message: the budget below is
-#     per call, while the prose, the citations and the quoted size are checked
-#     against the union of them. This is the only place that can be caught: `execs/update.sh` copies
-#     docs/mds/star-workflow wholesale into downstream projects, which are told
-#     not to edit it, so the file can only grow *here*. Without the size
-#     assertion below, growing §7 by 4 KB silently converts a one-message load
-#     into two round trips in every downstream run, with CI green.
-#
-#     And the section set now lives twice in each file: once in the awk regex,
-#     once in the prose that says what arrives and what does not. Those drift
-#     apart the way every other pair in this script has — a reader trusts the
-#     prose, a run gets the regex.
-#
-#     Pinned strings, in the same sense as check 19's: the canonical selector
-#     shape `awk '/^## /{k=/^## (a|b)\./} k'`, and the phrases that separate the
-#     loaded list from the excluded one in prose — "stay out" and "不装载".
-#     Rewording any of them centrally means updating this check in the same
-#     commit. Only bare §n counts in that prose; §n.m is a sub-item citation,
-#     which is how a stay-out reason may point at a section that IS loaded.
-#
-#     An item-grain selector loads part of one section by numbered item
-#     (star-flow-status takes §7 at its reporting items). Its shape is pinned
-#     too, found by the literal `{s=1;n=0}`: `/^## N\./{s=1;n=0}` opens the
-#     section, `/^## N+1\./{s=0}` closes it at the very next heading — anything
-#     else silently prints the sections in between — and the `n==` list names
-#     the preamble (0) and the items that print. What it prints is re-derived
-#     here the way 20b re-runs the set selectors, and the prose pin is the item
-#     list itself, spelled in the load block ("items 1, 4, 12" / "第 1、4、12
-#     条"), so a selector edit the prose does not follow fails.
-section "Selective conventions load"
-
-LOAD_EXCERPT_MAX=${LOAD_EXCERPT_MAX:-22000}
-
-# skill|file|section — a citation of a section the skill no longer loads, kept on
-# purpose because the sentence restates the rule and cites it only for provenance.
-# A `_zh` suffix is stripped before matching, so one row covers both languages.
-# Checked both ways, like check 15: a row whose citation is gone fails too.
-RESTATED_REGISTRY=(
-    "star-idea-storm|SKILL.md|2"
-    "star-idea-storm|SKILL.md|11"
-    "star-env-builder|SKILL.md|11"
-    "star-proj-adopt|SKILL.md|11"
-    "star-plan-decomposer|SKILL.md|11"
-    "star-code-architect|SKILL.md|11"
-    "star-code-release|SKILL.md|11"
-    "star-plan-coach|SKILL.md|11"
-    "star-metd-summarize|SKILL.md|1"
-    "star-expt-analyst|SKILL.md|1"
-    "star-expt-digest|SKILL.md|1"
-    "star-expt-digest|SKILL.md|2"
-    "star-expt-digest|SKILL.md|4"
-    "star-expt-digest|SKILL.md|10"
-    "star-expt-digest|references/digest_rubric.md|2"
-    "star-expt-digest|references/scope_spec.md|4"
-    "star-refs-reviewer|SKILL.md|1"
-    "star-refs-reviewer|SKILL.md|10"
-    "star-flow-status|SKILL.md|8"
-    "star-flow-status|SKILL.md|11"
-    "star-flow-status|references/status_spec.md|8"
-    "star-flow-status|references/status_spec.md|11"
-)
-
-sel_errors=0
-sel_files=0
-registry_hit=()
-
-bare_sections() { # stdin -> one bare section number per line, sorted unique
-    grep -oE '§[0-9]+(\.[0-9]+)?' | grep -v '\.' | tr -d '§' | sort -nu
-}
-
+# 19. Skills expose shared environment and language controls without prescribing
+#     a tool-call itinerary. Routing and authorization behavior are exercised with
+#     independent task scenarios; exact prose, call counts and output byte budgets
+#     are not contracts. Reference paths and adapters are checked elsewhere.
+section "Shared environment and language controls"
+control_errors=0
 for root in "${SKILL_ROOTS[@]}"; do
     while IFS= read -r skill; do
         for f in SKILL.md SKILL_zh.md; do
             path="${root}/${skill}/${f}"
             [[ -f "${path}" ]] || continue
-
-            # No mapfile: this script has to run under the bash 3.2 a macOS
-            # checkout still ships, where that builtin does not exist.
-            sels=()
-            while IFS= read -r sel_line; do
-                [[ -n "${sel_line}" ]] && sels+=( "${sel_line}" )
-            done < <(grep -F "awk '/^## /{k=/^## (" "${path}")
-            (( ${#sels[@]} > 0 )) || continue
-            sel_files=$(( sel_files + 1 ))
-
-            if [[ "${f}" == SKILL_zh.md ]]; then
-                conv="${CONV_ZH}"
-                lang=zh
-            else
-                conv="${CONV_EN}"
-                lang=en
-            fi
-
-            # A load may be split across several calls in one message, since the
-            # size limit is per tool result: each selector is sized on its own,
-            # while the prose, the citations and the quoted size read the union.
-            wants=()
-            bytes=0
-            sel_broken=0
-            for sel in "${sels[@]}"; do
-                # 20a. the selector names a set, and applies it to its own language's file
-                want="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel}")"
-                if [[ -z "${want}" ]]; then
-                    fail "${path}: carries a section selector whose set cannot be parsed"
-                    sel_errors=1
-                    sel_broken=1
-                    continue
-                fi
-                if ! grep -qF -- "${conv}" <<< "${sel}"; then
-                    fail "${path}: its selector does not read ${conv}"
-                    sel_errors=1
-                fi
-
-                # 20b. what it prints is exactly what it names — the renumber guard
-                excerpt="$(awk -v r="^## (${want})\\\\." '/^## /{k=($0~r)} k' "${conv}")"
-                if [[ -z "${excerpt}" ]]; then
-                    fail "${path}: selector (${want}) prints nothing from ${conv}; the conventions may have been renumbered"
-                    sel_errors=1
-                    sel_broken=1
-                    continue
-                fi
-                got="$(sed -nE 's/^## ([0-9]+)\..*/\1/p' <<< "${excerpt}" | sort -n | paste -sd'|' -)"
-                one_sorted="$(tr '|' '\n' <<< "${want}" | sort -n | paste -sd'|' -)"
-                if [[ "${got}" != "${one_sorted}" ]]; then
-                    fail "${path}: selector names §${one_sorted//|/, §} but prints §${got//|/, §}"
-                    sel_errors=1
-                fi
-
-                # 20c. every call stays clear of the Bash size limit on its own
-                one_bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
-                if (( one_bytes > LOAD_EXCERPT_MAX )); then
-                    fail "${path}: the (${want}) excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget — it will be written out and cost the round trip the one-message load exists to avoid. Move a section to another call in the same message, or drop one."
-                    sel_errors=1
-                fi
-
-                wants+=( "${want}" )
-                bytes=$(( bytes + one_bytes ))
-            done
-
-            # 20g. the item-grain selector: one section, by numbered item.
-            ipins=()
-            while IFS= read -r isel; do
-                [[ -n "${isel}" ]] || continue
-                isect="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=1;n=0\}.*|\1|p' <<< "${isel}")"
-                istop="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=0\}.*|\1|p' <<< "${isel}")"
-                if [[ -z "${isect}" || -z "${istop}" ]]; then
-                    fail "${path}: carries an item selector whose sections cannot be parsed"
-                    sel_errors=1; sel_broken=1
-                    continue
-                fi
-                if (( istop != isect + 1 )); then
-                    fail "${path}: the item selector opens §${isect} but closes at §${istop}; it must close at the very next heading or every section between rides in"
-                    sel_errors=1; sel_broken=1
-                    continue
-                fi
-                if ! grep -qF -- "${conv}" <<< "${isel}"; then
-                    fail "${path}: its item selector does not read ${conv}"
-                    sel_errors=1
-                fi
-                inums="$(grep -oE 'n==[0-9]+' <<< "${isel}" | grep -oE '[0-9]+$' | sort -n | uniq | paste -sd'|' -)"
-                items="$(tr '|' '\n' <<< "${inums}" | grep -v '^0$' | paste -sd'|' -)"
-                if [[ -z "${items}" ]]; then
-                    fail "${path}: the item selector names no items"
-                    sel_errors=1; sel_broken=1
-                    continue
-                fi
-                excerpt="$(awk -v sect="${isect}" -v keep="|${inums}|" '
-                    $0 ~ ("^## " sect "\\.")     {s=1; n=0}
-                    $0 ~ ("^## " (sect+1) "\\.") {s=0}
-                    s { if ($0 ~ /^[0-9]+\. /) n = int($0)
-                        if (index(keep, "|" n "|")) print }' "${conv}")"
-                if [[ -z "${excerpt}" ]]; then
-                    fail "${path}: the item selector prints nothing from §${isect} of ${conv}; the conventions may have been renumbered"
-                    sel_errors=1; sel_broken=1
-                    continue
-                fi
-                got_items="$(sed -nE 's/^([0-9]+)\. .*/\1/p' <<< "${excerpt}" | sort -n | uniq | paste -sd'|' -)"
-                if [[ "${got_items}" != "${items}" ]]; then
-                    fail "${path}: the item selector names items ${items//|/, } of §${isect} but prints items ${got_items//|/, }; the section's items may have been renumbered"
-                    sel_errors=1
-                fi
-                one_bytes="$(wc -c <<< "${excerpt}" | tr -d ' ')"
-                if (( one_bytes > LOAD_EXCERPT_MAX )); then
-                    fail "${path}: the §${isect} item excerpt is ${one_bytes} bytes, over the ${LOAD_EXCERPT_MAX} budget"
-                    sel_errors=1
-                fi
-                if [[ "${f}" == SKILL_zh.md ]]; then
-                    ipins+=( "第 ${items//|/、} 条" )
-                else
-                    ipins+=( "items ${items//|/, }" )
-                fi
-                wants+=( "${isect}" )
-                bytes=$(( bytes + one_bytes ))
-            done < <(grep -F '{s=1;n=0}' "${path}")
-            (( sel_broken == 0 )) || continue
-            wsorted="$(printf '%s\n' "${wants[@]}" | tr '|' '\n' | sort -n | paste -sd'|' -)"
-
-            # The load block: from its heading to the next ## section.
-            start="$(grep -nE '^\*\*Shared conventions\.|^\*\*通用规约。' "${path}" | head -n 1 | cut -d: -f1)"
-            if [[ -z "${start}" ]]; then
-                fail "${path}: has a section selector but no Shared-conventions block to describe it"
-                sel_errors=1
-                continue
-            fi
-            block="$(awk -v s="${start}" 'NR>=s{ if (NR>s && /^## /) exit; print }' "${path}")"
-            end="$(awk -v s="${start}" 'NR>s && /^## /{print NR-1; exit}' "${path}")"
-            [[ -n "${end}" ]] || end="$(wc -l < "${path}")"
-
-            # The loaded list and the stay-out list can share one line, so the split is
-            # on the phrase inside the flattened block, not on a line number. The block
-            # goes through a file, never `awk -v`, which would eat its backslashes.
-            flat="$(mktemp)"
-            tr '\n' ' ' <<< "${block}" > "${flat}"
-
-            # the item-list prose pin (20g): the block spells the exact list.
-            for pin in "${ipins[@]:-}"; do
-                [[ -n "${pin}" ]] || continue
-                if ! grep -qF -- "${pin}" "${flat}"; then
-                    fail "${path}: the load block never spells the item selector's list (\"${pin}\"); the selector and the prose have drifted"
-                    sel_errors=1
+            for key in STAR_LANG INVOLVE STAR_ .env; do
+                if ! grep -Fq -- "${key}" "${path}"; then
+                    fail "${path}: missing shared environment control ${key}"
+                    control_errors=1
                 fi
             done
-
-            # 20d. prose vs regex: what the block says arrives is the set, and what it
-            #      says stays out is the complement.
-            split_at="$(awk '{
-                best = 0
-                split("stay out|stays out|不装载", marks, "|")
-                for (i in marks) { p = index($0, marks[i]); if (p > 0 && (best == 0 || p < best)) best = p }
-                print best
-            }' "${flat}")"
-            if [[ "${split_at}" == "0" ]]; then
-                fail "${path}: the load block never says which sections stay out (pinned phrases: \"stay out\" / \"不装载\")"
-                sel_errors=1
-            else
-                claims_in="$(awk -v n="${split_at}" '{print substr($0, 1, n - 1)}' "${flat}" | bare_sections | paste -sd'|' -)"
-                claims_out="$(awk -v n="${split_at}" '{print substr($0, n)}' "${flat}" | bare_sections | paste -sd'|' -)"
-                if [[ "${claims_in}" != "${wsorted}" ]]; then
-                    fail "${path}: the block says §${claims_in//|/, §} arrives but the selector loads §${wsorted//|/, §}"
-                    sel_errors=1
-                fi
-                expect_out="$(for (( n=0; n<=CONV_MAX_SECTION; n++ )); do
-                                  grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${wsorted}")" || printf '%s\n' "${n}"
-                              done | paste -sd'|' -)"
-                if [[ "${claims_out}" != "${expect_out}" ]]; then
-                    fail "${path}: the block names §${claims_out//|/, §} as staying out; the sections it does not load are §${expect_out//|/, §}"
-                    sel_errors=1
-                fi
-            fi
-
-            # 20e. the size the prose quotes is the size the selector produces. This
-            #      caught two real errors when the shape was written: a stale figure,
-            #      and en/zh rounding that made one excerpt look smaller than its twin.
-            claimed_kb="$(awk '{
-                best = 0
-                split("excerpt|摘录", marks, "|")
-                for (i in marks) { p = index($0, marks[i]); if (p > 0 && (best == 0 || p < best)) best = p }
-                if (best > 0) print substr($0, best)
-            }' "${flat}" | grep -oE '[0-9]+ KB' | head -n 1 | grep -oE '[0-9]+')"
-            if [[ -z "${claimed_kb}" ]]; then
-                fail "${path}: the load block never states the excerpt's size, so nothing ties its prose to the ${bytes} bytes it loads"
-                sel_errors=1
-            else
-                measured_kb=$(( (bytes + 500) / 1000 ))
-                diff_kb=$(( claimed_kb > measured_kb ? claimed_kb - measured_kb : measured_kb - claimed_kb ))
-                if (( diff_kb > 1 )); then
-                    fail "${path}: the block says the excerpt is ${claimed_kb} KB; it is ${bytes} bytes (${measured_kb} KB)"
-                    sel_errors=1
-                fi
-            fi
-
-            # 20f. every conventions citation outside the block resolves inside the
-            #      loaded set, or is a pinned restatement.
-            while IFS= read -r hit; do
-                [[ -n "${hit}" ]] || continue
-                lineno="${hit%%:*}"
-                # inside the block itself 20d owns the citations; outside it they must resolve
-                (( lineno >= start && lineno <= end )) && continue
-                n="$(printf '%s' "${hit#*:}" | grep -oE '(conventions|规约) §[0-9]+' |
-                     grep -oE '[0-9]+' | head -n 1)"
-                [[ -n "${n}" ]] || continue
-                grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${wsorted}")" && continue
-                key="${skill}|${f/_zh.md/.md}|${n}"
-                if printf '%s\n' "${RESTATED_REGISTRY[@]}" | grep -qxF "${key}"; then
-                    registry_hit+=("${root}|${lang}|${key}")
-                else
-                    fail "${path}:${lineno}: cites conventions §${n}, which this skill no longer loads. Restate the rule and add '${key}' to RESTATED_REGISTRY, or put §${n} back in the selector."
-                    sel_errors=1
-                fi
-            done < <(grep -nE '(conventions|规约) §[0-9]+' "${path}" || true)
-
-            rm -f "${flat}"
-        done
-
-        # references/ carry citations too, and no selector of their own — they are
-        # checked against the skill's SKILL.md set.
-        en_manifest="${root}/${skill}/SKILL.md"
-        [[ -f "${en_manifest}" ]] || continue
-        want=""
-        while IFS= read -r sel_line; do
-            one="$(sed -nE "s/.*k=\/\^## \(([0-9|]+)\)\\\\\.\/.*/\1/p" <<< "${sel_line}")"
-            [[ -n "${one}" ]] && want="${want}${want:+|}${one}"
-        done < <(grep -F "awk '/^## /{k=/^## (" "${en_manifest}")
-        while IFS= read -r sel_line; do
-            one="$(sed -nE 's|.*/\^## ([0-9]+)\\\./\{s=1;n=0\}.*|\1|p' <<< "${sel_line}")"
-            [[ -n "${one}" ]] && want="${want}${want:+|}${one}"
-        done < <(grep -F '{s=1;n=0}' "${en_manifest}")
-        [[ -n "${want}" ]] || continue
-        while IFS= read -r ref; do
-            [[ -n "${ref}" ]] || continue
-            while IFS= read -r hit; do
-                [[ -n "${hit}" ]] || continue
-                n="$(printf '%s' "${hit#*:}" | grep -oE '(conventions|规约) §[0-9]+' |
-                     grep -oE '[0-9]+' | head -n 1)"
-                [[ -n "${n}" ]] || continue
-                grep -qx "${n}" <<< "$(tr '|' '\n' <<< "${want}")" && continue
-                rel="${ref#"${root}/${skill}/"}"
-                [[ "${rel}" == *_zh.md ]] && reflang=zh || reflang=en
-                key="${skill}|${rel/_zh.md/.md}|${n}"
-                if printf '%s\n' "${RESTATED_REGISTRY[@]}" | grep -qxF "${key}"; then
-                    registry_hit+=("${root}|${reflang}|${key}")
-                else
-                    fail "${ref}:${hit%%:*}: cites conventions §${n}, which ${skill} no longer loads. Restate the rule and add '${key}' to RESTATED_REGISTRY, or put §${n} back in the selector."
-                    sel_errors=1
-                fi
-            done < <(grep -nE '(conventions|规约) §[0-9]+' "${ref}" || true)
-        done < <(find -L "${root}/${skill}/references" -type f -name '*.md' 2>/dev/null | sort)
-    done < <(printf '%s\n' "${SKILLS}")
-done
-
-# The other direction, per tree: a registry row whose citation is gone is as
-# misleading as an unregistered citation, and asking each tree separately also
-# catches the restatement dropped from one tree and left in the other six.
-registry_hit_text="$(printf '%s\n' "${registry_hit[@]:-}")"
-for row in "${RESTATED_REGISTRY[@]}"; do
-    for root in "${SKILL_ROOTS[@]}"; do
-        skill_of_row="${row%%|*}"
-        [[ -d "${root}/${skill_of_row}" ]] || continue
-        for lang in en zh; do
-            if ! grep -qxF "${root}|${lang}|${row}" <<< "${registry_hit_text}"; then
-                fail "RESTATED_REGISTRY row '${row}' matches no citation in the ${lang} files of ${root}; drop the row or restore the restatement there"
-                sel_errors=1
-            fi
-        done
-    done
-done
-
-if (( sel_errors == 0 )); then
-    if (( sel_files == 0 )); then
-        note "no skill loads the conventions selectively; nothing to check"
-    else
-        note "${sel_files} selective loads hold: sections printed match sections named, prose matches the selector, excerpts under ${LOAD_EXCERPT_MAX} bytes with their stated sizes, ${#RESTATED_REGISTRY[@]} restatements pinned"
-    fi
-fi
-
-# 21. The reuse-an-earlier-load paragraph is present, uniform, and inside the load.
-#     A second skill in the same conversation is allowed to skip the parts of the
-#     opening load it can still see verbatim, which is the only thing that makes a
-#     multi-skill session cost one full load instead of N. The permission lives in
-#     one paragraph per manifest, and three ways of losing it are invisible above:
-#     dropping it from one tree (checks 1-3 compare file sets, not contents),
-#     rewording it in one tree so the trees disagree about what may be skipped, and
-#     moving it below the first ## heading, where it stops being part of the load
-#     the reader is deciding about. It carries no bare §n on purpose — check 20d
-#     reads every §n in this same block as a claim about which sections load.
-section "Reuse-an-earlier-load paragraph"
-reuse_errors=0
-reuse_en="$(mktemp)"
-reuse_zh="$(mktemp)"
-
-for root in "${SKILL_ROOTS[@]}"; do
-    while IFS= read -r skill; do
-        for f in SKILL.md SKILL_zh.md; do
-            path="${root}/${skill}/${f}"
-            [[ -f "${path}" ]] || continue   # check 3 owns missing files
-            if [[ "${f}" == SKILL_zh.md ]]; then
-                lead='^\*\*复用上一次装载。\*\*'
-                head='^\*\*通用规约。'
-                seen="${reuse_zh}"
-            else
-                lead='^\*\*Reusing an earlier load\.\*\*'
-                head='^\*\*Shared conventions\.'
-                seen="${reuse_en}"
-            fi
-
-            n="$(grep -cE "${lead}" "${path}")"
-            if (( n != 1 )); then
-                fail "${path}: ${n} reuse-an-earlier-load paragraphs, expected exactly 1"
-                reuse_errors=1
-                continue
-            fi
-            grep -E "${lead}" "${path}" >> "${seen}"
-
-            if grep -qE '§[0-9]+([^.0-9]|$)' <<< "$(grep -E "${lead}" "${path}")"; then
-                fail "${path}: the reuse paragraph cites a bare §n; check 20d reads those as load claims"
-                reuse_errors=1
-            fi
-
-            start="$(grep -nE "${head}" "${path}" | head -n 1 | cut -d: -f1)"
-            at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
-            next_h="$(awk -v s="${start:-0}" 'NR>s && /^## /{print NR; exit}' "${path}")"
-            if [[ -z "${start}" ]] || (( at < start )) || { [[ -n "${next_h}" ]] && (( at > next_h )); }; then
-                fail "${path}: the reuse paragraph sits outside the opening-load block"
-                reuse_errors=1
-            fi
         done
     done < <(printf '%s\n' "${SKILLS}")
 done
-
-for pair in "en:${reuse_en}" "zh:${reuse_zh}"; do
-    lang="${pair%%:*}"
-    file="${pair#*:}"
-    if (( $(sort -u "${file}" | wc -l) > 1 )); then
-        fail "the ${lang} reuse paragraph differs across manifests; it is uniform by design:"
-        sort -u "${file}" | cut -c1-80 | sed 's/^/      /'
-        reuse_errors=1
-    fi
-done
-rm -f "${reuse_en}" "${reuse_zh}"
-
-(( reuse_errors == 0 )) && note "every manifest carries the reuse paragraph, uniform per language, inside the opening-load block"
+(( control_errors == 0 )) && note "all manifests expose language, involvement and model controls"
 
 # 22. Delegation tool names stay native to each harness.
 #     The Claude tree already marks every delegation-capable file with
@@ -2114,22 +1610,12 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( ref_errors == 0 )) && note "${ref_checked} reference paths resolve, and every reference file is named by the skill that ships it"
 
-# 25. The where-this-run-executes paragraph: present once in every manifest that
-#     may relocate, absent from the two coaching skills that never do, uniform per
-#     language, and at the head of Workflow — after that heading, before its first
-#     step — so it runs before anything the skill resolves. Conventions §10.8
-#     states the rule, and this paragraph is the only place a manifest implements
-#     it: a tree that lost it silently leaves that skill on the session's model
-#     with the keys set, and a reworded copy has the trees disagree about when a
-#     run moves. The four exempt names are the ones §10.8 lists — the two
-#     coaching skills, which always owe the user a question, and the two READ-tier
-#     skills a harness may fork on their manifest's model, where a fork cannot
-#     dispatch; a skill that joins or leaves that list changes both places in the
-#     same commit.
+# 25. Every relocating skill has one routing entry before its first workflow
+#     action. The entry may describe that skill's actual phase or mode; identical
+#     prose across different skills is not required. Port checks own adaptation
+#     parity, while check_model_routing.sh checks installed model consumers.
 section "Relocation paragraph"
 reloc_errors=0
-reloc_en="$(mktemp)"
-reloc_zh="$(mktemp)"
 RELOCATE_NEVER="star-plan-coach star-idea-storm star-flow-status star-expt-digest"
 
 for root in "${SKILL_ROOTS[@]}"; do
@@ -2140,11 +1626,9 @@ for root in "${SKILL_ROOTS[@]}"; do
             if [[ "${f}" == SKILL_zh.md ]]; then
                 lead='^\*\*本次运行在哪里执行。\*\*'
                 workflow='^## 工作流'
-                seen="${reloc_zh}"
             else
                 lead='^\*\*Where this run executes\.\*\*'
                 workflow='^## Workflow'
-                seen="${reloc_en}"
             fi
 
             n="$(grep -cE "${lead}" "${path}")"
@@ -2160,7 +1644,6 @@ for root in "${SKILL_ROOTS[@]}"; do
                 reloc_errors=1
                 continue
             fi
-            grep -E "${lead}" "${path}" >> "${seen}"
 
             if [[ "${f}" == SKILL_zh.md ]]; then
                 stated="$(grep -oE '^本 skill 的名册档位是 `(plan|exec|read)`' "${path}" | grep -oE '(plan|exec|read)' | head -n 1)"
@@ -2186,18 +1669,7 @@ for root in "${SKILL_ROOTS[@]}"; do
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-for pair in "en:${reloc_en}" "zh:${reloc_zh}"; do
-    lang="${pair%%:*}"
-    file="${pair#*:}"
-    if (( $(sort -u "${file}" | wc -l) > 1 )); then
-        fail "the ${lang} relocation paragraph differs across manifests; it is uniform by design:"
-        sort -u "${file}" | cut -c1-80 | sed 's/^/      /'
-        reloc_errors=1
-    fi
-done
-rm -f "${reloc_en}" "${reloc_zh}"
-
-(( reloc_errors == 0 )) && note "every relocating manifest carries the relocation paragraph, uniform per language, at the head of Workflow; the two coaching and the two forked READ skills carry none"
+(( reloc_errors == 0 )) && note "relocating skills have routing entries before their actions; native READ entries are checked separately"
 
 printf '\n'
 if (( FAILURES > 0 )); then

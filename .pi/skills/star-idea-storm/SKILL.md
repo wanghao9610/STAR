@@ -2,46 +2,16 @@
 name: star-idea-storm
 disable-model-invocation: true
 description: >-
-  Coach a researcher from a vague interest to a defensible research topic through
-  diverge–scan–converge: clarify the starting idea and its constraints, generate 3–5 genuinely
-  distinct candidate directions, ground the kept ones in an abstract-level literature
-  scan (every named paper transcribed from a record fetched during the run, source URL
-  logged — never from memory), score them on a six-dimension rubric with Pursue /
-  Refine / Park verdicts, then frame the winner into a topic statement with a first
-  validation experiment — written incrementally to metds/ideas/<slug>_idea.md with
-  cross-session resume. The finalized idea file is the starting point for star-plan-coach. Use when the
-  user runs star-idea-storm, wants to brainstorm / 头脑风暴 research directions, has
-  an interest area but no committed topic, asks "what should I research", or mentions
-  idea files under metds/ideas. Bilingual (en/zh).
+  Turn a vague research interest into a defensible topic through structured divergence,
+  literature-grounded comparison, and convergence, with resumable idea records. Use when the user has
+  no committed topic or wants to resume an idea file; planning begins with star-plan-coach.
 ---
 
 # Research Idea Storm — from vague interest to a defensible topic
 
-Match the user's language. `.env`'s `STAR_LANG` replaces it wherever it is set (conventions §7.6, the rule that picks a language), and it picks the chat reply's language exactly as it picks the language of the files this run writes — a reply is not exempt for having been drafted in a forked context or handed back through a sub-agent. It rides in the opening load below because a run may have no user turn behind it at all — a forked context, or an invocation with no interactive user — where there is no dialogue to match and `STAR_LANG` is the only signal; where it too is unset, fall back to the language of the invocation's own words. For Chinese, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Any other language loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Invocation: `star-idea-storm [IDEA | IDEA_NAME]`. Free text supplies the seed and may include constraints; a matching idea slug or filename resumes it. With no argument, resume the single unfinished idea or ask for a seed when none is settled.
 
-Invocation: `star-idea-storm [IDEA | IDEA_NAME]` — free text seeds a new storm; an idea name (slug or filename against `metds/ideas/*_idea.md`) resumes that exploration; no argument resumes the unfinished idea file, or asks for a seed when there is none. An `involve=low|medium|high` token may accompany any argument: it sets this run's `involve` level (conventions §7.7) and is stripped from `IDEA` / `IDEA_NAME` before resolution.
-
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What an idea session acts on — §0 vocabulary, §1 git, §3 `.env` runtime, §4 real dates, §6 delegation, §7 dialogue, §8 the output table, §10 the skill roster — arrives through the opening load below. Four sections stay out: §2 the STOP line (nothing here runs heavy, and State & File Rules already draw that boundary — no model or dataset downloads, no paid API calls, no authenticated scraping), §5 plan-name resolution (it never resolves one: Step 0 resolves an idea file against `metds/ideas/*_idea.md`, collisions included, and no step reads `metds/plans/`), §9 project layout (State & File Rules confine writes to `metds/ideas/**` and the scan cache more strictly than that section states it), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
-
-Before acting, load it in one message — three `bash` calls with the project root as the working directory, sent together.
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|3|4|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-One message, three results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The three model keys ride the same lookup: they are where this run and every delegate it dispatches take their model from (§10.8). The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 50 KB in total, split 17, 21 and 12 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. Nothing else is front-loaded: `references/question_bank.md` is read one stage-section at a time, on entering the stage that draws on it (Stages 1, 2 and 4), and `references/scan_policy.md` and `references/idea_rubric.md` are each read at the stage that uses them (Stages 3 and 4).
-
-
-**Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and every value the `.env` lookup returned. Read whatever you cannot see, in the one message described above. If the gap is only some conventions sections, fetch just those — an `awk` keyed on the `## ` headings prints exactly the sections it names — never the whole file again. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 
@@ -64,8 +34,8 @@ You are the family's ideation coach, one step upstream of `star-plan-coach`: the
 ### Step 0: Locate or create an idea file
 
 1. List existing `*_idea.md` files under `metds/ideas/` and read each file's frontmatter.
-2. **An `IDEA_NAME`** (slug or filename matching an existing file) → resume: restore context in 2–3 sentences from the finished stages, continue from the first non-`done` stage. If the file is `finalized:`, ask whether to reopen the decision — clear `finalized:`, set `converge` and `frame` back to `in_progress`; new evidence or a revived parked direction goes through Stage 4 again, not straight into §5 — or route onward to `star-plan-coach <slug>`.
-3. No argument → if an unfinished idea file exists, ask whether to continue it (via `star_questionnaire`: continue that storm / start a new one); otherwise ask for the seed in plain text (no forced options).
+2. **An `IDEA_NAME`** → resume from the first non-`done` stage. If it is finalized, reopen only when the request says to revisit it; otherwise ask via `star_questionnaire` whether to reopen or route to `star-plan-coach <slug>`.
+3. No argument → resume the single unfinished idea. If several exist, ask which via `star_questionnaire`; if none exists, ask for the seed in plain text.
 4. New storm: take the seed (argument or answer); if it is too thin to name (a single word, a bare link, a complaint), ask one clarifying question before slugging. Derive a short English slug; on collision with an existing idea file, ask: resume that one, or pick a different slug. Create `metds/ideas/<slug>_idea.md` — English dialogue uses `assets/idea_template.md`, Chinese dialogue `assets/idea_template_zh.md`; set `language` accordingly, fill frontmatter with real dates, and write the seed **verbatim** into §1: convergence drifts, the seed anchors.
 
 ### Stage 1: Seed & constraints (`seed`)
@@ -74,7 +44,7 @@ Establish what really drives the interest and what the topic must fit inside: mo
 
 ### Stage 2: Diverge (`diverge`)
 
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one question over its numbered rows (reply with the numbers; recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
+Generate 3–5 distinct candidate directions with a research question, bet, novelty, and nearest area. Apply any selection already stated; otherwise present one table and ask once via `star_questionnaire` which 2–4 to scan, marking recommendations. Keep dropped candidates in §2 as `not scanned`.
 
 ### Stage 3: Landscape scan (`scan`)
 
@@ -96,7 +66,7 @@ Draft §5 from everything above, 150–400 words of structured prose:
 - the first validation experiment: the cheapest test of the riskiest assumption, about a week within §1's constraints, its kill-condition explicit;
 - known risks and open questions, addressed to the survey and the plan.
 
-Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. Show the draft, confirm (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
+Check the draft against the rubric's topic-statement test and show at most five failing items. Apply fixes or accepted exceptions already directed. If finalization is not yet authorized, show the draft and ask once via `star_questionnaire`; then write §5 and set `finalized: <date>`. Reopening Stage 4 or 5 clears it.
 
 ### Step 6: Digest & handoff
 
@@ -114,7 +84,7 @@ Check the draft against the rubric's topic-statement test (Part C); put the fail
 
 ## Dialogue Discipline
 
-- Every question goes through `star_questionnaire` — still one at a time, and still waiting for an explicit answer at the two confirmation points: the set of directions to keep (Stage 2) and the decision (Stage 4).
+- Ask one coaching question at a time through `star_questionnaire` only when its research choice remains unresolved; use concise plain text when the tool is unavailable. A direction set or final decision already supplied in the request or session is recorded and not asked again.
 - **Material a question is about goes in the text of the same message, above the call** — the candidate-directions table, the rubric failures, the drafted topic statement. The options carry the answers, never the material; read the message back before it goes out — options with nothing above them mean the material was skipped, not shortened.
 - Judge directions with the rubric and the scan, never with taste alone: every verdict line cites its evidence. Challenge vagueness — mild tone, sharp questions. The seed itself is never disparaged: even a crowded, infeasible seed gets its honest scan and a respectful Park.
 - Report honestly: depth never overstated ("the abstracts suggest" is the honest verb at abstract depth); a crowded field is reported as crowded even when it kills the favorite; a skipped scan is marked everywhere that would have cited it.

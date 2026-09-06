@@ -1,36 +1,15 @@
 ---
 name: star-plan-coach
 description: >-
-  分阶段引导计算机学科研究人员编写研究计划。以教练式提问为主，逐节打磨（问题定义 → 相关工作 → 核心方法 → 实验设计 → 风险备选 → 里程碑），每完成一节即写入 metds/plans/ 并支持跨会话续写。只要用户想写或完善研究计划、开题报告、research plan、proposal，想展开一个研究 idea，想把 metds/ideas 下定稿的 idea 文件长成计划，提到 metds/plans 下的计划文件，或者有想法但不知道如何推进研究时，都应使用本 skill——即使用户没有明确说出"计划"二字。Bilingual (中/英)— also trigger in English whenever the user wants to write or refine a research plan or proposal, flesh out a research idea, grow a finalized idea file under metds/ideas into a plan, mentions plan files under metds/plans, or has an idea but is unsure how to proceed, even if they never say the word "plan".
+  通过分阶段提问制定或完善研究计划，覆盖问题、相关工作、方法、实验、风险与里程碑，并把可续写文件保存在
+  metds/plans/。用于 idea 在拆解或执行前需要形成研究结构时。
 ---
 
 # Research Plan Coach — 研究计划引导
 
-> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
+调用方式：`star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`。topic 或定稿 idea 启动新计划；计划名加 section key 重开该节；不带参数恢复唯一未完成计划。多个计划或 idea 有歧义时询问，不自行选择。
 
-调用方式：`star-plan-coach [TOPIC | IDEA_NAME | PLAN_NAME [SECTION]]`——带主题则起草新计划；带 idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）则以那份定稿的 idea 文件为起点生成新计划；带计划名加章节键（`problem` / `related_work` / `method` / `experiments` / `risks` / `milestones`）则只重开已完成计划的那一节；不带参数续写 `metds/plans/` 下已有的计划。`involve=low|medium|high` 写法可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），不属于 `TOPIC` 或 `PLAN_NAME`，解析前先剥离。
-
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。陪跑写计划真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§2 红线（本 skill 什么都不跑——工具白名单里没有解释器、没有安装器、没有删除，也没有哪一步为谁准备重活命令）、§9 项目布局（状态与文件规则把计划能写到哪里划得比那一节更严，而 Write 与 Edit 的白名单只到 `metds/plans/**`）、§11 执行分支（它不建、不合并、不弃用分支，也不碰 worktree；那一节对其余 skill 的那一条要求，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述）。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
-
-动手前把它合成一条消息装载——三次 `bash` 调用，以项目根目录为工作目录，一起发出。
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。三个模型键搭同一次查询的车：本次运行与它派出的每个子代理，模型都取自这里（§10.8）。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 50 KB，分 18、20、12 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。问题库、模板与评分表各自留到用到它的步骤再读，不前置装载。
-
-
-**复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的全部取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
 
@@ -51,7 +30,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 1. 列出 `metds/plans/` 下现有的 `*_plan.md`，读取各文件的 frontmatter。
 2. **带 `SECTION` 键的 `PLAN_NAME`** → 只重开那一节：把它的 `status` 退回 `in_progress`，**清除 `finalized:`**——有章节开着时这份计划对下游就不可用，而 `star-plan-decomposer` 与 `star-code-architect` 都读它——用 2–3 句从它依赖的章节恢复上下文，单独辅导这一节，完成后对整份计划重跑 Step 7，由它重新设上。这是回到一份 `finalized` 计划的入口——`star-refs-reviewer` 翻出更近的工作、某个结果改变定位、审稿人提出异议。
-3. 若存在 `status` 中有非 `done` 章节的计划，确认是否继续（选项如：继续该计划 / 新建计划）；继续则先用 2–3 句话总结已完成章节的要点、帮用户找回上下文，再从第一个非 `done` 章节恢复提问。若还没有任何计划、但 `metds/ideas/` 下存在 `finalized` 的 idea 文件，先提议以它为种子（选项如：用这份 idea / 从新主题开始），再落到问主题。
+3. 不带参数时，只有一份计划含非 `done` 章节就直接恢复：概括已完成章节，从首个开放章节继续；有多份才通过 `star_questionnaire` 询问。没有计划且只有一份定稿 idea 时，把它作为建议种子；多个 idea 或新 topic 仍有歧义时才通过 `star_questionnaire` 询问。
 4. **带 `IDEA_NAME`**——参数按 slug 或文件名命中 `metds/ideas/*_idea.md`（计划名与 idea 名同时命中时计划名优先）→ 以那份 idea 文件为起点生成新计划。若文件没有 `finalized:`，如实说明，并建议先用 `star-idea-storm <slug>` 把它定稿——或者带着现状继续，标注未确认的部分。计划 slug 沿用 idea 的 slug，按第 5 条创建计划文件，然后预填：用 idea 的选题陈述（§5——问题、缺口、为什么是现在）起草 Stage 1，开场即拿这份草稿供确认与打磨，而不是从零提问，并在 §1 正文注明种子来源（"Seeded from `metds/ideas/<slug>_idea.md`"）。idea 的首个验证实验与风险，等 Stage 4–5 到来时再输入。
 5. 若新建：问清研究主题（一两句即可），据此生成简短英文 slug，取 0–9 中未被现有根计划前缀占用的最小数字（新项目为 `0`；十个数字全被占用时询问要淘汰哪个根计划，而不是发明更长的前缀），再按模板创建 `metds/plans/<数字>_<slug>_plan.md` 并填好 frontmatter——英文对话用 `assets/plan_template.md`，中文用 `assets/plan_template_zh.md`，`language` 相应填 `en` 或 `zh`。
 
@@ -97,4 +76,4 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 - 不评判 idea 本身的好坏，但应当直接指出逻辑缺口、被跳过的前提和未回答的问题——温和的态度，锋利的问题。
 - 问题库、质检表、模板均有中英两版（无后缀为英文默认版，`*_zh.md` 为中文版），按对话语言选用。
 - 计划文件正文语言以 frontmatter `language` 为准：创建时按对话语言确定，续写时保持文件原语言不变（即使对话语言变了）；用户明确要求切换时才改写，并同步更新 `language` 字段。中文计划中专业术语保留英文。
-- 参与度档位（规约 §7.7）。辅导类 skill 折叠档位（§7.9）：`medium` 与 `high` 就是本文件原样——提问本身就是产品，不是开销。`low` 切换为"先起草"：从种子材料和用户已说的内容起草每个阶段的章节（核心原则第 4 条的"直接帮我写"成为默认），呈现后每节写入前仍确认一次；用户未实质参与就放行的章节，保留如实的"由 AI 起草，待确认"标注。Step 0 的定位与收尾质检照常要问；提交提议按档位解出（规约 §1.5）。
+- 参与度按规约 §7.7。教练问题仍是产物，但用户已给出或明确接受的决定与章节文字绝不重复询问。`low` 先按现有材料起草，只问仍未解决的研究内容或验收；直接放行的章节标 `AI-drafted, pending confirmation`。Step 0 歧义与最终验收仍属实质决定。

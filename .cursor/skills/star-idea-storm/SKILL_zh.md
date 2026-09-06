@@ -1,43 +1,15 @@
 ---
 name: star-idea-storm
 description: >-
-  通过"发散—扫描—收敛"把模糊的研究兴趣打磨成一个站得住的研究选题：澄清种子想法与约束，生成 3–5 个
-  彼此真正不同的候选方向，对入围方向做摘要级文献扫描（文件中出现的每篇论文都转录自本次运行抓取的记录并
-  登记来源 URL——绝不凭记忆写），按六维评分表打分并给出 Pursue / Refine / 搁置裁决，最后把胜出方向
-  写成带首个验证实验的选题陈述——增量写入 metds/ideas/<slug>_idea.md，支持跨会话续写。定稿的 idea 文件
-  可直接输入给 star-plan-coach。只要用户运行 star-idea-storm、想头脑风暴 / brainstorm 研究方向、有兴趣
-  领域但还没定选题、问"我该研究什么"，或提到 metds/ideas 下的 idea 文件，都应使用本 skill。Bilingual
-  (中/英) — also trigger in English whenever the user wants to brainstorm research directions, has an
-  interest area but no committed topic, or mentions idea files under metds/ideas.
+  通过结构化发散、有文献依据的比较与收敛，把模糊研究兴趣变成站得住的选题，并留下可续写的 idea 记录。用于
+  尚未确定选题或要恢复 idea 文件时；后续规划交给 star-plan-coach。
 ---
 
 # Research Idea Storm — 从模糊兴趣到站得住的选题
 
-> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
+调用方式：`star-idea-storm [IDEA | IDEA_NAME]`。自由文本提供种子及约束；匹配的 idea slug 或文件名恢复该探索。不带参数时恢复唯一未完成 idea；没有已定种子则提问。
 
-调用方式：`star-idea-storm [IDEA | IDEA_NAME]`——自由文本作新一轮风暴的种子；idea 名（slug 或 `metds/ideas/*_idea.md` 的文件名）续写那次探索；不带参数则续写未完成的 idea 文件，都没有时先问种子。`involve=low|medium|high` 可与任意参数一同给出：它设定本次运行的参与度档位（规约 §7.7），解析前先从 `IDEA` / `IDEA_NAME` 中剥离。
-
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。一次想法生成真正用到的部分——§0 词汇表、§1 git、§3 `.env` 运行时、§4 真实日期、§6 委派、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有四节不装载：§2 红线（这里没有重活，状态与文件规则已经划好那条界——不下载模型与数据集、不调付费接口、不做需要登录的抓取）、§5 计划名解析（它从不解析计划名：Step 0 是把 idea 文件对着 `metds/ideas/*_idea.md` 解析的，连重名也在那里处理，没有哪一步读 `metds/plans/`）、§9 项目布局（状态与文件规则把可写范围限定在 `metds/ideas/**` 与扫描缓存，比那一节更严），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
-
-动手前把它合成一条消息装载——三次 Shell 调用，以项目根目录为工作目录，一起发出。
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|3|4|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。三个模型键搭同一次查询的车：本次运行与它派出的每个子代理，模型都取自这里（§10.8）。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 49 KB，分 17、20、12 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。别的都不前置装载：`references/question_bank_zh.md` 每次只读一个阶段的那一节，进入用它的阶段时才读（Stage 1、2、4）；`references/scan_policy_zh.md` 与 `references/idea_rubric_zh.md` 各自留到用它的阶段（Stage 3 与 Stage 4）再读。
-
-
-**复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的全部取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 **把档位模型传给受托者。** 取 `cursor` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `Task` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。先读 `.cursor/agents/star-<tier>.md`，核对 frontmatter 的 `model` 与解析值相同：`bash execs/update.sh --models` 同步这些文件，新会话才会装载。不传文档未声明的按次 `model` 参数。文件缺失、过期或当前会话找不到该代理时，保持原执行路径并说明需要同步或重开会话；只读运行不得自行修复。键为空则保留原代理选择。这些代理继承权限；交办说明须保留后文每条只读或写入范围限制，盲读不接收产出该工作的对话。记录受托者的实际会话模型，包括宿主的降级结果，不把请求值当成已核实的模型。
 
@@ -60,8 +32,8 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 ### Step 0：定位或新建 idea 文件
 
 1. 列出 `metds/ideas/` 下现有的 `*_idea.md`，读取各文件的 frontmatter。
-2. **带 `IDEA_NAME`**（slug 或文件名命中现有文件）→ 续写：用 2–3 句从已完成阶段恢复上下文，从第一个非 `done` 阶段继续。若文件已 `finalized:`，询问是重开决策——清除 `finalized:`，把 `converge` 与 `frame` 退回 `in_progress`；新证据或复活的搁置方向要重新走一遍 Stage 4，不能直接改 §5——还是转去 `star-plan-coach <slug>`。
-3. 不带参数 → 若存在未完成的 idea 文件，用 AskQuestion 确认是否继续（选项如：继续那次风暴 / 新开一次）；否则用普通文本问种子（不硬给选项）。
+2. **带 `IDEA_NAME`** → 从第一个非 `done` 阶段恢复。已有 `finalized:` 时，只有请求明确要重开才直接重开；否则通过 AskQuestion 询问重开还是转 `star-plan-coach <slug>`。
+3. 不带参数 → 只有一份未完成 idea 时直接恢复；有多份才通过 AskQuestion 问选哪份；一份都没有则用纯文本问种子。
 4. 新开风暴：拿到种子（参数或回答）；若薄到没法起名（一个词、一条裸链接、一句抱怨），先问一个澄清问题再起 slug。生成简短英文 slug；与现有 idea 文件撞名时询问：续写那份，还是换个 slug。创建 `metds/ideas/<slug>_idea.md`——英文对话用 `assets/idea_template.md`，中文对话用 `assets/idea_template_zh.md`；相应设置 `language`，用真实日期填好 frontmatter，并把种子**原话**写进 §1：收敛会漂移，种子是锚。
 
 ### Stage 1：种子与约束（`seed`）
@@ -70,7 +42,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 ### Stage 2：发散（`diverge`）
 
-用问题库 Stage 2 的生成手法（那一节在进入本阶段时读），从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一次 AskQuestion（allow_multiple，标出推荐项）：留 2–4 个进扫描——候选 5 个时选项装不下（规约 §7.3 把一题的选项封在 4 个），改成给表加编号、对着编号问：*留推荐的那几个* / *留另一组（报编号）* / *重新生成*。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
+提出 3–5 个真正不同的候选方向，各带研究问题、赌点、新意与最近领域。先应用用户已经给出的选择；否则展示一张表，并通过 AskQuestion 只问一次要扫描哪 2–4 个，标出推荐。其余仍写进 §2 并标 `not scanned`。
 
 ### Stage 3：文献扫描（`scan`）
 
@@ -92,7 +64,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 - 首个验证实验：对最危险假设的最便宜检验，在 §1 约束内约一周可跑完，kill-condition 写明白；
 - 已知风险与待解问题，留给文献调研和研究计划去追。
 
-按评分表的选题陈述关卡（Part C）检查草稿；把不达标项落到正文——最多 5 条，按重要性排序，每条一行：没过哪一关、缺了什么、怎么改——再逐条修掉，或由用户明确接受。展示草稿，用 AskQuestion 确认（选项如："写入文件" / "需要修改"）；确认后写入 §5，并在 frontmatter 加 `finalized: <日期>`——重开过的文件替换旧日期。`finalized:` 的含义就是这个：五个阶段全部 `done`（或 `skipped` 并标注）、关卡跑过并给出了答复、陈述经用户确认。它是 `star-plan-coach` 判断能否信任这份文件作种子的信号；除此之外没有任何东西会设上它，重开 Stage 4 或 5 则清除它。
+用评分表的选题陈述关卡检查草稿，展示最多五条失败项。先应用已指示的修复或接受例外。尚未授权定稿时才展示草稿，并通过 AskQuestion 问一次；随后写 §5 并设置 `finalized: <日期>`。重开 Stage 4 或 5 即清除该字段。
 
 ### Step 6：Digest 与交棒
 
@@ -110,7 +82,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 ## 对话纪律
 
-- 若当前环境无法使用 AskQuestion（无头或脚本化运行），改用纯文本提问——仍一次只问一题，且两道关卡（Stage 2 的候选集、Stage 4 的决定）仍要等到明确回答。
+- 只有研究选择仍未解决时才通过 AskQuestion 一次问一个教练式问题；工具不可用时退回简洁纯文本。请求或会话已经给出的方向集合或最终决定直接记录，不重复询问。
 - **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——候选方向表、评分表不达标项、选题陈述草稿。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过、不是被压缩。
 - 用评分表和扫描评判方向，绝不单凭品味：每一行裁决都注明证据。挑战含糊处——温和的态度，锋利的问题。绝不贬低种子本身：即使一个又拥挤又不可行的种子，也配得到一次诚实的扫描和一个有礼貌的搁置。
 - 如实报告：深度绝不夸大（摘要深度下，诚实的动词是"摘要显示……"）；领域拥挤就说拥挤，哪怕它杀掉了心头好；扫描被跳过时，所有本该引用扫描的地方都要标注。

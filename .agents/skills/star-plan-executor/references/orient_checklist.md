@@ -1,6 +1,6 @@
 # Codebase Orientation Checklist
 
-Run before drafting EXEC_PLAN (Step 2). Goal: know what exists in `${CODE_NAME}/` before planning to change it. Never assume a module, entrypoint, or config exists — read it.
+Run during Step 2, before Step 3 drafts EXEC_PLAN. Goal: know what exists in `${CODE_NAME}/` before planning to change it. Never assume a module, entrypoint, or config exists — read it.
 
 1. **Resolve the runtime.** Read `.env`; get `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (`docs/mds/star-workflow/research-workflow-conventions.md` §3).
 

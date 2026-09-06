@@ -33,6 +33,12 @@ One block, built by the main agent at Step 1 and handed to every collector **ver
 - `style_baseline` — PEP 8 plus the surrounding upstream style, wherever `codearc.md` is silent.
 - `language` — the report's language, resolved by the main agent. A collector never picks one.
 
+## Execution evidence and re-verification
+
+A prior check may be accepted without repeating it when the reviewer can inspect the exact command, exit/result, raw log or artifact, and the code version it tested (commit, or a recorded dirty-tree diff). A summary in EXEC_LOG or from a delegate is a pointer, not proof. Re-run the narrow relevant light check when provenance is missing or stale, and after integration changes behavior, dependencies, or checked code; never repeat a heavy or costly command merely so the main agent can claim ownership of it.
+
+For every blocker or major finding that challenges a quantitative result or claim intended for a paper, re-open the cited raw artifact, verify its code-version provenance, and reproduce the comparison or calculation when that is light. If the evidence cannot confirm the finding without heavy work, place it in Unconfirmed and name the exact missing evidence or handoff instead of counting it in the verdict. Preserve original logs/results while checking; a review never overwrites the evidence it audits.
+
 ## Severity levels
 
 - **blocker** — breaks something or violates a hard project constraint: syntax/import errors, hardcoded machine-local absolute paths, writes that end up outside the layout rules, an edited name from the do-not-rename list.
@@ -87,11 +93,11 @@ Not a finding here: hypothetical races, performance guesses, "might fail if …"
 
 ## F. Plan conformance (plan mode only)
 
-Score against disk, never against EXEC_LOG claims:
+Score implementation against disk; use EXEC_LOG only as an index into corroborating raw evidence, never as proof by itself:
 
 - One row per §3 task: `implemented` (code exists and does what the task says — cite module/function) / `partial` (started; name the gaps) / `missing` (no code found; say where you looked).
 - Each §4 deliverable that is code, or produced by code in scope: present at the stated path? One that only an un-run STOP-line command in EXEC_LOG's "Awaiting user" list can produce is scored `pending`, naming that command — never absent, which would turn every review run before the compute into a major nobody can act on.
-- §5 done-criterion: the machinery to check it exists (a test, an eval script, an assertion) — verify the machinery statically; running heavy checks is the executor's business, not the reviewer's.
-- Cross-check EXEC_LOG: files it claims changed exist and contain the claimed change; a claim without matching code is a major finding.
+- §5 done-criterion: the machinery to check it exists (a test, an eval script, an assertion) — verify the machinery statically. Where the report also states that the criterion was run or met, corroborate it through the exact command, raw result/artifact, and corresponding code version under the evidence rule above; running heavy checks is the executor's business, not the reviewer's.
+- Cross-check EXEC_LOG: files it claims changed exist and contain the claimed change; commands/results it cites resolve to raw evidence and the code version that produced it. A claim without matching code or evidence is a major finding only when the missing support is itself required by the plan; otherwise record the provenance gap in the scorecard.
 
 Conformance rows go in the report's scorecard section, separate from the A–E findings.

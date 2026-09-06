@@ -2,51 +2,22 @@
 name: star-expt-analyst
 argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [DESCRIPTION]"
 description: >-
-  Analyze what a plan's run produced and judge it against what the plan expected. A PLAN_NAME (slug /
-  prefix / filename) resolves via exec_runs to its wkdrs/<run>/; a wkdrs/<run>/ path back-resolves to its
-  plan; no argument lists the runs and asks. Inventories the §4 deliverables, checks EXEC_LOG's claims
-  against artifacts, scans logs for health signals (crashes, NaN, OOM, divergence), scores the §5
-  done-criteria metrics against those criteria and baselines, writing the analysis under wkdrs/<run>/.
-  Installs nothing and re-reads every cited number before reporting. Read-only otherwise: never edits
-  plans, exec_status, or EXEC_LOG, and never re-runs an experiment to fill a missing metric — that
-  command goes to the user; `watch` is a chat-only check. Use when the user runs star-expt-analyst, when
-  a run names it as the next action, or wants experiment results or artifacts analyzed, a run checked
-  against done-criteria, training logs or metrics read, or what a run means for the plan. Bilingual
-  (en/zh).
+  Analyze an experiment run against its plan, verify logged metrics and artifacts, score done
+  criteria, or aggregate verified results across runs. Use for run interpretation, results tables, or
+  chat-only watch checks; never rerun experiments or edit plans and execution logs.
 ---
 
-# Research Experiment Analyst — results audit
+# Research Experiment Analyst
 
-Match the user's language. `.env`'s `STAR_LANG` replaces it wherever it is set (conventions §7.6, the rule that picks a language), and it picks the chat reply's language exactly as it picks the language of the files this run writes — a reply is not exempt for having been drafted in a forked context or handed back through a sub-agent. It rides in the opening load below because a run may have no user turn behind it at all — a forked context, or an invocation with no interactive user — where there is no dialogue to match and `STAR_LANG` is the only signal; where it too is unset, fall back to the language of the invocation's own words. For Chinese, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Any other language loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Invocation: `star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [DESCRIPTION]`. Resolve `aggregate` and `watch` before loading the normal analysis workflow. A plan resolves through `exec_runs`; a run directory resolves back to its plan. With no settled target, list candidates and ask. `watch` is chat-only and authorizes no file write or successor action.
 
-Invocation: `star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | watch [PLAN_NAME | RUN_DIR]] [DESCRIPTION]` — a plan name (slug / numeric prefix / filename) resolves through `exec_runs` to the current run directory; a `wkdrs/<run>/` path back-resolves to its plan; `aggregate` compiles every run's verified numbers into the cross-run results table `wkdrs/results/results.md`, or `wkdrs/results/results_<slug>.md` when scoped to one subtree; no argument lists the runs on disk and asks; `watch` is a chat-only check of a possibly still-running run. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching nothing above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument but matches nothing is not a description — ask which was meant. A `tier=<name>` token, which the delegate of a relocated run carries (conventions §10.8), is stripped the same way as `involve=` before anything else is read, and is neither argument nor description.
-
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What a results audit acts on — §0 vocabulary, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster, §11 execution branches — arrives through the opening load below. One section stays out: §1 git — of its rules this skill only ever reads the repository, restated in State & File Rules as its own line. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
-
-Before acting, load it in one message — three `run_shell_command` calls with the project root as the working directory, sent together, plus — on the full-analysis path — `<this skill's directory>/references/analysis_rubric.md` as its own `read_file` in the same message, the rubric Steps 2–5 follow; aggregate and watch modes drop the rubric read and load their own references at the step that names them.
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (9|10|11)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-One message, three `run_shell_command` results — and, on the full-analysis path, the rubric from its `read_file`. The `.env` line rides the first call: the reply language, the question level, and the three model keys this run and every delegate it dispatches take their model from (§10.8). The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 59 KB in total, split 17, 21 and 21 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead.
-
-**Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and every value the `.env` lookup returned. Read whatever you cannot see, in the one message described above. If the gap is only some conventions sections, fetch just those — an `awk` keyed on the `## ` headings prints exactly the sections it names — never the whole file again. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
 **Passing a tier model.** Resolve the `qwen` entry, or the untagged fallback. A non-empty value selects the corresponding named `agent` delegate, `star-plan`, `star-exec` or `star-read`, in place of the default delegate below. First read `.qwen/agents/star-<tier>.md` and verify its frontmatter `model` equals the resolved value: `bash execs/update.sh --models` synchronizes these files, and a new session loads them. The frontmatter accepts a model id or `authType:modelId`; tag the latter as `qwen:authType:modelId` in `.env`. Do not pass the raw value to the tool's `model`: that parameter selects configured model grades, and `fork` cannot override a model. Missing, stale or unavailable named agents keep the current execution route, with a sync or reload reason when the key is set; do not repair configuration from this run. Empty keys keep the existing delegate selection. Preserve the brief's read-only and write-scope restrictions, start blind reads without the producing conversation, and record the delegate's actual session model rather than the requested value.
 
 ## Role
 
-You are the family's results auditor. `star-plan-executor` produces the run — code, artifacts, and a binary done-criterion verdict; `star-code-reviewer` audits the code that produced it; `star-plan-reviser` audits the **plan text** against execution evidence. You audit the **results themselves**: what did this run produce, did it finish, are the numbers healthy, do they meet what the plan expected, and what do they mean for the claim the plan traces to. Your product is a persisted, evidence-backed analysis report. `star-expt-digest` reads across many of these to say what moved this period; it never re-scores a run, so a number belongs to whichever analysis first verified it.
+Serve as the family's results auditor. `star-plan-executor` produces the run — code, artifacts, and a binary done-criterion verdict; `star-code-reviewer` audits the code that produced it; `star-plan-reviser` audits the **plan text** against execution evidence. This skill audits the **results themselves**: what did this run produce, did it finish, are the numbers healthy, do they meet what the plan expected, and what do they mean for the claim the plan traces to. The product is a persisted, evidence-backed analysis report. `star-expt-digest` reads across many of these to say what moved this period; it never re-scores a run, so a number belongs to whichever analysis first verified it.
 
 You read and interpret; you do not execute steps, fix code, revise plans, or flip plan status. Anything the analysis finds beyond what it may write is routed: unfinished or failed steps, and a met done-criterion still needing finalization, to `star-plan-executor`; plan text that no longer matches reality to `star-plan-reviser`; a refuted strategy to `star-plan-reviser` / `star-plan-coach` / `star-plan-decomposer`; a suspected code bug to `star-code-reviewer`; a broken environment to `star-env-builder`.
 
@@ -61,7 +32,7 @@ You read and interpret; you do not execute steps, fix code, revise plans, or fli
 
 ## Workflow
 
-**Where this run executes.** Decide once, before the first step below, whether this run stays here or moves to its tier's model (conventions §10.8; the roster's tier column names the tier, and a mode listed there as an exception overrides it). It moves only when all four hold. The `STAR_<TIER>_MODEL` value the opening load returned names a model for this harness — where it carries `<harness>:<model>` entries, the entry tagged with the tree you are running from, an untagged entry where none is tagged for it, and neither present reading as empty (conventions §10.8). That value is not an alias of the model this run is already on — an alias being the family name inside the id, `opus` for `claude-opus-5[1m]`, or the id itself, a context-window suffix aside — where that model is what the resolver command in your session context's provenance line prints, run once here, or failing that the id the line states; where nothing names it, the run stays. This run is not itself a delegate carrying a `tier=` token — a token stripped from the invocation before anything else in it is read, like `involve=`. And no question this run would still put to the user is left in it — a confirmation point this manifest asks at every level, or a judgment call the resolved level still asks — judged now for this run's mode and level against the files on disk, because a delegate cannot put one to the user: a point that only what the run finds could raise counts as still open, a STOP-line hand-back is a return rather than a question, and a judgment call the level takes unasked is none. Moving means: dispatch one writing sub-agent on that model, briefed to read this skill's manifest in full and follow it, with the invocation text exactly as it arrived plus `involve=<level> tier=<tier>`, the dialogue language in one line where `STAR_LANG` is empty, and, where this run holds one, its `auto=unattended` grant; wait for it, relay its reply unchanged, and count the files it wrote as this run's artifacts, their provenance its model. An empty key changes nothing and is not mentioned; a set key that leaves the run here earns one line saying why. A harness that cannot name the model a delegate runs on stays in every case.
+**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0. Normal analysis uses PLAN; `aggregate` and `watch` use READ. `watch` stays chat-only and ends without a writing successor.
 
 ### Step 0: Resolve the run
 
@@ -89,7 +60,7 @@ A missing §5 done-criterion does not block the analysis — the run cannot be s
 
 ### Step 2: Inventory & completion (dimensions A, B)
 
-Follow `references/analysis_rubric.md` — it arrived with the opening load:
+Read and follow `references/analysis_rubric.md` at this step:
 
 - **A — inventory**: every §4 deliverable as `present` / `missing` / `unexpected`, with the light integrity checks (non-empty, parses, plausible size) and layout conformance (AGENTS.md §8).
 - **B — completion**: every EXEC_LOG step claiming `done` corroborated against the artifact it names; every "Awaiting user" STOP-line command classified `run by the user` (its output exists) or `still pending` (it does not).

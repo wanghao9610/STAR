@@ -1,46 +1,16 @@
 ---
 name: star-env-builder
 description: >-
-  Build and verify the project's Python runtime so plan execution has a working interpreter. Reads .env:
-  a valid CONDA_HOME creates conda env ENV_NAME (argument, default CODE_NAME); otherwise a .venv in the
-  root. An existing environment is never deleted — after confirmation it is renamed to a dated backup
-  first. Dependencies come from the first source that has them: existing CODE_NAME/requirements* →
-  packaging metadata (pyproject / setup.py / environment.yml) → import scan of the code, written out as
-  requirements.txt plus a requirements/ folder (framework|runtime|optional.txt, conda-only in conda.txt).
-  Installs uv > pip > conda, CUDA-aware, behind one install-plan confirmation, then checks imports,
-  framework/GPU and the entrypoint and writes ENV_REPORT.md under wkdrs/. Use when the user runs
-  star-env-builder, when a run names it as the next action, wants the conda env or venv created or
-  rebuilt, needs dependencies resolved and installed, or wants the environment verified. Bilingual
-  (en/zh).
+  Create, repair, or extend the project's conda environment or venv from existing dependency sources,
+  then verify imports, framework support, and entrypoints. Use when execution lacks a working
+  interpreter or needs packages; never delete an existing environment.
 ---
 
-# Research Env Builder — runtime environment setup
+# Research Env Builder
 
-Match the user's language. `.env`'s `STAR_LANG` replaces it wherever it is set (conventions §7.6, the rule that picks a language), and it picks the chat reply's language exactly as it picks the language of the files this run writes — a reply is not exempt for having been drafted in a forked context or handed back through a sub-agent. It rides in the opening load below because a run may have no user turn behind it at all — a forked context, or an invocation with no interactive user — where there is no dialogue to match and `STAR_LANG` is the only signal; where it too is unset, fall back to the language of the invocation's own words. For Chinese, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Any other language loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]`. Resolve `add` first; every following package token belongs to that mode. Otherwise use the given environment name or `.env`'s `CODE_NAME`. Natural language may set requirements or authorize the build; ask only when the environment target, dependency choice, cost, or destructive handling remains unresolved.
 
-Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]` — the conda environment name to create, omitted to use `CODE_NAME` from `.env`; `add` installs packages into the environment `.env` already names and records them in the requirements layout. Anything left over is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, saying so first. A lone argument-like token that matches nothing is not a description — ask which was meant. `add` is the exception: every token after it is a package name. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7) and is stripped before the argument and description are read. A `tier=<name>` token, which the delegate of a relocated run carries (conventions §10.8), is stripped the same way as `involve=` before anything else is read, and is neither argument nor description.
-
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What building a runtime acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §7 dialogue, §8 the output table, §10 the skill roster — arrives through the opening load below. Three sections stay out: §6 delegation (the main agent runs the three runnable-check layers itself — Principle 6 and Step 6 say so, and no step here dispatches), §9 project layout (State & File Rules enumerate every path it may write, and every tree it may not, more strictly than that section states them), and §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs one of them.
-
-Before acting, load it in one message — three Bash calls with the project root as the working directory, plus a `Read` each of the two references every run reaches, the installer policy (Steps 5 and 8) and the runnable-check spec (Steps 6 and 8): `<this skill's directory>/references/installer_policy.md` and `<this skill's directory>/references/runnable_check_spec.md`, all sent together.
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|2|3|4|5)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-One message, five results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The three model keys ride the same lookup: they are where this run and every delegate it dispatches take their model from (§10.8). The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 48 KB in total, split 14, 21 and 12 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. References tied to a single step stay lazy: `references/dependency_resolution.md` (Step 3) and `assets/env_report_template.md` (the report-writing steps) are read when their step arrives, not up front.
-
-
-**Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and every value the `.env` lookup returned. Read whatever you cannot see, in the one message described above. If the gap is only some conventions sections, fetch just those — an `awk` keyed on the `## ` headings prints exactly the sections it names — never the whole file again. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
 **Passing a tier model.** Resolve the `kimi` entry, or the untagged fallback. When the current `Agent` / `AgentSwarm` schema exposes `model`, pass the resolved value on each dispatch of that tier; it must be an alias accepted by the configured secondary-model pool. An empty value omits the parameter. With no selectable pool, forced pool selection, or an unavailable alias, retain the current execution route and state why when the key is set; do not edit the user's global Kimi configuration. A blind read starts without the producing conversation. Keep the role and write limits below. After a rejected dispatch, verify it started no work before falling back. The delegate records its own actual session model, never the requested alias or the parent's resolver.
 
@@ -53,7 +23,7 @@ You **build the environment; you do not implement or refactor research code.** T
 ## Core Principles
 
 1. **`.env` is the only path source; never activate** (conventions §3). Resolve the target interpreter once — `ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` or `<project>/.venv/bin/python` — and run everything through that absolute path. This skill owns the environment: only it may create, rename, or install into one.
-2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via AskUserQuestion.
+2. **Show the install plan; ask only for unresolved material choices.** A clear request to build or extend the named environment authorizes the matching plan once its dependencies and cost stay within that request. Ask via AskUserQuestion when the target, dependency set, CUDA choice, cost, or treatment of an existing environment remains unresolved; everything settled runs autonomously.
 3. **Rename, never delete.** An existing environment is backed up by renaming it to `<name>_<YYYYMMDD>` — the date from `date +%Y%m%d` at run time, never invented. Stale backups are the user's to clean.
 4. **Category is policy; the install order is uv > pip > conda.** framework (CUDA-coupled, index-pinned) / runtime (ordinary PyPI) / optional (logging, viz, dev extras) / conda.txt (system-isolation items). Each category has its own route and failure handling: prefer uv, fall back to pip per package, conda only for the whitelist and only under a conda backend. Policy: `references/installer_policy.md`.
 5. **Adopt what exists; generate only what is missing.** Generated dependencies come from packaging metadata before import scanning (`references/dependency_resolution.md`), go into `requirements.txt` plus a `requirements/` folder, and are committed once the build is verified.
@@ -61,9 +31,7 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ## Workflow
 
-**Where this run executes.** Decide once, before the first step below, whether this run stays here or moves to its tier's model (conventions §10.8; the roster's tier column names the tier, and a mode listed there as an exception overrides it). It moves only when all four hold. The `STAR_<TIER>_MODEL` value the opening load returned names a model for this harness — where it carries `<harness>:<model>` entries, the entry tagged with the tree you are running from, an untagged entry where none is tagged for it, and neither present reading as empty (conventions §10.8). That value is not an alias of the model this run is already on — an alias being the family name inside the id, `opus` for `claude-opus-5[1m]`, or the id itself, a context-window suffix aside — where that model is what the resolver command in your session context's provenance line prints, run once here, or failing that the id the line states; where nothing names it, the run stays. This run is not itself a delegate carrying a `tier=` token — a token stripped from the invocation before anything else in it is read, like `involve=`. And no question this run would still put to the user is left in it — a confirmation point this manifest asks at every level, or a judgment call the resolved level still asks — judged now for this run's mode and level against the files on disk, because a delegate cannot put one to the user: a point that only what the run finds could raise counts as still open, a STOP-line hand-back is a return rather than a question, and a judgment call the level takes unasked is none. Moving means: dispatch one writing sub-agent on that model, briefed to read this skill's manifest in full and follow it, with the invocation text exactly as it arrived plus `involve=<level> tier=<tier>`, the dialogue language in one line where `STAR_LANG` is empty, and, where this run holds one, its `auto=unattended` grant; wait for it, relay its reply unchanged, and count the files it wrote as this run's artifacts, their provenance its model. An empty key changes nothing and is not mentioned; a set key that leaves the run here earns one line saying why. A harness that cannot name the model a delegate runs on stays in every case.
-
-For this skill the fourth condition never holds — the install-plan approval, and in `add` mode the confirmation point nothing installs before, is asked at every level — so the run stays here.
+**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0 on the EXEC tier. Existing authorization of the concrete environment, dependency set, and cost counts; keep the run here only while a required decision remains.
 
 ### Step 0: Preliminary check
 
@@ -81,8 +49,8 @@ For this skill the fourth condition never holds — the install-plan approval, a
 
 ### Step 2: When the environment already exists
 
-- conda: `<ENV_NAME>` already in `conda env list` → ask one question, three options: **backup & rebuild** (rename to `<ENV_NAME>_$(date +%Y%m%d)` via `conda rename`; older conda lacking `rename`: `create --clone` + `remove`, warn that disk usage temporarily doubles) / **verify & repair in place** (skip creation; jump to Step 5 for failed items or Step 6 — the resume path after an interrupted run) / **abort** (exit cleanly, nothing touched).
-- venv: `.venv` exists → same three-way ask → backup is `mv .venv .venv_$(date +%Y%m%d)`. Note in the report: a moved venv has old absolute paths baked into its scripts — a frozen backup to consult or restore from, not an activatable environment.
+- conda: `<ENV_NAME>` already in `conda env list` → honor a previously specified rebuild or repair choice; otherwise ask once between **backup & rebuild**, **verify & repair in place**, and **abort**, showing that clone-based backup may temporarily double disk use.
+- venv: `.venv` exists → honor the same prior choice or ask once; backup is `mv .venv .venv_$(date +%Y%m%d)`. Note that a moved venv is a frozen backup because its scripts retain old absolute paths.
 - Backup name already taken → append `-<HHMM>` (also from `date`).
 
 ### Step 3: Resolve dependencies (first signal wins)
@@ -95,9 +63,9 @@ Recipe and mapping table: `references/dependency_resolution.md`.
 
 Generated layout: `requirements.txt` holds only `-r requirements/framework.txt` and `-r requirements/runtime.txt` lines (optional referenced as a comment); `requirements/framework.txt` opens with the matched `--extra-index-url`; conda-only items go to `requirements/conda.txt` with a "conda installs this, not pip" header. Written now, committed in Step 7 after the build is verified.
 
-### Step 4: Confirmation point — the user approves the install plan
+### Step 4: Settle the install plan
 
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask via AskUserQuestion: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
+Present the backend, environment, Python version, dependency source, package counts and pins, torch↔CUDA match, rough large-wheel download size, conda-only items, and unresolved conflicts. If the request already authorizes this exact plan and introduces no new material cost or choice, proceed and record that authorization. Otherwise ask once via AskUserQuestion to build, adjust, or abort. Never hide an uncertainty.
 
 ### Step 5: Install (uv > pip > conda)
 
@@ -124,7 +92,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 1. Write `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md` from `assets/env_report_template.md`: identity + `ENV_PY`, machine detection, backup renames, per-category install results, the runnable-check results with evidence, failures/blocked items, awaiting-user commands.
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added while diagnosing runnable-check failures) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
-4. `.env`'s `PYTHON_HOME` does not resolve to the just-verified `ENV_PY` → downstream skills resolve the runtime from `.env`: offer to point `PYTHON_HOME` at it (conda: `$CONDA_HOME/envs/<ENV_NAME>`; venv: `<project>/.venv`) — only with explicit confirmation.
+4. `.env`'s `PYTHON_HOME` does not resolve to the verified `ENV_PY` → update it when that exact configuration change was authorized; otherwise show the proposed one-line change and ask because it changes a key runtime input.
 5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `star-plan-executor <leaf>` now has a runtime; `star-flow-status` shows what to run next.
 
 
@@ -138,11 +106,11 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 - Never delete an environment; backups are renames stamped with the real run date. Never invent timestamps.
 - Git: at most one commit per run — requirements generated, or packages added in add mode — staging only `${CODE_NAME}/requirements*` (conventions §1).
 - On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
-- Installs approved at the confirmation point run autonomously, including framework-scale downloads. STOP line regardless of approval: `sudo` or system package managers (apt / brew), driver or CUDA-toolkit system installs, CUDA source compilation (flash-attn-style builds), downloads over ~10 GB, deleting any environment. Prepare those as exact commands in the report instead.
+- Authorized installs run autonomously, including disclosed framework-scale downloads. The STOP line still covers `sudo` or system package managers, driver or CUDA-toolkit system installs, CUDA source compilation, downloads over ~10 GB, and deleting an environment; prepare exact commands instead.
 - Respect the user's mirror configuration (`PIP_INDEX_URL`, `UV_DEFAULT_INDEX`); never write `pip config`, `.condarc`, or `uv.toml`.
 - Repeat invocation: a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present → prefer **verify & repair in place** (Step 2), resuming from its failures instead of rebuilding.
 
 ## Dialogue Discipline
 
-- The confirmation point and all situational questions go through AskUserQuestion — one question per call, each with a recommendation. If it is unavailable (non-interactive `kimi -p`, no human to answer), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
+- Apply conventions §7.2 and §7.7. Existing authorization of the same target, package set, and disclosed cost remains valid; ask one concrete question through AskUserQuestion only when one of those material inputs is still unresolved, with concise plain text as the fallback when unavailable.
 - `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.

@@ -84,9 +84,8 @@ trees whose harness actually has it is almost always correct.
 what holds it there: its banned list is the union of the others' — every harness's file reader,
 terminal, question tool and plan tool, Codex's included. A load in that tree says "file read", a
 terminal call says
-"shell" as the ordinary English word rather than as a name, and it still carries the marked fallback
-that `cat`s the files into the shell call and accepts that the result is written out, because a
-harness arriving there may have no file-reading tool: Codex, whose only project root this is, has none.
+"shell" as the ordinary English word rather than as a name. The active host chooses a file reader
+or shell command and its output budget; the neutral skill does not prescribe a fixed call sequence.
 
 Every one of the six named trees' names was checked against its harness's own tool list, not against
 how the other trees write it: Anthropic's Agent Skills docs, Cursor's tool surface, the [Kimi Code CLI
@@ -328,54 +327,11 @@ input as JSON, which is also how the truncation below was measured.
 
 ## The description length limit
 
-**`SKILL.md` frontmatter descriptions are capped at 1024 characters, in all six trees.** Not a
-per-harness budget: the [agentskills.io `SKILL.md` spec](https://agentskills.io/specification),
-Anthropic's Agent Skills docs and the Kimi CLI docs all state `description` is 1–1024. `SKILL.md`
-only — it is the registered manifest whose description the platform surfaces, while `SKILL_zh.md` is
-loaded as a resource and runs past 1300 characters.
+Keep discovery concise: describe the capability, when it applies, and exclusions that prevent likely misrouting. Put mode syntax, procedures, output schemas and detailed guarantees in the body or references. Preserve real boundaries such as review-only scope or preparing a release without publishing it.
 
-This was long recorded here as a `.kimi-code`-only budget of 1050 **bytes**, because that tree was
-the only one anybody had condensed, and the number was reverse-engineered from its data (max 1041)
-rather than read from a spec. The guess was close enough to hide two measurement errors, both since
-fixed in check 12: awk's `length()` counts bytes, and these descriptions carry `§`, `—` and `→`, so
-bytes run up to 8 past characters; and `description: >-` left the folded-block indicator `>-` in the
-measured text, inflating every folded file by 3. `1024 + 3 + multibyte slack ≈ 1047` is why 1050
-passed for so long.
+The repository checker enforces a 1024-character description limit and a stricter 500-character limit for DSH. These are ceilings, not targets. Frontmatter remains harness-owned; when changing shared discovery semantics, update the six generated trees' descriptions without replacing their model, context or invocation-policy fields. Keep the Chinese edition consistent in meaning, although it is not loaded as the runtime manifest.
 
-**A harness may truncate well before the spec limit, and nothing in the repo can catch it.** Cursor
-cut three `.agents` descriptions at exactly character 1536, mid-word, back when they ran to 2108, 1665
-and 1559 (`star-metd-summarize`, `star-refs-reviewer`, `star-expt-analyst`; all three are inside the
-limit now) — so the tail of a long description silently never reaches the listing the agent matches
-against. Both numbers matter: 1024 is what the spec allows, ~1500 is where a description starts losing
-its ending in practice.
-
-**Codex truncates far harder than either number, and it is measurable.** `codex debug prompt-input`
-renders the model-visible input; in it every skill — Codex's own bundled ones included — is one line
-of `name: <first ~100 characters of description> (file: <path>)`, cut mid-word with no ellipsis. The
-fifteen `.agents` descriptions run 504–947 characters, so **about 10% of what is written reaches the
-model, and the "Use when the user invokes `star-*`, or wants …" trigger clause reaches it for none of
-the fifteen.** That clause is the entire mechanism by which a description earns an unprompted
-invocation, and on Codex it is dead weight. The full `SKILL.md` still loads once a skill is invoked,
-so this costs discovery, not execution — but discovery is what a description is for.
-
-**The fifteen `.agents` descriptions are now written against that window**: each opens with a
-trigger-bearing clause in user language that completes inside the first ~90 characters, and the
-mechanism, the routing and the guarantees follow behind it. Re-check it the way it was found —
-`codex debug prompt-input` and read the `- <name>: …` lines — because **no check here can see it**.
-Two rules when editing one: the window is measured from the *start* of the description, so prepending
-anything pushes a trigger out of view; and a guarantee about what the skill will not do still may not
-be cut to make room (see above), it moves later in the string instead. This is the one tree where
-description order carries function rather than style. The Chinese twins are deliberately untouched:
-`SKILL_zh.md` is not a registered manifest, Codex never loads it, so it has no truncation window to
-be written against.
-
-Condensing loses things silently, which is the real cost. Two clauses had gone missing from the
-English descriptions and were restored: `star-code-release`'s "prepares a release and never publishes
-one" and `star-expt-analyst`'s read-only guarantee and `watch` mode. Both fit inside the limit — those
-descriptions were at 890 and 593 characters — so the loss bought nothing. Both Chinese descriptions had
-kept the clauses, which is what made the English gap visible. **When you shorten a description to fit:
-cut detail, never a guarantee about what the skill will not do.** Check 12 enforces the length;
-nothing enforces that judgement.
+Catalog truncation depends on the harness and installed version. Historical measurements are not a permanent prompt budget. Inspect the current model-visible catalog when diagnosing discovery; avoid compensating with more trigger words or moving an essential boundary to the end of a long description.
 
 ## What the checks catch
 
@@ -436,34 +392,9 @@ nothing enforces that judgement.
     heading. On skill coverage the two shapes differ — the guide owes one numbered section per skill
     and no more, the READMEs only have to name each skill, since there it is a table row. What a
     section *says* about a skill is checked by nobody.
-19. **The opening-load shape holds in every tree.** One `.env` lookup line per file, no `cat` of the
-    whole conventions file inside a Bash block (only `.agents`' fallback sentence may, and it is marked
-    "accept that the result is written out" / "接受结果被存成文件"), `SKILL_zh.md` never a runtime load, and the two passages that are
-    uniform across all ninety file pairs by design — the language paragraph and the
-    `SKILL_zh.md` header blockquote — still identical, so a partial re-edit shows up. The strings it
-    pins are the lookup line and those two openings; rewording any of them centrally means updating
-    the check in the same commit.
-20. **A skill that loads only part of the conventions says so accurately, and stays under the size
-    limit.** Two skills take an `awk` excerpt of the sections they act on rather than the whole file
-    (`star-expt-digest`, `star-refs-reviewer`). Per such file: the excerpt prints exactly the sections
-    its regex names, so a renumber upstream fails here; it reads its own language's conventions file;
-    it stays under `LOAD_EXCERPT_MAX` (28000 bytes), which is the only place that can be caught, since
-    `execs/update.sh` copies the conventions wholesale into downstream projects and the file can only
-    grow here; the prose's loaded list equals the regex's set and its stay-out list equals the
-    complement; and the size the prose quotes matches the size the selector produces. Citations of a
-    section a skill no longer loads must be pinned in `RESTATED_REGISTRY`, checked per tree and per
-    language in both directions, so both an unregistered citation and an orphaned row fail. Pinned
-    strings: the selector shape, and the phrases splitting the two lists in prose ("stay out",
-    "不装载"). Deliberate gap: `star-flow-status` also loads part of the conventions, but through `sed`
-    ranges plus an item-level pass over §7, which a section-level parser cannot verify.
-21. **Every manifest carries the reuse-an-earlier-load paragraph, uniform per language, inside the
-    opening-load block.** That paragraph is what lets a second skill in the same conversation skip the
-    parts of the load it can still see verbatim, so a multi-skill session pays for one load rather than
-    N. Three ways of losing it are invisible to everything above: dropping it from one tree, since
-    checks 1–3 compare file sets and not contents; rewording it in one tree, so the six trees disagree
-    about what may be skipped; and moving it below the first `##` heading, where it stops being part of
-    the load the reader is deciding about. It must also carry no bare `§n` — check 20d reads every `§n`
-    in that same block as a claim about which sections the skill loads.
+19. **Shared environment controls remain discoverable.** Each manifest names `.env`, `STAR_LANG`, `INVOLVE` and model routing. The checker validates their presence, not an exact paragraph or number of tool calls.
+20. **Context reads are task-scoped.** Tool output limits belong to the active interface. Reference paths and generated adapters are checked separately; no fixed excerpt size or mandatory opening itinerary is imposed.
+21. **Behavior needs a task-level check.** After changing authorization or routing, run independent representative scenarios: local edits, read-only status, already-authorized work and a cost boundary. Static wording checks do not establish that a model makes the right decision.
 22. **Delegation calls stay native to each harness, and the shared root names none.** `.agents` may
     not carry a delegation tool or type key at all — `spawn_agent`, `star_subagent`, `Agent`, `Task`,
     `agent_type:`, `subagent_type:` — because a delegate there is named by what it does. In the other

@@ -1,6 +1,6 @@
 # Orchestration Spec
 
-How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Dispatch goes through `star_subagent`. The main agent orchestrates, verifies, and commits; it does not edit code itself.
+How this skill structures survey and migration work. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Delegate a bounded area or group whenever collaboration tools are available and delegation materially helps; execute locally when they are not. When delegating, dispatch a read-only sub-agent for a survey area or a writing sub-agent for a migration group. The main agent always owns the confirmation points, verification, commits, and restoring what failed.
 
 ## Roles
 

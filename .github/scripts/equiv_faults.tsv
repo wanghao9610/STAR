@@ -25,8 +25,8 @@ f10	Session hooks	rm -f "$W/.qwen/hooks/star_memory.sh"	star_memory.sh
 f10b	Session hooks	chmod -x "$W/.claude/hooks/star_commit_guard.sh"	star_commit_guard.sh
 f11	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl -pi -e 's/^## Role$/## Purpose/' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
 f11b	Heading structure (.claude / .cursor / .dsh / .kimi-code / .pi / .qwen)	perl -ni -e 'print unless /^#{2,4} /' "$W/.pi/skills/star-plan-coach/references/question_bank.md"	question_bank.md
-f12	Description length (<= ${DESC_MAX:=1024} characters, SKILL.md spec)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
-f13	Description length in .dsh (<= ${DSH_DESC_MAX:=500}, DSH catalog bound)	perl -pi -e 's/^description: /description: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /' "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
+f12	Description length	perl -pi -e 's/^description: .*/"description: ".("X" x 1100)/e' "$W/.cursor/skills/star-flow-status/SKILL.md"	.cursor/skills/star-flow-status/SKILL.md
+f13	DSH description length	perl -pi -e 's/^description: .*/"description: ".("X" x 600)/e' "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
 # f14 drifts .pi's own copy, and that copy is a link into .agents/skills: an
 # append would land on the file every tree shares and drift none of them apart.
 # cp -p then mv gives .pi the file itself, byte for byte, before the append.
@@ -40,22 +40,16 @@ f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/res
 f18b	Conventions document structure	perl -pi -e 's/^## 6\. Delegation$/## 6. Delegating/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f19	Skills guide coverage	perl -pi -e 's/star-expt-digest/star-expt-digestX/g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
 f20	complete definition	perl -pi -e 's{\.agents/skills/star-flow-status}{.agents/skills/star-flow-statusX}g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
-f21	Opening-load invariants	perl -pi -e "s/^Match the user's language\./Match the user language./" "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
-f21b	Opening-load invariants	perl -pi -e "s/grep -sE '\^\(STAR_LANG\|INVOLVE\)=' \.env/grep -sE 'STAR_LANG' .env/" "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md
-f22	Selective conventions load	perl -pi -e 's/\(0\|3\|5\|6\)/(0|3|5|6|9)/' "$W/.claude/skills/star-expt-digest/SKILL.md"	.claude/skills/star-expt-digest/SKILL.md
-# f22b edits the item selector's list without the prose following; f22c makes it
-# close two headings down, which would print the whole section in between.
-f22b	Selective conventions load	perl -pi -e 's/n==12/n==13/' "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
-f22c	Selective conventions load	perl -pi -e 's|## 8\\\./\{s=0\}|## 9\\./{s=0}|' "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
-f23	Reuse-an-earlier-load paragraph	perl -pi -e 's/^(\*\*Reusing an earlier load\.\*\*) /$1 Note: /' "$W/.qwen/skills/star-flow-status/SKILL.md"	reuse paragraph
 # f24 puts a harness's delegation tool back into the neutral root; f24b does the
 # same with a question tool. Both are what that root exists not to name.
 f24	Delegation vocabulary	perl -pi -e 's/dispatch a writing sub-agent/call `spawn_agent` with `agent_type: worker`/' "$W/.agents/skills/star-plan-executor/references/agent_dispatch_spec.md"	.agents/skills
 f24b	Harness tool vocabulary	perl -pi -e 's/your question tool/AskUserQuestion/' "$W/.agents/skills/star-plan-coach/SKILL.md"	.agents/skills
-f25	Harness tool vocabulary	perl -pi -e 's/`run_shell_command`/Bash/g' "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
+f25	Harness tool vocabulary	printf '\nUse `Bash` to read the files.\n' >> "$W/.qwen/skills/star-flow-status/SKILL.md"	.qwen/skills/star-flow-status/SKILL.md
 f25b	Harness tool vocabulary	perl -pi -e 's/AskQuestion/AskUserQuestion/g' "$W/.cursor/skills/star-plan-coach/SKILL.md"	.cursor/skills/star-plan-coach
 # f26 names a file no tree ships - the shape a mistyped or renamed reference
 # path takes, identical in all seven because one source generates them. f26b is
 # the other direction: a file every tree ships and no step ever opens.
 f26	Reference paths a skill names	printf 'Recipe: `references/repo_rubrics.md`.\n' >> "$W/.claude/skills/star-code-architect/SKILL.md"	.claude/skills/star-code-architect
 f26b	Reference paths a skill names	for t in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do : > "$W/$t/skills/star-code-architect/references/leftover_spec.md"; : > "$W/$t/skills/star-code-architect/references/leftover_spec_zh.md"; done	leftover_spec.md
+f21	Shared environment controls	perl -pi -e 's/STAR_LANG/REPLY_LANGUAGE/g' "$W/.claude/skills/star-flow-status/SKILL.md"	.claude/skills/star-flow-status/SKILL.md
+f21b	Shared environment controls	perl -pi -e 's/INVOLVE/QUESTION_LEVEL/g' "$W/.claude/skills/star-plan-coach/SKILL.md"	.claude/skills/star-plan-coach/SKILL.md

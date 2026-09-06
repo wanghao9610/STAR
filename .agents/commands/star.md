@@ -25,3 +25,5 @@ The seven skills marked † are explicit-only because each controls a researcher
 A request to pursue a goal autonomously — keep running whatever the plan tree needs next until something is reached — is not routed to one skill: give the exact `/star-auto <goal>` command and wait. Typing it is the grant that lets that run start the marked skills itself (conventions §10.7).
 
 If the request is empty, select `star-flow-status`. Otherwise, name the chosen skill, give the one-line reason, and pass through the request as its argument. Start an unmarked skill through the active harness's native skill mechanism and use that harness's owned copy. If two skills are equally plausible, ask one concise question instead of blending their scopes. Never bypass a skill by producing its owned artifact from general knowledge.
+
+A status, explanation or review-only request authorizes only that deliverable. Preserve it through routing: do not start fixes, implementation, installs or another writing successor merely because a report recommends one. Existing explicit execution authorization may permit follow-through within its goal and limits (conventions §10.6).

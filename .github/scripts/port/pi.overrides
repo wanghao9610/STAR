@@ -27,11 +27,6 @@ Dispatch read-only `star_subagent` subagents (`subagent_type: Explore`), one per
 Survey by topic — structure & dependencies, config system, data pipeline, train/eval entrypoints, scripts & tools, tests & docs — one read-only `star_subagent` dispatch each (`agent: "star-collector"`), each returning the structured report in `references/survey_spec.md`. Merge them into the **repo map**: module inventory, dependency direction, ranked suspicious patterns (only those that would motivate a migration item).
 ### star-code-architect/SKILL.md
 --- 1
-Show the architecture summary and the numbered migration table as normal text. Then ask via `star_questionnaire`: with ≤4 items, use multiSelect over them; with more, offer *approve all* / *approve all except (name numbers in Other)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
-+++ 1
-Show the architecture summary and the numbered migration table as normal text. Then ask: with ≤4 items, ask over the numbered ones and let the user reply with the numbers to approve; with more, offer *approve all* / *approve all except (name the numbers)* / *answer my questions on the ones I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Wait for the explicit answer; only approved items become the work list. "No migrations" is a valid outcome → skip to C4.
-### star-code-architect/SKILL.md
---- 1
 Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run in parallel, dependent groups serially. Dispatch one `star_subagent` subagent (`subagent_type: general-purpose`) per group with the brief: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: restore the group's paths via git, mark the items `blocked` in the migration record, continue with other groups.
 +++ 1
 Partition approved items into groups with **disjoint file ownership** (`references/orchestration_spec.md`); independent groups may run in parallel, dependent groups serially. Dispatch one `star_subagent` (`agent: "star-implementer"`) per group with the brief: scope verbatim ("ONLY these items"), explicit file list, mechanical moves + import fixes only — no opportunistic edits — runtime via the `.env` conda env, structured return (`changed` / `ran` / `check` / `blockers`). After each group the **main agent re-verifies** (compileall, import sweep, quick tests where runnable), then commits: `star-code-architect: migrate <ids> — <summary>`, staging only this skill's paths. Fail → feed the failure back, retry ≤2 → still failing: restore the group's paths via git, mark the items `blocked` in the migration record, continue with other groups.
@@ -47,11 +42,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, the `## Code Architecture` section of `AGENTS.md`, and `.cursor/rules/code-codearc.mdc`. Never touch `metds/plans/*`.
 +++ 1
 - Writes are limited to: `${CODE_NAME}/`, `metds/codearc.md`, and the `## Code Architecture` section of `AGENTS.md`. Never touch `metds/plans/*`.
-### star-code-architect/SKILL.md
---- 1
-- Both confirmation points and all questions go through `star_questionnaire` — one question per call. If it is unavailable (headless / scripted), fall back to plain text, still one at a time, and require an explicit approval message before anything past a confirmation point is written or run.
-+++ 1
-- Both confirmation points and all questions go through `star_questionnaire` — one question per call: still one at a time, and an explicit approval message is required before anything past a confirmation point is written or run.
 ### star-code-architect/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -78,11 +68,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 勘察按关注点分——结构与依赖、配置系统、数据管线、训练/评估入口、脚本与工具、测试与文档——每项一次只读的 `star_subagent` 派发（`agent: "star-collector"`），各自按 `references/survey_spec_zh.md` 返回结构化报告。汇总成**仓库地图**：模块清单、依赖方向、排序后的可疑写法（只收会促成迁移项的）。
 ### star-code-architect/SKILL_zh.md
 --- 1
-以普通文本展示架构摘要与编号迁移表。随后用 `star_questionnaire` 确认：≤4 条时用 multiSelect 逐条勾选；更多时给 *全部批准* / *全部批准但排除（在 Other 里写编号）* / *先解答我点名的几条* / *重新设计*——规约 §7.13 定的"先摊清单、再一次提问"。只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
-+++ 1
-以普通文本展示架构摘要与编号迁移表。随后确认：≤4 条时对着编号逐条问、让用户回复要批准的编号；更多时给 *全部批准* / *全部批准但排除（写出编号）* / *先解答我点名的几条* / *重新设计*——规约 §7.13 定的"先摊清单、再一次提问"。等到明确答复；只有获批条目进入工作清单。"零迁移"是合法结果 → 直接跳到 C4。
-### star-code-architect/SKILL_zh.md
---- 1
 把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组并行派发，有依赖的组串行。每组派发一个 `star_subagent` subagent（`subagent_type: general-purpose`），交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
 +++ 1
 把获批条目划分为**文件所有权互不相交**的组（`references/orchestration_spec_zh.md`）；相互独立的组可以并行，有依赖的组按依赖顺序串行。每组派一次 `star_subagent`（`agent: "star-implementer"`），交办说明为：范围原文照录（"只做这些条目"）、明确文件清单、只做例行移动 + import 修正——不顺手改别的——通过 `.env` conda 环境运行、结构化返回（`changed` / `ran` / `check` / `blockers`）。每组完成后**主 agent 亲自复核**（compileall、import 扫描、可跑的快速测试），然后提交：`star-code-architect: migrate <ids> — <summary>`，只暂存本 skill 涉及的路径。失败 → 把失败信息回传后重试 ≤2 次 → 仍失败：用 git 恢复该组路径，在迁移记录中把条目标 `blocked`，继续其他组。
@@ -98,11 +83,6 @@ Partition approved items into groups with **disjoint file ownership** (`referenc
 - 只写这些位置：`${CODE_NAME}/`、`metds/codearc.md`、`AGENTS.md` 的 `## Code Architecture` 一节、`.cursor/rules/code-codearc.mdc`。绝不碰 `metds/plans/*`。
 +++ 1
 - 只写这些位置：`${CODE_NAME}/`、`metds/codearc.md`、`AGENTS.md` 的 `## Code Architecture` 一节。绝不碰 `metds/plans/*`。
-### star-code-architect/SKILL_zh.md
---- 1
-- 两个确认点与所有提问都走 `star_questionnaire`——每次调用只问一题。不可用时（无头/脚本化）改用纯文本，仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
-+++ 1
-- 两个确认点与所有提问都走 `star_questionnaire`——一次调用只问一题：仍一次一题，且确认点之后每一次写文件、跑命令，都要先拿到明确的批准文字。
 ### star-code-architect/references/branch_a.md
 --- 1
 Present the top 3–5 via `star_questionnaire`, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
@@ -114,22 +94,12 @@ Present the top 3–5, one option per candidate: one-line why-it-fits, license, 
 +++ 1
 以普通文本呈现 top 3–5，一个候选一个选项：一句话贴合理由、许可证、stars、最近更新、主要风险，得分最高者排在首位并注明推荐。始终保留一条退路（"都不合适——细化检索 / 从零起步"）。若以 URL 调用，也要展示该库的许可证、活跃度与风险，确认后再克隆。
 ### star-code-architect/references/orchestration_spec.md
---- 1
-How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. The main agent orchestrates, verifies, and commits; it does not edit code itself.
-+++ 1
-How the main agent coordinates subagents for this skill. Sibling spec: the executor's `agent_dispatch_spec.md` — same philosophy, adapted to surveys and migrations. Dispatch goes through `star_subagent`. The main agent orchestrates, verifies, and commits; it does not edit code itself.
-### star-code-architect/references/orchestration_spec.md
 --- 2
 - **Surveyors** — read-only `star_subagent` subagents (`subagent_type: Explore`), one area each (`survey_spec.md`).
 - **Migrators** — `star_subagent` subagents (`subagent_type: general-purpose`), one per migration group, write access limited to their group's files.
 +++ 2
 - **Survey passes** — read-only, one area each (`survey_spec.md`).
 - **Migration passes** — one per migration group, writing only that group's files.
-### star-code-architect/references/orchestration_spec_zh.md
---- 1
-本 skill 的主 agent 如何调度 subagent。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。主 agent 负责编排、复核、提交；它自己不改代码。
-+++ 1
-本 skill 的主 agent 如何调度子代理。对应的规范：executor 的 `agent_dispatch_spec.md`——同一套思路，适配到勘察与迁移场景。派发一律走 `star_subagent`。主 agent 负责编排、复核、提交，自己不改代码。
 ### star-code-architect/references/orchestration_spec_zh.md
 --- 2
 - **勘察者**——只读 `star_subagent` subagent（`subagent_type: Explore`），一组一个（`survey_spec_zh.md`）。
@@ -194,31 +164,6 @@ A ranked suspicious pattern becomes a numbered migration item only after the mai
 4. Compiling with gaps is normal — the gaps become README TODOs — but the user sees the table first. When most sources are absent, say plainly that compiling now gives mostly TODOs, and offer via `star_questionnaire`: *run the producers first (recommended, name them)* / *compile what exists anyway*.
 +++ 1
 4. Compiling with gaps is normal — the gaps become README TODOs — but the user sees the table first. When most sources are absent, say plainly that compiling now gives mostly TODOs, and offer: *run the producers first (recommended, name them)* / *compile what exists anyway*.
-### star-code-release/SKILL.md
---- 1
-5. **Confirmation point 1:** present the promotion table as normal text — path, evidence, destination, action, risk — then ask via `star_questionnaire`. With ≤4 candidates use multiSelect over the rows; with more, offer *approve all* / *approve all except (name the rows in Other)* / *answer my questions on the rows I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Approving nothing is a valid outcome → skip to Step 2.
-+++ 1
-5. **Confirmation point 1:** present the promotion table as normal text — path, evidence, destination, action, risk — then ask. With ≤4 candidates ask over the numbered rows and let the user reply with the row numbers; with more, offer *approve all* / *approve all except (name the rows in Other)* / *answer my questions on the rows I name first* / *redesign* — the list-then-one-question shape conventions §7.13 defines. Approving nothing is a valid outcome → skip to Step 2.
-### star-code-release/SKILL.md
---- 1
-3. Settle them with **one** `star_questionnaire` over that list (conventions §7.13) — *apply all as listed* / *apply all but the ones I name* / *answer my questions on the ones I name first* / *apply none*, recommendation marked. With ≤4 findings, ask over the findings (multiSelect). Findings the user pulls out open a second round in the same shape. Apply each approved fix, then re-run `compileall` on the touched file; a failed re-check reverts that fix and marks it `reverted`.
-+++ 1
-3. Settle them with **one** question over that list (conventions §7.13) — *apply all as listed* / *apply all but the ones I name* / *answer my questions on the ones I name first* / *apply none*, recommendation marked. The user names findings by their numbers, so number the list on the page. Findings the user pulls out open a second round in the same shape. Apply each approved fix, then re-run `compileall` on the touched file; a failed re-check reverts that fix and marks it `reverted`.
-### star-code-release/SKILL.md
---- 1
-   - **Carries this skill's generated marker** → show the section-level change list first — one line per section: kept / rewritten / added / removed, and what changed — then ask per section via `star_questionnaire`. A section differing from what this skill last generated was hand-edited: default it to **keep**, and say so.
-+++ 1
-- **Carries this skill's generated marker** → show the section-level change list first — one line per section: kept / rewritten / added / removed, and what changed — then ask per section. A section differing from what this skill last generated was hand-edited: default it to **keep**, and say so.
-### star-code-release/SKILL.md
---- 1
-4. `README.md` is English. When the root plan's `language` is `zh`, offer `README.zh-CN.md` via `star_questionnaire`; when both exist, each carries the `**Language:**` line linking the other. Keep technical terms, metric names, dataset names, and file paths in English inside the Chinese README.
-+++ 1
-4. `README.md` is English. When the root plan's `language` is `zh`, offer `README.zh-CN.md`; when both exist, each carries the `**Language:**` line linking the other. Keep technical terms, metric names, dataset names, and file paths in English inside the Chinese README.
-### star-code-release/SKILL.md
---- 1
-- All confirmation points go through `star_questionnaire` — one question per call: the phase when the argument is unrecognized, the readiness decision when sources are mostly absent, Confirmation point 1 on the promotion table, the polish-findings list, each README section change, the STAR-README or hand-authored-README replacement, and the Chinese README offer. If it is unavailable (headless / scripted), fall back to plain text, still one at a time, and require explicit approval before any write.
-+++ 1
-- All confirmation points go through `star_questionnaire` — one per call: the phase when the argument is unrecognized, the readiness decision when sources are mostly absent, Confirmation point 1 on the promotion table, the polish-findings list, each README section change, the STAR-README or hand-authored-README replacement, and the Chinese README offer. Ask through `star_questionnaire`, still one at a time, and require explicit approval before any write.
 ### star-code-release/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -234,31 +179,6 @@ A ranked suspicious pattern becomes a numbered migration item only after the mai
 4. 带缺口编译是正常的——缺口会变成 README 的 TODO——但用户要先看到这张表。多数来源缺失时，直白地说现在编译出的 README 大半是 TODO，并经 `star_questionnaire` 提议：*先跑产出方（推荐，写明是哪些）* / *就用现有的编译*。
 +++ 1
 4. 带缺口编译是正常的——缺口会变成 README 的 TODO——但用户要先看到这张表。多数来源缺失时，直白地说现在编译出的 README 大半是 TODO，并提议：*先跑产出方（推荐，写明是哪些）* / *就用现有的编译*。
-### star-code-release/SKILL_zh.md
---- 1
-5. **确认点 1：** 以普通文本呈现移入表——路径、证据、目的地、动作、风险——然后经 `star_questionnaire` 询问。候选 ≤4 条时用 multiSelect 逐行勾选；更多时提供 *全部批准* / *除某几条外全部批准（在 Other 里写行号）* / *先解答我点名的几行* / *重做*——规约 §7.13 定的"先摊清单、再一次提问"。一条都不批准是有效结果 → 直接进 Step 2。
-+++ 1
-5. **确认点 1：** 以普通文本呈现移入表——路径、证据、目的地、动作、风险——然后询问。候选 ≤4 条时对着编号逐行问、让用户回复行号；更多时提供 *全部批准* / *除某几条外全部批准（写出行号）* / *先解答我点名的几行* / *重做*——规约 §7.13 定的"先摊清单、再一次提问"。一条都不批准是有效结果 → 直接进 Step 2。
-### star-code-release/SKILL_zh.md
---- 1
-3. 用**一次** `star_questionnaire` 就这份清单定下来（规约 §7.13）——*全部按清单修* / *除我点名的以外全部修* / *先解答我点名的几条* / *一条都不修*，标出推荐。问题项 ≤4 条时，直接就问题项发问（multiSelect）。被点出来的条目开启第二轮，形状照旧。每处批准的修改写入后对该文件重跑 `compileall`；复检失败就把该处恢复原样并标 `reverted`。
-+++ 1
-3. 用**一次**提问就这份清单定下来（规约 §7.13）——*全部按清单修* / *除我点名的以外全部修* / *先解答我点名的几条* / *一条都不修*，标出推荐。用户按编号点名，所以正文里的清单要编号。被点出来的条目开启第二轮，形状照旧。每处批准的修改写入后对该文件重跑 `compileall`；复检失败就把该处恢复原样并标 `reverted`。
-### star-code-release/SKILL_zh.md
---- 1
-   - **带本 skill 的生成标记** → 先给出分节变更清单——每节一行：保留 / 改写 / 新增 / 删除，以及变了什么——再经 `star_questionnaire` 逐节询问。与本 skill 上次生成结果不同的节即人工改过：默认**保留**，并说明这一点。
-+++ 1
-   - **带本 skill 的生成标记** → 先给出分节变更清单——每节一行：保留 / 改写 / 新增 / 删除，以及变了什么——再逐节询问。与本 skill 上次生成结果不同的节即人工改过：默认**保留**，并说明这一点。
-### star-code-release/SKILL_zh.md
---- 1
-4. `README.md` 用英文。根计划的 `language` 是 `zh` 时，经 `star_questionnaire` 提供 `README.zh-CN.md`；两者都存在时各自带上互链的 `**Language:**` 行。中文 README 里，技术术语、指标名、数据集名和文件路径保持英文。
-+++ 1
-4. `README.md` 用英文。根计划的 `language` 是 `zh` 时，提供 `README.zh-CN.md`；两者都存在时各自带上互链的 `**Language:**` 行。中文 README 里，技术术语、指标名、数据集名和文件路径保持英文。
-### star-code-release/SKILL_zh.md
---- 1
-- 所有确认点都走 `star_questionnaire`，一次一个问题：参数无法识别时的阶段选择、来源大面积缺失时的就绪决策、移入表的 确认点 1、打磨问题项清单、每处 README 小节变更、STAR README 或人工 README 的替换确认、以及中文 README 的提议。若该工具不可用（无人值守 / 脚本化），改用纯文本，仍然一次一个，任何写入前都必须拿到明确批准。
-+++ 1
-- 所有确认点都用普通文本提问，一条消息一个问题：参数无法识别时的阶段选择、来源大面积缺失时的就绪决策、移入表的 确认点 1、打磨问题项清单、每处 README 小节变更、STAR README 或人工 README 的替换确认、以及中文 README 的提议。提问走 `star_questionnaire`，仍然一次一个，任何写入前都必须拿到明确批准。
 ### star-code-reviewer/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -266,43 +186,14 @@ A ranked suspicious pattern becomes a numbered migration item only after the mai
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 ### star-code-reviewer/SKILL.md
 --- 1
-2. **Find wide, verify before reporting.** Collection always goes to read-only `star_subagent` subagents (`subagent_type: Explore`) — a context not party to the code under review — but the main agent re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
+2. **Find wide, verify before reporting.** When available, use read-only `star_subagent` collectors (`subagent_type: Explore`, `model:` the READ tier value, omitted when empty) from a context not party to the code under review, and size the fan-out to the scope. Every delegate follows `references/review_rubric.md`, never writes, and never grades the overall verdict. Independent review remains the goal; if `star_subagent` is unavailable, perform one local pass, record that limitation, and do not repeatedly ask for unavailable tooling. Re-read the cited code for every blocker/major finding before it enters the report; downgrade or drop what does not hold up.
 +++ 1
-2. **Find wide, verify before reporting.** Collection always goes to read-only `star_subagent` dispatches (`agent: "star-collector"`) — a context not party to the code under review — but the main agent re-reads the cited code for every blocker/major finding before it enters the report; what does not hold up is downgraded or dropped. A review is judged by the precision of its findings, not their count — one wrong blocker costs the report its credibility.
+2. **Find wide, verify before reporting.** When available, call `star_subagent` with `agent: "star-collector"` and the READ-tier `model` when non-empty, from a context not party to the code under review; size the fan-out to the scope. Every delegate follows `references/review_rubric.md`, never writes, and never grades the overall verdict. If `star_subagent` is unavailable, perform one local pass, record that limitation, and do not repeatedly ask for unavailable tooling. Re-read every blocker/major citation before reporting it.
 ### star-code-reviewer/SKILL.md
 --- 1
-5. **Fixes are mechanical and behavior-preserving; severity decides what is asked.** After the report, run a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. A `minor` or `nit` fix is applied unasked and named as it is applied; a `blocker` or `major` fix, and every fix that deletes code, is approved via `star_questionnaire` first — the whole list on the page, then one question over it (conventions §7.13), recommendation marked. Every fix is re-verified; one that fails is reverted. Never put up for approval a list the user cannot see; never "improve" adjacent code (AGENTS.md §3).
+- **How many is the main agent's call**, sized to the work (conventions §6.2): read-only `star_subagent` subagents (`subagent_type: Explore`, `model:` the READ tier value, omitted when empty) run in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding format in `references/review_rubric.md`. Collectors never write, never review outside their file list, never grade the overall verdict. One collector can carry a coherent scope up to roughly 50 files; past that, partition package by package in groups of 10–15, so a 60-file tree goes to four or five collectors rather than sixty. A package that hangs together may run longer instead of being cut only to hit a group size.
 +++ 1
-5. **Fixes are mechanical and behavior-preserving; severity decides what is asked.** After the report, run a fix pass covering only docstrings, scope-internal renames, unused imports, and dead code this project introduced. A `minor` or `nit` fix is applied unasked and named as it is applied; a `blocker` or `major` fix, and every fix that deletes code, is approved first — the whole list on the page, then one question over it (conventions §7.13), recommendation marked. Every fix is re-verified; one that fails is reverted. Never put up for approval a list the user cannot see; never "improve" adjacent code (AGENTS.md §3).
-### star-code-reviewer/SKILL.md
---- 1
-   - Nothing matches → list the nearest plan and path candidates and ask via `star_questionnaire`.
-+++ 1
-   - Nothing matches → list the nearest plan and path candidates and ask.
-### star-code-reviewer/SKILL.md
---- 1
-4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — grep and `wc`, no environment needed — then say so and offer to narrow (one sub-package, or diff mode) via `star_questionnaire`, naming from the screen where the evidence already is. An offer that makes the user guess a sub-package is a worse one.
-+++ 1
-4. Trim to reviewable source: Python files get the full rubric; shell / YAML / config files in scope are checked for dimension D only (paths & runtime); `datas/`, `inits/`, `wkdrs/` artifacts and generated files are out of scope. State the final file count before reviewing; above ~50 files, run Step 2's whole-tree screen first — grep and `wc`, no environment needed — then say so and offer to narrow (one sub-package, or diff mode), naming from the screen where the evidence already is. An offer that makes the user guess a sub-package is a worse one.
-### star-code-reviewer/SKILL.md
---- 3
-- **How many is the main agent's call**, sized to the work (conventions §6.2): read-only `star_subagent` subagents (`subagent_type: Explore`), run in parallel, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding format in `references/review_rubric.md`. Collectors never write, never review outside their file list, never grade the overall verdict. One collector carries a scope up to the ~50 files where Step 0 already offers to narrow; past that, partition by package/directory in groups of 10–15 files, so a 60-file tree goes to four or five collectors and not to sixty. Either side of that is the main agent's once it can say why — a package that hangs together and runs a little long stays whole rather than being cut to hit a group size.
-- **Dispatch is automatic; no approval is asked for it.** Running this command is the request for these collectors — Step 3 is where this skill dispatches, whether the user typed its name or the agent picked it up on a plainly matching task (conventions §10.2) — so a standing instruction conditioned on the user having asked is satisfied here. The involve level moves nothing either: at `high` the fan-out is announced with its partition before it goes out, never put to a question (conventions §6.8). Two things stop it, and no preference is among them: a standing instruction that bans delegation outright, or a host that offers no delegation at all. Only then, ask once for this dispatch rather than falling back silently, because collection inside the audited context is not the independent read this step exists for (conventions §6.1; §6.7 — the second opinion a main agent cannot give itself). Declined or unavailable, the main agent fills the same format locally, group by group, and the scope line records instead that no independent collector read the code.
-- **Plan mode adds dimension F** (main agent, not the read-only subagents — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
-+++ 3
-- **How many is the main agent's call**, sized to the work (conventions §6.2): read-only collection passes, run one at a time, each given the rubric, the review rule digest built at Step 1 — the same block, verbatim, for all of them — and its exact file list, returning the structured finding format in `references/review_rubric.md`. A pass never writes, never reviews outside its file list, never grades the overall verdict. One pass carries a scope up to the ~50 files where Step 0 already offers to narrow; past that, partition by package/directory in groups of 10–15 files, so a 60-file tree goes to four or five passes and not to sixty. Either side of that is the main agent's once it can say why — a package that hangs together and runs a little long stays whole rather than being cut to hit a group size.
-- **The partition is automatic; no approval is asked for it.** Running this command is the request for these passes — Step 3 is where this skill collects, whether the user typed its name or the agent picked it up on a plainly matching task (conventions §10.2). Collection goes to `star_subagent` dispatches (`agent: "star-collector"`), one per pass in the order the partition sets, with no question to ask about a partition running this command already requested. The involve level moves nothing either: at `high` the partition is announced before the passes start, never put to a question (conventions §6.8).
-- **Plan mode adds dimension F** (main agent, not the collection passes — it needs the plan context): the §3 task-to-code map, §4 deliverables on disk, §5 support, and the EXEC_LOG-vs-code cross-check.
-### star-code-reviewer/SKILL.md
---- 1
-3. Name the unasked fixes in the Step 6 digest before applying them (`file:line` and what changes), then put the asked ones on the page as one numbered list — `file:line`, severity, what changes — and settle it with **one** `star_questionnaire` over that list (conventions §7.13): *apply all as listed* / *apply all but the ones I name* / *answer my questions on the ones I name first* / *apply none*, recommendation marked. With four findings or fewer, ask over the findings themselves (multiSelect). Findings the user pulls out open a second round in the same shape. A fix that deletes code is never a row on that list — item 2 has it asked on its own.
-+++ 1
-3. Name the unasked fixes in the Step 6 digest before applying them (`file:line` and what changes), then put the asked ones on the page as one numbered list — `file:line`, severity, what changes — and settle it with **one** question over that list (conventions §7.13): *apply all as listed* / *apply all but the ones I name* / *answer my questions on the ones I name first* / *apply none*, recommendation marked. The user names findings by their numbers, so number the list on the page. Findings the user pulls out open a second round in the same shape. A fix that deletes code is never a row on that list — item 2 has it asked on its own.
-### star-code-reviewer/SKILL.md
---- 1
-- The fix-pass approvals that are asked — `blocker`/`major` fixes and every deletion — go through `star_questionnaire`: the whole list on the page, then one question over it (conventions §7.13), each deletion asked on its own. If it is unavailable (headless / scripted), fall back to plain text, still the list before the question, and require explicit approval before any write. What Step 7 applies unasked is named in the same reply that applies it.
-+++ 1
-- The fix-pass approvals that are asked — `blocker`/`major` fixes and every deletion — go through `star_questionnaire`: the whole list on the page, then one question over it (conventions §7.13), each deletion asked on its own; explicit approval is required before any write. What Step 7 applies unasked is named in the same reply that applies it.
+- **How many is the main agent's call**, sized to the work (conventions §6.2): parallel `star_subagent` calls with `agent: "star-collector"` and the READ-tier `model` when non-empty, each given the rubric, shared rule digest, and exact file list. Collectors never write, exceed their list, or grade the verdict. One can carry a coherent scope up to roughly 50 files; larger scopes partition package by package in groups of 10–15.
 ### star-code-reviewer/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -310,95 +201,24 @@ A ranked suspicious pattern becomes a numbered migration item only after the mai
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
 ### star-code-reviewer/SKILL_zh.md
 --- 1
-2. **广收集，先核实再报告。** 收集一律交给只读 `star_subagent` subagent（`subagent_type: Explore`）——一个没参与过这份代码的上下文——但每条要进报告的 blocker/major 问题项，主 agent 都要重读被引用的代码确认；站不住的降一档或丢弃。评价一份 review 看的是问题项的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
+2. **广收集，先核实再报告。** 可用时使用没参与过代码的只读 `star_subagent` 收集器（`subagent_type: Explore`；READ 档值非空时作为 `model:`），数量按范围决定。每个受托者遵循 `references/review_rubric_zh.md`，绝不写入或给整体结论。独立复核仍是目标；`star_subagent` 不可用时，本地做一次并记录限制，不反复询问不可用工具。每条 blocker/major 进报告前都重读被引用代码确认，站不住的降级或丢弃。
 +++ 1
-2. **广收集，先核实再报告。** 收集一律派给只读的 `star_subagent`（`agent: "star-collector"`）——一个没参与过这份代码的上下文——但每条要进报告的 blocker/major 问题项，主 agent 都要重读被引用的代码确认；站不住的降一档或丢弃。评价一份 review 看的是问题项的精度而不是数量——一条错误的 blocker 就足以让报告失去可信度。
+2. **广收集，先核实再报告。**可用时调用 `star_subagent`，设 `agent: "star-collector"`，READ 档值非空时传给 `model`，从未参与代码的上下文收集；数量按范围决定。每个受托者遵循 `references/review_rubric_zh.md`，绝不写入或给整体结论。工具不可用时本地做一次并记录限制。每条 blocker/major 进报告前都重读引用。
 ### star-code-reviewer/SKILL_zh.md
 --- 1
-5. **修复是例行的、不改行为的；问不问由严重度决定。** 报告之后走一轮修复，只覆盖 docstring、作用域内改名、未使用的 import、本项目引入的死代码。`minor` / `nit` 直接改，边改边点名；`blocker` / `major`，以及每一次删代码，先经 `star_questionnaire` 批准再写入——整张清单先摊到正文，再用一次提问定下来（规约 §7.13），标出推荐。每条写入后复检，不过就恢复原样。绝不把用户看不见的清单拿去批准；绝不顺手"改进"相邻代码（AGENTS.md §3）。
+- **派几个由主 agent 定**，按工作量来（规约 §6.2）：只读 `star_subagent` subagent（`subagent_type: Explore`；READ 档值非空时作为 `model:`）并行派发，每个拿到评分表、Step 1 构建的评判依据摘要（同一块内容，逐字发给所有人）和确切的文件清单，按 `references/review_rubric_zh.md` 的结构化格式返回。收集器绝不写文件、越出清单或给整体结论。约 50 个文件以内的连贯范围可由一个收集器承担；再多就逐 package 切分，每组 10–15 个，60 个文件分给四五个而非六十个。本身连成一块的 package 可以稍长，不为凑数硬切。
 +++ 1
-5. **修复是例行的、不改行为的；问不问由严重度决定。** 报告之后走一轮修复，只覆盖 docstring、作用域内改名、未使用的 import、本项目引入的死代码。`minor` / `nit` 直接改，边改边点名；`blocker` / `major`，以及每一次删代码，先单独提问批准再写入——整张清单先摊到正文，再用一次提问定下来（规约 §7.13），标出推荐。每条写入后复检，不过就恢复原样。绝不把用户看不见的清单拿去批准；绝不顺手"改进"相邻代码（AGENTS.md §3）。
-### star-code-reviewer/SKILL_zh.md
---- 1
-   - 都不匹配 → 列出最接近的计划与路径候选，经 `star_questionnaire` 询问。
-+++ 1
-   - 都不匹配 → 列出最接近的计划与路径候选，询问。
-### star-code-reviewer/SKILL_zh.md
---- 1
-4. 只留下可审的源码：Python 文件走完整评分表；范围内的 shell / YAML / 配置文件只查维度 D（路径与运行时）；`datas/`、`inits/`、`wkdrs/` 产物与生成文件不在范围内。审查前报出最终文件数；超过约 50 个文件时，先跑 Step 2 的全树筛查——只是 grep 和 `wc`，不需要环境——再说明情况，并经 `star_questionnaire` 提议收窄（某个子包，或 diff 模式），同时用筛查结果指出证据已经在哪里。让用户去猜哪个子包，是更差的提议。
-+++ 1
-4. 只留下可审的源码：Python 文件走完整评分表；范围内的 shell / YAML / 配置文件只查维度 D（路径与运行时）；`datas/`、`inits/`、`wkdrs/` 产物与生成文件不在范围内。审查前报出最终文件数；超过约 50 个文件时，先跑 Step 2 的全树筛查——只是 grep 和 `wc`，不需要环境——再说明情况，并提议收窄（某个子包，或 diff 模式），同时用筛查结果指出证据已经在哪里。让用户去猜哪个子包，是更差的提议。
-### star-code-reviewer/SKILL_zh.md
---- 4
-- **收集一律委派，范围多小都一样。** 主 agent 的上下文不是这份代码的中立读者：它一直在讨论这份代码；范围内有文件是本轮对话此前写出或改过的，它重读时用的还是当初产生那段代码的那套推理。收集器的上下文两样都没见过——所以主 agent 自己绝不收集问题项，并在报告的范围行写明：派了几个收集器、文件怎么分的；本会话写过范围内的文件时，一并写明代码出自本会话。
-- **派几个由主 agent 定**，按工作量来（规约 §6.2）：只读 `star_subagent` subagent（`subagent_type: Explore`），并行派发，每个拿到评分表、Step 1 构建的评判依据摘要（同一块内容，逐字发给所有人）和确切的文件清单，按 `references/review_rubric_zh.md` 规定的结构化问题项格式返回。收集器绝不写文件、绝不越出自己的清单、绝不给整体结论打分。Step 0 已经提议收窄的那约 50 个文件以内，一个收集器就够；再多就按包/目录切分，每片 10–15 个文件——60 个文件的树分给四五个收集器，不是六十个。往哪边偏都是主 agent 的判断，只要说得出为什么——本身连成一块、稍微长一点的包，宁可整块派出去，也不为凑片大小切开。
-- **派发是自动的，不为它征求同意。** 跑这条命令，请求的就是这些收集器——Step 3 正是这个技能派发的地方，用户亲手敲的名字也好，agent 自己因任务明显匹配而接手也好（规约 §10.2），都一样——所以以「用户提出请求」为条件的常驻指令在这里已被满足。参与度档位同样不改变这一点：`high` 只是在派出去之前把并行派发和切分方式说一声，绝不变成待答的问题（规约 §6.8）。能拦住它的只有两种，都不是偏好：彻底禁止委派的常驻指令，或宿主根本不提供委派能力。只有这时才为这一次派发问一次，不默默退回本地，因为在被审查的那个上下文里做收集，不是这一步要的那种独立阅读（规约 §6.1；§6.7——主 agent 没法自己给自己的第二意见）。被拒绝或本就派不出，主 agent 就按同一份返回格式逐片在本地填，范围行改成写明：没有独立收集器读过这份代码。
-- **计划模式加维度 F**（主 agent 做，不交收集器——它需要计划上下文）：§3 任务到代码的映射、§4 交付物在磁盘上核对、§5 支撑检查、EXEC_LOG 与代码交叉核对。
-+++ 4
-- **收集一律外派，范围多小都一样。** 主 agent 的上下文不是这份代码的中立读者：它一直在讨论这份代码；范围内有文件是本轮对话此前写出或改过的，它重读时用的还是当初产生那段代码的那套推理。收集器的上下文两样都没见过——所以主 agent 从不自己收集问题项。报告的范围行写明：跑了几个收集器、文件在它们之间怎么分的；本会话写过范围内的文件时，一并写明代码出自本会话。
-- **派几个由主 agent 定**，按工作量来（规约 §6.2）：只读收集遍，一次一遍，每个拿到评分表、Step 1 构建的评判依据摘要（同一块内容，逐字发给所有人）和确切的文件清单，按 `references/review_rubric_zh.md` 规定的结构化问题项格式返回。一遍只读收集绝不写文件、绝不越出自己的清单、绝不给整体结论打分。Step 0 已经提议收窄的那约 50 个文件以内，一遍就够；再多就按包/目录切分，每片 10–15 个文件——60 个文件的树分成四五遍，不是六十遍。往哪边偏都是主 agent 的判断，只要说得出为什么——本身连成一块、稍微长一点的包，宁可整块派出去，也不为凑片大小切开。
-- **切分是自动的，不为它征求同意。** 跑这条命令，请求的就是这几遍收集——Step 3 正是这个技能收集的地方，用户亲手敲的名字也好，agent 自己因任务明显匹配而接手也好（规约 §10.2），都一样。收集派给 `star_subagent`（`agent: "star-collector"`），按切分的顺序一遍一个；跑这条命令本身就是在请求这几遍收集，没有什么可问的。参与度档位同样不改变这一点：`high` 只是在开工前把切分方式说一声，绝不变成待答的问题（规约 §6.8）。
-- **计划模式加维度 F**（主 agent 做，不放进任何一遍收集——它需要计划上下文）：§3 任务到代码的映射、§4 交付物在磁盘上核对、§5 支撑检查、EXEC_LOG 与代码交叉核对。
-### star-code-reviewer/SKILL_zh.md
---- 1
-先把文件数对上：发出去的每个文件，都要落在某个收集器的 `files_reviewed` 计数里，或它的 `unknowns` 列表里；对不上的那些，连同 unknowns 一起重新派发（conventions §6.3）——没人能解析的文件，绝不能被当成干净文件算过去。然后合并去重。每条 blocker/major：不论收集器给的 `confidence` 是什么，都重新打开被引用的文件与行，确认问题真实、规则确实适用——blocker 上标着 `low`，是更该去读它的理由，不是少当回事的理由。不成立的降一档或丢弃；minor 抽查。值得一提但未确认的——包括重读也定不下来的 `low` 条目——进报告的 **Unconfirmed** 列表，绝不计入结论统计。
-+++ 1
-先把文件数对上：发出去的每个文件，都要落在某个收集器的 `files_reviewed` 计数里，或它的 `unknowns` 列表里；对不上的那些，连同 unknowns 一起补读一遍（conventions §6.3）——没人能解析的文件，绝不能被当成干净文件算过去。然后合并去重。每条 blocker/major：不论收集器给的 `confidence` 是什么，都重新打开被引用的文件与行，确认问题真实、规则确实适用——blocker 上标着 `low`，是更该去读它的理由，不是少当回事的理由。不成立的降一档或丢弃；minor 抽查。值得一提但未确认的——包括重读也定不下来的 `low` 条目——进报告的 **Unconfirmed** 列表，绝不计入结论统计。
-### star-code-reviewer/SKILL_zh.md
---- 1
-3. 直接改的那些，改之前先在 Step 6 的摘要里点名（`file:line` 与改什么）；其余先整张摊到正文里编号列出——`file:line`、严重度、改什么——再用**一次** `star_questionnaire` 就这份清单发问（规约 §7.13）：*全部按清单修* / *除我点名的以外全部修* / *先解答我点名的几条* / *一条都不修*，标出推荐。问题项在四条及以内时，直接就这些问题项发问（multiSelect）。被点出来的条目开启第二轮，形状照旧。删代码的修复永远不进这份清单——第 2 条要求它单独发问。
-+++ 1
-3. 直接改的那些，改之前先在 Step 6 的摘要里点名（`file:line` 与改什么）；其余先整张摊到正文里编号列出——`file:line`、严重度、改什么——再用**一次**提问就这份清单发问（规约 §7.13）：*全部按清单修* / *除我点名的以外全部修* / *先解答我点名的几条* / *一条都不修*，标出推荐。用户按编号点名，所以正文里的清单要编号。被点出来的条目开启第二轮，形状照旧。删代码的修复永远不进这份清单——第 2 条要求它单独发问。
-### star-code-reviewer/SKILL_zh.md
---- 1
-- 要问的那些修复（`blocker` / `major`，以及每一次删代码）的批准一律经 `star_questionnaire`——整张清单先摊到正文，再用一次提问定下来（规约 §7.13），其中每一次删代码单独发问。不可用（无人值守 / 脚本化）时改用纯文本，仍然先摊清单再提问，任何写入前先获明确批准。直接改的那些，在同一条回复里点名。
-+++ 1
-- 要问的那些修复（`blocker` / `major`，以及每一次删代码）的批准一律走 `star_questionnaire`——整张清单先摊到正文，再用一次提问定下来（规约 §7.13），其中每一次删代码单独发问；任何写入前先获明确批准。直接改的那些，在同一条回复里点名。
-### star-code-reviewer/references/review_rubric.md
---- 1
-Read-only subagents return this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the file count the collector was given is the remainder to re-dispatch (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
-+++ 1
-A collection pass returns this list (plus `files_reviewed: <n>` and `unknowns: [<a file it could not read or parse, one line each>]`) and nothing else: no prose verdicts, no fixes applied, no files written. Every finding carries `confidence: high | low`; `low` routes it to the report's Unconfirmed list and never moves a severity. A `files_reviewed` below the file count the collector was given is the remainder still to collect (conventions §6.3) — without `unknowns` and that count, silence about an unparseable file is indistinguishable from a clean one.
+- **派几个由主 agent 定**（规约 §6.2）：并行调用 `star_subagent`，设 `agent: "star-collector"`，READ 档值非空时传给 `model`；每个拿到评分表、同一份规则摘要和确切文件清单。收集器不写文件、不越界、不定整体结论。约 50 个文件内可用一个，更大范围逐 package 按 10–15 个分组。
 ### star-env-builder/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 +++ 1
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
-### star-env-builder/SKILL.md
---- 1
-2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit, via `star_questionnaire`.
-+++ 1
-2. **One confirmation point; situational asks.** The single confirmation point is install-plan approval (Step 4): nothing installs before it; everything it covers runs autonomously after it. Situational questions — overwrite an existing env, a CUDA mismatch, uv missing, a conda-only dependency under a venv backend — are asked when hit.
-### star-env-builder/SKILL.md
---- 1
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask via `star_questionnaire`: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
-+++ 1
-Present as normal text: backend + env name + python version; dependency source used; per-category package counts and notable pins; the torch↔CUDA match (detected driver ceiling vs chosen wheel index); rough download size of the big wheels; conda.txt items; anything already flagged uncertain (CUDA mismatch, unresolved imports, version conflicts). Then ask: *approve and build* / *adjust (say what)* / *abort*. Uncertainties are settled here — never silently.
-### star-env-builder/SKILL.md
---- 1
-- The confirmation point and all situational questions go through `star_questionnaire` — one question per call, each with a recommendation. If it is unavailable (headless / scripted), fall back to plain text, still one at a time; the install plan then needs an explicit approval message before anything installs.
-+++ 1
-- The confirmation point and all situational questions go through `star_questionnaire` — one question per call, each with a recommendation, and the install plan needs an explicit approval message before anything installs.
 ### star-env-builder/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 +++ 1
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
-### star-env-builder/SKILL_zh.md
---- 1
-2. **一个确认点，其余问题遇到才问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。其余问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 `star_questionnaire` 问。
-+++ 1
-2. **一个确认点，其余问题遇到才问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。其余问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时提问。
-### star-env-builder/SKILL_zh.md
---- 1
-以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后用 `star_questionnaire` 问：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
-+++ 1
-以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后问用户：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
-### star-env-builder/SKILL_zh.md
---- 1
-- 确认点与所有其余问题都走 `star_questionnaire`——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）改用纯文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
-+++ 1
-- 确认点与所有其余问题都走 `star_questionnaire`——一次调用只问一题，都带推荐项；安装计划必须先收到明确的批准文字才能开始安装。
 ### star-expt-analyst/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -479,21 +299,11 @@ and nothing else. This is safe because of the trust model above, not the collect
 报告判定为 `invalid` 或 `inconclusive` 的 run，或其数字复核未通过的 run，**不**出现在结果表里。它进 §5 已排除，附判定与一行原因——这行原因和判定一起写在收集器的返回里，所以排除一个 run 不必把那份报告再整份打开一遍。悄悄排除一个 run，结果表就是这么开始撒谎的：读者必须能看见被拿掉了什么、并数得出来。
 +++ 1
 报告判定为 `invalid` 或 `inconclusive` 的 run，或其数字复核未通过的 run，**不**出现在结果表里。它进 §5 已排除，附判定与一行原因——这行原因和判定一起写在那一遍的返回里，所以排除一个 run 不必把那份报告再整份打开一遍。悄悄排除一个 run，结果表就是这么开始撒谎的：读者必须能看见被拿掉了什么、并数得出来。
-### star-expt-analyst/references/aggregate_step_zh.md
---- 1
-按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把路径切分给收集器）；**每个数字入表前，重开它引用的来源并确认**；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并遵守写入规则：已存在的 `type: results` 文件要先让变更清单获批；范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
-+++ 1
-按 `references/aggregate_spec_zh.md` 编译结果汇总表：解析范围内的叶子；逐叶取其最新的 `EXPT_ANALYSIS_<日期>.md`（没有报告 → 记为缺口并转交，绝不去读原始 run；超过 ~6 份报告时按格式约定的**规模**一节把路径切成几遍来读）；**每个数字入表前，重开它引用的来源并确认**；按根 §4 的主张→实验映射与消融设计分组，绝不按 run 树分组；把 `invalid` / `inconclusive` 的 run 与复核未通过的数字连同原因排除到 §5，而 `not met` 的 run 留在它们该在的表里。把 `assets/results_template_zh.md`（英文：`assets/results_template.md`）填进由**范围**选定的那个目标——所有计划树写 `wkdrs/results/results.md`，限定到某棵子树时写 `wkdrs/results/results_<slug>.md`，绝不以其一覆盖其二——并遵守写入规则：已存在的 `type: results` 文件要先让变更清单获批；范围比本次编译更宽的文件绝不被收窄；人工撰写的文件绝不仅凭一个 diff 就覆盖。
-### star-expt-analyst/references/analysis_rubric.md
---- 1
-Read-only subagents return exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written. A dimension-C collector returns observations; it fills a metric row only where the metric's sole source is a line in a log on its own list, because D's source ladder compares across files and belongs to the agent holding all of them. It also returns one `config_echo` per log — `{source: <path>:<first–last line>, lines: <the verbatim config / argv / data-path block, ≤40 lines, kept to the data-path and split portion>}`, or `none` where the log has no echo. Quote it, never paraphrase and never judge: the main agent runs E's leakage and too-good checks against it, re-opening the cited range only on a hit. A `files_read` below the number of files the collector was given is the remainder to re-dispatch (conventions §6.3).
-+++ 1
-A collection pass returns exactly these two lists (plus `files_read: <n>`) and nothing else: no verdicts on the run, no interpretation, no files written. A dimension-C collector returns observations; it fills a metric row only where the metric's sole source is a line in a log on its own list, because D's source ladder compares across files and belongs to the agent holding all of them. It also returns one `config_echo` per log — `{source: <path>:<first–last line>, lines: <the verbatim config / argv / data-path block, ≤40 lines, kept to the data-path and split portion>}`, or `none` where the log has no echo. Quote it, never paraphrase and never judge: the main agent runs E's leakage and too-good checks against it, re-opening the cited range only on a hit. A `files_read` below the number of files the collector was given is the remainder still to collect (conventions §6.3).
 ### star-expt-digest/SKILL.md
---- 1
-Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]`. This run's argument is substituted here at load time — `$ARGUMENTS` — and nothing between those backticks means none was given. This skill runs in its own context (`context: fork`), so that substitution is the only place the argument appears: there is no user turn behind it to re-read, and taking an argument that is there as absent silently runs a different mode — with `ledger`, a different file. No argument resumes from the newest digest's `covers.through`, covering everything after it; a plan name (slug / numeric prefix / filename) covers that node's family, time-unbounded; `7d` or `2026-07-01` sets an explicit window; `all` covers the whole history and restarts the series; `ledger` writes a different artifact — the combined table of which model wrote what at `wkdrs/digests/MODEL_LEDGER.md` (Step 8). Anything left is a description (conventions §7.12): in your own words, what this run is for. Prose naming no mode and resolving to no plan is description alone, not a missing argument — resume from `covers.through` as with no argument, and say so before writing anything. A lone token parsing as neither a window nor a plan is not a description; it stays the ambiguity this skill asks about. A description can steer what the digest highlights; it never widens or narrows the window the argument set.
-+++ 1
-Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]` — no argument resumes from the newest digest's `covers.through`, covering everything after it; a plan name (slug / numeric prefix / filename) covers that node's family, time-unbounded; `7d` or `2026-07-01` sets an explicit window; `all` covers the whole history and restarts the series; `ledger` writes a different artifact — the combined table of which model wrote what at `wkdrs/digests/MODEL_LEDGER.md` (Step 8). Anything left is a description (conventions §7.12): in your own words, what this run is for. Prose naming no mode and resolving to no plan is description alone, not a missing argument — resume from `covers.through` as with no argument, and say so before writing anything. A lone token parsing as neither a window nor a plan is not a description; it stays the ambiguity this skill asks about. A description can steer what the digest highlights; it never widens or narrows the window the argument set.
+--- 2
+Because this skill runs with `context: fork`, read its load-time arguments from `$ARGUMENTS`; an empty substitution means no argument. The fork has no user turn from which to recover them.
+
++++ 0
 ### star-expt-digest/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -505,10 +315,10 @@ Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [
 +++ 1
 - Ask only where the workflow calls for it (an ambiguous plan name, an argument that parses as neither a window nor a plan). Ask through `star_questionnaire` and require an explicit answer. Since the skill writes nothing outside its own digest, there is no confirmation point — but for the same reason, never state or imply that you changed a plan, a status, a report, or the results table.
 ### star-expt-digest/SKILL_zh.md
---- 1
-调用方式：`star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [描述]`。本次调用带的参数在装载时替换到这里——`$ARGUMENTS`——两个反引号之间为空即表示没带参数。本 skill 在自己的独立上下文里运行（`context: fork`），这次替换是参数唯一出现的地方：背后没有可回看的用户消息，把带了的参数当成没带，就等于悄悄跑成另一种模式——若参数是 `ledger`，写出的还是另一份文件。不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。既不是模式词、也解析不到计划的成句文本只是描述，不是漏掉的参数——照不带参数那样从 `covers.through` 续接，并在动笔前说明这一点。既解析不成时间窗、也解析不成计划的孤立词不是描述，它仍是本 skill 要问清的那个歧义。描述可以引导 digest 强调什么，但不会放宽或收窄参数定下的时间窗。
-+++ 1
-调用方式：`star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [描述]`——不带参数则从最新一份 digest 的 `covers.through` 续接，覆盖其后全部；计划名（slug / 数字前缀 / 文件名）覆盖该节点家族，不设时间界；`7d` 或 `2026-07-01` 设定显式时间窗；`all` 覆盖全部历史并重建序列；`ledger` 写的是另一份产物——跨产物的模型出处汇总 `wkdrs/digests/MODEL_LEDGER.md`（Step 8）。剩下的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。既不是模式词、也解析不到计划的成句文本只是描述，不是漏掉的参数——照不带参数那样从 `covers.through` 续接，并在动笔前说明这一点。既解析不成时间窗、也解析不成计划的孤立词不是描述，它仍是本 skill 要问清的那个歧义。描述可以引导 digest 强调什么，但不会放宽或收窄参数定下的时间窗。
+--- 2
+本 skill 以 `context: fork` 运行；从装载时替换的 `$ARGUMENTS` 读取调用参数，替换为空即表示没有参数。fork 背后没有可用于恢复参数的用户轮次。
+
++++ 0
 ### star-expt-digest/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -520,10 +330,10 @@ Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [
 +++ 1
 - 只在工作流要求处提问（计划名有歧义、参数既解析不成窗口也解析不成计划）。一律走 `star_questionnaire` 并要求明确回答。因为本 skill 不在自己的 digest 之外写任何东西，所以没有审批确认点——也正因如此，绝不声称或暗示你改动了计划、状态、报告或结果汇总表。
 ### star-flow-status/SKILL.md
---- 1
-Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]`. This run's argument is substituted here at load time — `$ARGUMENTS` — and empty backticks mean none was given. This skill runs in its own context (`context: fork`), so that substitution is the argument's only appearance: no user turn behind it to re-read, and treating a present argument as absent silently answers a question nobody asked. With no argument, report the whole flow; with a slug / numeric prefix / filename, scope the tree and the coverage checks to that plan's subtree. Anything after `PLAN_NAME` is a description (conventions §7.12): in your own words, what this run is for. Prose resolving to no plan is description alone, not a missing target — report the whole flow, and say so in the reply's first line. A lone token that looks like a plan name and matches none is not a description: name it unmatched in that same line, since this skill never asks. A description steers what the report looks at hardest — which unknown is worth a second read, which line is worth quoting rather than counting, what the reason line addresses; it drops nothing the report owes, and never moves the next action, which the spec's priority order fixes down to the tie-break. An `involve=<level>` token is stripped before `PLAN_NAME` or the description is read (conventions §7.7); it changes nothing else here.
-+++ 1
-Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, report the whole flow; with a slug / numeric prefix / filename, scope the tree and the coverage checks to that plan's subtree. Anything after `PLAN_NAME` is a description (conventions §7.12): in your own words, what this run is for. Prose resolving to no plan is description alone, not a missing target — report the whole flow, and say so in the reply's first line. A lone token that looks like a plan name and matches none is not a description: name it unmatched in that same line, since this skill never asks. A description steers what the report looks at hardest — which unknown is worth a second read, which line is worth quoting rather than counting, what the reason line addresses; it drops nothing the report owes, and never moves the next action, which the spec's priority order fixes down to the tie-break. An `involve=<level>` token is stripped before `PLAN_NAME` or the description is read (conventions §7.7); it changes nothing else here.
+--- 2
+Because this skill runs with `context: fork`, read its load-time arguments from `$ARGUMENTS`; an empty substitution means no argument. The fork has no user turn from which to recover them.
+
++++ 0
 ### star-flow-status/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -535,10 +345,10 @@ Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, r
 +++ 1
 1. **Strictly read-only.** Never create, edit, or delete any file — not plans, logs, or frontmatter. It asks no questions and stops at no confirmation point. If the user wants to act on what you show, point them at the right skill (`star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-metd-summarize`, `star-code-release`).
 ### star-flow-status/SKILL_zh.md
---- 1
-调用方式：`star-flow-status [PLAN_NAME] [描述]`。本次调用的参数在装载时替换到这里——`$ARGUMENTS`——反引号之间为空即没带参数。本 skill 在独立上下文里运行（`context: fork`），这次替换是参数唯一出现的地方：背后没有用户消息可回看，把带了的参数当成没带，就等于答一个没人问过的问题。不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树与覆盖检查限定到该计划的子树。`PLAN_NAME` 之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。解析不到任何计划的成句文本只是描述，不是漏掉的目标——照常总览整条流程，并在回复第一行说明。形似计划名、却一个都对不上的孤立词不是描述：在同一行点明它没有匹配——本 skill 从不提问。描述引导报告重点看哪里——哪个 unknown 值得再读一遍、哪一行值得原文引用而不是计数、那句理由要回应什么；但报告该给的一样不少，也挪不动「下一步」那条推荐：它由 spec 的优先级顺序连同序时排法一并定死。参数里的 `involve=<level>` 记号先剥离，再读 `PLAN_NAME` 与描述（规约 §7.7）；除此之外在这里不改变任何行为。
-+++ 1
-调用方式：`star-flow-status [PLAN_NAME] [描述]`——不带参数则总览整条流程；带 slug / 数字前缀 / 文件名则把树与覆盖检查限定到该计划的子树。`PLAN_NAME` 之后的一切都是描述（规约 §7.12）：用你自己的话说明这次要做什么。解析不到任何计划的成句文本只是描述，不是漏掉的目标——照常总览整条流程，并在回复第一行说明。形似计划名、却一个都对不上的孤立词不是描述：在同一行点明它没有匹配——本 skill 从不提问。描述引导报告重点看哪里——哪个 unknown 值得再读一遍、哪一行值得原文引用而不是计数、那句理由要回应什么；但报告该给的一样不少，也挪不动「下一步」那条推荐：它由 spec 的优先级顺序连同序时排法一并定死。调用里的 `involve=<level>` 记号先剥离，再读 `PLAN_NAME` 与描述（规约 §7.7）；除此之外在这里不改变任何行为。
+--- 2
+本 skill 以 `context: fork` 运行；从装载时替换的 `$ARGUMENTS` 读取调用参数，替换为空即表示没有参数。fork 背后没有可用于恢复参数的用户轮次。
+
++++ 0
 ### star-flow-status/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -561,24 +371,9 @@ Invocation: `star-flow-status [PLAN_NAME] [DESCRIPTION]` — with no argument, r
 2. **One question at a time, via `star_questionnaire`**: Deliver every coaching question through the `star_questionnaire` tool — one question per call, waiting for the answer before sending the next. Never dump multiple questions as a plain-text list in one message. Give each question 2–4 short, concrete options from the question bank and what the user has already said, with your recommendation marked — always note that the user may answer freely outside the options. **Each option says what it would put in the idea file**, not just what it is called (conventions §7.3) — for a candidate direction, what it commits the idea to and what it drops. Anchor a question that builds on an earlier answer in one clause (§7.10). After every 2–3 answers, restate the key points you heard in one or two sentences of normal text. Exception: questions too open for meaningful candidates (e.g., the initial seed) may be asked without options.
 ### star-idea-storm/SKILL.md
 --- 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one `star_questionnaire` (multiSelect, recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
-+++ 1
-Generate 3–5 candidate directions from the seed using the generation moves in question-bank Stage 2, its section read on entering this stage — each with a one-line research question, the bet (why it might be tractable now), what would be new, and the nearest existing area. Genuinely distinct (Principle 3); invite the user's own candidates into the pool on equal terms. Present one table, then one question over its numbered rows (reply with the numbers; recommendations marked): keep 2–4 for scanning — with 5 candidates the options no longer fit (conventions §7.3 caps a question at 4), so number the table and ask over the numbers instead: *keep the recommended ones* / *keep a different set (say the numbers)* / *regenerate*. Dropped candidates stay in §2 marked `not scanned`. Write §2.
-### star-idea-storm/SKILL.md
---- 1
 Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a note on how crowded the area is (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scanning may fan out to read-only `star_subagent` subagents (`subagent_type: Explore`), run in parallel, one direction each, each returning the collector format in `references/scan_policy.md` — the briefing, and each collector's share of the rate budget, are built by the main agent, never by the collector; the main agent writes the file and owns every judgment line. Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are reported the moment they are found, not at stage end. A failed search is reported as failed, never padded.
 +++ 1
 Per kept direction, per `references/scan_policy.md` (Chinese dialogue: `references/scan_policy_zh.md`): build 2–3 queries, run them across the Semantic Scholar / arXiv / DBLP search endpoints plus web search, and collect 8–15 papers (title / venue / year / citations / one-clause relevance / record URL). Write that direction's §3 block as soon as its scan finishes: the scan table, a note on how crowded the area is (publication rate and trajectory, venues, named groups if evident, survey existence), the 3 closest works with what each one's abstract does **not** claim, and the apparent gap. Default depth is title + abstract; deepen — intro and related-work first paragraph of that direction's top-3 — only when the user names a direction or a gap claim decides between finalists, and record it in the block's `depth:` line. Scanning goes one direction at a time as a read-only collection pass, each filling the collector format in `references/scan_policy.md`; nothing runs concurrently, so the rate budget is spent one request at a time rather than split into shares (conventions §6.9); the main agent writes the file and owns every judgment line. Surprises — crowded where empty was expected, a same-question preprint from the last 6 months — are reported the moment they are found, not at stage end. A failed search is reported as failed, never padded.
-### star-idea-storm/SKILL.md
---- 1
-Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. Show the draft, confirm via `star_questionnaire` (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
-+++ 1
-Check the draft against the rubric's topic-statement test (Part C); put the failing items on the page — at most 5, ranked by importance, one line each: which test it fails, what is missing, and the fix — then fix them or let the user explicitly accept them one by one. Show the draft, confirm (options like "Write it to the file" / "Needs edits"); on confirmation write §5 and add `finalized: <date>` to the frontmatter — on a reopened file replace the old date. `finalized:` means exactly this: all five stages `done` (or `skipped` and marked), the test run and answered, the statement user-confirmed. It is the signal `star-plan-coach` reads to trust this file as a seed; nothing else sets it, and reopening Stage 4 or 5 clears it.
-### star-idea-storm/SKILL.md
---- 1
-- If `star_questionnaire` is unavailable (headless or scripted runs), fall back to plain-text questions — still one at a time, and still waiting for an explicit answer at the two confirmation points: the set of directions to keep (Stage 2) and the decision (Stage 4).
-+++ 1
-- Every question goes through `star_questionnaire` — still one at a time, and still waiting for an explicit answer at the two confirmation points: the set of directions to keep (Stage 2) and the decision (Stage 4).
 ### star-idea-storm/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -591,29 +386,9 @@ Check the draft against the rubric's topic-statement test (Part C); put the fail
 2. **一次只问一个问题**：每一道引导问题都作为一条普通文本问题发出，等用户答完再问下一题。禁止在一条消息里一口气列出多道题。每道题附 2–4 个短而具体的选项，取自问题库与用户已说内容，并标出你推荐的一项——每次都说明用户可以不选任何一项、自由作答。**每个选项要写清它会往 idea 文件里落下什么**，而不只是它叫什么（规约 §7.3）——对候选方向而言，就是它把这个 idea 定死在哪里、又丢掉了什么。承接前面答案的问题，用半句话点明承接之处（§7.10）。每答完 2–3 题，用一两句普通文本复述你听到的要点。例外：无法给出有意义候选的开放题（例如最初的种子）可以不带选项提问。
 ### star-idea-storm/SKILL_zh.md
 --- 1
-3. 不带参数 → 若存在未完成的 idea 文件，用 `star_questionnaire` 确认是否继续（选项如：继续那次风暴 / 新开一次）；否则用普通文本问种子（不硬给选项）。
-+++ 1
-3. 不带参数 → 若存在未完成的 idea 文件，确认是否继续（选项如：继续那次风暴 / 新开一次）；否则用普通文本问种子（不硬给选项）。
-### star-idea-storm/SKILL_zh.md
---- 1
-用问题库 Stage 2 的生成手法（那一节在进入本阶段时读），从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一次 `star_questionnaire`（multiSelect，标出推荐项）：留 2–4 个进扫描——候选 5 个时选项装不下（规约 §7.3 把一题的选项封在 4 个），改成给表加编号、对着编号问：*留推荐的那几个* / *留另一组（报编号）* / *重新生成*。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
-+++ 1
-用问题库 Stage 2 的生成手法（那一节在进入本阶段时读），从种子生成 3–5 个候选方向——每个候选带：一句话研究问题、关键假设（为什么现在可能做得动）、新在哪里、最接近的现有领域。彼此真正不同（原则 3）；邀请用户把自己的候选一视同仁放进池子。呈现一张表，然后用一个问题对着编号行提问（回复编号即可，推荐已标出）：留 2–4 个进扫描——候选 5 个时选项装不下（规约 §7.3 把一题的选项封在 4 个），改成给表加编号、对着编号问：*留推荐的那几个* / *留另一组（报编号）* / *重新生成*。被放下的候选留在 §2，标注 `not scanned`。写入 §2。
-### star-idea-storm/SKILL_zh.md
---- 1
 对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、竞争激烈程度说明（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇最接近的工作及各自摘要**没有**声称的东西、表面缺口。默认深度为标题 + 摘要；只有用户指明某方向、或某条缺口判断直接决定两个入选方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描可派出只读收集器 `star_subagent` 子代理（`subagent_type: Explore`），并行派发、每个负责一个方向、各自按 `references/scan_policy_zh.md` 的收集器返回格式返回——交办说明、以及按份数分给各收集器的速率配额，都由主 agent 构建，收集器绝不自己攒；主 agent 写文件，并亲自下所有判断行。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
 +++ 1
 对每个入围方向，按 `references/scan_policy.md`（中文对话读 `references/scan_policy_zh.md`）：起 2–3 个查询词，跑 Semantic Scholar / arXiv / DBLP 搜索端点加网页搜索，收 8–15 篇（标题 / venue / 年份 / 引用数 / 一小句相关性 / 记录 URL）。某方向扫完就立即写它的 §3 块：扫描表、竞争激烈程度说明（发文速率与走势、venue 分布、看得出的团队、有无综述）、3 篇最接近的工作及各自摘要**没有**声称的东西、表面缺口。默认深度为标题 + 摘要；只有用户指明某方向、或某条缺口判断直接决定两个入选方向的去留时才加深——读该方向 top-3 的 intro 与 related work 首段——并记录在该块的 `depth:` 行。扫描一次一个方向，每个方向一遍只读收集，各自按 `references/scan_policy_zh.md` 的收集器返回格式返回；没有任何东西并发，所以速率配额是一次一条请求地花掉，而不是拆成份额（规约 §6.9）；主 agent 写文件，并亲自下所有判断行。意外——预期冷清处很拥挤、近 6 个月出现同问题 preprint——一发现就立刻说，不等阶段结束。搜索失败如实报告失败，绝不填充。
-### star-idea-storm/SKILL_zh.md
---- 1
-按评分表的选题陈述关卡（Part C）检查草稿；把不达标项落到正文——最多 5 条，按重要性排序，每条一行：没过哪一关、缺了什么、怎么改——再逐条修掉，或由用户明确接受。展示草稿，用 `star_questionnaire` 确认（选项如："写入文件" / "需要修改"）；确认后写入 §5，并在 frontmatter 加 `finalized: <日期>`——重开过的文件替换旧日期。`finalized:` 的含义就是这个：五个阶段全部 `done`（或 `skipped` 并标注）、关卡跑过并给出了答复、陈述经用户确认。它是 `star-plan-coach` 判断能否信任这份文件作种子的信号；除此之外没有任何东西会设上它，重开 Stage 4 或 5 则清除它。
-+++ 1
-按评分表的选题陈述关卡（Part C）检查草稿；把不达标项落到正文——最多 5 条，按重要性排序，每条一行：没过哪一关、缺了什么、怎么改——再逐条修掉，或由用户明确接受。展示草稿，确认（选项如："写入文件" / "需要修改"）；确认后写入 §5，并在 frontmatter 加 `finalized: <日期>`——重开过的文件替换旧日期。`finalized:` 的含义就是这个：五个阶段全部 `done`（或 `skipped` 并标注）、关卡跑过并给出了答复、陈述经用户确认。它是 `star-plan-coach` 判断能否信任这份文件作种子的信号；除此之外没有任何东西会设上它，重开 Stage 4 或 5 则清除它。
-### star-idea-storm/SKILL_zh.md
---- 1
-- 若当前环境无法使用 `star_questionnaire`（无头或脚本化运行），改用纯文本提问——仍一次只问一题，且两道关卡（Stage 2 的候选集、Stage 4 的决定）仍要等到明确回答。
-+++ 1
-- 提问一律走 `star_questionnaire`——仍一次只问一题，且两道关卡（Stage 2 的候选集、Stage 4 的决定）仍要等到明确回答。
 ### star-metd-summarize/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -651,16 +426,6 @@ A collection pass extracts and returns; they never write files, never resolve cr
 Where Step 2 fanned out, reconcile before merging: every plan dispatched comes back in some collector's `plans_read` count, in its `unread` list, or as a remainder to re-dispatch (conventions §6.3). A plan a collector marked `unread` the main agent opens itself — not a gap, and never a Step 4 TODO. Then spot-check before trusting them — they return passages **rewritten to stand alone**, into documents whose Principle 2 names invention as the failure mode. Open the cited plan at the cited § for (a) three random passages per collector and (b) **every** passage carrying a numeric or path-valued fact — a hyperparameter, a split size, a threshold, a `datas/` / `inits/` / `${CODE_NAME}/` path. A passage its source does not carry invalidates that collector's whole return: re-run it, or read its slice locally. Report how many were checked, how many failed. Sampling bounds the risk without removing it — hence the exhaustive numeric and path check: those are what become wrong numbers in a paper.
 +++ 1
 Where Step 2 split into passes, reconcile before merging: every plan the partition named is accounted for in some pass's `plans_read` count, in its `unread` list, or as a remainder still to read (conventions §6.3). A plan marked `unread` is opened before Step 4 — not a gap, and never a Step 4 TODO. Then check the passes against their sources, not your memory of them — they return passages **rewritten to stand alone**, into documents whose Principle 2 names invention as the failure mode. Open the cited plan at the cited § for (a) three random passages per pass and (b) **every** passage carrying a numeric or path-valued fact — a hyperparameter, a split size, a threshold, a `datas/` / `inits/` / `${CODE_NAME}/` path. A passage its source does not carry invalidates that collector's whole return: re-run it, or read its slice locally. Report how many were checked, how many failed. Sampling bounds the risk without removing it — hence the exhaustive numeric and path check: those are what become wrong numbers in a paper.
-### star-metd-summarize/SKILL.md
---- 1
-- **Exists, generated by this skill** (`type:` + `generated:` present) → compare against the fresh compile. No substantive change → leave the file untouched and say so; do not churn the `generated` date. Substantive change → show the section-level change list (one line per section: added / rewritten / removed / unchanged, and what changed) on the page first, then ask via `star_questionnaire` to overwrite or skip — one question per document. More than two differing documents may be batched into one question over the numbered list — *overwrite all* / *overwrite all but the ones I name* / *answer my questions on the ones I name first* / *skip all* — since five differing documents no longer fit as options (conventions §7.3, and §7.13 for the shape).
-+++ 1
-- **Exists, generated by this skill** (`type:` + `generated:` present) → compare against the fresh compile. No substantive change → leave the file untouched and say so; do not churn the `generated` date. Substantive change → show the section-level change list (one line per section: added / rewritten / removed / unchanged, and what changed) on the page first, then ask to overwrite or skip — one question per document. More than two differing documents may be batched into one question over the numbered list — *overwrite all* / *overwrite all but the ones I name* / *answer my questions on the ones I name first* / *skip all* — since five differing documents no longer fit as options (conventions §7.3, and §7.13 for the shape).
-### star-metd-summarize/SKILL.md
---- 1
-- `star_questionnaire` carries the five confirmation points: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. If it is unavailable (headless / scripted), fall back to plain text and still require explicit approval before overwriting any existing file — and never compile past the readiness check without one.
-+++ 1
-- Plain-text questions carry the five confirmation points: the readiness override (draft-compiling an unfinished tree), an unrecognized OPT, which root subtree (multi-root tree), each overwrite of a generated doc, and any hand-authored doc in the way. Ask through `star_questionnaire` and still require explicit approval before overwriting any existing file — and never compile past the readiness check without one.
 ### star-metd-summarize/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -698,16 +463,6 @@ Where Step 2 split into passes, reconcile before merging: every plan the partiti
 步骤 2 分派出去的情况下,合并之前先对账:发出去的每一份计划,都要能在某个收集器的 `plans_read` 计数里、在它的 `unread` 列表里,或者作为待重发的余量出现(规约 §6.3)。被收集器标为 `unread` 的计划,由主 agent 自己打开——不是缺口,也绝不能作为步骤 4 的 TODO。然后再抽查收集器,查过才信它:它们返回的是**改写成可独立成立**的段落,而这些段落要进的文档,其原则 2 恰恰把"编造"点名为最主要的失败方式。回到被引用的计划、被引用的 §,核对(a) 每个收集器随机三段,以及 (b) **每一段**带数值或路径的事实——超参、split 规模、阈值,以及 `datas/` / `inits/` / `${CODE_NAME}/` 路径。只要有一段是它的来源里没有的,该收集器这一整份返回就作废:要么重跑它,要么本地把它那一片读一遍。报出核对了多少段、失败了多少段。抽样只压住风险,消除不了它——所以数值和路径类事实要逐条全查:正是它们会变成论文里的错数字。
 +++ 1
 步骤 2 切成几遍来读时,合并之前先对账:切分点名的每一份计划,都要能在某一遍的 `plans_read` 计数里、在它的 `unread` 列表里,或者作为尚未读到的余量出现(规约 §6.3)。标为 `unread` 的计划要在步骤 4 之前打开——不是缺口,也绝不能作为步骤 4 的 TODO。然后拿各遍的返回回去对源头,而不是对你自己的印象:它们返回的是**改写成可独立成立**的段落,而这些段落要进的文档,其原则 2 恰恰把"编造"点名为最主要的失败方式。回到被引用的计划、被引用的 §,核对(a) 每一遍随机三段,以及 (b) **每一段**带数值或路径的事实——超参、split 规模、阈值,以及 `datas/` / `inits/` / `${CODE_NAME}/` 路径。只要有一段是它的来源里没有的,这一整遍的返回就作废:那一片重读一遍。报出核对了多少段、失败了多少段。抽样只压住风险,消除不了它——所以数值和路径类事实要逐条全查:正是它们会变成论文里的错数字。
-### star-metd-summarize/SKILL_zh.md
---- 1
-- **存在且由本 skill 生成**（有 `type:` + `generated:`）→ 与新编译的内容比对。无实质变化 → 保持文件原样并说明；不要空转 `generated` 日期。有实质变化 → 分节变更清单（每节一行：新增 / 改写 / 删除 / 未变，以及变了什么）先落到正文，再经 `star_questionnaire` 询问覆盖还是跳过——一份文档一个问题。超过两份文档有差异时，可合并为一个问题，对着编号列表问：*全部覆盖* / *除我点名的以外全部覆盖* / *先解答我点名的几份* / *全部跳过*——五份文档都有差异时已经放不进选项（规约 §7.3；形状见 §7.13）。
-+++ 1
-- **存在且由本 skill 生成**（有 `type:` + `generated:`）→ 与新编译的内容比对。无实质变化 → 保持文件原样并说明；不要空转 `generated` 日期。有实质变化 → 分节变更清单（每节一行：新增 / 改写 / 删除 / 未变，以及变了什么）先落到正文，再询问覆盖还是跳过——一份文档一个问题。超过两份文档有差异时，可合并为一个问题，对着编号列表问：*全部覆盖* / *除我点名的以外全部覆盖* / *先解答我点名的几份* / *全部跳过*——五份文档都有差异时已经放不进选项（规约 §7.3；形状见 §7.13）。
-### star-metd-summarize/SKILL_zh.md
---- 1
-- 五个确认点都走 `star_questionnaire`：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。若不可用（无人值守 / 脚本化），改用纯文本，且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
-+++ 1
-- 五个确认点都用普通文本提问：就绪门槛的草稿豁免（对未完成的树编译草稿）、无法识别的 OPT、选哪个根子树（多根树）、每次覆盖已生成文档、以及挡路的手写文档。提问走 `star_questionnaire`；且覆盖任何已存在文件前仍必须取得明确批准——没有明确批准也绝不越过就绪门槛。
 ### star-metd-summarize/references/extract_map.md
 --- 1
 Read-only subagents return exactly these three lists plus `plans_read: <n>`, and nothing else:
@@ -728,11 +483,6 @@ A collection pass extracts only. They never write files, never resolve conflicts
 2. **One question at a time, via `star_questionnaire`**: Deliver every coaching question through the `star_questionnaire` tool — one question per call, waiting for the answer before sending the next. Never dump multiple questions as a plain-text list in one message. Give each question 2–4 short, concrete candidate options drafted from the question bank and what the user has already said, with your recommendation marked — the built-in "Other" field always lets the user answer freely, so options never trap them. **Each option says what it would put in the section**, not just what it is called (conventions §7.3): "scope to single images" is a label; "§3 commits to a single-image method, and the video extension moves to §5 as future work" is the choice the user is actually making. Anchor a question that builds on an earlier answer in one clause (§7.10). After every 2–3 answered questions, pause and restate the key points you heard in one or two sentences of normal text — this catches misunderstandings early. Exception: questions too open for meaningful candidates (e.g., the initial research topic) may be asked as plain text.
 +++ 1
 2. **One question at a time, via `star_questionnaire`**: Deliver every coaching question through the `star_questionnaire` tool — one question per call, waiting for the answer before sending the next. Never dump multiple questions as a plain-text list in one message. Give each question 2–4 short, concrete candidate options drafted from the question bank and what the user has already said, with your recommendation marked — always note that the user may answer freely outside the options. **Each option says what it would put in the section**, not just what it is called (conventions §7.3): "scope to single images" is a label; "§3 commits to a single-image method, and the video extension moves to §5 as future work" is the choice the user is actually making. Anchor a question that builds on an earlier answer in one clause (§7.10). After every 2–3 answered questions, pause and restate the key points you heard in one or two sentences of normal text — this catches misunderstandings early. Exception: questions too open for meaningful candidates (e.g., the initial research topic) may be asked without options.
-### star-plan-coach/SKILL.md
---- 1
-3. If a plan has any section whose `status` is not `done`, ask whether to continue it (via `star_questionnaire`: continue that plan / start a new one); if yes, summarize completed sections in 2–3 sentences to restore context, then resume from the first non-`done` section. If there are no plans yet but a `finalized` idea file exists under `metds/ideas/`, offer it as the seed (via `star_questionnaire`: use that idea / start from a fresh topic) before asking for a topic.
-+++ 1
-3. If a plan has any section whose `status` is not `done`, ask whether to continue it (continue that plan / start a new one); if yes, summarize completed sections in 2–3 sentences to restore context, then resume from the first non-`done` section. If there are no plans yet but a `finalized` idea file exists under `metds/ideas/`, offer it as the seed (use that idea / start from a fresh topic) before asking for a topic.
 ### star-plan-coach/SKILL.md
 --- 1
 - At stage end: turn the section into 150–400 words of structured prose (not a Q&A log), show it, then confirm via `star_questionnaire` (options like "Write it to the file" / "Needs edits"); after confirmation, write it to the plan file, set that section's `status` to `done` and the next to `in_progress`, and update `updated`. Then close the boundary (conventions §7.10): 2–3 sentences on what this stage settled, what it set in the file, and what the next stage opens — and that `star-plan-coach <slug> <section>` reopens exactly this one (which clears `finalized:`, Step 7).
@@ -760,11 +510,6 @@ When all sections are `done` (or `skipped`): Before listing anything, send the r
 2. **一次只问一个问题**：每一道引导问题都作为一条普通文本问题发出，等用户答完再问下一题。禁止在一条消息里一口气列出多道题。每道题附 2–4 个短而具体的候选选项，选项来自问题库并结合用户已说内容起草，并标出你推荐的一项——每次都说明用户可以不选任何一项、自由作答。**每个选项要写清它会往章节里落下什么**，而不只是它叫什么（规约 §7.3）："只做单图"是标题，"§3 就此定为单图方法，视频扩展移入 §5 作为未来工作"才是用户真正在选的东西。承接前面答案的问题，用半句话点明承接之处（§7.10）。每答完 2–3 题，暂停并用一两句普通文本复述你听到的要点——这能及早暴露误解。例外：无法给出有意义候选的开放题（例如最初的研究主题）可以不带选项提问。
 ### star-plan-coach/SKILL_zh.md
 --- 1
-3. 若存在 `status` 中有非 `done` 章节的计划，用 `star_questionnaire` 确认是否继续（选项如：继续该计划 / 新建计划）；继续则先用 2–3 句话总结已完成章节的要点、帮用户找回上下文，再从第一个非 `done` 章节恢复提问。若还没有任何计划、但 `metds/ideas/` 下存在 `finalized` 的 idea 文件，先用 `star_questionnaire` 提议以它为种子（选项如：用这份 idea / 从新主题开始），再落到问主题。
-+++ 1
-3. 若存在 `status` 中有非 `done` 章节的计划，确认是否继续（选项如：继续该计划 / 新建计划）；继续则先用 2–3 句话总结已完成章节的要点、帮用户找回上下文，再从第一个非 `done` 章节恢复提问。若还没有任何计划、但 `metds/ideas/` 下存在 `finalized` 的 idea 文件，先提议以它为种子（选项如：用这份 idea / 从新主题开始），再落到问主题。
-### star-plan-coach/SKILL_zh.md
---- 1
 - 阶段结束时：把该章节整理成 150–400 字的结构化正文（不是问答记录），展示给用户，再用 `star_questionnaire` 确认（选项如："写入文件" / "需要修改"）；确认后写入计划文件对应章节，把 frontmatter `status` 中该节改为 `done`、下一节改为 `in_progress`，更新 `updated` 日期。然后按规约 §7.10 收束这个边界：用 2–3 句讲清本阶段定下了什么、它在文件里落成了什么、下一阶段将打开什么——并点明 `star-plan-coach <slug> <section>` 可以单独重开这一节（这会清掉 `finalized:`，见第 7 步）。
 +++ 1
 - 阶段结束时：把该章节整理成 150–400 字的结构化正文（不是问答记录），展示给用户，再确认（选项如："写入文件" / "需要修改"）；确认后写入计划文件对应章节，把 frontmatter `status` 中该节改为 `done`、下一节改为 `in_progress`，更新 `updated` 日期。然后按规约 §7.10 收束这个边界：用 2–3 句讲清本阶段定下了什么、它在文件里落成了什么、下一阶段将打开什么——并点明 `star-plan-coach <slug> <section>` 可以单独重开这一节（这会清掉 `finalized:`，见第 7 步）。
@@ -783,11 +528,6 @@ When all sections are `done` (or `skipped`): Before listing anything, send the r
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 +++ 1
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
-### star-plan-decomposer/SKILL.md
---- 1
-2. With no argument, or an ambiguous match, list the available plans (prefix + slug + one-line title) and ask which one via `star_questionnaire`, with your recommendation marked.
-+++ 1
-2. With no argument, or an ambiguous match, list the available plans (prefix + slug + one-line title) and ask which one, with your recommendation marked.
 ### star-plan-decomposer/SKILL.md
 --- 1
 **First, check whether this plan has already been decomposed.** The digest carries every plan's `parent:`; find the files whose `parent:` is the target — equivalently, its prefix plus one digit. If any exist, decomposition is already partial or complete, and Steps 2–4 would overwrite files that may carry hand edits, a `## Revision History`, or execution state. Report what was found (prefix, slug, `exec_status`, and whether the parent's `## Sub-plans` / `children:` already list them) and offer via `star_questionnaire`:
@@ -825,11 +565,6 @@ Propose 2–3 axes (one question, recommend the first). Details and how to pick:
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
 ### star-plan-decomposer/SKILL_zh.md
 --- 1
-2. 若未给参数，或匹配有歧义，列出可选计划（前缀 + slug + 一句话标题），用 `star_questionnaire` 让用户选，并标出推荐项。
-+++ 1
-2. 若未给参数，或匹配有歧义，列出可选计划（前缀 + slug + 一句话标题），让用户选，并标出推荐项。
-### star-plan-decomposer/SKILL_zh.md
---- 1
 **先检查这份计划是否已经被拆解过。** 摘要里带着每个计划的 `parent:`；从中找出 `parent:` 指向目标的文件——即目标前缀再加一位数字。若已存在，说明拆解已部分或完全完成，而 Step 2–4 会覆盖这些文件，其中可能带着手工修订、`## Revision History` 或执行状态。报告发现了什么（前缀、slug、`exec_status`，以及父计划的 `## Sub-plans` / `children:` 是否已列出），并用 `star_questionnaire` 提供选项：
 +++ 1
 **先检查这份计划是否已经被拆解过。** 摘要里带着每个计划的 `parent:`；从中找出 `parent:` 指向目标的文件——即目标前缀再加一位数字。若已存在，说明拆解已部分或完全完成，而 Step 2–4 会覆盖这些文件，其中可能带着手工修订、`## Revision History` 或执行状态。报告发现了什么（前缀、slug、`exec_status`，以及父计划的 `## Sub-plans` / `children:` 是否已列出），并提供选项：
@@ -858,31 +593,18 @@ Propose 2–3 axes (one question, recommend the first). Details and how to pick:
 - 若当前环境无法使用 `star_questionnaire`（无头 / 脚本化），改用纯文本提问——仍一次只问一题。 **问题所指的内容装不进选项时**——子计划清单、某份子计划草稿、回写父计划的索引草稿、评分表不达标项——就写在同一条消息的正文里、排在这次调用之前，选项只装答案。两种形式下内容与问题都同来同止，中间不隔别的：用户收到的若是一排光选项，那是内容丢了，不是被压缩了。
 +++ 1
 - 提问一律走 `star_questionnaire`——仍一次只问一题。 **问题所指的内容装不进选项时**——子计划清单、某份子计划草稿、回写父计划的索引草稿、评分表不达标项——就写在同一条消息的正文里、排在问题之前，选项只装答案。两种形式下内容与问题都同来同止，中间不隔别的：用户收到的若是一排光选项，那是内容丢了，不是被压缩了。
-### star-plan-decomposer/references/decomposition_axes.md
---- 1
-An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes via `star_questionnaire`, recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
-+++ 1
-An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is allowed but confirm it). Offer the axes , recommendation first. Read the parent plan in full, plus the root's §3 (method), §4 (experiments), and §6 (milestones) — the sections the axes below slice; the parent scopes which part of them this level covers.
-### star-plan-decomposer/references/decomposition_axes_zh.md
---- 1
-拆分轴指*用什么方式*把父计划切成子计划。选一个（允许混合，但要确认）。用 `star_questionnaire` 提出这些轴，推荐项放第一位。先完整读父计划，以及根计划的 §3（方法）、§4（实验）、§6（里程碑）——下面各轴切的是根计划的总体方向，父计划只决定这一层切它的哪一部分。
-+++ 1
-拆分轴指*用什么方式*把父计划切成子计划。选一个（允许混合，但要确认）。提出这些轴，推荐项放第一位。先完整读父计划，以及根计划的 §3（方法）、§4（实验）、§6（里程碑）——下面各轴切的是根计划的总体方向，父计划只决定这一层切它的哪一部分。
 ### star-plan-executor/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 +++ 1
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 ### star-plan-executor/SKILL.md
---- 1
-2. **Plan behind a confirmation point, execute behind an agent.** The executable plan (EXEC_PLAN) is produced in **plan mode** and approved via **`ExitPlanMode`** before anything is written or run. Execution goes to **subagents, one per step / step-group**: the main agent orchestrates and verifies, and never edits code or launches jobs itself. Reference: `references/agent_dispatch_spec.md`.
-+++ 1
-2. **Plan behind a confirmation point, execute behind an agent.** The executable plan (EXEC_PLAN) must be **user-approved** before anything is written or run. `star-plan` is the user's switch, not a tool this agent can reach, so Step 3 stays the mode this skill imposes on itself: from the moment it starts until that approval arrives, nothing is written and nothing is run. Execution goes to `star_subagent` (`agent: "star-implementer"`), **one per step / step-group**: the main agent orchestrates — deciding dispatch order and concurrency freely by the steps' dependencies — and verifies each returned result itself. Reference: `references/agent_dispatch_spec.md`.
-### star-plan-executor/SKILL.md
---- 1
-2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it: list its leaves (prefix + slug + one-line objective) and ask via `star_questionnaire` which to execute (recommend the first ready in dependency order), or offer to execute them in dependency order, one at a time.
-+++ 1
-2. **Only leaves are executable.** If `PLAN_NAME` resolves to a node with children (non-empty `children:` frontmatter), do not execute it: list its leaves (prefix + slug + one-line objective) and ask which to execute (recommend the first ready in dependency order), or offer to execute them in dependency order, one at a time.
+--- 2
+2. **Make the plan visible, then proceed within scope.** Convert the sub-plan into an `EXEC_PLAN` whose actions each name files, commands, artifacts, and the action's own check. Use `EnterPlanMode` / `ExitPlanMode` only when a material decision remains unresolved; otherwise present the plan in commentary and continue without another approval gate. Invoking this executor authorizes ordinary in-scope implementation and light validation; request new direction only when a decision would materially change scope or require new authority.
+3. **Delegate what benefits from it.** How the work is split is the main agent's call. When bounded, independent work materially benefits from delegation, dispatch an `star_subagent` subagent (`subagent_type: general-purpose` for implementation, `Explore` for read-only orientation; pass the resolved tier `model` when non-empty). Never create one subagent per trivial sequential step. Give each delegate `references/agent_dispatch_spec.md`; the main agent remains responsible for integration and verified checks, accepting attributable original evidence and re-running only when provenance is missing/stale or integration changed relevant behavior. The action-start snapshot and blocked-edit decision never erase pre-existing/user work or raw evidence.
++++ 2
+2. **Make the plan visible, then proceed within scope.** Build and present the concrete `EXEC_PLAN`. `/star-plan` is the user's switch, not a tool this skill can invoke; do not require it or create a general approval gate. Use `star_questionnaire` only for a material decision that remains unresolved. Ordinary in-scope implementation and light validation are already authorized.
+3. **Delegate what benefits from it.** For bounded independent work, call `star_subagent` with `agent: "star-implementer"` for implementation or `agent: "star-collector"` for read-only orientation, and pass the tier `model` as described above. The main agent owns integration and verified checks, accepting attributable original evidence and re-running only when stale, missing, or integration-affected.
 ### star-plan-executor/SKILL.md
 --- 1
 1. **Executability.** §3 Task Breakdown and §5 Done-Criteria must be concrete. If they are still largely `[TBD]` / `【待定】`, say decomposition is unfinished and offer via `star_questionnaire`: *go back to `star-plan-decomposer` to flesh it out* (recommended) / *execute anyway (shallow, gaps stay `[TBD]`)*.
@@ -895,77 +617,51 @@ An axis is *how* you slice the parent plan into sub-plans. Pick one (mixing is a
 A lone weak signal is one sentence in the reply, never a question — interrupting a right-sized leaf costs more than missing an oversized one. Where the check fires, follow `references/sizing_check.md`: the split preview that goes above the question, the question itself and what each answer costs, and where the verdict is recorded.
 ### star-plan-executor/SKILL.md
 --- 1
-1. `EnterPlanMode` — except at involve `low`, where Step 4 takes the approval unasked and Claude Code's plan dialog waits for a keypress no hook can supply: draft EXEC_PLAN outside plan mode, everything else unchanged.
+1. Use `EnterPlanMode` only when the plan contains a material choice that still needs the user. At `low`, or whenever target, research scope, acceptance, key inputs, cost, and authority are already settled, draft EXEC_PLAN outside plan mode and do not manufacture an approval gate.
 +++ 1
-1. Say in one line that you are drafting the EXEC_PLAN and will write and run nothing until Step 4's approval. `star-plan` is the user's switch, not a tool you can reach, so this step is the mode, held by you rather than enforced by the host — which is exactly why it is stated out loud. At involve `low`, the line is not said: Step 4 takes the approval unasked there, so there is nothing to hold — draft EXEC_PLAN and go on, everything else unchanged.
+1. `/star-plan` is the user's switch and cannot be invoked here. Draft in the current mode; use `star_questionnaire` only when the plan contains a material choice that still needs the user, and do not manufacture a general approval gate.
 ### star-plan-executor/SKILL.md
 --- 1
-### Step 4: Confirmation point — the user approves (`ExitPlanMode`)
+**Before implementation, run the design check.** Send `references/design_check.md` to one read-only `star_subagent` subagent (`subagent_type: Explore`, `model:` the PLAN tier value, omitted when empty) with exactly the EXEC_PLAN, leaf plan, and root plan §4. Re-open cited evidence for every `fail`; correct execution-plan defects within the authorized plan and ask only when a confirmed finding leaves research scope, acceptance, key input, or cost unresolved. If `star_subagent` is unavailable, run the checklist locally once, record the missing independent view, and do not repeatedly ask for unavailable machinery.
 +++ 1
-### Step 4: Confirmation point — the user approves
+**Before implementation, run the design check from `references/design_check.md`.** Call `star_subagent` with `agent: "star-auditor"`, the PLAN-tier `model` when non-empty, and exactly the EXEC_PLAN, leaf plan, and root plan §4. Re-open every cited `fail`; correct authorized plan defects and ask through `star_questionnaire` only when research scope, acceptance, key input, or cost remains unresolved. If unavailable, run locally once and record the limitation.
 ### star-plan-executor/SKILL.md
 --- 1
-**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: one read-only `star_subagent` subagent (`subagent_type: Explore`) briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan read at its §4 alone, the only root section the checklist admits as evidence (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files, and of the root plan only its §4. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
+1. Present the concrete plan in commentary. If `EnterPlanMode` was used, call `ExitPlanMode` only to settle the material choices displayed with it; existing applicable authorization is reused. Per-action commits are recommended: reuse a recorded choice, otherwise `low` takes it, `medium` asks with the plan, and `high` asks separately. Resolve divergence rows through `references/plan_sync_rules.md`; `auto=unattended` covers only tactical rows that leave research scope, key inputs, §5 acceptance, and approved cost unchanged.
 +++ 1
-**Before the call, run the design check.** Send `references/design_check.md` out for a blind read: one read-only `star_subagent` (`agent: "star-auditor"`) briefed with exactly three files — the EXEC_PLAN just written, the leaf sub-plan, and the root plan read at its §4 alone, the only root section the checklist admits as evidence (name the checklist's `_zh` twin when the plan's frontmatter says `language: zh`; the delegate never picks) — and the scope "ONLY these three files, and of the root plan only its §4. Do not rank, do not decide, do not run anything." It returns, per item: `item`, `verdict: pass | fail | unclear`, `evidence`, `fix`. The main agent re-opens the cited line for every `fail` it means to raise — an absence `fail` quotes nothing, so for those it re-reads the section the item belongs to — then puts at most five findings on the page **above** the call, one line each; a `fail` it cannot confirm is dropped. The check reports; this confirmation point decides, and nothing here stops the run. Where no delegate is available the main agent runs the checklist itself (conventions §6.1).
+1. Present the concrete plan in commentary. Apply existing authorization; use `star_questionnaire` only for displayed material choices still unresolved. Per-action commits and branch/worktree choices follow the involve level. Resolve divergence rows through `references/plan_sync_rules.md`; `auto=unattended` covers only tactical rows that leave scope, key inputs, §5 acceptance, and approved cost unchanged.
 ### star-plan-executor/SKILL.md
---- 2
-1. `ExitPlanMode` presenting EXEC_PLAN + the changes it will make: files to be written, commands to be run, where the STOP line falls, rough cost/runtime — and the divergence table, stated as "approving this plan also syncs these back into the sub-plan". Ask at the same confirmation point whether each verified step gets its own commit (recommended), naming any path that already carries uncommitted changes — those are never staged. Say what saying no costs: if a later step has to be restored, the only record of where each step started is the one this run keeps itself (`references/agent_dispatch_spec.md`). Where Step 3 set `branch: <run>` or `worktree: <path>`, those two questions ride this same confirmation point, worded as `references/branch_rules.md` states (conventions §11, §11.7). At `low` the call is not made: the same material goes in full into the reply text, the questions riding it take their recommended answers, the decisions record logs the approval as taken unasked, and item 2 follows without waiting.
-2. On approval — an approved branch or tree is created first, by `references/branch_rules.md`'s "Creation", and everything below is born on it — then create `tasks/<plan-name>/` for intermediate working files. Persist `wkdrs/<run>/EXEC_PLAN.md` from `assets/exec_plan_template.md` and initialize `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_template.md`. **Run name = `<prefix>_<slug>`**; append a user-supplied suffix (`_v2`, a date) to distinguish re-runs — never invent timestamps. **Append** the run to the sub-plan's `exec_runs` rather than replacing it: that history lets `star-expt-analyst aggregate` see every run of this leaf, not only the last. A plan still carrying a single `exec_run:` is migrated here to `exec_runs: [<that run>]` before the new entry is appended.
-+++ 2
-1. Present EXEC_PLAN + the changes it will make: files to be written, commands to be run, where the STOP line falls, rough cost/runtime — and the divergence table, stated as "approving this plan also syncs these back into the sub-plan". Ask at the same confirmation point whether each verified step gets its own commit (recommended), naming any path that already carries uncommitted changes — those are never staged. Say what saying no costs: if a later step has to be restored, the only record of where each step started is the one this run keeps itself (`references/agent_dispatch_spec.md`). Where Step 3 set `branch: <run>` or `worktree: <path>`, those two questions ride this same confirmation point, worded as `references/branch_rules.md` states (conventions §11, §11.7). At `low` the approval is not asked: the same material goes in full into the reply text, the questions riding it take their recommended answers, the decisions record logs the approval as taken unasked, and item 2 follows without waiting.
-2. On approval the changes begin — an approved branch or tree is created first, by `references/branch_rules.md`'s "Creation", and everything below is born on it — then create `tasks/<plan-name>/` for intermediate working files. Persist `wkdrs/<run>/EXEC_PLAN.md` from `assets/exec_plan_template.md` and initialize `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_template.md`. **Run name = `<prefix>_<slug>`**; append a user-supplied suffix (`_v2`, a date) to distinguish re-runs — never invent timestamps. **Append** the run to the sub-plan's `exec_runs` rather than replacing it: that history lets `star-expt-analyst aggregate` see every run of this leaf, not only the last. A plan still carrying a single `exec_run:` is migrated here to `exec_runs: [<that run>]` before the new entry is appended.
+--- 1
+**Hand Step 5 to the EXEC tier.** With EXEC_PLAN, EXEC_LOG, and all currently required decisions recorded, dispatch one `star_subagent` subagent (`subagent_type: general-purpose`, `model:` the distinct EXEC value) when configured and this run is not already `tier=exec`. It reads this manifest and resumes from Step 5 with `involve=<level> tier=exec` and any valid `auto=unattended` grant. It may not edit EXEC_PLAN or improvise around a plan-level gap. A STOP-line command or unresolved blocked-edit decision is recorded and returned to the user-facing run; an existing applicable decision is reused. Re-read EXEC_LOG and continue at Step 6. With no usable model override or `star_subagent` route, run Step 5 here without asking repeatedly for unavailable machinery.
++++ 1
+**Hand Step 5 to the EXEC tier.** With records and decisions settled, call `star_subagent` with `agent: "star-runner"` and the distinct EXEC `model` to read this manifest and resume from Step 5 with `involve=<level> tier=exec` and any valid `auto=unattended` grant. It may not edit EXEC_PLAN or improvise around a plan-level gap. Re-read EXEC_LOG on return; if unavailable, run Step 5 here.
 ### star-plan-executor/SKILL.md
 --- 1
 ### Step 5: Execute–verify loop (one agent per step / step-group)
 +++ 1
 ### Step 5: Execute–verify loop (one step / step-group at a time)
 ### star-plan-executor/SKILL.md
---- 3
+--- 1
 1. Dispatch an `star_subagent` subagent (`subagent_type: general-purpose`, or `Explore` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
-2. When it returns, **the main agent re-runs the step's own check** (never trust a self-reported pass without evidence). Pass → record it in `EXEC_LOG.md`, update the sub-plan's lightweight status, and — when the confirmation point approved per-step commits — commit this step's files; on an execution branch that commit also stages the run-record updates this step caused, because only commits merge (conventions §11.2). Fail → the main agent's own re-run is the evidence: read the `file:line` the failure names, and open the agent's full diff only when deciding `blocked`, or when the failure looks like a sub-plan-granularity problem (item 4). Restore this step's files before retrying; bounded retry (≤2) with the failure fed back; still failing → mark the step `blocked`, settle what happens to its edits (`agent_dispatch_spec.md`), and stop with the log.
-3. **If the step is on the STOP line** (heavy experiment) → do **not** dispatch it; write the prepared command into EXEC_LOG's "Awaiting user" area, add a row to the "Cost" section with its expected cost (GPUs × hours, or call count and spend), and stop, handing it to the user. When the user returns with the result, fill the actual into that row — the only place the root plan's §4 compute budget is reconciled; where the actual cannot be recovered write `unrecorded`, never blank.
-+++ 3
-1. Write the step's brief out before touching anything, per `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "**only** this step; result stated as changed / ran / check / blockers / handoff". The brief is what the delegate is given, and what keeps the step from widening once it is running.
-2. With the step's edits made, **run the step's own check as its own command** and read the output (a step is not verified by having been written; nothing counts as a pass without the check's output in front of you). Pass → record it in `EXEC_LOG.md`, update the sub-plan's lightweight status, and — when the confirmation point approved per-step commits — commit this step's files; on an execution branch that commit also stages the run-record updates this step caused, because only commits merge (conventions §11.2). Fail → the check's output is the evidence: read the `file:line` the failure names, and re-read this step's whole diff only when deciding `blocked`, or when the failure looks like a sub-plan-granularity problem (item 4). Restore this step's files before retrying; bounded retry (≤2) with the failure fed back; still failing → mark the step `blocked`, settle what happens to its edits (`agent_dispatch_spec.md`), and stop with the log.
-3. **If the step is on the STOP line** (heavy experiment) → do **not** run it; write the prepared command into EXEC_LOG's "Awaiting user" area, add a row to the "Cost" section with its expected cost (GPUs × hours, or call count and spend), and stop, handing it to the user. When the user returns with the result, fill the actual into that row — the only place the root plan's §4 compute budget is reconciled; where the actual cannot be recovered write `unrecorded`, never blank.
++++ 1
+1. Call `star_subagent` with `agent: "star-implementer"` for implementation or `agent: "star-collector"` for read-only orientation, the applicable tier `model`, and `references/agent_dispatch_spec.md` plus exact scope, interpreter, check, and structured return contract.
 ### star-plan-executor/SKILL.md
 --- 1
-**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, put the batch on the page first — one numbered row per amendment: which section it changes, from what to what, and why — then ask via **one** `star_questionnaire` (*sync all / sync all but the rows I name / answer my questions on the rows I name first / skip*, recommendation marked — conventions §7.13) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a plan-level finding — routed back to the plan below, never synced.
+The active executor retains responsibility for the user's execution goal. Before a heavy launch or merge, use the Skill tool to run `star-code-reviewer` for this leaf unless a recorded review already covers the current code version and scope and satisfies the existing launch guard when a launch is pending. Pass the existing execution goal and authority, and require the reviewer to return its evidence and control here. A standalone review-only request has no continuation.
 +++ 1
-**Amendment sync (tactical signal).** If EXEC_LOG's "Pending amendments" is non-empty, put the batch on the page first — one numbered row per amendment: which section it changes, from what to what, and why — then ask **one** question (*sync all / sync all but the rows I name / answer my questions on the rows I name first / skip*, recommendation marked — conventions §7.13) and write confirmed rows back per `references/plan_sync_rules.md` (§2–§5 updated in place + `## Revision History` entry + `updated` bump, then check the rows off). Tactical only: anything touching §1/§6, a parent plan, or a kill-criterion is a plan-level finding — routed back to the plan below, never synced.
-### star-plan-executor/SKILL.md
---- 1
-**The report is not the end of the turn.** With its text out, start `star-code-reviewer` on this leaf in the same reply — the `Skill` tool, `star-code-reviewer` as the skill and the leaf as its argument, the way Step 5 dispatches an `star_subagent` — to audit the implementation against the conventions and the sub-plan. It is one of the eight skills the agent may start and its target is settled, so it runs rather than prints: a command printed to the agent itself is a handoff to nobody (conventions §10.6). This is the run's last action in either ending — after a completed run, before revising or moving on; and before the user runs a command handed back at the STOP line.
-+++ 1
-**The report is not the end of the turn.** With its text out, start `star-code-reviewer` on this leaf in the same reply — the way this host starts a skill, the leaf as its argument, as ordinary a move as Step 5 taking its next step — to audit the implementation against the conventions and the sub-plan. It is one of the eight skills the agent may start and its target is settled, so it runs rather than prints: `star-code-reviewer <leaf>` printed to the agent itself is a handoff to nobody (conventions §10.6). This is the run's last action in either ending — after a completed run, before revising or moving on; and before the user runs a command handed back at the STOP line.
-### star-plan-executor/SKILL.md
---- 2
-- If `star_questionnaire` or plan mode is unavailable (headless / scripted), fall back: present EXEC_PLAN as plain text and require an explicit plain-text approval before anything is written or run (at `low`, taken unasked — the involve bullet below) — still stop before heavy experiments, still confirm in plain text before any change is written back into the sub-plan.
-- **Material a question is about goes in the text of the same message, above the call** — the pending-amendment batch, the EXEC_PLAN put up for approval. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
-+++ 2
-- EXEC_PLAN goes to the user through `star_questionnaire` and needs an explicit approval before anything is written or run (at `low`, taken unasked — the involve bullet below) — still stop before heavy experiments, still confirm before any change is written back into the sub-plan.
-- **Material a question is about goes in the text of the same message, above the question** — the pending-amendment batch, the EXEC_PLAN put up for approval. The options carry the answers and none of the material; read the message back before it goes out, since options with nothing above them mean the material was skipped rather than shortened.
-### star-plan-executor/SKILL.md
---- 1
-- Involve (conventions §7.7). Always asked here: the ExitPlanMode confirmation point (Step 4, including its commit, execution-branch, and worktree questions), the STOP line (Step 5), the merge confirmation point and a branch's or worktree's discard, removal, or deletion (Step 7 — conventions §11), amendment sync (Step 6 — it writes plan §2–§5), the scratch offer, and what becomes of a blocked step's edits (each stops for confirmation before a deletion — `references/agent_dispatch_spec.md`). One of them moves at `low`: the Step 4 confirmation point is taken unasked. Plan mode is not entered (Step 3) and `ExitPlanMode` is not called, since Claude Code's plan dialog waits for a keypress that no hook can supply; the material is still presented in full in the reply, the questions riding that confirmation point take their recommended answers, and the decisions record logs the approval as taken unasked. Set to `low`: Step 0's which-leaf choice (take the first ready leaf in dependency order; a no-argument or ambiguous invocation still asks, conventions §5.2), Step 1's readiness fallback and its sizing check (take the recommendation: route back to the decomposer and stop), and Step 9's skip offer where an exploratory leaf's command is cheap (take the recommendation: start the review). Starting the review is not a question at any level — Step 9 states why, and neither is Step 4's hand-over of Step 5 to the EXEC tier: it changes which model runs the loop, not what the loop does. At `high`, confirm each step's dispatch (Step 5) before it goes to a subagent. Record the effective level and its source once in `EXEC_LOG.md`.
-+++ 1
-- Involve (conventions §7.7). Always asked here: the Step 4 confirmation point (including its commit, execution-branch, and worktree questions), the STOP line (Step 5), the merge confirmation point and a branch's or worktree's discard, removal, or deletion (Step 7 — conventions §11), amendment sync (Step 6 — it writes plan §2–§5), the scratch offer, and what becomes of a blocked step's edits (each stops for confirmation before a deletion — `references/agent_dispatch_spec.md`). One of them moves at `low`: the Step 4 confirmation point is taken unasked — the mode Step 3 states is skipped, the material is still presented in full in the reply, the questions riding that confirmation point take their recommended answers, and the decisions record logs the approval as taken unasked. Set to `low`: Step 0's which-leaf choice (take the first ready leaf in dependency order; a no-argument or ambiguous invocation still asks, conventions §5.2), Step 1's readiness fallback and its sizing check (take the recommendation: route back to the decomposer and stop), and Step 9's skip offer where an exploratory leaf's command is cheap (take the recommendation: start the review). Starting the review is not a question at any level — Step 9 states why, and neither is Step 4's hand-over of Step 5 to the EXEC tier: it changes which model runs the loop, not what the loop does. At `high`, confirm each step (Step 5) before starting it. Record the effective level and its source once in `EXEC_LOG.md`.
+The active executor retains responsibility for the user's execution goal. Before a heavy launch or merge, run `star-code-reviewer` for this leaf through this host's skill invocation unless a recorded review already covers the current code version and scope and satisfies the existing launch guard when a launch is pending. Pass the existing execution goal and authority, and require the reviewer to return its evidence and control here. A standalone review-only request has no continuation.
 ### star-plan-executor/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 +++ 1
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
 ### star-plan-executor/SKILL_zh.md
---- 1
-2. **规划走审批确认点,执行走 agent**。可执行 plan(EXEC_PLAN)在 **plan 模式**里产出,经 **`ExitPlanMode`** 审批后才允许写文件、跑命令。执行**下放给 subagent,每步(或每个连贯步骤组)一个**:主 agent 负责编排与验证,绝不自己改代码、启动任务。参见 `references/agent_dispatch_spec_zh.md`。
-+++ 1
-2. **规划走审批确认点,执行交给子代理**。可执行 plan(EXEC_PLAN)必须经**用户明确批准**后才允许写文件、跑命令。`star-plan` 是用户手上的开关,不是本 agent 能调用的工具,所以 Step 3 仍是本 skill 自己守住的那个模式:从它开始到批准到手,不写任何文件、不跑任何命令。执行派给 `star_subagent`(`agent: "star-implementer"`),**一步(或一个连贯步骤组)一个**:主 agent 自主编排——按步骤依赖自行决定派发顺序与并发——并亲自复核每个返回结果。参见 `references/agent_dispatch_spec_zh.md`。
-### star-plan-executor/SKILL_zh.md
---- 1
-2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它:列出它的叶子(前缀 + slug + 一句话目标),用 `star_questionnaire` 让用户选执行哪一个(推荐依赖顺序中第一个就绪的),或提议按依赖顺序一次一个地执行它们。
-+++ 1
-2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它:列出它的叶子(前缀 + slug + 一句话目标),让用户选执行哪一个(推荐依赖顺序中第一个就绪的),或提议按依赖顺序一次一个地执行它们。
+--- 2
+2. **让计划可见，再在范围内推进。**把子计划转成 `EXEC_PLAN`，逐 action 写明文件、命令、产物与检查。只有仍有实质决定时才用 `EnterPlanMode` / `ExitPlanMode`；否则在 commentary 展示计划后直接继续，不另设批准门槛。调用 executor 已授权普通范围内实现与轻量验证；只有改变范围或需要新增权限时才请求方向。
+3. **该委派时才委派。**有边界、相互独立的工作确实受益时，派 `star_subagent` subagent：实现用 `subagent_type: general-purpose`，只读勘察用 `Explore`，档位模型值非空时传给 `model:`。不给琐碎串行步骤逐个开代理。主 agent 负责集成与核验，可采用绑定代码版本的可归属原始证据，仅在溯源缺失/过期或整合改变相关行为时重跑。action 起点快照与 blocked 编辑决定绝不抹掉既有/用户工作或原始证据。
++++ 2
+2. **让计划可见，再在范围内推进。**建立并展示具体 `EXEC_PLAN`。`/star-plan` 是用户的切换命令，本 skill 不能调用，也不要求用户先切换；只有实质决定仍未解决时才用 `star_questionnaire`。普通范围内实现与轻量验证已获授权。
+3. **该委派时才委派。**有边界、相互独立的工作确有收益时调用 `star_subagent`：实现设 `agent: "star-implementer"`，只读勘察设 `agent: "star-collector"`，并按前文传档位 `model`。主 agent 负责集成与核验。
 ### star-plan-executor/SKILL_zh.md
 --- 1
 1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,说明拆解尚未完成,用 `star_questionnaire` 提供:*先回 `star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
@@ -978,26 +674,24 @@ A lone weak signal is one sentence in the reply, never a question — interrupti
 只有一条弱信号时，在回复里写一句话，不要发问——打断一个尺寸本来就合适的叶子，代价比漏掉一个过大的叶子更高。检查命中时，照 `references/sizing_check_zh.md` 走：写在问题之上的拆分预览、问题本身与两个答案各自的代价、以及判定结论记在哪里。
 ### star-plan-executor/SKILL_zh.md
 --- 1
-1. `EnterPlanMode`——`low` 档除外：那一档 Step 4 不问就放行，而 Claude Code 的 plan 审批对话框只等人按键、任何 hook 都替不了，所以 EXEC_PLAN 在 plan 模式之外起草，其余不变。
+1. 只有 EXEC_PLAN 仍含需要用户决定的实质选择时才用 `EnterPlanMode`。`low` 档，或目标、研究范围、验收、关键输入、成本和权限都已定下时，在 plan 模式外起草，不制造新的批准门槛。
 +++ 1
-1. 用一句话说明:你正在起草 EXEC_PLAN,在 Step 4 拿到批准之前不写任何文件、不跑任何命令。`star-plan` 是用户手上的开关,不是你能调用的工具,所以这个模式由你自己守着、而不是宿主替你拦着——正因如此才要把它说出口。`low` 档不说这句:那一档 Step 4 不问就放行,没有什么要守到批准——起草 EXEC_PLAN 接着往下走,其余不变。
+1. `/star-plan` 是用户的开关 只在计划仍有待用户决定的实质选择时使用；`low` 或目标、范围、验收、关键输入、成本与权限已定时，在当前模式起草，不制造批准门槛。
 ### star-plan-executor/SKILL_zh.md
 --- 1
-### Step 4：审批确认点（`ExitPlanMode`）
+**实现前先跑设计检查。** 派一个只读 `star_subagent` subagent（`subagent_type: Explore`，PLAN 档值非空时传给 `model:`）只读 EXEC_PLAN、叶子计划和根计划 §4。每条 `fail` 都重开所引证据；在已授权计划内纠正执行计划缺陷，只有研究范围、验收、关键输入或成本仍未解决时才问。`star_subagent` 不可用时本地跑一次并记录缺少独立视角，不反复请求宿主没有的机制。
 +++ 1
-### Step 4：审批确认点
+**实现前先按 `references/design_check_zh.md` 跑设计检查。**调用 `star_subagent`，设 `agent: "star-auditor"`，PLAN 值非空时传给 `model`，只提供 EXEC_PLAN、叶子计划和根计划 §4。重开每条 `fail` 证据；只有研究范围、验收、关键输入或成本仍未解决时才通过 `star_questionnaire` 询问。
 ### star-plan-executor/SKILL_zh.md
 --- 1
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一个只读 `star_subagent` 子代理（`subagent_type: Explore`），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+1. 在 commentary 中展示具体计划。若使用了 `EnterPlanMode`，只用 `ExitPlanMode` 解决随计划展示的未定实质选择；已有适用授权直接沿用。逐 action 提交为推荐：已有选择沿用，否则 `low` 采用、`medium` 随计划询问、`high` 分开询问。偏差按 `references/plan_sync_rules_zh.md` 处理；`auto=unattended` 只覆盖不改变研究范围、关键输入、§5 验收和已批成本的战术行。
 +++ 1
-**发起确认之前先跑设计检查。** 把 `references/design_check.md` 交出去做一次"不知情"的复核：一次只读的 `star_subagent`（`agent: "star-auditor"`），交办材料正好三个文件——刚写出的 EXEC_PLAN、叶子子计划、根计划只读它的 §4——检查表认作证据的唯一一节根计划内容（计划 frontmatter 写着 `language: zh` 时改点名检查表的 `_zh` 那份；受托者绝不自己选）——范围逐字写明："只看这三个文件，根计划只看 §4。不排序、不决定、不运行任何东西。"它按条返回 `item`、`verdict: pass | fail | unclear`、`evidence`、`fix`。主 agent 对每一条打算上报的 `fail` 都回去打开被引用的那一行——判"缺失"的 `fail` 引不出行，那就重读该条目所属的整节——然后把至多五条发现摆在确认调用**上方**，一条一行;确认不了的 `fail` 丢掉。检查只报告；做决定的是这个确认点，这里不叫停任何 run。没有受托者可用时，检查表由主 agent 自己跑（规约 §6.1）。
+1. 在 commentary 展示具体计划。沿用已有授权，只为仍未解决的实质选择使用本宿主原生提问机制；`/star-plan` 是用户的开关 已启用时在决定解决后退出。提交、分支与 worktree 按 involve 档位处理；`auto=unattended` 仅覆盖不改变范围、关键输入、§5 验收和已批成本的战术偏差。
 ### star-plan-executor/SKILL_zh.md
---- 2
-1. `ExitPlanMode` 呈现 EXEC_PLAN + 预计会做出的改动:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否给每个通过验证的步骤单独提交一次(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>` 或 `worktree: <path>`,这两问都搭在同一个确认点上,措辞照 `references/branch_rules_zh.md` 写(规约 §11、§11.7)。`low` 档不发起这次调用:同样的材料完整写进回复正文,搭在其上的几问取各自推荐项,这次未经询问的放行记入决策记录,随即不等回答进入第 2 项。
-2. 批准后——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
-+++ 2
-1. 呈现 EXEC_PLAN + 预计会做出的改动:要写的文件、要跑的命令、红线落在哪（即哪些命令停在这里、备好交回给你自己跑）、大致开销/耗时——以及偏差表,并注明"批准本计划即同时把这些偏差同步回子计划"。在同一个确认点里一并问:是否给每个通过验证的步骤单独提交一次(推荐),并列出任何已带未提交改动的路径——那些绝不暂存。并说明不做的代价:后面某一步要恢复时,唯一能依据的就是本次运行自己记下的每步起点(`references/agent_dispatch_spec_zh.md`)。若 Step 3 定了 `branch: <run>` 或 `worktree: <path>`,这两问都搭在同一个确认点上,措辞照 `references/branch_rules_zh.md` 写(规约 §11、§11.7)。`low` 档不问这次审批:同样的材料完整写进回复正文,搭在其上的几问取各自推荐项,这次未经询问的放行记入决策记录,随即不等回答进入第 2 项。
-2. 批准之后才开始改动——先按 `references/branch_rules_zh.md` 的"创建"建起获批的分支或树,让下面的一切都生在它上面——再为中间工作文件新建 `tasks/<plan-name>/`;用 `assets/exec_plan_template_zh.md` 写入 `wkdrs/<run>/EXEC_PLAN.md`,并用 `assets/exec_log_template_zh.md` 初始化 `wkdrs/<run>/EXEC_LOG.md`。**run 名 = `<prefix>_<slug>`**;重跑时追加用户给的后缀(`_v2`、日期)以区分——绝不自造时间戳。把本 run **追加**进子计划的 `exec_runs`,而不是替换它:这段历史让 `star-expt-analyst aggregate` 能看到该叶子的每一次 run,而不只是最后一次。仍带单个 `exec_run:` 的计划先在此迁移为 `exec_runs: [<那个 run>]`,再追加新条目。
+--- 1
+**把 Step 5 交给 EXEC 档。** EXECPLAN、EXEC_LOG 和当前必需决定均已记录，且配置了不同 EXEC 模型、本 run 不是 `tier=exec` 时，派一个 `star_subagent` subagent（`subagent_type: general-purpose`、`model:` 取该 EXEC 值）读取本说明并从 Step 5 恢复，带上 `involve=<level> tier=exec` 与合法 `auto=unattended`。它不得改 EXEC_PLAN 或绕过计划级缺口。STOP-line 命令或未决 blocked 编辑记入日志并返回用户侧运行；已有适用决定直接沿用。返回后重读日志并进 Step 6。无可用 override 或 `star_subagent` 路径时在本地执行，不反复请求不可用机制。
++++ 1
+**把 Step 5 交给 EXEC 档。**记录与决定均已定下时，调用 `star_subagent`，设 `agent: "star-runner"` 并传非空 EXEC `model`，从 Step 5 恢复并携带控制令牌。不得改 EXEC_PLAN 或绕过计划级缺口；返回后重读日志。不可用时本地运行。
 ### star-plan-executor/SKILL_zh.md
 --- 1
 ### Step 5：执行—验证循环（每步一个 agent）
@@ -1007,57 +701,17 @@ A lone weak signal is one sentence in the reply, never a question — interrupti
 --- 1
 1. 按 `references/agent_dispatch_spec_zh.md` 的交办说明派一个 `star_subagent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`）:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;返回结构化结果(changed / ran / check / blockers / handoff)"。
 +++ 1
-1. 动手之前,先按 `references/agent_dispatch_spec_zh.md` 的格式约定把本步的交办说明写出来:本步目标、要碰的确切文件、已解析的解释器路径、绑定的 check,以及"**只**做这一步;结果按 changed / ran / check / blockers / handoff 陈述"。交办说明就是交给受托方的那份东西,也是防止这一步越做越宽的东西(规约 §6.1)。
+1. 按 `references/agent_dispatch_spec_zh.md` 调用 `star_subagent`：实现设 `agent: "star-implementer"`，只读勘察设 `agent: "star-collector"`，并传相应档位 `model`；提供确切 action 范围、解释器、检查和结构化返回契约。
 ### star-plan-executor/SKILL_zh.md
 --- 1
-**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,先把整批落到正文——每条修正一行并编号,写明改哪一节、从什么改成什么、为什么——再用**一次** `star_questionnaire` 提问(*全部同步 / 除我点名的以外全部同步 / 先解答我点名的几行 / 不同步*,标出你推荐的一项——规约 §7.13),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是方向性信号——走下面的向上反馈,绝不同步。
+当前执行器仍负责用户的执行目标。重命令启动或合并前，通过 `Skill` 工具对本 leaf 运行 `star-code-reviewer`；已有审查覆盖当前代码版本和范围、且待启动时满足现有启动守卫，才直接复用。把既有执行目标和授权传入，并要求 reviewer 将证据与控制权交回这里。单独的只复核请求没有这条接续。
 +++ 1
-**修正同步(战术信号)**。若 EXEC_LOG 的"待同步修正"非空,先把整批落到正文——每条修正一行并编号,写明改哪一节、从什么改成什么、为什么——再用**一个**问题提问(*全部同步 / 除我点名的以外全部同步 / 先解答我点名的几行 / 不同步*,标出你推荐的一项——规约 §7.13),确认的行按 `references/plan_sync_rules_zh.md` 写回(原地更新 §2–§5 + 追加 `## Revision History` 条目 + 更新 `updated`,再把行勾掉)。只限战术层:凡触及 §1/§6、父计划或 kill-criterion 的,都是方向性信号——走下面的向上反馈,绝不同步。
-### star-plan-executor/SKILL_zh.md
---- 1
-**简报不是这一轮的结尾。** 简报文字发出后,在同一轮回复里就把 `star-code-reviewer` 对着这个叶子启动——用 `Skill` 工具,skill 名填 `star-code-reviewer`、参数是这个叶子,和 Step 5 派发 `star_subagent` 一样——对照规约与子计划审一遍实现。它属于那八个 agent 可以自己启动的 skill、目标已经定下,所以它是一次运行,而不是一行文字:一条打印给 agent 自己的命令,等于转交给了没有人(规约 §10.6)。两种收尾里它都是本次 run 的最后一个动作——完整跑完后,在修订计划或继续推进之前;有命令在红线交回时,在用户跑那条命令之前。
-+++ 1
-**简报不是这一轮的结尾。** 简报文字发出后,在同一轮回复里就把 `star-code-reviewer` 对着这个叶子启动——用这个宿主启动 skill 的方式,参数是这个叶子,和 Step 5 接着做下一步一样自然——对照规约与子计划审一遍实现。它属于那八个 agent 可以自己启动的 skill、目标已经定下,所以它是一次运行,而不是一行文字:把 `star-code-reviewer <叶子>` 打印给 agent 自己,等于转交给了没有人(规约 §10.6)。两种收尾里它都是本次 run 的最后一个动作——完整跑完后,在修订计划或继续推进之前;有命令在红线交回时,在用户跑那条命令之前。
-### star-plan-executor/SKILL_zh.md
---- 1
-- 若当前环境无法使用 `star_questionnaire` 或 plan 模式(无头 / 脚本化),回退:把 EXEC_PLAN 以纯文本呈现,并在写任何文件、跑任何命令之前要求一次明确的纯文本批准(`low` 档不问就放行——见下面参与度档位一条)——仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
-+++ 1
-- EXEC_PLAN 通过 `star_questionnaire` 交给用户,写任何文件、跑任何命令前都要一次明确批准(`low` 档不问就放行——见下面参与度档位一条)——仍然重实验前停,在任何同步回写子计划前仍需纯文本确认。
-### star-plan-executor/SKILL_zh.md
---- 1
-- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:ExitPlanMode 审批确认点(Step 4,含逐步提交、执行分支与 worktree 三问)、红线(Step 5)、合并确认点与分支或 worktree 的弃用、移除或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会、以及 blocked 步骤那些改动的去留(两者都把关一次删除——`references/agent_dispatch_spec_zh.md`)。其中一项在 `low` 档不问就放行:Step 4 的审批确认点。不进 plan 模式(Step 3)、不调用 `ExitPlanMode`,因为 Claude Code 的 plan 审批对话框只等人按键,任何 hook 都替不了;材料照常完整写进回复,搭在这个确认点上的几问取各自推荐项,这次未经询问的放行记入决策记录。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退与尺寸检查(取推荐项:送回 decomposer 并停下)、以及 Step 9 那个探索性叶子命令便宜时的跳过备选(取推荐项:启动审查)。启动审查本身在任何档位都不是一个问题——理由写在 Step 9;Step 4 把 Step 5 交给 EXEC 档同样不是问题:它换的是跑这个循环的模型,不是这个循环要做的事。`high` 档:Step 5 每步派发 subagent 前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
-+++ 1
-- 参与度档位(规约 §7.7)。本 skill 中不受档位影响:Step 4 审批确认点(含逐步提交、执行分支与 worktree 三问)、红线(Step 5)、合并确认点与分支或 worktree 的弃用、移除或删除(Step 7——规约 §11)、修正同步(Step 6,它回写计划 §2–§5)、删草稿的机会、以及 blocked 步骤那些改动的去留(两者都把关一次删除——`references/agent_dispatch_spec_zh.md`)。其中一项在 `low` 档不问就放行:Step 4 的审批确认点——跳过 Step 3 要说的那句,材料照常完整写进回复,搭在这个确认点上的几问取各自推荐项,这次未经询问的放行记入决策记录。`low` 档不再问:Step 0 的选叶子(按依赖序取第一个就绪的叶子;无参数或有歧义的调用仍要问,规约 §5.2)、Step 1 的就绪回退与尺寸检查(取推荐项:送回 decomposer 并停下)、以及 Step 9 那个探索性叶子命令便宜时的跳过备选(取推荐项:启动审查)。启动审查本身在任何档位都不是一个问题——理由写在 Step 9;Step 4 把 Step 5 交给 EXEC 档同样不是问题:它换的是跑这个循环的模型,不是这个循环要做的事。`high` 档:Step 5 每一步开工前先确认。生效档位及其来源在 `EXEC_LOG.md` 里记一次。
+当前执行器仍负责用户的执行目标。重命令启动或合并前，通过本宿主的 skill 调用方式对本 leaf 运行 `star-code-reviewer`；已有审查覆盖当前代码版本和范围、且待启动时满足现有启动守卫，才直接复用。把既有执行目标和授权传入，并要求 reviewer 将证据与控制权交回这里。单独的只复核请求没有这条接续。
 ### star-plan-executor/references/agent_dispatch_spec.md
 --- 1
 # Agent Dispatch Brief
 +++ 1
 # Agent Dispatch Brief (Pi — filled locally)
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-One `star_subagent` subagent per step (or coherent step-group) in EXEC_PLAN. Prefer `subagent_type: general-purpose`; use `Explore` only for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
-+++ 1
-One `star_subagent` dispatch per step (or coherent step-group) in EXEC_PLAN. Use `agent: "star-implementer"` for a step that changes files, `agent: "star-collector"` for read-only orientation. The main agent orchestrates and verifies; the agent does the edit/run for exactly one step — narrow, so failures localize and contexts stay short.
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-**Within that preference the model still follows the step.** A step that writes mechanically — filling a template, moving a file, renaming a symbol the plan already named, running a formatter, setting a value the plan states — asks little of judgment: dispatch `star_subagent` subagents (`subagent_type: general-purpose`), because the step's own check catches a mistake and this is where the tier changes the bill and not the result. A step that writes or changes logic — where the plan says what to achieve rather than what to type — names no model and runs on the session's. A step that reads either way is logic: a cheap agent wrong about logic costs a retry and the main agent's re-check, dearer than the tier saved.
-+++ 1
-**Within that preference the tier still follows the step.** A step that writes mechanically — filling a template, moving a file, renaming a symbol the plan already named, running a formatter, setting a value the plan states — asks little of judgment, and where a dispatch can pick how much to spend it takes the cheap end, because the step's own check catches a mistake and this is where the tier changes the bill and not the result. A step that writes or changes logic — where the plan says what to achieve rather than what to type — takes the default. A step that reads either way is logic: a cheap agent wrong about logic costs a retry and the main agent's re-check, dearer than the tier saved.
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-**A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is dispatched once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not return leaves every row un-done, so a resume never reads it as finished. Split a group at any STOP-line boundary.
-+++ 1
-**A coherent step-group** is at most 3 EXEC_PLAN actions that touch the same files, are meaningless apart, and share one check. Anything else is separate steps. A group is taken once, checked once, and written to EXEC_LOG as one row per member action carrying the group id — a group that did not finish leaves every row un-done, so a resume never reads it as finished. Split a group at any STOP-line boundary.
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-**Dispatch order and concurrency are the main agent's call.** Orchestrate freely from EXEC_PLAN's step order and dependencies: a step that consumes an earlier step's output is dispatched after that step's check passes; independent steps may go out concurrently or serially, whichever the main agent judges best — no fixed cap, no imposed order beyond the dependencies themselves. Concurrent implementing agents never share a file (conventions §6.2), and `EXEC_LOG.md` has one writer — the main agent records, and commits, each step as it verifies that step's returned result — so "stage only the files that step touched" keeps its meaning at any concurrency.
-+++ 1
-**Step order and concurrency are the main agent's call.** Orchestrate freely from EXEC_PLAN's step order and dependencies: a step that consumes an earlier step's output starts after that step's check passes; independent steps may be in flight together or run one by one, whichever the main agent judges best — no fixed cap, no imposed order beyond the dependencies themselves. Concurrent steps never share a file (conventions §6.2), and `EXEC_LOG.md` has one writer — the main agent records, and commits, each step as it verifies that step's returned result — so "stage only the files that step touched" keeps its meaning at any concurrency.
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-**Before dispatch**, this step's files are clean in git. A path already dirty when the run started is named as pre-existing and excluded from every restore below: it is not this run's to revert.
-+++ 1
-**Before a step starts**, its files are clean in git. A path already dirty when the run started is named as pre-existing and excluded from every restore below: it is not this run's to revert.
 ### star-plan-executor/references/agent_dispatch_spec.md
 --- 2
 ## What to give the agent
@@ -1079,46 +733,11 @@ These are the terms the dispatch states, and the delegate is held to for the len
 ## What the agent must return (structured)
 +++ 1
 ## What the agent must return (stated in the log)
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-The **main agent — not the agent — re-runs the step's own check**, then records the result in EXEC_LOG. Do not trust a self-reported `pass` without the evidence.
-+++ 1
-**Run the step's own check as its own command**, then record the result in EXEC_LOG. Nothing counts as `pass` on the strength of having written the code — the check's output is the evidence, and a delegate's self-reported pass is a claim like any other.
-### star-plan-executor/references/agent_dispatch_spec.md
---- 1
-- **Fail** → record the failure in EXEC_LOG. Restore this step's files before retrying — minus anything named pre-existing. Restore to how the tree stood when this step was dispatched, not to `HEAD`: the confirmation point may have declined per-step commits, and then earlier verified steps are uncommitted too, so resetting to `HEAD` would erase work EXEC_LOG already records as `done`. A restore never touches files outside this step's own; retry at most twice, with the failure fed back into the next dispatch. Still failing → the step is `blocked`: ask before restoring its half-finished edits (conventions §7.7 — it stops for confirmation before a deletion), record which way it went, name the paths either way, and stop with the log. No step ends leaving edits nobody has accounted for: a later step's commit stages "the files that step touched" and cannot tell them apart.
-+++ 1
-- **Fail** → record the failure in EXEC_LOG. Restore this step's files before retrying — minus anything named pre-existing. Restore to how the tree stood when this step started, not to `HEAD`: the confirmation point may have declined per-step commits, and then earlier verified steps are uncommitted too, so resetting to `HEAD` would erase work EXEC_LOG already records as `done`. A restore never touches files outside this step's own; retry at most twice, carrying the failure into the next attempt. Still failing → the step is `blocked`: ask before restoring its half-finished edits (conventions §7.7 — it stops for confirmation before a deletion), record which way it went, name the paths either way, and stop with the log. No step ends leaving edits nobody has accounted for: a later step's commit stages "the files that step touched" and cannot tell them apart.
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 1
 # Agent 交办说明
 +++ 1
 # Agent 交办说明（Pi——本地履行）
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一个 `star_subagent` subagent（`subagent_type: general-purpose`；只读勘察可用 `Explore`）。主 agent 负责编排与验证;agent 只做这一步的改/跑——只管一小块,以便失败可定位、上下文短。
-+++ 1
-EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一次 `star_subagent`。要改文件的步骤用 `agent: "star-implementer"`,只读摸底用 `agent: "star-collector"`。主 agent 编排并复核,受派方只做这一个步骤的改动与运行——只管一小块,以便失败可定位、上下文短。
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-**在这个偏好之内,模型仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少:派 `star_subagent` subagents（`subagent_type: general-purpose`）,因为这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——不指定模型,随会话的模型走。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
-+++ 1
-**在这个偏好之内,档位仍旧跟着步骤走。** 机械改写的步骤——填模板、挪文件、改计划已经点名的符号、跑格式化、设一个计划已写明的取值——要用的判断很少,若一次派发能挑用多少算力,就取便宜的一端:这一步自己的检查会兜住错误,而这里换档位只改账单、不改结果。写或改逻辑的步骤——计划只说要达成什么、没说要敲什么——用默认档位。两边都读得通的步骤算逻辑:便宜的 agent 在逻辑上出错,代价是一次重试加主 agent 的复核,比省下的档位更贵。
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-**连贯步骤组**指至多 3 个 EXEC_PLAN 动作:它们碰同一批文件、拆开就没有意义、共用同一个 check。除此之外都是各自独立的步骤。一个组只派发一次、只检查一次,写进 EXEC_LOG 时每个成员动作各占一行并带上组标识——没有返回的组,每一行都停在未完成,恢复时就不会把它读成已完成。碰到红线边界要把组拆开。
-+++ 1
-**连贯步骤组**指至多 3 个 EXEC_PLAN 动作:它们碰同一批文件、拆开就没有意义、共用同一个 check。除此之外都是各自独立的步骤。一个组只做一次、只检查一次,写进 EXEC_LOG 时每个成员动作各占一行并带上组标识——没做完的组,每一行都停在未完成,恢复时就不会把它读成已完成。碰到红线边界要把组拆开。
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-**派发顺序与并发由主 agent 自主决定。** 按 EXEC_PLAN 的步骤顺序与依赖关系自由编排:消费上游产出的步骤,等那一步的检查通过后再派;相互独立的步骤,并发还是串行由主 agent 自行判断——不设并发上限,除依赖本身外不强加任何顺序。并发的实现型 agent 之间文件互不重叠(规约 §6.2);`EXEC_LOG.md` 只有主 agent 一个写手——每验完一步的返回结果就由主 agent 记录并提交那一步——所以"只 stage 这一步碰过的文件"在任意并发数下都成立。
-+++ 1
-**步骤顺序与并发由主 agent 自主决定。** 按 EXEC_PLAN 的步骤顺序与依赖关系自由编排:消费上游产出的步骤,等那一步的检查通过后再开;相互独立的步骤,同时在手还是一个一个来由主 agent 自行判断——不设并发上限,除依赖本身外不强加任何顺序。并发的步骤之间文件互不重叠(规约 §6.2);`EXEC_LOG.md` 只有主 agent 一个写手——每验完一步的返回结果就由主 agent 记录并提交那一步——所以"只 stage 这一步碰过的文件"在任意并发数下都成立。
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-**派发之前**,这一步名下的文件在 git 里是干净的。运行开始时就已经改动过的路径,单独点名为既有改动,并排除在下面所有恢复动作之外:它不归本次运行去回退。
-+++ 1
-**这一步开工之前**,它名下的文件在 git 里是干净的。运行开始时就已经改动过的路径,单独点名为既有改动,并排除在下面所有恢复动作之外:它不归本次运行去回退。
 ### star-plan-executor/references/agent_dispatch_spec_zh.md
 --- 2
 ## 交给 agent 什么
@@ -1140,33 +759,16 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一次 `star_subagent`。�
 ## agent 必须返回什么（结构化）
 +++ 1
 ## agent 必须返回什么（记进日志）
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-**主 agent——而非 agent——重跑绑定的 check**,再记入 EXEC_LOG。没有证据就不轻信自报的 `pass`。
-+++ 1
-**把绑定的 check 作为一条独立命令跑一遍**,再记入 EXEC_LOG。代码写完了不等于这一步通过——check 的输出才是证据;而受托方自报的 pass,和任何一句声称一样,只是一句声称。
-### star-plan-executor/references/agent_dispatch_spec_zh.md
---- 1
-- **失败** → 把失败记进 EXEC_LOG。重试之前先把这一步名下的文件恢复回去——已写明的既有改动除外。恢复到这一步派发时的样子,不是恢复到 `HEAD`:确认点可能拒绝了逐步提交,那时更早的已验证步骤同样没提交,重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复动作绝不越出这一步自己的文件;最多重试 2 次,把失败信息回传给下一次派发。仍失败 → 该步标 `blocked`:那些做了一半的改动,恢复之前先问(规约 §7.7——这是把关删除的),记下最终怎么处理的,无论哪种都把路径写清楚,带日志停下。没有哪一步可以留下无人认领的改动:后面某一步提交时 stage 的是"这一步碰过的文件",它分不出来。
-+++ 1
-- **失败** → 把失败记进 EXEC_LOG。重试之前先把这一步名下的文件恢复回去——已写明的既有改动除外。恢复到这一步开工时的样子,不是恢复到 `HEAD`:确认点可能拒绝了逐步提交,那时更早的已验证步骤同样没提交,重置到 `HEAD` 会把 EXEC_LOG 已经记为 `done` 的工作一并抹掉。恢复动作绝不越出这一步自己的文件;最多重试 2 次,把失败信息带进下一次尝试。仍失败 → 该步标 `blocked`:那些做了一半的改动,恢复之前先问(规约 §7.7——这是把关删除的),记下最终怎么处理的,无论哪种都把路径写清楚,带日志停下。没有哪一步可以留下无人认领的改动:后面某一步提交时 stage 的是"这一步碰过的文件",它分不出来。
 ### star-plan-reviser/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 +++ 1
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 ### star-plan-reviser/SKILL.md
---- 2
-2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to parallel **read-only `star_subagent` subagents** (`subagent_type: Explore`) (execution log / artifacts / code state), each returning the structured collector format in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
-3. **The user owns every change.** Findings become numbered revision candidates. The whole list goes on the page, and **one** `star_questionnaire` over it settles them — recommendation marked, with every candidate the user names coming back on its own (conventions §7.13). Never put a list up for approval that the user cannot see, never edit unasked.
-+++ 2
-2. **Collect wide, judge in the main agent.** Evidence gathering is delegated to **read-only collection passes**, one at a time — execution log / artifacts / code state — each returning the structured collector format in `references/review_spec.md`. Collectors never write and never propose revisions; synthesis and judgment stay in the main agent.
-3. **The user owns every change.** Findings become numbered revision candidates. The whole list goes on the page, and **one** question over it settles them — recommendation marked, with every candidate the user names coming back on its own (conventions §7.13). Never put a list up for approval that the user cannot see, never edit unasked.
-### star-plan-reviser/SKILL.md
 --- 1
-2. With no argument, or an ambiguous match, list candidates (prefix + slug + one-line state) and ask via `star_questionnaire` — prefer nodes with execution evidence (`exec_runs` non-empty) or known drift.
+2. **Collect wide; judgment stays with the main agent.** When bounded, independent, read-only inspection of several runs or artifact sets materially helps, dispatch read-only `star_subagent` subagents (`subagent_type: Explore`, `model:` the READ tier value, omitted when empty). Each follows `references/review_spec.md`, never writes or proposes revisions; synthesis and judgment stay with the main agent.
 +++ 1
-2. With no argument, or an ambiguous match, list candidates (prefix + slug + one-line state) and ask — prefer nodes with execution evidence (`exec_runs` non-empty) or known drift.
+2. **Collect wide; judgment stays with the main agent.** When bounded independent inspection helps, call `star_subagent` with `agent: "star-collector"` and the READ-tier `model` when non-empty. Each follows `references/review_spec.md`, never writes or proposes revisions; synthesis and judgment stay with the main agent.
 ### star-plan-reviser/SKILL.md
 --- 1
 ### Step 2: Collect evidence (read-only subagents)
@@ -1177,35 +779,16 @@ EXEC_PLAN 里每个步骤(或每个连贯步骤组)派一次 `star_subagent`。�
 Larger than that: dispatch parallel read-only `star_subagent` subagents (`subagent_type: Explore`) per the collector formats in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
 +++ 1
 Larger than that: run read-only collection passes, one at a time per the collector formats in `references/review_spec.md` — typically a **log reader** (step statuses, claimed checks, "Awaiting user" commands, plan-level findings), an **artifact inspector** (each §4 deliverable: exists / size / mtime / cheap sanity), and, when §2–§3 name code, a **code inspector** (are the promised modules present and consistent with what the log claims changed?).
-### star-plan-reviser/SKILL.md
---- 1
-2. Then **one** `star_questionnaire` over that list: *adopt all as listed* / *adopt all but the ones I name* / *answer my questions on the ones I name first* / *adopt none* — recommendation marked, and the built-in "Other" field lets the user answer freely. With four candidates or fewer, ask over the candidates themselves (multiSelect), not their numbers. Rows the user pulls out open a second round in the same shape, carrying the redraft or the answer they asked for; a round down to one candidate is asked as that one candidate. A candidate that drops this node is never a row on the list — `references/revision_rules.md` has it asked on its own — and Step 5's `exec_status` reset and `finalized:` clearing are questions of their own there, after the edits.
-+++ 1
-2. Then **one** question over that list: *adopt all as listed* / *adopt all but the ones I name* / *answer my questions on the ones I name first* / *adopt none* — recommendation marked, and say that the user may answer freely outside the options. The user names rows by their numbers, so number the list on the page and keep that numbering in every later round. Rows the user pulls out open a second round in the same shape, carrying the redraft or the answer they asked for; a round down to one candidate is asked as that one candidate. A candidate that drops this node is never a row on the list — `references/revision_rules.md` has it asked on its own — and Step 5's `exec_status` reset and `finalized:` clearing are questions of their own there, after the edits.
-### star-plan-reviser/SKILL.md
---- 2
-- If `star_questionnaire` is unavailable (headless / scripted), fall back to plain-text questions — still the whole candidate list on the page before the one question that settles it, still explicit approval before any write.
-- **The candidate list goes in the text of the same message, above the call** — the options carry the answers and none of the material.
-+++ 2
-- Every question goes through `star_questionnaire` — still the whole candidate list on the page before the one question that settles it, still explicit approval before any write.
-- **The candidate list goes in the text of the same message, above the question** — the options carry the answers and none of the material.
 ### star-plan-reviser/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 +++ 1
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
 ### star-plan-reviser/SKILL_zh.md
---- 2
-2. **收集靠分散，判断在主 agent。** 证据收集委派给并行的**只读 `star_subagent` subagent**（`subagent_type: Explore`）（执行日志 / 产物 / 代码现状），各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
-3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次** `star_questionnaire` 把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
-+++ 2
-2. **收集靠分散，判断在主 agent。** 证据收集拆成**只读收集遍**，一次一遍——执行日志 / 产物 / 代码现状——各自按 `references/review_spec_zh.md` 的收集器格式约定返回结构化结果。收集器绝不写文件、绝不提修订意见；综合与判断留在主 agent。
-3. **每处改动由用户拍板。** 审查发现整理成编号的修订候选。整张清单先摊在页面上，再用**一次**提问把它们定下来——标出你的推荐，用户点名的每一条都会单独回来（规约 §7.13）。绝不把用户看不见的清单拿去批准，绝不擅自动笔。
-### star-plan-reviser/SKILL_zh.md
 --- 1
-2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并经 `star_questionnaire` 询问——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
+2. **广收集；判断留在主 agent。** 对多个 run 或产物集合进行有边界、相互独立、只读的检查确有帮助时，派出只读 `star_subagent` subagent（`subagent_type: Explore`；READ 档值非空时作为 `model:`）。受委派者遵守 `references/review_spec_zh.md`，绝不写入或提出修订；综合与判断留在主 agent。
 +++ 1
-2. 未给参数或匹配歧义时，列出候选（前缀 + slug + 一行状态）并询问——优先推荐有执行证据（`exec_runs` 非空）或已知失配的节点。
+2. **广收集；判断留在主 agent。**有边界、相互独立的只读检查确有帮助时，调用 `star_subagent`，设 `agent: "star-collector"`，READ 档值非空时传给 `model`。受委派者遵守 `references/review_spec_zh.md`，绝不写入或提出修订；综合与判断留在主 agent。
 ### star-plan-reviser/SKILL_zh.md
 --- 1
 ### Step 2：收集证据（只读 subagent）
@@ -1216,28 +799,6 @@ Larger than that: run read-only collection passes, one at a time per the collect
 规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `star_subagent` subagent（`subagent_type: Explore`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 +++ 1
 规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定一次一遍地做只读收集——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
-### star-plan-reviser/SKILL_zh.md
---- 1
-2. 然后就这份清单**只发一次** `star_questionnaire`：*全部按清单采纳* / *除我点名的以外全部采纳* / *先解答我点名的几项* / *一项都不采纳*——标出推荐，且内置"Other"始终允许自由作答。候选在四条及以内时，直接就这些候选发问（multiSelect），不必绕编号。被点出来的行开启第二轮，形状照旧，带上你给出的改写稿或用户要的解答；缩到只剩一条候选时就直接问那一条。丢弃本节点的候选永远不进清单——`references/revision_rules_zh.md` 要求它单独发问——Step 5 的 `exec_status` 重置与清除 `finalized:` 同样是那一步里各自独立的问题，在改动落盘之后问。
-+++ 1
-2. 然后就这份清单**只发一次**提问：*全部按清单采纳* / *除我点名的以外全部采纳* / *先解答我点名的几项* / *一项都不采纳*——标出推荐，且说明用户可以在选项之外自由作答。用户按编号点名，所以页面上的清单要编号，且后续每一轮沿用同一套编号。被点出来的行开启第二轮，形状照旧，带上你给出的改写稿或用户要的解答；缩到只剩一条候选时就直接问那一条。丢弃本节点的候选永远不进清单——`references/revision_rules_zh.md` 要求它单独发问——Step 5 的 `exec_status` 重置与清除 `finalized:` 同样是那一步里各自独立的问题，在改动落盘之后问。
-### star-plan-reviser/SKILL_zh.md
---- 2
-- `star_questionnaire` 不可用（无人值守 / 脚本化）时改用纯文本提问——仍然先把整张候选清单摊在页面上、再用那一个问题把它定下来，仍然先获明确批准再写入。
-- **候选清单写在同一条消息的正文里、放在调用之上**——选项只承载答案，不承载材料。
-+++ 2
-- 提问一律走 `star_questionnaire`——仍然先把整张候选清单摊在页面上、再用那一个问题把它定下来，仍然先获明确批准再写入。
-- **候选清单写在同一条消息的正文里、放在提问之上**——选项只承载答案，不承载材料。
-### star-plan-reviser/references/review_spec.md
---- 1
-- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run log collectors only on runs that exist, run in parallel; audit this node's own §1–§6 assumptions against the aggregated signals.
-+++ 1
-- **Root/internal**: do not fan out per descendant — read children frontmatter directly; run a log collector only on runs that exist, one run at a time; audit this node's own §1–§6 assumptions against the aggregated signals.
-### star-plan-reviser/references/review_spec_zh.md
---- 1
-- **根/内部**：不逐后代展开——直接读 children 的 frontmatter；只对确实存在的 run 派日志收集器，并行派发；用汇总后的信号审计本节点自己 §1–§6 的假设。
-+++ 1
-- **根/内部**：不逐后代展开——直接读 children 的 frontmatter；只对确实存在的 run 派日志收集器，一个 run 一遍；用汇总后的信号审计本节点自己 §1–§6 的假设。
 ### star-proj-adopt/SKILL.md
 --- 1
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
@@ -1248,16 +809,6 @@ Larger than that: run read-only collection passes, one at a time per the collect
 The survey may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `star_subagent` subagent (`subagent_type: Explore`) each, run in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` confidence decides what reaches Confirmation point 1, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check), not a re-read, so the repository's bulk never comes back. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
 +++ 1
 The survey may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `star_subagent` dispatch each (`agent: "star-collector"`), run in parallel, each held to this verbatim scope: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each pass returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` confidence decides what reaches Confirmation point 1, so it is assigned afterwards, over all six areas at once, rather than inside any one of them. Confirming a `certain` line takes a command (`test -d`, an interpreter version check), not a re-read, so the repository's bulk never comes back. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
-### star-proj-adopt/SKILL.md
---- 1
-List the prior runs the survey found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via `star_questionnaire` over the numbered list which to record — more than four runs cannot be options (conventions §7.3), so offer *record all* / *record some (say the numbers)* / *record none*. Symlink each chosen run to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command where recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
-+++ 1
-List the prior runs the survey found — path, date, what it appears to have produced, any metric visible in its logs. Ask once over the numbered list which to record — more than four runs cannot be options (conventions §7.3), so offer *record all* / *record some (say the numbers)* / *record none*. Symlink each chosen run to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command where recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
-### star-proj-adopt/SKILL.md
---- 1
-- All three confirmation points go through `star_questionnaire`, one question per call. If it is unavailable (headless / scripted), fall back to plain text — still one at a time, still an explicit answer before any write past a confirmation point.
-+++ 1
-- All three confirmation points go through `star_questionnaire`, one per call — still one at a time, still an explicit answer before any write past a confirmation point.
 ### star-proj-adopt/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
@@ -1268,31 +819,6 @@ List the prior runs the survey found — path, date, what it appears to have pro
 探测可以**按勘察项**分派——源码、运行时、数据、权重、输出、启动入口——每项一个只读 `star_subagent` 子代理（`subagent_type: Explore`），并行派发，每个的交办说明逐字写明："只读——不要跑这个项目的代码，不要 import 它的包，不要创建或修复任何环境；什么都不要写。"各自返回发现、证据路径、备选与未知项——**不返回置信标签**：`adopt_spec_zh.md` 里，置信度决定哪些行够格走到确认点 1，所以 `certain` / `likely` / `unknown` 由主 agent 自己判。确认一条 `certain` 只需跑一条命令（`test -d`、查解释器版本），不必重读，所以整个仓库的内容不会涌回上下文。陌生仓库的开销就集中在这一步；下面的 S4 直接用这些勘察项收集的证据，不再把它们的来源走第二遍。
 +++ 1
 探测**可以按勘察项铺开**——源码、运行时、数据、权重、输出、启动入口——每项一次只读的 `star_subagent` 派发（`agent: "star-collector"`），可以并行，每一遍的范围逐字写明："只读——不要跑这个项目的代码，不要 import 它的包，不要创建或修复任何环境；什么都不要写。"各自返回发现、证据路径、备选与未知项——**不返回置信标签**：`adopt_spec_zh.md` 里，置信度决定哪些行够格走到确认点 1，所以 `certain` / `likely` / `unknown` 留到六项都跑完之后一并判，而不是在其中任何一遍里判。确认一条 `certain` 只需跑一条命令（`test -d`、查解释器版本），不必重读，所以整个仓库的内容不会涌回上下文。陌生仓库的开销就集中在这一步；下面的 S4 直接用这些勘察项收集的证据，不再把它们的来源走第二遍。
-### star-proj-adopt/SKILL_zh.md
---- 1
-通过 `star_questionnaire` 提问，一次一问，只问勘察定不下来的：`CODE_NAME` 目录、`PYTHON_HOME` 解释器、数据 / 权重 / 输出的已有根目录。选项取自勘察结果并标出推荐项。这个确认点关上之前，什么都不写。
-+++ 1
-用普通文本提问，一次一问，只问勘察定不下来的：`CODE_NAME` 目录、`PYTHON_HOME` 解释器、数据 / 权重 / 输出的已有根目录。选项取自勘察结果并标出推荐项。这个确认点关上之前，什么都不写。
-### star-proj-adopt/SKILL_zh.md
---- 1
-列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。通过 `star_questionnaire` 一次性对着编号问哪些要记录到 wkdrs/——超过四个 run 就装不进选项（规约 §7.3），给成 *全部记录* / *记录其中几个（报编号）* / *都不记录*。把选中的每个 run 软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余仅作为证据留在清单里，报告中说明有多少没有入账。
-+++ 1
-列出勘察找到的既往 run——路径、日期、看起来产出了什么、日志里可见的指标。用一个问题对着编号问哪些要记录到 wkdrs/——超过四个 run 就装不进选项（规约 §7.3），给成 *全部记录* / *记录其中几个（报编号）* / *都不记录*。把选中的每个 run 软链到 `wkdrs/<run>/`，并按 `assets/exec_log_reconstructed_zh.md` 写一份最小 `EXEC_LOG.md`——重建头部（原则 4）、可复原时写出命令、现存产物，且明确不含步骤表。其余仅作为证据留在清单里，报告中说明有多少没有入账。
-### star-proj-adopt/SKILL_zh.md
---- 1
-- 三个确认点全部通过 `star_questionnaire`，每次调用只问一个问题。若该工具不可用（无人值守 / 脚本化运行），改用纯文本——仍然一次一问，任何跨确认点写入之前必须拿到明确答复。
-+++ 1
-- 三个确认点全部走 `star_questionnaire`，一次调用只问一个——仍然一次一问，任何跨确认点写入之前必须拿到明确答复。
-### star-proj-adopt/references/adopt_spec.md
---- 1
-Six areas, each with a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1; a `certain` line is reported, not asked about. Because that label decides what is asked, the main agent sets it: an area handed to a subagent comes back with findings and evidence paths and an empty confidence column, so the subagent never decides what the user gets asked about.
-+++ 1
-Six areas, each with a confidence: `certain` (one unambiguous match), `likely` (one match, weak signal), `unknown` (none or several). Only `likely` and `unknown` lines reach Confirmation point 1; a `certain` line is reported, not asked about. Because that label decides what is asked, the main agent sets it: an area handed to a collection pass comes back with findings and evidence paths and an empty confidence column, so the collection pass never decides what the user gets asked about.
-### star-proj-adopt/references/adopt_spec_zh.md
---- 1
-六个勘察项，每项带一个置信度：`certain`（唯一且无歧义的匹配）、`likely`（唯一匹配但信号弱）、`unknown`（没有或有多个）。只有 `likely` 与 `unknown` 的行会进入确认点 1；`certain` 的行只作报告，不去问。这个标签决定了要问什么，因此必须由主 agent 来标：交给子代理勘察的那一项，只返回发现与证据路径，置信度一列留空，子代理不决定用户会被问到什么。
-+++ 1
-六个勘察项，每项带一个置信度：`certain`（唯一且无歧义的匹配）、`likely`（唯一匹配但信号弱）、`unknown`（没有或有多个）。只有 `likely` 与 `unknown` 的行会进入确认点 1；`certain` 的行只作报告，不去问。这个标签决定了要问什么，因此必须由主 agent 来标：交出去做一遍勘察的那一项，只返回发现与证据路径，置信度一列留空，那一遍不决定用户会被问到什么。
 ### star-proj-adopt/references/backfill.md
 --- 1
 The user confirms leaf by leaf via `star_questionnaire` — one question over the numbered rows when there are several (*confirm all* / *confirm some (say the numbers)* / *confirm none*), one question each at four or fewer. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
@@ -1308,11 +834,6 @@ The user confirms leaf by leaf — one question over the numbered rows when ther
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `star_subagent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 +++ 1
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
-### star-refs-reviewer/SKILL.md
---- 1
-3. **Confirm the shape, then read.** Reading is the expensive step: bring ~15 ranked candidates (title / venue / year / citations / one clause of why) to a single `star_questionnaire` (one question over the table's numbered rows, the 5–10 recommended marked in the table) and read only what the user keeps. Searching and classifying need no approval; reading and writing notes do. In survey mode one question covers the whole document's shape at once: the profile, the taxonomy axis, and the tiered reading list (Step 10.3) — a judgment call `involve=low` takes on its recommendation, where the full pass's core-set question stays mandatory at every level.
-+++ 1
-3. **Confirm the shape, then read.** Reading is the expensive step: bring ~15 ranked candidates (title / venue / year / citations / one clause of why) to a single `star_questionnaire` call (one question over the table's numbered rows, the 5–10 recommended marked in the table) and read only what the user keeps. Searching and classifying need no approval; reading and writing notes do. In survey mode one question covers the whole document's shape at once: the profile, the taxonomy axis, and the tiered reading list (Step 10.3) — a judgment call `involve=low` takes on its recommendation, where the full pass's core-set question stays mandatory at every level.
 ### star-refs-reviewer/SKILL.md
 --- 1
 Searching may fan out by query group, each given 2–3 of the queries, the search profile, its own share of the per-host request budget written as a number, and the same candidate format Step 4 uses — plus a capped verbatim `abstract` (~60 words) per candidate. That field is not optional: the main agent must present ~15 ranked candidates at this skill's only mandatory confirmation point, re-ranked against `refs_rubric.md`, whose core criterion — direct overlap with this method — is unjudgeable from title, venue, year and citation count. The re-rank is the main agent's: it drops any candidate it cannot justify in one clause. Each group also returns `failures: [{host, error, retries}]` and caches what it fetched under this run's own `raw/` prefix, one prefix per query group (conventions §6.4). Before the confirmation point, check rather than trust: per collector, re-open one cached page and compare two of its rows word for word against what was returned. Step 5 re-fetches every survivor's bibliographic record from scratch, but only after the confirmation point — what the user picks to read in depth is decided here, from lines nobody has re-opened.
@@ -1333,21 +854,11 @@ Reading goes one paper at a time — a read-only collection pass each, each fill
 Expansion may fan out over the core papers, **one paper each** — how many collectors run at once (serial or concurrent) is the main agent's own call, with one hard bound: the request budget in `source_policy.md` is **per host**, not per agent, so a concurrent fan-out splits each host's budget across the collectors and writes each share into its brief as a number (conventions §6.9). Cite that file instead of repeating its numbers — they are kept current there. Each returns `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <one clause>}]`, `queries_run`, `failures: [{host, error, retries}]`, `papers_seen`, and nothing else. It fetches no bibliographic record and decides nothing about what is core; the pages it fetches are cached under this run's own `raw/` prefix, scoped to its own paper (conventions §6.4), and nothing else is written. Nothing it returns is trusted as a bib field — Step 5 re-fetches an authoritative record for every survivor from scratch, so a mis-transcribed title costs one failed match, routed to Needs-manual-check.
 +++ 1
 Expansion goes over the core papers, **one paper at a time** — which is also what the request budget in `source_policy.md` wants, since it is **per host** rather than per pass, and anything concurrent would multiply the real rate against every host this skill promises to be polite to. Cite that file instead of repeating its numbers — they are kept current there. Each returns `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <one clause>}]`, `queries_run`, `failures: [{host, error, retries}]`, `papers_seen`, and nothing else. It fetches no bibliographic record and decides nothing about what is core; the pages it fetches are cached under this run's own `raw/` prefix, scoped to its own paper (conventions §6.4), and nothing else is written. Nothing it returns is trusted as a bib field — Step 5 re-fetches an authoritative record for every survivor from scratch, so a mis-transcribed title costs one failed match, routed to Needs-manual-check.
-### star-refs-reviewer/SKILL.md
---- 1
-- The core-set confirmation is the only mandatory question in the full pass — one `star_questionnaire` over the table's numbered rows, recommendations marked in the table. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; Step 10.7's overwrite question stays mandatory there at every level. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one direct question with the candidates. If `star_questionnaire` is unavailable (headless / scripted), fall back to plain text and require an explicit answer before reading.
-+++ 1
-- The core-set confirmation is the only mandatory question in the full pass — one `star_questionnaire` call over the table's numbered rows, recommendations marked in the table. Survey mode's one question — profile, taxonomy axis, tiered list (Step 10.3) — is a judgment call: `involve=low` takes its recommendation unasked and logs it; Step 10.7's overwrite question stays mandatory there at every level. In `add`, a title resolving to several candidate records, or to none cleanly, is an ambiguity about what the user meant — asked at every level, one direct question with the candidates. Ask through `star_questionnaire` and require an explicit answer before reading.
 ### star-refs-reviewer/SKILL_zh.md
 --- 1
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `star_subagent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 +++ 1
 **把档位模型传给受托者。** 取 `pi` 条目，没有则取不带标签的备选，模型按 Pi 的 `provider/model` 写法填写。单任务把值传给 `star_subagent` 的 `model`，并行与串行分别传到相应 `tasks[]` / `chain[]` 项。它覆盖命名代理原有的模型；档位值为空则省略参数并保留原继承行为。盲读用 `star-auditor`，有边界的收集用 `star-collector`，执行动作用 `star-implementer`。整个技能或阶段须用通用受托者 `star-runner`，其权限取自该技能和交办说明。每次派发均启动全新进程，后文的范围与写入限制照旧。已安装扩展没有 `model` 字段或模型不可用时，保持原执行路径；键已设则说明一条原因。派发被拒后，须确认它尚未开始工作才能退回本地。受托者记录自己会话的实际模型，不用请求别名或父会话的解析命令代替。
-### star-refs-reviewer/SKILL_zh.md
---- 1
-3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）先摆成一张带编号的表，再用一次 `star_questionnaire` 对着编号提问（推荐的 5–10 条标在表里），只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下一个问题一次盖住整份文档的形状：检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
-+++ 1
-3. **先确认形状，再精读。** 精读是贵的那一步：把约 15 条排好序的候选（标题 / 会议 / 年份 / 引用数 / 一句话理由）先摆成一张带编号的表，再用一个问题对着编号提问（推荐的 5–10 条标在表里），只读用户留下的。检索和分类不需要批准；精读和写笔记需要。survey 模式下一个问题一次盖住整份文档的形状：检索画像、分类轴和分层阅读清单（Step 10.3）——这是 `involve=low` 会按推荐项直接采纳的判断型问题；完整流程的核心集确认在任何级别下都必答，不受影响。
 ### star-refs-reviewer/SKILL_zh.md
 --- 1
 检索可以按检索式分组分派,每组拿到其中 2–3 条检索式、检索要素、以及按份数分给它的那份 host 请求配额（写成具体数字）,并按 Step 4 那份候选返回格式返回——外加每条候选一段封顶的逐字 `abstract`（约 60 词）。这个字段不是可选的:主 agent 必须在本 skill 唯一的必答确认点上摆出约 15 条排好序的候选,并按 `refs_rubric_zh.md` 重排,而那份评分表的核心判据——与本方法的直接重叠度——只看标题、会议、年份和引用数根本判不了。重排是主 agent 的活:它一句话说不清理由的候选,直接丢掉。每组还返回 `failures: [{host, error, retries}]`,并把抓回来的原始内容缓存在本次运行自己的 `raw/` 前缀下、一个检索式分组一个前缀（规约 §6.4）。走到确认点之前不能只是相信,要抽查:每个收集器各挑一份缓存下来的内容重开,逐字核对其中两行和它返回的是否一致。Step 5 会为每个存活候选从头重抓权威记录,但那在确认点之后——用户挑哪几篇精读是在这里定下的,而所依据的那些行,还没有人重开核对过。
@@ -1368,48 +879,3 @@ Expansion goes over the core papers, **one paper at a time** — which is also w
 扩展可以按核心论文分派,**一个收集器一篇**——同时跑几个收集器(串行还是并发)由主 agent 自主决定,唯一的硬约束:`source_policy_zh.md` 里的请求预算是**按 host** 算的、不是按 agent 算的,并发分派就把每个 host 的预算按收集器拆开,在各自交办说明里写成具体数字(规约 §6.9)。要用就引那份文件,不要复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
 +++ 1
 扩展按核心论文来,**一次一篇**——这也正是 `source_policy_zh.md` 里请求预算想要的:它是**按 host** 算的、不是按遍数算的,任何并发都会把本 skill 承诺要礼貌相待的每个 host 的真实速率成倍放大。要用就引那份文件,不要复述它的数字——数字以那里为准。每个返回 `candidates: [{title, first_author, year, venue, citation_count, external_ids, found_via, why: <一句话>}]`、`queries_run`、`failures: [{host, error, retries}]`、`papers_seen`,别的都不返回。它不抓任何文献记录,也不判定什么算核心论文;它抓到的原始内容缓存在本次运行自己的 `raw/` 前缀下、一篇论文一个前缀（conventions §6.4）,除此之外不写任何东西。它返回的东西一律不当作 bib 字段来信——Step 5 会为每个存活候选从头重抓权威记录,所以一个抄错的标题代价只是一次匹配失败,转入待人工核查。
-### star-refs-reviewer/SKILL_zh.md
---- 1
-- 核心集确认是完整流程里唯一的强制提问——一次 `star_questionnaire`，对着编号提问，推荐标在表里。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；Step 10.7 的覆写确认在任何级别下仍必答。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。`star_questionnaire` 不可用（无人值守 / 脚本化）时改用纯文本，精读前必须拿到明确答复。
-+++ 1
-- 核心集确认是完整流程里唯一的强制提问——一个普通文本问题，对着编号提问，推荐标在表里。survey 模式的那一问——画像、分类轴、分层清单（Step 10.3）——是判断型问题：`involve=low` 按推荐项直接采纳并记录；Step 10.7 的覆写确认在任何级别下仍必答。`add` 里一个标题解析出多条候选记录、或一条也解析不干净，属于用户所指的歧义——任何级别下都要问，一个直接问题列出候选。提问一律走 `star_questionnaire`，精读前必须拿到明确答复。
-### star-refs-reviewer/references/refs_rubric.md
---- 1
-What a read-only subagent returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`; for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8); for `category`, which Step 6 derives from the whole collected pool and so cannot exist yet; and for §7's follow-ups, citekeys already in `reference.bib` — a file Step 5 has not yet built. A collector that fills those writes a record that is provably false.
-+++ 1
-What a collection pass returns when Step 3's reading fans out. `assets/ref_analysis_template.md` is the *file's* shape, not a delegate's return format: it asks for `read_on`; for `model_id` / `model_trail`, which belong to the session that writes the file (conventions §8); for `category`, which Step 6 derives from the whole collected pool and so cannot exist yet; and for §7's follow-ups, citekeys already in `reference.bib` — a file Step 5 has not yet built. A collector that fills those writes a record that is provably false.
-### star-refs-reviewer/references/refs_rubric.md
---- 1
-What a read-only subagent returns when Step 10.4's reading fans out. One paper each. The return:
-+++ 1
-What a collection pass returns when Step 10.4's reading fans out. One paper each. The return:
-### star-refs-reviewer/references/refs_rubric_zh.md
---- 1
-Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而它要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可被证明为假的记录。
-+++ 1
-Step 3 的精读分派出去时,只读收集遍返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而它要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可被证明为假的记录。
-### star-refs-reviewer/references/refs_rubric_zh.md
---- 1
-Step 10.4 的阅读分派出去时,只读 subagent 返回的就是这一份。一个收集器一篇论文。返回:
-+++ 1
-Step 10.4 的阅读分派出去时,只读收集遍返回的就是这一份。一个收集器一篇论文。返回:
-### star-refs-reviewer/references/survey_spec.md
---- 1
-2. **Search wide.** Step 1's machinery as written — same queries from the profile, same fan-out cap and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
-+++ 1
-2. **Search wide.** Step 1's machinery as written — same queries from the profile, same grouping and formats, same budgets and caching per `references/source_policy.md` — but the pool is kept, not cut to 15: a survey cites breadth. Keep the count ledger as the pool moves: found → deduplicated → screened → tiered, recorded in the survey's Scope section.
-### star-refs-reviewer/references/survey_spec.md
---- 1
-4. **Read.** The deep and abstract tiers may fan out as Step 3 does — one paper per collector, per-host budget split as numbers per `references/source_policy.md`, one `raw/` prefix per paper — each returning the survey collector format in `references/refs_rubric.md`. Below 6 papers to read, skip the fan-out and read them in the main session. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
-+++ 1
-4. **Read.** The deep and abstract tiers are read as Step 3 reads — one paper at a time, requests serialized against the per-host budget in `references/source_policy.md`, one `raw/` prefix per paper — each filling the survey collector format in `references/refs_rubric.md`. A paper whose fetched page names an official repository gets the same main-agent GitHub call as Step 3, completing its score — deep tier as a rule, an abstract-tier paper only when its page was fetched anyway; no page is fetched just to find a repo. No figure is captured here: figures are Step 3's, belonging to a note this mode does not write.
-### star-refs-reviewer/references/survey_spec_zh.md
---- 1
-2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分派上限与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
-+++ 1
-2. **放宽检索。** Step 1 的机器原样跑——同样的画像出检索式、同样的分组方式与返回格式、同样按 `references/source_policy_zh.md` 的预算与缓存——但池子留着，不砍到 15 条：综述靠广度立足。池子每动一步就记一笔账：found → deduplicated → screened → tiered，写进综述的 Scope 一节。
-### star-refs-reviewer/references/survey_spec_zh.md
---- 1
-4. **阅读。** 精读层与泛读层可按 Step 3 的方式分派——一篇一个收集器、host 预算按 `references/source_policy_zh.md` 拆成具体数字、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。待读不足 6 篇就不分派，主会话自己读。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。
-+++ 1
-4. **阅读。** 精读层与泛读层按 Step 3 的方式读——一次一篇、请求对着 `references/source_policy_zh.md` 的按 host 预算串行地打、一篇一个 `raw/` 前缀——各自按 `references/refs_rubric_zh.md` 的 survey 收集器返回格式返回。抓回的论文页挂出官方仓库的，照 Step 3 的规矩由主 agent 补一次 GitHub 调用、把分数补齐——精读层照例都补，泛读层只在本就抓了页面时顺手补；绝不为找仓库专门抓页面。本模式不带图：配图是 Step 3 的事，属于一篇本模式并不写的笔记。

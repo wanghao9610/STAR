@@ -1,6 +1,6 @@
 # Pre-compute Design Check
 
-Run this against the EXEC_PLAN about to be approved, not against the sub-plan as written. The root plan and the leaf passed their own checklists (`star-plan-coach`'s `plan_rubric.md`, `star-plan-decomposer`'s `subplan_rubric.md`); this asks whether the concrete run now on the page still satisfies them, plus two things neither checklist covers. Evidence is the EXEC_PLAN, the leaf sub-plan, and the root plan's §4 — nothing else. An item whose evidence is not in those three files is `unclear`, never `pass`.
+Run this against the completed EXEC_PLAN before implementation, not against the sub-plan as written. The root plan and the leaf passed their own checklists (`star-plan-coach`'s `plan_rubric.md`, `star-plan-decomposer`'s `subplan_rubric.md`); this asks whether the concrete run now on the page still satisfies them, plus two things neither checklist covers. Evidence is the EXEC_PLAN, the leaf sub-plan, and the root plan's §4 — nothing else. An item whose evidence is not in those three files is `unclear`, never `pass`.
 
 Return one entry per item — `item`, `verdict: pass | fail | unclear`, `evidence` (the quoted line, or the exact statement of what is absent), `fix` — and nothing else. Do not rank, do not decide, do not run anything.
 
@@ -18,4 +18,4 @@ Return one entry per item — `item`, `verdict: pass | fail | unclear`, `evidenc
 
 7. **What crosses the STOP line has a stated cost, and the plan can afford it** — every action handed back carries GPU×hours or call count and spend, and the root §4 compute budget is stated. A cost this run cannot fund is a decision for the user, not a surprise for the cost table afterwards.
 
-What this check is not: it does not judge whether the research question is worth asking, does not re-open a settled §5 threshold, and does not stop a run. It reports; the confirmation point that follows is where anything is decided.
+What this check is not: it does not judge whether the research question is worth asking, does not re-open a settled §5 threshold, and does not stop a run. It reports; the executor fixes in-scope execution-plan defects under existing authority and asks only when research scope, acceptance, key inputs, or cost remains unresolved.

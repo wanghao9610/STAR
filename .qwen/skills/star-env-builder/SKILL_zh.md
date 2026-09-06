@@ -2,45 +2,15 @@
 name: star-env-builder
 argument-hint: "[ENV_NAME | add <package>…] [描述] [involve=low]"
 description: >-
-  构建并验证项目的 Python 运行环境，让计划执行有可用的解释器。读取 .env：CONDA_HOME 有效则用它创建 conda 环境 ENV_NAME（参数，缺省为
-  CODE_NAME）；否则在项目根创建 .venv。已存在的环境绝不删除—— 经用户确认后重命名为带日期的备份（运行时真实日期）再重建。依赖按"先到先用"解析：已有的
-  CODE_NAME/requirements* → 打包元数据（pyproject / setup.py / environment.yml）→ 代码 import 扫描，生成结果写成
-  requirements.txt 加 requirements/ 文件夹（requirements.txt 只引用
-  requirements/framework|runtime|optional.txt；conda 专属项进 requirements/conda.txt）。经由唯一一道 安装计划确认点，按 uv >
-  pip > conda 的优先顺序安装，框架 wheel 按探测到的 CUDA 匹配；随后分三层 做跑通性检查（import → 框架/GPU → 项目入口），把 ENV_REPORT.md 和版本清单写入
-  wkdrs/。只要用户运行 star-env-builder、一次运行点名它是下一步动作、想为项目创建或重建 conda 环境或 venv、需要解析并安装依赖、或想验证运行环境时，都应使用本 skill。
-  Bilingual (中/英) — also trigger in English whenever the user wants the project's conda env or venv
-  created or rebuilt, needs dependencies resolved and installed, or wants the runtime environment
-  verified.
+  从已有依赖来源创建、修复或扩展项目的 conda 环境或 venv，并核验导入、框架支持与入口。用于执行缺少可用
+  解释器或需要新增包时；绝不删除已有环境。
 ---
 
-# Research Env Builder — 研究环境构建师
+# Research Env Builder
 
-> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
+调用方式：`star-env-builder [ENV_NAME | add <包名>…] [描述]`。先解析 `add`，其后每个包名都属于该模式；否则使用给定环境名或 `.env` 的 `CODE_NAME`。自然语言可设定需求或授权构建；仅在环境目标、依赖选择、成本或破坏性处理尚未解决时提问。
 
-调用方式：`star-env-builder [ENV_NAME | add <包名>…] [描述]`——要创建的 conda 环境名，不传则用 `.env` 中的 `CODE_NAME`；`add` 则把包安装进 `.env` 已指向的环境，并记入 requirements 布局。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何一个确认点。与上述都对不上的成句文本只是描述：照不带参数那样跑，并先说明这一点。形似参数却什么都对不上的孤立词不是描述——要问清指的是哪一个。`add` 是例外：它之后的每个词都是包名。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），在参数与描述解析之前先剥离。迁移出去的运行派出的受托者会带着 `tier=<档位名>` 令牌（规约 §10.8）；它与 `involve=` 一样在读取其他内容之前剥离，既不是参数也不是描述。
-
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。搭运行环境真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§7 对话纪律、§8 产物登记表、§10 skill 名册——经下面的开场装载进入。另有三节不装载：§6 委派（三层可运行性检查由主 agent 自己跑——原则 6 与 Step 6 都这么写，这里没有哪一步分派）、§9 项目布局（状态与文件规则把它可写的每条路径、不可碰的每棵目录树都列得比那一节更严），以及§11 执行分支，它那九条本 skill 一条都不做——不建、不合并、不弃用分支，也不碰 worktree——而它对其余 skill 的那一条要求，即签出停在别人的执行分支上时提交会随那个叶子一起合并，已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
-
-动手前把它合成一条消息装载——三次 `run_shell_command` 调用，以项目根目录为工作目录，外加对每次运行都会用到的两份参考各一次 `read_file`：安装器策略（Step 5 与 Step 8）`<本 skill 所在目录>/references/installer_policy_zh.md`，与可运行性检查规范（Step 6 与 Step 8）`<本 skill 所在目录>/references/runnable_check_spec_zh.md`，一起发出。
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|2|3|4|5)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-一条消息，五份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。三个模型键搭同一次查询的车：本次运行与它派出的每个子代理，模型都取自这里（§10.8）。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 46 KB，分 14、20、12 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。只服务于某一步的参考文件仍旧留到那一步：`references/dependency_resolution_zh.md`（Step 3）与 `assets/env_report_template_zh.md`（写报告的几步）等到各自的步骤再读，不前置。
-
-
-**复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的全部取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 **把档位模型传给受托者。** 取 `qwen` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `agent` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。先读 `.qwen/agents/star-<tier>.md`，核对 frontmatter 的 `model` 与解析值相同：`bash execs/update.sh --models` 同步这些文件，新会话才会装载。frontmatter 接受模型 id 或 `authType:modelId`；后者在 `.env` 中写成 `qwen:authType:modelId`。不要把原始值传给工具的 `model`：该参数选择已配置的模型等级，且 `fork` 不能覆盖模型。命名代理缺失、过期或不可用时，保持原执行路径；键已设则说明需要同步或重开会话，不在本次运行修复配置。键为空则保留原代理选择。交办说明的只读与写入范围限制照旧，盲读不继承产出该工作的对话，记录受托者的实际会话模型而非请求值。
 
@@ -53,7 +23,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 ## 核心原则
 
 1. **`.env` 是唯一路径来源；从不 activate**（规约 §3）。一次性解析出目标解释器——`ENV_PY = $CONDA_HOME/envs/<ENV_NAME>/bin/python` 或 `<项目根>/.venv/bin/python`——之后所有命令都走这个绝对路径。环境归本 skill 所有：只有它能创建、重命名环境或往里安装。
-2. **一个确认点，其余问题遇到才问。**唯一的确认点是安装计划批准（Step 4）：确认点之前不装任何东西；确认点覆盖的内容之后自主执行。其余问题——覆盖已有环境、CUDA 不匹配、uv 缺失、venv 后端遇到 conda 专属依赖——遇到时用 `ask_user_question` 问。
+2. **展示安装计划，只问仍未解决的实质选择。**清楚要求构建或扩展指定环境，在依赖与成本未超出该请求时已授权对应计划。只有环境目标、依赖集、CUDA 选择、成本或已有环境处理仍未解决时才通过 `ask_user_question` 提问；已定内容自主执行。
 3. **只改名，绝不删除。**已有环境重命名为 `<名称>_<YYYYMMDD>` 作备份——日期取运行时的 `date +%Y%m%d`，绝不编造。过期备份由用户自行清理。
 4. **类别即策略；安装优先顺序是 uv > pip > conda。**framework（CUDA 耦合、锁定 wheel 源）/ runtime（普通 PyPI）/ optional（日志、可视化、开发附加）/ conda.txt（需系统隔离的项）。每类有自己的安装方式与失败处理：优先 uv，逐包改用 pip，conda 只用于白名单且仅限 conda 后端。策略见 `references/installer_policy_zh.md`。
 5. **沿用已有的，只生成缺失的。**生成依赖时打包元数据优先于 import 扫描（`references/dependency_resolution_zh.md`），落入 requirements.txt 加 requirements/ 文件夹，构建验证通过后提交。
@@ -61,9 +31,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 ## 工作流
 
-**本次运行在哪里执行。** 在下面第一步开始之前一次性决定：本次运行留在这里跑，还是迁到它所属档位的模型上（规约 §10.8；名册的档位列写明档位，那里列为例外的模式则压过它）。四条同时成立才迁。开场装载取回的 `STAR_<TIER>_MODEL` 为本宿主给出了一个模型——值里是 `<宿主>:<模型>` 条目时取标签为你所在那棵树的那个，没有属于自己的标签就取不带标签的条目，两者都没有即读作空（规约 §10.8）。该值不是本次运行已经所在模型的别名——别名指模型 id 里的系列名，如 `opus` 之于 `claude-opus-5[1m]`，或 id 本身，上下文窗口后缀不计——所在模型以会话上下文里那条溯源提示给出的解析命令在此运行一次所打印的为准，打印不出就取那条提示写明的 id；两者都没有，运行留在原地。本次运行自己不是带着 `tier=` 令牌的受托者——该令牌与 `involve=` 一样，在读取调用里任何其他内容之前剥离。以及本次运行里不再剩下任何还会问到用户的问题——本清单在每个档位都要问的确认点，或解析出的档位仍会问的裁量题——此刻按本次运行的模式、档位和磁盘上的文件判断，因为受托者无法向用户提问：哪怕只有运行中的发现才会引出的确认点，也算仍然存在；STOP line 的交还算返回而不算提问；档位不问就取推荐项的裁量题不算。迁移的做法：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完并照它执行，原样带上收到的调用文本，再加 `involve=<档位> tier=<档位名>`，`STAR_LANG` 为空时用一行写明对话语言，本 run 手上有 `auto=unattended` 授权时一并带上；等它返回，把回复原样转达，它写下的文件算本次运行的产物，其中的溯源是它的模型。键为空则什么都不变、也不提；键已设而运行留在这里，就用一行说明原因。无法为受托者指定模型的 harness 一律留在原地。
-
-本 skill 第四条永远不成立——安装计划的批准（`add` 模式里是装任何东西之前的那个确认点）每个档位都要问——所以运行留在这里。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 EXEC 档处理整次运行的交接。对具体环境、依赖集与成本的既有授权同样有效；只有必需决定仍未解决时才留在这里。
 
 ### Step 0：预检
 
@@ -81,8 +49,8 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 ### Step 2：环境已存在时
 
-- conda：`conda env list` 中已有 `<ENV_NAME>` → 问一题，三选项：**备份重建**（用 `conda rename` 改名为 `<ENV_NAME>_$(date +%Y%m%d)`；老版 conda 没有 `rename` 则 `create --clone` + `remove`，提示磁盘占用临时翻倍）/ **原地验证修复**（跳过创建；直接进 Step 5 处理失败项或 Step 6——上次被打断时的续跑路径）/ **中止**（干净退出，什么都不动）。
-- venv：`.venv` 已存在 → 同样三选项 → 备份为 `mv .venv .venv_$(date +%Y%m%d)`。报告中注明：改名后的 venv 脚本里嵌着旧绝对路径——只是冻结备份，供查档或从中恢复，不能直接激活。
+- conda：`conda env list` 中已有 `<ENV_NAME>` → 先执行此前已明确的重建或修复选择；否则在**备份重建**、**原地验证修复**、**中止**之间问一次，并说明 clone 备份可能短暂翻倍磁盘占用。
+- venv：`.venv` 已存在 → 同样执行既有选择或问一次；备份为 `mv .venv .venv_$(date +%Y%m%d)`。说明移动后的 venv 因脚本保留旧绝对路径，只是冻结备份。
 - 备份名已被占用 → 追加 `-<HHMM>`（同样取自 `date`）。
 
 ### Step 3：解析依赖（先到先用）
@@ -95,9 +63,9 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 
 生成布局：`requirements.txt` 只放 `-r requirements/framework.txt` 与 `-r requirements/runtime.txt`（optional 以注释给出）；`requirements/framework.txt` 开头写匹配好的 `--extra-index-url`；conda 专属项进 `requirements/conda.txt` 并注明"用 conda 装，不用 pip"。现在写好，Step 7 构建验证后再提交。
 
-### Step 4：确认点——用户批准安装计划
+### Step 4：定下安装计划
 
-以普通文本呈现：后端 + 环境名 + python 版本；采用的依赖来源；各类别包数与关键锁定；torch↔CUDA 匹配（探测到的驱动上限 vs 选定的 wheel 源）；大 wheel 的下载量级；conda.txt 项；已标记的不确定项（CUDA 不匹配、未解析 import、版本冲突）。随后用 `ask_user_question` 问：*批准并构建* / *调整（说明哪里）* / *中止*。所有不确定项在此处解决——绝不悄悄带过。
+展示后端、环境、Python 版本、依赖来源、包数与锁定、torch↔CUDA 匹配、大 wheel 下载量级、conda 专属项及未解决冲突。请求已授权这份确切计划、且没有新增实质成本或选择时，直接执行并记录授权；否则通过 `ask_user_question` 只问一次构建、调整或中止。绝不隐藏不确定项。
 
 ### Step 5：安装（uv > pip > conda）
 
@@ -124,7 +92,7 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 1. 按 `assets/env_report_template_zh.md` 写 `wkdrs/env_<ENV_NAME>_<YYYYMMDD>/ENV_REPORT.md`：身份信息 + `ENV_PY`、机器探测、备份改名、各类别安装结果、带证据的跑通性检查结果表、失败/blocked 项、待用户命令。
 2. `uv pip freeze --python $ENV_PY`（或 `$ENV_PY -m pip freeze`）→ 同目录 `freeze.txt`。
 3. 本次生成的 requirements 文件（含跑通性检查排错时补充的依赖）现在提交：`star-env-builder: add requirements layout`，只暂存 `${CODE_NAME}/requirements*`。
-4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 下游 skill 从 `.env` 解析运行时：主动提出把 `PYTHON_HOME` 指向它（conda：`$CONDA_HOME/envs/<ENV_NAME>`；venv：`<项目根>/.venv`）——必须经明确确认才写。
+4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 该项配置变更已有明确授权时更新；否则展示一行变更并询问，因为它会改变关键运行时输入。
 5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`star-plan-executor <leaf>` 现在有运行时了；`star-flow-status` 查看下一步。
 
 
@@ -138,11 +106,11 @@ awk '/^## /{k=/^## (10)\./} k' docs/mds/star-workflow/research-workflow-conventi
 - 绝不删除环境；备份一律用运行时真实日期改名。绝不编造时间戳。
 - Git：每次运行至多一次提交——生成 requirements 文件时，或 add 模式下装包时——只 stage `${CODE_NAME}/requirements*`（规约 §1）。
 - 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
-- 确认点批准过的安装自主执行，包括框架级别的大下载。无论是否批准都在红线外：`sudo` 或系统包管理器（apt / brew）、驱动或 CUDA toolkit 的系统级安装、CUDA 源码编译（flash-attn 类构建）、超过约 10 GB 的下载、删除任何环境。这些以确切命令写进报告移交。
+- 已授权安装自主执行，包括已披露的框架级下载。STOP line 仍覆盖 `sudo` 或系统包管理器、驱动或 CUDA toolkit 系统安装、CUDA 源码编译、超过约 10 GB 的下载和删除环境；这些只准备准确命令。
 - 尊重用户镜像配置（`PIP_INDEX_URL`、`UV_DEFAULT_INDEX`）；绝不写 `pip config`、`.condarc` 或 `uv.toml`。
 - 重复调用：已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在 → 优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。
 
 ## 对话纪律
 
-- 确认点与所有其余问题都走 `ask_user_question`——每次调用只问一题，都带推荐项。不可用时（无头/脚本化）改用纯文本，仍一次一题；安装计划必须先收到明确的批准文字才能开始安装。
+- 按规约 §7.2 与 §7.7 处理。同一目标、包集与已披露成本的既有授权继续有效；只有这些实质输入仍未解决时才通过 `ask_user_question` 问一个具体问题，工具不可用时退回简洁纯文本。
 - `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。

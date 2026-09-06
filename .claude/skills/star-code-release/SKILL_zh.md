@@ -1,46 +1,15 @@
 ---
 name: star-code-release
 description: >-
-  为项目公开发布做准备：把散落的代码收集进 ${CODE_NAME}/（从 .env 读取）、打磨对外发布的部分、编译出项目
-  自己的 README.md。扫描 tasks/、wkdrs/ 和项目根下值得随版本发出去的代码，只移入通过三选一证据
-  检验的文件（README 会引用它、某个已执行叶子的交付物或完成判据需要它、或它能复现 wkdrs/results/results.md
-  中的某个数字），并严格按 metds/codearc.md 的放置规则确定去处——绝不自造目录。打磨只覆盖对外发布的部分（本次
-  移入的文件、入口、配置、README 展示的公共 API），逐项批准且不改行为。README 按一张成文的映射表逐节
-  编译自 metds/overview.md、framework.md、dataset.md、training.md、evaluation.md、results.md、
-  codearc.md、UPSTREAM.md、requirements* 与 reference.bib：数字只来自结果汇总表，凡打印的命令都先
-  验证其存在。最后跑一遍发布前检查（不通过就不能发布）——提交进仓库的密钥凭据、机器本地绝对路径、内网主机名、与已记录的
-  上游许可证冲突的 LICENSE——并写出 wkdrs/release/RELEASE_<date>.md。它只做发布准备，绝不代为发布：
-  不 push、不建仓库、不打 tag、不上传权重。当用户运行 star-code-release，想开源 / 发布项目、想要
-  一份仓库 README，或想把散在 tasks/ 的代码收集进代码库时使用。Bilingual（中/英）。
+  为开源发布收集有证据支撑的代码、打磨公开文件、从已核实产物编译 README.md，并检查密钥、路径、许可
+  证和命令。用于发布准备或 README 工作；绝不代为发布、push、打 tag 或上传。
 ---
 
-# Research Code Release — 收集、打磨、成文
+# Research Code Release
 
-> 本文件是 `SKILL.md` 的中文对照版，随英文版同步维护，供人阅读；运行时不装载它——指令以 `SKILL.md` 为准，中文对话按规约 §7.6 用中文回复，并把开场装载与各步骤点名的资源换成 `_zh` / `.zh-CN` 版本（中文措辞以规约 §0 词汇表为准）。若两版冲突，以 `SKILL.md` 为准。
+调用方式：`star-code-release [gather | polish | readme | check] [描述]`。先解析阶段再装载来源：未指定阶段则跑 `gather → polish → readme → check`，显式阶段只跑该阶段；`check` 只写报告。其余自然语言可约束或授权所选工作。
 
-调用方式：`star-code-release [gather | polish | readme | check] [描述]`——不带参数跑完整流程（gather → polish → readme → check）；带阶段名只跑该阶段。`check` 除报告外只读。其后剩下的都是描述（规约 §7.12）：用你自己的话说明这次要做什么——它是本次运行可采纳、可写进产物的线索，替代不了任何确认点。与上述都对不上的成句文本就只是描述：照不带参数那样跑，并先说明这一点。形似参数、却什么都对不上的孤立词不是描述——要问清指的是哪一个。可选的 `involve=low|medium|high` 可与任意参数一同给出（如 `… involve=low`）：它设定本次运行的参与度档位（规约 §7.7），既不属于参数也不属于描述，两者解析之前先剥离。迁移出去的运行派出的受托者会带着 `tier=<档位名>` 令牌（规约 §10.8）；它与 `involve=` 一样在读取其他内容之前剥离，既不是参数也不是描述。
-
-**通用规约。** `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md`（英文：`research-workflow-conventions.md`）是所有 STAR skill 共享的基线；本文件只写本 skill 特有的部分，比基线更严处以本文件为准。发布流程真正用到的部分——§0 词汇表、§1 git、§2 红线、§3 `.env` 运行时、§4 真实日期、§5 计划名解析、§6 委派、§7 对话纪律、§8 产物登记表、§9 项目布局、§10 skill 名册——经下面的开场装载进入。另有一节不装载：§11 执行分支,它那九条本 skill 一条都不做——不建、不合并、不弃用分支,也不碰 worktree——而它对其余 skill 的那一条要求,即签出停在别人的执行分支上时提交会随那个叶子一起合并,已在状态与文件规则里紧挨着它限定的那条提交规则就地重述。文档的前言同样不装载，它那条优先级规则就是本段开头写的那句。运行中万一需要其中某一节，就整份读进来。
-
-动手前把它合成一条消息装载——三次 Bash 调用，以项目根目录为工作目录，一起发出。
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-```bash
-awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.zh-CN.md
-```
-
-一条消息，三份结果。`STAR_LANG` 定回复语言、`INVOLVE` 定提问档位，两行都折进这条消息，谁也不另占一趟往返。三个模型键搭同一次查询的车：本次运行与它派出的每个子代理，模型都取自这里（§10.8）。几次调用分开发，是因为每份工具结果各有自己的大小上限：结果一旦超过 30 KB 左右就会被存成文件，要再读一次才拿得回来——正是这条消息要避开的那趟往返——而规约摘录合计约 55 KB，分 20、20、14 三次带回。每个 `awk` 只打印它上面点名的那些节，别的都不打印；若其中某一节没有出现在打印结果里——同步过来的规约副本可能节号不同——就改为整份读入。开场再没有别的无条件装载：`references/` 下的参考文件跟着用到它的阶段到来，绝不前置。
-
-
-**复用上一次装载。** 上面那份装载里，凡是文本此刻仍能在本轮对话中逐字看到的部分就跳过不读——同一份规约文件、同一种语言、至少覆盖本文件点名的那些节，同样的参考文件，以及那次 `.env` 探测取到的全部取值。看不到的部分照旧读，仍用上面那一条消息发出。缺口只是规约的几节时，就只补读那几节——用按 `## ` 标题筛选的 `awk` 恰好打印点名的节——而不是把整个文件重读一遍。两种情况不算看得到：上下文压缩后只剩摘要而正文已经不在；以及只记得自己读过。拿不准就重读一遍。唯独采集脚本的摘要不能这样复用（上面装载了它的话）：每次都重新跑一次扫描。若整份装载都已在手，开场那条消息就整个省掉；若只剩扫描一项，就让它单独发出。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 **把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `Agent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 
@@ -55,15 +24,13 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 1. **README 的每一行都能追到盘上的产物。** README 是编译出来的，不是写出来的：逐节来自 `metds/overview.md`、`framework.md`、`dataset.md`、`training.md`、`evaluation.md`、`wkdrs/results/results.md`、`metds/codearc.md`、`${CODE_NAME}/UPSTREAM.md`、`${CODE_NAME}/requirements*`、最新的 `wkdrs/env_*/ENV_REPORT.md` 和 `metds/refs/reference.bib`。映射表见 `references/readme_map_zh.md`，并规定了来源缺失时该节怎么处理。为一个没人写下来的方法编一段听上去合理的话，就是编造。
 2. **数字只来自结果汇总表；命令只来自磁盘。** README 里每个数字都连同背后的 run 从 `wkdrs/results/results.md` 抄下来——不来自 `EXEC_LOG`，不来自 digest（`star-expt-digest` 自己就写明了），更不来自记忆。README 打印的每条命令都先解析：脚本文件与配置路径存在、入口可导入。解析不了的就删掉或标为未验证。最高级说法是主张："state-of-the-art"、"outperforms X"、"best" 只在结果汇总表自己的结论支撑时才出现。
 3. **移入要有证据；确定去处要照规范。** 一个文件离开 `tasks/`、`wkdrs/` 或项目根，必须满足三条之一：README 会引用它；某个已执行叶子的 §4 交付物或 §5 完成判据需要它；或它能复现 `wkdrs/results/results.md` 里的某个数字。其余原地不动——`tasks/` 里的草稿文件本来就**该**是可丢弃的（规约 §9），发布不是收拾整个仓库的借口。目的地取自 `metds/codearc.md` §2；放置规则覆盖不到的候选是交给 `star-code-architect` 的架构缺口，绝不在这里自造目录。评分表见 `references/gather_rubric_zh.md`。
-4. **只打磨对外发布的部分。** 范围内：本次移入的文件、README 会打印的入口 / 配置 / `execs/scpts/*.sh`、以及 README 展示的公共 API——清晰度、docstring 覆盖读者会去查的地方、`codearc.md` 符合度、移动留下的残留、调试打印和被注释掉的实验。每处改动逐项批准且不改行为。`${CODE_NAME}/` 其余部分的六维审计属于 `star-code-reviewer`，绝不在这里重造；代码库还没审过时，先跑它。
+4. **只打磨对外发布的部分。**范围包括本次移入的文件、README 打印的入口/配置/脚本和展示的公共 API。已授权的 `polish` 或完整流程内，例行且不改行为的修复自主完成；只有发现会改变行为、范围、验收、成本、关键输入或覆盖有价值工作时才问。更广审查属于 `star-code-reviewer`。
 5. **发布前检查项是阻断性的，且在宣布"就绪"之前就查。** 提交进仓库的 `.env`、API 或 W&B token、`/home/<user>` 或 `/Users/<user>` 路径、内网集群主机名、与 `codearc.md` §5 记录的上游许可证冲突的根 LICENSE——每一条都是**发布阻断项**，带 `file:line` 报出。有未清阻断项的运行，结论就写阻断，绝不报告项目可以发布。清单见 `references/release_checklist_zh.md`。
 6. **你做发布准备，绝不代为发布。** 不 `git push`、不 `gh repo create`、不加 remote、不打 tag、不发 GitHub release、不把权重或数据上传到任何地方。发布不可逆，是用户的决定——你把命令交回去。红线原样适用：不训练、不做全量评测、不做高成本 API 调用——结果汇总表里没有的数字就留成 TODO。
 
 ## 工作流
 
-**本次运行在哪里执行。** 在下面第一步开始之前一次性决定：本次运行留在这里跑，还是迁到它所属档位的模型上（规约 §10.8；名册的档位列写明档位，那里列为例外的模式则压过它）。四条同时成立才迁。开场装载取回的 `STAR_<TIER>_MODEL` 为本宿主给出了一个模型——值里是 `<宿主>:<模型>` 条目时取标签为你所在那棵树的那个，没有属于自己的标签就取不带标签的条目，两者都没有即读作空（规约 §10.8）。该值不是本次运行已经所在模型的别名——别名指模型 id 里的系列名，如 `opus` 之于 `claude-opus-5[1m]`，或 id 本身，上下文窗口后缀不计——所在模型以会话上下文里那条溯源提示给出的解析命令在此运行一次所打印的为准，打印不出就取那条提示写明的 id；两者都没有，运行留在原地。本次运行自己不是带着 `tier=` 令牌的受托者——该令牌与 `involve=` 一样，在读取调用里任何其他内容之前剥离。以及本次运行里不再剩下任何还会问到用户的问题——本清单在每个档位都要问的确认点，或解析出的档位仍会问的裁量题——此刻按本次运行的模式、档位和磁盘上的文件判断，因为受托者无法向用户提问：哪怕只有运行中的发现才会引出的确认点，也算仍然存在；STOP line 的交还算返回而不算提问；档位不问就取推荐项的裁量题不算。迁移的做法：派一个可写子代理跑在那个模型上，交办说明为——把本 skill 的说明文件整份读完并照它执行，原样带上收到的调用文本，再加 `involve=<档位> tier=<档位名>`，`STAR_LANG` 为空时用一行写明对话语言，本 run 手上有 `auto=unattended` 授权时一并带上；等它返回，把回复原样转达，它写下的文件算本次运行的产物，其中的溯源是它的模型。键为空则什么都不变、也不提；键已设而运行留在这里，就用一行说明原因。无法为受托者指定模型的 harness 一律留在原地。
-
-本 skill 只有 `check` 模式能迁：其他阶段要问的确认点取决于它们的发现。迁出去的 `check` 运行写报告时，不必再按对话纪律在提问工具不可用时要求的纯文本批准——迁移本身已经确定没有剩下要问的问题。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 处理整次运行的交接。完整流程及 `gather`、`polish`、`readme` 使用 EXEC，`check` 使用 READ。仍有必需用户决定时不交接。
 
 ### Step 0：定向并解析阶段
 
@@ -78,16 +45,16 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 1. 按 `references/gather_rubric_zh.md` 列出的候选根扫描：`tasks/<plan>/`、`wkdrs/<run>/` 里的脚本与复现配置、项目根下的散落文件、`execs/scpts/`。绝不扫 `datas/`、绝不扫 `inits/`、绝不扫生成产物。
 2. 对每个候选跑三选一移入检验，记录通过的是哪一条及其证据——README 的哪一节、计划的 §4/§5 哪一行、结果汇总表的哪一行。一条都不过的原地保留，列为 `keep in place`，不算失败。
 3. 为每个被移入的候选从 `codearc.md` §2 解析目的地，检测 `${CODE_NAME}/` 中的近似重复，标注动作 `move` / `merge` / `keep in place` / `route`。路径被计划文件写明的候选标 `plan-referenced`：移动它会让那行计划文本过期，而计划文本不归你改——该行要带上会过期的确切行号，让用户看得见后果再批准。
-4. 候选超过约 15 条时先说明，与用户一起收窄，再去搭这张表。每一行标注的证据行都要在确认点之前重开一遍——它批准的是文件搬家，不该有哪一行靠没人打开过的证据走到这里。
-5. **确认点 1：** 以普通文本呈现移入表——路径、证据、目的地、动作、风险——然后经 AskUserQuestion 询问。候选 ≤4 条时用 multiSelect 逐行勾选；更多时提供 *全部批准* / *除某几条外全部批准（在 Other 里写行号）* / *先解答我点名的几行* / *重做*——规约 §7.13 定的"先摊清单、再一次提问"。一条都不批准是有效结果 → 直接进 Step 2。
-6. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用旧路径的调用点。每行做完，主 agent 自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 恢复原样，标 `blocked`，继续其余。
+4. 候选超过约 15 个时说明数量；只有请求尚未定下推广范围时才收窄。每行定案前重新打开所引证据。
+5. 呈现推广表——路径、证据、目标位置、动作、风险——并应用已经授权的行选择。移动集合仍未解决时，通过 AskUserQuestion 按规约 §7.13 对可见清单问一次。一条都不批准是合法结果 → 跳到 Step 2。
+6. 逐条执行已批准的行：移动（文件被 git 跟踪时用 `git mv`，否则普通移动——`wkdrs/` 下只有 `*.md` 被跟踪），然后修被移动文件的 import 以及每个引用旧路径的调用点。每行做完，自己复核，绝不采信自报：对目的地跑 `python -m compileall -q`，并在全仓库 grep 旧路径，证明没有残留引用。某行失败 → 恢复原样，标 `blocked`，继续其余。
 7. 提交本阶段（只 stage 被移入的路径及其修好的调用点）：`star-code-release: promote <n> file(s) into ${CODE_NAME}/`。
 
 ### Step 2 —— `polish`：对外发布的部分
 
 1. 解析对外发布的部分：Step 1 移入的文件，加上 README 会打印的入口、配置、`execs/scpts/*.sh`，加上它会展示的公共 API。报出文件数。范围之外的东西不读、不收问题项。
 2. 按 `references/gather_rubric_zh.md` 的"对外发布的部分打磨"一节收集问题项——codearc 符合度、README 提到之物的 docstring、搬移后的残留引用、调试输出、被注释掉的实验代码、脚本里的过期路径。这些文件之外的问题项只记录待转交，绝不动手修。逐条询问之前，先把发现落到正文——每条一行：`file:line`、是什么问题、怎么改。
-3. 用**一次** AskUserQuestion 就这份清单定下来（规约 §7.13）——*全部按清单修* / *除我点名的以外全部修* / *先解答我点名的几条* / *一条都不修*，标出推荐。问题项 ≤4 条时，直接就问题项发问（multiSelect）。被点出来的条目开启第二轮，形状照旧。每处批准的修改写入后对该文件重跑 `compileall`；复检失败就把该处恢复原样并标 `reverted`。
+3. 对 `polish` 或完整流程已覆盖的例行不改行为问题自主修复。实质或破坏性问题写进带编号的可见清单，若该项尚未明确授权，则通过 AskUserQuestion 按规约 §7.13 问一次。每个触及文件重跑 `compileall`；复核失败就还原并标 `reverted`。
 4. 有任何改动完成时提交本阶段：`star-code-release: polish release surface — <summary>`。
 
 ### Step 3 —— `readme`：编译 README
@@ -97,10 +64,10 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 1. 从 `references/readme_map_zh.md` 选定小节集合：必备节始终出现（来源缺失时带一条写明产出方 skill 的 `TODO`），空则省略的节直接删掉，不注水。
 2. 填 `assets/readme_template_zh.md`，按映射表的原样转录规则——数字连同 run 从结果汇总表原样抄，命令从解析过的脚本原样抄，图片路径只在文件存在时写。
 3. 处理 `README.md` 已有内容，三种情况：
-   - **带本 skill 的生成标记** → 先给出分节变更清单——每节一行：保留 / 改写 / 新增 / 删除，以及变了什么——再经 AskUserQuestion 逐节询问。与本 skill 上次生成结果不同的节即人工改过：默认**保留**，并说明这一点。
-   - **是 STAR 自己的模板 README**（它的图标、"Systematic Toolchain for AI Research" 标语、STAR 项目结构块）→ 说明它描述的是模板、不是这个项目，确认一次再替换。编译出的 README 保留 "Built with STAR" 页脚。
-   - **其他人工撰写的 README** → 不做"比对即覆盖"。说明它现在有什么、编译会换成什么，然后询问。保持原样是有效结果；编译到用户指定的另一个路径也是。
-4. `README.md` 用英文。根计划的 `language` 是 `zh` 时，经 AskUserQuestion 提供 `README.zh-CN.md`；两者都存在时各自带上互链的 `**Language:**` 行。中文 README 里，技术术语、指标名、数据集名和文件路径保持英文。
+   - **带本 skill 的生成标记** → 给出一张分节变更清单。明确要求更新这份生成 README 已授权所列编译；否则只通过 AskUserQuestion 对未解决章节问一次。人工改过的章节默认**保留**。
+   - **是 STAR 自己的模板 README** → 明确要求用项目 README 替换模板已构成授权；否则说明影响并通过 AskUserQuestion 问一次。保留 "Built with STAR" 页脚。
+   - **其他人工撰写的 README** → 只有用户在识别其内容后明确授权替换才覆盖；否则保持原样或编译到用户点名路径。
+4. `README.md` 用英文。仅在用户要求时创建 `README.zh-CN.md`；两者都存在时互链。中文 README 中的技术术语、指标名、数据集名与路径保留英文。
 5. 把溯源标记写成文件第一行——用 HTML 注释，绝不用 YAML frontmatter，否则 GitHub 会把它渲染成页首的一张表。标记里带 skill 名、日期、`model_id`，以及各来源在读取时带的日期（规约 §8；该标记就是这份产物的 header line）。
 
 ### Step 4 —— `check`：发布前检查
@@ -114,7 +81,7 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 ## 状态与文件规则
 
-- 写入仅限：`README.md`（以及被提议并接受时的 `README.zh-CN.md`）、移入 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、对外发布的部分内逐项批准的打磨改动、`wkdrs/release/RELEASE_<date>.md`。
+- 写入仅限：`README.md`（以及用户要求的 `README.zh-CN.md`）、移入 `${CODE_NAME}/` 的文件及被其移动破坏的调用点、已授权的范围内打磨改动、`wkdrs/release/RELEASE_<date>.md`。
 - 绝不写 `metds/**`——不写计划、不写 `codearc.md`、不写编译出的方法文档、不写 `metds/refs/*`。它们各有产出方；运行动手改自己的输入，就不算编译了。绝不写结果汇总表 `wkdrs/results/`（`star-expt-analyst aggregate` 的）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`.env`、`datas/`、`inits/`。
 - `LICENSE`、`CITATION*` 和 `${CODE_NAME}/UPSTREAM.md` 只读只引用，绝不改写。许可证冲突交给用户处理——选哪个 license 不是 skill 的决定。
 - 什么都不删。被移入的文件从原处移走；没移入的候选原地不动。`tasks/` 和 `wkdrs/` 只被扫描候选，绝不被"顺手清理"。
@@ -127,6 +94,6 @@ awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conven
 
 ## 对话纪律
 
-- 所有确认点都走 AskUserQuestion，一次一个问题：参数无法识别时的阶段选择、来源大面积缺失时的就绪决策、移入表的 确认点 1、打磨问题项清单、每处 README 小节变更、STAR README 或人工 README 的替换确认、以及中文 README 的提议。若该工具不可用（无人值守 / 脚本化），改用纯文本，仍然一次一个，任何写入前都必须拿到明确批准。
+- 未解决决定按规约 §7.2、§7.7 与 §7.13 处理。清楚点名阶段与确切写入范围的请求已经构成授权，不重复询问。只通过 AskUserQuestion 为阶段歧义、缺少关键来源仍要编译、未定推广集合、实质打磨变化，或尚未具体授权的覆盖提问；工具不可用时用简洁纯文本。
 - **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——打磨轮的问题项、分节变更清单。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过、不是被压缩。
 - 用用户的语言回复。无论对话语言为何，`README.md` 都是英文；发布报告跟随根计划的 `language`（没有计划时跟随对话语言）；中文文档里技术术语保持英文。

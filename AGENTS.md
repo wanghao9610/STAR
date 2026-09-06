@@ -1,13 +1,13 @@
 # Agent Instructions
 
-Behavioral guidelines to reduce common LLM coding mistakes. They bias toward caution over speed; for trivial tasks, use judgment.
+Project constraints for completing the user's task with proportionate care.
 
 ## 1. Think Before Coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Resolve routine details. Surface consequential uncertainty.**
 
-- State your assumptions explicitly. If something is unclear, stop, name what's confusing, and ask.
-- If multiple interpretations exist, present them - don't pick silently.
+- Use project conventions for routine, reversible details and continue; state assumptions that affect the result.
+- Ask when the answer would change the research objective, acceptance criteria, key inputs, cost, or authority. While waiting, continue independent work already authorized.
 - If a simpler approach exists, say so. Push back when warranted.
 
 ## 2. Simplicity First
@@ -30,21 +30,21 @@ The test: Every changed line should trace directly to the user's request.
 
 ## 4. Goal-Driven Execution
 
-**Define success criteria. Loop until verified.**
+**Define completion and carry the authorized task through verification.**
 
-- Turn the task into a check you can run: "add validation" -> tests for invalid inputs that pass; "fix the bug" -> a test that reproduces it, then passes; "refactor X" -> tests pass before and after.
-- For multi-step tasks, state the steps and the check that closes each one.
+- Identify the requested outcome and the evidence that establishes it. Use a regression test for a behavioral bug when practical; a small documentation or formatting change may need only a direct inspection.
+- For substantial multi-step work, state the actions and completion check. Existing explicit authorization remains valid for its stated scope; do not ask for the same approval again. A request to inspect, explain, or review without changes ends with that deliverable and never starts a writing successor.
 
 ## 5. Research Workflow
 
 **This project uses the STAR research workflow. Its records are files, not chat history.**
 
 - Plans live in `metds/plans/`; each leaf's execution record is under `wkdrs/<run>/` (`EXEC_PLAN.md`, `EXEC_LOG.md`).
-- Run the status skill first when you do not know where things stand: it reads the plan tree and the reports on disk and names the single next action.
+- Run the status skill when resuming research or choosing the next research task and the state is unknown. A scoped code or documentation task reads only the context it needs.
 - The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
 - A skill step whose written procedure dispatches subagents already carries the user's request to run it: dispatch without asking, even where a host instruction allows delegation only when the user has asked. An outright ban, or a host offering no delegation, still stops it; the grant covers the dispatch itself, not what a delegate may write.
 - `.env` `STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` name the model a skill run, and each delegate it dispatches, belongs on — research judgment, production, read-only work. Each key holds one model name, or comma-separated `<harness>:<model>` entries so one `.env` serves every tree — a run takes the entry tagged with the tree it runs from and reads the key as empty where none is. Which run takes which, and when a run relocates itself to one of them, is `docs/mds/star-workflow/research-workflow-conventions.md` §10.8; an empty key changes nothing.
-- Do not hand-edit generated reports under `wkdrs/`, and do not edit `docs/mds/star-workflow/`: `execs/update.sh` overwrites it.
+- Do not hand-edit generated reports under `wkdrs/`. In downstream projects, `docs/mds/star-workflow/` is replaced by `execs/update.sh`; maintain shared rules in the STAR upstream through `.github/CONTRIBUTING.md`, then sync them.
 
 ## 6. Reply Language
 
@@ -74,7 +74,7 @@ The test: Every changed line should trace directly to the user's request.
 - A plan's own tool scripts and its execution intermediate files belong in `tasks/<plan-name>/`; the scripts are durable, the rest is disposable scratch.
 - A dropped plan's files move aside, names unchanged, to `metds/plans/dropped/`, `wkdrs/dropped/<run>/`, `tasks/dropped/<plan-name>/`, and `execs/scpts/dropped/` — the plan-revision skill's drop does the move, a revival reverses it.
 - `execs/` holds launcher scripts only: `run.sh` and `update.sh` at its root, per-run scripts in `execs/scpts/<run>.sh`. Anything that is not a launcher does not go there at all.
-- `docs/` holds project documentation: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. `docs/mds/star-workflow/` is upstream-managed and overwritten by `execs/update.sh`; do not edit it.
+- `docs/` holds project documentation: Markdown in `docs/mds/<topic>/`, HTML pages in `docs/htmls/`, images and static assets in `docs/srcs/`. Shared workflow guides are maintained upstream as described above.
 - Output names must distinguish tasks, experiments, or runs.
 
 ## 9. Project Runtime
@@ -100,6 +100,6 @@ Before running Python, tests, or dependency checks:
 
 **Prove the change works before calling it done.**
 
-- Run the narrowest relevant checks first; broaden them when changes touch shared behavior, public interfaces, or risky paths.
+- Run the narrowest relevant checks first. After they pass, broaden or repeat only for new changes, failures, or unresolved risks involving shared behavior, public interfaces, or risky paths.
 - If a check cannot be run, say why and name the remaining risk.
 - Report what was verified, with evidence - not just that it "works."

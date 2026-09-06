@@ -30,45 +30,16 @@ allowed-tools:
   - Edit(wkdrs/**)
   - Write(wkdrs/**)
 description: >-
-  Adopt an already-started project into STAR without disturbing it. Phase `survey` inspects the repository
-  read-only (source layout, runtime, data / weights / output locations, entrypoints, git history, prior
-  runs), confirms the mapping, then puts the mechanical setup in place — writes .env, reaches large
-  existing directories by symlink instead of moving them, wraps existing launch commands into execs/scpts/
-  — and records a work inventory of what is already built, run, and concluded in metds/adopt.md, with the
-  user's chosen historical runs under wkdrs/. Phase `backfill` runs once the plan tree exists: it matches
-  that inventory to the leaves and, per leaf and only on the user's confirmation, records exec_status /
-  exec_runs so the tree shows real progress instead of 0%. Use when the user runs star-proj-adopt, wants
-  to bring an existing / partially finished project into STAR, asks how to onboard a repo that did not
-  start from the template, or needs finished work reflected in the tree. Bilingual (en/zh).
+  Adopt an existing project into STAR by surveying it, mapping files and historical work, adding
+  minimal workflow scaffolding, then backfilling confirmed progress into a later plan tree. Use for
+  repositories that did not start from STAR; preserve existing data and code.
 ---
 
 # Research Project Adopt — bring an in-progress project into STAR
 
-Match the user's language. `.env`'s `STAR_LANG` replaces it wherever it is set (conventions §7.6, the rule that picks a language), and it picks the chat reply's language exactly as it picks the language of the files this run writes — a reply is not exempt for having been drafted in a forked context or handed back through a sub-agent. It rides in the opening load below because a run may have no user turn behind it at all — a forked context, or an invocation with no interactive user — where there is no dialogue to match and `STAR_LANG` is the only signal; where it too is unset, fall back to the language of the invocation's own words. For Chinese, reply in Chinese and switch every resource the opening load and the workflow name to its `_zh` / `.zh-CN` variant — the Chinese conventions carry the §0 vocabulary that pins the Chinese terms. The instructions stay this file: `SKILL_zh.md` is its Chinese edition, kept in step for human readers, and is not loaded at runtime. Any other language loads the unsuffixed resources. If `SKILL_zh.md` conflicts with this file, this `SKILL.md` is authoritative.
+Invocation: `star-proj-adopt [survey | backfill] [DESCRIPTION]`. Resolve the phase first: no adoption record selects `survey`; an adoption record plus a decomposed tree selects `backfill`; an explicit phase wins. Re-running `survey` updates the record. Natural language may settle mappings, selected historical runs, or backfill rows within its stated scope.
 
-Invocation: `star-proj-adopt [survey | backfill] [DESCRIPTION]` — no argument auto-selects: no `metds/adopt.md` → `survey`; an adoption record plus a decomposed plan tree (≥1 sub-plan carrying `parent:`) → `backfill`. An explicit phase name overrides detection; re-running `survey` on an adopted project re-inspects and updates the record rather than starting over. Anything left is a description (conventions §7.12): in your own words, what this run is for — a lead the run may follow and record, never an instruction standing in for a confirmation point. Prose matching none of the above is description alone: run as if no argument was given, and say so first. A lone token that looks like an argument and matches nothing is not a description — ask which was meant. An optional `involve=low|medium|high` token may accompany any argument (e.g. `… involve=low`): it sets this run's `involve` level (conventions §7.7) and is stripped before argument or description is read. A `tier=<name>` token, which the delegate of a relocated run carries (conventions §10.8), is stripped the same way as `involve=` before anything else is read, and is neither argument nor description.
-
-**Shared conventions.** `docs/mds/star-workflow/research-workflow-conventions.md` (Chinese: `research-workflow-conventions.zh-CN.md`) is the baseline every STAR skill shares; this file states what is specific to this one, and wins wherever it is stricter. What an adoption acts on — §0 vocabulary, §1 git, §2 the STOP line, §3 `.env` runtime, §4 real dates, §5 plan-name resolution, §6 delegation, §7 dialogue, §8 the output table, §9 project layout, §10 the skill roster — arrives through the opening load below. One section stays out: §11 execution branches, whose nine items this skill never performs — it creates, merges and discards no branch and no worktree — and whose one rule for every other skill, that a commit made while the checkout sits on another run's execution branch rides into that leaf's merge, is restated in State & File Rules beside the commit rule it qualifies. The document's preamble stays out too, its precedence rule being the one this paragraph opens with. Read the whole file if a run ever needs it.
-
-Before acting, load it in one message — three Bash calls with the project root as the working directory, plus a `Read` of `<this skill's directory>/references/adopt_spec.md`, all sent together.
-
-```bash
-grep -sE '^(STAR_LANG|INVOLVE|STAR_(PLAN|EXEC|READ)_MODEL)=' .env || echo 'STAR_LANG / INVOLVE / STAR_*_MODEL: unset'   # reply language, question level, model tiers (§7.6, §7.7, §10.8)
-awk '/^## /{k=/^## (0|1|2|3|4|5|6)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (7|8)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-```bash
-awk '/^## /{k=/^## (9|10)\./} k' docs/mds/star-workflow/research-workflow-conventions.md
-```
-
-One message, four results. `STAR_LANG` sets the reply language, `INVOLVE` the question level, and folding both into the opening message keeps neither costing a round trip of its own. The three model keys ride the same lookup: they are where this run and every delegate it dispatches take their model from (§10.8). The calls stay separate because each tool result carries its own size limit: a result past roughly 30 KB is written out to a file that costs a second round trip to read back — exactly the round trip the one message exists to avoid — and the conventions excerpt is about 56 KB in total, split 21, 21 and 14 across its three calls. Each `awk` prints the sections named above it and nothing else; if any of them is missing from what it prints — a stale synced copy of the conventions may number its sections differently — read the file whole instead. `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) is the spec the Workflow below follows — the survey recipe, the inventory format, and the symlink / wrapper rules. The `assets/` templates are not part of the load: each is read at the step that writes from it.
-
-
-**Reusing an earlier load.** Skip any part of the load above whose text you can still see verbatim in this conversation — the same conventions file in the same language, covering at least the sections named here, the same reference files, and every value the `.env` lookup returned. Read whatever you cannot see, in the one message described above. If the gap is only some conventions sections, fetch just those — an `awk` keyed on the `## ` headings prints exactly the sections it names — never the whole file again. Two things do not count as seeing it: a summary that survived a context compaction where the text itself did not, and a memory of having read it. When in doubt, read it again. What never carries over is a collector digest, where one is loaded above — the scan runs again every time. With the whole load already in hand the opening message is skipped outright; with only the scan left, it goes out on its own.
+**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
 **Passing a tier model.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `Agent`'s `model` for every delegate of that tier; omit it when empty. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 
@@ -80,21 +51,19 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`s
 
 ## Core Principles
 
-1. **Never overwrite, never move, never rename.** The one constraint the whole skill turns on. Existing files keep their content, existing directories their location and name, and the environment the project already runs in is the one STAR uses. A conflict is a question, never a resolution: when a path you would write exists, show its content and ask. `CODE_NAME` points at whatever the source directory is already called.
+1. **Never overwrite, never move, never rename.** Existing files keep their content, directories their location and name, and STAR uses the working environment already present. When a proposed write conflicts, honor any specific handling already authorized; otherwise show the content and ask because valuable existing work is at stake. `CODE_NAME` keeps the source directory's current name.
 2. **Reach large directories, do not relocate them.** Existing data, weights, and output trees are wired in with symlinks at `datas/`, `inits/`, `wkdrs/` so `DATA_DIR` / `INIT_DIR` / `WORK_DIR` resolve, while every absolute path in existing code and scripts keeps working. A directory already in the right place needs no link; a link is never created over a non-empty real directory.
 3. **Evidence, not recall.** Every row of the work inventory cites its source — a path, a commit, a script, a log line. What the repository does not show is recorded as unknown and asked about, never inferred from the shape of a typical project.
 4. **Reconstruction is always labeled.** A record written after the fact is not an execution record. Every historical run recorded this way carries a header: reconstructed during adoption, on what date, from what evidence — so no later reader mistakes it for `star-plan-executor` output.
 5. **Adoption does not invent research strategy.** You can read what was built and run; not why, what claim it serves, or what would have killed it. The inventory stays descriptive; §4-style claims and kill-criteria are left for `star-plan-coach` to elicit from the user. A plan tree fabricated from a git log is worse than no plan tree.
-6. **The narrow write on plans.** `metds/plans/*` belongs to the coach, decomposer, executor, and reviser (conventions §8). Your one exception is frontmatter `exec_status:` and `exec_runs:` on leaves, in `backfill`, each leaf individually confirmed by the user. Plan bodies, `status:`, `finalized:`, `children:`, `depends_on` — never yours, in either phase.
-7. **Two confirmation points; autonomous between them.** Confirmation point 1: the user confirms the survey mapping (source, runtime, data / weights / outputs) before anything is written. Confirmation point 2: the user picks which historical runs get recorded. `backfill` adds a third of its own, per-leaf. Never do work a confirmation point did not cover.
+6. **The narrow write on plans.** `metds/plans/*` belongs to the coach, decomposer, executor, and reviser. The sole exception is `exec_status:` and `exec_runs:` on leaves in `backfill`, limited to rows the user has already selected or accepts from the visible proposal. Plan bodies and all other state remain untouched.
+7. **Settle three material choices; automate the rest.** Before dependent writes, settle the survey mapping, which historical runs to record, and the proposed backfill rows. Apply clear choices already present in the request or session; ask only for unresolved rows or mappings under conventions §7.2 and §7.7.
 
 ## Workflow
 
-Follow `references/adopt_spec.md` (Chinese: `references/adopt_spec_zh.md`) — the opening message under Shared conventions already loaded it; the shape is:
+After resolving the phase, read `references/adopt_spec.md` for `survey` or `references/backfill.md` for `backfill`; do not load the other branch.
 
-**Where this run executes.** Decide once, before the first step below, whether this run stays here or moves to its tier's model (conventions §10.8; the roster's tier column names the tier, and a mode listed there as an exception overrides it). It moves only when all four hold. The `STAR_<TIER>_MODEL` value the opening load returned names a model for this harness — where it carries `<harness>:<model>` entries, the entry tagged with the tree you are running from, an untagged entry where none is tagged for it, and neither present reading as empty (conventions §10.8). That value is not an alias of the model this run is already on — an alias being the family name inside the id, `opus` for `claude-opus-5[1m]`, or the id itself, a context-window suffix aside — where that model is what the resolver command in your session context's provenance line prints, run once here, or failing that the id the line states; where nothing names it, the run stays. This run is not itself a delegate carrying a `tier=` token — a token stripped from the invocation before anything else in it is read, like `involve=`. And no question this run would still put to the user is left in it — a confirmation point this manifest asks at every level, or a judgment call the resolved level still asks — judged now for this run's mode and level against the files on disk, because a delegate cannot put one to the user: a point that only what the run finds could raise counts as still open, a STOP-line hand-back is a return rather than a question, and a judgment call the level takes unasked is none. Moving means: dispatch one writing sub-agent on that model, briefed to read this skill's manifest in full and follow it, with the invocation text exactly as it arrived plus `involve=<level> tier=<tier>`, the dialogue language in one line where `STAR_LANG` is empty, and, where this run holds one, its `auto=unattended` grant; wait for it, relay its reply unchanged, and count the files it wrote as this run's artifacts, their provenance its model. An empty key changes nothing and is not mentioned; a set key that leaves the run here earns one line saying why. A harness that cannot name the model a delegate runs on stays in every case.
-
-For this skill the fourth condition never holds — Confirmation point 1 confirms the survey mapping before anything is written, Confirmation point 2 picks the runs to record, and `backfill` adds a third of its own — so the run stays here.
+**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0. `survey` uses EXEC and `backfill` uses PLAN. A mapping, historical-run selection, or backfill choice already settled by the request is not asked again.
 
 ### Phase `survey`
 
@@ -106,13 +75,13 @@ The survey may fan out **by area** — source, runtime, data, weights, outputs, 
 
 #### Step S2: Confirmation point 1 — confirm the mapping
 
-Ask through AskUserQuestion, one question at a time, only about what the survey could not settle: the `CODE_NAME` directory, the `PYTHON_HOME` interpreter, the existing data / weights / output roots. Options come from the survey with the recommendation marked. Nothing is written until the user answers.
+Apply mapping choices already stated by the user. For any unresolved `CODE_NAME`, `PYTHON_HOME`, or data / weights / output root, ask one concrete question via AskUserQuestion from the surveyed candidates before dependent writes.
 
 #### Step S3: Put the mechanical setup in place
 
 In this order, each step reported as done or skipped-because-it-exists:
 
-1. `.env` — from `.env.example` when absent. When it exists, never rewrite a value already set: show the diff you would make and ask per conflicting key.
+1. `.env` — from `.env.example` when absent. Preserve existing values unless the user specifically authorized the shown conflicting-key change; otherwise ask only about those keys.
 2. Symlinks for `datas/`, `inits/`, `wkdrs/` per Principle 2. Skip and say so when the path is a non-empty real directory.
 3. `execs/` — `run.sh` and `update.sh` only if missing. For each launch entrypoint, one `execs/scpts/<name>.sh` that **calls the project's existing command**, unchanged, through the exported paths. Never rewrite the project's own launcher.
 4. Verify: `bash execs/run.sh --list` lists the wrappers, and the resolved interpreter reports its version. Report what ran and what did not.
@@ -123,7 +92,7 @@ From git log, the entrypoints, the output directories, and the README, assemble 
 
 #### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
-List the prior runs the survey found — path, date, what it appears to have produced, any metric visible in its logs. Ask once via AskUserQuestion over the numbered list which to record — more than four runs cannot be options (conventions §7.3), so offer *record all* / *record some (say the numbers)* / *record none*. Symlink each chosen run to `wkdrs/<run>/` and write a minimal `EXEC_LOG.md` from `assets/exec_log_reconstructed.md` — a reconstructed header (Principle 4), the command where recoverable, the artifacts present, and explicitly no step table. The rest stay in the inventory as evidence only, and the report says how many were left out.
+List the prior runs — path, date, apparent output, and any visible logged metric. Apply an existing selection; if it does not settle the list, ask once via AskUserQuestion over the visible rows. Symlink each chosen run to `wkdrs/<run>/` and write a minimal reconstructed `EXEC_LOG.md` from `assets/exec_log_reconstructed.md`; keep all others as inventory evidence and report the count omitted.
 
 #### Step S6: Write the record & route
 
@@ -144,7 +113,7 @@ This phase matches the work inventory against the decomposed plan tree and propo
 
 ## Dialogue Discipline
 
-- All three confirmation points go through AskUserQuestion, one question per call. If it is unavailable (headless / scripted), fall back to plain text — still one at a time, still an explicit answer before any write past a confirmation point.
+- Ask one concrete question at a time through AskUserQuestion only for a mapping, run selection, backfill row, overwrite, or other material authority still unresolved; use concise plain text if the tool is unavailable. Existing explicit choices for the same scope remain valid and are not asked again.
 - **Material a question is about goes in the text of the same message, above the call** — the prior-run list, the proposed leaf rows. The options carry the answers and none of the material; read the message back before it goes out: options with nothing above them mean the material was skipped, not shortened.
 - Lead with what the survey found and what it could not settle — a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: read the code architecture, write a research plan, judge any result. Name the skill that owns each.
