@@ -642,7 +642,7 @@ The skill never starts these on its own:
 - Operations that may overwrite valuable artifacts;
 - Work whose duration or cost cannot be bounded.
 
-Instead it prepares the exact command, records it under “Awaiting user” in the execution log, and stops — then starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, caught after it costs the compute and the re-run too. The command stays yours to run; the review is not, and only an exploratory leaf whose command is cheap may skip it — which you are asked before it starts. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them, then hands the command back. After you run it, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
+Instead it prepares the exact command, records it under “Awaiting user” in the execution log, and stops — then starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, caught after it costs the compute and the re-run too. The command stays yours to run; the review is not, and nothing skips it — the launch guard declines the prepared command until the run's review exists and is no older than its log. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them, then hands the command back; the fixes the review applied itself go back the same way, for the touched steps' checks to run again. After you run it, invoke the same plan again; the skill resumes from the log and verifies the result instead of starting over.
 
 ### Main outputs
 
@@ -1195,7 +1195,7 @@ The scattered code lands in `${CODE_NAME}/` where `metds/codearc.md` says it bel
 
 Two paths. Choose per leaf, not per project.
 
-**The light path — `star-flow-status` → `star-plan-executor` → `star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to say whether the direction is worth pursuing. The executor's step checks plus the analyst's done-criteria scorecard are enough. Skip the code review and the plan revision — the code is scaffolding you may throw away, and the plan text has not been contradicted, only tested.
+**The light path — `star-flow-status` → `star-plan-executor` → `star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to say whether the direction is worth pursuing. The executor's step checks, the review it starts on its own, and the analyst's done-criteria scorecard are enough. Skip the plan revision — the plan text has not been contradicted, only tested.
 
 **The full path — `star-flow-status` → `star-plan-executor` → `star-code-reviewer` → (STOP line: you run the command, `star-expt-analyst watch <leaf>` while it runs) → `star-expt-analyst` → `star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result changes the top-level plan. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table; the reviser folds what the run taught back into the plan the method documents compile from.
 

@@ -23,6 +23,15 @@
 # the hookEventName the other PreToolUse harnesses carry, so this copy omits it
 # too rather than sending a field the parser was not shown.
 #
+# It also holds the order the executor's report states (conventions §2): a
+# prepared STOP-line command launches after its code review. A launch is the
+# run's script, `execs/scpts/<run>.sh`, in command position — past nohup,
+# bash -c and the other wrappers — or a redirect into the `wkdrs/<run>/.await`
+# marker a star-auto launch writes; either is declined while wkdrs/<run>/ holds
+# no CODE_REVIEW_<date>.md, or its newest one is dated before the newest date
+# in EXEC_LOG.md. Writing the script, reading the marker, and light validation
+# through execs/run.sh pass: none of them is the launch.
+#
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
 # quoting, so a flag written after a commit message (`commit -m x --amend`) is
 # past where it stops reading. Silence means "no decision", so that case, an
@@ -61,13 +70,13 @@ except Exception:
 
 cmd="$(command_text)"
 case "${cmd}" in
-    *git*) ;;
+    *git*|*execs/scpts/*|*.await*) ;;
     *) exit 0 ;;
 esac
 
 # The reason reaches the agent as JSON, so it carries no quote and no backslash.
-deny() { # $1 = one-line reason
-    printf '{"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"%s (declined by .kimi-code/hooks/star_commit_guard.sh — hand it to the user to run)"}}\n' "$1"
+deny() { # $1 = one-line reason, $2 = what to do instead (default: hand it to the user)
+    printf '{"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"%s (declined by .kimi-code/hooks/star_commit_guard.sh — %s)"}}\n' "$1" "${2:-hand it to the user to run}"
     exit 0
 }
 
@@ -88,11 +97,72 @@ staged_oversize() {
     printf '%s' "${out}"
 }
 
+# Why the prepared command of run $1 may not launch yet: no review in its run
+# dir, or a review dated before the log's newest date (the staleness rule the
+# status skill applies). Empty when it may launch, and for a directory that is
+# not a STAR run at all.
+unreviewed_run() {
+    local dir="${root}/wkdrs/$1" review review_date log_date
+    [[ -f "${dir}/EXEC_LOG.md" ]] || return 0
+    review="$(ls "${dir}"/CODE_REVIEW_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md 2>/dev/null | sort | tail -1)"
+    if [[ -z "${review}" ]]; then
+        printf 'STAR conventions §2: wkdrs/%s/ holds no CODE_REVIEW_<date>.md, and a prepared command launches only after its review' "$1"
+        return 0
+    fi
+    review_date="${review##*/CODE_REVIEW_}"; review_date="${review_date%.md}"
+    log_date="$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' "${dir}/EXEC_LOG.md" 2>/dev/null | sort | tail -1)"
+    [[ -n "${log_date}" && "${review_date}" < "${log_date}" ]] && \
+        printf 'STAR conventions §2: the newest review of wkdrs/%s/ (%s) is dated before its EXEC_LOG.md (%s), so the code it approved may have changed since' "$1" "${review_date}" "${log_date}"
+    return 0
+}
+
 # One shell line can carry several commands, so each is read on its own: `cd x &&
 # git add -A` is the add it looks like.
 while IFS= read -r segment; do
     read -ra tok <<< "${segment}"
     [[ ${#tok[@]} -gt 0 ]] || continue
+
+    # A prepared STOP-line command launches only after its review (conventions
+    # §2; the header). The run whose launch this segment is, if any: the run's
+    # script in command position, else a redirect into the run's .await marker.
+    launch_run=""
+    li=0
+    lt=""
+    while [[ ${li} -lt ${#tok[@]} ]]; do
+        lt="${tok[li]}"
+        lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
+        case "${lt##*/}" in
+            env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|sh|bash|zsh) li=$((li + 1)) ;;
+            *=*|-*|[0-9]*) li=$((li + 1)) ;;
+            *) break ;;
+        esac
+    done
+    if [[ ${li} -lt ${#tok[@]} ]]; then
+        case "${lt}" in
+            execs/scpts/*.sh|*/execs/scpts/*.sh)
+                launch_run="${lt##*execs/scpts/}"; launch_run="${launch_run%.sh}" ;;
+        esac
+    fi
+    if [[ -z "${launch_run}" ]]; then
+        for ((lj = 0; lj < ${#tok[@]}; lj++)); do
+            lt="${tok[lj]}"
+            case "${lt}" in
+                \>*) lt="${lt#>}"; lt="${lt#>}" ;;
+                *) (( lj > 0 )) && [[ "${tok[lj - 1]}" == *\> ]] || continue ;;
+            esac
+            lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
+            case "${lt}" in
+                wkdrs/*/.await|wkdrs/*/.await.*|*/wkdrs/*/.await|*/wkdrs/*/.await.*)
+                    launch_run="${lt##*wkdrs/}"; launch_run="${launch_run%%/*}" ;;
+            esac
+        done
+    fi
+    if [[ -n "${launch_run}" && "${launch_run}" != */* ]]; then
+        launch_reason="$(unreviewed_run "${launch_run}")"
+        [[ -n "${launch_reason}" ]] && \
+            deny "${launch_reason}" "run star-code-reviewer on that run first; the launch follows the review"
+    fi
+
     case "${tok[0]}" in
         git|*/git) ;;
         *) continue ;;

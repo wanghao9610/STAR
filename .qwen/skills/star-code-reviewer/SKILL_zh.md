@@ -116,7 +116,7 @@ awk '/^## /{k=/^## (10|11)\./} k' docs/mds/star-workflow/research-workflow-conve
 无人值守 auto 下，原本要问的清单只剩删除修复：标为 `skipped — deletion outside auto grant` 并转交，不发问题。
 4. 每条修复写入后：对该文件重跑 `compileall`（有 ruff 时加跑）；改名要在 `${CODE_NAME}/` 全域 grep 旧符号，证明没有残留引用。复检失败 → 把该项恢复原样，记 `reverted`，继续。
 5. 把修复记录追加进报告（`F<n> — applied / applied unasked / skipped / reverted`）。若 Step 0 时 working tree 干净，普通运行最后问一次：提交修复（只 stage 本 pass 碰过的文件；信息 `star-code-reviewer: apply review fixes — <scope>`）还是留着不提交。带 `auto=unattended` 时按路径提交并记录，不发问。tree 本来就脏 → 不提交并说明；授权绝不暂存既有脏改动。
-6. 收尾报出修了什么（未问就改的单独计数）、跳过什么、转交了什么，以及报告路径。
+6. 收尾报出修了什么（未问就改的单独计数）、跳过什么、转交了什么，以及报告路径。计划模式下，只要这一轮应用了任何修复，就以 `star-plan-executor <叶子>` 作为下一条命令收尾：executor 会对修复触及的文件所属步骤重跑各自的检查（见它的续跑规则），让最终启动的是它自己的检查看过的代码——它属于那八个，可以启动它的运行就直接启动（规约 §10.6）。什么都没应用时不点名下一条命令；待跑的命令仍归用户。
 
 ## 状态与文件规则
 

@@ -120,7 +120,7 @@ Fill `assets/code_review_template.md` (Chinese: `assets/code_review_template_zh.
 Under unattended auto, the would-be asked list contains only deletion fixes: mark them `skipped — deletion outside auto grant` and route them without emitting a question.
 4. Apply each fix; re-run `compileall` on each touched file (plus ruff when available), and for renames grep the old symbol across `${CODE_NAME}/` to prove no stale references remain. A failed re-check → revert that fix, mark it `reverted`, continue.
 5. Append the fix record to the report (`F<n> — applied / applied unasked / skipped / reverted`). If the working tree was clean at Step 0, normally ask one final question: commit the fixes (stage only the files this pass touched; message `star-code-reviewer: apply review fixes — <scope>`) or leave them uncommitted. With `auto=unattended`, make that explicit-path commit and log it without asking. With a dirty tree, leave fixes uncommitted and say so; the grant never stages pre-existing dirt.
-6. Close with what was applied — the unasked ones counted separately — what was skipped, and what was routed, plus the report path.
+6. Close with what was applied — the unasked ones counted separately — what was skipped, and what was routed, plus the report path. In plan mode, where the pass applied any fix, end with `star-plan-executor <leaf>` as the next command: the executor re-runs the checks of the steps whose files the fixes touched (its resume rules), so what launches is code its own checks have seen — one of the eight, so a run that may start it does (conventions §10.6). With nothing applied, name no next command; an awaiting command stays the user's.
 
 ## State & File Rules
 
