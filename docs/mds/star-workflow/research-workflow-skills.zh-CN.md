@@ -114,7 +114,7 @@ star-code-release
 
 每个 skill 还可以在参数后带自由文本，用你自己的话表达本次运行的意图、约束和任何明确授权：`star-plan-reviser 01 这条不做了，由 02 取代`。清楚要求执行某项具体操作，可以满足该操作的确认；背景说明或模糊偏好不可以。自由文本不会默默扩大已选目标或模式、替有实质歧义的计划名作决定，也不会替研究者选择尚未解决的研究方向。`star-auto` 单独解析 `stop=`，因此这条边界始终有效。第一个参数本来就是自由文本的 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——同样按此理解。完整规则见[规约 §7.12](research-workflow-conventions.zh-CN.md)。
 
-一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.zh-CN.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。宿主能指定被委派者跑在哪个模型上时，档位指向的模型与本会话正在用的不是同一个，这次运行就把自己交给该模型上的一个 delegate，并原样转达它的回复——这个决定写在每份会迁移的清单工作流开头的一段里，会话的模型由溯源解析命令读一次——文件仍属于这次运行，其中记录的来源是真正写下它们的那个模型。还欠你一个确认点的运行留在原地不动，每个阶段都要问你的 `star-idea-storm` 与 `star-plan-coach` 因此从不迁移。三个键出厂留空，留空即什么都不变：运行留在它开始的地方。完整规则见[规约 §10.8](research-workflow-conventions.zh-CN.md)。
+一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.zh-CN.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。宿主能指定被委派者跑在哪个模型上时，档位指向的模型与本会话正在用的不是同一个，这次运行就把自己交给该模型上的一个 delegate，并原样转达它的回复——这个决定写在每份会迁移的清单工作流开头的一段里，会话的模型由溯源解析命令读一次——文件仍属于这次运行，其中记录的来源是真正写下它们的那个模型。还欠你一个确认点的运行留在原地不动，每个阶段都要问你的 `star-idea-storm` 与 `star-plan-coach` 因此从不迁移。三个键出厂留空，留空即什么都不变：运行留在它开始的地方。条目还可以在模型名后带一个思考深度——`claude:opus@high`——由 `bash execs/update.sh --models` 写进该档的 Claude Code 清单，两档因此可以指定同一个模型，只在运行思考的深度上不同。完整规则见[规约 §10.8](research-workflow-conventions.zh-CN.md)。
 
 ## 2. 开始前的准备
 

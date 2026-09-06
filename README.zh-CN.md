@@ -218,7 +218,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 再有一个键 `STAR_HARNESSES`，指定同一个更新脚本安装并维护哪几棵 agent 宿主树。同见 `STAR_REPOSITORY` 指向的那一节。
 
-接下来三个键成套出现：`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定 STAR 的每一档工作跑在哪个模型上——研究判断（计划、评审、分析、盲审）、实现与产出、只读扫描与汇总——取值按你所用宿主称呼模型的写法，或者写完整的 model id。键值可以是这样一个名字——读到它的宿主都用它——也可以是逗号分隔的 `<宿主>:<模型>` 条目（标签沿用 `STAR_HARNESSES` 的记号：`claude`、`codex`、`cursor`、`dsh`、`kimi`、`pi`、`qwen`），好让一份 `.env` 服务所有的树：一次运行取标签为自己所在那棵树的条目，没有就回落到不带标签的条目，两者都没有则把这个键读作空；没有任何树认领的标签一律忽略，这是给日后新增宿主留下的位置。宿主能在指定模型上启动被委派者时，档位指向的模型与本会话正在用的不是同一个，这次运行就交给该模型上的一个 delegate，产物里记录的是真正写下它们的那个模型；Claude Code 的两个 READ 档分叉技能把模型写在清单里，Cursor、Qwen 则写进命名代理的定义，都由 `bash execs/update.sh --models` 从 `.env` 同步。三个键出厂都留空，留空即宿主默认——就用本会话自己的模型，skill 的运行方式什么都不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册) §10.8。
+接下来三个键成套出现：`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定 STAR 的每一档工作跑在哪个模型上——研究判断（计划、评审、分析、盲审）、实现与产出、只读扫描与汇总——取值按你所用宿主称呼模型的写法，或者写完整的 model id。键值可以是这样一个名字——读到它的宿主都用它——也可以是逗号分隔的 `<宿主>:<模型>` 条目（标签沿用 `STAR_HARNESSES` 的记号：`claude`、`codex`、`cursor`、`dsh`、`kimi`、`pi`、`qwen`），好让一份 `.env` 服务所有的树：一次运行取标签为自己所在那棵树的条目，没有就回落到不带标签的条目，两者都没有则把这个键读作空；没有任何树认领的标签一律忽略，这是给日后新增宿主留下的位置。条目还可以以 `@<深度>` 结尾——`low`、`medium`、`high`、`xhigh`、`max` 或一个正整数——即这一档的运行在能设定深度的宿主上所用的思考深度，两档因此可以指定同一个模型、只在深度上不同；今天会设定它的是 Claude Code，读的是 `--models` 写进该档各份清单的 `effort:` 那一行。宿主能在指定模型上启动被委派者时，档位指向的模型与本会话正在用的不是同一个，这次运行就交给该模型上的一个 delegate，产物里记录的是真正写下它们的那个模型；Claude Code 的两个 READ 档分叉技能把模型写在清单里，Cursor、Qwen 则写进命名代理的定义，都由 `bash execs/update.sh --models` 从 `.env` 同步。三个键出厂都留空，留空即宿主默认——就用本会话自己的模型，skill 的运行方式什么都不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册) §10.8。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
