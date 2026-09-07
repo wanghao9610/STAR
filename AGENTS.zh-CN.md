@@ -43,7 +43,7 @@
 - 恢复科研工作或选择下一项研究任务、且状态未知时，先运行展示研究状态的 skill。范围明确的代码或文档任务只读取所需上下文。
 - 所有工作流 skill 共同遵循的规则位于 `docs/mds/star-workflow/research-workflow-conventions.md`；各 skill 的职责位于 `research-workflow-skills.md`。
 - 若某个 skill 步骤的书面流程要求派发子代理，该流程本身已获用户对这次运行的授权：无需另行询问即可派发，即使宿主指令只允许在用户提出时委派。明确禁止委派，或宿主完全不提供委派能力时，仍不得派发；该授权只覆盖派发动作，不扩大被委派者可写入的范围。
-- `.env` 的 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定一次 skill 运行、以及它派出的每个 delegate 该跑在哪个模型上——分别对应研究判断、产出实现、只读工作。每个键写一个模型名，也可以写成逗号分隔的 `<宿主>:<模型>` 条目，让一份 `.env` 服务所有的树——一次运行取标签为自己所在那棵树的条目，没有就把这个键读作空。条目可以以 `@<深度>` 结尾，即这一档的运行在能设定深度的宿主上所用的思考深度，两档因此可以指定同一个模型、只在深度上不同。Codex 在每次派发时把受支持的具名深度传给 `reasoning_effort`，Claude Code 则把受托者派发成自带该深度的 `star-plan`、`star-exec`、`star-read` 三个 agent 之一，Cursor 的 `--models` 盖章把 `@<深度>` 写成该代理 `model:` 上的 `id[effort=<深度>]`；三者都是显式深度即使不换模型也会触发一个新 delegate。哪次运行归哪一档、运行何时把自己迁到该档的模型上，见 `docs/mds/star-workflow/research-workflow-conventions.md` §10.8；键为空则什么都不变。
+- `.env` 的 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定一次 skill 运行、以及它派出的每个 delegate 该跑在哪个模型上——分别对应研究判断、产出实现、只读工作。每个键写一个模型名，也可以写成逗号分隔的 `<宿主>:<模型>` 条目，让一份 `.env` 服务所有的树——一次运行取标签为自己所在那棵树的条目，没有就把这个键读作空。条目可以以 `@<深度>` 结尾，即这一档的运行在能设定深度的宿主上所用的思考深度，两档因此可以指定同一个模型、只在深度上不同。宿主能逐次应用的配置深度即使不换模型也会触发一个新 delegate。哪次运行归哪一档、宿主如何套用模型与深度、运行何时把自己迁到该档的模型上，见 `docs/mds/star-workflow/research-workflow-conventions.md` §10.8；键为空则什么都不变。
 - 不要手工编辑 `wkdrs/` 下生成的报告。下游项目的 `docs/mds/star-workflow/` 会被 `execs/update.sh` 替换；公共规则按 `.github/CONTRIBUTING.md` 在 STAR 上游维护，再同步给下游。
 
 ## 6. 回复语言
@@ -72,7 +72,7 @@
 - 核心代码放在 `.env` 定义的 `${CODE_NAME}/`；数据及相关文件放在 `datas/`；模型权重及相关文件放在 `inits/`；生成的输出文件放在 `wkdrs/`。
 - 方法说明放在 `metds/`，研究计划放在 `metds/plans/`。
 - 某个计划自己的工具脚本及执行过程中的中间文件放在 `tasks/<plan-name>/`；脚本长期保留，其余内容是可丢弃的暂存文件。
-- `execs/` 只存放启动脚本：根目录中的 `run.sh` 和 `update.sh`，以及 `execs/scpts/<run>.sh` 下的逐运行脚本。任何非启动器都不得放入其中。
+- `execs/` 只存放启动脚本：根目录中的 `run.sh`、`update.sh` 和 `configure.sh`，以及 `execs/scpts/<run>.sh` 下的逐运行脚本。任何非启动器都不得放入其中。
 - `docs/` 存放项目文档：Markdown 位于 `docs/mds/<topic>/`，HTML 页面位于 `docs/htmls/`，图片和静态资源位于 `docs/srcs/`。公共工作流指南按前述流程在上游维护。
 - 输出名称必须能区分任务、实验或运行。
 

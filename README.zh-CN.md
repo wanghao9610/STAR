@@ -219,7 +219,9 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 再有一个键 `STAR_HARNESSES`，指定同一个更新脚本安装并维护哪几棵 agent 宿主树。同见 `STAR_REPOSITORY` 指向的那一节。
 
-接下来三个键成套出现：`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 指定 STAR 的每一档工作跑在哪个模型上——研究判断（计划、评审、分析、盲审）、实现与产出、只读扫描与汇总——取值按你所用宿主称呼模型的写法，或者写完整的 model id。键值可以是这样一个名字——读到它的宿主都用它——也可以是逗号分隔的 `<宿主>:<模型>` 条目（标签沿用 `STAR_HARNESSES` 的记号：`claude`、`codex`、`cursor`、`dsh`、`kimi`、`pi`、`qwen`），好让一份 `.env` 服务所有的树：一次运行取标签为自己所在那棵树的条目，没有就回落到不带标签的条目，两者都没有则把这个键读作空；没有任何树认领的标签一律忽略，这是给日后新增宿主留下的位置。条目还可以以 `@<深度>` 结尾——`low`、`medium`、`high`、`xhigh`、`max` 或一个正整数——即这一档的运行在能设定深度的宿主上所用的思考深度，两档因此可以指定同一个模型、只在深度上不同。Claude Code 从 `bash execs/update.sh --models` 同步的档位清单读取深度；Codex 每次派发子代理时把受支持的后缀传给 `reasoning_effort`，不需要写入静态配置或重启会话，因此 PLAN、EXEC、READ 可分别使用 `codex:gpt-6-astra@xhigh`、`codex:gpt-6-astra@high`、`codex:gpt-6-astra@low`。 Cursor 的 `--models` 盖章把同一条 `@<深度>` 写成该档具名代理 `model:` 上的 `id[effort=<深度>]`，且不加引号，因此 `cursor:grok-4.6@xhigh` 配 `cursor:grok-4.6@high` 就是同一模型的两个深度。宿主能在指定模型上启动被委派者时，档位指向不同模型——或在 Codex 中显式配置了逐次深度——就把运行交给一个受托者，产物记录实际写入的模型；Claude Code 的两个 READ 档分叉技能把模型写在清单里，Cursor、Qwen 则写进命名代理的定义，由 `bash execs/update.sh --models` 从 `.env` 同步。三个键出厂都留空，留空即宿主默认——沿用本会话的模型与 effort，skill 的运行方式不变。完整规则见[研究工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册) §10.8。
+`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读工作的模型。每个键接受一个模型名，或逗号分隔的 `<宿主>:<模型>` 条目，标签沿用 `STAR_HARNESSES`。运行优先取本宿主条目，再取无标签的回退值；两者都没有则沿用宿主默认。可选后缀 `@<深度>`（`low`、`medium`、`high`、`xhigh`、`max` 或正整数）在宿主支持时设置思考深度。
+
+修改后运行 `bash execs/configure.sh`，并重新加载静态定义已变化的会话。Kimi 模型池注册使用 `bash execs/configure.sh --kimi-pool`。派发机制见[宿主适配说明](docs/mds/star-workflow/harness-adapters.zh-CN.md)，档位选择与运行迁移规则见[工作流规约 §10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册)。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
@@ -465,12 +467,13 @@ bash execs/update.sh
 - `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
 - `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 与 `/star-auto` 命令包，各自只在选中对应宿主时更新
 - `.agents/commands/`——唯一共享的 `/star` 分流名册与 `/star-auto` 流程——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
-- `.claude/agents/`、`.cursor/agents/` 与 `.qwen/agents/`——这三个宿主派发一次档位运行所用的具名代理 `star-plan`、`star-exec`、`star-read`，由 `bash execs/update.sh --models` 从 `.env` 盖章：Cursor 与 Qwen 盖该档的 `model`，Claude Code 盖它的 `effort`
+- `.claude/agents/`、`.cursor/agents/` 与 `.qwen/agents/`——这三个宿主派发一次档位运行所用的具名代理 `star-plan`、`star-exec`、`star-read`，由 `bash execs/configure.sh` 从 `.env` 盖章：Cursor 与 Qwen 盖该档的 `model`，Claude Code 盖它的 `effort`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 - `execs/update.sh`——更新脚本自己，好让你的项目建好之后上游才新增的路径仍然能到达它
+- `execs/configure.sh` — 模型配置同步与 Kimi 模型池注册入口
 
 agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cursor/rules/agent-instructions.mdc` 不在上面这份清单里。它们遵循与下文钩子注册配置相同的规则，所以已经写了自己那一份的项目原样保留，一份都没有的从上游取得。
 
@@ -488,14 +491,14 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o execs/update.sh
 ```
 
-命令的通用形式有三种：`bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]`、`bash execs/update.sh [ref] [--harnesses LIST] --adopt`，以及离线运行的 `bash execs/update.sh --models`：
+命令的通用形式有三种：`bash execs/update.sh [--diff] [ref] [--harnesses LIST] [--skill NAME] [--force]`、`bash execs/update.sh [ref] [--harnesses LIST] --adopt`，以及离线运行的 `bash execs/configure.sh`：
 
 ```bash
 bash execs/update.sh --diff
 bash execs/update.sh TAG_OR_BRANCH
 bash execs/update.sh --harnesses claude
 bash execs/update.sh --skill star-flow-status
-bash execs/update.sh --models
+bash execs/configure.sh
 ```
 
 - `--diff` 不改动任何文件地预览更新，有可更新内容时以 `2` 退出，完全一致时以 `0` 退出，出错时以 `1` 退出——脚本因此能区分“有更新”与“检查本身失败”。
@@ -503,7 +506,7 @@ bash execs/update.sh --models
 - 如果固定的 ref 早于 `.dsh/commands/` 或 `.kimi-code/plugins/`，普通更新与 `--adopt` 都会报告并跳过这个尚不存在的可选包；缺少其他必需路径仍会中止。
 - `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 或 `.agents/commands/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
 - `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
-- `--models` 离线同步已配置的模型：Claude 的两个 READ 档分叉技能、它各档清单与三个具名受托者的思考深度，以及 Cursor、Qwen 各自的三个 STAR 命名代理。每棵树先取自己的标签条目，再取不带标签的备选；值为空则保留现有文件。Codex 在派发时读取模型与受支持的 effort，此命令只显示 Codex 的配置值，不需要重启。普通更新也会执行静态同步；Claude、Cursor、Qwen 需新开会话装载变更后的清单或代理。此命令只能单独运行，与 `--adopt`、`--diff`、`--skill` 同用会被拒绝。
+- `bash execs/configure.sh` 离线同步模型配置；普通更新也会在同步文件后调用它。模型池注册使用 `bash execs/configure.sh --kimi-pool`，宿主差异见[适配说明](docs/mds/star-workflow/harness-adapters.zh-CN.md)。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
 
 `bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
@@ -512,11 +515,11 @@ bash execs/update.sh --models
 
 | 宿主 | STAR 如何选择受托者模型 |
 | --- | --- |
-| Claude Code | 每次派发传 `model`，并把受托者派发成带该档深度的 `star-plan`、`star-exec` 或 `star-read`；配置了深度，即使不换模型也会派出受托者。`--models` 同步这三个受托者、各档清单的深度，以及两个 READ 档分叉技能的清单。 |
+| Claude Code | 按次传入模型；`configure.sh` 同步具名代理和技能清单中的模型与深度。 |
 | [Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) | 每次派发传入 `model` 与受支持的 `reasoning_effort`；显式深度即使不换模型，也会触发使用全新上下文的委派。
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | 当前工具通过可选择的 secondary-model pool 提供 `model` 时，传入池接受的别名。模型池由用户自己的 Kimi 配置管理。 |
 | Pi | 通过 STAR 扩展给单任务、并行任务各项或串行步骤各项传 `model`。 |
-| [Cursor](https://cursor.com/docs/subagents) | 选择 `star-plan`、`star-exec` 或 `star-read`，模型由 `--models` 同步。 |
+| [Cursor](https://cursor.com/docs/subagents) | 使用具名代理；模型选择与回退规则见[适配说明](docs/mds/star-workflow/harness-adapters.zh-CN.md#cursor)。 |
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | 选择同名代理，在 frontmatter 中填写实际模型 id；工具按次调用的 `model` 字段是另一套已配置等级机制。 |
 | DSH | 当前工具没有按次选模参数，保持原执行路径；键已设时说明原因。 |
 
@@ -556,7 +559,7 @@ bash execs/update.sh --models
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.3.6](https://github.com/wanghao9610/STAR/tree/v0.3.6)**（2026-09-07）—— Cursor 现在也把档位的 `@深度` 写进具名代理：`bash execs/update.sh --models` 把 `cursor:grok-4.6@xhigh` 盖成未加引号的 `model: grok-4.6[effort=xhigh]`，分别落在 `star-plan`、`star-exec`、`star-read` 上，于是 PLAN、EXEC、READ 可以共用一个模型、只用深度区分。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Claude Code、Codex 已有的规则一致——Qwen 仍只取模型名、不取后缀。`check_model_routing.sh` 覆盖这一编码；盖章后仍须开新会话。
+- **[v0.3.6](https://github.com/wanghao9610/STAR/tree/v0.3.6)**（2026-09-07）—— Cursor 现在也把档位的 `@深度` 写进具名代理：`bash execs/update.sh --models` 把 `cursor:cursor-grok-4.6@xhigh` 盖成未加引号的 `model: cursor-grok-4.6-xhigh`，分别落在 `star-plan`、`star-exec`、`star-read` 上——用的是它目录里那种一个深度一个 id 的扁平写法，因为带参数的 `id[effort=<深度>]` 解析不了——于是 PLAN、EXEC、READ 可以共用一个模型、只用深度区分。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Claude Code、Codex 已有的规则一致——Qwen 仍只取模型名、不取后缀。`check_model_routing.sh` 覆盖这一编码；盖章后仍须开新会话。
 - **[v0.3.5](https://github.com/wanghao9610/STAR/tree/v0.3.5)**（2026-09-06）—— Claude Code 现在也能逐次派发指定档位的 `@深度`：`bash execs/update.sh --models` 把它盖进新增的 `.claude/agents/` 受托者 `star-plan`、`star-exec`、`star-read`，迁移整次运行或交接某个阶段时就派发成其中之一，于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配 `STAR_EXEC_MODEL=claude:opus@high` 能让执行阶段真正跑在 `high` 上。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Codex 自 v0.3.4 起的规则一致——而以普通 subagent 类型派出的受托者仍继承调用方的深度。`check_model_routing.sh` 覆盖新增的盖章，`check_consistency.sh` 拒绝 `.claude/agents/` 里没有的 `subagent_type`。
 - **[v0.3.4](https://github.com/wanghao9610/STAR/tree/v0.3.4)**（2026-09-06）—— Codex 现在把各档受支持的 `@深度` 传给 `reasoning_effort`，使 PLAN、EXEC、READ 可通过 `star-auto`、直接 READ 入口和执行阶段交接使用同模型的不同 effort。不需要写入静态模型配置或重启；直接调用的规划问答仍沿用主线程 effort。回归检查补齐 READ 入口，并确保全零后缀保留在模型名中。
 - **[v0.3.3](https://github.com/wanghao9610/STAR/tree/v0.3.3)**（2026-09-06）—— 档位键的条目现在可以以 `@<深度>` 结尾——`low`、`medium`、`high`、`xhigh`、`max` 或一个正整数——于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配上 `STAR_EXEC_MODEL=claude:opus@high`，就是同一个模型的两个思考深度。`bash execs/update.sh --models` 把每一档的深度写进该档 Claude Code 清单的 `effort:` frontmatter，宿主在以 `/star-<名字>` 启动的运行上应用它；只有拼成上述深度之一的后缀才会被读作深度，模型名自身带 `@` 时原样交给它的宿主。受托者仍沿用派发它的那次运行的深度——模型可以逐次指定，深度不能——不会设定深度的宿主则把条目整体读作模型名。
