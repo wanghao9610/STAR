@@ -114,7 +114,7 @@ star-code-release
 
 每个 skill 还可以在参数后带自由文本，用你自己的话表达本次运行的意图、约束和任何明确授权：`star-plan-reviser 01 这条不做了，由 02 取代`。清楚要求执行某项具体操作，可以满足该操作的确认；背景说明或模糊偏好不可以。自由文本不会默默扩大已选目标或模式、替有实质歧义的计划名作决定，也不会替研究者选择尚未解决的研究方向。`star-auto` 单独解析 `stop=`，因此这条边界始终有效。第一个参数本来就是自由文本的 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——同样按此理解。完整规则见[规约 §7.12](research-workflow-conventions.zh-CN.md)。
 
-一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.zh-CN.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。宿主能指定被委派者跑在哪个模型上时，档位指向不同模型、或带有该宿主能逐次应用的深度，这次运行就把自己交给一个 delegate 并原样转达它的回复；这个决定写在每份会迁移的清单工作流开头，会话模型由溯源解析命令读取一次。文件仍属于这次运行，其中记录的来源是真正写下它们的模型。还欠你一个确认点的运行留在原地不动，每个阶段都要问你的 `star-idea-storm` 与 `star-plan-coach` 因此从不自行迁移。三个键出厂留空，留空即什么都不变：运行留在它开始的地方。条目还可以在模型名后带思考深度——`claude:opus@high` 或 `codex:gpt-6-astra@high`——两档因此可以指定同一个模型，只在运行思考的深度上不同：Claude Code 从 `bash execs/update.sh --models` 同步的档位清单读取深度；Codex 每次派发都把受支持的后缀传给 `reasoning_effort`，所以只有深度不同时也会派发。完整规则见[规约 §10.8](research-workflow-conventions.zh-CN.md)。
+一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.zh-CN.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。宿主能指定被委派者跑在哪个模型上时，档位指向不同模型、或带有该宿主能逐次应用的深度，这次运行就把自己交给一个 delegate 并原样转达它的回复；这个决定写在每份会迁移的清单工作流开头，会话模型由溯源解析命令读取一次。文件仍属于这次运行，其中记录的来源是真正写下它们的模型。还欠你一个确认点的运行留在原地不动，每个阶段都要问你的 `star-idea-storm` 与 `star-plan-coach` 因此从不自行迁移。三个键出厂留空，留空即什么都不变：运行留在它开始的地方。条目还可以在模型名后带思考深度——`claude:opus@high` 或 `codex:gpt-6-astra@high`——两档因此可以指定同一个模型，只在运行思考的深度上不同：Claude Code 从 `bash execs/configure.sh` 同步的档位清单读取深度；Codex 每次派发都把受支持的后缀传给 `reasoning_effort`，所以只有深度不同时也会派发。完整规则见[规约 §10.8](research-workflow-conventions.zh-CN.md)。
 
 ## 2. 开始前的准备
 
@@ -939,7 +939,7 @@ star-flow-status 01
 - 子计划比父计划还旧、悬挂链接、无效依赖、孤儿 run 等失配；
 - 一行自审信息：统计形似报告、却不匹配任何已知产物模式的文件，好让某个产出方 skill 改了输出命名这件事被看见，而不是让对应的后续检查悄悄失效。
 
-这是一个**严格只读**的 skill：只扫描规约 §8 登记在册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/`、`wkdrs/results/`）——不创建也不修改任何文件。作为整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，它输出的那些规则仍留在 skill 里。只读、别的什么都不做，也把它和 `star-expt-digest` 一起放在 READ 档：这两个运行是仅有的、宿主可以在 skill 自己的清单里而不是在派发时定下模型的运行，`bash execs/update.sh --models` 会离线地把 `.env` 里的 `STAR_READ_MODEL` 盖进那两份清单（规约 §10.8）。
+这是一个**严格只读**的 skill：只扫描规约 §8 登记在册的产物——`metds/ideas/`、`metds/plans/`、`metds/refs/`、编译出的 `metds/*.md`，以及 `wkdrs/` 下的日志与报告（run 目录，外加 `wkdrs/reviews/`、`wkdrs/env_<name>_<date>/`、`wkdrs/digests/`、`wkdrs/results/`）——不创建也不修改任何文件。作为整条流程里调用最频繁的一个，它的全部输入——规约摘录、它的 spec、一个只读收集脚本（其自身目录下的 `scripts/scan.sh`）产出的摘要——由一条开场消息一次装齐，而不是逐文件读取；脚本只负责收集，它输出的那些规则仍留在 skill 里。只读、别的什么都不做，也把它和 `star-expt-digest` 一起放在 READ 档：这两个运行是仅有的、宿主可以在 skill 自己的清单里而不是在派发时定下模型的运行，`bash execs/configure.sh` 会离线地把 `.env` 里的 `STAR_READ_MODEL` 盖进那两份清单（规约 §10.8）。
 
 完整定义见 [`star-flow-status/SKILL_zh.md`](../../../.agents/skills/star-flow-status/SKILL_zh.md)。
 
