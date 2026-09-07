@@ -8,7 +8,7 @@ How this skill structures survey and migration work. Sibling spec: the executor'
 - **Surveyors** — read-only `Agent` subagents (`subagent_type: explore`), one area each (`survey_spec.md`).
 - **Migrators** — `Agent` subagents (`subagent_type: coder`), one per migration group, write access limited to their group's files.
 
-A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
+A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model — or on the pool alias binding that tier's configured depth — where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
 
 ## Partitioning migrations
 

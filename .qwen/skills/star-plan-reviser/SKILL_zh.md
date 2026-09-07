@@ -14,7 +14,7 @@ description: >-
 
 目标与 drop/restore/review 路径解析后运行 `scripts/scan.sh --slim`，把计划 frontmatter、子计划索引与运行日志 frontmatter 作为范围解析的原始输入；按证据步骤读取目标正文与相关规约。脚本失败时直接读取计划文件并说明回退。
 
-**把档位模型传给受托者。** 取 `qwen` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `agent` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。先读 `.qwen/agents/star-<tier>.md`，核对 frontmatter 的 `model` 与解析值相同：`bash execs/update.sh --models` 同步这些文件，新会话才会装载。frontmatter 接受模型 id 或 `authType:modelId`；后者在 `.env` 中写成 `qwen:authType:modelId`。不要把原始值传给工具的 `model`：该参数选择已配置的模型等级，且 `fork` 不能覆盖模型。命名代理缺失、过期或不可用时，保持原执行路径；键已设则说明需要同步或重开会话，不在本次运行修复配置。键为空则保留原代理选择。交办说明的只读与写入范围限制照旧，盲读不继承产出该工作的对话，记录受托者的实际会话模型而非请求值。
+**把档位模型传给受托者。** 取 `qwen` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `agent` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。先读 `.qwen/agents/star-<tier>.md`，核对 frontmatter 的 `model` 与解析值相同：`bash execs/configure.sh` 同步这些文件，新会话才会装载。frontmatter 接受模型 id 或 `authType:modelId`；后者在 `.env` 中写成 `qwen:authType:modelId`。不要把原始值传给工具的 `model`：该参数选择已配置的模型等级，且 `fork` 不能覆盖模型。命名代理缺失、过期或不可用时，保持原执行路径；键已设则说明需要同步或重开会话，不在本次运行修复配置。键为空则保留原代理选择。交办说明的只读与写入范围限制照旧，盲读不继承产出该工作的对话，记录受托者的实际会话模型而非请求值。
 
 ## 角色
 
