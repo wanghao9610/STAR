@@ -207,7 +207,7 @@ done < <(printf '%s\n' "${SKILLS}")
 #     works, on the wrong model. Both are checked here because nothing else
 #     reads this column.
 #     The second half holds a producer/consumer pair. The .claude manifests that
-#     fork in frontmatter are exactly the manifests `execs/update.sh --models`
+#     fork in frontmatter are exactly the manifests `execs/configure.sh`
 #     stamps a `model:` line into; add one to either side alone and it either
 #     forks on the model it shipped with and never sees .env, or gets stamped
 #     with a model nothing forks it on. There is deliberately no check that
@@ -233,13 +233,13 @@ if [[ "${TIERS_EN}" != "${TIERS_ZH}" ]]; then
     tier_errors=1
 fi
 FORKED_MANIFESTS="$(grep -l '^context: fork' .claude/skills/*/SKILL.md .claude/skills/*/SKILL_zh.md 2>/dev/null | sort)"
-STAMPED_MANIFESTS="$(grep -oE '\.claude/skills/[a-z-]+/SKILL(_zh)?\.md' execs/update.sh | sort -u)"
+STAMPED_MANIFESTS="$(grep -oE '\.claude/skills/[a-z-]+/SKILL(_zh)?\.md' execs/configure.sh | sort -u)"
 if [[ "${FORKED_MANIFESTS}" != "${STAMPED_MANIFESTS}" ]]; then
-    fail "the .claude manifests carrying 'context: fork' are not the ones execs/update.sh names for its --models stamp:"
+    fail "the .claude manifests carrying 'context: fork' are not the ones execs/configure.sh names for its stamp:"
     diff <(printf '%s\n' "${FORKED_MANIFESTS}") <(printf '%s\n' "${STAMPED_MANIFESTS}") | sed 's/^/      /'
     tier_errors=1
 fi
-(( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, en and zh agree on every one, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/update.sh stamps"
+(( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, en and zh agree on every one, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/configure.sh stamps"
 
 # 4b. Codex, Kimi and DSH need harness-owned packages for the generic router.
 #     Codex alone exposes one marketplace file through .agents; the other two
@@ -445,6 +445,19 @@ for root in "${SKILL_ROOTS[@]}"; do
             conv_errors=1
         }
     done < <(printf '%s\n' "${SKILLS}")
+done
+
+for conv in "${CONVENTIONS}" "${CONVENTIONS_ZH}"; do
+    # Shared policy names capabilities; concrete hosts and their APIs live in adapters.
+    if grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort' "${conv}"; then
+        fail "${conv}: harness-specific wording belongs in harness-adapters or model_id_spec"
+        conv_errors=1
+    fi
+    adapter="docs/mds/star-workflow/harness-adapters${conv#*research-workflow-conventions}"
+    if [[ ! -f "${adapter}" ]] || ! grep -Fq "(${adapter##*/})" "${conv}"; then
+        fail "${conv}: missing linked harness adapter reference"
+        conv_errors=1
+    fi
 done
 
 human_writing_errors=0
