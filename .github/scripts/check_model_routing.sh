@@ -10,6 +10,7 @@ trap 'rm -rf -- "${TMP_DIR}"' EXIT
 fail() { printf 'FAIL  %s\n' "$*" >&2; exit 1; }
 note() { printf 'ok    %s\n' "$*"; }
 expect_model() { grep -Fqx "model: \"$2\"" "$1" || fail "$1 should have model $2"; }
+expect_plain_model() { grep -Fqx "model: $2" "$1" || fail "$1 should have unquoted model $2"; }
 expect_effort() { grep -Fqx "effort: \"$2\"" "$1" || fail "$1 should have effort $2"; }
 run_models() { (cd "${PROJECT}" && bash execs/update.sh --models "$@") >/dev/null; }
 models_output() { (cd "${PROJECT}" && bash execs/update.sh --models "$@") 2>&1; }
@@ -55,7 +56,7 @@ write_env \
 run_models
 
 for tier in plan exec read; do
-	expect_model "${PROJECT}/.cursor/agents/star-${tier}.md" "cursor-${tier}"
+	expect_plain_model "${PROJECT}/.cursor/agents/star-${tier}.md" "cursor-${tier}"
 done
 expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
 expect_model "${PROJECT}/.qwen/agents/star-exec.md" bare-exec
@@ -68,7 +69,8 @@ done
 note "three tiers route to Cursor and Qwen; Claude stamps only the READ model"
 
 # A tier entry may end in @<depth>. Claude Code takes the depth into every manifest
-# of that tier, every tree takes the model without it, and a suffix spelling no
+# of that tier, Cursor rewrites it as id[effort=<depth>] on the named agent's model
+# field, Qwen keeps a non-depth suffix in the name, and a suffix spelling no
 # depth stays part of the name.
 write_env \
 	'STAR_PLAN_MODEL=claude:claude-plan@xhigh' \
@@ -89,9 +91,9 @@ fi
 expect_effort "${PROJECT}/.claude/agents/star-plan.md" xhigh
 expect_effort "${PROJECT}/.claude/agents/star-exec.md" high
 expect_effort "${PROJECT}/.claude/agents/star-read.md" medium
-expect_model "${PROJECT}/.cursor/agents/star-exec.md" cursor-exec
+expect_plain_model "${PROJECT}/.cursor/agents/star-exec.md" 'cursor-exec[effort=high]'
 expect_model "${PROJECT}/.qwen/agents/star-read.md" qwen-read@keep
-note "a depth suffix reaches Claude Code's manifests and named agents, and leaves every model name clean"
+note "a depth suffix reaches Claude Code as effort, Cursor as [effort=], and leaves other model names clean"
 
 # Codex consumes both halves at dispatch rather than through a static manifest.
 # This checks the parsed summary and instruction contracts, not a live dispatch.
@@ -136,6 +138,14 @@ grep -Fq 'Codex passes a supported named depth per dispatch as `reasoning_effort
 grep -Fq 'Claude Code dispatches the delegate as its `star-plan`, `star-exec` or `star-read` agent' \
 	"${ROOT_DIR}/AGENTS.md" ||
 	fail "AGENTS.md does not expose Claude Code per-dispatch effort"
+grep -Fq 'writes a configured `@<depth>` onto that tier'\''s named agent'\''s `model:` as `id[effort=<depth>]`' \
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
+	fail "workflow conventions do not define Cursor @depth encoding"
+grep -Fq '`id[effort=<depth>]`' "${ROOT_DIR}/AGENTS.md" ||
+	fail "AGENTS.md does not expose Cursor @depth encoding"
+grep -Fq '把 `.env` 的 `@<深度>` 写成该档具名代理 `model:` 上的 `id[effort=<深度>]`' \
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.zh-CN.md" ||
+	fail "Chinese workflow conventions do not define Cursor @depth encoding"
 grep -Fq 'or carries a depth' "${ROOT_DIR}/.claude/commands/star-auto.md" ||
 	fail "Claude star-auto does not route an explicit same-model depth"
 while IFS= read -r file; do
@@ -195,7 +205,7 @@ note "unknown tags and empty values leave existing stamps alone"
 
 write_env 'STAR_PLAN_MODEL=cursor:cursor-only,qwen:qwen-only' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
 run_models --harnesses cursor
-expect_model "${PROJECT}/.cursor/agents/star-plan.md" cursor-only
+expect_plain_model "${PROJECT}/.cursor/agents/star-plan.md" cursor-only
 expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
 expect_model "${PROJECT}/.claude/skills/star-flow-status/SKILL.md" claude-read
 note "--harnesses changes only the selected tree"
@@ -238,6 +248,14 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 	done
 done
 note "seven trees retain tier-model and READ routing entries"
+
+while IFS= read -r file; do
+	grep -Fq '`id[effort=<depth>]`' "${file}" || fail "${file} does not verify Cursor [effort=] encoding"
+done < <(find -L "${ROOT_DIR}/.cursor/skills" -type f -name SKILL.md)
+while IFS= read -r file; do
+	grep -Fq '`id[effort=<深度>]`' "${file}" || fail "${file} does not verify Chinese Cursor [effort=] encoding"
+done < <(find -L "${ROOT_DIR}/.cursor/skills" -type f -name SKILL_zh.md)
+note "Cursor skills verify @depth as id[effort=] on the named agent"
 
 for schema in TaskItem ChainItem SubagentParams; do
 	if ! sed -n "/const ${schema} = Type.Object({/,/^});/p" "${ROOT_DIR}/.pi/extensions/star-subagent/index.ts" | grep -Fq 'model: Type.Optional'; then

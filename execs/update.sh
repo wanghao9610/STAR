@@ -358,9 +358,10 @@ reported. Run /star-proj-adopt afterwards to wire the project up.
 into the static files whose hosts read them: the two Claude Code READ manifests take the READ
 model, every Claude Code manifest takes its tier's depth, Claude Code's named plan, exec and read
 agents take that same depth — a delegate dispatched as one runs at it, which is how a depth is
-named per dispatch there — and Cursor and Qwen's named plan, exec and read agents take their model.
-Codex reads its model and supported reasoning effort at dispatch, so this command reports those
-values without stamping a file or requiring a restart. It is offline. A key naming neither for that
+named per dispatch there — Cursor's named plan, exec and read agents take their model with a
+configured @depth rewritten as [effort=<depth>] on that field, and Qwen's take the model
+without the suffix. Codex reads its model and supported reasoning effort at dispatch, so this
+command reports those values without stamping a file or requiring a restart. It is offline. A key naming neither for that
 harness — empty, or carrying <harness>:<model> entries with neither its tag nor an untagged value —
 leaves that file unchanged. An ordinary update ends with the same step, so the stamps survive one; start a
 new Claude Code, Cursor or Qwen session afterward so it reloads the agent definitions. Which model
@@ -514,7 +515,8 @@ tier_depth_for() { # $1 = harness token, $2 = the raw key value; the depth, or n
 
 # Some hosts need a static file to select a delegate's model. Claude Code reads
 # its READ-tier model from these two forked-skill manifests; Cursor and Qwen read
-# their plan, exec, and read models from named agents below. The files cannot read
+# their plan, exec, and read models from named agents below. Cursor also encodes a
+# configured @depth as [effort=<depth>] on that model field. The files cannot read
 # `.env` themselves, so the updater stamps them after install. An empty key writes
 # nothing, leaving each shipped value in place (workflow conventions §10.8).
 READ_TIER_MANIFESTS=(
@@ -559,14 +561,37 @@ yaml_field_line() { # $1 = field name, $2 = its value; a YAML double-quoted line
     printf '%s: "%s"' "$1" "${value}"
 }
 
-stamp_frontmatter_field() { # $1 = project-relative path, $2 = field name, $3 = value
-    local path="$1" field="$2" value="$3" tmp
+yaml_plain_field_line() { # $1 = field name, $2 = its value; unquoted (Cursor model:)
+    local value="$2"
+    case "${value}" in
+        *$'\n'*|*$'\r'*) fail "Refusing to stamp a multiline ${1} value." ;;
+    esac
+    printf '%s: %s' "$1" "${value}"
+}
+
+cursor_model_stamp() { # $1 = model id, $2 = depth or empty; Cursor's model: encoding
+    local model="$1" depth="$2"
+    if [[ -n "${depth}" && "${model}" != *'['* ]]; then
+        printf '%s[effort=%s]' "${model}" "${depth}"
+    else
+        printf '%s' "${model}"
+    fi
+}
+
+stamp_frontmatter_field() { # $1 = path, $2 = field, $3 = value, $4 = quoted|plain
+    local path="$1" field="$2" value="$3" style="${4:-quoted}" tmp line
     [[ -f "${ROOT_DIR}/${path}" ]] || return 0
     tmp="${ROOT_DIR}/${path}.star-stamp"
     # Only the first frontmatter block is changed. The new line is supplied
     # through the environment so an id containing backslashes is not re-parsed
-    # as an awk -v escape sequence.
-    FIELD_LINE="$(yaml_field_line "${field}" "${value}")" awk -v key="${field}" '
+    # as an awk -v escape sequence. Cursor's agent loader treats quote characters
+    # as part of the model name, so its model: line is stamped unquoted.
+    if [[ "${style}" == plain ]]; then
+        line="$(yaml_plain_field_line "${field}" "${value}")"
+    else
+        line="$(yaml_field_line "${field}" "${value}")"
+    fi
+    FIELD_LINE="${line}" awk -v key="${field}" '
         NR == 1 { print; stage = ($0 == "---") ? 1 : 3; next }
         stage == 1 && $0 == "---" {
             for (i = 1; i <= n; i++) {
@@ -645,15 +670,21 @@ tier_model_key() { # $1 = plan, exec, or read
 }
 
 stamp_named_models() { # $1 = cursor or qwen
-    local harness="$1" tier key value path
+    local harness="$1" tier key raw value path style
     is_selected "${harness}" || return 0
 
     for tier in plan exec read; do
         key="$(tier_model_key "${tier}")"
-        value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
+        raw="$(env_value "${key}")"
+        value="$(tier_model_for "${harness}" "${raw}")"
         [[ -n "${value}" ]] || continue
+        style=quoted
+        if [[ "${harness}" == cursor ]]; then
+            value="$(cursor_model_stamp "${value}" "$(tier_depth_for cursor "${raw}")")"
+            style=plain
+        fi
         path=".${harness}/agents/star-${tier}.md"
-        stamp_frontmatter_field "${path}" model "${value}"
+        stamp_frontmatter_field "${path}" model "${value}" "${style}"
     done
 }
 
@@ -699,6 +730,9 @@ model_stamp_summary() {
             key="$(tier_model_key "${tier}")"
             value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
             if [[ -n "${value}" ]]; then
+                if [[ "${harness}" == cursor ]]; then
+                    value="$(cursor_model_stamp "${value}" "$(tier_depth_for cursor "$(env_value "${key}")")")"
+                fi
                 log "${key} in .env gives ${harness}: ${value}."
                 any=true
             fi
