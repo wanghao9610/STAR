@@ -7,7 +7,6 @@ REF_SET=false
 ADOPT=false
 DIFF=false
 FORCE=false
-MODELS=false
 HARNESSES_ARG=""
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -128,6 +127,7 @@ is_optional_path() {
         ".kimi-code/plugins")   return 0 ;;
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
+        "execs/configure.sh")      return 0 ;;
     esac
     return 1
 }
@@ -303,7 +303,6 @@ usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
        bash execs/update.sh --diff [ref] [--harnesses LIST] [--skill NAME] [--force]
-       bash execs/update.sh --models
        bash update.sh [ref] [--harnesses LIST] --adopt
 
 Overwrite STAR-managed skills, the Codex $star plugin, session hooks (model-id provenance, project
@@ -354,18 +353,8 @@ It runs against the current working directory, which must be a git repository ro
 never overwrites a file that is already there: every existing path is left alone and
 reported. Run /star-proj-adopt afterwards to wire the project up.
 
---models stamps the configured tier model, and the thinking depth an entry may carry after it,
-into the static files whose hosts read them: the two Claude Code READ manifests take the READ
-model, every Claude Code manifest takes its tier's depth, Claude Code's named plan, exec and read
-agents take that same depth — a delegate dispatched as one runs at it, which is how a depth is
-named per dispatch there — Cursor's named plan, exec and read agents take their model with a
-configured @depth rewritten as [effort=<depth>] on that field, and Qwen's take the model
-without the suffix. Codex reads its model and supported reasoning effort at dispatch, so this
-command reports those values without stamping a file or requiring a restart. It is offline. A key naming neither for that
-harness — empty, or carrying <harness>:<model> entries with neither its tag nor an untagged value —
-leaves that file unchanged. An ordinary update ends with the same step, so the stamps survive one; start a
-new Claude Code, Cursor or Qwen session afterward so it reloads the agent definitions. Which model
-and which depth each tier gets is workflow conventions §10.8.
+Model configuration is handled by execs/configure.sh. After syncing files, an ordinary
+update calls it to restore the selected harnesses' settings from .env.
 
 The upstream repository is STAR_REPOSITORY (environment first, then .env);
 default https://github.com/wanghao9610/STAR.git.
@@ -379,7 +368,6 @@ Examples:
   bash execs/update.sh TAG_OR_BRANCH --skill star-plan-coach
   bash execs/update.sh --harnesses claude
   bash execs/update.sh --harnesses claude,pi --diff
-  bash execs/update.sh --models
 
   cd /path/to/my-existing-project
   curl -fsSL https://raw.githubusercontent.com/wanghao9610/STAR/main/execs/update.sh -o /tmp/star-update.sh
@@ -421,9 +409,6 @@ while (( $# > 0 )); do
         --diff)
             DIFF=true
             ;;
-        --models)
-            MODELS=true
-            ;;
         --force)
             FORCE=true
             ;;
@@ -448,297 +433,6 @@ ENV_DIR="${ROOT_DIR}"
 env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
     [[ -f "${ENV_DIR}/.env" ]] || return 0
     sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
-}
-
-# A tier key holds one model name, or comma-separated <harness>:<model> entries so
-# one .env serves every tree (workflow conventions §10.8). Reduce a raw value to what
-# one harness gets: its own tagged entry, else an untagged one, else nothing. A tag
-# no harness in ALL_HARNESSES answers to is skipped, which is what leaves an entry
-# written for a harness this version does not ship unread instead of misapplied.
-tier_entry_for() { # $1 = harness token, $2 = the raw key value
-    awk -v want="$1" -v known="${ALL_HARNESSES[*]}" -v raw="$2" '
-        BEGIN {
-            n = split(known, k, " ")
-            for (i = 1; i <= n; i++) is_tag[k[i]] = 1
-            n = split(raw, entry, ",")
-            for (i = 1; i <= n; i++) {
-                gsub(/^[[:space:]]+|[[:space:]]+$/, "", entry[i])
-                if (entry[i] == "") continue
-                p = index(entry[i], ":")
-                tag = (p > 1) ? substr(entry[i], 1, p - 1) : ""
-                if (tag != "" && is_tag[tag]) {
-                    if (tag == want) {
-                        value = substr(entry[i], p + 1)
-                        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
-                        print value
-                        exit
-                    }
-                    continue
-                }
-                if (tag != "") continue          # a tag no tree answers to
-                if (bare == "") bare = entry[i]
-            }
-            print bare
-        }'
-}
-
-# An entry may end in `@<depth>`: the thinking depth a harness that can set one gives
-# the runs and delegates of that tier (workflow conventions §10.8). Only a suffix
-# spelling a depth in this vocabulary is read as one, so a model name carrying an '@'
-# of its own reaches its harness whole.
-is_tier_depth() { # $1 = the candidate suffix
-    case "$1" in
-        low|medium|high|xhigh|max) return 0 ;;
-        ''|*[!0-9]*) return 1 ;;
-        *[1-9]*) return 0 ;;
-        *) return 1 ;;
-    esac
-}
-
-tier_model_for() { # $1 = harness token, $2 = the raw key value; the model alone
-    local entry
-    entry="$(tier_entry_for "$1" "$2")"
-    if [[ "${entry}" == *@* ]] && is_tier_depth "${entry##*@}"; then
-        printf '%s' "${entry%@*}"
-    else
-        printf '%s' "${entry}"
-    fi
-}
-
-tier_depth_for() { # $1 = harness token, $2 = the raw key value; the depth, or nothing
-    local entry
-    entry="$(tier_entry_for "$1" "$2")"
-    [[ "${entry}" == *@* ]] || return 0
-    is_tier_depth "${entry##*@}" || return 0
-    printf '%s' "${entry##*@}"
-}
-
-# Some hosts need a static file to select a delegate's model. Claude Code reads
-# its READ-tier model from these two forked-skill manifests; Cursor and Qwen read
-# their plan, exec, and read models from named agents below. Cursor also encodes a
-# configured @depth as [effort=<depth>] on that model field. The files cannot read
-# `.env` themselves, so the updater stamps them after install. An empty key writes
-# nothing, leaving each shipped value in place (workflow conventions §10.8).
-READ_TIER_MANIFESTS=(
-    ".claude/skills/star-flow-status/SKILL.md"
-    ".claude/skills/star-flow-status/SKILL_zh.md"
-    ".claude/skills/star-expt-digest/SKILL.md"
-    ".claude/skills/star-expt-digest/SKILL_zh.md"
-)
-
-# A Claude Code run reads its thinking depth from the manifest it was invoked
-# through, so a tier's depth is stamped into every manifest of that tier — and a
-# delegate reads it from the named agent it was dispatched as, so the same depth is
-# stamped into .claude/agents/star-<tier>.md. Which skill belongs to which tier is
-# the roster in workflow conventions §10; keep these three lists and that table
-# saying the same thing.
-CLAUDE_PLAN_SKILLS=(
-    "star-idea-storm"
-    "star-plan-coach"
-    "star-code-architect"
-    "star-plan-decomposer"
-    "star-plan-executor"
-    "star-expt-analyst"
-    "star-plan-reviser"
-    "star-metd-summarize"
-)
-CLAUDE_EXEC_SKILLS=(
-    "star-proj-adopt"
-    "star-refs-reviewer"
-    "star-env-builder"
-    "star-code-reviewer"
-    "star-code-release"
-)
-CLAUDE_READ_SKILLS=(
-    "star-expt-digest"
-    "star-flow-status"
-)
-
-yaml_field_line() { # $1 = field name, $2 = its value; a YAML double-quoted line
-    local value="$2"
-    value="${value//\\/\\\\}"
-    value="${value//\"/\\\"}"
-    printf '%s: "%s"' "$1" "${value}"
-}
-
-yaml_plain_field_line() { # $1 = field name, $2 = its value; unquoted (Cursor model:)
-    local value="$2"
-    case "${value}" in
-        *$'\n'*|*$'\r'*) fail "Refusing to stamp a multiline ${1} value." ;;
-    esac
-    printf '%s: %s' "$1" "${value}"
-}
-
-cursor_model_stamp() { # $1 = model id, $2 = depth or empty; Cursor's model: encoding
-    local model="$1" depth="$2"
-    if [[ -n "${depth}" && "${model}" != *'['* ]]; then
-        printf '%s[effort=%s]' "${model}" "${depth}"
-    else
-        printf '%s' "${model}"
-    fi
-}
-
-stamp_frontmatter_field() { # $1 = path, $2 = field, $3 = value, $4 = quoted|plain
-    local path="$1" field="$2" value="$3" style="${4:-quoted}" tmp line
-    [[ -f "${ROOT_DIR}/${path}" ]] || return 0
-    tmp="${ROOT_DIR}/${path}.star-stamp"
-    # Only the first frontmatter block is changed. The new line is supplied
-    # through the environment so an id containing backslashes is not re-parsed
-    # as an awk -v escape sequence. Cursor's agent loader treats quote characters
-    # as part of the model name, so its model: line is stamped unquoted.
-    if [[ "${style}" == plain ]]; then
-        line="$(yaml_plain_field_line "${field}" "${value}")"
-    else
-        line="$(yaml_field_line "${field}" "${value}")"
-    fi
-    FIELD_LINE="${line}" awk -v key="${field}" '
-        NR == 1 { print; stage = ($0 == "---") ? 1 : 3; next }
-        stage == 1 && $0 == "---" {
-            for (i = 1; i <= n; i++) {
-                print buf[i]
-                if (!stamped && !placed && buf[i] ~ /^name:[[:space:]]/) {
-                    print ENVIRON["FIELD_LINE"]
-                    placed = 1
-                }
-            }
-            if (!stamped && !placed) print ENVIRON["FIELD_LINE"]
-            stage = 3
-            print
-            next
-        }
-        stage == 1 && $0 ~ "^" key ":[[:space:]]" { buf[++n] = ENVIRON["FIELD_LINE"]; stamped = 1; next }
-        stage == 1 { buf[++n] = $0; next }
-        { print }
-    ' "${ROOT_DIR}/${path}" > "${tmp}" || {
-        rm -f -- "${tmp}"
-        fail "Could not stamp the tier ${field} into ${path}."
-    }
-    if cmp -s "${tmp}" "${ROOT_DIR}/${path}"; then
-        rm -f -- "${tmp}"
-    else
-        mv -f -- "${tmp}" "${ROOT_DIR}/${path}"
-        log "Stamped ${field}: ${value} into ${path}"
-    fi
-}
-
-stamp_read_model() {
-    # A tree this run does not cover is left alone here too, so a project that
-    # excluded Claude keeps whatever its .claude holds, stamp included.
-    is_selected claude || return 0
-
-    local value path
-    value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
-    [[ -n "${value}" ]] || return 0
-
-    for path in "${READ_TIER_MANIFESTS[@]}"; do
-        stamp_frontmatter_field "${path}" model "${value}"
-    done
-}
-
-claude_tier_skills() { # $1 = plan, exec, or read
-    case "$1" in
-        plan) printf '%s\n' "${CLAUDE_PLAN_SKILLS[@]}" ;;
-        exec) printf '%s\n' "${CLAUDE_EXEC_SKILLS[@]}" ;;
-        read) printf '%s\n' "${CLAUDE_READ_SKILLS[@]}" ;;
-        *) fail "Unknown model tier '$1'." ;;
-    esac
-}
-
-stamp_claude_depths() {
-    is_selected claude || return 0
-
-    local tier depth skill name
-    for tier in plan exec read; do
-        depth="$(tier_depth_for claude "$(env_value "$(tier_model_key "${tier}")")")"
-        [[ -n "${depth}" ]] || continue
-        while IFS= read -r skill; do
-            for name in SKILL.md SKILL_zh.md; do
-                stamp_frontmatter_field ".claude/skills/${skill}/${name}" effort "${depth}"
-            done
-        done < <(claude_tier_skills "${tier}")
-        stamp_frontmatter_field ".claude/agents/star-${tier}.md" effort "${depth}"
-    done
-}
-
-tier_model_key() { # $1 = plan, exec, or read
-    case "$1" in
-        plan) printf 'STAR_PLAN_MODEL' ;;
-        exec) printf 'STAR_EXEC_MODEL' ;;
-        read) printf 'STAR_READ_MODEL' ;;
-        *) fail "Unknown model tier '$1'." ;;
-    esac
-}
-
-stamp_named_models() { # $1 = cursor or qwen
-    local harness="$1" tier key raw value path style
-    is_selected "${harness}" || return 0
-
-    for tier in plan exec read; do
-        key="$(tier_model_key "${tier}")"
-        raw="$(env_value "${key}")"
-        value="$(tier_model_for "${harness}" "${raw}")"
-        [[ -n "${value}" ]] || continue
-        style=quoted
-        if [[ "${harness}" == cursor ]]; then
-            value="$(cursor_model_stamp "${value}" "$(tier_depth_for cursor "${raw}")")"
-            style=plain
-        fi
-        path=".${harness}/agents/star-${tier}.md"
-        stamp_frontmatter_field "${path}" model "${value}" "${style}"
-    done
-}
-
-stamp_models() {
-    stamp_read_model
-    stamp_claude_depths
-    stamp_named_models cursor
-    stamp_named_models qwen
-}
-
-model_stamp_summary() {
-    local harness tier key value depth any=false
-    for harness in claude codex cursor qwen; do
-        is_selected "${harness}" || continue
-        if [[ "${harness}" == claude ]]; then
-            value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
-            if [[ -n "${value}" ]]; then
-                log "STAR_READ_MODEL in .env gives Claude Code: ${value}."
-                any=true
-            fi
-            for tier in plan exec read; do
-                key="$(tier_model_key "${tier}")"
-                depth="$(tier_depth_for claude "$(env_value "${key}")")"
-                if [[ -n "${depth}" ]]; then
-                    log "${key} in .env gives Claude Code's ${tier}-tier manifests and its star-${tier} agent the depth: ${depth}."
-                    any=true
-                fi
-            done
-            continue
-        fi
-        if [[ "${harness}" == codex ]]; then
-            for tier in plan exec read; do
-                key="$(tier_model_key "${tier}")"
-                value="$(tier_model_for codex "$(env_value "${key}")")"
-                [[ -n "${value}" ]] || continue
-                depth="$(tier_depth_for codex "$(env_value "${key}")")"
-                log "${key} in .env gives Codex at dispatch: model ${value}, requested reasoning effort ${depth:-default}; no file stamp is required."
-                any=true
-            done
-            continue
-        fi
-        for tier in plan exec read; do
-            key="$(tier_model_key "${tier}")"
-            value="$(tier_model_for "${harness}" "$(env_value "${key}")")"
-            if [[ -n "${value}" ]]; then
-                if [[ "${harness}" == cursor ]]; then
-                    value="$(cursor_model_stamp "${value}" "$(tier_depth_for cursor "$(env_value "${key}")")")"
-                fi
-                log "${key} in .env gives ${harness}: ${value}."
-                any=true
-            fi
-        done
-    done
-    [[ "${any}" == true ]] || log "No selected Claude Code, Codex, Cursor, or Qwen tier key names a model or a depth in .env; nothing was stamped."
 }
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,
@@ -787,14 +481,6 @@ if (( ${#SELECTED_HARNESSES[@]} < ${#ALL_HARNESSES[@]} )); then
     (( ${#SELECTED_HARNESSES[@]} == 0 )) || selected_label="${SELECTED_HARNESSES[*]}"
     log "Harnesses (${HARNESSES_SOURCE}): ${selected_label}."
     log "Left alone, neither written nor deleted: ${untouched[*]}."
-fi
-
-# --models does one offline edit and exits, so it shares nothing with a mode that
-# fetches, previews, or installs.
-if [[ "${MODELS}" == true ]]; then
-    [[ "${ADOPT}" == false ]] || fail "--models cannot be combined with --adopt."
-    [[ "${DIFF}" == false ]] || fail "--models cannot be combined with --diff."
-    [[ -z "${SKILL_NAME}" ]] || fail "--models cannot be combined with --skill."
 fi
 
 if [[ "${ADOPT}" == true ]]; then
@@ -848,6 +534,7 @@ if [[ "${ADOPT}" == true ]]; then
         ".cursorignore"
         "execs/run.sh"
         "execs/update.sh"
+        "execs/configure.sh"
         "execs/scpts/00_exp.sh"
         "${EXTENSION_FILES[@]}"
         "${HOOK_FILES[@]}"
@@ -881,7 +568,7 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     # A skill-only update still needs the named model agent the harness will
     # dispatch for its complete run or phase.
     SYNC_PATHS+=("${MODEL_AGENT_TREES[@]}")
-    SYNC_PATHS+=("${PI_SKILL_RUNTIME_PATHS[@]}")
+    SYNC_PATHS+=("${PI_SKILL_RUNTIME_PATHS[@]}" "execs/configure.sh")
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
     (( ${#SYNC_PATHS[@]} > 0 )) || \
@@ -941,6 +628,7 @@ else
         # The updater itself, replaced by rename rather than extracted — see the
         # extract step below.
         "${SELF_PATH}"
+        "execs/configure.sh"
     )
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=("${FILTERED[@]}")
@@ -951,15 +639,6 @@ fi
 if [[ "${ADOPT}" == false ]]; then
     [[ -f "${ROOT_DIR}/execs/run.sh" ]] || \
         fail "${ROOT_DIR} is not a STAR project (no execs/run.sh). This script updates the project it lives in: copy it to <project>/execs/update.sh and run it there, or pass --adopt to install STAR into the current directory."
-fi
-
-# --models is the whole run when it is given: the stamp reads .env and the tree
-# already on disk, so nothing below it — the clone, the archive, the installs —
-# has anything to contribute.
-if [[ "${MODELS}" == true ]]; then
-    stamp_models
-    model_stamp_summary
-    exit 0
 fi
 
 # Upstream resolution: environment wins, then .env, then the public default.
@@ -1003,7 +682,13 @@ if [[ "${ADOPT}" == false ]]; then
         # links resolve to nothing without it. A checkout path only — SYNC_PATHS
         # above is what gets copied out, so the Codex tree is still written to the
         # project only when codex is selected.
-        git -C "${SOURCE_DIR}" sparse-checkout set "${SYNC_PATHS[@]}" \
+        SPARSE_PATHS=()
+        for path in "${SYNC_PATHS[@]}"; do
+            # Cone-mode checkout takes directories; sync still copies only the command.
+            [[ "${path}" != execs/configure.sh ]] || path=execs
+            SPARSE_PATHS+=("${path}")
+        done
+        git -C "${SOURCE_DIR}" sparse-checkout set "${SPARSE_PATHS[@]}" \
             ".agents/skills/${SKILL_NAME}" ".codex/skills/${SKILL_NAME}"
     else
         # Directory-only patterns keep sparse-checkout correct in both cone and
@@ -1236,7 +921,9 @@ if [[ "${ADOPT}" == false ]]; then
     # After the extract, not before: an update replaces the manifests with the
     # upstream copies, which carry the shipped value, so a stamp made earlier
     # would be undone by the very run that made it.
-    stamp_models
+    if [[ -f "${ROOT_DIR}/execs/configure.sh" ]]; then
+        STAR_HARNESSES="${HARNESSES_SPEC}" bash "${ROOT_DIR}/execs/configure.sh"
+    fi
 
     log "Updated: ${SYNCED[*]}"
     if [[ "${SELF_REPLACED}" == true ]]; then
@@ -1317,7 +1004,9 @@ fi
 
 # The project may have no .env yet — the last line below is what tells the user to
 # make one — in which case this reads no key and stamps nothing.
-stamp_models
+if [[ -f "${ROOT_DIR}/execs/configure.sh" ]]; then
+    STAR_HARNESSES="${HARNESSES_SPEC}" bash "${ROOT_DIR}/execs/configure.sh"
+fi
 
 log "Adopted into ${ROOT_DIR}: ${installed} added, ${skipped} left alone."
 if (( skipped > 0 )); then
