@@ -13,7 +13,7 @@ description: >-
 
 目标解析后运行 `scripts/scan.sh --slim`，把它的计划 frontmatter 与运行日志 frontmatter 摘要作为 Step 0–1 的原始输入；目标 leaf 仍须整篇读取。脚本失败时直接读取计划文件并说明回退。
 
-**把档位模型传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `Agent` 的 `model`；键为空则省略。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
+**把档位模型与深度传给受托者。** 派发前取 `claude` 条目，没有则取不带标签的备选。该档每次派发都把解析值传给 `Agent` 的 `model`；键为空则省略。条目带有深度时，把该受托者派发成本档的具名 agent——`subagent_type: star-plan`、`star-exec` 或 `star-read`，其 `effort:` frontmatter 已由 `bash execs/update.sh --models` 写入该深度——取代后文步骤里写的通用 subagent 类型；配置了深度，即使档位模型是本会话模型的别名，也足以构成派发的理由，具名 agent 不存在时改派通用类型，并一次说明深度未能生效。模型须为当前工具所接受，后文规定的角色与写入限制照旧。盲读只拿产物与量表，不继承产出该工作的对话。模型不可用就留在这里并说明一条原因；派发被拒后，须确认它尚未开始工作才能退回本地。受托者从自己的会话溯源解析实际模型，不从请求中的别名或父会话转录取值。
 
 ## 角色
 
@@ -79,7 +79,7 @@ description: >-
 2. 必需决定全部解决后，按 `references/branch_rules_zh.md` 创建已记录的分支或树，再创建 `tasks/<plan-name>/`、`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`。把 run 追加到 `exec_runs`，保留既往记录；旧 `exec_run:` 先迁移。已有同名非可恢复 run 时使用用户给出的后缀。
 3. **把获授权偏差同步回子计划。**原地更新受影响的 §2–§5，追加 `## Revision History`，从系统时钟更新 `updated`，并把对应行标为 `synced`。研究范围、关键输入、§5 验收或成本变化仍未决定时继续询问。
 
-**把 Step 5 交给 EXEC 档。** EXECPLAN、EXEC_LOG 和当前必需决定均已记录，且配置了不同 EXEC 模型、本 run 不是 `tier=exec` 时，派一个 `Agent` subagent（`subagent_type: general-purpose`、`model:` 取该 EXEC 值）读取本说明并从 Step 5 恢复，带上 `involve=<level> tier=exec` 与合法 `auto=unattended`。它不得改 EXEC_PLAN 或绕过计划级缺口。STOP-line 命令或未决 blocked 编辑记入日志并返回用户侧运行；已有适用决定直接沿用。返回后重读日志并进 Step 6。无可用 override 或 `Agent` 路径时在本地执行，不反复请求不可用机制。
+**把 Step 5 交给 EXEC 档。** EXECPLAN、EXEC_LOG 和当前必需决定均已记录，且 EXEC 条目指定的模型或深度不是本 run 已在的那个、本 run 也不是 `tier=exec` 时，派一个 `Agent` subagent（`subagent_type: star-exec`、`model:` 取该 EXEC 值）读取本说明并从 Step 5 恢复，带上 `involve=<level> tier=exec` 与合法 `auto=unattended`。它不得改 EXEC_PLAN 或绕过计划级缺口。STOP-line 命令或未决 blocked 编辑记入日志并返回用户侧运行；已有适用决定直接沿用。返回后重读日志并进 Step 6。无可用 override 或 `Agent` 路径时在本地执行，不反复请求不可用机制。
 
 ### Step 5：执行—验证循环（每步一个 agent）
 

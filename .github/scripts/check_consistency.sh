@@ -1502,7 +1502,21 @@ check_subagent_types() { # $1 = skill root, $2 = allowed values as an ERE altern
     fi
 }
 
-check_subagent_types .claude/skills    'Explore|general-purpose'
+check_subagent_types .claude/skills    'Explore|general-purpose|star-plan|star-exec|star-read'
+# The three star-* values are not built-ins: they are the tier delegates in
+# .claude/agents, and a depth is named per dispatch by dispatching as one. A value
+# with no file there is rejected when the dispatch runs, like Pi's roster below.
+claude_roster="$(grep -h '^name:' .claude/agents/*.md 2>/dev/null | sed 's/^name: *//' | sort -u)"
+claude_named="$(mdgrep -hoE 'subagent_type: star-[a-z-]+' -- .claude/skills \
+    | sed 's/^subagent_type: //' | sort -u)"
+if [[ -n "${claude_named}" ]]; then
+    claude_unknown="$(printf '%s\n' "${claude_named}" | grep -vxF "${claude_roster}" || true)"
+    if [[ -n "${claude_unknown}" ]]; then
+        fail ".claude/skills dispatches to an agent that is not in .claude/agents:"
+        printf '%s\n' "${claude_unknown}" | sed 's/^/      /'
+        vocab_errors=1
+    fi
+fi
 check_subagent_types .cursor/skills    'explore'
 check_subagent_types .kimi-code/skills 'explore|coder'
 check_subagent_types .qwen/skills      'Explore|general-purpose|fork'

@@ -112,6 +112,7 @@ star-ai-research/
 ├── .cursor/commands/       # 同一对 /star、/star-auto 命令，Cursor 版
 ├── .qwen/commands/         # 同一对 /star、/star-auto 命令，Qwen Code 版
 ├── .cursor/rules/          # Cursor 自动加载的项目规则
+├── .claude/agents/         # Claude Code 的具名档位受托者：star-plan、star-exec、star-read
 ├── .cursor/agents/         # Cursor 的具名档位代理：star-plan、star-exec、star-read
 ├── .qwen/agents/           # Qwen Code 的具名档位代理：star-plan、star-exec、star-read
 ├── .pi/agents/             # star_subagent 的派发花名册：收集者、执行者、复核者、运行者
@@ -464,7 +465,7 @@ bash execs/update.sh
 - `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
 - `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 与 `/star-auto` 命令包，各自只在选中对应宿主时更新
 - `.agents/commands/`——唯一共享的 `/star` 分流名册与 `/star-auto` 流程——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`
-- `.cursor/agents/` 与 `.qwen/agents/`——这两个宿主派发一次档位运行所用的具名代理 `star-plan`、`star-exec`、`star-read`，其 `model` 由 `bash execs/update.sh --models` 从 `.env` 盖章
+- `.claude/agents/`、`.cursor/agents/` 与 `.qwen/agents/`——这三个宿主派发一次档位运行所用的具名代理 `star-plan`、`star-exec`、`star-read`，由 `bash execs/update.sh --models` 从 `.env` 盖章：Cursor 与 Qwen 盖该档的 `model`，Claude Code 盖它的 `effort`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
 - `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
@@ -502,7 +503,7 @@ bash execs/update.sh --models
 - 如果固定的 ref 早于 `.dsh/commands/` 或 `.kimi-code/plugins/`，普通更新与 `--adopt` 都会报告并跳过这个尚不存在的可选包；缺少其他必需路径仍会中止。
 - `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 或 `.agents/commands/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
 - `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
-- `--models` 离线同步已配置的模型：Claude 的两个 READ 档分叉技能，以及 Cursor、Qwen 各自的三个 STAR 命名代理。每棵树先取自己的标签条目，再取不带标签的备选；值为空则保留现有文件。Codex 在派发时读取模型与受支持的 effort，此命令只显示 Codex 的配置值，不需要重启。普通更新也会执行静态同步；Claude、Cursor、Qwen 需新开会话装载变更后的清单或代理。此命令只能单独运行，与 `--adopt`、`--diff`、`--skill` 同用会被拒绝。
+- `--models` 离线同步已配置的模型：Claude 的两个 READ 档分叉技能、它各档清单与三个具名受托者的思考深度，以及 Cursor、Qwen 各自的三个 STAR 命名代理。每棵树先取自己的标签条目，再取不带标签的备选；值为空则保留现有文件。Codex 在派发时读取模型与受支持的 effort，此命令只显示 Codex 的配置值，不需要重启。普通更新也会执行静态同步；Claude、Cursor、Qwen 需新开会话装载变更后的清单或代理。此命令只能单独运行，与 `--adopt`、`--diff`、`--skill` 同用会被拒绝。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
 
 `bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
@@ -511,7 +512,7 @@ bash execs/update.sh --models
 
 | 宿主 | STAR 如何选择受托者模型 |
 | --- | --- |
-| Claude Code | 每次派发传 `model`；`--models` 另同步两个 READ 档分叉技能的清单。 |
+| Claude Code | 每次派发传 `model`，并把受托者派发成带该档深度的 `star-plan`、`star-exec` 或 `star-read`；配置了深度，即使不换模型也会派出受托者。`--models` 同步这三个受托者、各档清单的深度，以及两个 READ 档分叉技能的清单。 |
 | [Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) | 每次派发传入 `model` 与受支持的 `reasoning_effort`；显式深度即使不换模型，也会触发使用全新上下文的委派。
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | 当前工具通过可选择的 secondary-model pool 提供 `model` 时，传入池接受的别名。模型池由用户自己的 Kimi 配置管理。 |
 | Pi | 通过 STAR 扩展给单任务、并行任务各项或串行步骤各项传 `model`。 |
@@ -555,15 +556,16 @@ bash execs/update.sh --models
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
+- **[v0.3.5](https://github.com/wanghao9610/STAR/tree/v0.3.5)**（2026-09-06）—— Claude Code 现在也能逐次派发指定档位的 `@深度`：`bash execs/update.sh --models` 把它盖进新增的 `.claude/agents/` 受托者 `star-plan`、`star-exec`、`star-read`，迁移整次运行或交接某个阶段时就派发成其中之一，于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配 `STAR_EXEC_MODEL=claude:opus@high` 能让执行阶段真正跑在 `high` 上。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Codex 自 v0.3.4 起的规则一致——而以普通 subagent 类型派出的受托者仍继承调用方的深度。`check_model_routing.sh` 覆盖新增的盖章，`check_consistency.sh` 拒绝 `.claude/agents/` 里没有的 `subagent_type`。
 - **[v0.3.4](https://github.com/wanghao9610/STAR/tree/v0.3.4)**（2026-09-06）—— Codex 现在把各档受支持的 `@深度` 传给 `reasoning_effort`，使 PLAN、EXEC、READ 可通过 `star-auto`、直接 READ 入口和执行阶段交接使用同模型的不同 effort。不需要写入静态模型配置或重启；直接调用的规划问答仍沿用主线程 effort。回归检查补齐 READ 入口，并确保全零后缀保留在模型名中。
 - **[v0.3.3](https://github.com/wanghao9610/STAR/tree/v0.3.3)**（2026-09-06）—— 档位键的条目现在可以以 `@<深度>` 结尾——`low`、`medium`、`high`、`xhigh`、`max` 或一个正整数——于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配上 `STAR_EXEC_MODEL=claude:opus@high`，就是同一个模型的两个思考深度。`bash execs/update.sh --models` 把每一档的深度写进该档 Claude Code 清单的 `effort:` frontmatter，宿主在以 `/star-<名字>` 启动的运行上应用它；只有拼成上述深度之一的后缀才会被读作深度，模型名自身带 `@` 时原样交给它的宿主。受托者仍沿用派发它的那次运行的深度——模型可以逐次指定，深度不能——不会设定深度的宿主则把条目整体读作模型名。
 - **[v0.3.2](https://github.com/wanghao9610/STAR/tree/v0.3.2)**（2026-09-06）—— 每份技能清单现在用一段话交代共享加载，而不是一套固定配方：挑选约定章节的 awk、「复用先前加载」段落和分层委派前言全部删去，改为引用约定 [§7.6、§7.7 和 §10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)，读文件用什么工具、输出给多少预算，交给当前 harness 自己定。`check_consistency.sh` 删掉审查这些段落的三项检查——开场加载不变量、按节选择性加载约定、复用先前加载段落——新增一项覆盖共享环境与语言控制。`AGENTS.md` 和 `.env.example` 把参与度重新表述为「在已有授权下以相称的谨慎行事」：例行实现在范围内，新的研究决策和破坏性操作仍需单独授权，只读请求永远不会启动写入的后续动作。
 - **[v0.3.1](https://github.com/wanghao9610/STAR/tree/v0.3.1)**（2026-09-06）—— 备好的红线命令现在在任何模式下都只在代码审查之后启动。`star-plan-executor` 不再提议跳过它在 run 结束时启动的那次审查；`star_commit_guard.sh` 会在 `wkdrs/<run>/` 里没有 `CODE_REVIEW_<date>.md`、或最新一份日期早于日志时，拒掉该 run 的启动脚本（`execs/scpts/<run>.sh`）和 `star-auto` 启动时写的 `wkdrs/<run>/.await` 标记；应用了修复的审查会把 `star-plan-executor <叶子>` 列为下一步，让被触及步骤的检查在启动前再跑一遍。你自己的终端不在守卫范围内：它看到的是 agent 运行的命令，不是你敲的。
-- **[v0.3.0](https://github.com/wanghao9610/STAR/tree/v0.3.0)**（2026-09-04）—— `.env` 的 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别指定研究判断、实现产出、只读工作跑在哪个模型上；每个键写一个模型名，或写成逗号分隔的 `<宿主>:<模型>` 条目，一份 `.env` 就能为每棵树各指定一个，键为空则每次运行与从前分毫不差。规约 [§10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 承载这条规则：名册新增档位列，模式可以压过所属 skill 的档位，`star-plan-executor` 与 `star-code-architect` 把动手那一段交给 EXEC 档，主会话里启动的运行只迁移一次——不递归，也绝不在还欠你一个确认点时迁移。Claude Code 在每次派发时指定模型，Cursor 与 Qwen Code 走具名代理 `star-plan`／`star-exec`／`star-read`（由 `bash execs/update.sh --models` 从 `.env` 写入，之后要新开会话），Pi 把它传给 `star_subagent`，无法指定被委派者模型的宿主则忽略这三个键。
 
 <details>
 <summary>更早的版本</summary>
 
+- **[v0.3.0](https://github.com/wanghao9610/STAR/tree/v0.3.0)**（2026-09-04）—— `.env` 的 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别指定研究判断、实现产出、只读工作跑在哪个模型上；每个键写一个模型名，或写成逗号分隔的 `<宿主>:<模型>` 条目，一份 `.env` 就能为每棵树各指定一个，键为空则每次运行与从前分毫不差。规约 [§10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 承载这条规则：名册新增档位列，模式可以压过所属 skill 的档位，`star-plan-executor` 与 `star-code-architect` 把动手那一段交给 EXEC 档，主会话里启动的运行只迁移一次——不递归，也绝不在还欠你一个确认点时迁移。Claude Code 在每次派发时指定模型，Cursor 与 Qwen Code 走具名代理 `star-plan`／`star-exec`／`star-read`（由 `bash execs/update.sh --models` 从 `.env` 写入，之后要新开会话），Pi 把它传给 `star_subagent`，无法指定被委派者模型的宿主则忽略这三个键。
 - **[v0.2.17](https://github.com/wanghao9610/STAR/tree/v0.2.17)**（2026-08-30）—— `star-auto` 等待已启动的重型命令改为事件驱动而非刷新：命令连同 `wkdrs/<run>/.await` 标记后台脱离启动，运行用一条阻塞 shell 调用守到退出——进程活着期间不重读日志、不重跑状态、不 watch——新调用发现活标记直接续等，goal 模式每次重驱只花一轮。`star-auto involve=low` 无人值守跑完 executor 链的 Git 生命周期——暂存、提交、执行分支、不删内容的审查修复、审查后的 squash 合并——`involve=` token 也传进 Claude 的门控钩子。Codex 的 model-id 溯源直接写明 SessionStart 的精确 id，并新增写后 `--check`：产物的 `model_id` 与 rollout 不符即阻止报告完成或提交。
 - **[v0.2.16](https://github.com/wanghao9610/STAR/tree/v0.2.16)**（2026-08-27）—— `/star-auto <目标> [stop=<停止线>]` 朝给定目标自动推进工作流：先看状态，再接着跑每次运行点名的下一步——只许显式调用的七个 skill 也在内，因为敲下这条命令就是研究者的决定，为整场追逐一次做出。备好的重命令默认直接启动，只被 `stop=` 用自然语言画出的停止线拦下；必问确认点照问，删除与覆盖永不自动执行。规约[§2 与 §10.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)记下这份授权，七个宿主入口都带上这条命令，共享流程只有 `.agents/commands/star-auto.md` 一份。
 - **[v0.2.15](https://github.com/wanghao9610/STAR/tree/v0.2.15)**（2026-08-26）—— `INVOLVE=low` 现在也管到计划审批：`.claude/hooks/star_plan_gate.sh` 应答 `ExitPlanMode` 的 `PermissionRequest`，放行的同时把会话切进 auto 模式（`acceptEdits`），`star-plan-executor` 的 plan 模式确认点材料照常完整呈现但不再停下等回答，搭在其上的几问取各自推荐项。仅 Claude 生效，按能力划界：其余 harness 没有把计划审批做成 hook 能应答的提示。规约 [§7.7](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) 记下这条例外——`low` 档唯一移动的确认点——`execs/update.sh` 则在保留的 `.claude/settings.json` 缺这条注册时给出提醒。

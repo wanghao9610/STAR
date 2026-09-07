@@ -31,6 +31,12 @@ for skill in star-flow-status star-expt-digest star-plan-executor star-code-revi
 		cp "${ROOT_DIR}/.claude/skills/${skill}/${suffix}" "${PROJECT}/.claude/skills/${skill}/"
 	done
 done
+# The three named delegates Claude Code dispatches a tier through: their frontmatter
+# is where a depth becomes a per-dispatch control rather than the run's own setting.
+mkdir -p "${PROJECT}/.claude/agents"
+for tier in plan exec read; do
+	cp "${ROOT_DIR}/.claude/agents/star-${tier}.md" "${PROJECT}/.claude/agents/"
+done
 
 write_env() { printf '%s\n' "$@" > "${PROJECT}/.env"; }
 snapshot() {
@@ -80,9 +86,12 @@ done
 if grep -Fqx 'model: "claude-plan"' "${PROJECT}/.claude/skills/star-plan-executor/SKILL.md"; then
 	fail "a plan-tier manifest should take its tier's depth and no model stamp"
 fi
+expect_effort "${PROJECT}/.claude/agents/star-plan.md" xhigh
+expect_effort "${PROJECT}/.claude/agents/star-exec.md" high
+expect_effort "${PROJECT}/.claude/agents/star-read.md" medium
 expect_model "${PROJECT}/.cursor/agents/star-exec.md" cursor-exec
 expect_model "${PROJECT}/.qwen/agents/star-read.md" qwen-read@keep
-note "a depth suffix reaches Claude Code's manifests and leaves every model name clean"
+note "a depth suffix reaches Claude Code's manifests and named agents, and leaves every model name clean"
 
 # Codex consumes both halves at dispatch rather than through a static manifest.
 # This checks the parsed summary and instruction contracts, not a live dispatch.
@@ -124,6 +133,15 @@ grep -Fq '显式传给 `reasoning_effort`' \
 grep -Fq 'Codex passes a supported named depth per dispatch as `reasoning_effort`' \
 	"${ROOT_DIR}/AGENTS.md" ||
 	fail "AGENTS.md does not expose Codex per-dispatch effort"
+grep -Fq 'Claude Code dispatches the delegate as its `star-plan`, `star-exec` or `star-read` agent' \
+	"${ROOT_DIR}/AGENTS.md" ||
+	fail "AGENTS.md does not expose Claude Code per-dispatch effort"
+grep -Fq 'or carries a depth' "${ROOT_DIR}/.claude/commands/star-auto.md" ||
+	fail "Claude star-auto does not route an explicit same-model depth"
+while IFS= read -r file; do
+	grep -Fq 'a configured depth is reason enough to dispatch' "${file}" ||
+		fail "${file} does not route a same-model depth to a named agent"
+done < <(find -L "${ROOT_DIR}/.claude/skills" -type f -name SKILL.md)
 for skill in star-flow-status star-expt-digest; do
 	entry="$(grep -F '**READ-tier entry on this harness.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md")"
 	grep -Fq 'or the harness can apply its depth per dispatch' <<<"${entry}" ||
@@ -212,7 +230,7 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 		grep -Fq 'Passing a tier model' "${file}" || fail "${file} lacks the tier-model entry"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL.md)
 	while IFS= read -r file; do
-		grep -Fq '把档位模型传给受托者。' "${file}" || fail "${file} lacks the Chinese tier-model entry"
+		grep -Fq '传给受托者。' "${file}" || fail "${file} lacks the Chinese tier-model entry"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL_zh.md)
 	for skill in star-flow-status star-expt-digest; do
 		grep -Fq 'READ-tier entry on this harness.' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its READ entry"

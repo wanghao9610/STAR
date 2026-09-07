@@ -54,10 +54,13 @@ EXTENSION_TREES=(
     ".pi/extensions/star-plan-mode"
     ".pi/extensions/star-subagent"
 )
-# Cursor and Qwen load named subagents from their project trees. These three
-# dispatch roles are STAR-owned like Pi's roster: a model stamp can change their
-# frontmatter, but a normal update replaces their prompt bodies from upstream.
+# Claude Code, Cursor and Qwen load named subagents from their project trees. These
+# three dispatch roles are STAR-owned like Pi's roster: a model or depth stamp can
+# change their frontmatter, but a normal update replaces their prompt bodies from
+# upstream. Claude Code's copies are what give a delegate a thinking depth of its
+# own: the depth is frontmatter, so naming one per dispatch means naming the agent.
 MODEL_AGENT_TREES=(
+    ".claude/agents"
     ".cursor/agents"
     ".qwen/agents"
 )
@@ -119,6 +122,7 @@ INSTRUCTION_FILES=(
 is_optional_path() {
     case "$1" in
         .*/hooks*)              return 0 ;;
+        ".claude/agents")      return 0 ;;
         ".cursor/agents")      return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
@@ -352,14 +356,15 @@ reported. Run /star-proj-adopt afterwards to wire the project up.
 
 --models stamps the configured tier model, and the thinking depth an entry may carry after it,
 into the static files whose hosts read them: the two Claude Code READ manifests take the READ
-model, every Claude Code manifest takes its tier's depth, and Cursor and Qwen's named plan, exec
-and read agents take their model. Codex reads its model and supported reasoning effort at dispatch,
-so this command reports those values without stamping a file or requiring a restart. It is offline.
-A key naming neither for that harness — empty,
-or carrying <harness>:<model> entries with neither its tag nor an untagged value — leaves that
-file unchanged. An ordinary update ends with the same step, so the stamps survive one; start a
-new Cursor or Qwen session afterward so it reloads the agent definition. Which model and which
-depth each tier gets is workflow conventions §10.8.
+model, every Claude Code manifest takes its tier's depth, Claude Code's named plan, exec and read
+agents take that same depth — a delegate dispatched as one runs at it, which is how a depth is
+named per dispatch there — and Cursor and Qwen's named plan, exec and read agents take their model.
+Codex reads its model and supported reasoning effort at dispatch, so this command reports those
+values without stamping a file or requiring a restart. It is offline. A key naming neither for that
+harness — empty, or carrying <harness>:<model> entries with neither its tag nor an untagged value —
+leaves that file unchanged. An ordinary update ends with the same step, so the stamps survive one; start a
+new Claude Code, Cursor or Qwen session afterward so it reloads the agent definitions. Which model
+and which depth each tier gets is workflow conventions §10.8.
 
 The upstream repository is STAR_REPOSITORY (environment first, then .env);
 default https://github.com/wanghao9610/STAR.git.
@@ -520,9 +525,11 @@ READ_TIER_MANIFESTS=(
 )
 
 # A Claude Code run reads its thinking depth from the manifest it was invoked
-# through, so a tier's depth is stamped into every manifest of that tier. Which
-# skill belongs to which tier is the roster in workflow conventions §10; keep
-# these three lists and that table saying the same thing.
+# through, so a tier's depth is stamped into every manifest of that tier — and a
+# delegate reads it from the named agent it was dispatched as, so the same depth is
+# stamped into .claude/agents/star-<tier>.md. Which skill belongs to which tier is
+# the roster in workflow conventions §10; keep these three lists and that table
+# saying the same thing.
 CLAUDE_PLAN_SKILLS=(
     "star-idea-storm"
     "star-plan-coach"
@@ -624,6 +631,7 @@ stamp_claude_depths() {
                 stamp_frontmatter_field ".claude/skills/${skill}/${name}" effort "${depth}"
             done
         done < <(claude_tier_skills "${tier}")
+        stamp_frontmatter_field ".claude/agents/star-${tier}.md" effort "${depth}"
     done
 }
 
@@ -670,7 +678,7 @@ model_stamp_summary() {
                 key="$(tier_model_key "${tier}")"
                 depth="$(tier_depth_for claude "$(env_value "${key}")")"
                 if [[ -n "${depth}" ]]; then
-                    log "${key} in .env gives Claude Code's ${tier}-tier manifests the depth: ${depth}."
+                    log "${key} in .env gives Claude Code's ${tier}-tier manifests and its star-${tier} agent the depth: ${depth}."
                     any=true
                 fi
             done
