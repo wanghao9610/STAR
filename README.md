@@ -105,7 +105,7 @@ STAR/
 ├── .kimi-code/hooks/       # Session hooks for Kimi Code (see Per-harness setup)
 ├── .pi/extensions/         # Pi extensions: STAR's session hooks, plus sub-agents, plan mode, questions
 ├── .qwen/hooks/            # Hooks for Qwen Code: model-id provenance, project memory, involve gate
-├── .star/memory/           # Project memory: what earlier sessions learned (local/ is git-ignored)
+├── .star/memory/           # Project memory: what earlier sessions learned (global/ and local/ are git-ignored)
 ├── .agents/commands/       # Shared /star router and /star-auto procedure, read by each harness-owned command
 ├── .agents/plugins/        # Codex marketplace discovery: one file link into .codex/plugins/
 ├── .claude/commands/       # Claude Code slash commands: /star to route a request, /star-auto to pursue a goal
@@ -457,7 +457,7 @@ Two rules keep it from becoming a second, competing source of truth:
 - **A fact is recorded there only when no file in the project already owns it.** Results belong to their run's `EXEC_LOG.md`, decisions about the research to their plan, papers to `metds/refs/`. Memory holds the residue.
 - **Where a memory disagrees with a file in the repository, the file wins**, and the memory is corrected or dropped.
 
-Facts that hold only on this machine go to `.star/memory/local/`, which git ignores the way it ignores `.env`. Nothing is recorded without your say-so — the agent offers, you decide — and `INVOLVE=low` in `.env` turns that into record-and-tell. The four kinds of memory, the file format, and how one is retired are in [Project Memory](docs/mds/star-workflow/memory_spec.md).
+Two subdirectories stay on the machine, git-ignored the way `.env` is, split by where the fact holds: `.star/memory/global/` for what is true everywhere, `.star/memory/local/` for what is true only of this machine, one plan, or one path. Nothing is recorded without your say-so — the agent offers, you decide — and `INVOLVE=low` in `.env` turns that into record-and-tell. The four kinds of memory, the file format, and how one is retired are in [Project Memory](docs/mds/star-workflow/memory_spec.md).
 
 ## Updating STAR skills and workflow guides
 

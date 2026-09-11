@@ -23,12 +23,15 @@
 .star/memory/
 ├── MEMORY.md          # 索引：每条记忆一行
 ├── <slug>.md          # 一事一文件
-└── local/             # 只对本机成立的记忆，git 忽略
+├── global/            # `scope: global` 的记忆，git 忽略
+│   ├── MEMORY.md
+│   └── <slug>.md
+└── local/             # 其余三种较窄作用域，git 忽略
     ├── MEMORY.md
     └── <slug>.md
 ```
 
-`.star/memory/` 入库，所以一条记忆活得比记下它的机器更久，也跟着 clone 一起走。`local/` 像 `.env` 一样被忽略：在这里成立、换台机器就不成立的路径、模块名或驱动怪癖归它。这类事实若仍值得带走，就写成共享记忆，并在 `scope` 里点明它成立的机器。
+`.star/memory/` 本身入库，所以写在那里的记忆活得比记下它的机器更久，也跟着 clone 一起走。两个子目录都像 `.env` 一样被忽略，按 `scope` 分开留在本机的部分：处处成立的事实进 `global/`，`machine:`、`plan:`、`code:` 三种作用域进 `local/`——在这里成立、换台机器就不成立的路径、模块名或驱动怪癖归 `local/`。这类窄作用域的事实若仍值得带走，就写进上面那层入库的共享区，并在 `scope` 里点明它成立的机器或计划。
 
 ## 单条记忆文件
 
@@ -95,6 +98,6 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 | Pi | `.pi/extensions/star-hooks/star_memory.sh` | `before_agent_start`，由 `.pi/extensions/star-hooks/index.ts` 接线 | 索引，作为第一次 agent 运行前的一条隐藏消息，模型每换一次再注入一次 |
 | Qwen Code | `.qwen/hooks/star_memory.sh` | `SessionStart` | 索引，装在 `additionalContext` 里 |
 
-每个钩子只打印那两份索引，别的什么都不打——共享的那份，以及 `local/` 那份（存在的话）。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而在健康条目上也会亮的标记只会教读者跳过它。空记忆库什么都不打印，所以什么都没记过的项目一分钱不花。
+每个钩子只打印那三份索引，别的什么都不打——入库的那份，以及 `global/`、`local/` 那两份（存在的话）。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而在健康条目上也会亮的标记只会教读者跳过它。空记忆库什么都不打印，所以什么都没记过的项目一分钱不花。
 
 钩子存在不等于已注册。Claude、Codex、Cursor、Qwen Code 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。DSH 是同一种形状：`.dsh/hooks.json` 是那张表，但指向它的那一行要写进本机的 `$DSH_HOME/cordis.patch.yml`，由 `bash .dsh/hooks/install.sh` 写一次——而它加载的那座桥不是 dsh 的依赖，每个用到的 profile 还需执行 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`。Pi 的注册是代码而不是配置——扩展会被自动发现，但只在受信任的项目里（`/trust`，或 `defaultProjectTrust`）；未获信任就不加载项目级扩展，也什么都不注入。Qwen Code 的注册多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件；`execs/update.sh` 从不覆盖，只把缺口报出来，那一条由人手工补上。

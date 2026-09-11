@@ -16,8 +16,9 @@ fact was last confirmed true, as `YYYY-MM-DD`. The separator between the first
 four fields is a space, a middle dot, and a space; everything after the em dash
 is free text. Only lines starting with `- ` are read.
 
-Machine-specific memories live in `local/`, which git ignores. Full rules —
-what belongs here, the file format, how a memory is retired:
-`docs/mds/star-workflow/memory_spec.md`.
+Two subdirectories git ignores hold what stays on this machine, split by
+`scope`: `global/` for a fact true everywhere, `local/` for the `machine:`,
+`plan:` and `code:` scopes. Full rules — what belongs here, the file format,
+how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
 
 <!-- entries below -->

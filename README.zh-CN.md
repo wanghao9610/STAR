@@ -105,7 +105,7 @@ star-ai-research/
 ├── .kimi-code/hooks/       # Kimi Code 的会话钩子（见分宿主配置）
 ├── .pi/extensions/         # Pi 的扩展：STAR 的会话钩子，外加子代理、计划模式、结构化提问
 ├── .qwen/hooks/            # Qwen Code 的钩子：model-id 溯源、项目记忆、INVOLVE=low 放行编辑
-├── .star/memory/           # 项目记忆：先前会话学到的事实（local/ 不入库）
+├── .star/memory/           # 项目记忆：先前会话学到的事实（global/ 与 local/ 不入库）
 ├── .agents/commands/       # 各宿主命令共同读取的 /star 分流规则与 /star-auto 流程
 ├── .agents/plugins/        # Codex marketplace 发现入口：仅一个指向 .codex/plugins/ 的文件链接
 ├── .claude/commands/       # Claude Code 的斜杠命令：/star 分流需求，/star-auto 朝目标推进
@@ -449,7 +449,7 @@ bash .dsh/hooks/install.sh         # DSH
 - **只有当项目里没有任何文件已经认领这条事实时，它才被记进去。** 结果属于那次运行的 `EXEC_LOG.md`，关于研究的决定属于它的计划，论文属于 `metds/refs/`。记忆装的是残余。
 - **记忆与仓库里的文件冲突时，以文件为准**，随后把这条记忆改正或删掉。
 
-只在这台机器上成立的事实放 `.star/memory/local/`，git 像忽略 `.env` 一样忽略它。任何东西都不会不打招呼就记下来——agent 提议，你来定——`.env` 里设 `INVOLVE=low` 则改为先记下再告诉你。四类记忆、文件格式，以及一条记忆怎么退场，见[项目记忆](docs/mds/star-workflow/memory_spec.zh-CN.md)。
+有两个子目录留在本机，git 像忽略 `.env` 一样忽略它们，按事实在哪里成立分装：处处成立的放 `.star/memory/global/`，只对这台机器、某个计划或某条路径成立的放 `.star/memory/local/`。任何东西都不会不打招呼就记下来——agent 提议，你来定——`.env` 里设 `INVOLVE=low` 则改为先记下再告诉你。四类记忆、文件格式，以及一条记忆怎么退场，见[项目记忆](docs/mds/star-workflow/memory_spec.zh-CN.md)。
 
 ## 更新 STAR 的 skill 与工作流指南
 

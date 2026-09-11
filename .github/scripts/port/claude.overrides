@@ -1818,10 +1818,10 @@ The active executor retains responsibility for the user's execution goal. Before
 ## agent 返回后
 ### star-plan-executor/references/branch_rules.md
 --- 2
-5. Worktree: git creates only tracked files in it, so link the runtime in from the main checkout — `.env`, `datas/`, `inits/`, and `.star/memory/local/` where present, absolute-path symlinks — then re-run the §3 resolution against the tree's `.env` to prove the interpreter still resolves. Never link `wkdrs/` or `tasks/` (§11.8). Record the tree's absolute path as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter; from here, every part of this run — delegations, checks, commits, records — happens inside the tree, and each delegate's dispatch brief names the tree root (`agent_dispatch_spec.md`).
+5. Worktree: git creates only tracked files in it, so link the runtime in from the main checkout — `.env`, `datas/`, `inits/`, and `.star/memory/global/`, `.star/memory/local/` where present, absolute-path symlinks — then re-run the §3 resolution against the tree's `.env` to prove the interpreter still resolves. Never link `wkdrs/` or `tasks/` (§11.8). Record the tree's absolute path as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter; from here, every part of this run — delegations, checks, commits, records — happens inside the tree, and each delegate's dispatch brief names the tree root (`agent_dispatch_spec.md`).
 6. Choosing the branch chooses per-action commits with it: a branch with nothing committed has nothing to merge.
 +++ 2
-5. Worktree: git creates only tracked files in it, so link the runtime in from the main checkout — `.env`, `datas/`, `inits/`, and `.star/memory/local/` where present, absolute-path symlinks — then re-run the §3 resolution against the tree's `.env` to prove the interpreter still resolves. Never link `wkdrs/` or `tasks/` (§11.8). Record the tree's absolute path as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter; from here, every part of this run — dispatches, checks, commits, records — happens inside the tree, and each dispatch brief names the tree root (`agent_dispatch_spec.md`).
+5. Worktree: git creates only tracked files in it, so link the runtime in from the main checkout — `.env`, `datas/`, `inits/`, and `.star/memory/global/`, `.star/memory/local/` where present, absolute-path symlinks — then re-run the §3 resolution against the tree's `.env` to prove the interpreter still resolves. Never link `wkdrs/` or `tasks/` (§11.8). Record the tree's absolute path as `worktree:` in EXEC_PLAN / EXEC_LOG frontmatter; from here, every part of this run — dispatches, checks, commits, records — happens inside the tree, and each dispatch brief names the tree root (`agent_dispatch_spec.md`).
 6. Choosing the branch chooses per-step commits with it: a branch with nothing committed has nothing to merge.
 ### star-plan-executor/references/branch_rules.md
 --- 1
@@ -1835,10 +1835,10 @@ Reached when every action is `done`, the §5 done-criterion is verified, and the
 Reached when every action is `done`, the §5 done-criterion is verified, and the newest `CODE_REVIEW_<date>.md` holds no unsettled blocker/major finding — with no review yet, the run's final independent-review step has already started one and the merge waits for it. A specific applicable merge decision already given is used and cited without another question. Otherwise ask, at every involve level, with consequences per option:
 ### star-plan-executor/references/branch_rules_zh.md
 --- 2
-5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
+5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/global/`、`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
 6. 选了分支就同时选了逐 action 提交：没有提交的分支没有东西可合并。
 +++ 2
-5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——派发、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
+5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/global/`、`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——派发、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
 6. 选了分支就同时选了逐步提交：没有提交的分支没有东西可合并。
 ### star-plan-executor/references/branch_rules_zh.md
 --- 1

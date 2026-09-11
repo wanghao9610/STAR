@@ -3,10 +3,12 @@
 # knowing what earlier sessions in this repository learned.
 #
 # The store is .star/memory/ in the project, not the harness's own memory: one
-# file per fact, listed one line each in MEMORY.md, with machine-specific facts
-# under local/ (git-ignored, like .env). Only the index is printed — the lines
-# are pointers, and the fact itself is read from its file when it matters. What
-# belongs in the store, and the format of both, is docs/mds/star-workflow/memory_spec.md.
+# file per fact, listed one line each in MEMORY.md, with two git-ignored
+# directories beside it (like .env) holding what stays on this machine: scope
+# `global` in global/, the narrower machine:, plan: and code: scopes in local/.
+# Only the index is printed — the lines are pointers, and the fact itself is
+# read from its file when it matters. What belongs in the store, and the format
+# of both, is docs/mds/star-workflow/memory_spec.md.
 #
 # Nothing is printed when the store holds no entries, so a fresh project pays
 # nothing: the rule that creates the first memory is AGENTS.md section 10, which
@@ -49,10 +51,12 @@ entries() { # $1 = index file -> its entry lines, aged `env` ones marked
 }
 
 shared="$(entries "${root}/.star/memory/MEMORY.md")"
+global="$(entries "${root}/.star/memory/global/MEMORY.md")"
 machine="$(entries "${root}/.star/memory/local/MEMORY.md")"
-[ -n "${shared}${machine}" ] || exit 0
+[ -n "${shared}${global}${machine}" ] || exit 0
 
 printf '%s\n' "STAR project memory — what earlier sessions in this repository learned, recorded under .star/memory/ rather than in your own memory store. Each line is a pointer, not the fact: type · scope · last verified · file — summary. Open the file under .star/memory/ before acting on one. A scope naming a machine or a plan applies only there, and where a memory disagrees with a file in the repository, the file wins. Recording a new one: AGENTS.md section 10."
 [ -n "${shared}" ] && printf 'Shared (.star/memory/):\n%s\n' "${shared}"
+[ -n "${global}" ] && printf 'Global scope (.star/memory/global/):\n%s\n' "${global}"
 [ -n "${machine}" ] && printf 'Machine-local (.star/memory/local/):\n%s\n' "${machine}"
 exit 0

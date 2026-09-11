@@ -31,7 +31,7 @@
 2. 可能正有任务运行的 checkout 不得切换——跑着的任务会中途重读被切换的文件。checkout 正忙正是把这个 run 送进 worktree 的信号。
 3. 只开分支：`git switch -c <run>`。运行前就有的未提交改动原样带过去；它们仍按既有改动点名，永不暂存（规约 §1.4）。
 4. 进 worktree：在被调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净地建出来。
-5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
+5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/global/`、`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——委派、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
 6. 选了分支就同时选了逐 action 提交：没有提交的分支没有东西可合并。
 
 无人值守 auto 在已记录的决定里点明授权；带尚未回收任务记录的 checkout 视为正忙，因此绝不切换它。

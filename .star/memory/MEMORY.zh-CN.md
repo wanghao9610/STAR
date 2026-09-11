@@ -10,7 +10,7 @@
 - <type> · <scope> · <verified> · [<slug>](<slug>.md) — <one-line fact>
 ```
 
-有效 `type` 为 `env`、`pref`、`insight` 和 `deadend`。有效 `scope` 为 `global`、`machine:<name>`、`plan:<prefix>` 和 `code:<path>`。仅对本机成立的条目放在 `.star/memory/local/` 下。
+有效 `type` 为 `env`、`pref`、`insight` 和 `deadend`。有效 `scope` 为 `global`、`machine:<name>`、`plan:<prefix>` 和 `code:<path>`。留在本机的条目按作用域分装：`global` 的放 `.star/memory/global/` 下，`machine:`、`plan:`、`code:` 的放 `.star/memory/local/` 下，两个目录 git 都忽略。
 
 已经由计划、日志、报告或参考文献条目承载的内容不应放在这里。详见 [项目记忆规范](../../docs/mds/star-workflow/memory_spec.zh-CN.md)。
 
