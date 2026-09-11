@@ -4,9 +4,9 @@
 # learned.
 #
 # The store is .star/memory/ in the project, not the harness's own memory: one
-# file per fact, listed one line each in MEMORY.md, with two git-ignored
-# directories beside it (like .env) holding what stays on this machine: scope
-# `global` in global/, the narrower machine:, plan: and code: scopes in local/.
+# file per fact, listed one line each in MEMORY.md, with a git-ignored
+# local/ beside it (like .env) holding what stays on this machine: the machine:
+# scoped facts, and any memory the user keeps off the repository.
 # Only the index is injected — the lines are pointers, and the fact itself is
 # read from its file when it matters. What belongs in the store, and the format
 # of both, is docs/mds/star-workflow/memory_spec.md.
@@ -56,17 +56,13 @@ entries() { # $1 = index file -> its entry lines, aged `env` ones marked
 }
 
 shared="$(entries "${root}/.star/memory/MEMORY.md")"
-global="$(entries "${root}/.star/memory/global/MEMORY.md")"
 machine="$(entries "${root}/.star/memory/local/MEMORY.md")"
-[ -n "${shared}${global}${machine}" ] || exit 0
+[ -n "${shared}${machine}" ] || exit 0
 
 ctx="STAR project memory — what earlier sessions in this repository learned, recorded under .star/memory/ rather than in your own memory store. Each line is a pointer, not the fact: type · scope · last verified · file — summary. Open the file under .star/memory/ before acting on one. A scope naming a machine or a plan applies only there, and where a memory disagrees with a file in the repository, the file wins. Recording a new one: AGENTS.md section 10."
 [ -n "${shared}" ] && ctx="${ctx}
 Shared (.star/memory/):
 ${shared}"
-[ -n "${global}" ] && ctx="${ctx}
-Global scope (.star/memory/global/):
-${global}"
 [ -n "${machine}" ] && ctx="${ctx}
 Machine-local (.star/memory/local/):
 ${machine}"

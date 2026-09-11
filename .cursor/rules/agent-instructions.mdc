@@ -95,7 +95,7 @@ Before running Python, tests, or dependency checks:
 
 - Record a fact there only when no file in the project already owns it: a plan, a log, a report, or a reference entry is the better home. Memory holds the residue.
 - Offer, never assume: at most two offers per session, and write only after the user agrees. `INVOLVE=low` records unasked and says so.
-- The two git-ignored subdirectories split what stays on this machine by scope: a fact true everywhere goes to `.star/memory/global/`, a `machine:`, `plan:` or `code:` scoped one to `.star/memory/local/`.
+- What travels with the repository goes to the versioned `.star/memory/`; a `machine:` scoped fact, true only here, goes to the git-ignored `.star/memory/local/`, as does any memory the user keeps off the repository.
 - Where a memory disagrees with a file in the repository, the file wins.
 - Types, file format, the index line the hooks parse, and how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
 

@@ -16,9 +16,8 @@ fact was last confirmed true, as `YYYY-MM-DD`. The separator between the first
 four fields is a space, a middle dot, and a space; everything after the em dash
 is free text. Only lines starting with `- ` are read.
 
-Two subdirectories git ignores hold what stays on this machine, split by
-`scope`: `global/` for a fact true everywhere, `local/` for the `machine:`,
-`plan:` and `code:` scopes. Full rules — what belongs here, the file format,
+One subdirectory git ignores, `local/`, holds what stays on this machine: the
+`machine:` scoped facts, and any memory kept off the repository. Full rules — what belongs here, the file format,
 how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
 
 <!-- entries below -->

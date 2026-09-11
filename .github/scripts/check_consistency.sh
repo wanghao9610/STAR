@@ -1698,6 +1698,23 @@ done
 
 (( reloc_errors == 0 )) && note "relocating skills have routing entries before their actions; native READ entries are checked separately"
 
+# 26. The versioned memory store ships as its template. STAR is the template
+#     every adopting project starts from — a clone or the GitHub template copies
+#     .star/memory/ as is — so a memory about developing STAR would arrive in
+#     every downstream project as a fact about that project. Upstream's own
+#     memories live under the git-ignored .star/memory/local/ whatever their
+#     scope (CONTRIBUTING, "Before you commit"); this holds the tracked store to
+#     the files the template ships.
+section "Upstream memory store ships as its template"
+MEMORY_TEMPLATE_FILES=$'.star/memory/MEMORY.md\n.star/memory/MEMORY.zh-CN.md'
+tracked_memory="$(git ls-files .star/memory)"
+if [[ "${tracked_memory}" == "${MEMORY_TEMPLATE_FILES}" ]]; then
+    note ".star/memory/ tracks only the files the template ships"
+else
+    fail ".star/memory/ tracks more than the template ships; STAR's own memories belong under the git-ignored .star/memory/local/:"
+    diff <(printf '%s\n' "${MEMORY_TEMPLATE_FILES}") <(printf '%s\n' "${tracked_memory}") | sed 's/^/      /'
+fi
+
 printf '\n'
 if (( FAILURES > 0 )); then
     printf '%d check(s) failed.\n' "${FAILURES}"

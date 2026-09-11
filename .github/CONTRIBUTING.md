@@ -476,3 +476,6 @@ Be honest with yourself about this list; it is where the real drift lives.
   and updating `AGENTS_SECTIONS` in the check script. Check 16 fails until both are done.
 - Keep the English and Chinese workflow guides line-aligned. They currently match line for line, which
   makes cross-language diffs readable — and check 17 now fails if a pair stops matching.
+- STAR is the template every adopting project starts from, so its own memories never enter the
+  versioned `.star/memory/`: record them under the git-ignored `.star/memory/local/` whatever their
+  scope. Check 26 fails on any tracked file there beyond the template.

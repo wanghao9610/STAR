@@ -23,15 +23,12 @@ One exclusive test: **a fact belongs in memory only when no file in the project 
 .star/memory/
 ├── MEMORY.md          # the index: one line per memory
 ├── <slug>.md          # one memory per file
-├── global/            # `scope: global` memories, git-ignored
-│   ├── MEMORY.md
-│   └── <slug>.md
-└── local/             # the narrower scopes, git-ignored
+└── local/             # git-ignored: what stays on this machine
     ├── MEMORY.md
     └── <slug>.md
 ```
 
-`.star/memory/` itself is versioned, so a memory written there outlives the machine that recorded it and travels with a clone. The two subdirectories are ignored the way `.env` is, and they split what stays behind by `scope`: `global/` takes the facts true everywhere, `local/` the `machine:`, `plan:` and `code:` ones — a path, module name, or driver quirk true here and false on the next machine belongs in `local/`. Where such a narrow fact is worth carrying anyway, write it to the versioned store above with a `scope` that names the machine or plan it holds on.
+`.star/memory/` itself is versioned, so a memory written there outlives the machine that recorded it and travels with a clone. `local/` is ignored the way `.env` is and holds what stays behind: a `machine:` scoped fact — a path, module name, or driver quirk true here and false on the next machine — and any memory the user keeps off the repository, whatever its scope. Every other scope holds on any clone and goes to the versioned store; the split is by where a fact travels, not by where it holds.
 
 ## The memory file
 
@@ -98,6 +95,6 @@ Deleting a memory is a deletion like any other: confirmed with the user at every
 | Pi | `.pi/extensions/star-hooks/star_memory.sh` | `before_agent_start`, wired by `.pi/extensions/star-hooks/index.ts` | the index, as a hidden message before the first agent run, and again after a model change |
 | Qwen Code | `.qwen/hooks/star_memory.sh` | `SessionStart` | the index, as `additionalContext` |
 
-Each hook prints the three indexes and nothing else — the versioned one, then `global/`'s and `local/`'s where they exist. An `env` line whose `verified` is more than 180 days old is marked stale in what the session sees, because a machine changes under a fact recorded about it; the other three types are not aged: a dead end stays dead, and a flag firing on healthy entries teaches the reader to skip it. An empty store prints nothing, so a project that has recorded nothing pays nothing.
+Each hook prints the two indexes and nothing else — the versioned one, then `local/`'s where it exists. An `env` line whose `verified` is more than 180 days old is marked stale in what the session sees, because a machine changes under a fact recorded about it; the other three types are not aged: a dead end stays dead, and a flag firing on healthy entries teaches the reader to skip it. An empty store prints nothing, so a project that has recorded nothing pays nothing.
 
 A hook that exists is not necessarily registered. Claude, Codex, Cursor and Qwen Code ship theirs registered in `.claude/settings.json`, `.codex/hooks.json`, `.cursor/hooks.json` and `.qwen/settings.json`; Kimi has no project-level config, so `bash .kimi-code/hooks/install.sh` registers it once per machine. DSH is the same shape: `.dsh/hooks.json` is the table, but the row pointing DSH at it belongs in the machine's `$DSH_HOME/cordis.patch.yml`, written once by `bash .dsh/hooks/install.sh` — and the bridge it loads is not a dsh dependency, so each profile needs `dsh plugin --profile <name> add @deepseek-ai/dsh-hooks-claude-code`. Pi's registration is code, not config — the extension is discovered automatically, but only in a trusted project (`/trust`, or `defaultProjectTrust`); untrusted, it loads no project extension and injects nothing. Qwen Code's registration adds one condition: a project-level hook runs only in a trusted folder, which applies only where folder trust is on (`security.folderTrust.enabled`, off by default). A project adopted before this hook existed keeps its own registration file; `execs/update.sh` never overwrites it, reports the gap instead, and the entry is added by hand.

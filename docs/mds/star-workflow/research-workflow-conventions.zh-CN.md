@@ -252,7 +252,7 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 | 某次 run 的产物、执行记录、报告 | `wkdrs/<run>/` |
 | 跨 run 的汇编产物 | `wkdrs/` 下的保留子树：`reviews/`、`results/`、`digests/`、`release/`、`env_*`、`ideas_*`、`refs_*`——不要拿这些、以及 `dropped/`，当 run 名 |
 | 计划、笔记、方法文档 | `metds/` |
-| 先前会话学到、又没有别的文件认领的事实 | `.star/memory/`；git 忽略的 `.star/memory/global/` 放处处成立的事实，`.star/memory/local/` 放 `machine:`、`plan:`、`code:` 作用域的（`memory_spec.zh-CN.md`） |
+| 先前会话学到、又没有别的文件认领的事实 | `.star/memory/`；git 忽略的 `.star/memory/local/` 放 `machine:` 作用域的事实和不入库的记忆（`memory_spec.zh-CN.md`） |
 | 项目文档 | `docs/mds/<topic>/`、`docs/htmls/`、`docs/srcs/`（`docs/mds/star-workflow/` 由上游管理） |
 | 计划自有工具脚本、计划执行期草稿 | `tasks/<plan-name>/` |
 | 运行入口 | `execs/run.sh` |
@@ -320,7 +320,7 @@ skill 写出的东西各归其位。每个去处互斥——文件属于哪一�
 5. **通过合入基础分支同步，不用 rebase。** 在明确获准的整合任务内，双方修改意图清楚的机械冲突可自行解决，再验证受影响行为。解决冲突需要取舍研究决定或覆盖用户工作时询问。仅有无人值守自动授权不覆盖冲突解决；除非用户另有授权，否则保留状态并报告。
 6. **弃用先保全记录。** 删除未合并分支前，将其 `wkdrs/<run>/*.md` 记录、计划的运行条目和结论带到基础分支，也保留非 Markdown 产物。负结果是证据。弃用与删除需要具体授权，可以由此前明确要求满足，但无人值守授权本身不包含这两项。
 7. **worktree 用来隔离忙碌的 checkout。** 信号包括另一运行的分支、另一运行拥有的未提交路径、尚未收集结果的启动命令或明确的并行工作。查看运行标记与可用的只读证据；尚无结果不能证明作业仍在运行，进程探测失败也不能证明它已停止。状态不明时优先使用隔离 worktree、不切换那个 checkout；只有这样仍不能安全避开冲突时才问。常规创建按 §7.7，移除须保留全部产物并符合第 4 条授权。
-8. **进树的 run 一律带分支；树、分支、run 目录同用 run 名。** 树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出，所以缺口清单本来判 `branch: none` 的计划，一进树就改为 `branch: <run>`。创建是一条命令，在被调用的 checkout 里跑：`git worktree add ../<根目录名>--wt/<run> -b <run> <base>`——树、分支、起点一步成型；树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`，后续会话靠这个字段找到 run 的家。git 只把被跟踪的文件放进新树，所以建树后从主 checkout 链入 `.env`、`datas/`、`inits/`（`.star/memory/global/`、`.star/memory/local/` 有则一并链）——绝不链 `wkdrs/` 与 `tasks/`：它们含被跟踪文件，整目录一链，在 git 眼里就成了一个符号链接。合并在检出着基础分支的那棵树里做——通常就是被调用的 checkout；用户把它切走了，就说明情况并发问。
+8. **进树的 run 一律带分支；树、分支、run 目录同用 run 名。** 树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出，所以缺口清单本来判 `branch: none` 的计划，一进树就改为 `branch: <run>`。创建是一条命令，在被调用的 checkout 里跑：`git worktree add ../<根目录名>--wt/<run> -b <run> <base>`——树、分支、起点一步成型；树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`，后续会话靠这个字段找到 run 的家。git 只把被跟踪的文件放进新树，所以建树后从主 checkout 链入 `.env`、`datas/`、`inits/`（`.star/memory/local/` 有则一并链）——绝不链 `wkdrs/` 与 `tasks/`：它们含被跟踪文件，整目录一链，在 git 眼里就成了一个符号链接。合并在检出着基础分支的那棵树里做——通常就是被调用的 checkout；用户把它切走了，就说明情况并发问。
 9. **移除之前，先把产物挪出来。** 树里 `wkdrs/<run>/` 与 `tasks/<plan-name>/` 下非 md 的未跟踪产物只存在于这棵树，`git worktree remove` 会连树带它们一起删。次序固定：合并（或第 6 条的记录抢救）→ 把这些产物挪到主 checkout 的相同路径——期间计划已被丢弃的 run，路径以它的 `dropped/` 位置为准（§9），被暂缓的丢弃搬移跟在这次抢救之后 → `git worktree remove` 且绝不带 `--force`——树里还剩零散文件时 git 自己会拒绝，这道拒绝是安全网，不是要绕过的障碍 → 分支删不删再单独问。树的目录被人工删掉是要上报的 blocker；`git worktree prune` 清理过期元数据，绝不无声重建。
 
 其他技能在运行记录的 `worktree:` 中工作。若将从另一运行的执行分支提交，保留无关改动，并按已有授权选择不冲突的路径；只有归属或目的地仍不明确才问。不要切换可能被活动作业重新读取的 checkout。执行器按上述条件负责创建和清理；用户已准备的 worktree 可直接使用，不重复询问创建。

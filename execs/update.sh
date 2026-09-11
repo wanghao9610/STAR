@@ -1025,7 +1025,7 @@ if [[ -e "${ROOT_DIR}/.gitignore" ]]; then
     # that a carve-out rule needs: one combined grep would let a .gitignore
     # naming only datas/ silence the warning about inits/ and wkdrs/ too.
     unignored=()
-    for tree in datas inits wkdrs .star/memory/global .star/memory/local; do
+    for tree in datas inits wkdrs .star/memory/local; do
         grep -qE "^/?${tree}(/|/\*|/\*\*)?$" "${ROOT_DIR}/.gitignore" 2>/dev/null || \
             unignored+=("${tree}/")
     done
