@@ -97,7 +97,7 @@ Before running Python, tests, or dependency checks:
 - Offer, never assume: at most two offers per session, and write only after the user agrees. `INVOLVE=low` records unasked and says so.
 - What travels with the repository goes to the versioned `.star/memory/`; a `machine:` scoped fact, true only here, goes to the git-ignored `.star/memory/local/`, as does any memory the user keeps off the repository.
 - Where a memory disagrees with a file in the repository, the file wins.
-- Types, file format, the index line the hooks parse, and how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
+- Types, file format, the index line the hooks build from each file, and how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
 
 ## 11. Verification
 

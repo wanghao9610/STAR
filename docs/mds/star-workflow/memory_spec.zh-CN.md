@@ -21,10 +21,9 @@
 
 ```text
 .star/memory/
-├── MEMORY.md          # 索引：每条记忆一行
+├── .gitkeep           # 模板在这里跟踪的唯一文件；记忆是你自己的
 ├── <slug>.md          # 一事一文件
 └── local/             # git 忽略：留在本机的部分
-    ├── MEMORY.md
     └── <slug>.md
 ```
 
@@ -38,6 +37,7 @@
 ---
 type: env
 scope: machine:cluster-a
+summary: 要先 `module load gcc/11` 才编得过
 language: zh
 verified: 2026-08-03
 model_id: claude-opus-5[1m]
@@ -54,6 +54,7 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 |---|---|
 | `type` | 上面四类之一；只有 `env` 会被钩子按时间标记 |
 | `scope` | `global`、`machine:<name>`、`plan:<prefix>` 或 `code:<path>`——事实在哪里成立，不是在哪里学到的 |
+| `summary` | 索引里代表它的那一句：说这条事实**是什么**，而不是关于什么——"要先 `module load gcc/11` 才编得过"，而不是"关于 flash-attn 编译的笔记" |
 | `language` | 正文语言（约定 §7.6，回复语言规则）；frontmatter 的键始终英文 |
 | `verified` | 最后一次确认它为真的日期，取自系统时钟（约定 §4，真实日期） |
 | `model_id` | 写下它或最后一次复核它的模型，原样照录（约定 §8，产物登记表；退路见 `model_id_spec.zh-CN.md`） |
@@ -64,21 +65,21 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 
 ## 索引行
 
-`MEMORY.md` 和这些文件并排放着，每条记忆一行，新的在上：
+没有任何一行是手写的：会话钩子读两个目录里的每个 `<slug>.md`，从它的 frontmatter 生成一行，按 `verified` 新的在上：
 
-    - <类型> · <适用范围> · <最后确认日期> · [<slug>](<slug>.md) — <一句话>
+    - <类型> · <适用范围> · <最后确认日期> · [<slug>](<slug>.md) — <summary>
     - env · machine:cluster-a · 2026-08-03 · [flash-attn-gcc11](flash-attn-gcc11.md) — 要先 `module load gcc/11` 才编得过
 
-前四个字段之间是"空格 + 中点 + 空格"；破折号之后是自由文本，包括那个分隔符本身。**会话钩子就是按它逐字节切分的**——把分隔符改个写法，它们会不声不响地什么都不再标记，哪里都不报错。时效标记对类型字段同样只认字面：`env` 保持英文，一句话用什么语言写都不影响。只有以 `- ` 开头的行会被读，所以索引文件自己的说明头对它们不可见。
+于是写一条记忆就是写一个文件，复核一条就是改一个字段。钩子按字面读 frontmatter：没有第二个 `---` 收尾的文件不会被列出；时效标记只认写出来的类型词 `env`——英文，一句话用什么语言写都不影响；没有 `summary` 的文件用正文第一行代替——正文本来就该以那句话开头——所以字段出现之前写下的记忆照样到达会话。
 
-一次会话判断相关性就靠这一句，所以它要说这条事实**是什么**，而不是关于什么："要先 `module load gcc/11` 才编得过"，而不是"关于 flash-attn 编译的笔记"。索引控制在 60 行上下；超过就把条目按类型分组、各组加个小标题——仍在这个文件里，绝不另开一个：钩子不把别的文件当索引读，拆出去的那份会不声不响地再也到不了会话，而小标题不过是又一种它们跳过的行。
+一次会话判断相关性就靠这一句，所以它要说这条事实**是什么**，而不是关于什么。记忆库控制在 60 条上下；超过就退场，不要分组——没有索引文件可加小标题，而每一行都会到达每次会话。
 
 ## 一条记忆怎么退场
 
 三条路，第一条最常走：
 
-- **复核通过**——事实仍然成立：把 `verified` 改成今天，`model_id` 改成做这次核对的模型，再把新日期带进索引行——陈旧标记读的是那一行，不是 frontmatter。
-- **被取代**——事实变了：写新的那条并带上 `supersedes: <旧 slug>`，然后删掉旧文件和它的索引行。历史在 git 里；记忆库内部不做归档——正是这一点让索引短到每次会话都注入得起。
+- **复核通过**——事实仍然成立：把 `verified` 改成今天，`model_id` 改成做这次核对的模型；索引行自己会跟上。
+- **被取代**——事实变了：写新的那条并带上 `supersedes: <旧 slug>`，然后删掉旧文件。历史在 git 里；记忆库内部不做归档——正是这一点让索引短到每次会话都注入得起。
 - **本来就错**——直接删。从来不成立的记忆不是值得留的历史。
 
 删掉一条记忆和别的删除一样：每个介入档位下都要向用户确认（约定 §7.7，各 skill 问多少）。
@@ -95,6 +96,6 @@ source: wkdrs/03_pretrain_run/EXEC_LOG.md
 | Pi | `.pi/extensions/star-hooks/star_memory.sh` | `before_agent_start`，由 `.pi/extensions/star-hooks/index.ts` 接线 | 索引，作为第一次 agent 运行前的一条隐藏消息，模型每换一次再注入一次 |
 | Qwen Code | `.qwen/hooks/star_memory.sh` | `SessionStart` | 索引，装在 `additionalContext` 里 |
 
-每个钩子只打印那两份索引，别的什么都不打——入库的那份，以及 `local/` 那份（存在的话）。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而在健康条目上也会亮的标记只会教读者跳过它。空记忆库什么都不打印，所以什么都没记过的项目一分钱不花。
+每个钩子只打印索引，别的什么都不打——入库目录里的记忆，然后是 `local/` 里的（存在的话）；给任意一份加 `--list` 运行，就能以纯文本看到同样的行。`verified` 距今超过 180 天的 `env` 行，会在会话看到的内容里被标为陈旧，因为机器会在一条关于它的事实底下悄悄改变；另外三类不按时间标记——死路一直是死路，而在健康条目上也会亮的标记只会教读者跳过它。空记忆库什么都不打印，所以什么都没记过的项目一分钱不花。
 
 钩子存在不等于已注册。Claude、Codex、Cursor、Qwen Code 出厂就在 `.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.qwen/settings.json` 里注册好了；Kimi 没有项目级配置，靠 `bash .kimi-code/hooks/install.sh` 每台机器注册一次。DSH 是同一种形状：`.dsh/hooks.json` 是那张表，但指向它的那一行要写进本机的 `$DSH_HOME/cordis.patch.yml`，由 `bash .dsh/hooks/install.sh` 写一次——而它加载的那座桥不是 dsh 的依赖，每个用到的 profile 还需执行 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`。Pi 的注册是代码而不是配置——扩展会被自动发现，但只在受信任的项目里（`/trust`，或 `defaultProjectTrust`）；未获信任就不加载项目级扩展，也什么都不注入。Qwen Code 的注册多一个条件：项目级钩子只在被信任的目录里跑，而这一条只在打开了目录信任（`security.folderTrust.enabled`，默认关闭）时才成立。在这个钩子出现之前就接入的项目，保留的是它自己的注册文件；`execs/update.sh` 从不覆盖，只把缺口报出来，那一条由人手工补上。

@@ -450,7 +450,7 @@ The script only globs `metds/` and `wkdrs/`, prints frontmatter and file listing
 
 ## Project memory
 
-What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever harness you happened to be driving. One file per fact, one line per fact in `.star/memory/MEMORY.md`, and a session hook puts that index in front of the agent at every session start, in all seven tools.
+What a session learns that no plan, log, or report owns — a build that only works after a module load, a standing preference of yours, an experiment not worth repeating — is recorded in the project at `.star/memory/`, not in whichever harness you happened to be driving. One file per fact; a session hook builds a one-line-per-fact index from those files and puts it in front of the agent at every session start, in all seven tools.
 
 Two rules keep it from becoming a second, competing source of truth:
 

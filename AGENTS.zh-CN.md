@@ -94,7 +94,7 @@
 - 只提议，不擅自写入：每个会话最多提议两次，并且只在用户同意后写入。`INVOLVE=low` 会不经询问记录，但必须说明。
 - 随仓库走的记忆写入受版本管理的 `.star/memory/`；`machine:` 作用域的事实只在本机成立，写入 Git 忽略的 `.star/memory/local/`，用户不想入库的记忆也放这里。
 - 记忆与仓库文件冲突时，以仓库文件为准。
-- 类型、文件格式、钩子解析的索引行，以及记忆的退役方式见 `docs/mds/star-workflow/memory_spec.md`。
+- 类型、文件格式、钩子从每个文件生成的索引行，以及记忆的退役方式见 `docs/mds/star-workflow/memory_spec.md`。
 
 ## 11. 验证
 
