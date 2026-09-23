@@ -219,9 +219,9 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 再有一个键 `STAR_HARNESSES`，指定同一个更新脚本安装并维护哪几棵 agent 宿主树。同见 `STAR_REPOSITORY` 指向的那一节。
 
-`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读工作的模型。每个键接受一个模型名，或逗号分隔的 `<宿主>:<模型>` 条目，标签沿用 `STAR_HARNESSES`。运行优先取本宿主条目，再取无标签的回退值；两者都没有则沿用宿主默认。可选后缀 `@<深度>`（`low`、`medium`、`high`、`xhigh`、`max` 或正整数）在宿主支持时设置思考深度。
+`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读工作的模型。每个键接受一个模型名，或逗号分隔的 `<宿主>:<模型>` 条目，标签沿用 `STAR_HARNESSES`。运行优先取本宿主条目，再取无标签的回退值；两者都没有则沿用宿主默认。可选后缀 `@<深度>`（`low`、`medium`、`high`、`xhigh`、`max` 或正整数）在宿主支持时设置思考深度。你敲下的技能留在会话的模型上，本档指定了别的模型时用一行说明；`star-auto` 以各自档位的模型启动每次运行。
 
-修改后运行 `bash execs/configure.sh`，并重新加载静态定义已变化的会话。Kimi 模型池注册使用 `bash execs/configure.sh --kimi-pool`。派发机制见[宿主适配说明](docs/mds/star-workflow/harness-adapters.zh-CN.md)，档位选择与运行迁移规则见[工作流规约 §10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册)。
+修改后运行 `bash execs/configure.sh`，并重新加载静态定义已变化的会话。Kimi 模型池注册使用 `bash execs/configure.sh --kimi-pool`。派发机制见[宿主适配说明](docs/mds/star-workflow/harness-adapters.zh-CN.md)，档位选择与运行在哪里执行见[工作流规约 §10.8](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册)。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
@@ -512,7 +512,7 @@ bash execs/configure.sh
 
 `bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
 
-`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读收集所用的模型。按 [配置示例](.env.example) 填入 `.env`；例如 `claude:fable,codex:gpt-6-astra`，可避免把一家宿主的别名传给另一家。这三个键不改变工作授权；仍须向用户提问的运行留在主会话。
+`STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读收集所用的模型。按 [配置示例](.env.example) 填入 `.env`；例如 `claude:fable,codex:gpt-6-astra`，可避免把一家宿主的别名传给另一家。这三个键不改变工作授权。你敲下的技能在你的会话里、用会话的模型跑，敲它不会换模型：本档指定了别的模型、或宿主只能逐次派发时应用的深度时，运行用一行说明本档的模型，以及两种得到它的办法——切换会话模型，或经 `star-auto` 启动这次运行——然后照常在原地跑。宿主能指定受托者模型时，`star-auto` 以各自档位的模型启动每次运行，`star-plan-executor` 与 `star-code-architect` 把执行那一段交给 EXEC 档上的受托者。
 
 | 宿主 | STAR 如何选择受托者模型 |
 | --- | --- |
@@ -524,7 +524,7 @@ bash execs/configure.sh
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | 选择同名代理，在 frontmatter 中填写实际模型 id；工具按次调用的 `model` 字段是另一套已配置等级机制。 |
 | DSH | 当前工具没有按次选模参数，保持原执行路径；键已设时说明原因。 |
 
-接口缺失、模型不可用或命名代理配置过期时，会说明情况，不把请求模型当成已经运行的模型；报告记录受托者的实际模型。没有原生技能分叉的宿主，状态查看与实验摘要通过 READ 档入口启动；`star-auto` 启动每个技能时也按同样的档位选择。
+接口缺失、模型不可用或命名代理配置过期时，会说明情况，不把请求模型当成已经运行的模型；报告记录受托者的实际模型。Claude Code 借状态查看与实验摘要自己的清单，以 READ 模型分叉运行它们；在其他宿主上，这两个技能和你敲下的其他技能一样在会话里跑。
 
 上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；更新范围内，仅存在于当前项目的自定义文件会保留。为避免误删自定义内容，上游已删除的文件不会在本地自动删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 

@@ -32,7 +32,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the PLAN tier. Existing authorization counts when deciding whether a user decision remains. Architecture design stays PLAN; approved migration execution uses EXEC as described below.
+**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Architecture design stays PLAN; approved migration execution is handed to EXEC as described below.
 
 ### Step 0: Orient & choose the branch
 

@@ -14,7 +14,7 @@ Invocation: `star-plan-reviser PLAN_NAME [DESCRIPTION]`. Resolve the plan first.
 
 After resolving the target and the drop, revival, or review path, run `scripts/scan.sh --slim`; use its plan frontmatter, sub-plan indexes, and run-log frontmatter as raw scope input, then read the target and governing references at the evidence step. If it fails, read the plans directly and report the fallback.
 
-**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` does not relocate the whole run again and records its actual model from its own session provenance.
+**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` was started on its tier and records its actual model from its own session provenance.
 
 ## Role
 
@@ -33,7 +33,7 @@ Revise text; do not re-run experiments, re-decompose subtrees, or re-derive stra
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the PLAN tier. A clear request may authorize named revisions, a drop, or a revival; whether a decision is still unresolved after that request is applied, which keeps the run here, is decided once before Step 0 under §10.8's fourth condition.
+**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A clear request may authorize named revisions, a drop, or a revival.
 
 ### Step 0: Resolve the target plan
 

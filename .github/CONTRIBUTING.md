@@ -35,7 +35,7 @@ The conventions must name no specific harness, provider model, private tool or c
 Keep invocation spelling and model/depth mechanics in
 `docs/mds/star-workflow/harness-adapters.md` (and its Chinese twin), with provenance commands in
 `model_id_spec.md`. The conventions link to those references where the mechanisms are needed;
-shared authority, tier selection and relocation conditions stay in the conventions. These references
+shared authority, tier selection and where a run executes stay in the conventions. These references
 ship with `docs/mds/star-workflow/` through the existing downstream sync. When moving a mechanism,
 preserve its adapter instructions and retarget its assertions in `check_model_routing.sh`.
 

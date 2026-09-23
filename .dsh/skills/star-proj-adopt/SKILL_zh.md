@@ -33,7 +33,7 @@ description: >-
 
 阶段解析后，`survey` 读取 `references/adopt_spec_zh.md`，`backfill` 读取 `references/backfill_zh.md`；另一分支不装载。
 
-**本次运行在哪里执行。** Step 0 前按规约 §10.8 应用迁移规则。`survey` 使用 EXEC，`backfill` 使用 PLAN。请求已经定下映射、历史 run 或回填选择时，不再重复询问。
+**本次运行在哪里执行。** 本次运行的档位随阶段而定：`survey` 为 EXEC，`backfill` 为 PLAN。它留在启动它的会话里，用会话的模型跑。该档的键（`STAR_EXEC_MODEL` 或 `STAR_PLAN_MODEL`）所指的模型不是会话正在跑的模型，或带有本宿主只能逐次派发时应用的深度时，在开头用一行说明——档位、该模型与深度，以及在这里得到它们的唯一办法：切换会话模型——随项目使用的 `subagent` 工具选不了模型，`star-auto` 也就无法按档位启动这次运行（规约 §10.8）——然后在这里照常继续。带 `tier=` 的运行已按档位启动，不给这一行。请求已经定下映射、历史 run 或回填选择时，不再重复询问。
 
 ### 阶段 `survey`
 

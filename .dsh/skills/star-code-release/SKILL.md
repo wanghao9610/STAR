@@ -32,7 +32,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0. The full run and `gather`, `polish`, and `readme` modes use EXEC; `check` uses READ. Whether a required user decision remains is decided once before Step 0 under §10.8's fourth condition.
+**Where this run executes.** This run's tier follows its mode: the full run and the `gather`, `polish`, and `readme` modes are EXEC, `check` is READ. It stays in the session that started it, on the session's model. When that tier's key (`STAR_EXEC_MODEL` or `STAR_READ_MODEL`) names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line.
 
 ### Step 0: Orient & resolve the phase
 

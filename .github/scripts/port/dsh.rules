@@ -14,3 +14,5 @@ headless / scripted	non-interactive `dsh --profile headless`, no human to answer
 headless/scripted	non-interactive `dsh --profile headless`, no human to answer
 无人值守 / 脚本化	非交互 `dsh --profile headless` 下，无人应答
 无人值守/脚本化	非交互 `dsh --profile headless` 下，无人应答
+and the two ways to get them: switch the session's model, or start the run through `star-auto` \(conventions §10\.8\)	and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8)
+以及两种得到它们的办法：切换会话模型，或经 `star-auto` 启动这次运行（规约 §10\.8）	以及在这里得到它们的唯一办法：切换会话模型——随项目使用的 `subagent` 工具选不了模型，`star-auto` 也就无法按档位启动这次运行（规约 §10.8）

@@ -14,7 +14,7 @@ Invocation: `star-metd-summarize [overview | dataset | framework | training | ev
 
 Resolve the output mode before running `scripts/scan.sh --slim`; treat its plan frontmatter, sub-plan indexes, and placeholder counts as the readiness check's input, and its `metds/` artifact frontmatter as the input to Step 5's stale check. The run-log and `wkdrs/` lines the scan also prints are not read (Principle 1). If it fails, read the plan files directly and report the fallback.
 
-**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` does not relocate the whole run again and records its actual model from its own session provenance.
+**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` was started on its tier and records its actual model from its own session provenance.
 
 ## Role
 
@@ -33,7 +33,7 @@ Compile and reorganize; do not decide method, revise plans, read code, or interp
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the PLAN tier. A clear request for a named output, draft, or scoped overwrite satisfies that same decision; whether a choice remains unresolved is decided once before Step 0 under §10.8's fourth condition — an existing method document the request did not name for overwrite keeps the run here.
+**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A clear request for a named output, draft, or scoped overwrite authorizes it.
 
 ### Step 0: Resolve the targets
 

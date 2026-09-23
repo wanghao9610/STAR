@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](harness-adapters.zh-CN.md)
 
-This file preserves STAR's per-harness invocation spelling and model-routing mechanics for [conventions](research-workflow-conventions.md) §10 (the skill roster and routing). The conventions own scope, authority, tier assignment, relocation conditions and provenance requirements; this file describes how each harness applies them. Read the current harness's entry before choosing an invocation or dispatch parameter, and use only capabilities the active interface supports.
+This file preserves STAR's per-harness invocation spelling and model-routing mechanics for [conventions](research-workflow-conventions.md) §10 (the skill roster and routing). The conventions own scope, authority, tier assignment, where a run executes, and provenance requirements; this file describes how each harness applies them. Read the current harness's entry before choosing an invocation or dispatch parameter, and use only capabilities the active interface supports.
 
 ## Invocation spelling and configuration tags
 
@@ -24,15 +24,15 @@ Model names retain their harness spelling, for example `pi:anthropic/claude-fabl
 
 ### Claude Code
 
-Claude Code takes the depth from the `effort:` frontmatter that `bash execs/configure.sh` writes into each tier's manifests and into its named `star-plan`, `star-exec` and `star-read` agents. A run invoked through a manifest reasons at that manifest's tier depth, and a delegate dispatched as one of those agents reasons at that agent's; naming the agent is therefore how a depth is named per dispatch there. A configured Claude Code depth is a routing difference even when the tier model aliases the active model, and a delegate dispatched as a plain subagent type still inherits the dispatching run's depth. A read-only dispatch — a collector or a blind read — is the exception: it keeps the generic `Explore` type, whose tool set is what keeps it read-only, because the named agents carry no tool restriction; it takes the tier's model but not its depth, and the run says so once.
+Claude Code takes the depth from the `effort:` frontmatter that `bash execs/configure.sh` writes into each tier's manifests and into its named `star-plan`, `star-exec` and `star-read` agents. A run invoked through a manifest reasons at that manifest's tier depth, and a delegate dispatched as one of those agents reasons at that agent's; naming the agent is therefore how a depth is named per dispatch there. A directly invoked run thus already has its roster tier's depth, but not the depth of a tier its mode switches to (conventions §10.8: `star-expt-analyst aggregate` and `watch`, `star-refs-reviewer synthesize`, `star-proj-adopt backfill`, `star-code-release check`), which Claude Code applies only per dispatch. `star-flow-status` and `star-expt-digest` also fork on the READ model stamped into their manifests. So the opening line of conventions §10.8 (where a run executes) names a tier model the session is not running and, for a mode that changes tier, that tier's depth; for those two it names nothing. For a phase hand-off or a `star-auto` start, a configured Claude Code depth is a routing difference even when the tier model aliases the active model, and a delegate dispatched as a plain subagent type still inherits the dispatching run's depth. A read-only dispatch — a collector or a blind read — is the exception: it keeps the generic `Explore` type, whose tool set is what keeps it read-only, because the named agents carry no tool restriction; it takes the tier's model but not its depth, and the run says so once.
 
-A subagent cannot dispatch subagents: a run started or relocated as a subagent runs its phase hand-offs and its inner delegates' work locally, on its own model and depth.
+A subagent cannot dispatch subagents: a run started as a subagent runs its phase hand-offs and its inner delegates' work locally, on its own model and depth.
 
 ### Codex
 
 Codex needs no file stamp: whenever its current `spawn_agent` interface accepts the suffix for the selected model, every tier dispatch passes it explicitly as `reasoning_effort`; a configured Codex depth is therefore a routing difference even when the tier model aliases the active model, and a phase that changes tier can change both.
 
-A direct invocation of `star-plan-coach` or `star-idea-storm` stays in the main thread and keeps its effort; `star-auto` can start them at the configured PLAN effort and relay questions back. This preserves the coaching exception in conventions §10.8 (run relocation conditions).
+A direct invocation of any skill stays in the main thread on the session's model and effort. Codex applies a depth only per dispatch, so a configured Codex depth is one the run's opening line names (conventions §10.8, where a run executes); `star-auto` starts each run at its tier's model and effort, `star-plan-coach` and `star-idea-storm` included, and relays their questions back.
 
 ### Cursor
 

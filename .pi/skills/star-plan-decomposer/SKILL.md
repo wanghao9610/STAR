@@ -15,7 +15,7 @@ Invocation: `star-plan-decomposer PLAN_NAME [DESCRIPTION]`. Resolve the slug, nu
 
 After resolving the target, run `scripts/scan.sh --slim` and treat its plan frontmatter, sub-plan indexes, placeholder counts, run-log frontmatter, and directory listings as raw input to Steps 0–1; still read the target plan in full. If it fails, read the plan files directly and report the fallback.
 
-**Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
+**Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A phase hand-off, or another skill a step of this one starts, needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 
 ## Role
 
@@ -44,7 +44,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the PLAN tier. A decomposition axis, unit list, or expansion scope already settled by the request is not asked again.
+**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A decomposition axis, unit list, or expansion scope already settled by the request is not asked again.
 
 ### Step 0: Resolve the target plan
 

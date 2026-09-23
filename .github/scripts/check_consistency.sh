@@ -1661,19 +1661,29 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( ref_errors == 0 )) && note "${ref_checked} reference paths resolve, and every reference file is named by the skill that ships it"
 
-# 25. Every relocating skill has one routing entry before its first workflow
-#     action. The entry may describe that skill's actual phase or mode; identical
-#     prose across different skills is not required. Port checks own adaptation
-#     parity, while check_model_routing.sh checks installed model consumers.
-section "Relocation paragraph"
-reloc_errors=0
-RELOCATE_NEVER="star-plan-coach star-idea-storm star-flow-status star-expt-digest"
+# 25. Every skill but the two conventions §10.8 names has one "Where this run
+#     executes." paragraph at the head of its Workflow, before its first step: it
+#     says where the run executes and gives the one-line notice when the run's
+#     tier names another model, or a depth the harness applies only per dispatch.
+#     It may describe that skill's own tier, phase or mode; identical prose across
+#     different skills is not required. No manifest may carry a paragraph that
+#     hands a whole flow-status or digest run to a READ delegate (its two leads
+#     are grepped below): §10.8 keeps a directly invoked run in the session that
+#     started it. Port checks own adaptation parity, while check_model_routing.sh
+#     checks installed model consumers.
+section "Where-this-run-executes paragraph"
+where_errors=0
+WHERE_EXEMPT="star-plan-coach star-idea-storm"
 
 for root in "${SKILL_ROOTS[@]}"; do
     while IFS= read -r skill; do
         for f in SKILL.md SKILL_zh.md; do
             path="${root}/${skill}/${f}"
             [[ -f "${path}" ]] || continue   # check 3 owns missing files
+            if grep -qF -e '**READ-tier entry on this harness.**' -e '**本宿主的 READ 档入口。**' "${path}"; then
+                fail "${path}: still hands the whole run to a READ delegate; conventions §10.8 keeps a directly invoked run in its session"
+                where_errors=1
+            fi
             if [[ "${f}" == SKILL_zh.md ]]; then
                 lead='^\*\*本次运行在哪里执行。\*\*'
                 workflow='^## 工作流'
@@ -1683,31 +1693,36 @@ for root in "${SKILL_ROOTS[@]}"; do
             fi
 
             n="$(grep -cE "${lead}" "${path}")"
-            if grep -qw "${skill}" <<< "${RELOCATE_NEVER}"; then
+            if grep -qw "${skill}" <<< "${WHERE_EXEMPT}"; then
                 if (( n != 0 )); then
-                    fail "${path}: carries the relocation paragraph; conventions §10.8 exempts this skill (it never relocates, or routes through its READ-tier entry)"
-                    reloc_errors=1
+                    fail "${path}: carries the where-this-run-executes paragraph; conventions §10.8 exempts this skill (a direct run keeps the session's settings, and star-auto can start it on the PLAN tier)"
+                    where_errors=1
                 fi
                 continue
             fi
             if (( n != 1 )); then
-                fail "${path}: ${n} relocation paragraphs, expected exactly 1"
-                reloc_errors=1
+                fail "${path}: ${n} where-this-run-executes paragraphs, expected exactly 1"
+                where_errors=1
                 continue
+            fi
+            para="$(grep -E "${lead}" "${path}")"
+            if ! grep -qF '`star-auto`' <<< "${para}" || grep -qiE 'relocat|迁移规则|hand the complete run|完整运行一次性交给' <<< "${para}"; then
+                fail "${path}: the where-this-run-executes paragraph must name star-auto as the way to get the tier's model and must not relocate the run"
+                where_errors=1
             fi
 
             wf_at="$(grep -nE "${workflow}" "${path}" | head -n 1 | cut -d: -f1)"
             at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
             first_step="$(awk -v s="${wf_at:-0}" 'NR>s && /^### /{print NR; exit}' "${path}")"
             if [[ -z "${wf_at}" ]] || (( at < wf_at )) || { [[ -n "${first_step}" ]] && (( at > first_step )); }; then
-                fail "${path}: the relocation paragraph is not at the head of Workflow (after its heading, before its first step)"
-                reloc_errors=1
+                fail "${path}: the where-this-run-executes paragraph is not at the head of Workflow (after its heading, before its first step)"
+                where_errors=1
             fi
         done
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-(( reloc_errors == 0 )) && note "relocating skills have routing entries before their actions; native READ entries are checked separately"
+(( where_errors == 0 )) && note "every skill but star-plan-coach and star-idea-storm states at the head of its Workflow where its run executes and its one-line tier notice; no manifest hands a whole run to a READ delegate"
 
 # 26. The versioned memory store ships as its template. STAR is the template
 #     every adopting project starts from — a clone or the GitHub template copies

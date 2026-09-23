@@ -31,7 +31,7 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the EXEC tier. A report-only request remains read/report scoped even when routed; independent collectors use READ. A grant alone does not authorize fixes outside the requested scope.
+**Where this run executes.** This run's tier is EXEC; it stays in the session that started it, on the session's model. When `STAR_EXEC_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A report-only request stays read-only and report-scoped; independent collectors use READ. A grant alone does not authorize fixes outside the requested scope.
 
 ### Step 0: Resolve the scope
 

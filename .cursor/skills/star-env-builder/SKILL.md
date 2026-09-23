@@ -31,7 +31,7 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ## Workflow
 
-**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the EXEC tier. Existing authorization of the concrete environment, dependency set, and cost counts; whether a required decision remains is decided once before Step 0 under §10.8's fourth condition.
+**Where this run executes.** This run's tier is EXEC; it stays in the session that started it, on the session's model. When `STAR_EXEC_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Existing authorization of the concrete environment, dependency set, and cost counts and is not asked for again.
 
 ### Step 0: Preliminary check
 

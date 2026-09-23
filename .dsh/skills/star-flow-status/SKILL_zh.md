@@ -28,7 +28,7 @@ description: >-
 
 ## 工作流
 
-**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：配置的 READ override 可用——模型不是本 run 所在模型的别名，或宿主能逐次应用其深度——时，把完整运行一次性交给一个全新 READ 档受托者，传入该模型与受支持的深度，带原始调用、本次运行已解析的范围（写明已定）、这次调用是用户亲手敲下的还是被拾起的（规约 §10.5）、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过这次交接判断。否则留在这里，仅在模型已配置时说明一条原因。全程严格只读。状态、覆盖与优先级见 `references/status_spec_zh.md`（英文：`references/status_spec.md`）。
+**本次运行在哪里执行。** 本次运行的档位是 READ，它留在启动它的会话里。`STAR_READ_MODEL` 所指的模型不是本次运行正在用的模型，或带有本宿主只能逐次派发时应用的深度时，在开头用一行说明——档位、该模型与深度，以及在这里得到它们的唯一办法：切换会话模型——随项目使用的 `subagent` 工具选不了模型，`star-auto` 也就无法按档位启动这次运行（规约 §10.8）——然后在这里照常继续。带 `tier=` 的运行已按档位启动，不给这一行。宿主以清单所写的模型 fork 本 skill 时，这个模型已经应用，这一行只说仍缺的部分，什么都不缺就不说。全程严格只读。状态、覆盖与优先级见 `references/status_spec_zh.md`（英文：`references/status_spec.md`）。
 
 ### Step 1：扫描
 运行 `scripts/scan.sh --slim`，并读取实时执行分支与 worktree 清单。把扫描当作原始输入：每份计划的 frontmatter、`## Sub-plans` 索引、§3/§5 占位符计数、run 日志 frontmatter 与正文计数、原样保留的待用户复选框和方向性信号、产物 frontmatter，以及 `metds/` / `wkdrs/` 深度 1 清单。脚本只收集，不判状态或优先级。

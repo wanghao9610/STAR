@@ -173,24 +173,16 @@ while IFS= read -r file; do
 		fail "${file} does not route a same-model depth to a named agent"
 done < <(find -L "${ROOT_DIR}/.claude/skills" -type f -name SKILL.md)
 for skill in star-flow-status star-expt-digest; do
-	entry="$(grep -F '**READ-tier entry on this harness.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md")"
-	grep -Fq 'or the harness can apply its depth per dispatch' <<<"${entry}" ||
-		fail "${skill} READ entry omits a same-model depth"
-	grep -Fq 'with that model and supported depth' <<<"${entry}" ||
-		fail "${skill} READ entry does not pass its depth"
-	if grep -Fq 'differs from the known current model' <<<"${entry}"; then
-		fail "${skill} READ entry still requires a different model"
-	fi
-	entry="$(grep -F '**本宿主的 READ 档入口。**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md")"
-	grep -Fq '或宿主能逐次应用其深度' <<<"${entry}" ||
-		fail "Chinese ${skill} READ entry omits a same-model depth"
-	grep -Fq '传入该模型与受支持的深度' <<<"${entry}" ||
-		fail "Chinese ${skill} READ entry does not pass its depth"
-	if grep -Fq '不同于已知当前模型' <<<"${entry}"; then
-		fail "Chinese ${skill} READ entry still requires a different model"
+	grep -Fq '**Where this run executes.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" ||
+		fail "${skill} does not say where its run executes"
+	grep -Fq '**本次运行在哪里执行。**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md" ||
+		fail "Chinese ${skill} does not say where its run executes"
+	if grep -Fq -e '**READ-tier entry on this harness.**' -e '**本宿主的 READ 档入口。**' \
+		"${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md"; then
+		fail "${skill} still hands the whole run to a READ delegate"
 	fi
 done
-note "Codex summaries parse three efforts; auto, EXEC, and direct READ instructions carry depth routing"
+note "Codex summaries parse three efforts; auto and EXEC hand-offs carry depth routing; flow-status and digest runs stay where they were started"
 
 # Kimi consumes both halves at dispatch through its secondary-model pool: a depth
 # selects the pool alias binding it. This checks the parsed summary and contracts.
@@ -412,11 +404,11 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 		grep -Fq '传给受托者。' "${file}" || fail "${file} lacks the Chinese tier-model entry"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL_zh.md)
 	for skill in star-flow-status star-expt-digest; do
-		grep -Fq 'READ-tier entry on this harness.' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its READ entry"
-		grep -Fq '本宿主的 READ 档入口。' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL_zh.md" || fail "${tree} ${skill} lacks its Chinese READ entry"
+		grep -Fq '**Where this run executes.**' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its where-this-run-executes paragraph"
+		grep -Fq '**本次运行在哪里执行。**' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL_zh.md" || fail "${tree} ${skill} lacks its Chinese where-this-run-executes paragraph"
 	done
 done
-note "seven trees retain tier-model and READ routing entries"
+note "seven trees retain tier-model entries, and flow-status and digest say where their run executes"
 
 while IFS= read -r file; do
 	grep -Fq 'Pass the stamped id when this session'\''s selectable `Task` `model` list contains it' "${file}" ||

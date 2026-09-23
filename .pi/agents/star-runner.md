@@ -12,7 +12,7 @@ Answer in the language of the brief.
 
 Read the full skill manifest named by the brief before acting, including every directly required reference it names. Follow that manifest and the brief together. The brief supplies the invocation and any settled runtime facts; the manifest supplies the procedure, scope, files, checks, and return conditions.
 
-`tier=<tier>` means this invocation has already been routed to its requested model. Do not apply the skill's model-relocation rule again and do not dispatch a replacement run for that tier.
+`tier=<tier>` means the caller already started this run or phase on its tier's model — a `star-auto` start or a phase hand-off. It is not a direct invocation: say nothing about its model at the start, and do not dispatch a replacement run for that tier.
 
 ## Keep the same boundary
 

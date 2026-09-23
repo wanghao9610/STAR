@@ -227,9 +227,9 @@ A third, `STAR_REPOSITORY`, names the repository `execs/update.sh` pulls later s
 
 A fourth, `STAR_HARNESSES`, names the agent harness trees that same updater installs and keeps current. Same section as `STAR_REPOSITORY` above.
 
-`STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` select models for research judgment, implementation and production, and read-only work. Each accepts one model name or comma-separated `<harness>:<model>` entries using the `STAR_HARNESSES` tags. A run uses its tagged entry, then an untagged fallback; with neither, it keeps the harness default. An optional `@<depth>` (`low`, `medium`, `high`, `xhigh`, `max`, or a positive integer) requests thinking depth where supported.
+`STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` select models for research judgment, implementation and production, and read-only work. Each accepts one model name or comma-separated `<harness>:<model>` entries using the `STAR_HARNESSES` tags. A run uses its tagged entry, then an untagged fallback; with neither, it keeps the harness default. An optional `@<depth>` (`low`, `medium`, `high`, `xhigh`, `max`, or a positive integer) requests thinking depth where supported. A skill you type stays on your session's model and says in one line when its tier names another; `star-auto` starts each run on its tier's model.
 
-After editing these keys, run `bash execs/configure.sh` and reload sessions whose static definitions changed. For Kimi pool registration, use `bash execs/configure.sh --kimi-pool`. See [harness adapters](docs/mds/star-workflow/harness-adapters.md) for dispatch mechanics and [workflow conventions §10.8](docs/mds/star-workflow/research-workflow-conventions.md#10-the-skill-roster) for tier selection and run relocation.
+After editing these keys, run `bash execs/configure.sh` and reload sessions whose static definitions changed. For Kimi pool registration, use `bash execs/configure.sh --kimi-pool`. See [harness adapters](docs/mds/star-workflow/harness-adapters.md) for dispatch mechanics and [workflow conventions §10.8](docs/mds/star-workflow/research-workflow-conventions.md#10-the-skill-roster) for tier selection and where a run executes.
 
 The local `.env` file is ignored by Git, so machine-specific paths are not committed.
 
@@ -520,7 +520,7 @@ bash execs/configure.sh
 
 `bash execs/update.sh --help` carries the full usage summary, so it stays correct when the flags change.
 
-`STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` select research judgment, implementation and production, and read-only collection respectively. Set them in `.env` using the [examples](.env.example); a tagged value such as `claude:fable,codex:gpt-6-astra` keeps one host's aliases out of another host. The three keys do not change which work is authorized, and a run that still owes the user a question remains in the main session.
+`STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` select research judgment, implementation and production, and read-only collection respectively. Set them in `.env` using the [examples](.env.example); a tagged value such as `claude:fable,codex:gpt-6-astra` keeps one host's aliases out of another host. The three keys do not change which work is authorized. A skill you type runs in your session on the session's model, so typing it does not switch models: when its tier names another model, or a depth the host applies only per dispatch, the run says so in one line, naming the tier's model and the two ways to get it — switch the session's model, or start the run through `star-auto` — and then runs where it is. Where the host can name a delegate's model, `star-auto` starts each run on its tier's model, and `star-plan-executor` and `star-code-architect` hand their execution phase to a delegate on EXEC.
 
 | Harness | How STAR selects a delegate's model |
 | --- | --- |
@@ -532,7 +532,7 @@ bash execs/configure.sh
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | Selects the same named agents with actual model ids in their frontmatter; the tool's per-call `model` field is a different mechanism for configured grades. |
 | DSH | Keeps the existing route because the current tool exposes no per-dispatch model selector; a set key gets an explanation. |
 
-A missing interface, unavailable model, or stale named-agent configuration is reported without pretending the requested model ran. Reports record the delegate's actual model. Status and digest runs use the READ entry route on hosts without native skill forks; `star-auto` uses the same tier selection when starting each skill.
+A missing interface, unavailable model, or stale named-agent configuration is reported without pretending the requested model ran. Reports record the delegate's actual model. Claude Code forks status and digest runs on the READ model through their own manifests; on other hosts those two run in the session like any skill you type.
 
 Files at matching paths are overwritten, new upstream files added, and project-specific files that exist only in the updated directories preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 

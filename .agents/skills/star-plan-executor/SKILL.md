@@ -15,7 +15,7 @@ Invocation: `star-plan-executor PLAN_NAME [DESCRIPTION]`. Resolve the leaf by sl
 
 After resolving the target, run `scripts/scan.sh --slim` and treat its plan-frontmatter and run-log-frontmatter digest as raw input to Steps 0–1; still read the target leaf in full. If the script fails, read the plan files directly and report the fallback.
 
-**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` does not relocate the whole run again and records its actual model from its own session provenance.
+**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` was started on its tier and records its actual model from its own session provenance.
 
 ## Role
 
@@ -34,7 +34,7 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 
 ## Workflow
 
-**Where this run executes.** The run's tier is PLAN, but it never hands itself to a delegate as a whole (conventions §10.8): the fourth condition there never holds for this skill, because the merge confirmation point, the pending-amendments batch at Step 5, and what becomes of a blocked step's edits turn on what the run finds. It stays in the user-facing session; its tier change is the hand-over of Step 4 (execute and verify) to EXEC below. Existing execution authorization counts as settled when judging whether a required decision remains, and a `tier=` delegate never re-hands that phase.
+**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Its tier change is the hand-over of Step 4 (execute and verify) to EXEC below: existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 
 ### Step 0: Resolve the target
 
