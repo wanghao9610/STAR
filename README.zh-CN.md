@@ -321,7 +321,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流；同一命令包的 `/star-auto <目标>` 朝敲下的目标自主推进。
 
-七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都坐在一个属于你的决定上。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（skill 名册）那张表为准，本节只是跟随它。
+七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都涉及一个应由你做的决定。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md)（skill 名册）那张表为准，本节只是跟随它。
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环" width="100%">
@@ -349,7 +349,7 @@ dsh --profile YOUR_PROFILE --dump-config
 | --- | --- | --- |
 | `star-plan-decomposer` | 把总体计划拆成可以各自单独验证的子计划 | `metds/plans/<前缀>_<任务>_plan.md` |
 | `star-plan-executor` | 实现并初步验证一个可执行的叶子计划 | `tasks/<计划名称>/` 下该计划自有的工具脚本与中间工作文件、代码，以及 `wkdrs/<运行名称>/EXEC_PLAN.md`、`EXEC_LOG.md` 和生成产物；经确认的偏差同步写回计划并带 Revision History 记录 |
-| `star-code-reviewer` | 对照项目规范与计划承诺审查代码，并落实例行性修复——minor 直接改，major 经批准后改 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
+| `star-code-reviewer` | 对照项目规范与计划承诺审查代码，并在被要求修复时落实不改变行为的例行性修复 | `wkdrs/<运行名称>/CODE_REVIEW_<日期>.md` 或 `wkdrs/reviews/code_<范围>_<日期>.md` |
 
 **读实验结果，再把它带回计划。** 一次跑完的实验是证据，不是结论。这一阶段把产物和日志对照计划的预期核一遍，把指标对照完成判据和 baseline 打分——每个数字进报告前都按引用重新打开原文核实，站不住的降一档或丢弃——随后据此修订计划：哪条假设没站住、哪条判据定错了、下一步该做什么。
 
@@ -374,7 +374,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 ### 模型选择建议
 
-这些技能分成两类工作，两类各自侧重的模型能力不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。
+这些技能分成两类工作，两类各自侧重的模型能力不同。下列模型名截至 2026-07，会随时间过时；括号内是同档位的等效替代。`.env` 的档位键不按这两类分，而是按名册的档位列和 §10.8 里模式对档位的覆盖（[规约 §10](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md#10-skill-名册)）：`star-plan-executor` 与 `star-code-architect` 属 PLAN 档，其中的实现阶段跑在 EXEC 上；`star-refs-reviewer` 属 EXEC 档；`star-flow-status` 与 `star-expt-digest` 属 READ 档。
 
 | 工作性质 | Skills | 建议模型 |
 |---|---|---|
@@ -391,7 +391,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。在 Claude Code 里，子代理启动时这两个钩子会再跑一次——会话钩子在子代理里根本不触发：溯源钩子把解析该 delegate 自己转录的命令交给它，于是 delegate 写出的产物记录的是真正写下它的那个模型，而不是会话的模型；记忆钩子则为它重放一遍索引。Claude、Codex 和 Qwen Code 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Claude 还注册了 `star_bash_gate.sh`：`low` 档会放行普通本地 shell 命令，包括上面受守卫的 worktree 与提交流程；删除、`sudo`、系统改动、进程控制、`git push` 和强制复制/移动仍走宿主原有提示。Cursor、DSH、Kimi Code 和 Pi 没有文件编辑闸门：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因在它自己身上：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都不回答这种情况，因为它对项目根目录之外的路径本来就一概放行。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交——也会在一个 run 还没有代码审查、或审查早于它的日志时，拒掉该 run 备好命令（`execs/scpts/<run>.sh`）的启动。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。在 Claude Code 里，子代理启动时这两个钩子会再跑一次——会话钩子在子代理里根本不触发：溯源钩子把解析该 delegate 自己转录的命令交给它，于是 delegate 写出的产物记录的是真正写下它的那个模型，而不是会话的模型；记忆钩子则为它重放一遍索引。Claude、Codex 和 Qwen Code 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json` 和 `.qwen/settings.json` 里。Claude 还注册了 `star_bash_gate.sh`：`low` 档会放行普通本地 shell 命令，包括上面受守卫的 worktree 与提交流程；删除、`sudo`、系统改动、进程控制、`git push` 和强制复制/移动仍走宿主原有提示。Cursor、DSH、Kimi Code 和 Pi 没有文件编辑闸门：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因在它自己身上：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都只在运行的 worktree（`../<根目录名>--wt/<run>/`，规约 §11.8）里回答这种情况，项目根目录之外的其他路径它一概不管。何况那座桥也不会认 `allow`。七家还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.zh-CN.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交——也会在一个 run 还没有代码审查、或审查早于它的日志时，拒掉该 run 备好命令（`execs/scpts/<run>.sh`）的启动。Claude、Codex、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
 用 **Kimi Code** 或 **DSH** 驱动 STAR 时，每台机器运行一次对应的安装脚本，把钩子注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
@@ -406,11 +406,12 @@ bash .dsh/hooks/install.sh         # DSH
 
 有六个 skill 在动手之前都要打开同一批计划、run 日志与报告：`star-flow-status`、`star-expt-digest`、`star-plan-decomposer`、`star-plan-executor`、`star-plan-reviser` 与 `star-metd-summarize`。它们不逐个打开文件，而是各自用一个只读脚本一次收齐——所用宿主目录下、各 skill 自己目录里的 `scripts/scan.sh`。这是一次 shell 调用，所以 agent 第一次运行它时会请求授权。
 
-全新安装的 Claude Code 无需任何设置：`.claude/settings.json` 已附带只针对这六个脚本的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`——`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖——因此需要自己补上这些规则：
+全新安装的 Claude Code 无需任何设置：`.claude/settings.json` 已附带只针对这六个脚本、外加溯源钩子交给 delegate 的只读模型 id 解析命令的放行规则，不涉及其他任何命令。更早接入的项目会保留它自己的 `settings.json`——`execs/update.sh` 只在该文件缺失时安装它，绝不覆盖——因此需要自己补上这些规则：
 
 ```json
 "permissions": {
   "allow": [
+    "Bash(bash .claude/hooks/star_model_id.sh --resolve:*)",
     "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh)",
     "Bash(bash .claude/skills/star-flow-status/scripts/scan.sh:*)",
     "Bash(bash .claude/skills/star-expt-digest/scripts/scan.sh)",

@@ -24,7 +24,9 @@ Model names retain their harness spelling, for example `pi:anthropic/claude-fabl
 
 ### Claude Code
 
-Claude Code takes the depth from the `effort:` frontmatter that `bash execs/configure.sh` writes into each tier's manifests and into its named `star-plan`, `star-exec` and `star-read` agents: a run invoked through a manifest reasons at that manifest's tier depth, and a delegate dispatched as one of those agents reasons at that agent's, so naming the agent is how a depth is named per dispatch there — a configured Claude Code depth is a routing difference even when the tier model aliases the active model, and a delegate dispatched as a plain subagent type still inherits the dispatching run's depth.
+Claude Code takes the depth from the `effort:` frontmatter that `bash execs/configure.sh` writes into each tier's manifests and into its named `star-plan`, `star-exec` and `star-read` agents. A run invoked through a manifest reasons at that manifest's tier depth, and a delegate dispatched as one of those agents reasons at that agent's; naming the agent is therefore how a depth is named per dispatch there. A configured Claude Code depth is a routing difference even when the tier model aliases the active model, and a delegate dispatched as a plain subagent type still inherits the dispatching run's depth. A read-only dispatch — a collector or a blind read — is the exception: it keeps the generic `Explore` type, whose tool set is what keeps it read-only, because the named agents carry no tool restriction; it takes the tier's model but not its depth, and the run says so once.
+
+A subagent cannot dispatch subagents: a run started or relocated as a subagent runs its phase hand-offs and its inner delegates' work locally, on its own model and depth.
 
 ### Codex
 
@@ -42,9 +44,9 @@ Qwen's named agents take the model without the suffix.
 
 ### Kimi Code
 
-`--kimi-pool` requires the project Python configured in `.env` with `tomllib` (Python 3.11+). It parses and validates the complete edit before writing; unsupported table layouts leave the config unchanged.
+`bash execs/configure.sh --kimi-pool`, which registers the depth variants described below, requires the project Python configured in `.env` with `tomllib` (Python 3.11+). It parses and validates the complete edit before writing; unsupported table layouts leave the config unchanged.
 
-Kimi Code likewise has no per-dispatch depth parameter: its `Agent` / `AgentSwarm` `model` accepts only aliases from the configured secondary-model pool, so a configured `@<depth>` is dispatched as the pool alias binding that model at that depth — conventionally `<model>-<depth>`, a `[models]` variant carrying that `default_effort` which the user registers in `~/.kimi-code/config.toml` and lists in the pool, by hand or with `bash execs/configure.sh --kimi-pool`, and which no skill run ever writes — so a configured Kimi depth is a routing difference even when the tier model aliases the active model; where no pool entry binds the depth, the dispatch passes the model alone and says once that the depth went unapplied, and a section-wide `[secondary_model].default_effort` overrides every variant binding.
+Kimi Code likewise has no per-dispatch depth parameter: its `Agent` / `AgentSwarm` `model` accepts only aliases from the configured secondary-model pool. A configured `@<depth>` is therefore dispatched as the pool alias binding that model at that depth — conventionally `<model>-<depth>`, a `[models]` variant carrying that `default_effort`. The user registers that variant in `~/.kimi-code/config.toml` and lists it in the pool, by hand or with `bash execs/configure.sh --kimi-pool`; no skill run ever writes it. A configured Kimi depth is thus a routing difference even when the tier model aliases the active model. Where no pool entry binds the depth, the dispatch passes the model alone and says once that the depth went unapplied. A section-wide `[secondary_model].default_effort` overrides every variant binding.
 
 ### DSH and Pi
 

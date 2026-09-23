@@ -10,7 +10,7 @@
 
 | # | 小节 | 类型 | 主来源 | 辅助来源 | 来源缺失时 |
 |---|---|---|---|---|---|
-| 1 | 头部——标题、标语、徽章、teaser | M | `metds/overview.md` §问题 + §核心想法 | 仓库目录名、`.env` 的 `CODE_NAME`、`metds/refs/reference.bib` 自引用条目 | 标题取仓库名/`CODE_NAME`；标语写 `TODO` → `star-metd-summarize overview` |
+| 1 | 头部——标题、标语、徽章、teaser | M | `metds/overview.md` §问题 + §核心想法 | 仓库目录名、`.env` 的 `CODE_NAME`、`metds/refs/reference.bib` 自引用条目（见 §15） | 标题取仓库名/`CODE_NAME`；标语写 `TODO` → `star-metd-summarize overview` |
 | 2 | News / Updates | O | 根计划 §6 带日期的里程碑、`wkdrs/digests/EXPT_DIGEST_*.md` | — | 省略——没人写过的 news 不是 news |
 | 3 | Abstract / Introduction | M | `metds/overview.md`——问题、缺口、核心想法 | 根计划 §1–§2 | `TODO` → `star-metd-summarize overview` |
 | 4 | Highlights / Contributions | O | `metds/overview.md` 的 contributions（写成可证伪主张的那些） | — | 省略 |
@@ -24,7 +24,7 @@
 | 12 | Results | O | `wkdrs/results/results.md`——**数字的唯一来源** | — | 省略。绝不从 `EXPT_ANALYSIS` 报告或 digest 重建表格 |
 | 13 | Repository structure | O | `metds/codearc.md` §1 目录布局 | — | 省略 |
 | 14 | TODO / Roadmap | O | 根计划 §6 中尚未 `done` 的里程碑 | — | 省略 |
-| 15 | Citation | M | `metds/refs/reference.bib` 自引用条目 | 根计划 §1 取标题 | 给带 `TODO` 的占位 BibTeX——绝不编造 venue、年份或作者列表 |
+| 15 | Citation | M | `metds/refs/reference.bib` 自引用条目——标题与本项目论文标题（根计划 §1 或 `metds/overview.md`）一致的那一条；一条都对不上或对上多条时，向用户确认 | 根计划 §1 取标题 | 给带 `TODO` 的占位 BibTeX——绝不编造 venue、年份或作者列表。缺失的条目在论文公开后转交 `star-refs-reviewer add <arXiv id>`，否则由用户手工加一条 `% src: user-supplied` 条目 |
 | 16 | License | M | 根 `LICENSE` | `metds/codearc.md` §5 上游许可证的约束 | 用一行写明缺失的文件；发布前检查清单会把它记为阻断项 |
 | 17 | Acknowledgement | 有 `UPSTREAM.md` 时为 M | `${CODE_NAME}/UPSTREAM.md` | `metds/refs/refs_index.md` 的核心论文 | 只有在既无上游、也无核心论文基础时才省略 |
 | 18 | 页脚——Built with STAR | M | — | — | 始终存在 |

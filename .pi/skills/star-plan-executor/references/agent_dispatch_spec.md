@@ -26,6 +26,7 @@ These are the terms the dispatch states, and the delegate is held to for the len
 - `check` — the result of the step's own check: `pass` / `fail` + the evidence (test output, metric, artifact path).
 - `blockers` — anything that stopped it, or `none`.
 - `handoff` — any STOP-line command prepared for the user, or `none`.
+- `model` — the model id the delegate's own runtime reports for its session (conventions §8), copied verbatim, or `unrecorded`.
 
 ## After the agent returns
 

@@ -10,7 +10,7 @@ Which tool installs what, in what order, and what happens on failure. Every comm
 | pip (second choice) | uv absent and declined, or a package fails under uv | `$ENV_PY -m pip install <pkg>` |
 | conda (whitelist only) | conda backend **and** the package is on the whitelist | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <pkg> -y` |
 
-- uv missing → ask once, recommending: install uv (e.g. `$PYTHON_HOME/bin/python -m pip install --user uv`, or the official standalone installer if the user prefers) / use pip for this run. Declining costs speed, not correctness.
+- uv missing → ask once, recommending: install uv (the official standalone installer, or `pipx install uv`; either puts uv outside the environment, and the user choosing this option is the approval for that write) / use pip for this run. Declining costs speed, not correctness.
 - Do not mix managers beyond these three: what uv/pip installed, uv/pip upgrades. Never conda-install over pip-managed packages — the whitelist is conda's only territory, and pip never owns it.
 
 ## Install order

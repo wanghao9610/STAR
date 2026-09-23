@@ -7,7 +7,7 @@ description: >-
 
 # Research Env Builder
 
-调用方式：`star-env-builder [ENV_NAME | add <包名>…] [描述]`。先解析 `add`，其后每个包名都属于该模式；否则使用给定环境名或 `.env` 的 `CODE_NAME`。自然语言可设定需求或授权构建；仅在环境目标、依赖选择、成本或破坏性处理尚未解决时提问。
+调用方式：`star-env-builder [ENV_NAME | add <包名>…] [描述]`。先解析 `add`，其后每个包名都属于该模式；否则使用给定环境名，其次 `.env` 的 `ENV_NAME`，再次其 `CODE_NAME`。自然语言可设定需求或授权构建；仅在环境目标、依赖选择、成本或破坏性处理尚未解决时提问。
 
 **共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
@@ -30,12 +30,12 @@ description: >-
 
 ## 工作流
 
-**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 EXEC 档处理整次运行的交接。对具体环境、依赖集与成本的既有授权同样有效；只有必需决定仍未解决时才留在这里。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 EXEC 档应用迁移规则。对具体环境、依赖集与成本的既有授权同样有效；是否还剩必需决定，在 Step 0 前按 §10.8 的第四条一次性判定。
 
 ### Step 0：预检
 
-1. 读 `.env`，解析 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
-2. `ENV_NAME` := 参数，否则 `CODE_NAME`。参数为 `add <包名>…` 则进入 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的环境——不创建、不改名、不重建。
+1. 读 `.env`，解析 `CODE_NAME`、`ENV_NAME`、`CONDA_HOME`、`PYTHON_HOME`（规约 §3）。
+2. `ENV_NAME` := 参数，否则 `.env` 的 `ENV_NAME`，再否则 `CODE_NAME`。参数为 `add <包名>…` 则进入 **add 模式**：直接跳到 Step 8，目标是 `.env` 已指向的环境——不创建、不改名、不重建。
 3. 探测并记录（供安装计划与报告用）：平台 + 架构；`nvidia-smi`（驱动支持的 CUDA 上限）；`nvcc --version` / `CUDA_HOME`（本机 toolkit，常缺失）；`$CONDA_HOME/bin/conda --version`；`uv --version`。
 4. `${CODE_NAME}/` 缺失或实质为空 → 没有依赖来源；建议先跑 `star-code-architect`，用户仍想要则可只建裸环境（仅 python）。
 
@@ -48,7 +48,7 @@ description: >-
 
 ### Step 2：环境已存在时
 
-- conda：`conda env list` 中已有 `<ENV_NAME>` → 先执行此前已明确的重建或修复选择；否则在**备份重建**、**原地验证修复**、**中止**之间问一次，并说明 clone 备份可能短暂翻倍磁盘占用。
+- conda：`conda env list` 中已有 `<ENV_NAME>` → 先执行此前已明确的重建或修复选择；否则在**备份重建**、**原地验证修复**、**中止**之间问一次，并说明 clone 备份可能短暂翻倍磁盘占用。备份为 `$CONDA_HOME/bin/conda rename -n <ENV_NAME> <ENV_NAME>_$(date +%Y%m%d)`，它先克隆环境、再删除原环境——磁盘占用因此短暂翻倍。conda 没有 `rename` 时，克隆到备份名（`create --clone`）、核验克隆结果，再把删除原环境的命令作为红线命令交还用户；重建等它执行后再做。
 - venv：`.venv` 已存在 → 同样执行既有选择或问一次；备份为 `mv .venv .venv_$(date +%Y%m%d)`。说明移动后的 venv 因脚本保留旧绝对路径，只是冻结备份。
 - 备份名已被占用 → 追加 `-<HHMM>`（同样取自 `date`）。
 
@@ -94,7 +94,6 @@ description: >-
 4. `.env` 的 `PYTHON_HOME` 解析不到刚验证过的 `ENV_PY` → 该项配置变更已有明确授权时更新；否则展示一行变更并询问，因为它会改变关键运行时输入。
 5. 聊天汇报 ≤500 字：验证了什么（附证据）、失败项、待用户命令。**向下游交棒：**`star-plan-executor <leaf>` 现在有运行时了；`star-flow-status` 查看下一步。
 
-
 ### Step 8：新增依赖（仅 add 模式）
 
 `add <包名>…` 只跑这一步，它的七项——解析 `ENV_PY`、给每个包定类别、安装前必须过的确认点、按 uv > pip > conda 分层安装、只针对新包的跑通性检查、依赖文件与报告的更新，以及收尾汇报——在 `references/add_mode_zh.md`，是这个模式时才读，之前不读。建环境或修环境的运行完全不读它。
@@ -104,12 +103,12 @@ description: >-
 - 只写这些位置：环境本身（`$CONDA_HOME/envs/` 之下或 `<项目根>/.venv`）、`${CODE_NAME}/requirements*`（仅在生成缺失布局或补验证过的缺口时）、`wkdrs/env_<ENV_NAME>_<日期>/`，以及——仅经用户明确确认——`.env` 里的 `PYTHON_HOME=` 一行。绝不碰源代码、`metds/plans/*` 或其他 skill 的产物。
 - 绝不删除环境；备份一律用运行时真实日期改名。绝不编造时间戳。
 - Git：每次运行至多一次提交——生成 requirements 文件时，或 add 模式下装包时——只 stage `${CODE_NAME}/requirements*`（规约 §1）。
-- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：在这种分支上提交之前先说明，并提议先切回去（规约 §11）。
-- 已授权安装自主执行，包括已披露的框架级下载。STOP line 仍覆盖 `sudo` 或系统包管理器、驱动或 CUDA toolkit 系统安装、CUDA 源码编译、超过约 10 GB 的下载和删除环境；这些只准备准确命令。
+- 签出停在并非本次运行目标的执行分支上时，提交会随那个叶子一起合并：先说明，不在这种分支上提交；由用户切回，或指定提交落在哪里（规约 §11）。
+- 已授权安装自主执行，包括已披露的框架级下载。红线仍覆盖 `sudo` 或系统包管理器、驱动或 CUDA toolkit 系统安装、CUDA 源码编译、超过约 10 GB 的下载和删除环境；这些只准备准确命令。
 - 尊重用户镜像配置（`PIP_INDEX_URL`、`UV_DEFAULT_INDEX`）；绝不写 `pip config`、`.condarc` 或 `uv.toml`。
 - 重复调用：已有匹配的 `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` 且环境存在 → 优先走 **原地验证修复**（Step 2）——从报告中的失败项续跑，而不是重建。
 
 ## 对话纪律
 
 - 按规约 §7.2 与 §7.7 处理。同一目标、包集与已披露成本的既有授权继续有效；只有这些实质输入仍未解决时才通过 AskUserQuestion 问一个具体问题，工具不可用时退回简洁纯文本。
-- `ENV_REPORT.md` 正文语言跟随对话语言；中文报告中专业术语保留英文。
+- `ENV_REPORT.md` 正文语言取按规约 §7.6 解析出的语言；中文报告中专业术语保留英文。

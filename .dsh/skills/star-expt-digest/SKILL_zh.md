@@ -1,8 +1,8 @@
 ---
 name: star-expt-digest
 description: >-
-  按增量、日期、计划家族或全历史窗口总结实验进展，并生成模型溯源记录表。用于周期性进度汇报；未分析的
-  run 只作临时信息，绝不重跑实验，也不改计划、日志、分析报告或结果表。
+  按增量、日期、计划家族或全历史窗口总结实验进展，并生成模型记录表。用于周期性进度汇报；未分析的
+  run 只列为未核实层，绝不重跑实验，也不改计划、日志、分析报告或结果表。
 ---
 
 # Research Experiment Digest
@@ -28,11 +28,11 @@ description: >-
 3. **报告级，而非重新核实——并且 digest 自己要说出这一点**。与 `aggregate` 不同，你不会逐个重开引用源去确认数字。你连同出处一起抄录（`{值, 来源, 报告日期}`），让读者能自己去查。每份 digest 用自己的话写明：这是一份进展记录，经核实的数字在 `wkdrs/results/results.md`。从 digest 里把数字抄进论文，是文件本身就在警告的误用。
 4. **"变化"才是重点**。一份只罗列 run 的 digest，只是更差版的 `star-flow-status`。价值在于与上一份 digest 的 `sources:` 对比——哪些 run 是新的、哪些判定变了、哪些上次还是未核实层而这次已被分析、哪些主张被证伪。没有上一份 digest 就说序列从此开始，并整段省略，而不是编造变化。
 5. **允许叙事，不许归因**。你可以写学到了什么、一个负面结果暗示了什么、工作在哪里转了向。你**不可以**说*为什么*某个变体赢了——那需要这一家 skill 都不做的受控对比（`aggregate_spec.md` 的规矩，这里同样生效）。报告方向，并说清该问谁：解读找 `star-expt-analyst <run>`，对计划意味着什么找 `star-plan-reviser`。
-6. **除自己的文件外严格只读；红线同样适用**。你只写 `wkdrs/digests/EXPT_DIGEST_<date>.md`。绝不碰计划、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`、任何 `EXPT_ANALYSIS` 报告，或结果汇总表 `wkdrs/results/*`。绝不为填一个缺口去重跑训练、评测或高成本调用——没测的东西是一条带转交命令的缺口，不是你要接下的活。
+6. **除自己的文件外严格只读；红线同样适用**。你只写 `wkdrs/digests/EXPT_DIGEST_<date>.md`，`ledger` 模式下另写 `wkdrs/digests/MODEL_LEDGER.md`。绝不碰计划、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`、任何 `EXPT_ANALYSIS` 报告，或结果汇总表 `wkdrs/results/*`。绝不为填一个缺口去重跑训练、评测或高成本调用——没测的东西是一条带转交命令的缺口，不是你要接下的活。
 
 ## 工作流
 
-**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：配置的 READ override 可用——模型与本 run 不同，或宿主能逐次应用其深度——时，把完整运行一次性交给一个全新 READ 档受托者，传入该模型与受支持的深度，带原始调用、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过此门。否则留在这里，仅在模型已配置时说明一条原因。digest 与 `ledger` 只写各自摘要文件，不接续写入型后续。
+**本宿主的 READ 档入口。** 扫描前只按规约 §10.8 判断一次：配置的 READ override 可用——模型不是本 run 所在模型的别名，或宿主能逐次应用其深度——时，把完整运行一次性交给一个全新 READ 档受托者，传入该模型与受支持的深度，带原始调用、本次运行已解析的模式与范围（写明已定）、这次调用是用户亲手敲下的还是被拾起的（规约 §10.5）、已解析语言、`involve=<level> tier=read` 与已有 grant；等待并转达回复。宿主原生 READ 分叉或已带 `tier=read` 的运行跳过这次交接判断。否则留在这里，仅在模型已配置时说明一条原因。digest 与 `ledger` 只写各自摘要文件，不接续写入型后续。
 
 先解析模式。`ledger` 运行 `scripts/scan.sh --trails`，取得全部 `model_trail`、计划 `## Revision History` 与无 frontmatter 文件头的 `model_id`，然后只做 Step 8。其他模式先按 `references/scope_spec_zh.md` 定时间窗，再运行默认扫描并读取未合并执行分支；其输出包含计划与产物 frontmatter、run 日志状态/步骤/待用户项/方向性信号/日期，以及 `metds/` 与 `wkdrs/` 清单。把它当作原始输入，脚本不判断范围或证据层。
 
@@ -50,7 +50,7 @@ Step 1 确定范围内 run 后，再运行 `--bodies 2,3,7 --runs <run 目录>`�
 
 从扫描结果的计划 frontmatter 解析范围内的叶子，并逐叶取其 `exec_runs` 的每一项——为第二个种子重跑的叶子会有好几个 run，各自独立计日期。按 `references/scope_spec_zh.md` 的规则给每个 run 判定日期（分析报告日期，其次 EXEC_LOG 最后一条带日期的条目；绝不用文件 mtime），保留落在窗内的：报告日期在扫描清单的文件名里，日志日期在每份日志的 `[dates seen]` 行里。plan 模式下全部保留。
 
-把每个保留下来的 run 分类为**有报告依据的**（目录里有 `EXPT_ANALYSIS_<date>.md`，取最新的一份）或**临时**（没有）。
+把每个保留下来的 run 分类为**有报告依据的**（目录里有 `EXPT_ANALYSIS_<date>.md`，取最新的一份）或**未核实**（没有）。
 
 ### Step 2：读有报告依据的层
 
@@ -67,7 +67,7 @@ Step 1 确定范围内 run 后，再运行 `--bodies 2,3,7 --runs <run 目录>`�
 ### Step 5：收集周边语境
 
 - **期内计划树变化**：`updated`（或 `finalized:`）落在窗内的计划——新建、修订、拆解、定稿。扫描结果里的计划 frontmatter 就是全部输入，不 diff 正文。
-- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选红线命令的叶子；开场那次调用的清单显示仍未合并的执行分支——它们的记录在分支上、从当前 checkout 可能看不见，所以要点出分支名、转 `star-plan-executor <叶子>` 抵达合并确认点，并绝不隔着分支边界引用结果；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
+- **缺口与欠账**：范围内没有分析报告的 run；没有 `exec_runs` 的叶子；EXEC_LOG 里有未勾选红线命令的叶子；`git branch --list '[0-9]*_*'` 显示仍未合并的执行分支——它们的记录在分支上、从当前 checkout 可能看不见，所以要点出分支名、转 `star-plan-executor <叶子>` 抵达合并确认点，并绝不隔着分支边界引用结果；以及 `wkdrs/results/results.md`（或按范围的 `wkdrs/results/results_<slug>.md`）是否比范围内最新的分析报告更旧。
 
 ### Step 6：写 digest
 
@@ -79,7 +79,7 @@ Step 1 确定范围内 run 后，再运行 `--bodies 2,3,7 --runs <run 目录>`�
 
 ### Step 7：摘要与转交
 
-≤500 字，先说周期：窗口与范围、有报告依据的 / 无报告、数字未核实的各多少个 run、核心结论（学到了什么）、相对上一份 digest 有什么变化、最主要的缺口。然后是转交：未分析的 run → `star-expt-analyst <run dir>`；过期的结果汇总表 → `star-expt-analyst aggregate`；未执行或待用户的叶子 → `star-plan-executor <slug>`；被证伪的主张或 kill-criterion 命中 → `star-plan-reviser <slug>`；当前树态 → `star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
+≤500 字，先说周期：窗口与范围、有报告依据与未核实的 run 各多少个、核心结论（学到了什么）、相对上一份 digest 有什么变化、最主要的缺口。然后是转交：未分析的 run → `star-expt-analyst <run dir>`；过期的结果汇总表 → `star-expt-analyst aggregate`；未执行或待用户的叶子 → `star-plan-executor <slug>`；被证伪的主张或 kill-criterion 命中 → `star-plan-reviser <slug>`；当前树态 → `star-flow-status`。以 digest 路径收尾，并用一行说明：这是一份进展记录，其中的数字引自报告，并未在此核实。
 
 ### Step 8：模型记录表（仅 ledger 模式）
 
@@ -91,7 +91,7 @@ Step 1 确定范围内 run 后，再运行 `--bodies 2,3,7 --runs <run 目录>`�
 - 绝不碰：`metds/plans/*`（含 `exec_status`、`exec_runs`、`updated`）；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`；任何 `EXPT_ANALYSIS_<date>.md`（你的输入，永远不是你的输出）；`wkdrs/results/results.md` 与 `wkdrs/results/results_<slug>.md`（结果汇总表属于 `star-expt-analyst aggregate`，digest 里的数字绝不能流进去）；`${CODE_NAME}/`；`.env`。
 - 绝不移动、重命名或删除任何 run 目录、日志、产物，或更早的 digest。更早的 digest 是序列的历史，也是下一次运行的基线。
 - 更早的 digest 只读它的 frontmatter——`covers`、`sources`、`previous`。绝不为了让它符合你现在知道的情况而回头改写它。
-- 所有命令走 `.env` 的 conda 环境；不用系统 python；绝不安装或升级任何东西（规约 §3.5）。本 skill 除读文件外不需要任何包。
+- 所有命令走 `.env` 的解释器（规约 §3）；不用系统 python；绝不安装或升级任何东西（规约 §3.5）。本 skill 除读文件外不需要任何包。
 - 不做重活：不训练、不评测、不全量数据集遍历、不高成本 API 调用（规约 §2）。
 - Git：只读；本 skill 从不提交（规约 §1）。`wkdrs/` 下只有 `*.md` 不被 git 忽略，因此 digest 序列**是可以进版本库的**——它就是 `wkdrs/digests/` 下的 markdown。这些文件会一直处于未暂存状态，直到用户自己提交；用户问到分享时如实说明。
 

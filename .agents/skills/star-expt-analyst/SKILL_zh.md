@@ -2,7 +2,7 @@
 name: star-expt-analyst
 description: >-
   对照计划分析实验 run、核实日志指标与产物、评定完成判据，或跨 run 汇总已核实结果。用于 run 解读、结果
-  表或仅聊天的 watch 检查；绝不重跑实验，也不改计划与执行日志。
+  表，或只在聊天里检查仍在跑的任务是否健康（watch）；绝不重跑实验，也不改计划与执行日志。
 ---
 
 # Research Experiment Analyst
@@ -11,7 +11,7 @@ description: >-
 
 **共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
-**把档位模型传给受托者。** 按规约 §10.8 为当前宿主解析本模式的 PLAN、EXEC 或 READ 档模型。委派接口支持逐次 `model` 时传入解析值；与完整上下文继承冲突时使用全新、自包含的交办说明。READ 档收集与盲读不继承产出者对话。空值省略 model override，保留宿主或会话默认值；已配置但宿主无法指定时留在当前运行并说明原因。不跨厂商改写模型名，不臆造参数，不另启 CLI。带 `tier=` 的受托者不再次迁移整次运行，并按自身会话溯源记录实际模型。
+**把档位模型传给受托者。** 按规约 §10.8，为当前宿主解析每个受托者所做工作的档位模型——收集者用 READ，实现者用 EXEC，盲读者用 PLAN。委派接口支持逐次 `model` 时传入解析值；模型选择与完整上下文继承冲突时，改用全新、自包含的上下文。READ 档收集者与 PLAN 档盲读者都不继承产出者对话。空值省略 model override，保留宿主或会话默认值；已配置但宿主无法指定时留在当前运行并说明原因。不跨厂商改写模型名，不臆造参数，不另启 CLI。带 `tier=` 的受托者不再次迁移整次运行，并按自身会话溯源记录实际模型。
 
 ## 角色
 
@@ -22,15 +22,15 @@ description: >-
 ## 核心原则
 
 1. **预期是写明的；每条判定都要引用一条。** 评判依据：子计划的 §5 完成判据、§4 交付物、根计划的 §4 指标与 §5 kill-criteria，以及计划写明的任何 baseline。每条打分行携带 {判据原文、数字、来源、判定}。计划没写预期的，该行就写**未写明预期**——绝不发明阈值，绝不照着找到的数字倒推阈值。评分表见 `references/analysis_rubric_zh.md`。
-2. **广读，每个数字进报告前先核实。** 对许多或超大日志的有边界、彼此独立、只读的读取确有实质帮助时就委派收集——派几个由主 agent 定——并派一个只读子代理，跑在 READ 档的模型上（规约 §10.8），前提是这个 harness 能指定受托者用哪个模型。每个受委派方遵循 `references/analysis_rubric_zh.md` 的观察格式约定，绝不写入，也绝不给 run 的判定打分。每个数字、每条 blocker/major 观察进报告前，都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
+2. **广读，每个数字进报告前先核实。** 对许多或超大日志的有边界、彼此独立、只读的读取确有实质帮助时就委派收集——派几个由主 agent 定——并派一个只读子代理，跑在 READ 档的模型上（规约 §10.8），前提是这个宿主能指定受托者用哪个模型。每个受托者遵循 `references/analysis_rubric_zh.md` 的观察格式约定，绝不写入，也绝不给 run 的判定打分。每个数字、每条 blocker/major 观察进报告前，都要按引用重开那个文件、定位到那一行确认；站不住的降一档或丢弃。报告里的数字是会被抄进论文的。
 3. **磁盘是证据；EXEC_LOG 是待核实的说法。** 标 `done` 的步骤，在磁盘上找到与描述相符的产物之前，只是说法；日志里引用的指标，在追溯回产生它的文件之前，也只是说法。没有佐证的说法是观察，不是事实（reviser 的纪律，应用到结果上）。
-4. **只做轻量解析；工具是证据，绝不安装。** 读文件、grep 日志、经 `.env` 的 conda 环境跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `star-env-builder` 的）。
+4. **只做轻量解析；工具是证据，绝不安装。** 读文件、grep 日志、经 `.env` 的解释器（规约 §3）跑小段解析代码。pandas / matplotlib / tensorboard **仅当已安装时**才用；没有就只做纯文字、无曲线的分析，并在报告里写明。绝不安装或升级任何东西（那是 `star-env-builder` 的）。
 5. **诚实解读；负结果是发现，不是失败。** 说清这个 run 显示了什么、没显示什么：单 seed 不是显著性，子集不是 benchmark，没有 baseline 的指标不叫提升。命中根计划 kill-criterion 的结果是**方向性信号**——如实写明并转交。看起来过好的结果，先过泄漏检查再庆祝。
 6. **严格只读；红线适用。** 本 skill 只写自己的报告：`wkdrs/<run>/` 下的单 run 分析及其图，以及 aggregate 模式下的跨 run 结果汇总表（`wkdrs/results/results.md`，限定范围时为 `wkdrs/results/results_<slug>.md`）。绝不碰计划文件、`exec_status`、`EXEC_PLAN.md`、`EXEC_LOG.md`——判据达标是*建议*交给 `star-plan-executor`，终验归它。绝不为补一个缺失指标而启动训练、评测或高成本 API 调用：报为 unmeasurable，把备好的命令交还给用户。
 
 ## 工作流
 
-**本次运行在哪里执行。** Step 0 前按规约 §10.8 处理整次运行的交接。普通分析使用 PLAN，`aggregate` 与 `watch` 使用 READ；`watch` 只在聊天中完成，结束后不启动写入型后续。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 应用迁移规则。普通分析使用 PLAN，`aggregate` 与 `watch` 使用 READ；`watch` 只在聊天中完成，结束后不启动写入型后续。
 
 ### Step 0：解析 run
 
@@ -52,7 +52,7 @@ description: >-
 
 - 子计划 §1–§6——尤其 §4 交付物、§5 完成判据、§6 局部风险与回退——以及它的 `traces_to` frontmatter。
 - 沿 `parent:` 链上溯到顶的**根计划**：其 §4 指标与 §5 kill-criteria 都是这个 run 可能命中的评判依据（中间祖先都是子计划，其 §5 是完成判据）。
-- `wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`：步骤清单、绑定的检查、"Awaiting user" 红线命令、"Pending amendments"，以及记录在案的 方向性信号。
+- `wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`：步骤清单、绑定的检查、"待用户执行"红线命令（英文日志："Awaiting user"）、"待同步修正"（英文日志："Pending amendments"），以及记录在案的方向性信号。
 
 §5 完成判据缺失不会阻断分析——这个 run 无法对照计划打分，而这本身就是报告的核心结论，也是转交给 `star-plan-decomposer` 或 `star-plan-reviser` 的信号。
 
@@ -61,7 +61,7 @@ description: >-
 此步读取并遵循 `references/analysis_rubric_zh.md`：
 
 - **A——清点**：每个 §4 交付物记为 `present` / `missing` / `unexpected`，附轻量完整性检查（非空、可解析、大小合理）与布局符合度（AGENTS.md §8）。
-- **B——完成度**：EXEC_LOG 中每个自称 `done` 的步骤，用它写明的产物核实；每条 "Awaiting user" 红线命令归类为 `用户已跑`（其输出存在）或 `仍待跑`（不存在）。
+- **B——完成度**：EXEC_LOG 中每个自称 `done` 的步骤，用它写明的产物核实；每条"待用户执行"红线命令（英文日志："Awaiting user"）归类为 `用户已跑`（其输出存在）或 `仍待跑`（不存在）。
 
 红线命令从未执行的 run 是**未完成**的，其 §5 判据通常是 `unmeasurable`——早点说清楚，而不是绕着它打分。
 
@@ -83,14 +83,13 @@ description: >-
 
 ### Step 6：写出报告
 
-按 `assets/expt_analysis_template_zh.md`（英文计划用 `assets/expt_analysis_template.md`；报告跟随计划 frontmatter 的 `language`，否则跟随对话语言）填写：范围与证据基础、判定、完成判据记分卡、产物与完成度、日志健康、指标与对比（含图）、解读、建议与转交。写入 `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`。日期必须真实；同一天对同一 run 的二次分析覆盖原文件，跨天则各写各的。
+按 `assets/expt_analysis_template_zh.md`（英文计划用 `assets/expt_analysis_template.md`；报告跟随计划 frontmatter 的 `language`，否则取按规约 §7.6 解析出的语言）填写：范围与证据基础、判定、完成判据记分卡、产物与完成度、日志健康、指标与对比（含图）、解读、建议与转交。写入 `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`。日期必须真实；同一天对同一 run 的二次分析覆盖原文件，跨天则各写各的。
 
 **run 判定**取以下之一：`met` / `partially met` / `not met` / `inconclusive`（证据缺失——例如红线命令从未跑过）/ `invalid`（结果存在但不可信——泄漏、崩溃的 run 被标成 done、指标取自错误的 split）。选那个诚实的；`inconclusive` 与 `invalid` 是真答案，不是给不出判定。
 
 ### Step 7：摘要与转交
 
-以判定开头，控制在约 500 字以内：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `star-plan-executor <slug>`；§5 已达标 → `star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；计划文本已不属实 → `star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `star-plan-reviser`（据证据修订）/ `star-plan-coach`（重审方法与风险）/ `star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `star-code-reviewer <slug>`；import 报错或环境损坏 → `star-env-builder`。结尾给报告路径。
-
+以判定开头，控制在约 500 字以内：run 判定与 §5 记分卡各一行、所有 blocker/major 观察、关键指标及其来源、有兄弟 run 时的对比、图在哪里。然后是转交（维度 F）：步骤未完成或红线命令仍待跑 → `star-plan-executor <slug>`；§5 已达标、叶子还不是 `exec_status: done` → `star-plan-executor <slug>` 去终验并 finalize（`exec_status` 归它）；已经 `done` → 不需要 executor 这一步；计划文本已不属实 → `star-plan-reviser <slug>`；命中 kill-criterion 或主张被推翻 → `star-plan-reviser`（据证据修订）/ `star-plan-coach`（重审方法与风险）/ `star-plan-decomposer`（重新划分）；日志指向的代码缺陷 → `star-code-reviewer <slug>`；import 报错或环境损坏 → `star-env-builder`。结尾给报告路径。
 
 ### Step 8：Aggregate（仅 aggregate 模式）
 
@@ -103,13 +102,13 @@ description: >-
 ## 状态与文件规则
 
 - 唯一的写入是 `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`、渲染了图时的 `wkdrs/<run>/analysis/`（`.png` 加上绘图脚本），以及——仅在 aggregate 模式下——`wkdrs/results/results.md`（所有计划树）或 `wkdrs/results/results_<slug>.md`（限定范围）。除此以外，任何地方都不写。watch 模式什么都不写——它的全部产出就是聊天摘要。
-- 绝不碰：`metds/plans/*`——包括 `exec_status`、`exec_runs`、`updated`；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`（executor 的日志是证据，不是草稿纸——方向性信号 是报告并转交，不是写进日志）；`${CODE_NAME}/`；`metds/codearc.md`；`UPSTREAM.md`；`.env`。
+- 绝不碰：`metds/plans/*`——包括 `exec_status`、`exec_runs`、`updated`；`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`（executor 的日志是证据，不是草稿纸——方向性信号是报告并转交，不是写进日志）；`${CODE_NAME}/`；`metds/codearc.md`；`UPSTREAM.md`；`.env`。
 - 绝不移动、重命名或删除任何产物、日志或 checkpoint——run 目录就是证据基础，分析绝不改动自身证据。
-- 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包。解析代码内联跑；唯一留在磁盘上的脚本是 `analysis/` 下某张图的绘图脚本。
-- 不跑重活：不训练、不跑评测、不做全量数据 pass、不做高成本 API 调用——executor 的红线在这里同样适用。需要跑一次才能拿到的指标就是 `unmeasurable`；把备好的命令交还给用户。
+- 所有命令经 `.env` 的解释器（规约 §3）；不用系统 python；绝不安装或升级包。解析代码内联跑；唯一留在磁盘上的脚本是 `analysis/` 下某张图的绘图脚本。
+- 不跑重活：不训练、不跑评测、不做全量数据 pass、不做高成本 API 调用——红线（规约 §2）在这里同样适用。需要跑一次才能拿到的指标就是 `unmeasurable`；把备好的命令交还给用户。
 - Git：只读；本 skill 绝不提交（规约 §1）。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计线索就是报告文件。
 
 ## 对话纪律
 
-- 仅在工作流要求处（分析哪个 run、匹配有歧义时）一次只问一条，并要求明确答复。本 skill 除自己的报告外什么都不写，没有审批确认点——但绝不声称或暗示改动了计划、状态或日志。报告跟随计划 frontmatter 的 `language`，否则跟随对话语言。
+- 仅在工作流要求处（分析哪个 run、匹配有歧义时）一次只问一条，并要求明确答复。本 skill 除自己的报告外什么都不写，没有审批确认点——但绝不声称或暗示改动了计划、状态或日志。报告跟随计划 frontmatter 的 `language`，否则取按规约 §7.6 解析出的语言。

@@ -11,7 +11,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 该 run 有 `EXPT_ANALYSIS_<date>.md`。取**最新**的一份。只从它、且只从它读取——报告的 **§2、§3、§7** 三节承载了下面全部内容，第二次扫描因此带 `--bodies 2,3,7 --runs <窗口内的 run>` 跑；报告若重新编号，改的是这一行，脚本里什么都不用动：
 
 - run 判定（`met` / `partially met` / `not met` / `inconclusive` / `invalid`）；
-- §5 done-criteria 记分卡，压缩成一行；
+- §5 完成判据记分卡，压缩成一行；
 - 关键指标，逐条按报告记录的 `{值, 来源, split, seeds, spread}` 原样转录——只跑过一次的数字在这里写 `n=1`，不留空；
 - 它写明的任何 blocker 或 major 观察，以及任何方向性信号或 kill-criterion 命中。
 
@@ -29,7 +29,7 @@ digest 是一份**进展记录**，不是结果表。`wkdrs/results/results.md` 
 
 - **绝不去找数字**。如果 EXEC_LOG 没有把数字递到你手上，答案就是 `not measured`。grep run 的指标文件、解析 results JSON、读 TB event 文件，都属于分析，在这里越界。
 - **绝不出图**，绝不跑解析脚本，绝不计算派生量（跨种子均值、差值、百分比）。
-- **绝不给未核实 run 评分**，不对照任何 §5 done-criterion。它没有判定；frontmatter 记 `verdict: —`，表格里写 `awaiting analysis`。
+- **绝不给未核实 run 评分**，不对照任何 §5 完成判据。它没有判定；frontmatter 记 `verdict: —`，表格里写 `awaiting analysis`。
 - **每个临时值都要标注** `provisional (unverified)`，并带上它的 `path:line`。
 
 未核实层的每一行都要带上它的转交去向：`star-expt-analyst <run dir>`。

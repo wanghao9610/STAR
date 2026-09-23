@@ -23,7 +23,7 @@ leaf 与清单行只在**证据重叠**时才算匹配：leaf 的 §4 交付路�
 | 清单 `state` | 提议的 leaf `exec_status` |
 |---|---|
 | `concluded` | `done` |
-| `run` | 证据显示 leaf 的 §5 done-criterion 明显已达成时 `done`；否则 `in_progress` |
+| `run` | 证据显示 leaf 的 §5 完成判据明显已达成时 `done`；否则 `in_progress` |
 | `built` | `in_progress` |
 | `abandoned` | 不提议——报告出来交给用户决定 |
 

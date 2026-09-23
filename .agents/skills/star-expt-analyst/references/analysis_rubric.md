@@ -119,7 +119,7 @@ Map each unresolved item to exactly one owner; the analyst itself writes nothing
 | --- | --- |
 | Steps unfinished, a step `blocked`, or a STOP-line command still pending | `star-plan-executor` (resume the run) |
 | §5 criteria met — the run needs its final verification and `exec_status` | `star-plan-executor` (it owns finalization; the analyst never flips status) |
-| The plan text no longer describes what was actually done or produced | `star-plan-reviser` (evidence-based revision, per-item approved) |
+| The plan text no longer describes what was actually done or produced | `star-plan-reviser` (evidence-based revision) |
 | A root kill-criterion hit, or the `traces_to` claim refuted | `star-plan-reviser` (revise from evidence) → `star-plan-coach` (revisit method and risks) → `star-plan-decomposer` (re-scope the sub-plans) |
 | The logs point at a code defect (a bug, a wrong path, a mis-wired metric) | `star-code-reviewer` (scoped to this plan) |
 | Import errors, missing CUDA, a package the run needed | `star-env-builder` |

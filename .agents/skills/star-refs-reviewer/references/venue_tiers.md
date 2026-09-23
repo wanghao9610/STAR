@@ -1,8 +1,12 @@
 # Venue Tiers — the venue component of the impact score
 
-The lookup behind the venue component in `references/refs_rubric.md` (Impact score). Deterministic: take the fetched record's venue field — the transcribed `booktitle` or `journal`, else the search record's venue string — strip braces, and match it case-insensitively against the rows below. An abbreviation matches only as a whole word (`ACL` does not hit `NAACL`); a name fragment matches as a substring, any one of a row's fragments enough — the dotted alternatives cover DBLP's condensed journal forms (`IEEE Trans. Pattern Anal. Mach. Intell.`). First tier with a hit wins; no hit and published → 4; preprint-only → 2.
+The lookup behind the venue component in `references/refs_rubric.md` (Impact score). Deterministic: take the fetched record's venue field — the transcribed `booktitle` or `journal`, else the search record's venue string — strip braces, and match it case-insensitively against the rows below. An abbreviation matches only as a whole word (`ACL` does not hit `NAACL`); a name fragment matches as a substring, any one of a row's fragments enough — the dotted alternatives cover DBLP's condensed journal forms (`IEEE Trans. Pattern Anal. Mach. Intell.`). A hit in the checked-first list below scores 4 before any tier row is tried; otherwise the first tier with a hit wins; no hit and published → 4; preprint-only → 2.
 
 The lists are calibrated for CS/AI. A project in another field edits the lists, never the rule — an unlisted venue that "obviously" deserves a tier gets a row here, not a mid-run exception. Judgment never enters a lookup.
+
+## Checked first — 4
+
+A venue string containing any of these, case-insensitively, scores 4 before any tier row is tried: `Workshop` — a workshop's venue string carries its host conference's abbreviation or name (`CVPR Workshops`, `… Pattern Recognition Workshops (CVPRW)`); and the lesser venues whose names contain a flagship's fragment — `Machine Learning and Applications` (ICMLA), `Computer Vision Systems` (ICVS), `Computer Vision Theory` (VISAPP).
 
 ## Tier 10 — flagship
 
@@ -50,7 +54,7 @@ ACL's fragment is the full "Annual Meeting …" phrase deliberately: NAACL's and
 
 ## Tier 4 — every other published venue
 
-Workshops, regional conferences, journals off the lists: any record whose venue no row matches. 4 is the published default; no patterns needed.
+Workshops (caught by the checked-first list), regional conferences, journals off the lists: any record whose venue no tier row matches. 4 is the published default; no patterns needed.
 
 ## Tier 2 — preprint-only
 

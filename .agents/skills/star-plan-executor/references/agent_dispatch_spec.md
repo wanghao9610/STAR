@@ -25,6 +25,7 @@ Delegate whenever collaboration tools are available and the work is bounded, ind
 - `check` — `pass` / `fail` plus evidence.
 - `blockers` — unresolved blockers, or `none`.
 - `handoff` — prepared STOP-line command, or `none`.
+- `model` — the model id the delegate's own runtime reports for its session (conventions §8), copied verbatim, or `unrecorded`.
 
 ## Main-agent responsibility
 

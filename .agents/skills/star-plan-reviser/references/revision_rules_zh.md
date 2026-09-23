@@ -1,6 +1,6 @@
 # 修订规则 — 权限、痕迹与连带影响
 
-star-plan-reviser 允许改什么、改动如何记录、什么必须转交别处。一次会话只修订**一个目标文件**（外加至多父计划里对应的那一行索引）。
+star-plan-reviser 允许改什么、改动如何记录、什么必须转交别处。一次会话只修订**一个目标文件**（外加至多父计划里对应的那一行索引；已批准的丢弃还外加根计划 §5"已否定的路线"里追加的一行，以及根计划里记下它的那条一行 `## Revision History` 与根计划 `updated` 的更新）。
 
 ## 权限表
 
@@ -14,6 +14,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 | 目标 frontmatter `dropped:` | 允许——仅作为已批准候选，按下方丢弃规则 |
 | 已丢弃子树在磁盘上的文件（计划文件、`tasks/<plan-name>/`、`wkdrs/<run>/` 目录、`execs/scpts/<run>.sh`） | 允许——仅限已批准的丢弃或恢复所带的、搬进或搬出 `dropped/` 位置的那次移动（`drop_rules_zh.md`）；内容绝不编辑 |
 | 父计划 `## Sub-plans` 中目标对应行 | 允许——仅当目标的标题 / 一行目标发生变化，或为它加上、去掉丢弃标记 |
+| 根计划 §5 的"已否定的路线"、根计划的 `## Revision History` 与 `updated` | 允许——仅限已批准的丢弃：追加一行已否定路线、一条记下这一行的一行 Revision History，并更新 `updated`（`drop_rules_zh.md`"向上汇总"） |
 | 目标 `## Sub-plans` 里的概要行（还没展开的单元——规约 §0） | 允许——作为已批准候选：改写、重排、增删概要行；已展开子计划文件的条目仍归 star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | 绝不——run 属于 executor；审查报告写在日志*旁边*，不写进日志 |
 | 数字前缀 / 文件名 | 绝不——不重编号、不改名、不分叉 `_v2`、不删除（丢弃的搬移保留每个文件名，变的只是目录） |
@@ -37,16 +38,16 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 ### 2026-07-16 — star-plan-reviser · claude-opus-4-8 (report: wkdrs/01_mvp-verify/REVIEW_2026-07-16.md)
 - §3 step 4: batch eval → streaming eval——run 在 step 4 OOM（证据：EXEC_LOG.md step 4, blocked）
 - §5: mIoU 阈值 85 → 80——MVP run 达到 82.3，根计划 §4 的余量分析可接受 80（证据：wkdrs/01_mvp-verify/eval.json）
-- exec_status: done → pending（done-criterion 已变化）
+- exec_status: done → pending（完成判据已变化）
 ```
 
-每次会话一个 `###` 块，真实日期（绝不编造），并在 skill 名之后写上本次编辑会话的 `model_id`——运行时报出的 id 原样抄录，没有则写 `unrecorded`（规约 §8）。这个逐条记录的 id 就是计划的模型归属依据：frontmatter 的 `model_id` 只写明最近一次写入者；更早的修订出自谁手保留在本节。每处改动一个要点：章节、改了什么、为什么、证据。`exec_status` 的重置、以及被清除的 `finalized:` 也记在这里；值得留痕的被拒候选可选记一笔（"用户保留 85 阈值，尽管未达标"）。丢弃同样是其中一条要点——`dropped: 2026-08-11 — 被 02 取代`——什么终结了这个方向写在这一条里，因为 frontmatter 那个字段只放得下一行。
+每次会话一个 `###` 块，真实日期（绝不编造），并在 skill 名之后写上本次编辑会话的 `model_id`——运行时报出的 id 原样抄录，没有则写 `unrecorded`（规约 §8）。这个逐条记录的 id 就是计划的模型归属依据：frontmatter 的 `model_id` 只写明最近一次写入者；更早的修订出自谁手保留在本节。每处改动一个要点：章节、改了什么、为什么、证据。`exec_status` 的重置、被清除的 `finalized:`，以及只做 §4/§5 战术性修订后保留下来的 `finalized:` 也记在这里；值得留痕的被拒候选可选记一笔（"用户保留 85 阈值，尽管未达标"）。丢弃同样是其中一条要点——`dropped: 2026-08-11 — 被 02 取代`——什么终结了这个方向写在这一条里，因为 frontmatter 那个字段只放得下一行。
 
 ## exec_status 重置规则
 
 | 编辑后的情形 | 动作 |
 |---|---|
-| §5 done-criterion 实质变化，且叶子为 `done` / `blocked` | 提议重置为 `pending`（`exec_runs` 无论如何都留着历史） |
+| §5 完成判据实质变化，且叶子为 `done` / `blocked` | 提议重置为 `pending`（`exec_runs` 无论如何都留着历史） |
 | §3 新增或实质改动了步骤，且叶子为 `done` | 提议重置为 `pending` |
 | 叶子为 `in_progress` | 不动——executor 下次运行会从 `EXEC_LOG.md` 重新定位 |
 | 编辑只涉及 §1/§2/§4 的行文或 §6 风险 | 无需重置——仅更新 `updated` |
@@ -55,7 +56,7 @@ star-plan-reviser 允许改什么、改动如何记录、什么必须转交别�
 
 ## 丢弃一份计划（`dropped:`）
 
-一次丢弃写什么、绝不动什么、以及怎么走回来，都在 `drop_rules_zh.md`，本次运行是丢弃或恢复时才读，之前不读。
+一次丢弃写什么、绝不动什么、以及怎么走回来，都在 `drop_rules_zh.md`，本次运行是丢弃或恢复、或评审采纳了一条丢弃候选时才读，之前不读。
 
 ## 章节状态翻转
 

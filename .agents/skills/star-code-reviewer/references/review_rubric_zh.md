@@ -20,7 +20,7 @@
   confidence: high | low
 ```
 
-收集器只返回这个列表（外加 `files_reviewed: <n>` 与 `unknowns: [<读不了或解析不了的文件，每个一行>]`），不返回其他：不写叙述性结论、不动手修、不写任何文件。每条问题项都带 `confidence: high | low`；`low` 归到报告的 Unconfirmed 一栏，绝不因此改动严重级别。`files_reviewed` 少于交给该收集器的文件数，差额就要重新派发（conventions §6.3）——没有 `unknowns` 和这个计数，解析不了的文件保持沉默，与干净的文件毫无区别。
+收集器只返回这个列表（外加 `files_reviewed: <n>` 与 `unknowns: [<读不了或解析不了的文件，每个一行>]`），不返回其他：不写叙述性结论、不动手修、不写任何文件。每条问题项都带 `confidence: high | low`；`low` 归到报告的 Unconfirmed 一栏，绝不因此改动严重级别。`files_reviewed` 少于交给该收集器的文件数，差额就要重新派发（规约 §6.3）——没有 `unknowns` 和这个计数，解析不了的文件保持沉默，与干净的文件毫无区别。
 
 ## 评判依据摘要
 
@@ -78,7 +78,7 @@
 - **禁止硬编码机器本地路径**（`/Users/...`、`/home/...`、`C:\...`）；机器相关根路径来自 `.env` / 环境变量 / 配置（§9）。一律 blocker。
 - 数据从 `datas/` 读、权重从 `inits/` 读、生成输出写 `wkdrs/`；运行时不写 `metds/`、不写包自身（§8）。
 - 新模块放在 codearc.md 放置规则与计划组件映射指定的位置。
-- 运行时假设与项目一致：入口按 `.env` conda 环境 / `execs/run.sh` 运行；不假设系统 python shebang；可复用启动脚本放 `execs/scpts/`。
+- 运行时假设与项目一致：入口按 `.env` 的解释器（规约 §3）/ `execs/run.sh` 运行；不假设系统 python shebang；可复用启动脚本放 `execs/scpts/`。
 - 改名残留（codearc.md §7）——registry 字符串、config `type:` 键、checkpoint `state_dict` 前缀、logger/项目名——原样不动。
 
 ## E. 正确性可疑写法（仅报高置信）

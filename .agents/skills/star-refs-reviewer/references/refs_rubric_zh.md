@@ -4,11 +4,11 @@
 
 ## 红线（违反即本轮作废）
 
-1. 每个 bib 字段都能追溯到本次运行抓回并缓存在 run 目录里的记录（`references/source_policy_zh.md`）。没有凭记忆的字段，没有推断的字段，没有"明显应该是这个"的填充。
-2. 每个 citekey 在 `refs_index.md` 里都有出处行：来源、记录 URL、抓取日期。
+1. 每个 bib 字段都能追溯到一条抓回的记录，缓存在抓取它的那次运行的 `wkdrs/refs_<date>/raw/` 下（日期见条目的 `% src:` 行）；否则该条目就是 `% src: user-supplied`（`references/source_policy_zh.md`）。没有凭记忆的字段，没有推断的字段，没有"明显应该是这个"的填充。
+2. 每个 citekey 在 `refs_index.md` 里都有出处行：来源、记录 URL、抓取日期；`% src: user-supplied` 的条目则来源写 `user-supplied`，不带 URL 与日期。
 3. 每一条都能用一句话说清它与本方法主题的关系。为凑数塞进关系松散的工作，比如实报 43 条更糟。
 4. 每篇核心论文都有分析笔记；每篇笔记的 citekey 都在 `reference.bib` 里。
-5. 除 `metds/refs/**` 与 `wkdrs/refs_<date>/**` 外不写任何文件。
+5. 除 `metds/refs/**` 与 `wkdrs/refs_<date>/raw/**` 外不写任何文件。
 
 ## 核心论文的挑选（5–10 篇）
 
@@ -52,33 +52,33 @@
 
 ## 笔记收集器的返回格式
 
-Step 3 的精读分派出去时,只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状,不是受托者的返回格式:它要求填 `read_on`,填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（conventions §8）——还要求填 `category`,而它要到 Step 6 才从整个池子推导出来,此刻根本不可能存在;§7 的延伸阅读同理,要的是 `reference.bib` 里已有的 citekey,而那个文件 Step 5 还没建起来。收集器把这些填上,写下的就是一份可被证明为假的记录。
+Step 3 的精读分派出去时，只读 subagent 返回的就是这一份。`assets/ref_analysis_template_zh.md` 是那个*文件*的形状，不是受托者的返回格式：它要求填 `read_on`，填 `model_id` / `model_trail`——那属于真正写下文件的那次会话（规约 §8）——还要求填 `category`，而它要到 Step 6 才从整个池子推导出来，此刻根本不可能存在；§7 的延伸阅读同理，要的是 `reference.bib` 里已有的 citekey，而那个文件 Step 5 还没建起来。收集器把这些填上，写下的就是一份可被证明为假的记录。
 
-一个收集器一篇论文。返回:
+一个收集器一篇论文。返回：
 
-- `note_body`——模板的 §1、§2、§3、§4、§6,填好。**§5 与 §7 留空**:§5 需要本项目的方法上下文,正是这篇笔记存在的理由;§7 要的是 Step 5 之前还不存在的 `reference.bib` 里的 citekey。
+- `note_body`——模板的 §1、§2、§3、§4、§6，填好。**§5 与 §7 留空**：§5 需要本项目的方法上下文，正是这篇笔记存在的理由；§7 要的是 Step 5 之前还不存在的 `reference.bib` 里的 citekey。
 - `title` / `venue` / `year`——完全照论文自己页面上的写法。
-- `links`——paper / code / project,或 `none found`。
+- `links`——paper / code / project，或 `none found`。
 - `depth`——它实际读到了哪一层。
-- `depth_evidence`——`{sections_reached: [...], results_table: <表题加一行,原文照录>}`,或 `none reachable`。
-- `relation_material`——`[{claim, where}]`:给 §5 用的原料,绝不是 §5 本身。
-- `cited_works`——这篇论文相关工作章节引的东西,趁论文已经打开时顺手采下来。
+- `depth_evidence`——`{sections_reached: [...], results_table: <表题加一行,原文照录>}`，或 `none reachable`。
+- `relation_material`——`[{claim, where}]`：给 §5 用的原料，绝不是 §5 本身。
+- `cited_works`——这篇论文相关工作章节引的东西，趁论文已经打开时顺手采下来。
 - `figure_candidates`——论文 arXiv HTML 页上的每一张图，写成 `[{n, caption, image_url, referenced_at}]`；没有渲染版就返回 `no html rendering`。图注原文照录、超过约 600 字符才截断；`referenced_at` 是正文里按编号引用这张图的句子，原文照录、每张至多两句——笔记里图的说明就拿这两个字段写，图注被砍到只剩第一句，留下来的那张图就没人讲得清了。收集器不选、也不下载：笔记带哪几张图、到底有没有合格的、每张在说什么，都是 Step 3 的判断，由主 agent 做。
 
-别的都不返回:不填 frontmatter 溯源、不填 `category`、不填 `read_on`、不写 §5。文件全部由主 agent 来写。
+别的都不返回：不填 frontmatter 溯源、不填 `category`、不填 `read_on`、不写 §5。文件全部由主 agent 来写。
 
 ## Survey 收集器的返回格式
 
-Step 10.4 的阅读分派出去时,只读 subagent 返回的就是这一份。一个收集器一篇论文。返回:
+Step 10.4 的阅读分派出去时，只读 subagent 返回的就是这一份。一个收集器一篇论文。返回：
 
-- `facts`——`[{claim, where}]`:论文做了什么、说了什么、报了什么,每条都系在它出自的章节或表格上。
+- `facts`——`[{claim, where}]`：论文做了什么、说了什么、报了什么，每条都系在它出自的章节或表格上。
 - `title` / `venue` / `year`——完全照论文自己页面上的写法。
-- `links`——paper / code / project,或 `none found`。
-- `depth`——它实际读到了哪一层,用笔记的深度词汇（`method-and-results` / `abstract-and-intro`）。
-- `depth_evidence`——`{sections_reached: [...], results_table: <表题加一行,原文照录>}`,或 `none reachable`。
+- `links`——paper / code / project，或 `none found`。
+- `depth`——它实际读到了哪一层，用笔记的深度词汇（`method-and-results` / `abstract-and-intro`）。
+- `depth_evidence`——`{sections_reached: [...], results_table: <表题加一行,原文照录>}`，或 `none reachable`。
 - `failures`——`[{host, error, retries}]`。
 
-别的都不返回:不归支（分类体系由主 agent 对着整个池子定）、不写成段的正文、不填任何 frontmatter 字段。文件由主 agent 来写。
+别的都不返回：不归支（分类体系由主 agent 对着整个池子定）、不写成段的正文、不填任何 frontmatter 字段。文件由主 agent 来写。
 
 ## reference.bib 的组织
 

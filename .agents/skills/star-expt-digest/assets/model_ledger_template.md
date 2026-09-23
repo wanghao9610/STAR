@@ -27,9 +27,10 @@ artifacts_without_trail: <n>
 
 ## 2. Write Events
 
-<!-- One row per model_trail entry across every artifact, newest first. This is the flow: the same
-     artifact appears once per session that wrote it, so a file handed between models shows as
-     consecutive rows with different models. Write "None" if no artifact carries a trail yet. -->
+<!-- One row per model_trail entry across every artifact, or per header-line model_id, newest
+     first. This is the flow: the same artifact appears once per session that wrote it, so a file
+     handed between models shows as consecutive rows with different models. Write "None" if no
+     artifact records a model yet. -->
 
 | Date | Model | Skill | Artifact | Scope |
 |---|---|---|---|---|
@@ -56,9 +57,11 @@ artifacts_without_trail: <n>
 
 ## 5. Gaps
 
-<!-- Listed artifacts on disk carrying no model_trail (written before the field existed, or by a
-     skill that skipped it), and trail entries whose model is `unrecorded`. These are the blind spots
-     in the model record file; a reader must be able to see how much is missing before drawing a conclusion.
+<!-- Listed artifacts on disk carrying frontmatter but no model_trail (written before the field existed,
+     or by a skill that skipped it), and trail entries whose model is `unrecorded`. An artifact that
+     records its model on a header line (conventions §8) is not a gap: its model_id is one write
+     event. These are the blind spots in the model record file; a reader must be able to see how
+     much is missing before drawing a conclusion.
      Write "None" if every artifact is fully attributed. -->
 
 | Artifact | Gap | Why it matters |

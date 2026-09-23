@@ -78,7 +78,7 @@ Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`);
 - **No hardcoded machine-local paths** (`/Users/...`, `/home/...`, `C:\...`) in code; machine-specific roots come from `.env` / environment variables / config (§9). Always a blocker.
 - Data is read from `datas/`, weights from `inits/`, generated outputs go to `wkdrs/`; nothing writes into `metds/` or into the package itself at runtime (§8).
 - New modules sit where codearc.md's placement rules and plan-component map assign them.
-- Runtime assumptions match the project: entrypoints documented to run via the `.env` conda env / `execs/run.sh`; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
+- Runtime assumptions match the project: entrypoints documented to run via `.env`'s interpreter (conventions §3) / `execs/run.sh`; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
 - Names left unchanged on purpose (codearc.md §7) — registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/project names — are untouched.
 
 ## E. Suspicious correctness patterns (high-confidence only)

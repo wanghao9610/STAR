@@ -10,7 +10,7 @@
 | pip（次选） | uv 缺失且用户拒装，或某个包在 uv 下失败 | `$ENV_PY -m pip install <包>` |
 | conda（仅白名单） | conda 后端**且**包在白名单上 | `$CONDA_HOME/bin/conda install -n <ENV_NAME> -c conda-forge <包> -y` |
 
-- uv 缺失 → 问一次并推荐：装 uv（如 `$PYTHON_HOME/bin/python -m pip install --user uv`，用户偏好官方独立安装器亦可）/ 本次改用 pip。拒装只损失速度，不损失正确性。
+- uv 缺失 → 问一次并推荐：装 uv（用官方独立安装器，或 `pipx install uv`；两者都把 uv 装在环境之外，用户选这一项就是批准这次写入）/ 本次改用 pip。拒装只损失速度，不损失正确性。
 - 这三者之外不混用管理器：uv/pip 装的由 uv/pip 升级。绝不用 conda 覆盖 pip 管理的包——conda 只管白名单，pip 从不涉足。
 
 ## 安装顺序

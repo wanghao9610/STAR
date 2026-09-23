@@ -4,10 +4,12 @@
 # star_involve_gate.sh, so a goal-driven run (goal mode re-invoking star-auto)
 # is not parked at a prompt for every ls, grep, or python call. The red lines
 # stay prompts at every level: deletion, sudo, disk and device writes, system
-# and package installs, process kills, service control, git push, and forced
-# mv/cp — this gate stays silent on those, and the normal permission flow takes
-# over. Confirmation points are untouched: the STOP line and the questions a
-# skill must ask are model turns, not permission prompts a hook can answer.
+# and package installs, process kills, service control, git push, the git
+# commands that delete files or discard uncommitted work (clean, stash drop /
+# clear, a restore or checkout of the whole tree), and forced mv/cp — this gate
+# stays silent on those, and the normal permission flow takes over.
+# Confirmation points are untouched: the STOP line and the questions a skill
+# must ask are model turns, not permission prompts a hook can answer.
 # star_commit_guard.sh runs beside this gate on the same matcher and its deny
 # outranks this allow, so a blanket add is still declined, not allowed.
 #
@@ -147,7 +149,36 @@ while IFS= read -r segment; do
                     *) break ;;
                 esac
             done
-            [[ ${j} -lt ${#tok[@]} && "${tok[j]}" == "push" ]] && exit 0
+            [[ ${j} -lt ${#tok[@]} ]] || continue
+            # Quotes cling to the words they open and close (`bash -c "git
+            # stash clear"`), so each word read below sheds them first.
+            sub="${tok[j]}"; sub="${sub#\'}"; sub="${sub#\"}"; sub="${sub%\'}"; sub="${sub%\"}"
+            case "${sub}" in
+                push)
+                    exit 0 ;;
+                clean)
+                    # Removes untracked and, with -x, git-ignored files:
+                    # datas/, inits/, .env.
+                    exit 0 ;;
+                stash)
+                    # drop and clear throw stashed work away for good.
+                    nxt="${tok[j + 1]:-}"; nxt="${nxt#\'}"; nxt="${nxt#\"}"; nxt="${nxt%\'}"; nxt="${nxt%\"}"
+                    case "${nxt}" in drop|clear) exit 0 ;; esac
+                    ;;
+                restore|checkout)
+                    # Only a pathspec covering the whole tree discards every
+                    # uncommitted change; restoring named paths is how a failed
+                    # group of edits is rolled back, and prompting it would
+                    # re-block a designed restore.
+                    for ((k = j + 1; k < ${#tok[@]}; k++)); do
+                        arg="${tok[k]}"
+                        arg="${arg#\'}"; arg="${arg#\"}"; arg="${arg%\'}"; arg="${arg%\"}"
+                        case "${arg}" in
+                            .|./|:/|:/.|'*'|':/*') exit 0 ;;
+                        esac
+                    done
+                    ;;
+            esac
             ;;
         mv|cp)
             # Only the forced form; a plain mv is how a dropped plan's files

@@ -6,9 +6,9 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 
 | 来源 | 提供什么 |
 |---|---|
-| 计划文件本身 | 意图：§1 目标、§3 任务、§4 交付物路径、§5 done-criterion、§6 风险；frontmatter 的 `status` / `exec_status` / `exec_runs` / `depends_on` / `children` / `updated` |
+| 计划文件本身 | 意图：§1 目标、§3 任务、§4 交付物路径、§5 完成判据、§6 风险；frontmatter 的 `status` / `exec_status` / `exec_runs` / `depends_on` / `children` / `updated` |
 | `wkdrs/<run>/EXEC_PLAN.md` | executor 当时承诺的动作，以及红线划在哪 |
-| `wkdrs/<run>/EXEC_LOG.md` | 步骤状态、绑定检查的结果、产物路径、"待用户执行"命令、Notes/decisions（含 **方向性信号** 记录） |
+| `wkdrs/<run>/EXEC_LOG.md` | 步骤状态、绑定检查的结果、产物路径、"待用户执行"命令、"备注 / 决策"一节（英文日志："Notes / decisions"；含 **方向性信号** 记录） |
 | `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md`（若存在） | star-expt-analyst 的结果审计：run 判定、带每个指标来源的完成判据记分卡、日志健康，以及含 kill-criteria 命中的解读——已预先核实，但仍要和其他声明一样对照磁盘复核 |
 | §4 交付物路径 | 磁盘上的产物：是否存在、大小、修改时间、低开销合理性检查 |
 | §2/§3 写明的 `${CODE_NAME}/` 模块 | 承诺的代码是否真的写出来了、与日志声称的改动是否吻合 |
@@ -65,9 +65,9 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 
 ## 报告各节
 
-1. **目标回顾**——1–2 行目标；叶子逐字引用其 §5 done-criterion，根/内部写明 finalized 状态与其依赖的关键主张/假设。
+1. **目标回顾**——1–2 行目标；叶子逐字引用其 §5 完成判据，根/内部写明 finalized 状态与其依赖的关键主张/假设。
 2. **实际发生了什么**——步骤 done / blocked / skipped；磁盘核实过的产物；仍在"待用户执行"的命令；根/内部目标附 children 汇总。
-3. **完成度记分卡**——每个 §3 任务一行，外加 §5 done-criterion 一行：结论 + 证据出处。
+3. **完成度记分卡**——每个 §3 任务一行，外加 §5 完成判据一行：结论 + 证据出处。
 4. **偏差清单**——计划说 X 实际做 Y；计划之外的额外工作；被证据推翻的假设；kill-criteria 命中与原文引用的方向性信号。
 5. **阻塞与遗留**——blocked 的步骤及原因；残留的 `[TBD]` / `【待定】`；执行提出但未回答的问题。
 6. **影响范围图**——反向 `depends_on` 边（把本节点列入依赖的兄弟）、由它派生的 children、各修订候选会让什么失效。

@@ -4,14 +4,14 @@ Run during Step 2, before Step 3 drafts EXEC_PLAN. Goal: know what exists in `${
 
 1. **Resolve the runtime.** Read `.env`; get `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (`docs/mds/star-workflow/research-workflow-conventions.md` §3).
 
-2. **Map the code root.** List `${CODE_NAME}/`. If it holds only `.gitkeep` (empty), declare **empty codebase**: the plan builds the structure from scratch and the gap list is "everything".
+2. **Map the code root.** List `${CODE_NAME}/`. If it holds only `.gitkeep` (empty), declare **empty codebase**: the plan builds the structure from scratch and the gap list is "everything". If `metds/codearc.md` exists, read its §2 placement rules and §7 names-left-unchanged table: a `create` step places its file by §2, and no action renames a §7 name.
 
 3. **Locate what §2 names.** For each dependency the sub-plan's §2 lists — a module/entrypoint under `${CODE_NAME}/`, a dataset under `datas/`, weights under `inits/` — confirm it exists and note its real path. A missing hard dependency is a Step 1 blocker, not something to invent.
 
 4. **Trace each §3 step to code.** For every step in the sub-plan's §3 Task Breakdown: does the code **exist**, need **modifying**, or need **creating**? This mapping IS the gap list that seeds EXEC_PLAN's Orientation and Actions.
 
-5. **Find the launch entry point.** Identify how the project is actually run — the train/eval entrypoint, config format, CLI conventions. Read `execs/run.sh` (the project's canonical run entrypoint) and list `execs/scpts/` (where run scripts live). Later commands must go through this + the conda env, not ad-hoc one-off scripts. If `execs/run.sh` is empty (empty codebase), the plan may create it, and any reusable launch script this run prepares goes under `execs/scpts/<run>.sh` — not loose in `wkdrs/`.
+5. **Find the launch entry point.** Identify how the project is actually run — the train/eval entrypoint, config format, CLI conventions. Read `execs/run.sh` (the project's canonical run entrypoint) and list `execs/scpts/` (where run scripts live). Later commands must go through this + `.env`'s interpreter (conventions §3), not ad-hoc one-off scripts. If `execs/run.sh` is empty (empty codebase), the plan may create it, and any reusable launch script this run prepares goes under `execs/scpts/<run>.sh` — not loose in `wkdrs/`.
 
-6. **Check upstream artifacts.** For each prefix in the leaf's `depends_on` (mirrored in §2), confirm the upstream sibling is `exec_status: done` and its deliverables exist under `wkdrs/` / `inits/` / `datas/`. If an upstream leaf is not `done`, the current leaf is blocked — say so and stop.
+6. **Check upstream artifacts.** For each prefix in the leaf's `depends_on` (mirrored in §2), confirm the upstream sibling is finished — a leaf at `exec_status: done`, or an internal node whose every live leaf is terminal (`done` or `abandoned`), at least one of them `done`, with no outline line left in any `## Sub-plans` index of its subtree (`docs/mds/star-workflow/research-workflow-conventions.md` §5.5) — and that its deliverables exist under `wkdrs/` / `inits/` / `datas/`. If an upstream sibling is not finished, the current leaf is blocked — say so and stop.
 
 **Output of this step:** a gap list (per §3 step: exists / modify / create, with real paths) plus the launch entry point. This feeds into Step 3's EXEC_PLAN.

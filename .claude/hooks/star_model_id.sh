@@ -39,12 +39,19 @@
 # Which turns count depends on which transcript this is. In a session
 # transcript, sidechain turns are skipped: a delegated sub-agent may run a
 # different model, and the question this answers is which model is writing the
-# artifact. A delegate's own transcript — .../subagents/agent-<id>.jsonl, a
-# separate file as of Claude Code 2.1.260, with the session transcript carrying
-# none of those turns any more — holds nothing but that delegate's
-# turns and marks none of them as sidechain, so the same filter there would drop
-# every turn and answer with the session model, the one id already known to be
-# wrong.
+# artifact. A delegate's own transcript — .../subagents/agent-<id>.jsonl, or
+# .../subagents/workflows/wf_<id>/agent-<id>.jsonl for a delegate a workflow
+# script dispatched; a separate file as of Claude Code 2.1.260, with the session
+# transcript carrying none of those turns any more — holds nothing but that
+# delegate's turns and marks every one of them as sidechain, so the same filter
+# there would drop every turn and leave nothing to record. The path, not the
+# flag, is what tells a delegate's file apart.
+#
+# The SubagentStart line cannot tell the two layouts apart — the payload names
+# neither, and the file does not exist yet when that hook fires — so it names
+# the flat path; a delegate path that cannot be read here is looked up by its
+# file name under the subagents/ directory it names, which finds the workflow
+# layout too.
 #
 # session_model is what SessionStart reported, and settles the two ways the
 # transcript alone is not enough. It stands in when the transcript names nothing
@@ -56,8 +63,16 @@ if [ "${1:-}" = "--resolve" ]; then
     transcript="${2:-}"
     session_model="${3:-}"
     resolved=""
+    if [ -n "${transcript}" ] && [ ! -r "${transcript}" ]; then
+        case "${transcript}" in
+            */subagents/agent-*.jsonl)
+                found=$(find "$(dirname "${transcript}")" -type f \
+                    -name "$(basename "${transcript}")" 2>/dev/null | head -1)
+                [ -n "${found}" ] && transcript="${found}" ;;
+        esac
+    fi
     case "${transcript}" in
-        */subagents/agent-*.jsonl) delegate=true ;;
+        */subagents/*agent-*.jsonl) delegate=true ;;
         *) delegate=false ;;
     esac
     if [ -n "${transcript}" ] && [ -r "${transcript}" ]; then
@@ -168,7 +183,7 @@ if [ "${event}" = "SubagentStart" ]; then
     # of the two `transcript_path` carries, so a path already naming a delegate
     # file is taken as it stands rather than nested a second time.
     case "${transcript}" in
-        */subagents/agent-*.jsonl) agent_transcript="${transcript}" ;;
+        */subagents/*agent-*.jsonl) agent_transcript="${transcript}" ;;
         *) agent_transcript="$(dirname "${transcript}")/${session_id}/subagents/agent-${agent_id}.jsonl" ;;
     esac
     ctx="STAR provenance: this run is a delegate; the model id you record is this delegate's, not the session's. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${agent_transcript} — at the moment you write, not earlier — then copy what it prints verbatim. Write 'unrecorded' only if it prints nothing, and do not guess."

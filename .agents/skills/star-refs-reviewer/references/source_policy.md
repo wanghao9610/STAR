@@ -132,8 +132,8 @@ A note may carry up to three images: the figures its own paper uses to show what
 
 ## Self-audit before finishing
 
-1. Every citekey in `reference.bib` has a cached record in the run dir **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date.
+1. Every fetched entry has its record cached under the `raw/` of the run that fetched it **and** a provenance row in `refs_index.md` **and** a `% src:` line above the entry carrying that row's URL and date; a user-supplied entry carries `% src: user-supplied` and a row saying so.
 2. Re-fetch 5 entries at random; diff field-by-field against the file. Any mismatch → correct the file to match the source, then re-check that entry's whole batch.
-3. Parse the file with `bibtexparser` through the `.env` conda env **if it is already installed** (never install it — that is `star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
+3. Parse the file with `bibtexparser` through `.env`'s interpreter (conventions §3) **if it is already installed** (never install it — that is `star-env-builder`'s job); otherwise check brace balance and key uniqueness mechanically.
 4. No entry has an empty required field; no key appears twice.
 5. No paper in the `%% Needs manual check` block also appears as an entry; no line in that block contains `@`.

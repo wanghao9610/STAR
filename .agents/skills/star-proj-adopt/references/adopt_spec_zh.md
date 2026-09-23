@@ -28,13 +28,13 @@ source     CODE_NAME=<dir>            certain   （唯一可导入包；被 trai
 runtime    PYTHON_HOME=<path>         likely    （conda env "ovd"；与 scripts/train.sh 里的环境名一致）
 data       datas/ -> <path>           certain   （被 4 个配置引用）
 weights    inits/ -> <path>           unknown   （未找到 checkpoint 目录）
-outputs    wkdrs/ -> <path>           likely    （12 个带时间戳的子目录）
+outputs    <path>（逐 run 链接）      likely    （12 个带时间戳的子目录）
 entry      3 个启动入口                —         （scripts/train.sh、scripts/eval.sh、tools/infer.py）
 ```
 
 ## 3. 软链规则
 
-对 `datas/`、`inits/`、`wkdrs/` 逐一按此顺序判定：
+对 `datas/`、`inits/` 逐一按此顺序判定：
 
 1. 路径不存在 → 建软链指向已确认的目标。
 2. 路径是空目录（或只有 `.gitkeep`）→ 移除占位，建软链。
@@ -43,6 +43,8 @@ entry      3 个启动入口                —         （scripts/train.sh、sc
 5. 已确认的目标就在仓库内且位置正确 → 不需要软链，报告 `already in place`。
 
 目标在仓库之外是可接受的；把它的绝对路径记入 `metds/adopt.md`。目标位于网络盘或可移动挂载点时，记录中注明这一点。
+
+`wkdrs/` 绝不建成软链：git 拒绝暂存软链之后的任何路径，而它下面的 run 记录——执行日志、评审、分析、digest、结果汇总表——必须能进版本库（规约 §1.6）。不存在 → 建成真实目录。已经是软链 → 报告冲突并询问；用户同意后把链接换成真实目录，这不会删除它指向的任何内容。用户不同意 → 链接保留，§6 不在它下面写任何东西：选中的 run 报告出来并留在清单里，不放进提交提议。已有输出树从它内部接入，每个选中的 run 一个链接（§6）。之后某个 run 的大文件要放到别的盘时，链接 `wkdrs/<run>/` 里面的产物子目录，绝不链接 `wkdrs/` 或 `wkdrs/<run>/` 本身。
 
 ## 4. 包装脚本规则
 
@@ -80,12 +82,12 @@ bash scripts/train.sh "$@"
 
 对用户选中的每个 run：
 
-1. 把已有 run 目录软链到 `wkdrs/<run>/`；`<run>` 在原名已足够区分时沿用原名，原名不足以区分时（`output/`、`run1/`）用 `<原名>_<run 日期>`。
-2. 按 `assets/exec_log_reconstructed_zh.md` 写 `wkdrs/<run>/EXEC_LOG.md`。若软链指向只读或外部位置，改写到 `wkdrs/<run>_adopted/EXEC_LOG.md` 并在报告中说明。
+1. 新建真实目录 `wkdrs/<run>/`，把已有 run 目录以绝对路径链接进去，成为 `wkdrs/<run>/output`（`star-plan-reviser` 的丢弃把 run 移到 `wkdrs/dropped/<run>/` 后，链接仍能解析）；`<run>` 在原名已足够区分、且在 `wkdrs/` 下尚未被占用时沿用原名，否则（`output/`、`run1/`）用 `<原名>_<run 日期>`。
+2. 按 `assets/exec_log_reconstructed_zh.md` 写 `wkdrs/<run>/EXEC_LOG.md`，与 `output` 链接并列：那里的真实文件，阶段末的提交提议才能暂存。
 3. 重建日志包含：带接入日期的 `reconstructed:` 头部、`source_plan:（无——接入时计划树尚不存在）`、命令（仅当脚本或存档配置里有逐字记录）、现存产物，以及按 §5 引用的任何指标。**不含步骤表**——当时没有步骤可记，而编造步骤正是这条规则要防的失效模式。
-4. 绝不往被软链的目录里面写。`EXEC_LOG.md` 放在 `wkdrs/` 这一层。
+4. 绝不往被软链的目录里面写。`EXEC_LOG.md` 放在 `wkdrs/<run>/` 里，与链接并列。
 
-被选中的 run 目录里若已有 `EXEC_LOG.md`，原样不动，该 run 报告为 `already recorded`。
+被选中的 run 目录里若已有 `EXEC_LOG.md`，原样不动，也不为它新建 `wkdrs/<run>/`，该 run 报告为 `already recorded`。
 
 ## 7. 回填对账（`backfill` 阶段）
 

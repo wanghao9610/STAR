@@ -28,13 +28,13 @@ source     CODE_NAME=<dir>            certain   (only importable package; import
 runtime    PYTHON_HOME=<path>         likely    (conda env "ovd"; matches env name in scripts/train.sh)
 data       datas/ -> <path>           certain   (referenced by 4 configs)
 weights    inits/ -> <path>           unknown   (no checkpoint dir found)
-outputs    wkdrs/ -> <path>           likely     (12 timestamped subdirs)
+outputs    <path> (per-run links)     likely     (12 timestamped subdirs)
 entry      3 launchers                 —         (scripts/train.sh, scripts/eval.sh, tools/infer.py)
 ```
 
 ## 3. Symlink rules
 
-For each of `datas/`, `inits/`, `wkdrs/`, in this order:
+For each of `datas/` and `inits/`, in this order:
 
 1. Path does not exist → create the symlink to the confirmed target.
 2. Path is an empty directory (or holds only `.gitkeep`) → remove the placeholder, create the symlink.
@@ -43,6 +43,8 @@ For each of `datas/`, `inits/`, `wkdrs/`, in this order:
 5. The confirmed target is inside the repository and already in the right place → no link needed, report `already in place`.
 
 A target outside the repository is fine; record its absolute path in `metds/adopt.md`. A target on a network or removable mount is recorded with that caveat.
+
+`wkdrs/` is never a symlink: git refuses every path behind one, and the run records under it — execution logs, reviews, analyses, digests, the results table — must stay stageable (conventions §1.6). Missing → create it as a real directory. Already a symlink → report the conflict and ask; with the user's agreement, replace the link with a real directory, which deletes nothing it points at. Declined → the link stays and §6 writes nothing under it: the chosen runs are reported and left in the inventory, not offered for commit. Prior output trees are reached from inside it, one link per chosen run (§6). A later run whose heavy artifacts belong on another disk links an artifact subdirectory inside `wkdrs/<run>/`, never `wkdrs/` or `wkdrs/<run>/` itself.
 
 ## 4. Wrapper rules
 
@@ -80,12 +82,12 @@ One row per identifiable unit of finished or in-flight work. Fewer, well-evidenc
 
 For each run the user selects:
 
-1. Symlink the existing run directory to `wkdrs/<run>/`, where `<run>` is its existing name when that is already distinctive, and `<existing>_<date-of-run>` when it is not (`output/`, `run1/`).
-2. Write `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_reconstructed.md`. If the link points into a read-only or external location, write the log to `wkdrs/<run>_adopted/EXEC_LOG.md` instead and say so in the report.
+1. Create `wkdrs/<run>/` as a new real directory and link the existing run directory inside it as `wkdrs/<run>/output` by its absolute path, so the link still resolves after `star-plan-reviser`'s drop moves the run to `wkdrs/dropped/<run>/`, where `<run>` is its existing name when that is already distinctive and still free under `wkdrs/`, and `<existing>_<date-of-run>` otherwise (`output/`, `run1/`).
+2. Write `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_reconstructed.md`, beside the `output` link: a real file there is what the phase's commit offer can stage.
 3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — adopted before the plan tree existed)`, the command where a script or saved config records it verbatim, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this rule prevents.
-4. Never write into the linked directory itself. The `EXEC_LOG.md` goes at the `wkdrs/` level.
+4. Never write into the linked directory itself. The `EXEC_LOG.md` goes in `wkdrs/<run>/`, beside the link.
 
-An `EXEC_LOG.md` already in a selected run directory is left untouched; the run is reported as `already recorded`.
+An `EXEC_LOG.md` already in a selected run directory is left untouched, and no new `wkdrs/<run>/` is created for it; the run is reported as `already recorded`.
 
 ## 7. Backfill matching (Phase `backfill`)
 

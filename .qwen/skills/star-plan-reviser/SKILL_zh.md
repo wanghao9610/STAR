@@ -8,11 +8,11 @@ description: >-
 
 # Research Plan Reviser
 
-调用方式：`star-plan-reviser PLAN_NAME [描述]`。先解析计划。自然语言明确放弃或恢复方向时选择 `drop` 或 `restore` 并提供理由，否则走证据审查；也可批准点名修订项。只要求审查、审计或阅读报告且不改动时，报告交付后即停止，不进入修订问答。目标未定时列出候选并询问。
+调用方式：`star-plan-reviser PLAN_NAME [描述]`。先解析计划。自然语言明确放弃或恢复方向时选择丢弃或恢复，并提供理由，否则走证据审查；也可批准点名修订项。只要求审查、审计或阅读报告且不改动时，报告交付后即停止，不进入修订问答。目标未定时列出候选并询问。
 
 **共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
-目标与 drop/restore/review 路径解析后运行 `scripts/scan.sh --slim`，把计划 frontmatter、子计划索引与运行日志 frontmatter 作为范围解析的原始输入；按证据步骤读取目标正文与相关规约。脚本失败时直接读取计划文件并说明回退。
+目标与丢弃、恢复或审查路径解析后运行 `scripts/scan.sh --slim`，把计划 frontmatter、子计划索引与运行日志 frontmatter 作为范围解析的原始输入；按证据步骤读取目标正文与相关规约。脚本失败时直接读取计划文件并说明回退。
 
 **把档位模型传给受托者。** 取 `qwen` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `agent` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。先读 `.qwen/agents/star-<tier>.md`，核对 frontmatter 的 `model` 与解析值相同：`bash execs/configure.sh` 同步这些文件，新会话才会装载。frontmatter 接受模型 id 或 `authType:modelId`；后者在 `.env` 中写成 `qwen:authType:modelId`。不要把原始值传给工具的 `model`：该参数选择已配置的模型等级，且 `fork` 不能覆盖模型。命名代理缺失、过期或不可用时，保持原执行路径；键已设则说明需要同步或重开会话，不在本次运行修复配置。键为空则保留原代理选择。交办说明的只读与写入范围限制照旧，盲读不继承产出该工作的对话，记录受托者的实际会话模型而非请求值。
 
@@ -24,16 +24,16 @@ description: >-
 
 ## 核心原则
 
-1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（executor 的红线同样生效）。这是把项目的 Verification 规则（AGENTS.md §11）应用到计划本身。规则见 `references/review_spec_zh.md`。
-2. **广收集；判断留在主 agent。** 对多个 run 或产物集合进行有边界、相互独立、只读的检查确有帮助时，派出只读 `agent` subagent（`subagent_type: Explore`；READ 档值非空时作为 `model:`）。受委派者遵守 `references/review_spec_zh.md`，绝不写入或提出修订；综合与判断留在主 agent。
+1. **证据先于观点。** 每条审查结论都带证据出处（文件路径、日志行、命令输出）。日志自报的 `done` 不等于完成——要对照磁盘上的产物核实，关键处可复跑低开销检查；绝不启动重实验（规约 §2 的红线同样生效）。这是把项目的 Verification 规则（AGENTS.md §11）应用到计划本身。规则见 `references/review_spec_zh.md`。
+2. **广收集；判断留在主 agent。** 对多个 run 或产物集合进行有边界、相互独立、只读的检查确有帮助时，派出只读 `agent` subagent（`subagent_type: Explore`；READ 档值非空时作为 `model:`）。受托者遵守 `references/review_spec_zh.md`，绝不写入或提出修订；综合与判断留在主 agent。
 3. **每处改动由用户拍板。**审查发现整理成编号候选。先应用已获授权的点名改动；其余摆在页面上，通过 `ask_user_question` 按规约 §7.13 问一次。每次写入都必须追溯到明确指令或从可见清单接受的候选。
 4. **就地修订，留下痕迹。** 批准的改动写回原 `<prefix>_<slug>_plan.md`；绝不另存 `_v2` 副本（重复前缀会破坏 status/decomposer/executor 解析的计划树）。每次会话追加一条 `## Revision History`（日期、逐处改动一句话与证据、报告路径）并更新 `updated`；旧版本靠 git 追溯。
 5. **守住家族的写入纪律。** 绝不重编号前缀；绝不动 `EXEC_PLAN.md` / `EXEC_LOG.md`（属于 executor）；结构性重构（增删子计划、重画依赖图）转给 `star-plan-decomposer`；研究问题或方法级转向转给 `star-plan-coach`——而目标自己的概要行，即还没展开成文件的单元（规约 §0），只是文字，仍属 local 候选。边界见 `references/revision_rules_zh.md`。
-6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `star-flow-status` 浮现。
+6. **连带影响意识。** 一处修订可能让建立在旧文本上的工作失效。在征询任何改动**之前**先呈现反向 `depends_on` 边和派生的 children（报告 §6）；目标计划的一行目标变了就同步父计划 `## Sub-plans` 里对应那行；`updated` 一更新，过期提示自然在 `star-flow-status` 浮现。
 
 ## 工作流
 
-**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 PLAN 档处理整次运行的交接。清楚的请求可授权点名修订、丢弃或恢复；只有应用这些指令后仍有决定未解决时才留在这里。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 PLAN 档应用迁移规则。清楚的请求可授权点名修订、丢弃或恢复；应用这些指令后是否仍有决定未解决、从而让运行留在这里，在 Step 0 前按 §10.8 的第四条一次判定。
 
 ### Step 0：解析目标计划
 
@@ -49,9 +49,9 @@ description: >-
 
 ### Step 2：收集证据（只读 subagent）
 
-**证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径、§2–§3 没有点名任何代码模块——通常由主 agent 自己读更省事：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是 conventions §6.1 排除掉的情形。
+**证据面很小时**——只有一个 run、≤ ~5 个步骤、≤ ~3 个交付物路径、§2–§3 没有点名任何代码模块——通常由主 agent 自己读更省事：`EXEC_PLAN.md`、`EXEC_LOG.md`，外加逐个交付物 stat 一下。这种规模还派三个收集器，正是规约 §6.1 排除掉的情形。
 
-规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `agent` subagent（`subagent_type: Explore`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
+规模超过这个的：按 `references/review_spec_zh.md` 的收集器格式约定并行派出只读 `agent` subagent（`subagent_type: Explore`）——通常是 **日志读取器**（步骤状态、自报检查、"待用户执行"命令（英文日志："Awaiting user"）、方向性信号）、**交付物检查器**（§4 每个交付物：存在 / 大小 / 修改时间 / 低开销合理性检查），以及当 §2–§3 涉及代码时的 **代码检查器**（承诺的模块是否真的写出来了、与日志声称的改动是否一致）。
 
 分歧在主 agent 交叉核对——日志说 `done` 但产物缺失 → 该结论记为 **unverifiable**，不算 met。关键的低开销检查由你亲自复跑；重的一律不跑。
 
@@ -59,7 +59,7 @@ description: >-
 
 ### Step 3：汇总并写出审查报告
 
-按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 done-criterion：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 影响范围图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
+按 `assets/review_report_template_zh.md`（英文计划用 `assets/review_report_template.md`）填写七节：① 目标回顾 ② 实际发生了什么 ③ 完成度记分卡（逐 §3 任务加 §5 完成判据：`met` / `partial` / `unmet` / `unverifiable`，每条带证据）④ 偏差清单 ⑤ 阻塞与遗留 ⑥ 影响范围图 ⑦ 修订候选，每条标注 **local / structural / strategic**。
 
 写入 `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md`（真实日期，绝不编造）。计划没有 run 时用 `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`。聊天里给 ≤500 字摘要：结论、最重要的偏差、候选清单的一行版。
 
@@ -78,11 +78,17 @@ description: >-
 1. 依据证据和用户的答复起草新的章节文本；给出简洁的改前 → 改后摘要；写入文件。
 2. 让章节 `status` 映射保持诚实：引入 `[TBD]` / `【待定】` 的修改把该节翻回 `in_progress`；经确认的重写保持 `done`。
 
-最后一处改完后：更新 `updated`；若叶子的 §5 done-criterion 或 §3 任务发生实质变化、且 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）；若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法、里程碑——就问一次是否清除 `finalized:`（只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它），因为 `star-code-architect` 读这个字段判断该计划能否驱动搜索，而重新定稿走 `star-plan-coach <slug> <section>`；若某条采纳的候选丢弃了本节点，就在此写入 `dropped:`、在父计划索引行上加 `— dropped <date>` 标记，再按 `references/drop_rules_zh.md` 第 4 步把子树的文件搬到一边，别的一概不动——子树靠继承变暗；然后按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
+最后一处改完后：
+
+- 更新 `updated`。
+- 若叶子的 §5 完成判据或 §3 任务发生实质变化、且 `exec_status` 为 `done` 或 `blocked`，询问是否重置为 `pending`（`exec_runs` 无论如何都留着历史）。
+- 若某条采纳的候选改动了一份 `finalized` 计划的 §1、§2、§3 或 §6——问题、定位、方法、里程碑——就问一次是否清除 `finalized:`；只改 §4/§5 的战术性修订，如收紧一条 kill-criterion，不动它。规约 §0 点名的那几个 skill 都等着这个字段；重新定稿走 `star-plan-coach <slug> <section>`。
+- 若某条采纳的候选丢弃了本节点，就在此写入 `dropped:`、在父计划索引行上加 `— dropped <date>` 标记、往根计划 §5 的"已否定的路线"追加一行（`references/drop_rules_zh.md` 表中"向上汇总"那一行），再按 `references/drop_rules_zh.md` 第 4 步把子树的文件搬到一边，别的一概不动——整棵子树靠继承随之退出计数与推荐。
+- 每次都做、且放在最后：按 `references/revision_rules_zh.md` 追加 `## Revision History` 条目。
 
 ### Step 6：一致性检查
 
-- 若计划标题或一行目标变了，同步父计划 `## Sub-plans` 里对应那行——这是目标文件之外唯一允许的编辑。
+- 若计划标题或一行目标变了，同步父计划 `## Sub-plans` 里对应那行。目标文件之外，只允许这一行和丢弃时的写入（`references/drop_rules_zh.md`：父计划标记、根计划的已否定路线及记下它的那条一行 Revision History 与 `updated` 更新、文件搬移）。
 - 复核 `children:` 条目与 `depends_on` 前缀仍能解析；悬空引用**标记**出来交给 `star-plan-decomposer`——不要悄悄修复。（编辑目标自己的 `depends_on` 列表可作为已批准候选；跨兄弟重画依赖边不行。）
 - 若目标是父节点、且修订触及 children 赖以派生的内容，指明受影响的 children 并建议重新拆解。
 
@@ -92,14 +98,14 @@ description: >-
 
 ### 丢弃一份计划，以及把它收回来
 
-这条路用它自己的五步替换 Steps 1–6——读清哪些会随之熄灭、问一次、写三处、把子树的文件搬到一边、汇报——它的规则（包括 `dropped:` 写在哪里、文件搬到哪里、继承对后代意味着什么）在 `references/drop_rules_zh.md`，本次运行是丢弃或恢复时才读，之前不读。评审运行完全不读它。
+这条路用它自己的五步替换 Steps 1–6——读清哪些节点会随之被视为已丢弃、问一次、写丢弃要写的几处、把子树的文件搬到一边、汇报——它的规则（包括 `dropped:` 写在哪里、文件搬到哪里、继承对后代意味着什么）在 `references/drop_rules_zh.md`，本次运行是丢弃或恢复时才读，之前不读。评审运行只在本 skill 的 Step 4 采纳了一条丢弃候选之后才读它，为的是那份文件第 4 步的搬移和"向上汇总"那一行。
 
 ## 状态与文件规则
 
 - 审查报告放 `wkdrs/`，绝不放 `metds/plans/`。
-- 只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行；仅在已批准的丢弃或恢复中，再加上把子树文件在活跃位置与 `dropped/` 位置之间搬移（`references/drop_rules_zh.md`）。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
+- 只能编辑：目标计划的正文与 frontmatter（`updated`、章节 `status` 映射、`depends_on`、`exec_status`、`dropped:`——后三者仅作为用户批准的候选），以及当目标的一行目标变化、或要给它加上丢弃标记时，父计划 `## Sub-plans` 的对应行；仅在已批准的丢弃中，再加上往根计划 §5 的"已否定的路线"追加的那一行，连同根计划的 `updated` 更新与一条一行的 `## Revision History`；仅在已批准的丢弃或恢复中，再加上把子树文件在活跃位置与 `dropped/` 位置之间搬移（`references/drop_rules_zh.md`）。其余一律只读：`EXEC_PLAN.md` / `EXEC_LOG.md`、兄弟与子计划正文、前缀（绝不重编号）、计划文件本身（绝不删除或分叉）。
 - 每次写入都必须追溯到明确指令或已接受候选；`## Revision History` 只追加、不改写。
-- Git：有写入修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划）——`star-plan-reviser: <slug> — <n> 处修订`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
+- Git：有写入修订时，在 Step 7 提出一次提交提议，涵盖目标计划（及一行目标变化时的父计划；丢弃或恢复时，还有被搬移的子树路径，丢弃时再加根计划里那行已否定路线）——`star-plan-reviser: <slug> — <n> changes`（规约 §1）。核心原则 4 的"旧版本存于 git"正依赖这些提交。
 - 合法章节 `status`：`pending` / `in_progress` / `done` / `skipped`；合法 `exec_status`：`pending` / `in_progress` / `done` / `blocked` / `abandoned`——与家族一致。把某个叶子置为 `abandoned` 同样是一条修订候选：需要用户明确批准，理由写进本次 Revision History 条目。`dropped:` 是一行「日期 + 原因」，只写在本节点上——所有 skill 都按整棵子树继承来读它——设置与清除只走 `references/revision_rules_zh.md` 的丢弃规则。
 
 ## 对话纪律

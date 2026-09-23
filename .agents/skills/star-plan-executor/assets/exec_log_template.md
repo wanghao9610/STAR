@@ -23,8 +23,11 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 ## Step status
 
 <!-- One row per EXEC_PLAN action. `check result` is filled by the main agent re-running or
-     independently inspecting the action's own check, not by a delegate's self-report. Allowed
-     status: pending / in_progress / done / blocked / skipped. -->
+     independently inspecting the action's own check, not by a delegate's self-report. `model` is the
+     model the row's action ran on: the delegate's own reported id when its return carries one; for an
+     action this session ran itself, this session's id; otherwise `unrecorded` — a model requested at
+     dispatch is not a reported id (conventions §8). Allowed status: pending / in_progress / done /
+     blocked / skipped. -->
 
 | # | Step | status | model | artifact (wkdrs/<run>/…) | check result | note |
 |---|------|--------|-------|---------------------------|--------------|------|
@@ -34,10 +37,12 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 ## Awaiting user (STOP line)
 
 <!-- Commands the user must run (heavy experiments). Move a step here instead of running it when it
-     crosses the STOP line. Each item: the exact conda command, what it produces, and what output to
-     bring back for done-criterion verification. -->
+     crosses the STOP line. Each item: the exact command — `bash execs/scpts/<run>.sh`, the launch
+     script the launch guard recognizes (references/stop_line_rules.md) — what it produces, and what
+     output to bring back for done-criterion verification. Tick the item (`- [x]`) once its output is
+     bound to this record; an item left un-ticked still reads as waiting on the user. -->
 
-- [ ] `<conda command>` → produces `wkdrs/<run>/…`; bring back <metric/output> for the done-criterion.
+- [ ] `bash execs/scpts/<run>.sh` → produces `wkdrs/<run>/…`; bring back <metric/output> for the done-criterion.
 
 ## Cost
 
@@ -65,5 +70,6 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 <!-- Anything a resuming session needs: assumptions made, blockers hit and how they were resolved, and for a step left `blocked`, what became of its edits — restored, or kept by an explicit decision, with the paths named either way
      (material deviations from the sub-plan go under "Pending amendments" above, not here).
      If a result hit a root §5 kill-criterion, record it here as a
-     **Plan-level finding** and note the recommended feedback path (star-plan-coach or
-     star-plan-decomposer) — the executor never edits the parent plan itself. -->
+     **Plan-level finding** and note the recommended feedback path (star-plan-reviser first;
+     star-plan-coach or star-plan-decomposer where the strategy or the split must change) — the
+     executor never edits the parent plan itself. -->

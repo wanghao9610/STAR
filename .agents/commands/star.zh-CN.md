@@ -10,17 +10,17 @@
 | `star-code-release` | † | 准备仓库发布材料；绝不实际发布 |
 | `star-code-reviewer` | | 按规约及计划承诺审查代码 |
 | `star-env-builder` | | 根据 `.env` 构建并验证项目的 Python 运行时 |
-| `star-expt-analyst` | | 按计划的完成标准判断一次运行的结果 |
-| `star-expt-digest` | | 汇总实验计划最近的进展 |
+| `star-expt-analyst` | | 按计划的完成判据判断一次运行的结果；汇编跨运行的结果汇总表（`aggregate`）；检查仍在跑的任务是否健康（`watch`） |
+| `star-expt-digest` | | 汇总整体实验工作最近的进展 |
 | `star-flow-status` | | 展示计划树、进度和唯一的下一步行动 |
 | `star-idea-storm` | † | 把模糊兴趣收敛为经过评分并最终确定的研究主题 |
 | `star-metd-summarize` | | 把已完成的计划树汇编成可用于论文的方法文档 |
 | `star-plan-coach` | † | 每次通过一个引导问题起草或重新打开研究计划 |
 | `star-plan-decomposer` | † | 把完成的计划拆分成可执行的叶子子计划 |
-| `star-plan-executor` | | 执行一个叶子子计划：规划、审批、编码并做轻量验证 |
-| `star-plan-reviser` | † | 逐项依据执行证据修订计划 |
+| `star-plan-executor` | | 执行一个叶子子计划：规划、编码、轻量验证并记录 |
+| `star-plan-reviser` | † | 依据执行证据，从一份审阅过的候选清单修订计划；放弃或恢复一个方向 |
 | `star-proj-adopt` | † | 在不扰动现有项目的前提下把它纳入 STAR |
-| `star-refs-reviewer` | | 建立逐论文笔记和已验证的 `reference.bib` |
+| `star-refs-reviewer` | | 建立逐论文笔记、已验证的 `reference.bib`、领域综述或相关工作叙述 |
 
 标有 † 的七个 skill 只能显式调用，因为每个都控制一项属于研究者的决定。通用 `/star` 路由绝不直接启动它们：先请求明确确认，给出准确的 `/star-<name> <argument>` 命令，然后等待。任务明确匹配时，可以选择其余八个 skill。
 

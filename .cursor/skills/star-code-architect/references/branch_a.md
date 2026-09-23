@@ -32,7 +32,7 @@ Follow `references/rebrand_checklist.md`: top-level package directory, all impor
 
 ## Step A7: Runtime check (STOP-line aware)
 
-If a usable conda env from `.env` exists, run `python -c "import <package>"` through it. Environment creation and dependency installation are usually heavy: prepare the exact commands (`conda create …`, `pip install -r …`); run light pure-Python installs only with the user's explicit in-session consent; anything with CUDA compilation or downloads over ~1 GB always goes to the user (STOP line, `references/orchestration_spec.md`). Record what ran and what awaits the user. For the full build, hand off to `star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and the runnable check under its own install-plan confirmation point.
+If the interpreter `.env` names (conventions §3) exists and runs, run `python -c "import <package>"` through it. Environment creation and dependency installation are prepared, never run here (conventions §3.5): write the exact commands (`conda create …`, `pip install -r …`); a missing pure-Python package routes to `star-env-builder add <package>`; anything with CUDA compilation or downloads over ~1 GB stays a STOP-line command handed to the user (`references/orchestration_spec.md`). Record what ran and what awaits the user. For the full build, hand off to `star-env-builder` — it owns backend choice, dependency resolution, the tiered install, and the runnable check under its own install-plan confirmation point.
 
 ## Step A8: Survey the clone
 

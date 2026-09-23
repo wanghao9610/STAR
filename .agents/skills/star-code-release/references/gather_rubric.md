@@ -65,7 +65,7 @@ One entry per candidate, in sweep order:
 After each approved row, the main agent re-runs the checks itself — never a self-reported pass:
 
 1. `python -m compileall -q <destination>` through the `.env` interpreter.
-2. `grep -rn "<old path>" --include="*.py" --include="*.sh" --include="*.md" .` over the repository — any remaining hit is a call site still to fix, or the row is not done.
+2. `grep -rn "<old path>" --include="*.py" --include="*.sh" --include="*.md" .` over the repository — any remaining hit outside `metds/` and `wkdrs/` is a call site still to fix, or the row is not done. This run never writes those two trees, so a hit there does not fail the row: a hit under `metds/plans/` goes into the row's `plan_referenced` and the report's "Plan text made stale" block, routed to `star-plan-reviser`; a hit in any other file there — a compiled `metds/*.md`, a run record or the results table under `wkdrs/` — is listed on the row and left alone, since a run record describes what ran at the time.
 3. For a `merge`, the receiving file compiles and its existing importers still resolve.
 
 A row still failing after the fix attempt is reverted (`git checkout` for tracked paths, move back otherwise), marked `blocked` in the report with the failure text, and the run continues with the remaining rows.

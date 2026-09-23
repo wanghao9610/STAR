@@ -4,11 +4,11 @@ Two products are graded: the per-paper analysis notes, and `reference.bib` with 
 
 ## Red lines (a violation invalidates the run)
 
-1. Every bib field traces to a record fetched this run and cached in the run dir (`references/source_policy.md`). No remembered fields, no inferred fields, no "obviously right" fills.
-2. Every citekey has a provenance row in `refs_index.md`: source, record URL, fetch date.
+1. Every bib field traces to a fetched record cached under the `wkdrs/refs_<date>/raw/` of the run that fetched it (its `% src:` line gives the date), or the entry is `% src: user-supplied` (`references/source_policy.md`). No remembered fields, no inferred fields, no "obviously right" fills.
+2. Every citekey has a provenance row in `refs_index.md`: source, record URL, fetch date — or, for a `% src: user-supplied` entry, source `user-supplied` with no URL or date.
 3. Every entry is reachable from the method's topic in one sentence. Padding with loosely related work to hit a number is worse than reporting 43 entries and saying so.
 4. Every core paper has an analysis note; every note's citekey exists in `reference.bib`.
-5. Nothing is written outside `metds/refs/**` and `wkdrs/refs_<date>/**`.
+5. Nothing is written outside `metds/refs/**` and `wkdrs/refs_<date>/raw/**`.
 
 ## Core-paper selection (5–10)
 

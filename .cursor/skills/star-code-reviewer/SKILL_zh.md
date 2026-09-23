@@ -7,9 +7,9 @@ description: >-
 
 # Research Code Reviewer
 
-调用方式：`star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [描述]`。计划选择其实现与符合度证据；路径、`diff` 或 git range 选择对应文件。用户明确调用但没给范围时审查整个 `${CODE_NAME}/`，即使描述写着只复核也一样；自然语言或自动接手则取请求或当前工作已确定的最窄范围，仍不明确才问。只为核验跨文件 import、API、schema 或 contract 扩展范围，并记录每个扩展理由。只复核/只读请求写完报告就停止：不应用修复、不提交修复、不启动可写后继。明确要求修问题时，已授权其所述范围内的合格修复；直接沿用，不重复询问。
+调用方式：`star-code-reviewer [PLAN_NAME | PATH | diff | GIT_RANGE] [描述]`。计划选择其实现与符合度证据；路径、`diff` 或 git range 选择对应文件。用户明确调用但没给范围目标时审查整个 `${CODE_NAME}/`；描述要求只复核，限制的是本次能写什么，不是能读什么。自然语言或自动接手则取请求或当前工作已确定的最窄范围，仍不明确才问。只为核验跨文件 import、API、schema 或 contract 扩展范围，并记录每个扩展理由。只复核/只读请求写完报告就停止：不应用修复、不提交修复、不启动可写后继。明确要求修问题时，已授权其所述范围内的合格修复；直接沿用，不重复询问。
 
-**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：用户明确要求优先，其次是有效的 `STAR_LANG`，最后跟随对话语言或调用文本语言；使用对应语种的资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 **把档位模型传给受托者。** 取 `cursor` 条目，没有则取不带标签的备选。值非空时，以对应的命名 `Task` 受托者 `star-plan`、`star-exec` 或 `star-read` 替换后文的默认代理。Cursor 只认它模型目录里列出的扁平 id，一个深度一个 id，带参数的 `id[effort=<深度>]` 会被拒绝；`bash execs/configure.sh` 把配置的 `@<深度>` 以 `-<深度>` 接在模型名后，再把这个扁平 id 不加引号写进 `.cursor/agents/star-<tier>.md`。`Task` 也能按次传 `model`，但没有单独的深度参数；传入的 `model` 会盖过文件。本会话 `Task` 的 `model` 可选列表含该盖章 id 时就传它；否则在该列表里找同族且已带所需深度的 slug——`cursor-grok-4.6-xhigh-fast` 这类速度变体也算——找到就传。不要发明列表里没有的 slug，不要把 `@<深度>` 或方括号参数拼进 `model`，也不要传深度不对的同族变体。列表里都没有时，省略 `model`，以免盖过文件盖章，并一次说明按次 slug 不可用。键为空则省略 `model`，保留原代理选择。这些代理继承权限；交办说明须保留后文每条只读或写入范围限制，盲读不接收产出该工作的对话。记录受托者的实际会话模型，包括宿主的降级结果，不把请求值当成已核实的模型。
 
@@ -30,7 +30,7 @@ description: >-
 
 ## 工作流
 
-**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 EXEC 档处理整次运行的交接。只要报告的请求即使换档仍保持只读/报告范围；独立收集用 READ，不知情的二次复核用 PLAN。单凭 grant 不授权超出请求范围的修复。
+**本次运行在哪里执行。** Step 0 前按规约 §10.8 在 EXEC 档应用迁移规则。只要报告的请求，即使换到别的档位，仍然只读、只写报告；独立收集用 READ。单凭 grant 不授权超出请求范围的修复。
 
 ### Step 0：解析范围
 
@@ -41,8 +41,9 @@ description: >-
    - 已存在的文件或目录 → **路径模式**；`wkdrs/<run>/` 目录经 `exec_runs` 反查到对应计划 → 计划模式。
    - 用户明确调用但没有范围 → `${CODE_NAME}/` 全部；自然语言或自动接手没有目标 → 请求/当前工作已经确定的最窄范围，只有没有已定范围时才问。
    - 都不匹配 → 列出最接近的计划与路径候选，通过 AskQuestion 直接问一个问题。
-3. 计划模式的范围是三者并集：§2 写明的代码模块、§4 交付物中的代码路径、`wkdrs/<run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是问题项（维度 F），绝不静默跳过。当该日志记录了执行分支（`branch:`——规约 §11）时，分支的 diff 是更精确的代码侧清单：把 `git diff --name-only <base>...HEAD` 的文件并入并集，并在报告的范围行里记下分支及其 head commit——合并授权点等着本次审查的结论。
+3. 计划模式的范围是三者并集：§2 写明的代码模块、§4 交付物中的代码路径、`wkdrs/<run>/EXEC_LOG.md` 记录的改动文件。说明每个来源贡献了哪些文件；§2/§4 里不存在的路径本身就是问题项（维度 F），绝不静默跳过。在报告的范围行里记下当前的 head commit。当该日志记录了执行分支（`branch:`——规约 §11）时，分支的 diff 是更精确的代码侧清单：把 `git diff --name-only <base>...HEAD` 的文件并入并集，并在那个 commit 旁记下分支——合并授权点等着本次审查的结论。
 4. 只留下可审的源码：Python 文件走完整评分表；范围内的 shell / YAML / 配置文件只查维度 D（路径与运行时）；`datas/`、`inits/`、`wkdrs/` 产物与生成文件不在范围内。审查前报出最终文件数；超过约 50 个文件时，先跑 Step 2 的范围内筛查——只是 grep 和 `wc`，不需要环境——说明范围较大，然后逐 package 切分收集并完成。只有用户要求或真实资源上限阻止完成时才收窄；不因文件数本身发问。
+5. 刷新——计划模式下、请求没要求重新完整审查的一次审查，其 run 最新的 `CODE_REVIEW_<date>.md` 早于该 run 的 `EXEC_LOG.md` 里最新的日期（无论是执行器交回、`star-flow-status` 推荐，还是 `star-auto` 因启动守卫拒绝而启动）且记有代码版本，`git diff --quiet <该 sha> -- <范围内文件>` 通过，且范围内没有未追踪文件——写出今天的报告，沿用那份报告的结论与问题项，并加一行 `code unchanged since <sha>`，跳过 Step 1–4；有任何差异就走完整审查。
 
 ### Step 1：载入评判依据
 
@@ -65,33 +66,33 @@ description: >-
 
 ### Step 4：核实
 
-先把文件数对上：每个发出的文件都落在 `files_reviewed` 或 `unknowns`；能重新派发就补派，否则本地检查并记录限制（conventions §6.3）。合并去重后，每条 blocker/major 都重新打开所引代码，确认规则适用。质疑定量结果或论文主张的 blocker/major，还须按 `references/review_rubric_zh.md` 重开原始产物、核对代码版本溯源，并在轻量可行时复现比较。不成立的降级或丢弃；minor 抽查。仍未确认的进 **Unconfirmed**，不计入结论；绝不为强行确认而跑重型工作。
+先把文件数对上：每个发出的文件都落在 `files_reviewed` 或 `unknowns`；能重新派发就补派，否则本地检查并记录限制（规约 §6.3）。合并去重后，每条 blocker/major 都重新打开所引代码，确认规则适用。质疑定量结果或论文主张的 blocker/major，还须按 `references/review_rubric_zh.md` 重开原始产物、核对代码版本溯源，并在轻量可行时复现比较。不成立的降级或丢弃；minor 抽查。仍未确认的进 **Unconfirmed**，不计入结论；绝不为强行确认而跑重型工作。
 
 ### Step 5：写出报告
 
-按 `assets/code_review_template_zh.md`（英文计划用 `assets/code_review_template.md`）填写：范围与证据基础、结论、按严重度分组的问题项（`blocker` / `major` / `minor` / `nit`，编号 F1、F2、…）、计划符合度记分卡（计划模式）、好实践（≤3）、下一步。计划模式且有 run 时写入 `wkdrs/<run>/CODE_REVIEW_<YYYY-MM-DD>.md`；否则 `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md`（`scope-slug` = 计划前缀+slug、路径（`/`→`-`）、`diff` 或 `full`）。日期取系统时钟，绝不编造。
+按 `assets/code_review_template_zh.md`（英文计划用 `assets/code_review_template.md`）填写：范围与证据基础、结论、按严重度分组的问题项（`blocker` / `major` / `minor` / `nit`，编号 F1、F2、…）、计划符合度记分卡（计划模式）、好实践（≤3）、下一步。计划模式且有 run 时写入 `wkdrs/<run>/CODE_REVIEW_<YYYY-MM-DD>.md`；否则 `wkdrs/reviews/code_<scope-slug>_<YYYY-MM-DD>.md`（`scope-slug` = 计划前缀+slug、路径（`/`→`-`）、git range（`/` 与 `..`→`-`，如 `main..feature` → `main-feature`）、`diff` 或 `full`）。日期取系统时钟，绝不编造。
 
 ### Step 6：聊天摘要
 
 以结论开头，控制在约 500 字以内：审了多少文件、各严重度数量、top ≤10 问题项一行版（`file:line — 问题`）、符合度结论（计划模式）和跑过的静态工具。结尾给出越界问题项的转交去向。只复核请求写完报告和建议就停止：不进 Step 7、不提交、不启动可写后继。已有明确修复请求或合法 `auto=unattended` grant 时，写入前点名 Step 7 将应用的合格修复及授权来源。
 
-### Step 7：修复轮（仅例行项）
+### Step 7：修复轮（仅机械修复项）
 
 1. **可修**：缺失或不完整的 docstring；引用全部落在审查范围内的改名；未使用的 import；本项目引入的死代码（upstream 继承的死代码只报告、绝不删——AGENTS.md §3）；评分表标记的注释问题。**不可修**：任何触及行为、范围外被引用的签名、范围外文件或残留清单名称的改动。
 2. **授权决定应用哪些修复。** 只复核请求或没有修复授权的审查，不论严重度都在 Step 6 结束。具体适用的修复指示授权其范围内的合格改动，直接应用而不重复询问。合法 `auto=unattended` 授权各严重度的推荐、合格、不改行为修复，但每项删除都跳过并转交。两类授权都不覆盖行为变化、范围外文件、未经具体授权的覆盖或删除。`involve=high` 不重开已有授权。
 3. 应用获授权修复前，逐项点名 `file:line` 和具体变化。用户要求修复但范围仍未确定时，把具体合格清单摊在正文并通过 AskQuestion 按规约 §7.13 只问一次；绝不反问只复核用户是否扩大任务。删除或覆盖需要其自己的具体授权，已有适用决定直接沿用。
 4. 每条修复写入后：对该文件重跑 `compileall`（有 ruff 时加跑）；改名要在 `${CODE_NAME}/` 全域 grep 旧符号，证明没有残留引用。复检失败 → 把该项恢复原样，记 `reverted`，继续。
 5. 把修复记录追加进报告（`F<n> — applied / skipped / reverted`），并写明授权来源。Step 0 的 working tree 干净时，提交已获授权、合法 `auto=unattended` 适用、或 `involve=low` 采用范围内提交默认值，就按确切路径提交；`medium`/`high` 仅在提交权限仍缺失时询问。tree 本来就脏则不提交并说明；任何 grant 都不暂存既有脏改动。
-6. 收尾报出应用、跳过、转交项和报告路径。只有更大的执行目标已获授权、且这些修复需要刷新其运行证据时，才启动 `star-plan-executor <叶子>`；只复核或只修复请求在这里以建议结束。executor 恢复时可以采用可归属的原始检查，只重跑过期或受整合影响的检查（`references/resume_rules_zh.md`）。
+6. 收尾报出应用、跳过、转交项和报告路径。有仍在进行的执行器调用方时，按下文交回它；运行证据需要刷新时推荐 `star-plan-executor <叶子>`；只复核请求到此结束；修复请求只做到完成其已获授权的修复为止，范围外的工作留作建议。executor 恢复时可以采用可归属的原始检查，只重跑过期或受整合影响的检查（`references/resume_rules_zh.md`）。
 
-**交回调用方。** 若本次评审由仍有效的执行器或 `star-auto` 执行目标启动，在获准的修复轮之后把报告与控制权交回调用方；干净报告或仅报告 blocker 也一样。调用方负责补救、结果收集、启动与合并授权；本技能不因推荐就自行另启执行器。单独的只复核请求止于报告。
+**交回调用方。** 若本次评审由仍有效的执行器或 `star-auto` 执行目标启动，在获准的修复轮之后把报告与控制权交回调用方；干净报告或仅报告 blocker 也一样。调用方负责补救、结果收集、启动与合并授权；本 skill 不因推荐就自行另启执行器。单独的只复核请求止于报告。
 
 ## 状态与文件规则
 
 - 报告放 `wkdrs/`（计划的 run 目录，否则 `wkdrs/reviews/`）；绝不放 `metds/plans/`，绝不放进 `${CODE_NAME}/`。
 - 只有明确修复请求或合法 `auto=unattended` grant 适用时才写代码，且只写审查范围内的合格修复项。绝不碰：`metds/plans/*`（计划类问题项转给 `star-plan-reviser`）、`EXEC_PLAN.md` / `EXEC_LOG.md`、`UPSTREAM.md`、`LICENSE` / `CITATION*`、`metds/codearc.md`、`.env`。
 - 绝不移动、重命名或删除文件/目录——结构性变更属于 `star-code-architect`。删除文件内代码也需要具体授权，且不在 auto grant 内。
-- 所有命令经 `.env` 的 conda 环境；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（executor 的红线同样适用）。
+- 所有命令经 `.env` 的解释器（规约 §3）；不用系统 python；绝不安装或升级包；不跑重活——不训练、不全量评测、不高成本 API 调用（规约 §2 的红线同样适用）。
 - Git：只读，外加一次获授权的可选修复提交，只 stage 修复轮碰过的文件（规约 §1）；`auto=unattended` 或 `involve=low` 仅在 Step 0 看到干净工作树时选择提交。在执行分支上落在该分支、赶在合并之前；绝不切分支或暂存既有脏改动。
 - 本 skill 不设任何计划 frontmatter 字段、不创建 run 目录；审计线索就是报告文件，外加（若有）那次修复提交。
 

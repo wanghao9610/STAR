@@ -37,15 +37,22 @@ edited_path() {
     fi
 }
 
+# A run's worktree sits beside the project, at ../<root-dirname>--wt/<run>/
+# (conventions §11.8), and its edits are the run's own as much as edits in the
+# project are; any other path outside the project keeps its prompt.
+wt="$(dirname "${root}")/$(basename "${root}")--wt"
 path="$(edited_path)"
 case "${path}" in
-    "${root}"/*) ;;
+    "${root}"/*) rel="${path#"${root}"/}" ;;
+    "${wt}"/*/*) rel="${path#"${wt}"/}"; rel="${rel#*/}" ;;
     *) exit 0 ;;
 esac
 
-# Dot-directories at the project root — .git, .claude, .star, the other tool
-# trees — keep their prompt, the way acceptEdits mode keeps one for protected
-# paths. Their contents are project machinery, not the code a run is editing.
-[[ "${path#"${root}"/}" == .* ]] && exit 0
+# Dot-directories at the project root, or at a worktree's root — .git, .claude,
+# .star, the other tool trees, a worktree's linked .env — keep their prompt, the
+# way acceptEdits mode keeps one for protected paths. Their contents are project
+# machinery, not the code a run is editing. A `..` segment can climb back out
+# of either root, so a path carrying one keeps its prompt too.
+[[ "${rel}" == .* || "${rel}" == */../* || "${rel}" == */.. ]] && exit 0
 
 printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"involve=low"}}\n'

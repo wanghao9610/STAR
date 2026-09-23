@@ -1,6 +1,6 @@
 # Revision Rules — authority, trail, and knock-on effects
 
-What star-plan-reviser may change, how changes are recorded, and what must be routed elsewhere. One session revises **one target file** (plus, at most, the single matching index line in its parent).
+What star-plan-reviser may change, how changes are recorded, and what must be routed elsewhere. One session revises **one target file** (plus, at most, the single matching index line in its parent, and, on an approved drop, one appended line in the root plan's §5 dead ends, plus the root's one-line `## Revision History` entry for it and its `updated` bump).
 
 ## Authority table
 
@@ -14,6 +14,7 @@ What star-plan-reviser may change, how changes are recorded, and what must be ro
 | target frontmatter `dropped:` | yes — only as an approved candidate, under the drop rule below |
 | the dropped subtree's files on disk (plan files, `tasks/<plan-name>/`, `wkdrs/<run>/` dirs, `execs/scpts/<run>.sh`) | yes — only the move to or from their `dropped/` locations that an approved drop or revival carries (`drop_rules.md`); their contents are never edited |
 | parent `## Sub-plans` line for the target | yes — only when the target's title / one-line objective changed, or to add or remove its drop marker |
+| root plan §5 dead-ends list, its `## Revision History` and `updated` | yes — only on an approved drop: one appended dead-end line, one one-line Revision History entry recording it, and the `updated` bump (`drop_rules.md`, Rolled up) |
 | target `## Sub-plans` outline lines (units not yet expanded — conventions §0) | yes — as approved candidates: reword, reorder, add or remove outline lines; entries for expanded child files stay with star-plan-decomposer |
 | `EXEC_PLAN.md` / `EXEC_LOG.md` | never — runs belong to the executor; reviews are written *next to* logs, not into them |
 | numeric prefixes / filenames | never — no renumbering, no renaming, no `_v2` forks, no deletion (a drop's move keeps every filename; only the directory changes) |
@@ -40,7 +41,7 @@ Appended at the end of the plan file (after `## Sub-plans` if present); created 
 - exec_status: done → pending (done-criterion changed)
 ```
 
-One `###` block per session, real date (never invented), and after the skill name the editing session's `model_id` — the runtime's reported id copied verbatim, or `unrecorded` (conventions §8). That per-entry id gives a plan its model attribution: the frontmatter `model_id` names only the latest writer; this section preserves who wrote each earlier revision. One bullet per change: section, what changed, why, evidence. Record `exec_status` resets and a cleared `finalized:` here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss"). A drop is one more bullet — `dropped: 2026-08-11 — superseded by 02` — carrying the account of what ended the direction, since the frontmatter field holds only one line.
+One `###` block per session, real date (never invented), and after the skill name the editing session's `model_id` — the runtime's reported id copied verbatim, or `unrecorded` (conventions §8). That per-entry id gives a plan its model attribution: the frontmatter `model_id` names only the latest writer; this section preserves who wrote each earlier revision. One bullet per change: section, what changed, why, evidence. Record `exec_status` resets, a cleared `finalized:`, and a `finalized:` kept after a tactical §4/§5 edit here too, and optionally a declined candidate worth remembering ("user kept the 85 threshold despite the miss"). A drop is one more bullet — `dropped: 2026-08-11 — superseded by 02` — carrying the account of what ended the direction, since the frontmatter field holds only one line.
 
 ## exec_status reset rule
 
@@ -55,7 +56,7 @@ Never reset silently; the offer names the consequence (the leaf rejoins the runn
 
 ## Dropping a plan (`dropped:`)
 
-What a drop writes, what it never touches, and the walk back are in `drop_rules.md`, read where the run is a drop or a revival and not before.
+What a drop writes, what it never touches, and the walk back are in `drop_rules.md`, read where the run is a drop or a revival, or where a review adopts a drop candidate, and not before.
 
 ## Section status flips
 

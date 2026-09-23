@@ -40,13 +40,13 @@ model_trail:                    # append-only: one entry per write session, newe
 ## Actions
 
 <!-- Ordered. Each action binds a check. `owner` = `agent`, `delegate`, or `stop → user`
-     (the agent prepares the command, user runs it — see STOP line). Commands go through the .env conda
-     env; artifacts are written under wkdrs/<run>/.
+     (the agent prepares the command, user runs it — see STOP line). Commands go through the interpreter
+     .env names (conventions §3); artifacts are written under wkdrs/<run>/.
      A whole set of configurations (a grid, repeats over seeds) is **one** action, not one row per
      cell: the artifact column reads wkdrs/<run>/cells/, and the check column carries the criterion
      the sub-plan's §5 states for the whole grid. -->
 
-| # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | owner |
+| # | Action | Files / module (${CODE_NAME}/…) | Command (via .env interpreter) | Artifact (wkdrs/<run>/…) | Check | owner |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
 | 1 | <create/modify …> | <path> | — | — | <import / runnable check> | agent |
 | 2 | <…> | <path> | <cmd> | <path> | <what proves it> | agent/delegate |
@@ -55,10 +55,10 @@ model_trail:                    # append-only: one entry per write session, newe
 ## STOP line
 
 <!-- Which actions cross the STOP line and why (long/multi-GPU training, full-dataset eval, costly
-     API). For each: the exact command through the conda env (via execs/run.sh where one exists),
-     what it produces and where, and what output the user should bring back so the done-criterion can
-     be verified. A reusable launch script may be written to execs/scpts/<run>.sh (writing it is fine;
-     running it stays with the user).
+     API). For each: the exact command through the .env interpreter (conventions §3; via execs/run.sh
+     where one exists), what it produces and where, and what output the user should bring back so the
+     done-criterion can be verified. The command is written as the launch script execs/scpts/<run>.sh
+     (writing it is light; running it follows references/stop_line_rules.md).
      Each one also states its expected cost: GPUs × hours, or call count and spend. That is what the
      root plan's §4 compute budget is reconciled against — when the command comes back, the actual
      cost goes into EXEC_LOG's cost section.

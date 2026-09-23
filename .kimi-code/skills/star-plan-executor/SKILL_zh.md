@@ -2,14 +2,14 @@
 name: star-plan-executor
 description: >-
   执行或恢复一份叶子研究子计划：定位代码库、写出带检查的执行计划、做外科式实现、验证并记录进度。用于计划
-  已可落实时；高成本实验停在准确的交还命令前。
+  已可落实时；高成本实验只在有具体授权时启动，否则停在准确的交还命令前。
 ---
 
 # Research Plan Executor
 
 调用方式：`star-plan-executor PLAN_NAME [描述]`。按 slug、数字前缀或文件名解析 leaf。其余自然语言可约束范围或明确授权执行选择；仅在目标、研究范围、验收标准、成本、关键输入、破坏性动作或覆盖仍未解决时提问。
 
-**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：用户明确要求优先，其次是有效的 `STAR_LANG`，最后跟随对话语言或调用文本语言；使用对应语种的资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
+**共享规约。** 先解析调用目标和模式，再读取 `docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` 中本目标实际涉及的节；进入具体分支或模式时才读取它引用的 `references/` 与 `assets/`。从 `.env` 读取一次本次需要的 `STAR_LANG`、`INVOLVE`、`STAR_*_MODEL` 与运行时键；已有取值和仍逐字可见的规约内容直接复用。按规约 §7.6 解析语言：先看用户明确要求，再看有效的 `STAR_LANG`，最后取对话或调用文本语言；使用对应的本地化资源。`SKILL_zh.md` 仅供人阅读，运行时不装载。已有文档保持其 frontmatter 语言。清楚的自然语言指令可以同时选定目标、范围并授权对应动作；不要重复询问已经明确授权的事项。
 
 目标解析后运行 `scripts/scan.sh --slim`，把它的计划 frontmatter 与运行日志 frontmatter 摘要作为 Step 0–1 的原始输入；目标 leaf 仍须整篇读取。脚本失败时直接读取计划文件并说明回退。
 
@@ -23,28 +23,28 @@ description: >-
 
 ## 核心原则
 
-1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察:读子计划 §2 指向的模块/入口,产出一份"现状 vs §3 要求"的缺口清单。绝不假设代码已存在;`code/` 可能是空的(只有 `.gitkeep`),此时计划从零搭骨架——更好的做法是先用 `star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
+1. **先读再写**。动手规划任何改动前,先在 `${CODE_NAME}/` 里勘察:读子计划 §2 指向的模块/入口,产出一份"现状 vs §3 要求"的缺口清单。绝不假设代码已存在;`${CODE_NAME}/` 可能是空的(只有 `.gitkeep`),此时计划从零搭骨架——更好的做法是先用 `star-code-architect` 搭好参考代码库。参见 `references/orient_checklist_zh.md`。
 2. **让计划可见，再在范围内推进。**建立具体 `EXEC_PLAN`。`EnterPlanMode` / `ExitPlanMode` 只在仍有实质决定时使用；否则在 commentary 展示后继续，不另设批准门槛。调用 executor 已授权普通范围内实现与轻量验证。
 3. **该委派时才委派。**有边界、相互独立的工作确有收益时使用 `Agent`；角色为 `coder` / `explore`。模型按前文 secondary-model pool 路线选择，不臆造参数。主 agent 负责集成与核验，可采用可归属原始证据，仅在缺失、过期或受整合影响时重跑。
-4. **在未获授权的重型或不可逆工作前停。**长时/多卡训练、全量评测、高成本 API、无界任务与覆盖有价值产物都越过 STOP line。备好可复现命令、成本与产出；只有具体适用的用户授权或边界内 `star-auto` 例外才启动，否则交给用户。见 `references/stop_line_rules_zh.md`。
+4. **在未获授权的重型或不可逆工作前停。**长时/多卡训练、全量评测、高成本 API、无界任务与覆盖有价值产物都越过红线。备好可复现命令、成本与产出；只有具体适用的用户授权或边界内 `star-auto` 例外才启动，否则交给用户。见 `references/stop_line_rules_zh.md`。
 5. **记录已验证状态，并保持子计划真实。**执行记录存在 `wkdrs/<run>/`，中间工作文件在 `tasks/<plan-name>/`。每个 action 检查后更新日志。子计划 frontmatter 只维护 `exec_status`、`exec_runs`、`updated`；偏差或方法文档会引用的补充值只通过一次授权后沿用的回同步流程写入 §2–§5 并追加 `## Revision History`。泛泛实现请求和 `auto=unattended` 都不授权改变研究范围或 §5 验收。
 6. **使用项目运行时和布局。**从 `.env` 读取 `CONDA_HOME`、`PYTHON_HOME`、`CODE_NAME`，不用系统 Python 或猜测路径。项目入口存在时用 `execs/run.sh`；中间文件放 `tasks/<plan-name>/`，脚本放 `execs/scpts/`，产物与记录放 `wkdrs/<run>/`，数据、权重和代码分别放 `datas/`、`inits/`、`${CODE_NAME}/`。遵循 `AGENTS.md`。
 
 ## 工作流
 
-**本次运行在哪里执行。**整体运行属于 PLAN；仍有必需决定时留在可与用户交互的会话。执行—验证阶段按后文交给 EXEC。既有执行授权继续有效；带 `tier=` 的受托者不再次转交同一阶段。
+**本次运行在哪里执行。**本 skill 的档位是 PLAN，但整次运行从不交给受托者（规约 §10.8）：那里的第四条对它从不成立，因为合并确认点、Step 6 的待同步修正批次，以及以 `blocked` 结束的步骤其改动的去留，都取决于运行中发现了什么。它留在可与用户交互的会话；档位变化是后文把执行—验证阶段（Step 5）交给 EXEC。判断是否还缺必需决定时，既有执行授权视为已定；带 `tier=` 的受托者不再次转交这一阶段。
 
 ### Step 0：定位目标计划
 
-1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与开场装载的摘要列出的计划匹配;它就是那份清单,不必再列一次目录。
-2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它:列出它的叶子(前缀 + slug + 一句话目标),用 AskUserQuestion 让用户选执行哪一个(推荐依赖顺序中第一个就绪的),或提议按依赖顺序一次一个地执行它们。
+1. 解析 `PLAN_NAME`(slug / 数字前缀 / 完整文件名),与扫描摘要列出的计划匹配;它就是那份清单,不必再列一次目录。
+2. **只有叶子可执行**。若 `PLAN_NAME` 命中一个有子节点的节点(`children:` frontmatter 非空),不要直接执行它:列出它的叶子(前缀 + slug + 一句话目标),用 AskUserQuestion 让用户选执行哪一个(推荐依赖顺序中第一个就绪的);其余每个叶子各是一次独立的运行(规约 §10.4),在已有执行目标下等本次运行结束后再启动(§10.6)。
 3. 若未给参数或匹配有歧义，列出可选计划并通过 AskUserQuestion 询问。
 4. 完整读取选定的子计划。
 
 ### Step 1：就绪检查
 
 1. **可执行性**。§3 任务分解与 §5 完成判据必须具体。若仍大量是 `[TBD]` / `【待定】`,说明拆解尚未完成,用 AskUserQuestion 提供:*先回 `star-plan-decomposer` 补完*(推荐) / *仍然执行(较浅,缺口保留 `【待定】`)*。
-2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟叶子是否都已 `exec_status: done`?从已带着每个兄弟 frontmatter 的摘要读它们的状态,不要逐个打开。若硬依赖缺失,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的 blocker:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
+2. **依赖**。检查 §2 输入与依赖:指定的数据集(`datas/`)、权重(`inits/`)、代码模块是否就位?叶子 `depends_on` frontmatter 列出的上游兄弟节点是否都已完成?从已带着每个兄弟 frontmatter 的摘要读它们的状态,不要逐个打开。兄弟节点算完成:它是 `exec_status: done` 的叶子;或它是内部节点,其下每个未丢弃的叶子都已到终态(`done` 或 `abandoned`)、其中至少一个是 `done`,且其子树里任何 `## Sub-plans` 索引都不再有概要行(从这些文件里读,规约 §5.5)。若硬依赖缺失或上游兄弟尚未完成,**停下上报**——缺失的数据集或权重是拆解上的缺口,不是绕开就行的 blocker:指明本该负责它的数据就绪叶子,或转交给 `star-plan-decomposer <父计划>` 去补一个。不要伪造输入。
 3. **未被丢弃**。带着 `dropped:` 的叶子、或祖先被丢弃的叶子，一律不执行：点名丢弃写在哪个节点上，然后停下。要重新启用它，先用 `star-plan-reviser` 清掉那个字段——照跑一个用户已经否掉的方向，只会把算力花在没有任何东西会去统计的工作上。
 4. **尺寸合适**。能执行的叶子未必是合适的工作单元，而拆完之后没有任何环节再看一眼：这份计划可能是几周前拆的，也可能是手写的。把 decomposer 用在自己草稿上的那条尺寸判据——一块可独立检验的工作（它自己的 `references/subplan_rubric_zh.md` 第 8 条）——拿到这里，对着计划当下的样子再判一次。所有信号都在 Step 0 已经读进来的正文里，这一检查不额外花任何一次调用。
 
@@ -66,20 +66,20 @@ description: >-
 ### Step 3：建立可执行计划
 
 1. `EnterPlanMode` / `ExitPlanMode` 只在计划仍有待用户决定的实质选择时使用；`low` 或目标、范围、验收、关键输入、成本与权限已定时，在当前模式起草，不制造批准门槛。
-2. 把 §3 + 缺口清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 conda) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。末尾动作绑 §5 完成判据。动作清单要朝 Step 5 成组派遣的形状去塑(`references/agent_dispatch_spec_zh.md`):相邻动作碰同一批文件、收在同一个 check 里的,写成一组(至多 3 个),不留成各自派遣——每省一次派遣,就少开一个全新的 subagent 上下文,而检查粒度不受损:一组仍只收在它那一个 check,遇红线边界照样拆开。
-3. 按 `references/stop_line_rules_zh.md` 明确 STOP line 并估算运行时间/成本。若计划超过 12 个 action 或多次越线而 Step 1 未命中，把它作为一项实质选择：先拆分再实现，或照原计划执行。已有选择就沿用，否则在依赖它的工作前询问。
+2. 把 §3 + 缺口清单细化成 **EXEC_PLAN**:一串有序动作,每个标注 `{要碰的文件 / 要跑的命令(走 .env 解释器) / wkdrs/<run>/ 下的产物 / 绑定的 check}`。末尾动作绑 §5 完成判据。排动作清单时,就按 Step 5 成组派遣时的分组来排(`references/agent_dispatch_spec_zh.md`):相邻动作碰同一批文件、收在同一个 check 里的,写成一组(至多 3 个),不留成各自派遣——每省一次派遣,就少开一个全新的 subagent 上下文,而检查粒度不受损:一组仍只收在它那一个 check,遇红线边界照样拆开。
+3. 按 `references/stop_line_rules_zh.md` 明确红线并估算运行时间/成本。若计划超过 12 个 action 或多次越线而 Step 1 未命中，把它作为一项实质选择：先拆分再实现，或照原计划执行。已有选择就沿用，否则在依赖它的工作前询问。
 4. **收集实质性偏差**:把 EXEC_PLAN 相对子计划 §2–§5 的实质性出入,以变更项形式(ADDED / MODIFIED / REMOVED / ENRICHED)记入 EXEC_PLAN 的"与子计划的偏差"表。与子计划自身粒度相矛盾算偏差;"更具体"不算——除非那是计划未写明、而某份方法文档会引用的值,记为一条 ENRICHED 行并写明该章节;点不出会引用它的那一节,就是细节。偏差表非空时才读 `references/plan_sync_rules_zh.md`:它是 Step 4 与 Step 6 执行的回写流程,空表两处都不跑。
 5. **定下分支与 worktree 两行**（规约 §11）：修改 `${CODE_NAME}/` 的既有跟踪文件推荐 `branch: <run>`；只新增文件或只写 `tasks/`、`wkdrs/` 推荐 `branch: none`。记录当前分支为 `base:`。忙碌信号推荐 worktree 并强制使用分支；任务状态不明时优先隔离，不切换可疑 checkout。已有选择就沿用；否则 `low` 取推荐，`medium` 随计划一起问，`high` 分开问。任一行非 `none` 时读 `references/branch_rules_zh.md`。
 
 ### Step 4：解决剩余决定并记录计划
 
-**实现前先按 `references/design_check_zh.md` 跑设计检查。**使用 `Agent` 的只读角色（`coder` / `explore` 中对应的只读角色），仅提供 EXEC_PLAN、叶子计划和根计划 §4。重开每条 `fail` 证据；只在研究范围、验收、关键输入或成本仍未解决时提问。模型走 secondary-model pool；工具不可用时本地跑一次并记录限制。
+**实现前先跑设计检查。**把 `references/design_check.md` 交给 `Agent` 的只读角色（`coder` / `explore` 中对应的只读角色），仅提供 EXEC_PLAN、叶子计划和根计划 §4。重开每条 `fail` 证据；只在研究范围、验收、关键输入或成本仍未解决时提问。模型走 secondary-model pool；工具不可用时本地跑一次并记录限制。
 
 1. 在 commentary 展示具体计划。沿用已有授权，只为仍未解决的实质选择使用本宿主原生提问机制；`EnterPlanMode` / `ExitPlanMode` 已启用时在决定解决后退出。提交、分支与 worktree 按 involve 档位处理；`auto=unattended` 仅覆盖不改变范围、关键输入、§5 验收和已批成本的战术偏差。
 2. 必需决定全部解决后，按 `references/branch_rules_zh.md` 创建已记录的分支或树，再创建 `tasks/<plan-name>/`、`wkdrs/<run>/EXEC_PLAN.md` 与 `EXEC_LOG.md`。把 run 追加到 `exec_runs`，保留既往记录；旧 `exec_run:` 先迁移。已有同名非可恢复 run 时使用用户给出的后缀。
 3. **把获授权偏差同步回子计划。**原地更新受影响的 §2–§5，追加 `## Revision History`，从系统时钟更新 `updated`，并把对应行标为 `synced`。研究范围、关键输入、§5 验收或成本变化仍未决定时继续询问。
 
-**把 Step 5 交给 EXEC 档。**记录与决定都已定下时，按 secondary-model pool 路线用 `Agent` 的执行角色接手——EXEC 条目带深度时传绑定该深度的池别名，配置了深度即使模型相同也足以构成接手理由——携带 `involve=<level> tier=exec` 与合法 `auto=unattended`。不得改 EXEC_PLAN 或绕过计划级缺口；返回后重读 EXEC_LOG。模型路线不可用时在本地运行，不反复询问。
+**把 Step 5 交给 EXEC 档。**记录与决定都已定下，且 EXEC 条目指定的模型不是本 run 所在模型的别名（规约 §10.8）、或指定的深度不是本 run 已在的那个，本 run 也不是 `tier=exec` 时，按 secondary-model pool 路线用 `Agent` 的执行角色接手——EXEC 条目带深度时传绑定该深度的池别名，配置了深度即使模型是本会话模型的别名也足以构成接手理由——携带 `involve=<level> tier=exec` 与合法 `auto=unattended`。不得改 EXEC_PLAN 或绕过计划级缺口；返回后重读 EXEC_LOG。没有这样的 override 或模型路线不可用时在本地运行，不反复询问。
 
 ### Step 5：执行—验证循环（每步一个 agent）
 
@@ -87,7 +87,7 @@ description: >-
 
 1. 按 `references/agent_dispatch_spec_zh.md` 使用 `Agent`，角色为 `coder` / `explore`，并给出确切 action 范围、解释器、检查与结构化返回契约；模型走 secondary-model pool 路线。
 2. 检查 diff，并按 `references/agent_dispatch_spec_zh.md` 核验 action 的 check。原始证据可检查且绑定代码版本时直接采用；溯源缺失/过期或整合改变相关行为时才重跑。通过则记证据并按已定选项提交；失败则保留原始证据，只恢复 action 自有增量，有具体修正时最多重试两次，否则标 `blocked`，沿用已有编辑处理决定或询问缺失的破坏性权限。
-3. **action 越过 STOP line 时**，在“待用户执行”记录命令、预计成本、产出和代码版本。普通运行已有具体授权或合法 `star-auto` 时，也只有审查与成本守卫通过后才启动；否则交给用户。`tier=exec` 受托者在此返回，绝不自行启动。
+3. **action 越过红线时**，把命令写成 `execs/scpts/<run>.sh`（启动守卫只认这条路径），在“待用户执行（红线）”一节记下它和预计成本、产出、代码版本。普通运行已有具体授权或合法 `star-auto` 时，也只有审查与成本守卫通过后才启动；否则交给用户。`tier=exec` 受托者在此返回，绝不自行启动。
 4. 重试或 blocker 改变子计划粒度做法时，记一行“待同步修正”。可继续与该变化无关的已授权工作，但研究范围、关键输入或完成判据未具体授权前不得依赖新值。
 
 主 agent 回复保持精简;细节都在日志里。
@@ -100,7 +100,7 @@ description: >-
 
 **完成判据。**修正同步与评分表修复都处理完后才核验 §5。已有证据可归属且仍有效时直接采用；溯源缺失/过期或整合改变相关行为时才重跑。此后代码、关键输入或验收变化会使受影响证据失效并重开状态。达标才把 run 与子计划设为 `exec_status: done`，默认保留 `tasks/<plan-name>/` 的 scratch 和工具脚本并报告位置；只有用户具体要求、且持久证据已提升到 `wkdrs/<run>/` 后才删除，`auto=unattended` 不授权删 scratch。未达标则走 §6 或报告缺口。
 
-**向上反馈(方向性信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `star-plan-reviser <slug>`(审计证据并在逐条批准下修订计划)、`star-plan-coach <slug>`(重审风险/方法)或 `star-plan-decomposer <slug>`(重新拆分子计划)。
+**向上反馈(方向性信号)**。若结果与父计划依赖的某个假设相悖——即撞上根计划 §5 的 **kill-criterion**,或计划称为"便宜早测"的 MVP 完成判据返回了负面结果——你不改父计划 §1–§6(那归 coach/decomposer)。而是:把它记进本轮 `EXEC_LOG.md` 的"备注 / 决策"(这个文件本 skill 拥有),并在 Step 8 简报里**显式点出**,建议回 `star-plan-reviser <slug>`(审计证据并修订计划)、`star-plan-coach <slug>`(重审风险/方法)或 `star-plan-decomposer <slug>`(重新拆分子计划)。
 
 ### Step 7：进度记录与续跑规则
 
@@ -134,6 +134,6 @@ description: >-
 ## 对话纪律
 
 - 非交互运行中继续普通已授权实现与轻量验证。仍有必需决定且 AskUserQuestion 不可用时，用纯文本呈现具体问题，只停依赖它的 action，并继续无关的已授权工作；沉默或时间经过都不是批准。
-- **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——待同步修正整批、交付批准的 EXEC_PLAN。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过了、不是被压缩了。
-- 对话跟随用户语言，计划正文保持 frontmatter `language`；中文计划中的技术术语保留英文。
+- **问题所指的内容写在同一条消息的正文里、排在这次调用之前**——例如仍未决定的待同步修正、验收变化或具体成本承诺。选项只装答案，不装内容本身；发出前回看一眼：选项上面空无一物，说明内容是被跳过了、不是被压缩了。
+- 用按规约 §7.6 解析出的语言回复，计划正文保持 frontmatter `language`；中文计划中的技术术语保留英文。
 - involve（规约 §7.7）只控制未决裁量，不撤销已有授权。提交、分支、worktree：`low` 取推荐，`medium` 合并问，`high` 分开问；已有适用选择不重问。研究范围、§5 验收、关键输入、成本/启动权限、覆盖、弃用、移除、删除或所有权歧义必须解决。`auto=unattended` 只增加写明的战术计划、经审查启动、干净 squash、不删除修复和空 worktree 授权；不授权研究/验收变化、冲突消解、证据丢失、scratch 删除或其他破坏性操作。生效档位、来源和决定各记一次。

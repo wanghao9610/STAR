@@ -39,7 +39,7 @@ status:
 <!-- main risks; kill criteria (what result refutes the direction); Plan B.
      Dead ends: one line per direction already ruled out — what was tried, which result ruled it
      out, and what not to attempt again. A dropped node's own revision history stops being read
-     once its subtree goes dark; this is the one place it is still found. The limitations section,
+     once its subtree is dropped; this is the one place it is still found. The limitations section,
      and the answer to a reviewer asking whether you tried X, are written from these lines. -->
 
 ## 6. Milestones & Deliverables

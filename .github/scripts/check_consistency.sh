@@ -1685,7 +1685,7 @@ for root in "${SKILL_ROOTS[@]}"; do
             n="$(grep -cE "${lead}" "${path}")"
             if grep -qw "${skill}" <<< "${RELOCATE_NEVER}"; then
                 if (( n != 0 )); then
-                    fail "${path}: carries the relocation paragraph, but conventions §10.8 says this skill never relocates itself"
+                    fail "${path}: carries the relocation paragraph; conventions §10.8 exempts this skill (it never relocates, or routes through its READ-tier entry)"
                     reloc_errors=1
                 fi
                 continue
@@ -1694,19 +1694,6 @@ for root in "${SKILL_ROOTS[@]}"; do
                 fail "${path}: ${n} relocation paragraphs, expected exactly 1"
                 reloc_errors=1
                 continue
-            fi
-
-            if [[ "${f}" == SKILL_zh.md ]]; then
-                stated="$(grep -oE '^本 skill 的名册档位是 `(plan|exec|read)`' "${path}" | grep -oE '(plan|exec|read)' | head -n 1)"
-            else
-                stated="$(grep -oE "^This skill's roster tier is \`(plan|exec|read)\`" "${path}" | grep -oE '(plan|exec|read)' | head -n 1)"
-            fi
-            if [[ -n "${stated}" ]]; then
-                roster_tier="$(awk -v s="${skill}" '$1 == s {print $2}' <<< "${TIERS_EN}")"
-                if [[ "${stated}" != "${roster_tier}" ]]; then
-                    fail "${path}: states its roster tier as ${stated}, but the §10 roster says ${roster_tier:-nothing}"
-                    reloc_errors=1
-                fi
             fi
 
             wf_at="$(grep -nE "${workflow}" "${path}" | head -n 1 | cut -d: -f1)"

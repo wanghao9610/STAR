@@ -10,7 +10,8 @@
 # filter-branch, filter-repo), the forced branch operations §11 makes costly
 # (branch -D / -f, switch -C / -f / --discard-changes, checkout -B / -f — an
 # execution branch force-deleted before its records reach the base branch loses
-# them), and a commit whose staged files exceed 10 MB — a
+# them), a forced worktree removal (worktree remove --force, which deletes the
+# tree's untracked artifacts), and a commit whose staged files exceed 10 MB — a
 # checkpoint or a dataset in history is a research repository's one costly
 # mistake, since clearing it back out needs exactly those rewrites. `push` is
 # deliberately absent: no rule here makes a skill likelier to push, and a user
@@ -31,8 +32,10 @@
 # bash -c and the other wrappers — or a redirect into the `wkdrs/<run>/.await`
 # marker a star-auto launch writes; either is declined while wkdrs/<run>/ holds
 # no CODE_REVIEW_<date>.md, or its newest one is dated before the newest date
-# in EXEC_LOG.md. Writing the script, reading the marker, and light validation
-# through execs/run.sh pass: none of them is the launch.
+# in EXEC_LOG.md. The run dir is looked up in this checkout first, then in the
+# run's worktree at ../<root-dirname>--wt/<run>/ (§11.8), where a worktree run
+# keeps its records until the merge. Writing the script, reading the marker, and
+# light validation through execs/run.sh pass: none of them is the launch.
 #
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
 # quoting, so a flag written after a commit message (`commit -m x --amend`) is
@@ -105,6 +108,7 @@ staged_oversize() {
 # not a STAR run at all.
 unreviewed_run() {
     local dir="${root}/wkdrs/$1" review review_date log_date
+    [[ -f "${dir}/EXEC_LOG.md" ]] || dir="$(dirname "${root}")/$(basename "${root}")--wt/$1/wkdrs/$1"
     [[ -f "${dir}/EXEC_LOG.md" ]] || return 0
     review="$(ls "${dir}"/CODE_REVIEW_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md 2>/dev/null | sort | tail -1)"
     if [[ -z "${review}" ]]; then

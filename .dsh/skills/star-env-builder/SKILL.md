@@ -8,7 +8,7 @@ description: >-
 
 # Research Env Builder
 
-Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]`. Resolve `add` first; every following package token belongs to that mode. Otherwise use the given environment name or `.env`'s `CODE_NAME`. Natural language may set requirements or authorize the build; ask only when the environment target, dependency choice, cost, or destructive handling remains unresolved.
+Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]`. Resolve `add` first; every following package token belongs to that mode. Otherwise use the given environment name, else `.env`'s `ENV_NAME`, else its `CODE_NAME`. Natural language may set requirements or authorize the build; ask only when the environment target, dependency choice, cost, or destructive handling remains unresolved.
 
 **Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
@@ -31,12 +31,12 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ## Workflow
 
-**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0 on the EXEC tier. Existing authorization of the concrete environment, dependency set, and cost counts; keep the run here only while a required decision remains.
+**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the EXEC tier. Existing authorization of the concrete environment, dependency set, and cost counts; whether a required decision remains is decided once before Step 0 under §10.8's fourth condition.
 
 ### Step 0: Preliminary check
 
-1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
-2. `ENV_NAME` := the argument, else `CODE_NAME`. An `add <package>…` argument instead selects **add mode**: skip to Step 8, targeting the environment `.env` already names — nothing created, renamed, or rebuilt.
+1. Read `.env` and resolve `CODE_NAME`, `ENV_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
+2. `ENV_NAME` := the argument, else `.env`'s `ENV_NAME`, else `CODE_NAME`. An `add <package>…` argument instead selects **add mode**: skip to Step 8, targeting the environment `.env` already names — nothing created, renamed, or rebuilt.
 3. Detect and record (feeds the install plan and the report): platform + arch; `nvidia-smi` (driver's CUDA ceiling); `nvcc --version` / `CUDA_HOME` (local toolkit, often absent); `$CONDA_HOME/bin/conda --version`; `uv --version`.
 4. `${CODE_NAME}/` missing or effectively empty → no dependency source; recommend `star-code-architect` first, and offer a bare env (python only) if the user wants one anyway.
 
@@ -49,7 +49,7 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ### Step 2: When the environment already exists
 
-- conda: `<ENV_NAME>` already in `conda env list` → honor a previously specified rebuild or repair choice; otherwise ask once between **backup & rebuild**, **verify & repair in place**, and **abort**, showing that clone-based backup may temporarily double disk use.
+- conda: `<ENV_NAME>` already in `conda env list` → honor a previously specified rebuild or repair choice; otherwise ask once between **backup & rebuild**, **verify & repair in place**, and **abort**, showing that clone-based backup may temporarily double disk use. Backup is `$CONDA_HOME/bin/conda rename -n <ENV_NAME> <ENV_NAME>_$(date +%Y%m%d)`, which clones the environment and then removes the original — hence the doubling. A conda without `rename` clones to the backup name (`create --clone`), verifies the clone, and hands the removal of the original back as a STOP-line command; the rebuild waits for it.
 - venv: `.venv` exists → honor the same prior choice or ask once; backup is `mv .venv .venv_$(date +%Y%m%d)`. Note that a moved venv is a frozen backup because its scripts retain old absolute paths.
 - Backup name already taken → append `-<HHMM>` (also from `date`).
 
@@ -95,7 +95,6 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 4. `.env`'s `PYTHON_HOME` does not resolve to the verified `ENV_PY` → update it when that exact configuration change was authorized; otherwise show the proposed one-line change and ask because it changes a key runtime input.
 5. Chat report ≤500 words: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `star-plan-executor <leaf>` now has a runtime; `star-flow-status` shows what to run next.
 
-
 ### Step 8: Add packages (add mode only)
 
 `add <package>…` runs this step and no other, and its seven items — resolving `ENV_PY`, categorising each package, the confirmation point nothing installs before, the tiered install, the runnable check on the new packages alone, the requirements and report updates, and the closing report — are in `references/add_mode.md`, read when that is the mode and not before. A run that builds or repairs an environment reads none of it.
@@ -105,7 +104,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 - Write only to: the environment itself (under `$CONDA_HOME/envs/` or `<project>/.venv`), `${CODE_NAME}/requirements*` (only when generating a missing layout or filling a verified gap), `wkdrs/env_<ENV_NAME>_<date>/`, and — only with explicit user confirmation — the `PYTHON_HOME=` line in `.env`. Never touch source code, `metds/plans/*`, or other skills' outputs.
 - Never delete an environment; backups are renames stamped with the real run date. Never invent timestamps.
 - Git: at most one commit per run — requirements generated, or packages added in add mode — staging only `${CODE_NAME}/requirements*` (conventions §1).
-- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: say so and do not commit on it; the user switches back or names where the commit goes (conventions §11).
 - Authorized installs run autonomously, including disclosed framework-scale downloads. The STOP line still covers `sudo` or system package managers, driver or CUDA-toolkit system installs, CUDA source compilation, downloads over ~10 GB, and deleting an environment; prepare exact commands instead.
 - Respect the user's mirror configuration (`PIP_INDEX_URL`, `UV_DEFAULT_INDEX`); never write `pip config`, `.condarc`, or `uv.toml`.
 - Repeat invocation: a matching `wkdrs/env_<ENV_NAME>_*/ENV_REPORT.md` exists and the env is present → prefer **verify & repair in place** (Step 2), resuming from its failures instead of rebuilding.
@@ -113,4 +112,4 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 ## Dialogue Discipline
 
 - Apply conventions §7.2 and §7.7. Existing authorization of the same target, package set, and disclosed cost remains valid; ask one concrete question through ask_user_question only when one of those material inputs is still unresolved, with concise plain text as the fallback when unavailable.
-- `ENV_REPORT.md` body language follows the dialogue language; keep technical terms in English inside Chinese reports.
+- `ENV_REPORT.md` body language follows the language resolved under conventions §7.6; keep technical terms in English inside Chinese reports.

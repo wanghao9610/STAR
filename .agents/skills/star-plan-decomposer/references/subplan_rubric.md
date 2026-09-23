@@ -6,7 +6,7 @@ Run this over each sub-plan you wrote. Rank failing items by importance and repo
 
 2. **Non-goals are explicit** — §1 says what is deliberately left to siblings or deeper depth, so adjacent sub-plans don't double-own the same work.
 
-3. **Dependencies are concrete, located, and encoded** — §2 names actual datasets (`datas/`), weights (`inits/`), code (`code/`), and any upstream sub-plans (by prefix) that must finish first, with the artifact each hands over. No vague "the data" / "the model". The `depends_on` frontmatter list matches those upstream sibling prefixes. Whether that graph has a cycle, and whether it agrees with the parent's index, is settled by Step 7's computation — do not work it out again here; this item asks only whether each dependency is the *right* one.
+3. **Dependencies are concrete, located, and encoded** — §2 names actual datasets (`datas/`), weights (`inits/`), code (`${CODE_NAME}/`), and any upstream sub-plans (by prefix) that must finish first, with the artifact each hands over. No vague "the data" / "the model". The `depends_on` frontmatter list matches those upstream sibling prefixes. Whether that graph has a cycle, and whether it agrees with the parent's index, is settled by Step 7's computation — do not work it out again here; this item asks only whether each dependency is the *right* one.
 
 4. **Every step is verb-concrete and checkable** — §3 has no "explore / combine / look into" verbs whose completion can't be verified; each numbered step is small enough that "done or not" is unambiguous.
 
@@ -20,4 +20,4 @@ Run this over each sub-plan you wrote. Rank failing items by importance and repo
 
 9. **Coverage without overlap** — together, the sibling sub-plans cover the scope they decompose — the root §3/§4/§6 material the parent node owns — and no piece is owned by two of them.
 
-10. **Frontmatter is consistent** — `prefix` matches the filename, `parent` is the exact parent filename, `level` equals the prefix length, and `language` matches the parent plan. The parent's `children:` list includes this file — checking the `## Sub-plans` index is Step 7's job, not this item's.
+10. **Frontmatter is consistent** — `prefix` matches the filename, `parent` is the exact parent filename, and `language` matches the parent plan. The parent's `children:` list includes this file — checking the `## Sub-plans` index is Step 7's job, not this item's.

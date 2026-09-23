@@ -3,17 +3,17 @@ name: star-plan-reviser
 disable-model-invocation: true
 description: >-
   Audit a research plan against execution evidence and revise approved items in place with a recorded
-  history; it can also drop or restore a plan subtree. Use after partial or complete execution;
+  history; it can also drop or revive a plan subtree. Use after partial or complete execution;
   structural decomposition and strategy changes route to their owning skills.
 ---
 
 # Research Plan Reviser
 
-Invocation: `star-plan-reviser PLAN_NAME [DESCRIPTION]`. Resolve the plan first. Natural language that clearly gives up or restores the direction selects `drop` or `restore` and supplies its reason; otherwise run the evidence review. It may also approve named revision items. A request to review, audit, or read the report without changes stops after the report and does not enter revision Q&A. With no settled target, list candidates and ask.
+Invocation: `star-plan-reviser PLAN_NAME [DESCRIPTION]`. Resolve the plan first. Natural language that clearly gives up or revives the direction selects a drop or a revival and supplies its reason; otherwise run the evidence review. It may also approve named revision items. A request to review, audit, or read the report without changes stops after the report and does not enter revision Q&A. With no settled target, list candidates and ask.
 
 **Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
-After resolving the target and the drop, restore, or review path, run `scripts/scan.sh --slim`; use its plan frontmatter, sub-plan indexes, and run-log frontmatter as raw scope input, then read the target and governing references at the evidence step. If it fails, read the plans directly and report the fallback.
+After resolving the target and the drop, revival, or review path, run `scripts/scan.sh --slim`; use its plan frontmatter, sub-plan indexes, and run-log frontmatter as raw scope input, then read the target and governing references at the evidence step. If it fails, read the plans directly and report the fallback.
 
 **Passing a tier model.** Resolve the `pi` entry, or the untagged fallback, using Pi's `provider/model` spelling. Pass it to `star_subagent` as `model` in single mode, or in each selected `tasks[]` / `chain[]` item. It overrides the named agent's model; an empty tier value omits the parameter and preserves inheritance. Use `star-auditor` for a blind read, `star-collector` for bounded collection, and `star-implementer` for execution actions. A whole skill or phase needs a general delegate: use `star-runner`, whose authority is that skill and the supplied brief. Every dispatch starts in a fresh process; preserve the scope and write limits below. If the installed extension has no `model` field or the model is unavailable, retain the current execution route and give one reason when the key is set. After a rejected dispatch, verify it started no work before falling back. The delegate records its actual session model, not the requested alias or the parent's resolver.
 
@@ -25,7 +25,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ## Core Principles
 
-1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (the executor's STOP line applies here too). This applies the project's Verification rule (AGENTS.md §11) to the plan itself. Rules: `references/review_spec.md`.
+1. **Evidence before opinion.** Every review claim carries an evidence pointer (file path, log line, command output). A log's self-reported `done` is not completion — corroborate it against artifacts on disk, re-running cheap checks where pivotal; never launch heavy experiments (conventions §2's STOP line applies here too). This applies the project's Verification rule (AGENTS.md §11) to the plan itself. Rules: `references/review_spec.md`.
 2. **Collect wide; judgment stays with the main agent.** When bounded independent inspection helps, call `star_subagent` with `agent: "star-collector"` and the READ-tier `model` when non-empty. Each follows `references/review_spec.md`, never writes or proposes revisions; synthesis and judgment stay with the main agent.
 3. **The user owns every change.** Findings become numbered revision candidates. Apply any named changes already authorized; put the rest on the page and ask once via `star_questionnaire` under conventions §7.13. Every write must trace to an explicit directive or a candidate accepted from that visible list.
 4. **Revise in place, leave a trail.** Approved edits go into the original `<prefix>_<slug>_plan.md`; never fork `_v2` copies (a duplicate prefix breaks the tree status/decomposer/executor parse). Each session appends one `## Revision History` entry (date, per-change one-liners with evidence, report path) and bumps `updated`; older versions live in git.
@@ -34,7 +34,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ## Workflow
 
-**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0 on the PLAN tier. A clear request may authorize named revisions, drop, or restore; keep the run here only for decisions still unresolved after that request is applied.
+**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0 on the PLAN tier. A clear request may authorize named revisions, a drop, or a revival; whether a decision is still unresolved after that request is applied, which keeps the run here, is decided once before Step 0 under §10.8's fourth condition.
 
 ### Step 0: Resolve the target plan
 
@@ -79,11 +79,17 @@ For each adopted candidate, in file order:
 1. Draft the new section text from the evidence and the user's answer; show a concise before → after summary; write the file.
 2. Keep the section-`status` map honest: an edit that introduces `[TBD]` / `【待定】` flips that section to `in_progress`; a confirmed rewrite stays `done`.
 
-After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks materially changed on a leaf whose `exec_status` is `done` or `blocked`, offer to reset it to `pending` (`exec_runs` keeps the history either way); if an adopted candidate changed a `finalized` plan's §1, §2, §3, or §6 — problem, positioning, method, milestones — ask once whether to clear `finalized:` (a §4/§5 tactical edit such as tightening a kill-criterion leaves it), since `star-code-architect` reads that field to decide whether the plan can drive a search and re-finalizing is `star-plan-coach <slug> <section>`; if an adopted candidate drops this node, write `dropped:` here and the `— dropped <date>` marker on the parent's index line, then move the subtree's files aside per `references/drop_rules.md` step 4, and nothing else — the subtree goes dark by inheritance; then append the `## Revision History` entry per `references/revision_rules.md`.
+After the last edit:
+
+- Bump `updated`.
+- If the §5 done-criterion or §3 tasks materially changed on a leaf whose `exec_status` is `done` or `blocked`, offer to reset it to `pending` (`exec_runs` keeps the history either way).
+- If an adopted candidate changed a `finalized` plan's §1, §2, §3, or §6 — problem, positioning, method, milestones — ask once whether to clear `finalized:`; a §4/§5 tactical edit such as tightening a kill-criterion leaves it. The skills conventions §0 names wait on that field; re-finalizing is `star-plan-coach <slug> <section>`.
+- If an adopted candidate drops this node, write `dropped:` here and the `— dropped <date>` marker on the parent's index line, append one line to the root plan's §5 dead ends (the Rolled up row of `references/drop_rules.md`), then move the subtree's files aside per `references/drop_rules.md` step 4, and nothing else — the subtree counts as dropped by inheritance.
+- Always, last: append the `## Revision History` entry per `references/revision_rules.md`.
 
 ### Step 6: Consistency pass
 
-- If the plan's title or one-line objective changed, update the parent's matching `## Sub-plans` line — the only edit allowed outside the target file.
+- If the plan's title or one-line objective changed, update the parent's matching `## Sub-plans` line. Outside the target file, this line and a drop's writes (`references/drop_rules.md`: the parent marker, the root plan's dead-end line with its one-line Revision History entry and `updated` bump, the move) are the only edits allowed.
 - Re-check that `children:` entries and `depends_on` prefixes still resolve; **flag** dangling references for `star-plan-decomposer` — do not repair silently. (Editing the target's own `depends_on` list is allowed as an approved candidate; redrawing edges across siblings is not.)
 - If the target is a parent and the revision touched content its children were derived from, name the affected children and recommend re-decomposition.
 
@@ -93,17 +99,17 @@ After the last edit: bump `updated`; if the §5 done-criterion or §3 tasks mate
 
 ### Dropping a plan, and taking one back
 
-This path replaces Steps 1–6 with five steps of its own — read what goes dark, ask once, write the three places, move the subtree's files aside, report — and its rules, including where `dropped:` is written, where the files go, and what inheritance does to the descendants, are in `references/drop_rules.md`, read where the run is a drop or a revival and not before. A review run reads none of it.
+This path replaces Steps 1–6 with five steps of its own — read what the drop takes with it, ask once, write the drop's places, move the subtree's files aside, report — and its rules, including where `dropped:` is written, where the files go, and what inheritance does to the descendants, are in `references/drop_rules.md`, read where the run is a drop or a revival and not before. A review run reads it only once this skill's Step 4 adopts a drop candidate, for that file's step 4 (the move) and its Rolled up row.
 
 ## State & File Rules
 
 - Review reports live under `wkdrs/`, never under `metds/plans/`.
-- Edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status`, `dropped:` — the last three only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed or its drop marker goes on, plus — on an approved drop or revival only — moving the subtree's files between their live and `dropped/` locations (`references/drop_rules.md`). Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
+- Edit only: the target plan's body and frontmatter (`updated`, section `status` map, `depends_on`, `exec_status`, `dropped:` — the last three only as user-approved candidates), plus the parent's `## Sub-plans` one-liner when the objective changed or its drop marker goes on, plus — on an approved drop only — one line appended to the root plan's §5 dead ends, with the root's `updated` bump and one-line `## Revision History` entry, plus — on an approved drop or revival only — moving the subtree's files between their live and `dropped/` locations (`references/drop_rules.md`). Everything else is read-only: `EXEC_PLAN.md` / `EXEC_LOG.md`, sibling and child plan bodies, prefixes (never renumber), plan files (never delete or fork).
 - Every write must trace to an explicit user directive or an accepted candidate; `## Revision History` is append-only.
-- Git: when edits were applied, offer once at Step 7 to commit the target plan (plus the parent when its `## Sub-plans` line changed) — `star-plan-reviser: <slug> — <n> changes` (conventions §1). Core Principle 4's "older versions live in git" depends on these commits.
+- Git: when edits were applied, offer once at Step 7 to commit the target plan (plus the parent when its `## Sub-plans` line changed; on a drop or revival, also the moved subtree paths, and on a drop the root plan's dead-end line) — `star-plan-reviser: <slug> — <n> changes` (conventions §1). Core Principle 4's "older versions live in git" depends on these commits.
 - Legal section `status`: `pending` / `in_progress` / `done` / `skipped`; legal `exec_status`: `pending` / `in_progress` / `done` / `blocked` / `abandoned` — same as the family. Setting `abandoned` is a revision candidate like any other: it needs the user's explicit approval, with the reason in the Revision History entry. `dropped:` is a date-plus-reason line written on this node alone — every skill reads it as inherited by the whole subtree — set or cleared only through the drop rule in `references/revision_rules.md`.
 
 ## Dialogue Discipline
 
-- Ask one question at a time through `star_questionnaire` only for unresolved revision, reset, finalization, drop, restore, or overwrite authority; use concise plain text if the tool is unavailable. A report-only request ends with the report. The plan body and review report keep the plan's frontmatter `language`.
+- Ask one question at a time through `star_questionnaire` only for unresolved revision, reset, finalization, drop, revival, or overwrite authority; use concise plain text if the tool is unavailable. A report-only request ends with the report. The plan body and review report keep the plan's frontmatter `language`.
 - **The candidate list goes in the text of the same message, above the question** — the options carry the answers and none of the material.

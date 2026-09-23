@@ -185,11 +185,15 @@ function print_section(n, pat, label,   i) {
 # checkbox items, and plan-level-finding notes. Language-agnostic apart from the
 # bilingual token pairs (the current labels plus the pre-rename ones, so
 # EXEC_LOG.md files already on disk still index), and it keeps prose out of the
-# digest.
-function body_index(n,   i, line, heading, printed) {
-    heading = ""; printed = 0
+# digest. A line that opens with <!-- (template guidance), and every line up to
+# its -->, is skipped; a <!-- later in a line is content, so a row or checkbox
+# carrying a trailing comment still prints.
+function body_index(n,   i, line, heading, printed, incomment) {
+    heading = ""; printed = 0; incomment = 0
     for (i = 1; i <= n; i++) {
         line = buf[i]
+        if (incomment) { if (line ~ /-->/) incomment = 0; continue }
+        if (line ~ /^[ \t]*<!--/) { if (line !~ /-->/) incomment = 1; continue }
         if (line ~ /^## /) { heading = line; printed = 0; continue }
         if (heading == "") continue
         if (line ~ /^\|/ || line ~ /^[ \t]*- \[/ || line ~ /Plan-level finding/ ||
@@ -275,10 +279,12 @@ function tally_row(line,   cells, nc, c, v) {
         tcount[c SUBSEP v]++
     }
 }
-function body_tally(n,   i, line) {
-    theading = ""; tally_reset()
+function body_tally(n,   i, line, incomment) {
+    theading = ""; tally_reset(); incomment = 0
     for (i = 1; i <= n; i++) {
         line = buf[i]
+        if (incomment) { if (line ~ /-->/) incomment = 0; continue }
+        if (line ~ /^[ \t]*<!--/) { if (line !~ /-->/) incomment = 1; continue }
         if (line ~ /^## /) { tally_flush(); theading = line; tally_reset(); continue }
         if (theading == "") continue
         if (line ~ /^\|/) { tally_row(line); continue }
@@ -486,12 +492,12 @@ sweep() {   # $1 = mode, $2 = what to say when the sweep found nothing; paths on
 # byte-identical whatever the caller ran it with.
 find_md() {   # $1 = dir, $2 = exact depth below it, $3 = name pattern
     [ -d "$1" ] || return 0
-    find "$1" -mindepth "$2" -maxdepth "$2" -type f -name "$3" 2>/dev/null | sort
+    find -L "$1" -mindepth "$2" -maxdepth "$2" -type f -name "$3" 2>/dev/null | sort
 }
 
 find_dirs() { # $1 = dir; immediate subdirectories, trailing slash kept
     [ -d "$1" ] || return 0
-    find "$1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|$|/|' | sort
+    find -L "$1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|$|/|' | sort
 }
 
 if [ ! -d metds ] && [ ! -d wkdrs ]; then

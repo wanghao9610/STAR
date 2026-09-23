@@ -65,7 +65,7 @@
 每执行完一条获批的行，主 agent 就自己重跑检查——绝不采信自报：
 
 1. 经 `.env` 解释器对目的地跑 `python -m compileall -q <destination>`。
-2. 在全仓库跑 `grep -rn "<旧路径>" --include="*.py" --include="*.sh" --include="*.md" .`——任何残留命中要么是还没修的调用点，要么说明这一行没做完。
+2. 在全仓库跑 `grep -rn "<旧路径>" --include="*.py" --include="*.sh" --include="*.md" .`——`metds/` 与 `wkdrs/` 之外的任何残留命中，要么是还没修的调用点，要么说明这一行没做完。本次运行从不写这两处，所以那里的命中不判这一行失败：`metds/plans/` 下的命中写进该行的 `plan_referenced` 和报告的"因此过期的计划文本"一块，转交 `star-plan-reviser`；那里其他文件中的命中——编译出的 `metds/*.md`、`wkdrs/` 下的运行记录或结果汇总表——列在该行上、原样不动，因为运行记录描述的是当时跑了什么。
 3. `merge` 的情况：接收方文件能编译，且其原有导入方仍可解析。
 
 尝试修复后仍失败的行要恢复原样（被跟踪路径用 `git checkout`，其余移回原处），在报告里标 `blocked` 并附失败文本，然后继续处理其余行。

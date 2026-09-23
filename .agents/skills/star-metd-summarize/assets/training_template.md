@@ -54,6 +54,6 @@ sources:
 
 ## 5. Reproduction
 
-<!-- Per stage: the entry point, the config, and the launch command through the project's conda
-     env (via execs/run.sh where the plans use one), plus where outputs are written under wkdrs/. Commands
+<!-- Per stage: the entry point, the config, and the launch command through the project's .env
+     interpreter (via execs/run.sh where the plans use one), plus where outputs are written under wkdrs/. Commands
      as the plans record them — this document is read, never executed. -->

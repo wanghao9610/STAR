@@ -5,10 +5,10 @@ source_plan: <prefix>_<slug>_plan.md # 本次执行的 metds/plans/ 下叶子子
 task_dir: tasks/<prefix>_<slug>      # 该计划执行过程的中间文件目录
 code_name: <CODE_NAME>               # 从 .env 解析
 created: <YYYY-MM-DD>
-approved: <YYYY-MM-DD>               # 用户经 exit_plan_mode 批准的日期
+started: <YYYY-MM-DD>                # agent 开始本次已授权执行的日期
 branch: <run 名 | none>          # 本次执行所在的执行分支，名字与上面的 run: 完全相同（规约 §11）；none = 在基础分支上执行
 base: <分支名@短SHA | —>             # 分支从哪里分出——也是合并目标；branch 为 none 时写 —
-worktree: <绝对路径 | none>          # 安置本次 run 的工作树（规约 §11.7–9）；none = 在被调用的 checkout 里执行
+worktree: <绝对路径 | none>          # 安置本次 run 的工作树（规约 §11.7–9）；none = 在发起调用的 checkout 里执行
 done_criterion: "<本轮必须满足的子计划 §5 检查,含阈值>"
 model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
 model_trail:                    # 只追加：每次写入会话一条，新的加在末尾，绝不改写既有条目
@@ -37,11 +37,11 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 ## 动作清单
 
 <!-- 有序。每个动作绑一个 check。`执行方` = `agent`(在此执行) 或 `stop → 用户`(agent 备好命令、用户来跑
-     ——见红线)。命令走 .env 的 conda 环境;产物落 wkdrs/<run>/ 下。
+     ——见红线)。命令走 .env 的解释器(规约 §3);产物落 wkdrs/<run>/ 下。
      一整组配置(超参网格、多 seed 重复)算**一个**动作,不是一格一行:产物列写 wkdrs/<run>/cells/,
      检查列写子计划 §5 对整张网格提的那条判据。 -->
 
-| # | 动作 | 文件 / 模块(${CODE_NAME}/…) | 命令(走 conda) | 产物(wkdrs/<run>/…) | 检查 | 执行方 |
+| # | 动作 | 文件 / 模块(${CODE_NAME}/…) | 命令(走 .env 解释器) | 产物(wkdrs/<run>/…) | 检查 | 执行方 |
 |---|------|------------------------------|-----------------|----------------------|------|--------|
 | 1 | <新建/修改 …> | <路径> | — | — | <import / 跑通性检查> | agent |
 | 2 | <…> | <路径> | <命令> | <路径> | <证明它完成的检查> | agent |
@@ -49,9 +49,9 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 ## 红线
 
-<!-- 哪些动作越过红线、为什么(长时/多卡训练、全量评测、大开销 API)。每条给出:走 conda 环境的确切命令
-     (存在运行入口时经 execs/run.sh)、它产出什么和存哪、用户该带回什么输出以便验证完成判据。可把可复用的启动
-     脚本写到 execs/scpts/<run>.sh(写它没问题;跑它仍归用户)。
+<!-- 哪些动作越过红线、为什么(长时/多卡训练、全量评测、大开销 API)。每条给出:走 .env 解释器的确切命令
+     (规约 §3;存在运行入口时经 execs/run.sh)、它产出什么和存哪、用户该带回什么输出以便验证完成判据。命令写成
+     启动脚本 execs/scpts/<run>.sh(写它是轻量的;跑它按 references/stop_line_rules_zh.md 处理)。
      每条还要写出预计开销:GPU 数 × 小时,或调用次数与费用。它是根计划 §4 算力预算的对账依据——
      命令跑完带回来时,实际开销填进 EXEC_LOG 的"开销"一节。
      -->

@@ -36,4 +36,4 @@ For each occurrence class, add a row to the do-not-rename table (`codearc.md` §
 
 ## Import check (post-env)
 
-Once the `.env` conda env has the dependencies: `python -c "import <code_name>"` through that env. Record it in the final report; if the env does not exist yet, say the check is pending and hand over the prepared install commands instead.
+Once the interpreter `.env` names (conventions §3) has the dependencies: `python -c "import <code_name>"` through it. Record it in the final report; if the env does not exist yet, say the check is pending and hand over the prepared install commands instead.

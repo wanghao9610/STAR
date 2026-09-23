@@ -50,4 +50,4 @@ Never run autonomously — prepare the exact command, record it in the report, a
 - Downloads over ~1 GB (weights, datasets).
 - Full test suites, benchmarks, or anything that trains.
 
-Light pure-Python installs may run only with the user's explicit in-session consent. When in doubt, treat it as heavy.
+Installs of any size are prepared and routed to `star-env-builder` (conventions §3.5).

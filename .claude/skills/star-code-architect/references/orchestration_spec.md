@@ -5,8 +5,8 @@ How this skill structures survey and migration work. Sibling spec: the executor'
 ## Roles
 
 - **The main agent (the architect)** — plans, asks the user at each confirmation point, partitions work, re-runs checks, commits each verified group, restores what failed.
-- **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value the opening load returned, omitted when that key is empty), one area each (`survey_spec.md`).
-- **Migrators** — `Agent` subagents (`subagent_type: general-purpose`, `model:` the EXEC tier value the opening load returned, omitted when that key is empty), one per migration group, write access limited to their group's files.
+- **Surveyors** — read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value read from `.env`, omitted when that key is empty), one area each (`survey_spec.md`).
+- **Migrators** — `Agent` subagents (`subagent_type: general-purpose`, `model:` the EXEC tier value read from `.env`, omitted when that key is empty), one per migration group, write access limited to their group's files.
 
 A delegated survey area runs on the READ tier's model and a delegated migration group on the EXEC tier's model, where the harness can name the model a delegate runs on (conventions §10.8); an empty key, or a harness that cannot name one, changes nothing else here.
 
@@ -50,4 +50,4 @@ Never run autonomously — prepare the exact command, record it in the report, a
 - Downloads over ~1 GB (weights, datasets).
 - Full test suites, benchmarks, or anything that trains.
 
-Light pure-Python installs may run only with the user's explicit in-session consent. When in doubt, treat it as heavy.
+Installs of any size are prepared and routed to `star-env-builder` (conventions §3.5).

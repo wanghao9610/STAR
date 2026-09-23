@@ -30,8 +30,8 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## Artifacts present
 
-<!-- What is actually in the run directory now: checkpoints, metrics files, logs, figures. Paths
-     relative to this file. Sizes or counts where they help. -->
+<!-- What is actually in the linked run directory now: checkpoints, metrics files, logs, figures.
+     Paths relative to this file, so each starts with `output/`. Sizes or counts where they help. -->
 
 ## Metrics found
 

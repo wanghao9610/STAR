@@ -2,7 +2,7 @@
 
 **Language:** English | [简体中文](memory_spec.zh-CN.md)
 
-Where a session records what it learned, and how that reaches the next one. The rule for *whether* to record — offer, never assume; the project's own files come first — is `AGENTS.md` §10, not repeated here. This file is the format both halves stand on: what the store holds, what one memory looks like, what the hooks parse.
+Where a session records what it learned, and how that reaches the next one. The rule for *whether* to record: offer, never assume — at most two offers a session, written only after the user agrees, `INVOLVE=low` recording unasked and saying so; a fact a project file already owns goes there (`AGENTS.md` §10 where present). This file is the format both halves stand on: what the store holds, what one memory looks like, what the hooks parse.
 
 ## What belongs here
 

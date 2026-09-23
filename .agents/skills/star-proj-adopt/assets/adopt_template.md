@@ -32,7 +32,7 @@ model_trail:                    # append-only: one entry per write session, newe
 | Runtime | `PYTHON_HOME=<path>` | — | | |
 | Data | `datas/` | `<abs path>` | | link / already in place |
 | Weights | `inits/` | `<abs path>` | | |
-| Outputs | `wkdrs/` | `<abs path>` | | |
+| Outputs | `wkdrs/<run>/output`, per chosen run | `<abs path>` | | |
 
 ## 3. What was wired
 

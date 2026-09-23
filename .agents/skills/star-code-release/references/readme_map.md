@@ -10,7 +10,7 @@ The reference shape is what research repositories converge on (GroundingDINO, YO
 
 | # | Section | Kind | Primary source | Supporting source | When the source is absent |
 |---|---|---|---|---|---|
-| 1 | Header — title, tagline, badges, teaser | M | `metds/overview.md` §problem + §core idea | repo directory name, `.env` `CODE_NAME`, `metds/refs/reference.bib` self-entry | Title from the repo/`CODE_NAME`; tagline `TODO` → `star-metd-summarize overview` |
+| 1 | Header — title, tagline, badges, teaser | M | `metds/overview.md` §problem + §core idea | repo directory name, `.env` `CODE_NAME`, `metds/refs/reference.bib` self-entry (see §15) | Title from the repo/`CODE_NAME`; tagline `TODO` → `star-metd-summarize overview` |
 | 2 | News / Updates | O | root plan §6 milestones with dates, `wkdrs/digests/EXPT_DIGEST_*.md` | — | Omit — a news line nobody wrote is not news |
 | 3 | Abstract / Introduction | M | `metds/overview.md` — problem, gap, core idea | root plan §1–§2 | `TODO` → `star-metd-summarize overview` |
 | 4 | Highlights / Contributions | O | `metds/overview.md` contributions (its falsifiable claims) | — | Omit |
@@ -24,7 +24,7 @@ The reference shape is what research repositories converge on (GroundingDINO, YO
 | 12 | Results | O | `wkdrs/results/results.md` — **the only source of a number** | — | Omit. Never reconstruct a table from `EXPT_ANALYSIS` reports or digests |
 | 13 | Repository structure | O | `metds/codearc.md` §1 directory layout | — | Omit |
 | 14 | TODO / Roadmap | O | root plan §6 milestones not yet `done` | — | Omit |
-| 15 | Citation | M | `metds/refs/reference.bib` self-entry | root plan §1 for the title | Placeholder BibTeX with a `TODO` — never a fabricated venue, year, or author list |
+| 15 | Citation | M | `metds/refs/reference.bib` self-entry — the entry whose title matches the project's paper title (root plan §1 or `metds/overview.md`), confirmed with the user when none or several match | root plan §1 for the title | Placeholder BibTeX with a `TODO` — never a fabricated venue, year, or author list. Route the missing entry to `star-refs-reviewer add <arXiv id>` once the paper is public, else to a hand-added `% src: user-supplied` entry |
 | 16 | License | M | root `LICENSE` | `metds/codearc.md` §5 upstream license implications | One line naming the missing file; the checklist raises it as a blocker |
 | 17 | Acknowledgement | M when `UPSTREAM.md` exists | `${CODE_NAME}/UPSTREAM.md` | `metds/refs/refs_index.md` core papers | Omit only when there is no upstream and no core-paper base |
 | 18 | Footer — Built with STAR | M | — | — | Always present |

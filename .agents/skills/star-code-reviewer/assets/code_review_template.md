@@ -10,7 +10,9 @@
      files). Review rules loaded (project guidelines, metds/codearc.md, plan §2–§5) and which
      were absent. Static evidence: compileall result; ruff/flake8 result or "not installed";
      "reading-only review" when the env was unusable. Whole-tree screen: what each of the three
-     checks returned — it runs whatever the scope, and whether or not the env works. -->
+     checks returned — it runs whatever the scope, and whether or not the env works.
+     Code version: the head commit at review time (`git rev-parse --short HEAD`), with the execution
+     branch beside it when the run records one — a later refresh (Step 0, item 5) diffs against it. -->
 
 ## 2. Verdict
 
@@ -60,5 +62,5 @@
 
 ## 7. Fix Record
 
-<!-- Appended by the fix pass: one line per eligible finding — F<n>: applied / applied unasked / skipped / reverted
-     (<reason>) — plus the commit hash when the fixes were committed. "No fix pass run" otherwise. -->
+<!-- Appended by the fix pass: one line per eligible finding — F<n>: applied / skipped / reverted
+     (<reason>), with its authorization source — plus the commit hash when the fixes were committed. "No fix pass run" otherwise. -->

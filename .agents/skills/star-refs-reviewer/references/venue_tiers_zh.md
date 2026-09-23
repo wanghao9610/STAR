@@ -1,8 +1,12 @@
 # Venue 档位表 —— 影响力分的发表分量
 
-`references/refs_rubric_zh.md`"影响力分"一节里发表分量背后的查询表。查法是确定性的：取抓回记录的 venue 字段——转录下来的 `booktitle` 或 `journal`，没有就用检索记录的 venue 串——去掉花括号，忽略大小写，对下面各行匹配。缩写只按整词命中（`ACL` 不会命中 `NAACL`）；名称片段按子串命中，一行里任一片段命中即可——带缩写点的备选片段覆盖 DBLP 的 condensed 期刊形式（`IEEE Trans. Pattern Anal. Mach. Intell.`）。先命中的档位生效；哪行都没命中而已正式发表 → 4；仅预印本 → 2。
+`references/refs_rubric_zh.md`"影响力分"一节里发表分量背后的查询表。查法是确定性的：取抓回记录的 venue 字段——转录下来的 `booktitle` 或 `journal`，没有就用检索记录的 venue 串——去掉花括号，忽略大小写，对下面各行匹配。缩写只按整词命中（`ACL` 不会命中 `NAACL`）；名称片段按子串命中，一行里任一片段命中即可——带缩写点的备选片段覆盖 DBLP 的 condensed 期刊形式（`IEEE Trans. Pattern Anal. Mach. Intell.`）。命中下面"先查清单"的记 4，不再试任何档位行；否则先命中的档位生效；哪行都没命中而已正式发表 → 4；仅预印本 → 2。
 
 表按 CS/AI 校准。换领域的项目改的是清单，绝不是规则——某个没列的 venue"明显该进某档"，就在这里加一行，而不是运行中临场破例。查表不掺判断。
+
+## 先查清单 —— 4
+
+venue 串（忽略大小写）含下列任一项的，在试任何档位行之前就记 4：`Workshop`——workshop 的 venue 串里带着主会的缩写或名称（`CVPR Workshops`、`… Pattern Recognition Workshops (CVPRW)`）；以及名称里含旗舰片段、却不是那个会的次级 venue——`Machine Learning and Applications`（ICMLA）、`Computer Vision Systems`（ICVS）、`Computer Vision Theory`（VISAPP）。
 
 ## 档位 10 —— 旗舰
 
@@ -50,7 +54,7 @@ ACL 的片段故意取完整的 "Annual Meeting …" 短语：NAACL 与 EACL 的
 
 ## 档位 4 —— 其他正式发表
 
-workshop、区域会议、清单之外的期刊：venue 哪行都对不上的记录都算这档。4 是正式发表的默认档；不需要匹配模式。
+workshop（由先查清单拦下）、区域会议、清单之外的期刊：venue 哪一档位行都对不上的记录都算这档。4 是正式发表的默认档；不需要匹配模式。
 
 ## 档位 2 —— 仅预印本
 

@@ -41,7 +41,7 @@ Invocation: `star-proj-adopt [survey | backfill] [DESCRIPTION]`. Resolve the pha
 
 **Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
-**Passing a tier model and depth.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `Agent`'s `model` for every delegate of that tier; omit it when empty. Where the entry carries a depth, dispatch that delegate as its tier's named agent — `subagent_type: star-plan`, `star-exec` or `star-read`, whose `effort:` frontmatter `bash execs/configure.sh` stamped with that depth — in place of whatever generic subagent type a step below names; a configured depth is reason enough to dispatch even when the tier model is an alias of this session's, and where the named agent is missing, dispatch the generic type and say once that the depth went unapplied. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
+**Passing a tier model and depth.** Resolve the `claude` entry, or the untagged fallback, before dispatch. Pass the resolved value as `Agent`'s `model` for every delegate of that tier; omit it when empty. Where the entry carries a depth, dispatch a whole-run, phase or implementing delegate as its tier's named agent — `subagent_type: star-plan`, `star-exec` or `star-read`, whose `effort:` frontmatter `bash execs/configure.sh` stamped with that depth — in place of the generic subagent type a step below names; a configured depth is reason enough to dispatch even when the tier model is an alias of this session's. A read-only dispatch keeps `Explore` and passes only `model:`, because the named agents carry no tool restriction. Where a depth goes unapplied — a read-only dispatch, or a missing named agent, when the generic type is dispatched instead — say so once. Use a model accepted by the current tool, preserving the role and write limits specified below. A blind read receives only its artifact and rubric, never the producing conversation. If the model is unavailable, keep the run here and give one reason; after a rejected dispatch, verify it started no work before falling back. The delegate resolves its own actual model from its own session provenance, never from the requested alias or the parent's transcript.
 
 ## Role
 
@@ -52,7 +52,7 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`s
 ## Core Principles
 
 1. **Never overwrite, never move, never rename.** Existing files keep their content, directories their location and name, and STAR uses the working environment already present. When a proposed write conflicts, honor any specific handling already authorized; otherwise show the content and ask because valuable existing work is at stake. `CODE_NAME` keeps the source directory's current name.
-2. **Reach large directories, do not relocate them.** Existing data, weights, and output trees are wired in with symlinks at `datas/`, `inits/`, `wkdrs/` so `DATA_DIR` / `INIT_DIR` / `WORK_DIR` resolve, while every absolute path in existing code and scripts keeps working. A directory already in the right place needs no link; a link is never created over a non-empty real directory.
+2. **Reach large directories, do not relocate them.** Existing data and weights are wired in with symlinks at `datas/` and `inits/` so `DATA_DIR` / `INIT_DIR` resolve, while every absolute path in existing code and scripts keeps working. `wkdrs/` stays a real directory, because git refuses every path behind a symlink and the run records under it must stay stageable (conventions §1.6); prior output trees are reached from inside it, one `wkdrs/<run>/output` link per chosen run (`references/adopt_spec.md` §6). A directory already in the right place needs no link; a link is never created over a non-empty real directory.
 3. **Evidence, not recall.** Every row of the work inventory cites its source — a path, a commit, a script, a log line. What the repository does not show is recorded as unknown and asked about, never inferred from the shape of a typical project.
 4. **Reconstruction is always labeled.** A record written after the fact is not an execution record. Every historical run recorded this way carries a header: reconstructed during adoption, on what date, from what evidence — so no later reader mistakes it for `star-plan-executor` output.
 5. **Adoption does not invent research strategy.** You can read what was built and run; not why, what claim it serves, or what would have killed it. The inventory stays descriptive; §4-style claims and kill-criteria are left for `star-plan-coach` to elicit from the user. A plan tree fabricated from a git log is worse than no plan tree.
@@ -63,7 +63,7 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`s
 
 After resolving the phase, read `references/adopt_spec.md` for `survey` or `references/backfill.md` for `backfill`; do not load the other branch.
 
-**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0. `survey` uses EXEC and `backfill` uses PLAN. A mapping, historical-run selection, or backfill choice already settled by the request is not asked again.
+**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0. `survey` uses EXEC and `backfill` uses PLAN. A mapping, historical-run selection, or backfill choice already settled by the request is not asked again.
 
 ### Phase `survey`
 
@@ -71,7 +71,7 @@ After resolving the phase, read `references/adopt_spec.md` for `survey` or `refe
 
 Detect, without writing anything: candidate source directories (top-level importable packages, the one the entrypoints import), the runtime in use (`conda env list`, a `.venv`, `which python`, an env name in existing scripts), where data / weights / outputs live, the launch entrypoints and how they are invoked, the existing tests, and the git history shape (first commit, commit count, active paths). Present the mapping as one compact block, marking every low-confidence line.
 
-The survey may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `Agent` subagent (`subagent_type: Explore`, `model:` the READ tier value the opening load returned, omitted when that key is empty) each, run in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` confidence decides what reaches Confirmation point 1, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check), not a re-read, so the repository's bulk never comes back. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
+The survey may fan out **by area** — source, runtime, data, weights, outputs, entrypoints — one read-only `Agent` subagent (`subagent_type: Explore`, `model:` the READ tier value read from `.env`, omitted when that key is empty) each, run in parallel, each briefed verbatim: "read-only — do not run the project's code, do not import its package, do not create or repair any environment; write nothing." Each returns findings, evidence paths, alternatives and unknowns — and **no confidence label**: in `adopt_spec.md` confidence decides what reaches Confirmation point 1, so the main agent assigns `certain` / `likely` / `unknown` itself. Confirming a `certain` line takes a command (`test -d`, an interpreter version check), not a re-read, so the repository's bulk never comes back. This is the expensive part of an unfamiliar repository; S4 below builds on what these areas gathered instead of walking their sources again.
 
 #### Step S2: Confirmation point 1 — confirm the mapping
 
@@ -82,7 +82,7 @@ Apply mapping choices already stated by the user. For any unresolved `CODE_NAME`
 In this order, each step reported as done or skipped-because-it-exists:
 
 1. `.env` — from `.env.example` when absent. Preserve existing values unless the user specifically authorized the shown conflicting-key change; otherwise ask only about those keys.
-2. Symlinks for `datas/`, `inits/`, `wkdrs/` per Principle 2. Skip and say so when the path is a non-empty real directory.
+2. Symlinks for `datas/` and `inits/` per Principle 2, and a real `wkdrs/` where none exists (`references/adopt_spec.md` §3). Skip and say so when a path is a non-empty real directory.
 3. `execs/` — `run.sh` and `update.sh` only if missing. For each launch entrypoint, one `execs/scpts/<name>.sh` that **calls the project's existing command**, unchanged, through the exported paths. Never rewrite the project's own launcher.
 4. Verify: `bash execs/run.sh --list` lists the wrappers, and the resolved interpreter reports its version. Report what ran and what did not.
 
@@ -92,7 +92,7 @@ From git log, the entrypoints, the output directories, and the README, assemble 
 
 #### Step S5: Confirmation point 2 — record the historical runs worth keeping
 
-List the prior runs — path, date, apparent output, and any visible logged metric. Apply an existing selection; if it does not settle the list, ask once via AskUserQuestion over the visible rows. Symlink each chosen run to `wkdrs/<run>/` and write a minimal reconstructed `EXEC_LOG.md` from `assets/exec_log_reconstructed.md`; keep all others as inventory evidence and report the count omitted.
+List the prior runs — path, date, apparent output, and any visible logged metric. Apply an existing selection; if it does not settle the list, ask once via AskUserQuestion over the visible rows. Link each chosen run inside a new real `wkdrs/<run>/` and write a minimal reconstructed `EXEC_LOG.md` there from `assets/exec_log_reconstructed.md`; keep all others as inventory evidence and report the count omitted.
 
 #### Step S6: Write the record & route
 
@@ -104,12 +104,12 @@ This phase matches the work inventory against the decomposed plan tree and propo
 
 ## State & File Rules
 
-- The durable output is `metds/adopt.md` (conventions §8). Writes are otherwise limited to: `.env`, the `datas/` / `inits/` / `wkdrs/` symlinks, `execs/run.sh`, `execs/update.sh`, `execs/scpts/*.sh`, the recorded `wkdrs/<run>/` links and their reconstructed `EXEC_LOG.md`, and — in `backfill` only — the two frontmatter fields on confirmed leaves.
+- The durable output is `metds/adopt.md` (conventions §8). Writes are otherwise limited to: `.env`, the `datas/` / `inits/` symlinks, a real `wkdrs/` where none existed or, with the user's agreement, in place of a linked one, `execs/run.sh`, `execs/update.sh`, `execs/scpts/*.sh`, the recorded `wkdrs/<run>/` directories with their `output` links and reconstructed `EXEC_LOG.md`, and — in `backfill` only — the two frontmatter fields on confirmed leaves.
 - Never touched in either phase: `${CODE_NAME}/` and everything under it, the project's own launchers, configs, and CI, `metds/ideas/**`, `metds/refs/**`, `metds/codearc.md`, the compiled `metds/*.md`, and every part of a plan file outside those two fields.
 - Real dates only, from the system clock (conventions §4) — the adoption date, each recorded run's date, the backfill date.
 - STOP line (conventions §2): nothing here trains, evaluates, installs, or deletes. The survey is read-only, the verification is `--list` plus an interpreter version check. Environment repair belongs to `star-env-builder`; a runtime that cannot run python is a blocker to report, not one to fix.
 - Git: offered once at the end of each phase, staging only the paths this skill wrote — `star-proj-adopt: <phase> — <summary>` (conventions §1). `.env` and the ignored trees stay out of history. A path that already carried uncommitted changes when the run started is never staged — common in an adopted repository: name those paths rather than working around them.
-- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: say so and do not commit on it; the user switches back or names where the commit goes (conventions §11).
 
 ## Dialogue Discipline
 
@@ -117,4 +117,4 @@ This phase matches the work inventory against the decomposed plan tree and propo
 - **Material a question is about goes in the text of the same message, above the call** — the prior-run list, the proposed leaf rows. The options carry the answers and none of the material; read the message back before it goes out: options with nothing above them mean the material was skipped, not shortened.
 - Lead with what the survey found and what it could not settle — a confidently wrong `CODE_NAME` costs the user every downstream skill.
 - Say plainly what adoption did **not** do: read the code architecture, write a research plan, judge any result. Name the skill that owns each.
-- `metds/adopt.md` body language follows the dialogue language at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.
+- `metds/adopt.md` body language follows the language resolved under conventions §7.6 at creation and is kept on re-run. Keep paths, package names, commit SHAs, and metric names in English inside Chinese documents.

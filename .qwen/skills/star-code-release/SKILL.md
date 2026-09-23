@@ -33,7 +33,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 ## Workflow
 
-**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0. The full run and `gather`, `polish`, and `readme` modes use EXEC; `check` uses READ. Do not hand off a run while a required user decision remains.
+**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0. The full run and `gather`, `polish`, and `readme` modes use EXEC; `check` uses READ. Whether a required user decision remains is decided once before Step 0 under §10.8's fourth condition.
 
 ### Step 0: Orient & resolve the phase
 
@@ -50,7 +50,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 3. Resolve each promoted candidate's destination from `codearc.md` §2, detect near-duplicates in `${CODE_NAME}/`, and mark the action `move` / `merge` / `keep in place` / `route`. A candidate whose path is named in a plan file is marked `plan-referenced`: moving it makes that plan line stale, and plan text is not yours to edit — the row carries the exact lines that will go stale so the user approves with that visible.
 4. Above ~15 candidates, state the count and narrow only if the requested promotion scope did not already settle it. Re-open each row's cited evidence before deciding it.
 5. Present the promotion table — path, evidence, destination, action, risk — and apply any row selection already authorized. If the move set remains unresolved, ask once via `ask_user_question` over the visible list under conventions §7.13. Approving nothing is valid → skip to Step 2.
-6. Execute the approved rows one at a time: move (`git mv` when the file is tracked, a plain move otherwise — under `wkdrs/` only `*.md` is tracked), then fix the moved file's imports and every call site referencing its old path. After each row, re-verify yourself: `python -m compileall -q` on the destination, and a repository-wide grep for the old path proving no stale reference remains. A row that fails → revert it, mark it `blocked`, continue with the rest.
+6. Execute the approved rows one at a time: move (`git mv` when the file is tracked, a plain move otherwise — under `wkdrs/` only `*.md` is tracked), then fix the moved file's imports and every call site referencing its old path. After each row, re-verify yourself: `python -m compileall -q` on the destination, and a repository-wide grep for the old path proving no stale reference remains outside `metds/` and `wkdrs/`, which this run never writes — hits there are listed on the row as `references/gather_rubric.md` says. A row that fails → revert it, mark it `blocked`, continue with the rest.
 7. Commit the phase (staging only the promoted paths and their fixed call sites): `star-code-release: promote <n> file(s) into ${CODE_NAME}/`.
 
 ### Step 2 — `polish`: the files a reader will open
@@ -67,7 +67,7 @@ Before drafting, read `docs/mds/star-workflow/human-writing-guide.md` (Chinese: 
 1. Choose the section set from `references/readme_map.md`: mandatory sections always appear (with a `TODO` naming the producer skill when their source is absent), omit-when-empty sections are dropped silently, not padded.
 2. Fill `assets/readme_template.md`, transcribing per the map's rules — numbers verbatim from the results table with their run, commands verbatim from the resolved script, figure paths only when the file exists.
 3. Handle what is already at `README.md`, three cases:
-- **Carries this skill's generated marker** → show one section-level change list. An explicit request to update this generated README authorizes the listed compile; otherwise ask once via `ask_user_question` over unresolved sections. A section changed by hand defaults to **keep**.
+   - **Carries this skill's generated marker** → show one section-level change list. An explicit request to update this generated README authorizes the listed compile; otherwise ask once via `ask_user_question` over unresolved sections. A section changed by hand defaults to **keep**.
    - **Is STAR's own template README** → a clear request to replace the template with the project README authorizes replacement; otherwise show the consequence and ask once via `ask_user_question`. Keep the "Built with STAR" footer.
    - **Any other hand-authored README** → overwrite only when the user specifically authorized replacing it after its contents were identified; otherwise leave it or compile to a user-named path.
 4. `README.md` is English. Create `README.zh-CN.md` only when requested; when both exist, each links the other. Keep technical terms, metric names, dataset names, and paths in English inside the Chinese README.
@@ -92,11 +92,11 @@ Run every family in `references/release_checklist.md` over the tracked repositor
 - Never publish: no `git push`, no remote or branch changes, no tag, no `gh repo create` / `gh release`, no upload of weights or data to any host. The prepared commands go in the report.
 - All commands run through `.env`'s interpreter; never install or upgrade anything (`star-env-builder` owns the environment). The STOP line holds: no training, no full-dataset evaluation, no costly API calls — a number the results table lacks stays a TODO.
 - Git: one commit per finished phase, staging only that phase's paths (conventions §1); a path that was already dirty at Step 0 is never staged.
-- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: say so and do not commit on it; the user switches back or names where the commit goes (conventions §11).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is `wkdrs/release/RELEASE_<date>.md`, the README's provenance marker, and the per-phase commits.
 
 ## Dialogue Discipline
 
 - Apply conventions §7.2, §7.7, and §7.13 to unresolved decisions. A clear request for the phase and exact write scope is authorization; do not repeat it. Ask through `ask_user_question` only for an ambiguous phase, compiling despite missing key sources, an unsettled promotion set, a material polish change, or an overwrite not already specifically authorized; use concise plain text if that tool is unavailable.
 - **Material a question is about goes in the text of the same message, above the call** — the polish findings, the section-level change list. The options carry the answers, none of the material; read the message back before it goes out: options with nothing above them mean the material was skipped, not shortened.
-- Reply in the user's language. `README.md` is English regardless of the dialogue language; the release report follows the root plan's `language` (dialogue language if no plan); keep technical terms in English inside Chinese documents.
+- Reply in the language resolved under conventions §7.6. `README.md` is English regardless of the dialogue language; the release report follows the root plan's `language` (the language resolved under conventions §7.6 if no plan); keep technical terms in English inside Chinese documents.

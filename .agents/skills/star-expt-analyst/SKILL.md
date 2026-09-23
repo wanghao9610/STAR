@@ -3,7 +3,8 @@ name: star-expt-analyst
 description: >-
   Analyze an experiment run against its plan, verify logged metrics and artifacts, score done
   criteria, or aggregate verified results across runs. Use for run interpretation, results tables, or
-  chat-only watch checks; never rerun experiments or edit plans and execution logs.
+  chat-only health checks of a still-running job (watch); never rerun experiments or edit plans and
+  execution logs.
 ---
 
 # Research Experiment Analyst
@@ -12,7 +13,7 @@ Invocation: `star-expt-analyst [PLAN_NAME | RUN_DIR | aggregate [PLAN_NAME] | wa
 
 **Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. `SKILL_zh.md` is for human readers and is never loaded at runtime. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
 
-**Passing a tier model.** Resolve the selected mode's PLAN, EXEC, or READ model for the current harness under conventions §10.8. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. READ-tier collection and blind review do not inherit the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` does not relocate the whole run again and records its actual model from its own session provenance.
+**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` does not relocate the whole run again and records its actual model from its own session provenance.
 
 ## Role
 
@@ -25,13 +26,13 @@ Read and interpret; do not execute steps, fix code, revise plans, or flip plan s
 1. **Expectations are written down; every verdict cites one.** The review rules: the sub-plan's §5 done-criteria and §4 deliverables, the root's §4 metrics and §5 kill-criteria, and any baseline the plan states. Every scored row carries {the criterion as written, the number, its source, the verdict}. Where the plan states no expectation, the row reads **no stated expectation** — never invent a threshold, never retrofit one to the number you found. Rubric: `references/analysis_rubric.md`.
 2. **Read wide, verify every number before it enters the report.** Delegate collection whenever bounded, independent, read-only reading of many or oversized logs materially helps — the main agent sizes it — by dispatching a read-only sub-agent on the READ tier's model (conventions §10.8), where the harness can name one. Every delegate follows the observation format in `references/analysis_rubric.md`, never writes, and never grades the run's verdict. Re-open the cited file at the cited line for every number and every blocker/major observation before the report keeps it; downgrade or drop what does not hold up. A number in a report gets quoted into a paper.
 3. **Disk is the evidence; EXEC_LOG is a claim to corroborate.** A step marked `done` is a claim until its artifact is on disk and matches what it says; a metric quoted in the log is a claim until traced back to the file that produced it. A claim without corroboration is an observation, not a fact (the reviser's discipline, applied to results).
-4. **Light parsing only; tools are evidence, never installed.** Read files, grep logs, run small parsing snippets through the `.env` conda env. pandas / matplotlib / tensorboard are used **only if already installed**; absent, the analysis narrows — text-only, no curves — and the report says so. Never install or upgrade anything (that is `star-env-builder`'s).
+4. **Light parsing only; tools are evidence, never installed.** Read files, grep logs, run small parsing snippets through `.env`'s interpreter (conventions §3). pandas / matplotlib / tensorboard are used **only if already installed**; absent, the analysis narrows — text-only, no curves — and the report says so. Never install or upgrade anything (that is `star-env-builder`'s).
 5. **Interpret honestly; a negative result is a finding, not a failure.** Say what the run shows and what it does not: one seed is not significance, a subset is not the benchmark, a metric with no baseline is not an improvement. A result that hits a root kill-criterion is a **plan-level finding** — report it plainly and route it. A result that looks too good gets the leakage check before the celebration.
 6. **Strictly read-only; the STOP line applies.** This skill writes only its own reports: the per-run analysis and its figures under `wkdrs/<run>/`, and — in aggregate mode — the cross-run results table (`wkdrs/results/results.md`, or `wkdrs/results/results_<slug>.md` when scoped). Never touch plan files, `exec_status`, `EXEC_PLAN.md`, or `EXEC_LOG.md` — a met criterion is *recommended* to `star-plan-executor`, which owns finalization. Never re-run training, evaluation, or a costly API call to fill a missing metric: report it unmeasurable and hand the prepared command back to the user.
 
 ## Workflow
 
-**Where this run executes.** Apply the whole-run handoff in conventions §10.8 before Step 0. Normal analysis uses PLAN; `aggregate` and `watch` use READ. `watch` stays chat-only and ends without a writing successor.
+**Where this run executes.** Apply the relocation rule in conventions §10.8 before Step 0. Normal analysis uses PLAN; `aggregate` and `watch` use READ. `watch` stays chat-only and ends without a writing successor.
 
 ### Step 0: Resolve the run
 
@@ -84,14 +85,13 @@ Merge and drop duplicates. For every number that will appear in the report, and 
 
 ### Step 6: Persist the report
 
-Fill `assets/expt_analysis_template.md` (Chinese: `assets/expt_analysis_template_zh.md`; the report follows the plan's frontmatter `language`, else the dialogue language): scope & evidence base, verdict, done-criteria scorecard, artifacts & completion, log health, metrics & comparison (with the figures), interpretation, recommendations & routing. Write to `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`. Real dates only; a second analysis of the same run on the same day overwrites, on a later day writes its own file.
+Fill `assets/expt_analysis_template.md` (Chinese: `assets/expt_analysis_template_zh.md`; the report follows the plan's frontmatter `language`, else the language resolved under conventions §7.6): scope & evidence base, verdict, done-criteria scorecard, artifacts & completion, log health, metrics & comparison (with the figures), interpretation, recommendations & routing. Write to `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`. Real dates only; a second analysis of the same run on the same day overwrites, on a later day writes its own file.
 
 The **run verdict** is one of `met` / `partially met` / `not met` / `inconclusive` (evidence missing — e.g. STOP-line commands never run) / `invalid` (results exist but are untrustworthy — leakage, a crashed run marked done, a metric from the wrong split). Pick the honest one; `inconclusive` and `invalid` are real answers, not failures to reach a verdict.
 
 ### Step 7: Digest & routing
 
-Lead with the verdict, under about 500 words: the run verdict and the §5 scorecard in one line each, any blocker/major observations, the headline metrics with their sources, the sibling comparison if any, and where the figures are. Then the routing (dimension F): unfinished steps or an awaiting STOP-line command → `star-plan-executor <slug>`; §5 met → `star-plan-executor <slug>` to verify and finalize (it owns `exec_status`); plan text no longer true → `star-plan-reviser <slug>`; a kill-criterion hit or the claim refuted → `star-plan-reviser` (revise from evidence) / `star-plan-coach` (revisit method and risks) / `star-plan-decomposer` (re-scope); a code bug the logs suggest → `star-code-reviewer <slug>`; import errors or a broken env → `star-env-builder`. End with the report path.
-
+Lead with the verdict, under about 500 words: the run verdict and the §5 scorecard in one line each, any blocker/major observations, the headline metrics with their sources, the sibling comparison if any, and where the figures are. Then the routing (dimension F): unfinished steps or an awaiting STOP-line command → `star-plan-executor <slug>`; §5 met on a leaf not yet `exec_status: done` → `star-plan-executor <slug>` to verify and finalize (it owns `exec_status`); already `done` → no executor step; plan text no longer true → `star-plan-reviser <slug>`; a kill-criterion hit or the claim refuted → `star-plan-reviser` (revise from evidence) / `star-plan-coach` (revisit method and risks) / `star-plan-decomposer` (re-scope); a code bug the logs suggest → `star-code-reviewer <slug>`; import errors or a broken env → `star-env-builder`. End with the report path.
 
 ### Step 8: Aggregate (aggregate mode only)
 
@@ -106,11 +106,11 @@ Lead with the verdict, under about 500 words: the run verdict and the §5 scorec
 - The only writes are `wkdrs/<run>/EXPT_ANALYSIS_<YYYY-MM-DD>.md`, `wkdrs/<run>/analysis/` when figures were rendered (the `.png` files plus their plot scripts), and — in aggregate mode only — `wkdrs/results/results.md` (all plan trees) or `wkdrs/results/results_<slug>.md` (scoped). Nothing else, anywhere. Watch mode writes nothing — its whole product is the chat digest.
 - Never touch: `metds/plans/*` — including `exec_status`, `exec_runs`, and `updated`; `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md` (the executor's log is evidence, not a scratchpad — a plan-level finding is reported and routed, not written into the log); `${CODE_NAME}/`; `metds/codearc.md`; `UPSTREAM.md`; `.env`.
 - Never move, rename, or delete any artifact, log, or checkpoint — a run directory is the evidence base, and analysis never mutates its evidence.
-- All commands run through `.env`'s conda env; no system python; never install or upgrade packages. Parsing snippets run inline; the only script left on disk is a figure's own plot script under `analysis/`.
-- Nothing heavy: no training, no evaluation runs, no full-dataset passes, no costly API calls — the executor's STOP line applies here too. A metric that would need a run to obtain is `unmeasurable`; hand the prepared command back to the user.
+- All commands run through `.env`'s interpreter (conventions §3); no system python; never install or upgrade packages. Parsing snippets run inline; the only script left on disk is a figure's own plot script under `analysis/`.
+- Nothing heavy: no training, no evaluation runs, no full-dataset passes, no costly API calls — the STOP line (conventions §2) applies here too. A metric that would need a run to obtain is `unmeasurable`; hand the prepared command back to the user.
 - Git: read-only; this skill never commits (conventions §1).
 - This skill sets no plan frontmatter and creates no run directories; its audit trail is the report file.
 
 ## Dialogue Discipline
 
-- Ask one direct question at a time where the workflow calls for it (which run to analyze, an ambiguous match) and require an explicit answer. The skill writes nothing outside its own report, so there is no confirmation point — but never state or imply that a plan, a status, or a log was changed. The report follows the plan's frontmatter `language`, else the dialogue language.
+- Ask one direct question at a time where the workflow calls for it (which run to analyze, an ambiguous match) and require an explicit answer. The skill writes nothing outside its own report, so there is no confirmation point — but never state or imply that a plan, a status, or a log was changed. The report follows the plan's frontmatter `language`, else the language resolved under conventions §7.6.

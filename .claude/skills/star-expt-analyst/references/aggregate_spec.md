@@ -40,7 +40,7 @@ Never read a metric out of a raw log no report covers: that is per-run analysis,
 
 ## Scale
 
-A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value the opening load returned, omitted when that key is empty), run in parallel, each given its exact list and this return format:
+A programme of ≤ ~6 reports is usually simplest to read in the main agent. Above that, partition the **report paths** across read-only `Agent` subagents (`subagent_type: Explore`, `model:` the READ tier value read from `.env`, omitted when that key is empty), run in parallel, each given its exact list and this return format:
 
 ```yaml
 - run: <slug>
@@ -100,5 +100,5 @@ sources:                          # every run that fed this results table
 Applied to the destination the scope selected above — never to the other one.
 
 - **Missing** → write it.
-- **Exists with `type: results`** → confirm its `scope:` matches the scope being compiled. It does → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → write nothing; leave the file and its `generated` date alone. It does **not** match — a wider scope than this one — → stop and say so rather than narrow it; that is the overwrite the filename rule exists to prevent.
+- **Exists with `type: results`** → confirm its `scope:` matches the scope being compiled. It does → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → rewrite only the frontmatter's `generated:` and `sources:`, with no question, since no number a reader quotes moved; the body stays byte-identical. It does **not** match — a wider scope than this one — → stop and say so rather than narrow it; that is the overwrite the filename rule exists to prevent.
 - **Exists without that frontmatter** → hand-authored. Say what it holds and what compiling would replace it with, and ask. Leaving it alone is a valid outcome; so is compiling to a path the user names.

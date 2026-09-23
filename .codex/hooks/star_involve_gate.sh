@@ -44,16 +44,21 @@ except Exception:
     fi
 }
 
-# Every path the patch names must sit in the project, outside the dot-directories
-# at its root — .git, .codex, .star, the other harness trees — whose contents are
-# project machinery rather than the code a run is editing.
+# Every path the patch names must sit in the project, or in a run's worktree
+# beside it at ../<root-dirname>--wt/<run>/ (conventions §11.8), and outside the
+# dot-directories at either root — .git, .codex, .star, the other harness trees,
+# a worktree's linked .env — whose contents are project machinery rather than
+# the code a run is editing.
+wt="$(dirname "${root}")/$(basename "${root}")--wt"
 path_ok() { # $1 = path as the header writes it, relative to cwd or absolute
     local rel="$1"
     case "$1" in
         /*) case "$1" in
                 "${root}"/*) rel="${1#"${root}"/}" ;;
+                "${wt}"/*/*) rel="${1#"${wt}"/}"; rel="${rel#*/}" ;;
                 *) return 1 ;;
             esac ;;
+        ../"${wt##*/}"/*/*) rel="${1#../"${wt##*/}"/}"; rel="${rel#*/}" ;;
     esac
     case "${rel}" in
         .*|*/..|*/../*) return 1 ;;

@@ -37,7 +37,7 @@ You are the family's ideation coach, one step upstream of `star-plan-coach`: the
 1. List existing `*_idea.md` files under `metds/ideas/` and read each file's frontmatter.
 2. **An `IDEA_NAME`** → resume from the first non-`done` stage. If it is finalized, reopen only when the request says to revisit it; otherwise ask via `ask_user_question` whether to reopen or route to `star-plan-coach <slug>`.
 3. No argument → resume the single unfinished idea. If several exist, ask which via `ask_user_question`; if none exists, ask for the seed in plain text.
-4. New storm: take the seed (argument or answer); if it is too thin to name (a single word, a bare link, a complaint), ask one clarifying question before slugging. Derive a short English slug; on collision with an existing idea file, ask: resume that one, or pick a different slug. Create `metds/ideas/<slug>_idea.md` — English dialogue uses `assets/idea_template.md`, Chinese dialogue `assets/idea_template_zh.md`; set `language` accordingly, fill frontmatter with real dates, and write the seed **verbatim** into §1: convergence drifts, the seed anchors.
+4. New storm: take the seed (argument or answer); if it is too thin to name (a single word, a bare link, a complaint), ask one clarifying question before slugging. Derive a short English slug; on collision with an existing idea file, ask: resume that one, or pick a different slug. Create `metds/ideas/<slug>_idea.md` — `assets/idea_template.md` when the language resolved under conventions §7.6 is English, `assets/idea_template_zh.md` when it is Chinese; set `language` accordingly, fill frontmatter with real dates, and write the seed **verbatim** into §1: convergence drifts, the seed anchors.
 
 ### Stage 1: Seed & constraints (`seed`)
 
@@ -81,7 +81,7 @@ Check the draft against the rubric's topic-statement test and show at most five 
 - Every paper in the file carries venue, year, and its record URL, the fetched record cached before the row is written. Network use is search metadata and abstracts (plus top-3 intros on a recorded deepening), serialized and backed off per `references/scan_policy.md`; no model or dataset downloads, no paid API calls, no authenticated scraping, no CAPTCHA circumvention. Nothing in this skill crosses the STOP line (conventions §2); if a step would, it is not this skill's to run.
 - Real dates only (conventions §4).
 - Git: when the session ends (topic finalized, or the user pauses), offer once to commit the idea file this session created or edited — `star-idea-storm: <slug> — <milestone>` (conventions §1). Declining is fine.
-- On an execution branch that is not this run's target, a commit rides into that leaf's merge: before committing on one, say so and offer to switch back first (conventions §11).
+- On an execution branch that is not this run's target, a commit rides into that leaf's merge: say so and do not commit on it; the user switches back or names where the commit goes (conventions §11).
 
 ## Dialogue Discipline
 
@@ -89,4 +89,4 @@ Check the draft against the rubric's topic-statement test and show at most five 
 - **Material a question is about goes in the text of the same message, above the call** — the candidate-directions table, the rubric failures, the drafted topic statement. The options carry the answers, never the material; read the message back before it goes out — options with nothing above them mean the material was skipped, not shortened.
 - Judge directions with the rubric and the scan, never with taste alone: every verdict line cites its evidence. Challenge vagueness — mild tone, sharp questions. The seed itself is never disparaged: even a crowded, infeasible seed gets its honest scan and a respectful Park.
 - Report honestly: depth never overstated ("the abstracts suggest" is the honest verb at abstract depth); a crowded field is reported as crowded even when it kills the favorite; a skipped scan is marked everywhere that would have cited it.
-- Reply in the user's language; resources ship English (no suffix) and Chinese `*_zh.md` — pick by dialogue language. Idea-file body language follows frontmatter `language`: set at creation from the dialogue language, kept on resume even if chat language changes, rewritten only on explicit request. In Chinese files, keep technical terms, paper titles, and venue names in English.
+- Reply in the language resolved under conventions §7.6; resources ship English (no suffix) and Chinese `*_zh.md` — pick by that language. Idea-file body language follows frontmatter `language`: set at creation from that language, kept on resume even if chat language changes, rewritten only on explicit request. In Chinese files, keep technical terms, paper titles, and venue names in English.

@@ -5,7 +5,7 @@ source_plan: <prefix>_<slug>_plan.md # the leaf sub-plan under metds/plans/ this
 task_dir: tasks/<prefix>_<slug>      # plan-specific execution-process intermediate files
 code_name: <CODE_NAME>               # resolved from .env
 created: <YYYY-MM-DD>
-approved: <YYYY-MM-DD>               # date the user approved this via ExitPlanMode
+started: <YYYY-MM-DD>                # date the agent started this authorized execution run
 branch: <run name | none>          # execution branch this run executes on, named exactly as run: above (conventions §11); none = the base branch
 base: <branch@short-sha | —>         # what the branch forked from — the merge target; — when branch is none
 worktree: <absolute path | none>     # the tree housing this run (conventions §11.7–9); none = the invoking checkout
@@ -40,13 +40,13 @@ model_trail:                    # append-only: one entry per write session, newe
 ## Actions
 
 <!-- Ordered. Each action binds a check. `run by` = `agent` (executes here) or `stop → user`
-     (agent prepares the command, user runs it — see STOP line). Commands go through the .env conda
-     env; artifacts are written under wkdrs/<run>/.
+     (agent prepares the command, user runs it — see STOP line). Commands go through the interpreter
+     .env names (conventions §3); artifacts are written under wkdrs/<run>/.
      A whole set of configurations (a grid, repeats over seeds) is **one** action, not one row per
      cell: the artifact column reads wkdrs/<run>/cells/, and the check column carries the criterion
      the sub-plan's §5 states for the whole grid. -->
 
-| # | Action | Files / module (${CODE_NAME}/…) | Command (via conda) | Artifact (wkdrs/<run>/…) | Check | run by |
+| # | Action | Files / module (${CODE_NAME}/…) | Command (via .env interpreter) | Artifact (wkdrs/<run>/…) | Check | run by |
 |---|--------|----------------------------------|----------------------|--------------------------|-------|--------|
 | 1 | <create/modify …> | <path> | — | — | <import / runnable check> | agent |
 | 2 | <…> | <path> | <cmd> | <path> | <what proves it> | agent |
@@ -55,10 +55,10 @@ model_trail:                    # append-only: one entry per write session, newe
 ## STOP line
 
 <!-- Which actions cross the STOP line and why (long/multi-GPU training, full-dataset eval, costly
-     API). For each: the exact command through the conda env (via execs/run.sh where one exists),
-     what it produces and where, and what output the user should bring back so the done-criterion can
-     be verified. A reusable launch script may be written to execs/scpts/<run>.sh (writing it is fine;
-     running it stays with the user).
+     API). For each: the exact command through the .env interpreter (conventions §3; via execs/run.sh
+     where one exists), what it produces and where, and what output the user should bring back so the
+     done-criterion can be verified. The command is written as the launch script execs/scpts/<run>.sh
+     (writing it is light; running it follows references/stop_line_rules.md).
      Each one also states its expected cost: GPUs × hours, or call count and spend. That is what the
      root plan's §4 compute budget is reconciled against — when the command comes back, the actual
      cost goes into EXEC_LOG's cost section.

@@ -12,7 +12,7 @@
 
 ## 何时推荐进 worktree
 
-分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是被调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`。进树的 run 一律带分支，即便缺口清单判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。Step 3 先沿用已有适用决定；没有时，与分支决定一起按 involve 档位处理推荐项。尚未回收的交回命令足以推荐 worktree，无须探测或切换可能正忙的 checkout。
+分支问的是这个 run 的历史要不要隔离（上一节）；worktree 问的是发起调用的 checkout 此刻腾不腾得出来（规约 §11.7）。Step 2 摸底时顺带查信号：HEAD 停在别的 run 的执行分支上；工作区未提交改动的路径归属别的 run 的记录；某份 EXEC_LOG 记着命令已交回用户、结果还没回收——可能有任务正在跑，任何命令都探测不了；或用户明说要并行。任一信号命中 → 推荐 `worktree: ../<根目录名>--wt/<run>`；一个都没有 → `worktree: none`。进树的 run 一律带分支，即便缺口清单判的是 `branch: none`——树里的提交要有自己的归宿，而基础分支正被别的 checkout 检出（§11.8）。Step 3 先沿用已有适用决定；没有时，与分支决定一起按 involve 档位处理推荐项。尚未回收的交回命令足以推荐 worktree，无须探测或切换可能正忙的 checkout。
 
 无人值守 auto 沿用同一条带守卫的推荐；它不授权触碰可能正忙的 checkout，也不授权暂存其中的改动。
 
@@ -30,7 +30,7 @@
 1. 把 checkout 当前分支与短 SHA 记为 `base:`（`git rev-parse --abbrev-ref HEAD`、`git rev-parse --short HEAD`）。绝不假定是 `main`。
 2. 可能正有任务运行的 checkout 不得切换——跑着的任务会中途重读被切换的文件。checkout 正忙正是把这个 run 送进 worktree 的信号。
 3. 只开分支：`git switch -c <run>`。运行前就有的未提交改动原样带过去；它们仍按既有改动点名，永不暂存（规约 §1.4）。
-4. 进 worktree：在被调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净地建出来。
+4. 进 worktree：在发起调用的 checkout 里 `git worktree add <path> -b <run> <base>`——树、分支、起点一步成型，任何 checkout 都不切换。运行前的未提交改动留在原 checkout；树从 `base:` 干净地建出来。
 5. 进 worktree：git 只把被跟踪的文件放进新树，所以从主 checkout 链入运行时——`.env`、`datas/`、`inits/`，`.star/memory/local/` 有则一并，全用绝对路径符号链接——然后对树里的 `.env` 重跑一次 §3 解析，证明解释器仍然可用。绝不链 `wkdrs/` 与 `tasks/`（§11.8）。树的绝对路径记进 EXEC_PLAN / EXEC_LOG frontmatter 的 `worktree:`；此后这个 run 的一切——派发、检查、提交、记录——都发生在树里，每份交办说明写明树根（`agent_dispatch_spec_zh.md`）。
 6. 选了分支就同时选了逐步提交：没有提交的分支没有东西可合并。
 
@@ -43,7 +43,7 @@
 ## 续跑（Step 0）
 
 - 存在与叶子匹配的 `<prefix>_<slug>*` 分支，就是进行中的那次 run——即便基础 checkout 显示叶子未执行：基础分支是准据（规约 §11.3）。去分支上续跑。
-- 记录里带 `worktree:` 的 run 住在那棵树里。先确认树还在（`git worktree list`），然后**在树里**续跑——被调用的 checkout 从不切换。记录在案的树从磁盘上消失了，是要上报的 blocker：`git worktree prune` 清掉过期元数据，绝不无声重建。
+- 记录里带 `worktree:` 的 run 住在那棵树里。先确认树还在（`git worktree list`），然后**在树里**续跑——发起调用的 checkout 从不切换。记录在案的树从磁盘上消失了，是要上报的 blocker：`git worktree prune` 清掉过期元数据，绝不无声重建。
 - 切换之前先 `git status`：无关的未提交改动逐一点名。绝不替用户 stash、暂存、覆盖或丢弃它们。只有已有适用决定明确说明路径不会相撞时才切换；否则询问用户要怎样保护这些工作。
 - 记录在案的 `branch:` 已不存在，是要上报的 blocker；绝不无声重建。
 
@@ -59,4 +59,4 @@
 
 ## 其余 skill 看到什么
 
-执行分支 `<run>` 被 checkout 期间，每个 skill 都作用在它上面：reviewer 的修复提交、analyst 的报告、reviser 对**这个**叶子计划的编辑都落在分支上、随它一起合并。进了 worktree 的 run，家记在 `worktree:` 字段里——这些 skill 都在那棵树里工作，主 checkout 全程检出着基础分支。要提交与本次 run 无关内容的 skill 先说明并提议切回去（规约 §11）。`execs/update.sh` 只在基础分支上运行，绝不在这里。
+执行分支 `<run>` 被 checkout 期间，每个 skill 都作用在它上面：reviewer 的修复提交、analyst 的报告、reviser 对**这个**叶子计划的编辑都落在分支上、随它一起合并。进了 worktree 的 run，家记在 `worktree:` 字段里——这些 skill 都在那棵树里工作，主 checkout 全程检出着基础分支。要提交与本次 run 无关内容的 skill 先说明，不在这里提交；由用户切回，或指定提交落在哪里（规约 §11）。`execs/update.sh` 只在基础分支上运行，绝不在这里。

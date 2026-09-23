@@ -299,6 +299,18 @@ missing_hooks() { # $1 = registration config path
     printf '%s' "${out}"
 }
 
+# A kept .claude/settings.json can register every hook and still lack the allow
+# rule for the command the provenance hook hands a delegate. A delegate cannot
+# answer a permission prompt, so that command is denied and the delegate records
+# "unrecorded". A missing permission is not a missing hook, so it gets a note of
+# its own rather than a name in missing_hooks.
+note_resolver_rule() { # $1 = config path relative to the project root
+    [[ "$1" == ".claude/settings.json" && -e "${ROOT_DIR}/$1" ]] || return 0
+    grep -q 'star_model_id\.sh --resolve' "${ROOT_DIR}/$1" 2>/dev/null && return 0
+    log "NOTE: $1 does not allow the model-id resolver, so a delegate's model_id reads unrecorded."
+    log "      Copy \"Bash(bash .claude/hooks/star_model_id.sh --resolve:*)\" from upstream $1 into its permissions.allow."
+}
+
 usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
@@ -914,6 +926,7 @@ if [[ "${ADOPT}" == false ]]; then
                 log "NOTE: ${cfg} was kept and does not register the STAR $(missing_hooks "${ROOT_DIR}/${cfg}") hook."
                 log "      Merge the missing hook entry from upstream ${cfg} to enable it."
             fi
+            note_resolver_rule "${cfg}"
         done
     fi
 
@@ -1050,6 +1063,7 @@ for cfg in "${INSTALL_CONFIGS[@]}"; do
         log "      Run /hooks in the Codex CLI and approve it — re-approve whenever it changes."
         log "      Until then model_id stays unrecorded in every report, with nothing to see."
     fi
+    note_resolver_rule "${cfg}"
 done
 
 log "Next: copy .env.example to .env, then run /star-proj-adopt to wire the project up."
