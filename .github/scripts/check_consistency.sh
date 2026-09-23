@@ -393,14 +393,14 @@ for root in "${SKILL_ROOTS[@]}"; do
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-# Shared policy names capabilities; concrete hosts and their APIs live in adapters.
-if grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort' "${CONVENTIONS}"; then
-    fail "${CONVENTIONS}: harness-specific wording belongs in harness-adapters or model_id_spec"
+# Shared policy names capabilities; concrete hosts and their APIs live in §13
+# (harness adapters), the one section of the conventions allowed to name them.
+if awk '/^## 13\. /{exit} {print}' "${CONVENTIONS}" | grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort'; then
+    fail "${CONVENTIONS}: harness-specific wording belongs in §13 (harness adapters)"
     conv_errors=1
 fi
-adapter="docs/mds/star-workflow/harness-adapters.md"
-if [[ ! -f "${adapter}" ]] || ! grep -Fq "(${adapter##*/})" "${CONVENTIONS}"; then
-    fail "${CONVENTIONS}: missing linked harness adapter reference"
+if ! awk '/^## 13\. /{f=1;next} f&&NF{print;exit}' "${CONVENTIONS}" | grep -Fq 'This is the one section of this file that names a harness'; then
+    fail "${CONVENTIONS}: §13 (harness adapters) no longer opens by claiming the harness names"
     conv_errors=1
 fi
 
@@ -408,8 +408,8 @@ human_writing_errors=0
 HUMAN_WRITING_SKILLS=(star-idea-storm star-plan-coach star-refs-reviewer star-expt-digest star-metd-summarize star-code-release)
 for root in "${SKILL_ROOTS[@]}"; do
     for skill in "${HUMAN_WRITING_SKILLS[@]}"; do
-        grep -q 'human-writing-guide.md' "${root}/${skill}/SKILL.md" || {
-            fail "${root}/${skill}/SKILL.md does not reference human-writing-guide.md"
+        grep -qi 'human-writing contract' "${root}/${skill}/SKILL.md" || {
+            fail "${root}/${skill}/SKILL.md does not cite the human-writing contract (conventions §7)"
             human_writing_errors=1
         }
     done
@@ -649,7 +649,7 @@ for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh \
-         docs/mds/star-workflow/memory_spec.md; do
+         docs/mds/star-workflow/research-workflow-conventions.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
 done
@@ -691,8 +691,8 @@ for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
     fi
 done
 rm -rf "${memory_fixture}"
-grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
-    { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
+grep -qF '180 days' docs/mds/star-workflow/research-workflow-conventions.md || \
+    { fail "conventions §12 no longer states the 180-day aging window"; hook_errors=1; }
 
 #     Codex closes provenance with a write-after check. Three cases pin its
 #     precedence and failure boundary; more cases would duplicate the resolver's
@@ -1193,6 +1193,8 @@ CONV_HEADINGS=(
     '9. Project layout'
     '10. The skill roster'
     '11. Execution branches and worktrees'
+    '12. Project memory'
+    '13. Harness adapters'
 )
 CONV_ITEMS=("1|6" "3|6" "4|3" "5|6" "6|10" "7|13" "10|8" "11|9")
 # The highest section the pinned list carries. Check 18 bounds a §n citation

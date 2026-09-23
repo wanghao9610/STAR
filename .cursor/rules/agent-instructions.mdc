@@ -46,7 +46,7 @@ The test: Every changed line should trace directly to the user's request.
 - Run the status skill when resuming research or choosing the next research task and the state is unknown. A scoped code or documentation task reads only the context it needs.
 - The rules every workflow skill follows are in `docs/mds/star-workflow/research-workflow-conventions.md`; what each skill does is in `research-workflow-skills.md`.
 - A skill step whose written procedure dispatches subagents already carries the user's request to run it: dispatch without asking, even where a host instruction allows delegation only when the user has asked. An outright ban, or a host offering no delegation, still stops it; the grant covers the dispatch itself, not what a delegate may write.
-- `.env` `STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` name the model a skill run, and each delegate it dispatches, belongs on — research judgment, production, read-only work. Each key holds one model name, or comma-separated `<harness>:<model>` entries so one `.env` serves every tree — a run takes the entry tagged with the tree it runs from and reads the key as empty where none is. An entry may end in `@<depth>`, the thinking depth that tier's runs take where the harness can set one, so two tiers may name one model and differ only in depth. For a phase hand-off or a `star-auto` start, a configured depth the harness can apply per dispatch triggers a fresh delegate even when the model is unchanged. Which run takes which and how a host applies the model and depth is `docs/mds/star-workflow/research-workflow-conventions.md` §10.8: a directly invoked run stays on the session's model and says in one line when its tier asks for a model or depth the session lacks, `star-auto` starts each run on its tier's model, and an empty key changes nothing.
+- `.env` `STAR_PLAN_MODEL`, `STAR_EXEC_MODEL` and `STAR_READ_MODEL` name the model a skill run, and each delegate it dispatches, belongs on — research judgment, production, read-only work. Each key holds one model name, or comma-separated `<harness>:<model>` entries so one `.env` serves every tree — a run takes the entry tagged with the tree it runs from and reads the key as empty where none is. An entry may end in `@<depth>`, the thinking depth that tier's runs take where the harness can set one, so two tiers may name one model and differ only in depth. For a phase hand-off or a `star-auto` start, a configured depth the harness can apply per dispatch triggers a fresh delegate even when the model is unchanged. Which run takes which and how a host applies the model and depth is `docs/mds/star-workflow/research-workflow-conventions.md` §10.8: a directly invoked run stays on the session's model and says in one line when its tier asks for a model or depth the session lacks, `star-auto` starts each run on its tier's model, and an empty key changes nothing; each host's mechanics are §13 (harness adapters) of the same file.
 - Do not hand-edit generated reports under `wkdrs/`. In downstream projects, `docs/mds/star-workflow/` is replaced by `execs/update.sh`; maintain shared rules in the STAR upstream through `.github/CONTRIBUTING.md`, then sync them.
 
 ## 6. Reply Language
@@ -66,7 +66,7 @@ The test: Every changed line should trace directly to the user's request.
 - A pointer that says nothing on its own — `§4`, `C4`, `Step B1`, a run or plan name — stays verbatim and takes a few words of what it points at, in parentheses: `§4 (the experiments section)`. First use in every reply, not once per conversation; the reader does not scroll back. Where a label has no room, the line under it.
 - Technical prose, no filler and no emoji. Plain does not mean chatty.
 - Lead with the answer. Skip praise, staged introductions, service offers, and generic positive endings; end on the last useful fact, decision, command, or blocker.
-- Replies and generated prose follow `docs/mds/star-workflow/human-writing-guide.md`: preserve research claims and the user's voice, diagnose formulaic prose from pattern clusters rather than isolated words, and never add facts or personality merely to sound human.
+- Replies and generated prose follow the human-writing contract in `docs/mds/star-workflow/research-workflow-conventions.md` §7: preserve research claims and the user's voice, diagnose formulaic prose from pattern clusters rather than isolated words, and never add facts or personality merely to sound human.
 
 ## 8. Project Layout
 
@@ -97,7 +97,7 @@ Before running Python, tests, or dependency checks:
 - Offer, never assume: at most two offers per session, and write only after the user agrees. `INVOLVE=low` records unasked and says so.
 - What travels with the repository goes to the versioned `.star/memory/`; a `machine:` scoped fact, true only here, goes to the git-ignored `.star/memory/local/`, as does any memory the user keeps off the repository.
 - Where a memory disagrees with a file in the repository, the file wins.
-- Types, file format, the index line the hooks build from each file, and how a memory is retired: `docs/mds/star-workflow/memory_spec.md`.
+- Types, file format, the index line the hooks build from each file, and how a memory is retired: `docs/mds/star-workflow/research-workflow-conventions.md` §12.
 
 ## 11. Verification
 

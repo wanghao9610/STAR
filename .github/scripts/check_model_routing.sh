@@ -131,16 +131,16 @@ grep -Fq 'or a depth this harness can apply per dispatch' \
 	"${ROOT_DIR}/.agents/skills/star-code-architect/SKILL.md" ||
 	fail "star-code-architect does not route a same-model EXEC depth"
 grep -Fq 'passes it explicitly as `reasoning_effort`' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
 	fail "harness adapters do not define Codex per-dispatch effort"
 grep -Fq 'appends a configured `@<depth>` to the model as `-<depth>` and writes that flat id, unquoted, onto that tier'\''s named agent'\''s `model:`' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
 	fail "harness adapters do not stamp Cursor -<depth> as the model field"
 grep -Fq 'scan that list for a slug of the same model family that already carries the wanted depth' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
 	fail "harness adapters do not map Cursor @depth onto a listed variant"
 grep -Fq 'omit `model` so the file stamp is not overridden' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
+	"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md" ||
 	fail "harness adapters do not leave an unlisted Cursor Task model unpassed"
 grep -Fq 'or carries a depth' "${ROOT_DIR}/.claude/commands/star-auto.md" ||
 	fail "Claude star-auto does not route an explicit same-model depth"

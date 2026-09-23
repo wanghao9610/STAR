@@ -9,7 +9,7 @@
 # file's frontmatter — type, scope, verified, summary — one line per memory,
 # newest first: the lines are pointers, and the fact itself is read from its
 # file when it matters. What belongs in the store, and the file format, is
-# docs/mds/star-workflow/memory_spec.md.
+# docs/mds/star-workflow/research-workflow-conventions.md section 12.
 #
 # `--list` prints that index as plain text and reads no payload: the form a
 # person, a test, or the consistency check calls by hand.
@@ -75,7 +75,7 @@ if $list; then
     exit 0
 fi
 
-printf '%s\n' "STAR project memory — what earlier sessions in this repository learned, recorded under .star/memory/ rather than in your own memory store. Each line is a pointer, not the fact: type · scope · last verified · file — summary. Open the file under .star/memory/ before acting on one. A scope naming a machine or a plan applies only there, and where a memory disagrees with a file in the repository, the file wins. Recording a new one: docs/mds/star-workflow/memory_spec.md."
+printf '%s\n' "STAR project memory — what earlier sessions in this repository learned, recorded under .star/memory/ rather than in your own memory store. Each line is a pointer, not the fact: type · scope · last verified · file — summary. Open the file under .star/memory/ before acting on one. A scope naming a machine or a plan applies only there, and where a memory disagrees with a file in the repository, the file wins. Recording a new one: docs/mds/star-workflow/research-workflow-conventions.md section 12."
 [ -n "${shared}" ] && printf 'Shared (.star/memory/):\n%s\n' "${shared}"
 [ -n "${machine}" ] && printf 'Machine-local (.star/memory/local/):\n%s\n' "${machine}"
 exit 0

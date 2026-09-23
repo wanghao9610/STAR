@@ -29,7 +29,7 @@ of stamping project files. It preserves existing entries and backs up before
 writing. Requires the project Python configured in .env with tomllib
 (Python 3.11+); unsupported layouts leave the config unchanged.
 
-Harness details: docs/mds/star-workflow/harness-adapters.md.
+Harness details: docs/mds/star-workflow/research-workflow-conventions.md §13.
 EOF
 }
 

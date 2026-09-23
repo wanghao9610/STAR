@@ -62,7 +62,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **受证据约束的自然行文**：覆盖回复、计划、文献笔记、进展 digest、方法文档和发布 README；改掉程式化表达，但不改事实、引用、数字、未确定性和负面结果。
 - **太大或只属于本机的东西不进版本库**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
-十五个 skill 按研究阶段分组列在[研究工作流](#研究工作流)一节：各自负责什么、产出什么，以及在你所用宿主里怎么调用；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。共享的行文标准及其证据保真边界见[自然写作指南](docs/mds/star-workflow/human-writing-guide.md)。
+十五个 skill 按研究阶段分组列在[研究工作流](#研究工作流)一节：各自负责什么、产出什么，以及在你所用宿主里怎么调用；完整的端到端示例、生成文件清单和常见问题，见[研究工作流 Skills 使用指南](docs/mds/star-workflow/research-workflow-skills.zh-CN.md)。共享的行文标准及其证据保真边界见[自然写作约定](docs/mds/star-workflow/research-workflow-conventions.md#human-writing-contract)。
 
 ## 项目结构
 
@@ -221,7 +221,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 分别选择研究判断、实现与产出、只读工作的模型。每个键接受一个模型名，或逗号分隔的 `<宿主>:<模型>` 条目，标签沿用 `STAR_HARNESSES`。运行优先取本宿主条目，再取无标签的回退值；两者都没有则沿用宿主默认。可选后缀 `@<深度>`（`low`、`medium`、`high`、`xhigh`、`max` 或正整数）在宿主支持时设置思考深度。你敲下的技能留在会话的模型上，本档指定了别的模型时用一行说明；`star-auto` 以各自档位的模型启动每次运行。
 
-修改后运行 `bash execs/configure.sh`，并重新加载静态定义已变化的会话。Kimi 模型池注册使用 `bash execs/configure.sh --kimi-pool`。派发机制见[宿主适配说明](docs/mds/star-workflow/harness-adapters.md)，档位选择与运行在哪里执行见[工作流规约 §10.8](docs/mds/star-workflow/research-workflow-conventions.md#10-the-skill-roster)。
+修改后运行 `bash execs/configure.sh`，并重新加载静态定义已变化的会话。Kimi 模型池注册使用 `bash execs/configure.sh --kimi-pool`。派发机制见[宿主适配说明](docs/mds/star-workflow/research-workflow-conventions.md#13-harness-adapters)，档位选择与运行在哪里执行见[工作流规约 §10.8](docs/mds/star-workflow/research-workflow-conventions.md#10-the-skill-roster)。
 
 本地 `.env` 已被 Git 忽略，因此其中的机器相关路径不会被提交。
 
@@ -400,7 +400,7 @@ bash .kimi-code/hooks/install.sh   # Kimi Code
 bash .dsh/hooks/install.sh         # DSH
 ```
 
-两者各自先备份、再写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`；重复运行不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在打开目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入，或把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问、运行 `/trust` 或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，`.pi/extensions/` 带来的子代理、计划模式和结构化提问也统统不存在——而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它 `model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。各运行时上报什么、取不到时退回什么，见[模型 id 溯源](docs/mds/star-workflow/model_id_spec.md)。
+两者各自先备份、再写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`；重复运行不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Pi 和 Qwen Code 的两个钩子都随仓库一起注册好，用这五个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在打开目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入，或把那个文件删掉。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问、运行 `/trust` 或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，`.pi/extensions/` 带来的子代理、计划模式和结构化提问也统统不存在——而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它 `model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。各运行时上报什么、取不到时退回什么，见[模型 id 溯源](docs/mds/star-workflow/research-workflow-conventions.md#hooks-and-model-provenance)。
 
 ### 为状态收集脚本预先授权
 
@@ -450,7 +450,7 @@ bash .dsh/hooks/install.sh         # DSH
 - **只有当项目里没有任何文件已经认领这条事实时，它才被记进去。** 结果属于那次运行的 `EXEC_LOG.md`，关于研究的决定属于它的计划，论文属于 `metds/refs/`。记忆装的是残余。
 - **记忆与仓库里的文件冲突时，以文件为准**，随后把这条记忆改正或删掉。
 
-有一个子目录留在本机，git 像忽略 `.env` 一样忽略它：`.star/memory/local/` 放只对这台机器成立的事实，以及你不想入库的记忆；其余记忆都受版本管理，随克隆一起走。任何东西都不会不打招呼就记下来——agent 提议，你来定——`.env` 里设 `INVOLVE=low` 则改为先记下再告诉你。四类记忆、文件格式，以及一条记忆怎么退场，见[项目记忆](docs/mds/star-workflow/memory_spec.md)。
+有一个子目录留在本机，git 像忽略 `.env` 一样忽略它：`.star/memory/local/` 放只对这台机器成立的事实，以及你不想入库的记忆；其余记忆都受版本管理，随克隆一起走。任何东西都不会不打招呼就记下来——agent 提议，你来定——`.env` 里设 `INVOLVE=low` 则改为先记下再告诉你。四类记忆、文件格式，以及一条记忆怎么退场，见[项目记忆](docs/mds/star-workflow/research-workflow-conventions.md#12-project-memory)。
 
 ## 更新 STAR 的 skill 与工作流指南
 
@@ -507,7 +507,7 @@ bash execs/configure.sh
 - 如果固定的 ref 早于 `.dsh/commands/` 或 `.kimi-code/plugins/`，普通更新与 `--adopt` 都会报告并跳过这个尚不存在的可选包；缺少其他必需路径仍会中止。
 - `--harnesses LIST` 把这一次运行限定在点名的那几棵树上——`claude,pi`、`all` 或 `none`——仅对本次覆盖 `STAR_HARNESSES`。删掉 `.agents/skills/` 或 `.agents/commands/` 会被下一次运行装回来，宿主树则不会。名称不认识时命令会停止，并列出七个有效名称。
 - `--skill NAME` 只更新共享根目录与其余六个宿主目录中的这一个 skill——收窄过的话就是剩下的那几个目录——不动工作流文档和溯源钩子。名称无效、或本次范围内的上游 skill 目录中有任何一处缺少它，命令会停止且不覆盖任何文件。
-- `bash execs/configure.sh` 离线同步模型配置；普通更新也会在同步文件后调用它。模型池注册使用 `bash execs/configure.sh --kimi-pool`，宿主差异见[适配说明](docs/mds/star-workflow/harness-adapters.md)。
+- `bash execs/configure.sh` 离线同步模型配置；普通更新也会在同步文件后调用它。模型池注册使用 `bash execs/configure.sh --kimi-pool`，宿主差异见[适配说明](docs/mds/star-workflow/research-workflow-conventions.md#13-harness-adapters)。
 - `--force` 更新同样这批路径，但解除两处拦截：这些路径下的未提交改动直接被覆盖而不再中止命令，钩子注册配置也改为覆盖而不再保留。它不扩大范围——上游没有的文件依旧原样保留，你自己放在这些目录下的 skill 和文档不会丢。
 
 `bash execs/update.sh --help` 里有完整的用法摘要——选项变了它也跟着变，不会过期。
@@ -520,7 +520,7 @@ bash execs/configure.sh
 | [Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) | 每次派发传入 `model` 与受支持的 `reasoning_effort`；显式深度即使不换模型，也会触发使用全新上下文的委派。
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | 当前工具通过可选择的 secondary-model pool 提供 `model` 时，传入池接受的别名。模型池由用户自己的 Kimi 配置管理。 |
 | Pi | 通过 STAR 扩展给单任务、并行任务各项或串行步骤各项传 `model`。 |
-| [Cursor](https://cursor.com/docs/subagents) | 使用具名代理；模型选择与回退规则见[适配说明](docs/mds/star-workflow/harness-adapters.md#cursor)。 |
+| [Cursor](https://cursor.com/docs/subagents) | 使用具名代理；模型选择与回退规则见[适配说明](docs/mds/star-workflow/research-workflow-conventions.md#cursor)。 |
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | 选择同名代理，在 frontmatter 中填写实际模型 id；工具按次调用的 `model` 字段是另一套已配置等级机制。 |
 | DSH | 当前工具没有按次选模参数，保持原执行路径；键已设时说明原因。 |
 
@@ -560,7 +560,7 @@ bash execs/configure.sh
 
 按版本列出要点，最新在前。每个版本对应一个 git tag，因此 `bash execs/update.sh v0.1.0` 可将更新固定到该版本。
 
-- **[v0.3.7](https://github.com/wanghao9610/STAR/tree/v0.3.7)**（2026-09-07）—— 模型配置从更新器里搬出来：`bash execs/configure.sh` 从 `.env` 读三个档位键，离线写入各宿主支持的模型与深度字段，`--kimi-pool` 把配置好的别名注册进 Kimi 自己的配置文件，`bash execs/update.sh --models` 随之取消。各宿主的具体机制——Cursor 的扁平 id 写法、Claude Code 的清单盖章、Codex 的 `reasoning_effort`——移入新的[宿主适配器](docs/mds/star-workflow/harness-adapters.md)，规约只留共享规则和一个链接。`star-flow-status` 现在以 `effort: medium` 发布，与 `star-expt-digest` 已有的深度一致。
+- **[v0.3.7](https://github.com/wanghao9610/STAR/tree/v0.3.7)**（2026-09-07）—— 模型配置从更新器里搬出来：`bash execs/configure.sh` 从 `.env` 读三个档位键，离线写入各宿主支持的模型与深度字段，`--kimi-pool` 把配置好的别名注册进 Kimi 自己的配置文件，`bash execs/update.sh --models` 随之取消。各宿主的具体机制——Cursor 的扁平 id 写法、Claude Code 的清单盖章、Codex 的 `reasoning_effort`——移入新的[宿主适配器](docs/mds/star-workflow/research-workflow-conventions.md#13-harness-adapters)，规约只留共享规则和一个链接。`star-flow-status` 现在以 `effort: medium` 发布，与 `star-expt-digest` 已有的深度一致。
 - **[v0.3.6](https://github.com/wanghao9610/STAR/tree/v0.3.6)**（2026-09-07）—— Cursor 现在也把档位的 `@深度` 写进具名代理：`bash execs/update.sh --models` 把 `cursor:cursor-grok-4.6@xhigh` 盖成未加引号的 `model: cursor-grok-4.6-xhigh`，分别落在 `star-plan`、`star-exec`、`star-read` 上——用的是它目录里那种一个深度一个 id 的扁平写法，因为带参数的 `id[effort=<深度>]` 解析不了——于是 PLAN、EXEC、READ 可以共用一个模型、只用深度区分。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Claude Code、Codex 已有的规则一致——Qwen 仍只取模型名、不取后缀。`check_model_routing.sh` 覆盖这一编码；盖章后仍须开新会话。
 - **[v0.3.5](https://github.com/wanghao9610/STAR/tree/v0.3.5)**（2026-09-06）—— Claude Code 现在也能逐次派发指定档位的 `@深度`：`bash execs/update.sh --models` 把它盖进新增的 `.claude/agents/` 受托者 `star-plan`、`star-exec`、`star-read`，迁移整次运行或交接某个阶段时就派发成其中之一，于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配 `STAR_EXEC_MODEL=claude:opus@high` 能让执行阶段真正跑在 `high` 上。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Codex 自 v0.3.4 起的规则一致——而以普通 subagent 类型派出的受托者仍继承调用方的深度。`check_model_routing.sh` 覆盖新增的盖章，`check_consistency.sh` 拒绝 `.claude/agents/` 里没有的 `subagent_type`。
 - **[v0.3.4](https://github.com/wanghao9610/STAR/tree/v0.3.4)**（2026-09-06）—— Codex 现在把各档受支持的 `@深度` 传给 `reasoning_effort`，使 PLAN、EXEC、READ 可通过 `star-auto`、直接 READ 入口和执行阶段交接使用同模型的不同 effort。不需要写入静态模型配置或重启；直接调用的规划问答仍沿用主线程 effort。回归检查补齐 READ 入口，并确保全零后缀保留在模型名中。
@@ -624,7 +624,7 @@ bash execs/configure.sh
 - **[v0.1.15](https://github.com/wanghao9610/STAR/tree/v0.1.15)** (2026-08-05) — `INVOLVE=low` 现在管得到权限确认框，而不只是 skill 主动问的那些问题：`.claude/hooks/star_involve_gate.sh` 对 `Edit`、`Write`、`NotebookEdit` 的 `PreToolUse` 回一个 allow，而项目之外的路径、以及项目根下每一个点目录仍然照常弹框，`Bash` 则根本不在匹配器里。它只挪权限确认框、别的一概不动，这正是 [§7.7](docs/mds/star-workflow/research-workflow-conventions.md) 自己那条划分落到宿主上的样子——红线、提交提议、删除与覆盖、方案审批在 `low` 与在 `high` 完全一样地成立。同一版还给 `reference.bib` 每条记录加上 `% src:` 出处行，把论文笔记的头条数字连同数据集、指标与设定写进自足的一行，并让 §10.6 的接手规则学会混合情形。
 - **[v0.1.14](https://github.com/wanghao9610/STAR/tree/v0.1.14)** (2026-08-04) — 十五个 skill 里有八个现在可以自己发起：规约 [§10](docs/mds/star-workflow/research-workflow-conventions.md) 列出全部十五个并给七个标上 † 表示 slash-only，因为一个由 agent 自作主张走到的决定，等于没有人做过这个决定。被自行拾起并不改变运行随后的行为——红线、提交提议、删除与覆盖、每一个必问确认点，都与你亲手点名时一模一样——并有三条规则给它划出边界：目标不明就问而不猜、一次调用一个 skill、并在决策记录里留一行。光有权限什么也没动，因为每份技能文本仍然只是把命令打印给读者，所以 §10.6 补上这个缺口：一次运行以这八个之一收尾且目标已经确定时，就直接跑它，而不是把命令印出来。
 - **[v0.1.13](https://github.com/wanghao9610/STAR/tree/v0.1.13)** (2026-08-04) — 每条文献记录都带上影响力分数：`star-refs-reviewer` 把年均引用、venue 分级与代码采纳按固定权重合成 0–10 的总分，数据全部来自本次运行中抓取并标注日期的指标——绝不靠印象，也绝不写进 `reference.bib` 字段。分数决定详略而不决定去留，「近比有名重要」依然负责挑核心集；新增的 `score` 模式用一次批量调用重抓整个 bib 的指标，让既有的文献库一条命令就能用上这个功能。同一版还让更新脚本永不覆盖 `AGENTS.md` 及镜像它的那条 Cursor 规则。
-- **[v0.1.12](https://github.com/wanghao9610/STAR/tree/v0.1.12)** (2026-08-03) — 项目有了自己的记忆：一次会话学到的、而任何计划、日志或报告都不拥有的事实，记录在 `.star/memory/` 下，一个事实一个文件，旁边一行索引；第二个会话钩子会在每次会话开始时把这份索引摆到 agent 面前。`AGENTS.md` 新增 §10 承载全部写入规则——只记项目里没有文件已经拥有的事实、要提议而不要擅自、记忆与仓库文件冲突时以文件为准——于是「验证」挪到 §11，四棵 skill 树里所有对它的引用一并跟着挪。格式与退役规则见 [`memory_spec.md`](docs/mds/star-workflow/memory_spec.md)；只对某一台机器成立的事实放进 `.star/memory/local/`，像 `.env` 一样被 git 忽略。
+- **[v0.1.12](https://github.com/wanghao9610/STAR/tree/v0.1.12)** (2026-08-03) — 项目有了自己的记忆：一次会话学到的、而任何计划、日志或报告都不拥有的事实，记录在 `.star/memory/` 下，一个事实一个文件，旁边一行索引；第二个会话钩子会在每次会话开始时把这份索引摆到 agent 面前。`AGENTS.md` 新增 §10 承载全部写入规则——只记项目里没有文件已经拥有的事实、要提议而不要擅自、记忆与仓库文件冲突时以文件为准——于是「验证」挪到 §11，四棵 skill 树里所有对它的引用一并跟着挪。格式与退役规则见 [`memory_spec.md`](docs/mds/star-workflow/research-workflow-conventions.md#12-project-memory)；只对某一台机器成立的事实放进 `.star/memory/local/`，像 `.env` 一样被 git 忽略。
 - **[v0.1.11](https://github.com/wanghao9610/STAR/tree/v0.1.11)** (2026-08-03) — 项目指向了它写作侧的搭档 [STAGE](https://github.com/wanghao9610/STAGE)：首页副标题改为「Every STAGE needs a STAR」，结尾的行动号召新增「Pair it with STAGE」按钮，页脚新增 STAGE 链接，与 STAGE 一直保留的指向 STAR 的链接对称。两份 README 现在都以分工开篇——STAR 负责把研究跑起来，产出方法文档、结果与摘要；STAGE 以只读、带指纹的证据形式导入它们，并在其上写论文，于是稿子里的一个数字能回溯到产生它的那次运行。这种配对在两个方向上都是可选的。
 - **[v0.1.10](https://github.com/wanghao9610/STAR/tree/v0.1.10)** (2026-08-02) — `star-plan-decomposer` 子计划清单确认点里的「调整粒度」有了明确行为，它是一个方向、并且优先问：*更粗*把同类别或有依赖关系的单元合并后重新展示清单，若合并会剩不到三个就询问是否就此打住而不是硬并到两个；*更细*绝不新增同级单元，而是把被点名太粗的单元带进递归步骤。更新脚本的上游变得可配置，`execs/update.sh` 依次从环境变量、`.env`、内置默认值解析 `STAR_REPOSITORY`，于是跟踪一个 fork 只需一行。更新集合还纳入了 `execs/run.sh`，而 `execs/scpts/` 下的实验脚本仍然属于项目自己、永不被触碰。
 - **[v0.1.9](https://github.com/wanghao9610/STAR/tree/v0.1.9)** (2026-08-02) — 代码审查挪到了红线命令之前：`star-plan-executor` 为重型运行停下时，报告现在把 `star-code-reviewer` 写在它交回的命令上方，因为在算力开销之前抓到的缺陷只值一次审查，而同一个缺陷在之后被抓到，代价是算力加重跑。回环也一并闭合了——`CODE_REVIEW_<date>.md` 里日志没有记录为已了结的 blocker/major 问题项，会重新打开它们所落的那些步骤。`star-flow-status` 按同样的顺序推荐审查，评分表把只有那条尚未执行的命令才能产出的交付物记为 `pending` 而不是缺失。

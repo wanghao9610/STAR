@@ -80,7 +80,7 @@ Read `references/idea_rubric.md` (Chinese dialogue: `references/idea_rubric_zh.m
 
 ### Stage 5: Frame the topic (`frame`)
 
-Before drafting, read `docs/mds/star-workflow/human-writing-guide.md`. Treat the chosen question, source-backed gap, constraints, named works, risks, and kill-condition as protected content: the prose pass may reorganize them, but may not weaken, strengthen, or invent them.
+Before drafting, apply the human-writing contract (`docs/mds/star-workflow/research-workflow-conventions.md` §7). Treat the chosen question, source-backed gap, constraints, named works, risks, and kill-condition as protected content: the prose pass may reorganize them, but may not weaken, strengthen, or invent them.
 
 Draft §5 from everything above, 150–400 words of structured prose:
 

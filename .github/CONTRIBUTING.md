@@ -31,13 +31,12 @@ So the cost of changing one shared rule is measured in files, not lines. Recent 
 `877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
 rather than 24. Prefer this whenever the rule is not harness-specific.
 
-The conventions must name no specific harness, provider model, private tool or configuration path.
-Keep invocation spelling and model/depth mechanics in
-`docs/mds/star-workflow/harness-adapters.md`, with provenance commands in
-`model_id_spec.md`. The conventions link to those references where the mechanisms are needed;
-shared authority, tier selection and where a run executes stay in the conventions. These references
-ship with `docs/mds/star-workflow/` through the existing downstream sync. When moving a mechanism,
-preserve its adapter instructions and retarget its assertions in `check_model_routing.sh`.
+The conventions name a specific harness, provider model, hook event or configuration path only in
+§13 (harness adapters): invocation spelling, hook registration, per-runtime model-id provenance and
+model/depth mechanics live there, and §0–§12 hold the shared rules, tier selection and where a run
+executes. Project memory is §12 and the writing rules are §7's human-writing contract; there are no
+separate spec files. When moving a mechanism, keep it in §13 and retarget its assertions in
+`check_model_routing.sh`.
 
 ## `.agents/skills/` is the authoring baseline
 

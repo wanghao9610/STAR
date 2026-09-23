@@ -119,9 +119,13 @@ INSTRUCTION_FILES=(
 # A file of the project's own under the same paths is never on this list.
 RETIRED_FILES=(
     ".agents/commands/star-auto.zh-CN.md"
+    "docs/mds/star-workflow/harness-adapters.md"
     "docs/mds/star-workflow/harness-adapters.zh-CN.md"
+    "docs/mds/star-workflow/human-writing-guide.md"
     "docs/mds/star-workflow/human-writing-guide.zh-CN.md"
+    "docs/mds/star-workflow/memory_spec.md"
     "docs/mds/star-workflow/memory_spec.zh-CN.md"
+    "docs/mds/star-workflow/model_id_spec.md"
     "docs/mds/star-workflow/model_id_spec.zh-CN.md"
     "docs/mds/star-workflow/research-workflow-conventions.zh-CN.md"
 )

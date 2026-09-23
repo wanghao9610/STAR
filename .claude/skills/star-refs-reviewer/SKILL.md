@@ -90,7 +90,7 @@ Rank candidates by the core-paper criteria in `references/refs_rubric.md` and pr
 
 ### Step 3: Read and write the notes
 
-Before writing the first note, read `docs/mds/star-workflow/human-writing-guide.md`. Apply it to the note's prose while preserving source-derived facts, quotations, citations, depth labels, uncertainty, negative results, and the boundary between the paper's claims and this project's judgment.
+Before writing the first note, apply the human-writing contract (`docs/mds/star-workflow/research-workflow-conventions.md` §7). Apply it to the note's prose while preserving source-derived facts, quotations, citations, depth labels, uncertainty, negative results, and the boundary between the paper's claims and this project's judgment.
 
 Per confirmed paper: fetch the paper page (arXiv abs/HTML, ACL Anthology, CVF open access, or the project page), read at minimum abstract, intro, method, and main results table, fill `assets/ref_analysis_template.md` (Chinese: `assets/ref_analysis_template_zh.md`), and **write it immediately** to `metds/refs/<ABBREV>.md`. `ABBREV` is the paper's own abbreviation (`CLIP.md`, `DETR.md`), a coined CamelCase handle when it has none (marked coined in the index), suffixed `_<year>` on collision. Set `depth:` to what you actually read. Where the paper's own page names a repository — the note's `links.code` — fetch its stars and last-push date, one GitHub API call per repo under `references/source_policy.md`'s cap and cache, completing that paper's impact score; the main agent makes that call when writing the note, never a collector. A repo found anywhere but the paper's own pages is `unofficial` — logged, never scored.
 
@@ -124,7 +124,7 @@ Re-fetch 5 entries at random and diff them field by field against the file; any 
 
 ### Steps 9–11: the three offline modes
 
-Each of these modes carries its own procedure, read when that mode is the one running and not before: `references/synthesize_spec.md` for `synthesize` (Step 9 — compile the notes into `metds/refs/related_work.md`), `references/survey_spec.md` for `survey` (Step 10 — read a field in tiers into `metds/refs/<slug>_survey.md`), and `references/score_spec.md` for `score` (Step 11 — refresh citation counts and repository stars over every entry). `synthesize` and `survey` read and apply the human-writing guide before drafting their narrative output; `score` changes records rather than prose. A full pass, `add`, `verify` and `organize` enter none of them and read none of those files.
+Each of these modes carries its own procedure, read when that mode is the one running and not before: `references/synthesize_spec.md` for `synthesize` (Step 9 — compile the notes into `metds/refs/related_work.md`), `references/survey_spec.md` for `survey` (Step 10 — read a field in tiers into `metds/refs/<slug>_survey.md`), and `references/score_spec.md` for `score` (Step 11 — refresh citation counts and repository stars over every entry). `synthesize` and `survey` apply the human-writing contract (conventions §7) before drafting their narrative output; `score` changes records rather than prose. A full pass, `add`, `verify` and `organize` enter none of them and read none of those files.
 
 ## State & File Rules
 

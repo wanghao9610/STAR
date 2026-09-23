@@ -50,7 +50,7 @@ STAR 的十五个相互衔接的研究工作流 skill，把模糊的研究兴趣
 
 这些 skill 把计划状态写进项目文件，因此可以跨对话、跨 session 继续工作，不依赖聊天记录。
 
-选题定稿、计划章节、文献笔记与综述、实验 digest、方法文档和发布 README 都在起草叙述性正文时应用共享的[自然写作指南](human-writing-guide.md)。它在段落层面改掉程式化表达，同时保住证据记录：事实、引用、数字、日期、路径、命令、状态值、未确定性和负面结果不随润色移动。
+选题定稿、计划章节、文献笔记与综述、实验 digest、方法文档和发布 README 都在起草叙述性正文时应用共享的[自然写作约定](research-workflow-conventions.md#human-writing-contract)。它在段落层面改掉程式化表达，同时保住证据记录：事实、引用、数字、日期、路径、命令、状态值、未确定性和负面结果不随润色移动。
 
 ## 目录
 
@@ -114,7 +114,7 @@ star-code-release
 
 每个 skill 还可以在参数后带自由文本，用你自己的话表达本次运行的意图、约束和任何明确授权：`star-plan-reviser 01 这条不做了，由 02 取代`。清楚要求执行某项具体操作，可以满足该操作的确认；背景说明或模糊偏好不可以。自由文本不会默默扩大已选目标或模式、替有实质歧义的计划名作决定，也不会替研究者选择尚未解决的研究方向。`star-auto` 单独解析 `stop=`，因此这条边界始终有效。第一个参数本来就是自由文本的 skill——`star-idea-storm`、`star-plan-coach`、`star-refs-reviewer`——同样按此理解。完整规则见[规约 §7.12](research-workflow-conventions.md)。
 
-一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、计划评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。你敲下的 skill 在你的会话里、用会话的模型跑：敲它不会换模型。本档指定了不同的模型、或宿主只能逐次派发时应用的深度时，运行在开头用一行说明——档位、该模型与深度，以及两种得到它们的办法：切换会话模型，或经 `star-auto` 启动这次运行——然后照常在原地跑；宿主已经借 skill 自己的清单应用了档位时，这一行只说仍缺的部分。这一行就是每份清单工作流开头、以 **本次运行在哪里执行。** 起头的那一段，除 `star-idea-storm` 与 `star-plan-coach` 外每个 skill 都有。`star-auto` 直接以各自档位的模型启动每次运行；`star-plan-executor` 与 `star-code-architect` 把执行那一段交给 EXEC 档上的受托者，见下面各自的小节；其他受托者都按所做的工作取档：采集器 READ，实现者 EXEC，盲审 PLAN。文件仍属于这次运行，其中记录的来源是真正写下它们的模型。三个键出厂留空，留空即什么都不变，也不提。条目还可以在模型名后带思考深度——`claude:opus@high` 或 `codex:gpt-6-astra@high`——两档因此可以指定同一个模型，只在运行思考的深度上不同。各宿主怎样应用深度，见[宿主适配说明](harness-adapters.md)。完整规则见[规约 §10.8](research-workflow-conventions.md)。
+一次运行用哪个模型，由 `.env` 分三档设定：`STAR_PLAN_MODEL` 管研究判断——计划、计划评审、分析，以及替它们把关的盲审——`STAR_EXEC_MODEL` 管实现与产出，`STAR_READ_MODEL` 管只读扫描、收集与汇总。[规约 §10](research-workflow-conventions.md) 的名册里每个 skill 都带着自己的档位；少数模式走另一档，还有两个运行中途换档，各自写在下面对应的小节里。你敲下的 skill 在你的会话里、用会话的模型跑：敲它不会换模型。本档指定了不同的模型、或宿主只能逐次派发时应用的深度时，运行在开头用一行说明——档位、该模型与深度，以及两种得到它们的办法：切换会话模型，或经 `star-auto` 启动这次运行——然后照常在原地跑；宿主已经借 skill 自己的清单应用了档位时，这一行只说仍缺的部分。这一行就是每份清单工作流开头、以 **本次运行在哪里执行。** 起头的那一段，除 `star-idea-storm` 与 `star-plan-coach` 外每个 skill 都有。`star-auto` 直接以各自档位的模型启动每次运行；`star-plan-executor` 与 `star-code-architect` 把执行那一段交给 EXEC 档上的受托者，见下面各自的小节；其他受托者都按所做的工作取档：采集器 READ，实现者 EXEC，盲审 PLAN。文件仍属于这次运行，其中记录的来源是真正写下它们的模型。三个键出厂留空，留空即什么都不变，也不提。条目还可以在模型名后带思考深度——`claude:opus@high` 或 `codex:gpt-6-astra@high`——两档因此可以指定同一个模型，只在运行思考的深度上不同。各宿主怎样应用深度，见[规约 §13](research-workflow-conventions.md#model-and-thinking-depth)。完整规则见[规约 §10.8](research-workflow-conventions.md)。
 
 ## 2. 开始前的准备
 
@@ -136,7 +136,7 @@ star-code-release
 
 只是编写或拆解计划的话，不需要提前准备数据、权重或可运行代码；这些输入会在执行阶段检查。
 
-每个 skill 写出的产物都记录它由哪个模型产出，好让日后横向比较模型时有据可依：单次写入记在 `model_id`，跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——由 `star-expt-digest ledger` 汇总进 `wkdrs/digests/MODEL_LEDGER.md`。取值是运行时在写入当时报出的：自报而非核实，所以把它当作关于来源的证据，而不是证明。完整规则见[规约 §8](research-workflow-conventions.md)；运行时没报出模型时的退路，在 [`model_id_spec.md`](model_id_spec.md)。
+每个 skill 写出的产物都记录它由哪个模型产出，好让日后横向比较模型时有据可依：单次写入记在 `model_id`，跨多次会话写成的产物还带一个只追加的 `model_trail`——每次写入会话一条——由 `star-expt-digest ledger` 汇总进 `wkdrs/digests/MODEL_LEDGER.md`。取值是运行时在写入当时报出的：自报而非核实，所以把它当作关于来源的证据，而不是证明。完整规则见[规约 §8](research-workflow-conventions.md)；运行时没报出模型时的退路，在[规约 §13](research-workflow-conventions.md#hooks-and-model-provenance)。
 
 ## 3. `star-proj-adopt`：接入一个做了一半的项目
 
