@@ -1,7 +1,5 @@
 # Clear writing in the research record
 
-**Language:** English | [简体中文](human-writing-guide.zh-CN.md)
-
 This guide applies shared checks for formulaic writing to STAR replies and narrative records.
 The goal is clear, natural research prose, not authorship detection or detector evasion.
 The [research workflow conventions](research-workflow-conventions.md) remain authoritative for evidence, state, ownership, and provenance.

@@ -7,7 +7,7 @@ disableModelInvocation: true
 # Drive the workflow toward a goal
 
 Read `.agents/commands/star-auto.md` from the current project root and follow it as the authoritative procedure.
-When `.env` sets `STAR_LANG=zh`, or it is unset and the conversation is in Chinese, use `.agents/commands/star-auto.zh-CN.md` for the user-facing wording while keeping the English file's decisions.
+Write the user-facing wording in the language resolved under conventions §7.6: Chinese when `.env` sets `STAR_LANG=zh`, or when it is unset and the conversation is in Chinese. `.agents/commands/star-auto.md` is the only procedure; its decisions do not change with the language.
 
 Adapt its invocation spelling and model routing for Kimi Code:
 

@@ -138,9 +138,7 @@ tier_depth_for() { # $1 = harness token, $2 = the raw key value; the depth, or n
 # nothing, leaving each shipped value in place (workflow conventions §10.8).
 READ_TIER_MANIFESTS=(
     ".claude/skills/star-flow-status/SKILL.md"
-    ".claude/skills/star-flow-status/SKILL_zh.md"
     ".claude/skills/star-expt-digest/SKILL.md"
-    ".claude/skills/star-expt-digest/SKILL_zh.md"
 )
 
 # A Claude Code run reads its thinking depth from the manifest it was invoked
@@ -264,14 +262,12 @@ claude_tier_skills() { # $1 = plan, exec, or read
 stamp_claude_depths() {
     is_selected claude || return 0
 
-    local tier depth skill name
+    local tier depth skill
     for tier in plan exec read; do
         depth="$(tier_depth_for claude "$(env_value "$(tier_model_key "${tier}")")")"
         [[ -n "${depth}" ]] || continue
         while IFS= read -r skill; do
-            for name in SKILL.md SKILL_zh.md; do
-                stamp_frontmatter_field ".claude/skills/${skill}/${name}" effort "${depth}"
-            done
+            stamp_frontmatter_field ".claude/skills/${skill}/SKILL.md" effort "${depth}"
         done < <(claude_tier_skills "${tier}")
         stamp_frontmatter_field ".claude/agents/star-${tier}.md" effort "${depth}"
     done

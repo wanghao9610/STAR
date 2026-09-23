@@ -27,13 +27,13 @@ So the cost of changing one shared rule is measured in files, not lines. Recent 
 
 **Before editing seven trees, check whether the rule belongs in
 `docs/mds/star-workflow/research-workflow-conventions.md` instead.** Consistency check 6 proves every
-`SKILL.md` defers to that document, so a rule stated there reaches all fifteen skills in two files
-(English and Chinese). `877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
+`SKILL.md` defers to that document, so a rule stated there reaches all fifteen skills in one file.
+`877aaec` fixed the `involve=` token for twelve skills that way, in 2 files
 rather than 24. Prefer this whenever the rule is not harness-specific.
 
 The conventions must name no specific harness, provider model, private tool or configuration path.
 Keep invocation spelling and model/depth mechanics in
-`docs/mds/star-workflow/harness-adapters.md` (and its Chinese twin), with provenance commands in
+`docs/mds/star-workflow/harness-adapters.md`, with provenance commands in
 `model_id_spec.md`. The conventions link to those references where the mechanisms are needed;
 shared authority, tier selection and where a run executes stay in the conventions. These references
 ship with `docs/mds/star-workflow/` through the existing downstream sync. When moving a mechanism,
@@ -252,10 +252,10 @@ correctly, because §6.1's local fill is a floor rather than a prohibition.
 ## `.agents` is the authored neutral form
 
 The neutral source is not required to mirror one harness's control structure: its executor has 7
-steps where the generated harnesses have 9. Its heading structure differs from `.claude` in 8 files — four under `star-plan-executor` (the manifest and
-`agent_dispatch_spec.md`, each in both languages), four under `star-code-architect`
+steps where the generated harnesses have 9. Its heading structure differs from `.claude` in 7 files — three under `star-plan-executor` (the manifest, and
+`agent_dispatch_spec.md` in both languages), four under `star-code-architect`
 (`orchestration_spec.md` and `survey_spec.md`, likewise) — and those differences are not simple
-omissions: it restructures. `stop_line_rules.md` was the ninth and tenth until the tree stopped naming
+omissions: it restructures. `stop_line_rules.md` was the eighth and ninth until the tree stopped naming
 a harness: it was titled "what **Codex** runs", and now says "what the agent runs", which is what
 `.claude` says, so those two files agree heading for heading.
 
@@ -339,7 +339,7 @@ input as JSON, which is also how the truncation below was measured.
 
 Keep discovery concise: describe the capability, when it applies, and exclusions that prevent likely misrouting. Put mode syntax, procedures, output schemas and detailed guarantees in the body or references. Preserve real boundaries such as review-only scope or preparing a release without publishing it.
 
-The repository checker enforces a 1024-character description limit and a stricter 500-character limit for DSH. These are ceilings, not targets. Frontmatter remains harness-owned; when changing shared discovery semantics, update the six generated trees' descriptions without replacing their model, context or invocation-policy fields. Keep the Chinese edition consistent in meaning, although it is not loaded as the runtime manifest.
+The repository checker enforces a 1024-character description limit and a stricter 500-character limit for DSH. These are ceilings, not targets. Frontmatter remains harness-owned; when changing shared discovery semantics, update the six generated trees' descriptions without replacing their model, context or invocation-policy fields.
 
 Catalog truncation depends on the harness and installed version. Historical measurements are not a permanent prompt budget. Inspect the current model-visible catalog when diagnosing discovery; avoid compensating with more trigger words or moving an essential boundary to the end of a long description.
 
@@ -353,17 +353,19 @@ Catalog truncation depends on the harness and installed version. Historical meas
 2. Frontmatter `name:` matches the directory name.
 3. Per-skill file inventory is identical across trees (`.agents`' `agents/` links to Codex's
    manifests aside).
-4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and both Chinese editions list exactly the same skills and † set, while the Codex, Kimi and DSH router packages point back to that source.
-5. Every `.md` has its `_zh.md` twin.
+4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and its Chinese edition list exactly the same skills and † set, while the Codex, Kimi and DSH router packages point back to that source.
+5. Every reference and asset `.md` has its `_zh.md` twin, because a Chinese run writes its documents from
+   the `_zh` templates; `SKILL.md` has no Chinese edition, in the skill trees or the router plugins.
 6. Every `SKILL.md` references the conventions document.
 7. Invocation tokens are tree-appropriate — no prefix at all in `.agents`, `/star-*` in `.claude`,
    `.cursor`, `.pi` and `.qwen`, `/skill:star-*` in `.dsh` and `.kimi-code` — and every harness's
    `/star` entry point remains a thin wrapper around `.agents/commands/star.md`; Codex, Kimi and DSH also have their plugin or command metadata checked.
-8. Workflow docs ship as en/zh pairs.
+8. Workflow docs are English, except the skills user guide, which ships as an en/zh pair. No other
+   workflow doc has a Chinese edition, and neither do `AGENTS.md`, this guide or the `/star-auto` command.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are
     registered in all six harnesses' registration files.
-11. **Heading structure matches across `.claude`, `.cursor`, `.kimi-code`, `.pi` and `.qwen`** — 1236
+11. **Heading structure matches across `.claude`, `.cursor`, `.kimi-code`, `.pi` and `.qwen`** — 1054
     headings per tree, compared after stripping parentheticals (both `(...)` and `（...）`) and
     inline code, so harness vocabulary inside a heading is allowed to differ. Currently exact, with
     no exception list.
@@ -388,12 +390,11 @@ Catalog truncation depends on the harness and installed version. Historical meas
     The drift it exists for shipped twice: layout and runtime moved to §8 and §9, and both
     `star-code-reviewer` and `star-expt-analyst` kept citing §5 and §6 with CI green, because no check
     had ever looked at a citation.
-17. **The conventions document's numbered structure is pinned, and the workflow docs stay line-aligned
-    across languages.** Skills cite that file at sub-section granularity — §7.7 280 times, §6.3 50
-    times — so inserting an item into the middle of a section repoints every citation after it. The
-    headings are pinned; item counts are pinned for the sections whose items are cited (§1, §3, §4, §5,
-    §6, §7), and both languages are counted, since a §n that means different things per language is the
-    same bug. The line-count parity is the "keep them line-aligned" rule below, enforced.
+17. **The conventions document's numbered structure is pinned, and a workflow doc with a Chinese
+    edition stays line-aligned with it.** Skills cite that file at sub-section granularity — §7.7 113
+    times, §6.3 63 times — so inserting an item into the middle of a section repoints every citation
+    after it. The headings are pinned; item counts are pinned for the sections whose items are cited
+    (§1, §3, §4, §5, §6, §7). The line-count parity is the "keep them line-aligned" rule below, enforced.
 18. **The skills guide and the two READMEs stay tied to the skills they describe.** Roughly 69% of that
     guide paraphrases the fifteen `SKILL.md` files, which are authoritative and change far more often.
     This holds the joins a script can see, across all four documents: every relative link target on
@@ -437,8 +438,7 @@ Be honest with yourself about this list; it is where the real drift lives.
   `star-refs-reviewer` and the executor's non-interactive fallback with it (restored in `042ece5`).
   Nothing would have caught it, and nothing would catch the next one.
 - **Chinese/English divergence in meaning.** Check 5 proves the `_zh.md` file exists; nothing proves it
-  says the same thing. Check 11 now proves the two have the same section structure, which is a floor,
-  not a guarantee.
+  says the same thing or how it is sectioned.
 - **`docs/htmls/`.** The landing page is not compared against the READMEs or the workflow guide, and
   has drifted from both.
 - **Whether a shortened description still says the important thing.** Check 12 enforces the length
@@ -474,8 +474,8 @@ Be honest with yourself about this list; it is where the real drift lives.
   item to §1, §3, §4, §5, §6 or §7 fails it until every `§n.m` citation has been re-audited.
 - Same for `AGENTS.md`: renumbering a section means re-auditing every `§n` citation in the skill trees
   and updating `AGENTS_SECTIONS` in the check script. Check 16 fails until both are done.
-- Keep the English and Chinese workflow guides line-aligned. They currently match line for line, which
-  makes cross-language diffs readable — and check 17 now fails if a pair stops matching.
+- Keep the English and Chinese skills user guides line-aligned. They currently match line for line, which
+  makes cross-language diffs readable — and check 17 now fails if they stop matching.
 - STAR is the template every adopting project starts from, so its own memories never enter the
   versioned `.star/memory/`: record them under the git-ignored `.star/memory/local/` whatever their
   scope. Check 26 fails on any tracked file there beyond the template.

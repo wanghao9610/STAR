@@ -43,10 +43,8 @@ done
 # The two READ manifests take the READ model; the other two stand in for the plan
 # and exec tiers, which take a depth and no model.
 for skill in star-flow-status star-expt-digest star-plan-executor star-code-reviewer; do
-	for suffix in SKILL.md SKILL_zh.md; do
-		mkdir -p "${PROJECT}/.claude/skills/${skill}"
-		cp "${ROOT_DIR}/.claude/skills/${skill}/${suffix}" "${PROJECT}/.claude/skills/${skill}/"
-	done
+	mkdir -p "${PROJECT}/.claude/skills/${skill}"
+	cp "${ROOT_DIR}/.claude/skills/${skill}/SKILL.md" "${PROJECT}/.claude/skills/${skill}/"
 done
 # The three named delegates Claude Code dispatches a tier through: their frontmatter
 # is where a depth becomes a per-dispatch control rather than the run's own setting.
@@ -78,9 +76,7 @@ expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
 expect_model "${PROJECT}/.qwen/agents/star-exec.md" bare-exec
 expect_model "${PROJECT}/.qwen/agents/star-read.md" authType:model-id
 for skill in star-flow-status star-expt-digest; do
-	for suffix in SKILL.md SKILL_zh.md; do
-		expect_model "${PROJECT}/.claude/skills/${skill}/${suffix}" claude-read
-	done
+	expect_model "${PROJECT}/.claude/skills/${skill}/SKILL.md" claude-read
 done
 note "three tiers route to Cursor and Qwen; Claude stamps only the READ model"
 
@@ -95,7 +91,6 @@ write_env \
 run_models
 
 expect_effort "${PROJECT}/.claude/skills/star-plan-executor/SKILL.md" xhigh
-expect_effort "${PROJECT}/.claude/skills/star-plan-executor/SKILL_zh.md" xhigh
 expect_effort "${PROJECT}/.claude/skills/star-code-reviewer/SKILL.md" high
 for skill in star-flow-status star-expt-digest; do
 	expect_model "${PROJECT}/.claude/skills/${skill}/SKILL.md" claude-read
@@ -124,18 +119,11 @@ for expected in \
 	'STAR_READ_MODEL in .env gives Codex at dispatch: model gpt-6-astra, requested reasoning effort low'; do
 	grep -Fq "${expected}" <<<"${codex_output}" || fail "Codex model/depth summary lacks: ${expected}"
 done
-for file in \
-	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL.md" \
-	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL_zh.md"; do
-	grep -Fq 'reasoning_effort' "${file}" || fail "${file} does not pass Codex effort per dispatch"
-	grep -Fq 'fork_turns' "${file}" || fail "${file} does not preserve fresh-context routing"
-done
-grep -Fq 'even when the model is unchanged' \
-	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL.md" ||
+file="${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL.md"
+grep -Fq 'reasoning_effort' "${file}" || fail "${file} does not pass Codex effort per dispatch"
+grep -Fq 'fork_turns' "${file}" || fail "${file} does not preserve fresh-context routing"
+grep -Fq 'even when the model is unchanged' "${file}" ||
 	fail "Codex star-auto does not route an explicit same-model depth"
-grep -Fq '即使不换模型也会触发' \
-	"${ROOT_DIR}/.codex/plugins/star/skills/star-auto/SKILL_zh.md" ||
-	fail "Chinese Codex star-auto does not route an explicit same-model depth"
 grep -Fq 'or the harness can apply its depth per dispatch' \
 	"${ROOT_DIR}/.agents/skills/star-plan-executor/SKILL.md" ||
 	fail "star-plan-executor does not route a same-model EXEC depth"
@@ -145,9 +133,6 @@ grep -Fq 'or a depth this harness can apply per dispatch' \
 grep -Fq 'passes it explicitly as `reasoning_effort`' \
 	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
 	fail "harness adapters do not define Codex per-dispatch effort"
-grep -Fq '显式传给 `reasoning_effort`' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.zh-CN.md" ||
-	fail "Chinese harness adapters do not define Codex per-dispatch effort"
 grep -Fq 'appends a configured `@<depth>` to the model as `-<depth>` and writes that flat id, unquoted, onto that tier'\''s named agent'\''s `model:`' \
 	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
 	fail "harness adapters do not stamp Cursor -<depth> as the model field"
@@ -157,15 +142,6 @@ grep -Fq 'scan that list for a slug of the same model family that already carrie
 grep -Fq 'omit `model` so the file stamp is not overridden' \
 	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.md" ||
 	fail "harness adapters do not leave an unlisted Cursor Task model unpassed"
-grep -Fq '把 `.env` 的 `@<深度>` 以 `-<深度>` 接在模型名后，再把这个扁平 id 不加引号写进该档具名代理的 `model:`' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.zh-CN.md" ||
-	fail "Chinese harness adapters do not stamp Cursor -<depth> as the model field"
-grep -Fq '在该列表里找同族且已带所需深度的 slug' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.zh-CN.md" ||
-	fail "Chinese harness adapters do not map Cursor @depth onto a listed variant"
-grep -Fq '省略 `model`，以免盖过文件盖章' \
-	"${ROOT_DIR}/docs/mds/star-workflow/harness-adapters.zh-CN.md" ||
-	fail "Chinese harness adapters do not leave an unlisted Cursor Task model unpassed"
 grep -Fq 'or carries a depth' "${ROOT_DIR}/.claude/commands/star-auto.md" ||
 	fail "Claude star-auto does not route an explicit same-model depth"
 while IFS= read -r file; do
@@ -175,10 +151,7 @@ done < <(find -L "${ROOT_DIR}/.claude/skills" -type f -name SKILL.md)
 for skill in star-flow-status star-expt-digest; do
 	grep -Fq '**Where this run executes.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" ||
 		fail "${skill} does not say where its run executes"
-	grep -Fq '**本次运行在哪里执行。**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md" ||
-		fail "Chinese ${skill} does not say where its run executes"
-	if grep -Fq -e '**READ-tier entry on this harness.**' -e '**本宿主的 READ 档入口。**' \
-		"${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" "${ROOT_DIR}/.agents/skills/${skill}/SKILL_zh.md"; then
+	if grep -Fq '**READ-tier entry on this harness.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md"; then
 		fail "${skill} still hands the whole run to a READ delegate"
 	fi
 done
@@ -201,10 +174,6 @@ while IFS= read -r file; do
 	grep -Fq 'a configured depth is reason enough to dispatch' "${file}" ||
 		fail "${file} does not route a same-model depth to a pool alias"
 done < <(find -L "${ROOT_DIR}/.kimi-code/skills" -type f -name SKILL.md)
-while IFS= read -r file; do
-	grep -Fq '也足以构成派发的理由' "${file}" ||
-		fail "${file} does not route a same-model depth to a pool alias in Chinese"
-done < <(find -L "${ROOT_DIR}/.kimi-code/skills" -type f -name SKILL_zh.md)
 note "Kimi summaries name the pool alias per depth; skills route a same-model depth"
 
 # --kimi-pool registers the variants and pool keys the kimi tier entries need in
@@ -400,12 +369,8 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 	while IFS= read -r file; do
 		grep -Fq 'Passing a tier model' "${file}" || fail "${file} lacks the tier-model entry"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL.md)
-	while IFS= read -r file; do
-		grep -Fq '传给受托者。' "${file}" || fail "${file} lacks the Chinese tier-model entry"
-	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL_zh.md)
 	for skill in star-flow-status star-expt-digest; do
 		grep -Fq '**Where this run executes.**' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its where-this-run-executes paragraph"
-		grep -Fq '**本次运行在哪里执行。**' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL_zh.md" || fail "${tree} ${skill} lacks its Chinese where-this-run-executes paragraph"
 	done
 done
 note "seven trees retain tier-model entries, and flow-status and digest say where their run executes"
@@ -426,22 +391,6 @@ while IFS= read -r file; do
 		fail "${file} still denies the official Cursor stamp"
 	fi
 done < <(find -L "${ROOT_DIR}/.cursor/skills" -type f -name SKILL.md)
-while IFS= read -r file; do
-	grep -Fq '本会话 `Task` 的 `model` 可选列表含该盖章 id 时就传它' "${file}" ||
-		fail "${file} does not pass the stamped Cursor id when Task lists it in Chinese"
-	grep -Fq '在该列表里找同族且已带所需深度的 slug' "${file}" ||
-		fail "${file} does not map Cursor @depth onto a listed variant in Chinese"
-	grep -Fq '省略 `model`，以免盖过文件盖章' "${file}" ||
-		fail "${file} does not leave an unlisted Cursor Task model unpassed in Chinese"
-	grep -Fq '把配置的 `@<深度>` 以 `-<深度>` 接在模型名后' "${file}" ||
-		fail "${file} does not keep Cursor's flat -<depth> id as the stamp in Chinese"
-	if grep -Fq '不传文档未声明的按次' "${file}"; then
-		fail "${file} still forbids passing Task model in Chinese"
-	fi
-	if grep -Fq '文件也不是路由' "${file}"; then
-		fail "${file} still denies the official Cursor stamp in Chinese"
-	fi
-done < <(find -L "${ROOT_DIR}/.cursor/skills" -type f -name SKILL_zh.md)
 grep -Fq 'Pass the stamped id when this session'\''s selectable `Task` `model` list contains it' \
 	"${ROOT_DIR}/.cursor/commands/star-auto.md" ||
 	fail "Cursor star-auto does not pass the stamped id when Task lists it"

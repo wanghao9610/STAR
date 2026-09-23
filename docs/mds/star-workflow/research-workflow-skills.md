@@ -1264,7 +1264,7 @@ Yes, but keep the frontmatter consistent with the body, especially `parent`, `ch
 
 `.agents/skills/` is the single authored source: tool-neutral, prefix-free, and also the shared root required by the `AGENTS.md` convention. Six generated harness trees adapt that source to their native invocation and control mechanisms; harness-only behavior lives in explicit adapter rules or anchored overrides. At runtime, read the generated copy owned by your tool when one exists. Do not mix tool-specific invocation or control instructions across these roots:
 
-Every skill directory has the same shape in all seven roots: `SKILL.md` is the runtime entry point and English definition; `SKILL_zh.md` is the human-readable Chinese edition kept in step with it. At runtime the entry point stays `SKILL.md` — Chinese dialogue replies in Chinese and switches to the `*_zh.md` / `.zh-CN` resources — and where the two conflict, `SKILL.md` wins. This guide's invocation examples carry no prefix (§1), and its "complete definition" links point into the authored `.agents/skills/` source. Read the copy your own tool owns — the row below names it — where an adapter changes tool mechanics.
+Every skill directory has the same shape in all seven roots: `SKILL.md` is the runtime entry point and the skill's English definition. A run in Chinese still follows `SKILL.md`: it replies in Chinese and switches to the `*_zh.md` templates and references. This guide's invocation examples carry no prefix (§1), and its "complete definition" links point into the authored `.agents/skills/` source. Read the copy your own tool owns — the row below names it — where an adapter changes tool mechanics.
 
 | Tool | Runtime directory | Invocation form |
 | --- | --- | --- |

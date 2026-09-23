@@ -1,7 +1,5 @@
 # Workflow Harness Adapters
 
-**Language:** English | [简体中文](harness-adapters.zh-CN.md)
-
 This file preserves STAR's per-harness invocation spelling and model-routing mechanics for [conventions](research-workflow-conventions.md) §10 (the skill roster and routing). The conventions own scope, authority, tier assignment, where a run executes, and provenance requirements; this file describes how each harness applies them. Read the current harness's entry before choosing an invocation or dispatch parameter, and use only capabilities the active interface supports.
 
 ## Invocation spelling and configuration tags

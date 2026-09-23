@@ -1,6 +1,6 @@
 # 发布准备 — <项目>（<YYYY-MM-DD>）
 
-<!-- 由 star-code-release 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>）。
+<!-- 由 star-code-release 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.md>）。
      本次跑了哪些阶段：gather | polish | readme | check（或"完整流程"）。
      无话可说的节收缩为一行——绝不注水。 -->
 
@@ -77,7 +77,7 @@
 
 ## 7. 等待用户
 
-<!-- 发布命令，只准备不执行（`SKILL_zh.md` 核心原则 6）。每条给出：确切命令、它产生什么、
+<!-- 发布命令，只准备不执行（`SKILL.md` 核心原则 6）。每条给出：确切命令、它产生什么、
      它让什么变得不可逆。外加每个需要用户决定才能修的阻断项——选 license、
      误提交密钥凭据后是否重写历史。 -->
 

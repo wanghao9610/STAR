@@ -12,14 +12,22 @@ f04	Slash-only guards match the conventions roster	perl -pi -e 's/^disable-model
 # The manifest lives under .codex now; .agents/skills carries a link to it at the
 # path Codex scans, and perl -i would replace that link instead of the file.
 f04b	Slash-only guards match the conventions roster	perl -pi -e 's/allow_implicit_invocation: false/allow_implicit_invocation: true/' "$W/.codex/skills/star-plan-coach/agents/openai.yaml"	star-plan-coach
-# f04c flips one roster row's tier in the en conventions only, which is what
-# a hand-edited table does: the zh edition then sends that skill to another
-# tier's model, and nothing but this check notices.
-f04c	Roster run tiers	perl -pi -e 's/^(\| .star-env-builder. \| )exec( \|)/${1}read${2}/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
+# f04c blanks one roster row's tier, which is what a hand-edited table does:
+# that skill then runs on whichever model happened to be running, and nothing
+# but this check notices.
+f04c	Roster run tiers	perl -pi -e 's/^(\| .star-env-builder. \| )exec( \|)/${1}${2}/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f05	Bilingual twins in skill trees	touch "$W/.pi/skills/star-flow-status/references/orphan.md"	orphan.md
+# f05b brings a Chinese manifest back in all seven trees, so the inventory
+# parity check stays quiet and only the SKILL_zh.md guard can catch it; f05c
+# brings one back in a router plugin, which no skill tree covers.
+f05b	Bilingual twins in skill trees	for t in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do : > "$W/$t/skills/star-flow-status/SKILL_zh.md"; done	SKILL_zh.md
+f05c	Bilingual twins in skill trees	: > "$W/.codex/plugins/star/skills/star-auto/SKILL_zh.md"	.codex/plugins/star/skills/star-auto/SKILL_zh.md
 f06	Shared-conventions reference	perl -pi -e 's{research-workflow-conventions}{research-workflow-CONV}g' "$W/.kimi-code/skills/star-code-release/SKILL.md"	.kimi-code/skills/star-code-release/SKILL.md
 f07	Invocation-token hygiene	printf '\n/star-plan-coach\n' >> "$W/.dsh/skills/star-flow-status/SKILL.md"	.dsh/skills/star-flow-status/SKILL.md
-f08	Bilingual twins in docs/mds/star-workflow	touch "$W/docs/mds/star-workflow/orphan.md"	orphan.md
+# f08 brings a deleted Chinese workflow doc back; f08b does the same with the
+# Chinese instruction file at the repository root.
+f08	Bilingual twins in docs/mds/star-workflow	touch "$W/docs/mds/star-workflow/memory_spec.zh-CN.md"	memory_spec.zh-CN.md
+f08b	Bilingual twins in docs/mds/star-workflow	touch "$W/AGENTS.zh-CN.md"	AGENTS.zh-CN.md
 f09	Cursor rule mirrors AGENTS.md	printf 'drift\n' >> "$W/.cursor/rules/agent-instructions.mdc"	agent-instructions.mdc
 f10	Session hooks	rm -f "$W/.qwen/hooks/star_memory.sh"	star_memory.sh
 f10b	Session hooks	chmod -x "$W/.claude/hooks/star_commit_guard.sh"	star_commit_guard.sh
@@ -36,7 +44,7 @@ f15	Manifest section parity (.agents vs .claude)	perl -ni -e 'print unless /^## 
 # .agents/skills and the literals live in files on both sides of that line.
 f16	Grepped literals have a producer	find -L "$W/.claude/skills" -type f -exec grep -l -- '[TBD]' {} + | xargs perl -pi -e 's/\[TBD\]/[TBDX]/g'	.claude
 f17	AGENTS.md section citations	perl -pi -e 's/^## 9\. Project Runtime$/## 9. Project Runtime Environment/' "$W/AGENTS.md"	AGENTS.md
-f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
+f18	Conventions document structure	printf '\n' >> "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
 f18b	Conventions document structure	perl -pi -e 's/^## 6\. Delegation$/## 6. Delegating/' "$W/docs/mds/star-workflow/research-workflow-conventions.md"	research-workflow-conventions
 f19	Skills guide coverage	perl -pi -e 's/star-expt-digest/star-expt-digestX/g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills
 f20	complete definition	perl -pi -e 's{\.agents/skills/star-flow-status}{.agents/skills/star-flow-statusX}g' "$W/docs/mds/star-workflow/research-workflow-skills.md"	research-workflow-skills

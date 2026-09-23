@@ -2,7 +2,7 @@
 
 在 Step 2 执行，先完成本清单，再由 Step 3 起草 EXEC_PLAN。目标:在计划改动 `${CODE_NAME}/` 之前弄清它现在有什么。绝不假设某个模块、入口或配置存在——去读它。
 
-1. **解析运行环境**。读 `.env`;取 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`(`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` §3)。
+1. **解析运行环境**。读 `.env`;取 `CODE_NAME`、`CONDA_HOME`、`PYTHON_HOME`(`docs/mds/star-workflow/research-workflow-conventions.md` §3)。
 
 2. **摸清代码根**。列出 `${CODE_NAME}/`。若只有 `.gitkeep`(空),声明 **空代码库（从零起步）**:计划要从零搭骨架,缺口清单就是"全部"。若 `metds/codearc.md` 存在，读它的 §2 放置规则和 §7 改名残留表：需新建的步骤按 §2 放置文件，任何动作都不改 §7 里的名字。
 
@@ -12,6 +12,6 @@
 
 5. **找到运行入口**。弄清项目实际怎么跑——训练/评测入口、配置格式、CLI 约定。读 `execs/run.sh`(项目的标准运行入口)、列出 `execs/scpts/`(运行脚本的存放处)。后续命令必须走这个入口 + `.env` 的解释器(规约 §3),而不是临时的一次性脚本。若 `execs/run.sh` 为空(空代码库（从零起步）),计划可以搭建它;本轮准备的任何可复用启动脚本放到 `execs/scpts/<run>.sh`——而不是散落在 `wkdrs/` 里。
 
-6. **检查上游产物**。对叶子 `depends_on` 里的每个前缀(与 §2 一致),确认上游兄弟已完成——`exec_status: done` 的叶子，或其下每个未丢弃的叶子都已到终态（`done` 或 `abandoned`）、其中至少一个是 `done`、且子树里任何 `## Sub-plans` 索引都不再有概要行的内部节点（`docs/mds/star-workflow/research-workflow-conventions.zh-CN.md` §5.5）——且其产物存在于 `wkdrs/` / `inits/` / `datas/`。若某上游兄弟尚未完成,当前叶子就被挡住——说明并停下。
+6. **检查上游产物**。对叶子 `depends_on` 里的每个前缀(与 §2 一致),确认上游兄弟已完成——`exec_status: done` 的叶子，或其下每个未丢弃的叶子都已到终态（`done` 或 `abandoned`）、其中至少一个是 `done`、且子树里任何 `## Sub-plans` 索引都不再有概要行的内部节点（`docs/mds/star-workflow/research-workflow-conventions.md` §5.5）——且其产物存在于 `wkdrs/` / `inits/` / `datas/`。若某上游兄弟尚未完成,当前叶子就被挡住——说明并停下。
 
 **本步产出**:一份缺口清单(每个 §3 步骤:已存在 / 修改 / 新建,附真实路径)+ 运行入口。它输入给 Step 3 的 EXEC_PLAN。

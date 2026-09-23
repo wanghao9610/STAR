@@ -534,7 +534,7 @@ bash execs/configure.sh
 
 A missing interface, unavailable model, or stale named-agent configuration is reported without pretending the requested model ran. Reports record the delegate's actual model. Claude Code forks status and digest runs on the READ model through their own manifests; on other hosts those two run in the session like any skill you type.
 
-Files at matching paths are overwritten, new upstream files added, and project-specific files that exist only in the updated directories preserved. To avoid deleting custom content, files removed upstream are not removed locally. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
+Files at matching paths are overwritten, new upstream files added, and project-specific files that exist only in the updated directories preserved. A STAR file upstream no longer ships — each `SKILL_zh.md` beside an upstream skill, and the retired files listed in `RETIRED_FILES` — is deleted (`--diff` lists it as `removes`); any other file that exists only locally, your own included, is kept. STAR no longer ships `AGENTS.zh-CN.md` or `CLAUDE.zh-CN.md`: an update keeps yours, so delete them if they came from STAR. The update does not modify other directories, the current branch, Git remotes, or the staging area. Commit current work before updating, then review and commit the result with `git status` and `git diff`.
 
 ## Project conventions
 

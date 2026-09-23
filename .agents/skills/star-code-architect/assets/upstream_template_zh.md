@@ -5,7 +5,7 @@
 <!-- 只记录事实元数据；架构摘要写在 metds/codearc.md §5（上游来源与改造策略）。 -->
 
 - **来源**：<仓库 URL>
-- **model_id**：<写入时运行时声明的模型 ID；若运行时未声明则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.zh-CN.md>
+- **model_id**：<写入时运行时声明的模型 ID；若运行时未声明则写 "unrecorded"——见 docs/mds/star-workflow/model_id_spec.md>
 - **提交**：`<完整 SHA>`（<提交日期，YYYY-MM-DD>）
 - **子路径**：<单体仓库中的子路径，或 —>
 - **克隆日期**：<YYYY-MM-DD>

@@ -99,16 +99,14 @@ done < <(printf '%s\n' "${SKILLS}")
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
 #    pick up. Both failures are silent in use, which is what this check is for.
-#    The conventions roster and the shared /star router are held to the trees
-#    and to their own translations: each must
-#    list exactly the skills that exist — a † row for a skill that does not is
-#    never iterated by the per-skill loop, so without this it passed and was
-#    even counted — and the zh edition must carry the same rows and the same
-#    † set, because a zh project reads the zh conventions.
+#    The conventions roster and the shared /star router are held to the trees:
+#    each must list exactly the skills that exist — a † row for a skill that
+#    does not is never iterated by the per-skill loop, so without this it passed
+#    and was even counted — and the router's zh edition must carry the same rows
+#    and the same † set, because a Chinese session reads it.
 section "Slash-only guards match the conventions roster"
 guard_errors=0
 CONVENTIONS="docs/mds/star-workflow/research-workflow-conventions.md"
-CONVENTIONS_ZH="docs/mds/star-workflow/research-workflow-conventions.zh-CN.md"
 # Rows are read from §10 only: §8's output table opens its rows with the same
 # backticked skill names, and a file-wide scan drags those in.
 roster_rows() { # $1 = conventions file, $2 = row regex -> matching §10 skill names, sorted
@@ -125,18 +123,6 @@ ROSTER_ALL="$(roster_rows "${CONVENTIONS}" "${ANY_ROW}")"
 if [[ "${ROSTER_ALL}" != "${SKILLS}" ]]; then
     fail "${CONVENTIONS}: the §10 roster does not list exactly the skills the ${#SKILL_ROOTS[@]} trees carry:"
     diff <(printf '%s\n' "${SKILLS}") <(printf '%s\n' "${ROSTER_ALL}") | sed 's/^/      /'
-    guard_errors=1
-fi
-ROSTER_ALL_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${ANY_ROW}")"
-if [[ "${ROSTER_ALL_ZH}" != "${ROSTER_ALL}" ]]; then
-    fail "${CONVENTIONS_ZH}: the zh §10 roster does not list the same skills as the en roster:"
-    diff <(printf '%s\n' "${ROSTER_ALL}") <(printf '%s\n' "${ROSTER_ALL_ZH}") | sed 's/^/      /'
-    guard_errors=1
-fi
-SLASH_ONLY_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${DAGGER_ROW}")"
-if [[ "${SLASH_ONLY_ZH}" != "${SLASH_ONLY}" ]]; then
-    fail "${CONVENTIONS_ZH}: the zh roster's † set differs from the en roster's:"
-    diff <(printf '%s\n' "${SLASH_ONLY}") <(printf '%s\n' "${SLASH_ONLY_ZH}") | sed 's/^/      /'
     guard_errors=1
 fi
 ROUTER=".agents/commands/star.md"
@@ -196,16 +182,14 @@ while IFS= read -r skill; do
         fi
     done
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "conventions and shared /star router list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills en/zh; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
+(( guard_errors == 0 )) && note "conventions and shared /star router (en/zh) list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
 
 # 4a. The roster's second column, and the one part of the tier mechanism that is
 #     static. Conventions §10.8 sends a run to the model named by the tier this
 #     column carries, so a row that lost its tier quietly leaves that skill on
-#     whichever model happened to be running, and a zh row disagreeing with its
-#     en twin puts the same skill on two different models depending on which
-#     edition the project reads. Neither failure prints anything in use: the run
-#     works, on the wrong model. Both are checked here because nothing else
-#     reads this column.
+#     whichever model happened to be running. That failure prints nothing in
+#     use: the run works, on the wrong model. It is checked here because nothing
+#     else in this script reads this column.
 #     The second half holds a producer/consumer pair. The .claude manifests that
 #     fork in frontmatter are exactly the manifests `execs/configure.sh`
 #     stamps a `model:` line into; add one to either side alone and it either
@@ -226,20 +210,14 @@ if [[ "${TIERED}" != "${ROSTER_ALL}" ]]; then
     tier_errors=1
 fi
 TIERS_EN="$(roster_rows "${CONVENTIONS}" "${TIER_PAIR}")"
-TIERS_ZH="$(roster_rows "${CONVENTIONS_ZH}" "${TIER_PAIR}")"
-if [[ "${TIERS_EN}" != "${TIERS_ZH}" ]]; then
-    fail "${CONVENTIONS_ZH}: the zh §10 roster does not give each skill the tier the en roster gives it:"
-    diff <(printf '%s\n' "${TIERS_EN}") <(printf '%s\n' "${TIERS_ZH}") | sed 's/^/      /'
-    tier_errors=1
-fi
-FORKED_MANIFESTS="$(grep -l '^context: fork' .claude/skills/*/SKILL.md .claude/skills/*/SKILL_zh.md 2>/dev/null | sort)"
-STAMPED_MANIFESTS="$(grep -oE '\.claude/skills/[a-z-]+/SKILL(_zh)?\.md' execs/configure.sh | sort -u)"
+FORKED_MANIFESTS="$(grep -l '^context: fork' .claude/skills/*/SKILL.md 2>/dev/null | sort)"
+STAMPED_MANIFESTS="$(grep -oE '\.claude/skills/[a-z-]+/SKILL[A-Za-z_]*\.md' execs/configure.sh | sort -u)"
 if [[ "${FORKED_MANIFESTS}" != "${STAMPED_MANIFESTS}" ]]; then
     fail "the .claude manifests carrying 'context: fork' are not the ones execs/configure.sh names for its stamp:"
     diff <(printf '%s\n' "${FORKED_MANIFESTS}") <(printf '%s\n' "${STAMPED_MANIFESTS}") | sed 's/^/      /'
     tier_errors=1
 fi
-(( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, en and zh agree on every one, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/configure.sh stamps"
+(( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/configure.sh stamps"
 
 # 4b. Codex, Kimi and DSH need harness-owned packages for the generic router.
 #     Codex alone exposes one marketplace file through .agents; the other two
@@ -270,12 +248,6 @@ if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
     fail "${PLUGIN_ROOT}/skills/star is not the explicit-only wrapper around the shared router"
     plugin_errors=1
 fi
-if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" ]] || \
-   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" "name: star" || \
-   ! grep -qF '.agents/commands/star.md' "${PLUGIN_ROOT}/skills/star/SKILL_zh.md"; then
-    fail "${PLUGIN_ROOT}/skills/star lacks its Chinese wrapper around the shared router"
-    plugin_errors=1
-fi
 KIMI_MARKETPLACE=".kimi-code/plugins/marketplace.json"
 KIMI_PLUGIN_ROOT=".kimi-code/plugins/star"
 if ! python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); e=m["plugins"]; assert m["version"] == "2" and len(e) == 1 and e[0]["id"] == "star" and e[0]["source"] == "./.kimi-code/plugins/star"; assert p["name"] == "star" and p["skills"] == "./skills/"' "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json"; then
@@ -289,18 +261,9 @@ if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
     fail "${KIMI_PLUGIN_ROOT}/skills/star is not the explicit-only wrapper around the shared router"
     plugin_errors=1
 fi
-if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" ]] || \
-   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" "name: star" || \
-   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md" "disableModelInvocation: true" || \
-   ! grep -qF '.agents/commands/star.md' "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md"; then
-    fail "${KIMI_PLUGIN_ROOT}/skills/star lacks its Chinese explicit-only wrapper"
-    plugin_errors=1
-fi
 for skill_file in \
     "${PLUGIN_ROOT}/skills/star/SKILL.md" \
-    "${PLUGIN_ROOT}/skills/star/SKILL_zh.md" \
-    "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md" \
-    "${KIMI_PLUGIN_ROOT}/skills/star/SKILL_zh.md"; do
+    "${KIMI_PLUGIN_ROOT}/skills/star/SKILL.md"; do
     if ! grep -qF 'STAR_LANG=zh' "${skill_file}" || \
        ! grep -qF '.agents/commands/star.zh-CN.md' "${skill_file}"; then
         fail "${skill_file} does not apply STAR's Chinese router wording"
@@ -317,12 +280,6 @@ if [[ ! -f "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
     fail "${PLUGIN_ROOT}/skills/star-auto is not the explicit-only wrapper around the shared auto procedure"
     plugin_errors=1
 fi
-if [[ ! -f "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" ]] || \
-   ! frontmatter_has_line "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "name: star-auto" || \
-   ! grep -qF '.agents/commands/star-auto.md' "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; then
-    fail "${PLUGIN_ROOT}/skills/star-auto lacks its Chinese wrapper around the shared auto procedure"
-    plugin_errors=1
-fi
 if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
    ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" "name: star-auto" || \
    ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" "disableModelInvocation: true" || \
@@ -330,24 +287,6 @@ if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
     fail "${KIMI_PLUGIN_ROOT}/skills/star-auto is not the explicit-only wrapper around the shared auto procedure"
     plugin_errors=1
 fi
-if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" ]] || \
-   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "name: star-auto" || \
-   ! frontmatter_has_line "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" "disableModelInvocation: true" || \
-   ! grep -qF '.agents/commands/star-auto.md' "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; then
-    fail "${KIMI_PLUGIN_ROOT}/skills/star-auto lacks its Chinese explicit-only wrapper"
-    plugin_errors=1
-fi
-for skill_file in \
-    "${PLUGIN_ROOT}/skills/star-auto/SKILL.md" \
-    "${PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md" \
-    "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" \
-    "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL_zh.md"; do
-    if [[ -f "${skill_file}" ]] && { ! grep -qF 'STAR_LANG=zh' "${skill_file}" || \
-       ! grep -qF '.agents/commands/star-auto.zh-CN.md' "${skill_file}"; }; then
-        fail "${skill_file} does not apply STAR's Chinese auto wording"
-        plugin_errors=1
-    fi
-done
 
 DSH_PLUGIN_ROOT=".dsh/commands/star"
 if ! python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["name"] == "star" and p["main"] == "lib/index.js" and p["dsh"]["bundle"]["patch"] == "./cordis.patch.yml"' "${DSH_PLUGIN_ROOT}/package.json"; then
@@ -418,13 +357,16 @@ for readme in README.md README.zh-CN.md; do
 done
 (( plugin_errors == 0 )) && note "Codex, Kimi and DSH router packages all delegate to the shared /star roster"
 
-# 5. Bilingual twins: every skill .md has its _zh.md counterpart and vice versa.
-# Deliberately English-only files are exempt: star-code-architect's SKILL_zh.md
-# states upstream_template.md has no _zh version (UPSTREAM.md is always English).
+# 5. Bilingual twins: every reference and asset .md has its _zh.md counterpart
+# and vice versa, because a Chinese run writes its documents from the _zh
+# templates. SKILL.md is English only, in the skill trees and in the router
+# plugins alike, so a SKILL_zh.md anywhere fails. Deliberately English-only
+# files are exempt too: UPSTREAM.md is always English, so star-code-architect's
+# upstream_template.md has no _zh version.
 section "Bilingual twins in skill trees"
 twin_errors=0
 while IFS= read -r f; do
-    if [[ "${f}" == */star-code-architect/assets/upstream_template.md ]]; then
+    if [[ "${f}" == */star-code-architect/assets/upstream_template.md || "${f}" == */SKILL.md ]]; then
         continue
     fi
     if [[ "${f}" == *_zh.md ]]; then
@@ -433,7 +375,11 @@ while IFS= read -r f; do
         [[ -f "${f%.md}_zh.md" ]] || { fail "${f} has no _zh.md counterpart"; twin_errors=1; }
     fi
 done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.md')
-(( twin_errors == 0 )) && note "every skill .md file has its bilingual twin"
+while IFS= read -r f; do
+    fail "${f}: SKILL.md has no Chinese edition; a Chinese run reads SKILL.md and replies in Chinese"
+    twin_errors=1
+done < <(find -L "${SKILL_ROOTS[@]}" .codex/skills .codex/plugins .kimi-code/plugins -name SKILL_zh.md | sort)
+(( twin_errors == 0 )) && note "every reference and asset .md file has its bilingual twin; no tree or plugin carries a SKILL_zh.md"
 
 # 6. Every SKILL.md defers to the shared conventions document.
 section "Shared-conventions reference"
@@ -447,31 +393,25 @@ for root in "${SKILL_ROOTS[@]}"; do
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-for conv in "${CONVENTIONS}" "${CONVENTIONS_ZH}"; do
-    # Shared policy names capabilities; concrete hosts and their APIs live in adapters.
-    if grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort' "${conv}"; then
-        fail "${conv}: harness-specific wording belongs in harness-adapters or model_id_spec"
-        conv_errors=1
-    fi
-    adapter="docs/mds/star-workflow/harness-adapters${conv#*research-workflow-conventions}"
-    if [[ ! -f "${adapter}" ]] || ! grep -Fq "(${adapter##*/})" "${conv}"; then
-        fail "${conv}: missing linked harness adapter reference"
-        conv_errors=1
-    fi
-done
+# Shared policy names capabilities; concrete hosts and their APIs live in adapters.
+if grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort' "${CONVENTIONS}"; then
+    fail "${CONVENTIONS}: harness-specific wording belongs in harness-adapters or model_id_spec"
+    conv_errors=1
+fi
+adapter="docs/mds/star-workflow/harness-adapters.md"
+if [[ ! -f "${adapter}" ]] || ! grep -Fq "(${adapter##*/})" "${CONVENTIONS}"; then
+    fail "${CONVENTIONS}: missing linked harness adapter reference"
+    conv_errors=1
+fi
 
 human_writing_errors=0
 HUMAN_WRITING_SKILLS=(star-idea-storm star-plan-coach star-refs-reviewer star-expt-digest star-metd-summarize star-code-release)
 for root in "${SKILL_ROOTS[@]}"; do
     for skill in "${HUMAN_WRITING_SKILLS[@]}"; do
-        for manifest in SKILL.md SKILL_zh.md; do
-            for guide in human-writing-guide.md human-writing-guide.zh-CN.md; do
-                grep -q "${guide}" "${root}/${skill}/${manifest}" || {
-                    fail "${root}/${skill}/${manifest} does not reference ${guide}"
-                    human_writing_errors=1
-                }
-            done
-        done
+        grep -q 'human-writing-guide.md' "${root}/${skill}/SKILL.md" || {
+            fail "${root}/${skill}/SKILL.md does not reference human-writing-guide.md"
+            human_writing_errors=1
+        }
     done
 done
 (( conv_errors == 0 && human_writing_errors == 0 )) && note "every SKILL.md references the conventions document"
@@ -573,17 +513,32 @@ fi
 
 (( token_errors == 0 )) && note "invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router"
 
-# 8. Workflow docs ship as en/zh pairs.
+# 8. The workflow docs are English, apart from the skills user guide, which
+#    ships as an en/zh pair. The workflow reads only the English docs, so no
+#    other Chinese edition may come back, here or beside the instruction file,
+#    the contributing guide or the /star-auto command.
 section "Bilingual twins in docs/mds/star-workflow"
 doc_errors=0
+ZH_DOC_PAIRS=(docs/mds/star-workflow/research-workflow-skills)
+for base in "${ZH_DOC_PAIRS[@]}"; do
+    for f in "${base}.md" "${base}.zh-CN.md"; do
+        [[ -f "${f}" ]] || { fail "${f} is missing; the skills user guide ships as an en/zh pair"; doc_errors=1; }
+    done
+done
 while IFS= read -r f; do
-    if [[ "${f}" == *.zh-CN.md ]]; then
-        [[ -f "${f%.zh-CN.md}.md" ]] || { fail "${f} has no English counterpart"; doc_errors=1; }
-    else
-        [[ -f "${f%.md}.zh-CN.md" ]] || { fail "${f} has no .zh-CN.md counterpart"; doc_errors=1; }
+    [[ -f "${f%.zh-CN.md}.md" ]] || { fail "${f} has no English counterpart"; doc_errors=1; }
+    if [[ " ${ZH_DOC_PAIRS[*]} " != *" ${f%.zh-CN.md} "* ]]; then
+        fail "${f}: only the skills user guide has a Chinese edition among the workflow docs"
+        doc_errors=1
     fi
-done < <(find docs/mds/star-workflow -type f -name '*.md')
-(( doc_errors == 0 )) && note "workflow docs are paired en/zh"
+done < <(find docs/mds/star-workflow -name '*.zh-CN.md' | sort)
+for f in AGENTS.zh-CN.md CLAUDE.zh-CN.md .github/CONTRIBUTING.zh-CN.md .agents/commands/star-auto.zh-CN.md; do
+    if [[ -e "${f}" || -L "${f}" ]]; then
+        fail "${f}: STAR ships no Chinese edition of this file; the English one is the only copy"
+        doc_errors=1
+    fi
+done
+(( doc_errors == 0 )) && note "the skills user guide is paired en/zh; no other workflow doc has a Chinese edition, and none of the retired ones is back"
 
 # 9. The always-on Cursor rule body stays in sync with AGENTS.md.
 #    AGENTS.md: title + blank line, then the shared body.
@@ -687,21 +642,21 @@ grep -qF 'block: true' .pi/extensions/star-hooks/index.ts || \
 grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
     { fail ".dsh/hooks.json no longer matches DSH's lowercase bash tool"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
-#     seven memory hooks build their lines with, and what both specs document as
+#     seven memory hooks build their lines with, and what the spec documents as
 #     the shape a session reads. Reword it in one place and the hooks and the spec
 #     describe two different lines: same failure mode as check 15's registry.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh \
-         docs/mds/star-workflow/memory_spec.md docs/mds/star-workflow/memory_spec.zh-CN.md; do
+         docs/mds/star-workflow/memory_spec.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
 done
 #     The aging rule is copied the same way: every memory hook carries
 #     both date spellings of the 180-day cutoff (BSD and GNU) and gates the
-#     stale mark on the literal type `env` read from the frontmatter, and both
-#     specs state the same window. Change one copy and the others keep answering
+#     stale mark on the literal type `env` read from the frontmatter, and the
+#     spec states the same window. Change one copy and the others keep answering
 #     for a rule the store no longer follows.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
@@ -738,8 +693,6 @@ done
 rm -rf "${memory_fixture}"
 grep -qF '180 days' docs/mds/star-workflow/memory_spec.md || \
     { fail "memory_spec.md no longer states the 180-day aging window"; hook_errors=1; }
-grep -qF '180 天' docs/mds/star-workflow/memory_spec.zh-CN.md || \
-    { fail "memory_spec.zh-CN.md no longer states the 180-day aging window"; hook_errors=1; }
 
 #     Codex closes provenance with a write-after check. Three cases pin its
 #     precedence and failure boundary; more cases would duplicate the resolver's
@@ -914,8 +867,6 @@ rm -f "${struct_mismatch}"
 #         perl, as check 18's anchors already do.
 #       - the folded-block indicator is not part of the value. `description: >-`
 #         left ">-" in the measured text and inflated every folded file by 3.
-#     SKILL.md only: it is the registered manifest whose description the platform
-#     surfaces. SKILL_zh.md is loaded as a resource and runs past 1300 chars.
 #
 #     Not checked, because no repo state can hold it: a harness may truncate the
 #     listing well before the spec limit. Cursor cut three .agents descriptions
@@ -1034,17 +985,15 @@ norm_sections() { # $1 = file; prints the file's normalized ## headings, sorted 
 section_errors=0
 section_files=0
 while IFS= read -r skill; do
-    for manifest in SKILL.md SKILL_zh.md; do
-        baseline=".agents/skills/${skill}/${manifest}"
-        other=".claude/skills/${skill}/${manifest}"
-        [[ -f "${baseline}" && -f "${other}" ]] || continue   # checks 3 and 5 own missing files
-        section_files=$(( section_files + 1 ))
-        if ! diff -q <(norm_sections "${baseline}") <(norm_sections "${other}") > /dev/null; then
-            fail "${other}: ## sections differ from ${baseline}:"
-            diff <(norm_sections "${baseline}") <(norm_sections "${other}") | sed 's/^/      /'
-            section_errors=1
-        fi
-    done
+    baseline=".agents/skills/${skill}/SKILL.md"
+    other=".claude/skills/${skill}/SKILL.md"
+    [[ -f "${baseline}" && -f "${other}" ]] || continue   # checks 2 and 3 own missing files
+    section_files=$(( section_files + 1 ))
+    if ! diff -q <(norm_sections "${baseline}") <(norm_sections "${other}") > /dev/null; then
+        fail "${other}: ## sections differ from ${baseline}:"
+        diff <(norm_sections "${baseline}") <(norm_sections "${other}") | sed 's/^/      /'
+        section_errors=1
+    fi
 done < <(printf '%s\n' "${SKILLS}")
 (( section_errors == 0 )) && note ".claude manifests carry the same ## sections as the authored .agents source (${section_files} files)"
 
@@ -1160,17 +1109,13 @@ AGENTS_SECTIONS=(
 # number AGENTS.md currently gives that title.
 CITATION_LABELS=(
     "Project Layout|§[0-9]+ layout"
-    "Project Layout|§[0-9]+ 布局"
     "Project Layout|[Ll]ayout (conformance|rules) \(((AGENTS|CLAUDE)\.md )?§[0-9]+\)"
     "Project Layout|布局(符合度|规则)（((AGENTS|CLAUDE)\.md )?§[0-9]+）"
     "Project Runtime|§[0-9]+ runtime"
-    "Project Runtime|§[0-9]+ 运行时"
     "Project Runtime|§[0-9]+: no hardcoded"
     "Project Runtime|§[0-9]+：禁止硬编码"
     "Simplicity First|§[0-9]+ simplicity"
-    "Simplicity First|§[0-9]+ 简洁"
     "Surgical Changes|§[0-9]+ surgical"
-    "Surgical Changes|§[0-9]+ 外科手术"
 )
 
 CITATION_SCAN=("${SKILL_ROOTS[@]}" docs/mds/star-workflow)
@@ -1223,8 +1168,8 @@ done
 
 (( cite_errors == 0 )) && note "AGENTS.md heading map pinned; ${cite_checked} labelled citations resolve"
 
-# 17. The conventions document's numbered structure is pinned, and the workflow
-#     docs stay line-aligned across languages.
+# 17. The conventions document's numbered structure is pinned, and a workflow
+#     doc with a Chinese edition stays line-aligned with it.
 #     Skills cite this file at sub-section granularity — §7.7 is cited 64 times,
 #     §6.3 40 times — so renumbering a section, or inserting an item into the
 #     middle of one, silently repoints every citation after it. CONTRIBUTING has
@@ -1235,7 +1180,6 @@ done
 section "Conventions document structure"
 
 CONV_EN="docs/mds/star-workflow/research-workflow-conventions.md"
-CONV_ZH="docs/mds/star-workflow/research-workflow-conventions.zh-CN.md"
 CONV_HEADINGS=(
     '0. Vocabulary'
     '1. Git'
@@ -1273,21 +1217,14 @@ if [[ "${expected_conv}" != "${actual_conv}" ]]; then
     conv_errors=1
 fi
 
-if [[ "$(sed -nE 's/^## ([0-9]+)\..*/\1/p' "${CONV_EN}")" != "$(sed -nE 's/^## ([0-9]+)\..*/\1/p' "${CONV_ZH}")" ]]; then
-    fail "${CONV_ZH} does not carry the same section numbers as ${CONV_EN}; a §n citation resolves to a different rule per language"
-    conv_errors=1
-fi
-
 for row in "${CONV_ITEMS[@]}"; do
     sec="${row%%|*}"
     want="${row#*|}"
-    for f in "${CONV_EN}" "${CONV_ZH}"; do
-        got="$(conv_items "${f}" "${sec}")"
-        if [[ "${got}" != "${want}" ]]; then
-            fail "${f}: §${sec} carries ${got} numbered items, pinned at ${want} — every §${sec}.n citation past the change now points at a different item"
-            conv_errors=1
-        fi
-    done
+    got="$(conv_items "${CONV_EN}" "${sec}")"
+    if [[ "${got}" != "${want}" ]]; then
+        fail "${CONV_EN}: §${sec} carries ${got} numbered items, pinned at ${want} — every §${sec}.n citation past the change now points at a different item"
+        conv_errors=1
+    fi
 done
 
 while IFS= read -r en_doc; do
@@ -1422,15 +1359,13 @@ section "Shared environment and language controls"
 control_errors=0
 for root in "${SKILL_ROOTS[@]}"; do
     while IFS= read -r skill; do
-        for f in SKILL.md SKILL_zh.md; do
-            path="${root}/${skill}/${f}"
-            [[ -f "${path}" ]] || continue
-            for key in STAR_LANG INVOLVE STAR_ .env; do
-                if ! grep -Fq -- "${key}" "${path}"; then
-                    fail "${path}: missing shared environment control ${key}"
-                    control_errors=1
-                fi
-            done
+        path="${root}/${skill}/SKILL.md"
+        [[ -f "${path}" ]] || continue
+        for key in STAR_LANG INVOLVE STAR_ .env; do
+            if ! grep -Fq -- "${key}" "${path}"; then
+                fail "${path}: missing shared environment control ${key}"
+                control_errors=1
+            fi
         done
     done < <(printf '%s\n' "${SKILLS}")
 done
@@ -1667,58 +1602,50 @@ done
 #     tier names another model, or a depth the harness applies only per dispatch.
 #     It may describe that skill's own tier, phase or mode; identical prose across
 #     different skills is not required. No manifest may carry a paragraph that
-#     hands a whole flow-status or digest run to a READ delegate (its two leads
-#     are grepped below): §10.8 keeps a directly invoked run in the session that
+#     hands a whole flow-status or digest run to a READ delegate (its lead is
+#     grepped below): §10.8 keeps a directly invoked run in the session that
 #     started it. Port checks own adaptation parity, while check_model_routing.sh
 #     checks installed model consumers.
 section "Where-this-run-executes paragraph"
 where_errors=0
 WHERE_EXEMPT="star-plan-coach star-idea-storm"
 
+lead='^\*\*Where this run executes\.\*\*'
 for root in "${SKILL_ROOTS[@]}"; do
     while IFS= read -r skill; do
-        for f in SKILL.md SKILL_zh.md; do
-            path="${root}/${skill}/${f}"
-            [[ -f "${path}" ]] || continue   # check 3 owns missing files
-            if grep -qF -e '**READ-tier entry on this harness.**' -e '**本宿主的 READ 档入口。**' "${path}"; then
-                fail "${path}: still hands the whole run to a READ delegate; conventions §10.8 keeps a directly invoked run in its session"
-                where_errors=1
-            fi
-            if [[ "${f}" == SKILL_zh.md ]]; then
-                lead='^\*\*本次运行在哪里执行。\*\*'
-                workflow='^## 工作流'
-            else
-                lead='^\*\*Where this run executes\.\*\*'
-                workflow='^## Workflow'
-            fi
+        path="${root}/${skill}/SKILL.md"
+        [[ -f "${path}" ]] || continue   # check 2 owns missing files
+        if grep -qF '**READ-tier entry on this harness.**' "${path}"; then
+            fail "${path}: still hands the whole run to a READ delegate; conventions §10.8 keeps a directly invoked run in its session"
+            where_errors=1
+        fi
 
-            n="$(grep -cE "${lead}" "${path}")"
-            if grep -qw "${skill}" <<< "${WHERE_EXEMPT}"; then
-                if (( n != 0 )); then
-                    fail "${path}: carries the where-this-run-executes paragraph; conventions §10.8 exempts this skill (a direct run keeps the session's settings, and star-auto can start it on the PLAN tier)"
-                    where_errors=1
-                fi
-                continue
-            fi
-            if (( n != 1 )); then
-                fail "${path}: ${n} where-this-run-executes paragraphs, expected exactly 1"
-                where_errors=1
-                continue
-            fi
-            para="$(grep -E "${lead}" "${path}")"
-            if ! grep -qF '`star-auto`' <<< "${para}" || grep -qiE 'relocat|迁移规则|hand the complete run|完整运行一次性交给' <<< "${para}"; then
-                fail "${path}: the where-this-run-executes paragraph must name star-auto as the way to get the tier's model and must not relocate the run"
+        n="$(grep -cE "${lead}" "${path}")"
+        if grep -qw "${skill}" <<< "${WHERE_EXEMPT}"; then
+            if (( n != 0 )); then
+                fail "${path}: carries the where-this-run-executes paragraph; conventions §10.8 exempts this skill (a direct run keeps the session's settings, and star-auto can start it on the PLAN tier)"
                 where_errors=1
             fi
+            continue
+        fi
+        if (( n != 1 )); then
+            fail "${path}: ${n} where-this-run-executes paragraphs, expected exactly 1"
+            where_errors=1
+            continue
+        fi
+        para="$(grep -E "${lead}" "${path}")"
+        if ! grep -qF '`star-auto`' <<< "${para}" || grep -qiE 'relocat|hand the complete run' <<< "${para}"; then
+            fail "${path}: the where-this-run-executes paragraph must name star-auto as the way to get the tier's model and must not relocate the run"
+            where_errors=1
+        fi
 
-            wf_at="$(grep -nE "${workflow}" "${path}" | head -n 1 | cut -d: -f1)"
-            at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
-            first_step="$(awk -v s="${wf_at:-0}" 'NR>s && /^### /{print NR; exit}' "${path}")"
-            if [[ -z "${wf_at}" ]] || (( at < wf_at )) || { [[ -n "${first_step}" ]] && (( at > first_step )); }; then
-                fail "${path}: the where-this-run-executes paragraph is not at the head of Workflow (after its heading, before its first step)"
-                where_errors=1
-            fi
-        done
+        wf_at="$(grep -nE '^## Workflow' "${path}" | head -n 1 | cut -d: -f1)"
+        at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
+        first_step="$(awk -v s="${wf_at:-0}" 'NR>s && /^### /{print NR; exit}' "${path}")"
+        if [[ -z "${wf_at}" ]] || (( at < wf_at )) || { [[ -n "${first_step}" ]] && (( at > first_step )); }; then
+            fail "${path}: the where-this-run-executes paragraph is not at the head of Workflow (after its heading, before its first step)"
+            where_errors=1
+        fi
     done < <(printf '%s\n' "${SKILLS}")
 done
 
