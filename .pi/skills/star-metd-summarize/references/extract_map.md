@@ -111,6 +111,9 @@ Every generated document opens with:
 type: <overview|dataset|framework|training|evaluation>
 language: <en|zh>
 generated: <YYYY-MM-DD>          # a real date; never invented
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — conventions §8>
+model_trail:                      # append-only, one entry per write session; a regeneration starts a fresh trail
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: star-metd-summarize, scope: <what this session wrote> }
 sources:                          # every plan that fed this document, with the updated it carried when read
   - plan: <prefix>_<slug>_plan.md
     updated: <YYYY-MM-DD>
@@ -140,15 +143,9 @@ unread:                             # a plan in the slice that could not be read
 plans_read: 7
 ```
 
-`target:` is required because a collector holds plans, not a document, and the five
-templates' section names collide only by accident. `exec_status` is a leaf field the
-collector omits on strategy nodes rather than filling a plausible value, the rule the
-sibling formats state (`scan_policy.md`: never fill a field the record does not carry).
+`target:` is required because a collector holds plans, not a document, and the five templates' section names collide only by accident. `exec_status` is a leaf field the collector omits on strategy nodes rather than filling a plausible value.
 
-`unread` is not a gap. A gap means no plan covers the section, and reaches the
-delivered document as a TODO routed to `star-plan-coach`; a plan the collector could
-not open is one the main agent reads itself. Keeping them in one list turns a read
-failure into a false hole in the method.
+`unread` is not a gap. A gap means no plan covers the section, and reaches the delivered document as a TODO; a plan the collector could not open is one the main agent reads itself. Keeping them in one list turns a read failure into a false hole in the method.
 
 A collection pass extracts only. They never write files, never resolve conflicts across plans (return both passages; resolution is the main agent's), never invent a fact absent from the plans, and never compile a document. `overview` is compiled last, from the other four documents' compiled content — but its extraction is ordinary work: a collector returns its slice's `overview` rows like any other target's.
 

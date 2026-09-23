@@ -9,14 +9,15 @@
 <!-- How the scope resolved (plan mode: which of §2 / §4 deliverables / EXEC_LOG contributed which
      files). Review rules loaded (project guidelines, metds/codearc.md, plan §2–§5) and which
      were absent. Static evidence: compileall result; ruff/flake8 result or "not installed";
-     "reading-only review" when the env was unusable. Whole-tree screen: what each of the three
-     checks returned — it runs whatever the scope, and whether or not the env works.
+     "reading-only review" when the env was unusable. Scoped screen: what the checks for machine-local path
+     literals, oversized modules and (when the change could affect one) codearc.md protected names
+     returned over the requested files; any paths added to verify a contract, and why.
      Code version: the head commit at review time (`git rev-parse --short HEAD`), with the execution
      branch beside it when the run records one — a later refresh (Step 0, item 5) diffs against it. -->
 
 ## 2. Verdict
 
-<!-- 2–4 lines: overall state, finding counts per severity, conformance summary (plan mode).
+<!-- Briefly: overall state, finding counts per severity, conformance summary (plan mode).
      Specific and honest — no grade inflation, no alarmism. -->
 
 ## 3. Findings
@@ -47,12 +48,12 @@
 | Item | Verdict | Evidence |
 | --- | --- | --- |
 | §3.1 <task> | implemented / partial / missing | <module/function, or where you looked> |
-| §4 <deliverable> | present / absent | <path> |
+| §4 <deliverable> | present / absent / pending | <path, or the awaiting STOP-line command> |
 | §5 done-criterion | supported / unsupported | <the machinery that checks it> |
 
 ## 5. Good Practices
 
-<!-- ≤3 bullets worth keeping or propagating; omit the section rather than invent. -->
+<!-- The few practices worth keeping or propagating; omit the section rather than invent. -->
 
 ## 6. Next Actions
 

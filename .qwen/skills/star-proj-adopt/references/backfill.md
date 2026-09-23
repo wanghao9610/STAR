@@ -1,6 +1,6 @@
 # Phase `backfill`
 
-Read where the phase resolves to `backfill` — the argument named it, or Step 0 auto-selected it from an adoption record plus a decomposed plan tree. A `survey` run never reads this file. Section 7 of `adopt_spec.md` moved here with the phase: the matching rules are below, not there.
+Read where the phase resolves to `backfill` — the argument named it, or an adoption record plus a decomposed plan tree selected it. A `survey` run never reads this file.
 
 ## Step B1: Match inventory to leaves
 
@@ -8,7 +8,7 @@ Read `metds/adopt.md` and every leaf in `metds/plans/` (conventions §5.4). A sm
 
 ## Step B2: Confirmation point 3 — per-leaf confirmation
 
-The user confirms leaf by leaf via `ask_user_question` — one question over the numbered rows when there are several (*confirm all* / *confirm some (say the numbers)* / *confirm none*), one question each at four or fewer. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
+The user confirms leaf by leaf in one `ask_user_question` call over the proposed rows under conventions §7.13 — a drafted list is one question, not one per row. An unconfirmed leaf is left exactly as it is. A leaf marked `done` with no recorded run is allowed, and noted: `star-flow-status` will flag it as done-with-no-run, the honest state.
 
 ## Step B3: Write, record, report
 

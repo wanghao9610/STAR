@@ -42,14 +42,14 @@
 
 ## 摘要
 
-<!-- (M §3) 取自 metds/overview.md：问题、缺口、核心想法，按此顺序。三到六句。
+<!-- (M §3) 取自 metds/overview.md：问题、缺口、核心想法，按此顺序，写成一小段。
      这一节和下一节是多数读者真正会读的部分——之后的一切都是写给已经决定试一试的读者的。 -->
 
 <TODO：从 metds/overview.md 编译——运行 star-metd-summarize overview>
 
 ## ✨ 亮点
 
-<!-- (O §4) 取自 metds/overview.md 中写成可证伪主张的 contributions。三到五条，每条讲一件
+<!-- (O §4) 取自 metds/overview.md 中写成可证伪主张的 contributions。挑最有分量的几条，每条讲一件
      baseline 做不到的事。这里出现的数字，要么连同背后的 run 从 wkdrs/results/results.md 抄来，
      要么就不该是数字。 -->
 

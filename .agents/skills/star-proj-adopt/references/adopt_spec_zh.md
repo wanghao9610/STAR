@@ -84,11 +84,11 @@ bash scripts/train.sh "$@"
 
 1. 新建真实目录 `wkdrs/<run>/`，把已有 run 目录以绝对路径链接进去，成为 `wkdrs/<run>/output`（`star-plan-reviser` 的丢弃把 run 移到 `wkdrs/dropped/<run>/` 后，链接仍能解析）；`<run>` 在原名已足够区分、且在 `wkdrs/` 下尚未被占用时沿用原名，否则（`output/`、`run1/`）用 `<原名>_<run 日期>`。
 2. 按 `assets/exec_log_reconstructed_zh.md` 写 `wkdrs/<run>/EXEC_LOG.md`，与 `output` 链接并列：那里的真实文件，阶段末的提交提议才能暂存。
-3. 重建日志包含：带接入日期的 `reconstructed:` 头部、`source_plan:（无——接入时计划树尚不存在）`、命令（仅当脚本或存档配置里有逐字记录）、现存产物，以及按 §5 引用的任何指标。**不含步骤表**——当时没有步骤可记，而编造步骤正是这条规则要防的失效模式。
+3. 重建日志包含：带接入日期的 `reconstructed:` 头部、`source_plan: (none — 该 run 早于计划树)`、命令（仅当脚本或存档配置里有逐字记录）、现存产物，以及按 §5 引用的任何指标。**不含步骤表**——当时没有步骤可记，而编造步骤正是这条规则要防的失效模式。
 4. 绝不往被软链的目录里面写。`EXEC_LOG.md` 放在 `wkdrs/<run>/` 里，与链接并列。
 
 被选中的 run 目录里若已有 `EXEC_LOG.md`，原样不动，也不为它新建 `wkdrs/<run>/`，该 run 报告为 `already recorded`。
 
 ## 7. 回填对账（`backfill` 阶段）
 
-对账规则与这个阶段放在一起，在 `backfill_zh.md`，Step 0 解析出 `backfill` 时才读，之前不读。走 `survey` 的运行一条都用不上。
+对账规则与这个阶段放在一起，在 `backfill_zh.md`，阶段解析为 `backfill` 时才读，之前不读。走 `survey` 的运行一条都用不上。

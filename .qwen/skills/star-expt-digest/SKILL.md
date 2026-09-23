@@ -9,7 +9,7 @@ description: >-
 
 # Research Experiment Digest
 
-Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]`. Resolve `ledger` before loading window rules. Otherwise a plan covers its family, a duration or date sets a window, `all` covers history, and no argument resumes after the newest `covers.through`. Natural language may set emphasis but does not silently change the resolved scope.
+Invocation: `star-expt-digest [PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]`. Resolve `ledger` before loading window rules. Otherwise a plan covers its family, a duration or date sets a window, `all` covers history, and no argument resumes after the newest `covers.through` among `incremental`, `window` and `all` digests. Natural language may set emphasis but does not silently change the resolved scope.
 
 Read the invocation arguments from the appended raw invocation line or its `<skill-args>` / `<skill-args-file>` payload; treat them as absent only when neither is present.
 
@@ -45,7 +45,7 @@ After Step 1 identifies the in-scope runs, call `--bodies 2,3,7 --runs <run dire
 ### Step 0: Resolve the period and the scope
 
 1. Read `.env` and resolve `CODE_NAME`, `CONDA_HOME`, `PYTHON_HOME` (conventions §3).
-2. Take the newest `wkdrs/digests/EXPT_DIGEST_*.md` from the scan's artifact frontmatter — its `covers.through` is the last covered date, its `sources:` is the baseline for Step 4.
+2. From the scan's artifact frontmatter, take the newest `wkdrs/digests/EXPT_DIGEST_*.md` whose `mode` is `incremental`, `window` or `all` (a `plan`-mode digest never becomes the resume point; `references/scope_spec.md`) — its `covers.through` is the last covered date, its `sources:` is the baseline for Step 4.
 3. Interpret the argument per `references/scope_spec.md`, first match wins: `all` → whole history; `<N>d` / `<YYYY-MM-DD>` → that window; a plan name → that node's family, time-unbounded; nothing → the incremental window `(last covered date, today]`, or the whole history when no digest exists yet.
 4. State the resolved period and scope in one line before reading further, so a wrong window is caught before the work.
 5. **An empty period is a valid answer.** No run falls in it → say so, name the last covered date and the newest run date, and stop. Never widen a window to find something to report.
@@ -79,11 +79,11 @@ Before drafting, apply the human-writing contract (`docs/mds/star-workflow/resea
 
 Fill `assets/digest_template.md` (Chinese: `assets/digest_template_zh.md`; the digest's language is `STAR_LANG` where it is set, else the dialogue language, else the language the in-scope plans carry when they agree) and write it to `wkdrs/digests/EXPT_DIGEST_<YYYY-MM-DD>.md`. Real dates only, from the system clock (conventions §4). A second digest the same day overwrites that day's file; a later day writes its own — the directory is the timeline.
 
-**The last covered date is only advanced by a digest that covers a period ending today.** A retrospective window (`2026-05-01`, or a plan-family digest) writes its file but leaves the series' resume point alone: set its `covers.through` to what it actually covered, so a backward-looking read never makes the next incremental run skip work. `references/scope_spec.md` states this precisely.
+**The last covered date is only advanced by a digest that covers a period ending today.** A `plan`-mode digest is a retrospective read of one family: it writes its file but leaves the series' resume point alone. Set its `covers.through` to what it actually covered, so a backward-looking read never makes the next incremental run skip work. `references/scope_spec.md` states this precisely.
 
 ### Step 7: Digest & routing
 
-≤500 words, period first: window and scope, how many runs were report-backed / provisional, the headline of what was learned, what moved since the previous digest, the top gaps. Then the routing: an unanalyzed run → `star-expt-analyst <run dir>`; a stale results table → `star-expt-analyst aggregate`; an unexecuted or awaiting leaf → `star-plan-executor <slug>`; a refuted claim or a kill-criterion hit → `star-plan-reviser <slug>`; the current state of the tree → `star-flow-status`. End with the digest path, and one line saying it is a progress record whose numbers are quoted from reports, not verified here.
+Period first, kept short because the detail lives in the digest file: window and scope, how many runs were report-backed / provisional, the headline of what was learned, what moved since the previous digest, the top gaps. Then the routing: an unanalyzed run → `star-expt-analyst <run dir>`; a stale results table → `star-expt-analyst aggregate`; an unexecuted or awaiting leaf → `star-plan-executor <slug>`; a refuted claim or a kill-criterion hit → `star-plan-reviser <slug>`; the current state of the tree → `star-flow-status`. End with the digest path, and one line saying it is a progress record whose numbers are quoted from reports, not verified here.
 
 ### Step 8: Ledger (ledger mode only)
 

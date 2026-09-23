@@ -48,4 +48,4 @@ Report this at Confirmation point 1 — the user decides with eyes open:
 
 ## 5. Present the shortlist (Confirmation point 1)
 
-One option per candidate, top 3–5, each carrying: one-line why-it-fits, license, stars, last update, main risk (one phrase). Recommend the highest-scoring candidate first. Always include the escape option: "none of these — refine the search / start from scratch". Record the final scores; the chosen repo's row goes into `codearc.md` §5.
+One line per candidate, top 3–5, each carrying: one-line why-it-fits, license, stars, last update, main risk (one phrase). Recommend the highest-scoring candidate first. Always include the escape option: "none of these — refine the search / start from scratch". Record the final scores; the chosen repo's row goes into `codearc.md` §5.

@@ -7,7 +7,7 @@
 ## 1. Verdict
 
 <!-- One line first: "release-ready" only when no blocker is open, else "blocked (<n>)" with the
-     blockers named. Then 2–3 lines: what this run changed, and what the user must decide next.
+     blockers named. Then, briefly: what this run changed, and what the user must decide next.
      No grade inflation — an open blocker is not a caveat. -->
 
 ## 2. Source Readiness

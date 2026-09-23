@@ -10,5 +10,5 @@ The environment already exists; this mode installs into it and records what it i
 4. Install in the uv > pip > conda order (conda only under a conda backend and only for the whitelist). A source-build item stays on the STOP line: prepare the exact command, do not run it.
 5. Run the runnable check on the new packages only (`references/runnable_check_spec.md`): L1 — each imports and reports a version through `$ENV_PY`; a new framework package also gets L2. A failure → diagnose, one bounded retry, then mark it `blocked` and report; never leave a package installed but unverified.
 6. Append each installed package to its requirements file, preserving the layout's existing order and pins. Append an `## Added <date>` block to the newest `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` (none exists → write a fresh report). Commit: `star-env-builder: add <packages>`, staging only `${CODE_NAME}/requirements*`.
-7. Report ≤500 words: what installed, what each requirements file gained, the runnable-check evidence, anything blocked or awaiting the user.
+7. Report, a short digest of the `## Added` block: what installed, what each requirements file gained, the runnable-check evidence, anything blocked or awaiting the user.
 

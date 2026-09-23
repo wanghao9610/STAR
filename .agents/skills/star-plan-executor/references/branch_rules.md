@@ -1,6 +1,6 @@
 # Execution Branch and Worktree Rules
 
-The operating procedure behind conventions §11. Step 3 decides and creates; Step 4 commits onto the branch; after Step 7's review, the resume path ends the branch — merge or discard — and the worktree that housed it. Every git command here is the executor's to run, except where a line hands it to the user.
+The operating procedure behind conventions §11. Planning decides and creates; each verified action commits onto the branch; after the review, the resume path ends the branch — merge or discard — and the worktree that housed it. Every git command here is the executor's to run, except where a line hands it to the user.
 
 An explicit, applicable decision already recorded in the dialogue or run records satisfies the corresponding authorization point; use and cite it instead of asking again. Authorization to implement does not by itself authorize a merge, discard, deletion, overwrite, or a choice between competing user or research intent. A valid `auto=unattended` token with effective `involve=low` is the limited `star-auto` grant; it authorizes only the guarded recommended paths explicitly named below.
 
@@ -25,7 +25,7 @@ Under unattended auto, show the same material and identify the limited grant as 
 - **Branch**, where Step 3 set `branch: <run>` (conventions §11): name the base branch it forks from, that taking it takes the per-step commits with it — only commits merge — and its one precondition, that nothing is currently running from this checkout; declining executes on the base branch as before.
 - **Worktree**, where Step 3 set `worktree: <path>` (§11.7): name the busy signal that recommends it, the path, the symlinks it will get (`.env`, `datas/`, `inits/`), and that the whole run — commits, records, follow-on skills — then lives in that tree while this checkout stays put; declining executes here, waiting on whatever made the checkout busy.
 
-## Creation (Step 3, after the decisions are recorded)
+## Creation (after the decisions are recorded)
 
 1. Record the checkout's current branch and short SHA as `base:` (`git rev-parse --abbrev-ref HEAD`, `git rev-parse --short HEAD`). Never assume `main`.
 2. Do not switch a checkout from which a job may be running — a live job can re-read switched files mid-run. A busy checkout is the signal that sends this run into a worktree instead.
@@ -36,7 +36,7 @@ Under unattended auto, show the same material and identify the limited grant as 
 
 Under unattended auto, the logged decision names the grant; a checkout with an unresolved job record is treated as busy and therefore is never switched.
 
-## Commits on the branch (Step 4)
+## Commits on the branch
 
 Each verified action's commit stages the action's files **plus the run-record updates that action caused** — the `EXEC_LOG.md` row, `EXEC_PLAN.md` sync marks, the sub-plan's frontmatter — message prefix per conventions §1.2. A record left uncommitted does not merge, and worse: an uncommitted edit to a file both branches carry rides along on a later `git switch` instead of staying with the branch.
 
@@ -47,9 +47,9 @@ Each verified action's commit stages the action's files **plus the run-record up
 - Before switching, `git status`: unrelated uncommitted changes are named. Never stash, stage, overwrite, or discard them. Switch only when an existing applicable user decision says the paths cannot collide; otherwise ask how the user wants to protect their work.
 - A recorded `branch:` that no longer exists is a blocker to report; never re-create it silently.
 
-## The merge authorization point (after Step 7 review)
+## The merge authorization point (after the review)
 
-Reached when every action is `done`, the §5 done-criterion is verified, and the newest `CODE_REVIEW_<date>.md` holds no unsettled blocker/major finding — with no review yet, Step 6 has already started one and the merge waits for it. A specific applicable merge decision already given is used and cited without another question. Otherwise ask, at every involve level, with consequences per option:
+Reached when every action is `done`, the §5 done-criterion is verified, and the newest `CODE_REVIEW_<date>.md` holds no unsettled blocker/major finding — with no review yet, the run's final independent-review step has already started one and the merge waits for it. A specific applicable merge decision already given is used and cited without another question. Otherwise ask, at every involve level, with consequences per option:
 
 1. **Merge (recommended).** Commit any run records still loose on the branch first. If the base branch moved past `base:`, merge it *into* the execution branch — never rebase (conventions §1.3) — and inspect the combined diff. With existing implementation/integration authorization, resolve a routine conflict when the intended combined result is unambiguous and the resolution is mechanical; then re-run the checks affected by the integration plus the leaf's light checks. A conflict that requires choosing between user changes, research approaches, goals, or acceptance criteria is reported with its files and asks for direction. The `auto=unattended` token alone never authorizes conflict resolution. The squash runs in whichever tree has `<base>` checked out — `git switch <base>` first on a branch-only run; on a worktree run the main checkout already stands there. Run `git merge --squash <run>` without committing yet; when the user selected retained step history, use `git merge --no-ff --no-commit <run>` instead. Apply the same conflict rule. Run the affected light checks on this integrated tree. Only after they pass, set `merged:` in the run records, add their provenance and verification evidence, and stage only those records with this run's integration changes. Create the merge commit with message `star-plan-executor: <run> — merge (squash), <N> steps, review <report-file>` (describe retained history accurately when selected). Confirm the commit contains the `merged:` records. If checks or the commit fail, leave `merged:` unset, retain the pending integration and all evidence, and report the failure; never report a completed merge or clean up the tree before the commit succeeds. On a worktree run, then settle the tree — its removal is a deletion and needs specific authorization because untracked files die with it: reuse an applicable authorization already given; otherwise ask. On authorization, first move the non-md untracked artifacts under the tree's `wkdrs/<run>/` and `tasks/<plan-name>/` to the same paths in the main checkout, preserve raw logs and evidence, inspect `git -C <path> status --porcelain`, then `git worktree remove <path>` without `--force` only when empty — git refusing over stray files means something was missed; investigate, never override (§11.9). Last, retain `<run>` unless the user separately authorized deleting it.
 2. **Not yet.** The branch stays; `star-flow-status` keeps naming the merge as this leaf's outstanding follow-up. On a worktree run the tree stays with it. Nothing else changes.

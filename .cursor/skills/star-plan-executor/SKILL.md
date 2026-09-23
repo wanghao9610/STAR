@@ -98,7 +98,7 @@ Keep the main agent's reply concise; details live in the log.
 
 **Amendment sync (tactical signal).** Apply recorded specific decisions first. Put only unresolved rows on the page and ask once via AskQuestion under conventions §7.13. `auto=unattended` covers recommended tactical rows only when their substance leaves research scope, key inputs, §5 acceptance, and approved cost unchanged; a section number or ENRICHED label does not broaden it. Write authorized rows through `references/plan_sync_rules.md`. Anything touching §1/§6, a parent plan, or a kill-criterion is a plan-level finding and is never synced here.
 
-**Execution rubric.** Check `references/exec_rubric.md` and fix in-scope failures before claiming completion; report at most five remaining failures with concrete remedies.
+**Execution rubric.** Check `references/exec_rubric.md` and fix in-scope failures before claiming completion; report the remaining failures, most important first, with concrete remedies.
 
 **Done criterion.** Verify §5 only after amendments and rubric fixes are settled. Use attributable existing evidence when valid; re-run only if provenance is missing/stale or integration changed relevant behavior. Any later code, key-input, or acceptance change invalidates affected evidence and reopens the status. When met, set the run and sub-plan `exec_status: done`, retaining `tasks/<plan-name>/` scratch and tool scripts by default and naming their location. Delete only files the user specifically requests after promoting durable evidence to `wkdrs/<run>/`; `auto=unattended` grants no scratch deletion. If unmet, follow §6 or report the gap.
 
@@ -111,7 +111,7 @@ Keep the main agent's reply concise; details live in the log.
 
 ### Step 8: Report
 
-Lead with the outcome. State what was verified and its evidence, where retained task workspace and run artifacts live, which commands await launch authority or results, which amendments were synced, and any remaining risk. Name the independent review this run starts before any awaiting heavy command. Confirmed blocker/major findings and authorized fixes return through `star-plan-executor <leaf>` for affected-action verification. A clean branch review leads to the merge authorization point in `references/branch_rules.md`; reuse specific authority, otherwise ask via AskQuestion. Name the unmerged branch and any worktree. Once heavy outputs exist, `star-expt-analyst <leaf>` scores them against §5. Keep the report under about 500 words.
+Lead with the outcome. State what was verified and its evidence, where retained task workspace and run artifacts live, which commands await launch authority or results, which amendments were synced, and any remaining risk. Name the independent review this run starts before any awaiting heavy command. Confirmed blocker/major findings and authorized fixes return through `star-plan-executor <leaf>` for affected-action verification. A clean branch review leads to the merge authorization point in `references/branch_rules.md`; reuse specific authority, otherwise ask via AskQuestion. Name the unmerged branch and any worktree. Once heavy outputs exist, `star-expt-analyst <leaf>` scores them against §5.
 
 ### Step 9: Review and return to the execution goal
 

@@ -39,7 +39,7 @@ What separates a compiled README from a written one:
 4. **A claim carries its evidence.** "State of the art", "outperforms", "best", "significantly" appear only where `wkdrs/results/results.md` carries a verdict that says so. Comparative language against a named baseline needs that baseline's number in the same results table. Everything else is described, not ranked.
 5. **Unverified content is marked, not hidden.** Content compiled from a leaf whose `exec_status` is not `done` — a training recipe never run end to end, an evaluation protocol never executed — keeps one italic line saying it is not yet verified, the same discipline `star-metd-summarize` uses. The failure this prevents: a README that silently presents intent as fact. A dropped leaf is not a case of this: a node carrying `dropped:`, and everything under it, contributes nothing to the README.
 6. **Merge along the reader's axis.** One method document may feed three sections; one section may merge four. Rewrite into one voice — a section that reads as pasted excerpts, or that repeats what the section above already said, has failed. Where two sources disagree, the newer `generated:` wins and the report names the conflict.
-7. **Length is a feature.** The header through §4 is what most readers read. Keep §1–§4 under about 400 words total; push detail down into the sections that hold it, and link out to `metds/` for the rest.
+7. **Length is a feature.** The header through §4 is what most readers read. Keep §1–§4 to what a reader needs to decide whether to try the project; push detail down into the sections that hold it, and link out to `metds/` for the rest.
 
 ## The provenance marker
 

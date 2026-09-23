@@ -34,4 +34,4 @@ Before `finalized:` is set, all of these hold:
 5. Scan depth is recorded per direction — abstracts / abstracts+intros / skipped — and nothing in the statement claims deeper reading than the record shows.
 6. Every paper named in the file carries venue, year, and the URL of its fetched record.
 
-Failing items are listed for the user (at most 5, ranked by importance) and either fixed or explicitly accepted. An accepted failure is written into the file next to the item it concerns — the plan inherits open issues, not surprises.
+Failing items are listed for the user, ranked by importance, and either fixed or explicitly accepted. An accepted failure is written into the file next to the item it concerns — the plan inherits open issues, not surprises.

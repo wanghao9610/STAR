@@ -1,6 +1,6 @@
 # Execution Branch and Worktree Rules
 
-The operating procedure behind conventions §11. Step 3 decides and creates; Step 4 commits onto the branch; after Step 7's review, the resume path ends the branch — merge or discard — and the worktree that housed it. Every git command here is the executor's to run, except where a line hands it to the user.
+The operating procedure behind conventions §11. Planning decides and creates; each verified action commits onto the branch; after the review, the resume path ends the branch — merge or discard — and the worktree that housed it. Every git command here is the executor's to run, except where a line hands it to the user.
 
 An explicit, applicable decision already recorded in the dialogue or run records satisfies the corresponding authorization point; use and cite it instead of asking again. Authorization to implement does not by itself authorize a merge, discard, deletion, overwrite, or a choice between competing user or research intent. A valid `auto=unattended` token with effective `involve=low` is the limited `star-auto` grant; it authorizes only the guarded recommended paths explicitly named below.
 
@@ -25,7 +25,7 @@ Under unattended auto, show the same material and identify the limited grant as 
 - **Branch**, where Step 3 set `branch: <run>` (conventions §11): name the base branch it forks from, that taking it takes the per-step commits with it — only commits merge — and its one precondition, that nothing is currently running from this checkout; declining executes on the base branch as before.
 - **Worktree**, where Step 3 set `worktree: <path>` (§11.7): name the busy signal that recommends it, the path, the symlinks it will get (`.env`, `datas/`, `inits/`), and that the whole run — commits, records, follow-on skills — then lives in that tree while this checkout stays put; declining executes here, waiting on whatever made the checkout busy.
 
-## Creation (Step 3, after the decisions are recorded)
+## Creation (after the decisions are recorded)
 
 1. Record the checkout's current branch and short SHA as `base:` (`git rev-parse --abbrev-ref HEAD`, `git rev-parse --short HEAD`). Never assume `main`.
 2. Do not switch a checkout from which a job may be running — a live job can re-read switched files mid-run. A busy checkout is the signal that sends this run into a worktree instead.
@@ -36,7 +36,7 @@ Under unattended auto, show the same material and identify the limited grant as 
 
 Under unattended auto, the logged decision names the grant; a checkout with an unresolved job record is treated as busy and therefore is never switched.
 
-## Commits on the branch (Step 4)
+## Commits on the branch
 
 Each verified step's commit stages the step's files **plus the run-record updates that step caused** — the `EXEC_LOG.md` row, `EXEC_PLAN.md` sync marks, the sub-plan's frontmatter — message prefix per conventions §1.2. A record left uncommitted does not merge, and worse: an uncommitted edit to a file both branches carry rides along on a later `git switch` instead of staying with the branch.
 
@@ -47,7 +47,7 @@ Each verified step's commit stages the step's files **plus the run-record update
 - Before switching, `git status`: unrelated uncommitted changes are named. Never stash, stage, overwrite, or discard them. Switch only when an existing applicable user decision says the paths cannot collide; otherwise ask how the user wants to protect their work.
 - A recorded `branch:` that no longer exists is a blocker to report; never re-create it silently.
 
-## The merge authorization point (after Step 7 review)
+## The merge authorization point (after the review)
 
 Reached when every action is `done`, the §5 done-criterion is verified, and the newest `CODE_REVIEW_<date>.md` holds no unsettled blocker/major finding — with no review yet, the run's final independent-review step has already started one and the merge waits for it. A specific applicable merge decision already given is used and cited without another question. Otherwise ask, at every involve level, with consequences per option:
 

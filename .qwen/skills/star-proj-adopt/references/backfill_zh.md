@@ -1,6 +1,6 @@
 # 阶段 `backfill`
 
-在阶段解析为 `backfill` 时读——参数点名了它，或 Step 0 从"已有采纳记录 + 已分解的计划树"自动选中它。走 `survey` 的运行不读本文件。`adopt_spec_zh.md` 的第 7 节随这个阶段搬到了这里：对账规则在下面，不在那边。
+在阶段解析为 `backfill` 时读——参数点名了它，或"已有采纳记录 + 已分解的计划树"选中了它。走 `survey` 的运行不读本文件。
 
 ## Step B1：清单与 leaf 对账
 
@@ -8,7 +8,7 @@
 
 ## Step B2：确认点 3——逐 leaf 确认
 
-用户通过 `ask_user_question` 逐个确认——条目较多时给提议行编号、用一个问题问（*全部确认* / *确认其中几行（报编号）* / *都不确认*），四行及以下时一个一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
+用户通过一次 `ask_user_question` 按规约 §7.13 逐 leaf 确认，全部提议行只问一次——起草的列表是一个问题，不是一行一问。未获确认的 leaf 原样不动。标为 `done` 但没有入账 run 的 leaf 是允许的，并记一笔：`star-flow-status` 会把它标为 done-with-no-run，那正是诚实的状态。
 
 ## Step B3：写入、记录、汇报
 

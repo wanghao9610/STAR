@@ -67,4 +67,4 @@ model_trail:                    # append-only: one entry per write session, newe
 ## Done-criterion
 
 <!-- Restate the sub-plan §5 check that ends this run, with its threshold, tied back to the root's
-     §4 metrics / §5 kill-criteria where relevant. This is what Step 6 verifies. -->
+     §4 metrics / §5 kill-criteria where relevant. This is what finalization verifies. -->

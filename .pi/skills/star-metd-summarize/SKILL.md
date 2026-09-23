@@ -70,7 +70,7 @@ Where Step 2 split into passes, reconcile before merging: every plan the partiti
 
 Before drafting, apply the human-writing contract (`docs/mds/star-workflow/research-workflow-conventions.md` §7). Treat plan provenance, measured values, paths, `TODO` markers, verification labels, unresolved conflicts, uncertainty, and negative results as protected content; the prose pass may merge and order them, but may not strengthen or invent a conclusion.
 
-Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), and `sources:` — every plan that fed this document with the `updated` date it carried when read, making staleness detectable on the next run.
+Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), `sources:` — every plan that fed this document with the `updated` date it carried when read, making staleness detectable on the next run — and the `model_id` and `model_trail` provenance every artifact carries (conventions §8).
 
 ### Step 5: Write, comparing against what is already there
 
@@ -83,7 +83,7 @@ For each target, in dependency order:
 
 ### Step 6: Report
 
-≤500 words: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `star-plan-coach`, execution detail to `star-plan-decomposer`, a value an executed run settled to `star-plan-executor`, plan text contradicting reality to `star-plan-reviser`, results to `star-expt-analyst`, citations to `star-refs-reviewer`. Never call a document paper-ready: it is compiled material, and its gaps are why. A draft compile (readiness-check override) says so in the report's first line.
+The reply is the digest and the documents carry the detail (conventions §7.1). Lead with what was written: per document — written / skipped / unchanged, its path, its gap count and not-yet-verified count. Then the three things a researcher acts on: the **gaps** (which plan section each wants, worst first), the **⚠ conflicts** with both sources named, and the routing — strategy gaps to `star-plan-coach`, execution detail to `star-plan-decomposer`, a value an executed run settled to `star-plan-executor`, plan text contradicting reality to `star-plan-reviser`, results to `star-expt-analyst`, citations to `star-refs-reviewer`. Never call a document paper-ready: it is compiled material, and its gaps are why. A draft compile (readiness-check override) says so in the report's first line.
 
 ## State & File Rules
 
@@ -92,7 +92,7 @@ For each target, in dependency order:
 - Reads are `metds/plans/*_plan.md`, `.env`, and the five target docs. `wkdrs/` is deliberately not read: if a run's detail is missing here, the fix is a plan sync, not a wider read.
 - This skill runs nothing: no python, no training, no evaluation, no installs.
 - Git: read-only; this skill never commits (conventions §1).
-- It sets no plan frontmatter and creates no run directories; each document's `sources:` block is the whole audit trail.
+- It sets no plan frontmatter and creates no run directories; each document's frontmatter — its `sources:` block and `model_trail` — is the whole audit trail.
 
 ## Dialogue Discipline
 

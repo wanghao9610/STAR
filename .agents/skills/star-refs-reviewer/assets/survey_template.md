@@ -22,7 +22,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## 1. TL;DR
 
-<!-- 5–8 bullets: the takeaways a reader needs before deciding whether to read the map. -->
+<!-- Bullets: the takeaways a reader needs before deciding whether to read the map. -->
 
 ## 2. Scope & Method
 
@@ -54,7 +54,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## 7. Evolution & Trends
 
-<!-- 2–3 paragraphs on how the field moved, with years. Record-tier papers may be named here. -->
+<!-- A short account of how the field moved, with years. Record-tier papers may be named here. -->
 
 ## 8. Benchmarks & Evaluation Practice
 

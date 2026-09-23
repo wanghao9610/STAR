@@ -1,6 +1,6 @@
 # Research Plan Quality Checklist
 
-Check each item during the final quality pass. Rank failing items by importance and report at most 5 to the user, each with a concrete improvement suggestion and the section it belongs to.
+Check each item. For each, give the verdict, the quoted line (or the exact statement of what is absent), and, where the plan falls short, a concrete fix naming the section it belongs to. Which items reach the user, and in what order, is decided afterwards, once each `fail` is confirmed against the plan.
 
 1. **The research question fits in one sentence** and is verifiable/falsifiable — after reading it, you know exactly what "success" looks like.
 2. **The gap is "the field cannot do this", not "I haven't done this yet"** — a blank space is not motivation by itself; the plan must say why this gap is worth filling.

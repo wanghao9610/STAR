@@ -111,6 +111,9 @@ Every generated document opens with:
 type: <overview|dataset|framework|training|evaluation>
 language: <en|zh>
 generated: <YYYY-MM-DD>          # a real date; never invented
+model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — conventions §8>
+model_trail:                      # append-only, one entry per write session; a regeneration starts a fresh trail
+  - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: star-metd-summarize, scope: <what this session wrote> }
 sources:                          # every plan that fed this document, with the updated it carried when read
   - plan: <prefix>_<slug>_plan.md
     updated: <YYYY-MM-DD>

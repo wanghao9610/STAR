@@ -28,7 +28,7 @@ sources:
 
 ## 1. Period & Scope
 
-<!-- Two or three lines: the window and how it was set (resumed from the previous digest / explicit
+<!-- In brief: the window and how it was set (resumed from the previous digest / explicit
      window / plan family), the scope, how many runs fell in it, and the report-backed vs provisional
      split. In plan mode, name the ancestors read for claim context. If there is no previous digest,
      say the series starts here. If the period is empty, say so with the newest run date and the
@@ -36,7 +36,7 @@ sources:
 
 ## 2. Headline — what was learned
 
-<!-- Three to five sentences, report-backed evidence only (references/digest_rubric.md, "Writing the
+<!-- One short paragraph, report-backed evidence only (references/digest_rubric.md, "Writing the
      headline"). Lead with the finding, not the activity. A kill-criterion hit always leads. Name in
      one clause what root §4 still calls for that nobody has measured. If every run is provisional,
      the headline says exactly that and nothing about their numbers. -->

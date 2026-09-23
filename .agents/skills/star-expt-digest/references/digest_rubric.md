@@ -72,7 +72,7 @@ No previous digest → the section is omitted, and §1 says the series starts he
 
 ## Writing the headline
 
-Three to five sentences. It answers *what did we learn in this period* using only report-backed evidence:
+One short paragraph. It answers *what did we learn in this period* using only report-backed evidence:
 
 - Lead with the finding, not the activity. "The 3-way ablation refutes the shared-head hypothesis at `02_core-method`" beats "three runs completed this week."
 - A negative result leads if it is the period's biggest fact. A kill-criterion hit always leads (`analysis_rubric.md`'s stance, carried here): it is the plan working.

@@ -65,7 +65,7 @@ Never promote `unverifiable` to `met` on the log's word alone.
 
 ## Report sections
 
-1. **Intent recap** — the objective in 1–2 lines; a leaf quotes its §5 done-criterion verbatim, a root/internal states its finalized status and the key claims/assumptions it rests on.
+1. **Intent recap** — the objective, briefly; a leaf quotes its §5 done-criterion verbatim, a root/internal states its finalized status and the key claims/assumptions it rests on.
 2. **What actually happened** — steps done / blocked / skipped; artifacts verified on disk; commands still under "Awaiting user"; children summarized for root/internal targets.
 3. **Completion scorecard** — one row per §3 task plus one row for the §5 done-criterion: verdict + evidence pointer.
 4. **Divergences** — planned X but did Y; extra work not in the plan; assumptions the evidence contradicts; kill-criteria hits and quoted plan-level findings.

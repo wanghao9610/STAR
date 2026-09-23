@@ -23,7 +23,7 @@ One `agent` subagent (`subagent_type: Explore`) per area, run in parallel (none 
 - **Return** (structured):
   - `inventory` — dirs/modules in its area, one line each: path + responsibility.
   - `entrypoints` — runnable entry points found (scripts, CLI commands), if in scope.
-  - `mechanisms` — how the area works (config style, registry use, data flow), 3–6 bullets.
+  - `mechanisms` — how the area works (config style, registry use, data flow), as short bullets.
   - `smells` — only findings that could motivate a migration item: dead code, duplication, cross-layer imports, naming inconsistencies, giant files. Each: path + one-line evidence.
   - `unknowns` — what it could not determine and why.
 

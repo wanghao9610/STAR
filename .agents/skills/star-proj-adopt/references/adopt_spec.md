@@ -84,11 +84,11 @@ For each run the user selects:
 
 1. Create `wkdrs/<run>/` as a new real directory and link the existing run directory inside it as `wkdrs/<run>/output` by its absolute path, so the link still resolves after `star-plan-reviser`'s drop moves the run to `wkdrs/dropped/<run>/`, where `<run>` is its existing name when that is already distinctive and still free under `wkdrs/`, and `<existing>_<date-of-run>` otherwise (`output/`, `run1/`).
 2. Write `wkdrs/<run>/EXEC_LOG.md` from `assets/exec_log_reconstructed.md`, beside the `output` link: a real file there is what the phase's commit offer can stage.
-3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — adopted before the plan tree existed)`, the command where a script or saved config records it verbatim, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this rule prevents.
+3. The reconstructed log carries: the `reconstructed:` header with the adoption date, `source_plan: (none — this run predates the plan tree)`, the command where a script or saved config records it verbatim, the artifacts present, and any metric quoted per §5. **No step table** — there were no steps to record, and inventing them is the failure mode this rule prevents.
 4. Never write into the linked directory itself. The `EXEC_LOG.md` goes in `wkdrs/<run>/`, beside the link.
 
 An `EXEC_LOG.md` already in a selected run directory is left untouched, and no new `wkdrs/<run>/` is created for it; the run is reported as `already recorded`.
 
 ## 7. Backfill matching (Phase `backfill`)
 
-The matching rules live with the phase, in `backfill.md`, read where Step 0 resolved `backfill` and not before. A `survey` run needs none of them.
+The matching rules live with the phase, in `backfill.md`, read once the phase resolves to `backfill` and not before. A `survey` run needs none of them.

@@ -43,16 +43,16 @@
 
 ## Abstract
 
-<!-- (M §3) From metds/overview.md: the problem, the gap, the core idea, in that order. Three to
-     six sentences. This and the section below are what most readers actually read — everything
+<!-- (M §3) From metds/overview.md: the problem, the gap, the core idea, in that order, as one
+     short paragraph. This and the section below are what most readers actually read — everything
      after them is for the reader who has already decided to try it. -->
 
 <TODO: compile from metds/overview.md — run star-metd-summarize overview>
 
 ## ✨ Highlights
 
-<!-- (O §4) From metds/overview.md's contributions, which are written as falsifiable claims. Three
-     to five bullets, each one thing the project does that its baselines do not. A number here is
+<!-- (O §4) From metds/overview.md's contributions, which are written as falsifiable claims. The
+     strongest few as bullets, each one thing the project does that its baselines do not. A number here is
      copied from wkdrs/results/results.md with the run behind it, or it is not a number here. -->
 
 - **<claim>** — <one line of substance, not adjectives>

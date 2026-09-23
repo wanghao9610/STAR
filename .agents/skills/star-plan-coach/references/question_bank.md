@@ -34,7 +34,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 - Have you deliberately searched for literature that contradicts your view?
 - Which paper is a reviewer most likely to point at and say "hasn't this been done already"? How will you respond?
 
-**When stuck**: if the user's literature coverage is thin, don't spin — give 2-3 search keyword combinations for them to look up, or suggest running the deep-research skill for a literature survey first; mark this section `in_progress`, move on to later stages, and come back to it.
+**When stuck**: if the user's literature coverage is thin, don't spin — give 2-3 search keyword combinations for them to look up, or recommend `star-refs-reviewer` for a literature survey first and resume with `star-plan-coach <slug> related_work`; if the user would rather continue, write what they know and mark what the survey should later confirm.
 
 ---
 

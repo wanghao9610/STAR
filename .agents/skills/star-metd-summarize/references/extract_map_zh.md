@@ -111,6 +111,9 @@ TODO —— 无计划覆盖；请补充到 <计划文件> §<n>。
 type: <overview|dataset|framework|training|evaluation>
 language: <en|zh>
 generated: <YYYY-MM-DD>          # 真实日期；绝不编造
+model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见规约 §8>
+model_trail:                      # 只追加：每次写入会话一条；整体重新生成时另起新的记录
+  - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: star-metd-summarize, scope: <本次会话写了什么> }
 sources:                          # 输入给本文档的每个计划，以及读取时它所带的 updated
   - plan: <prefix>_<slug>_plan.md
     updated: <YYYY-MM-DD>

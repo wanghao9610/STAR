@@ -22,7 +22,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 
 ## 2. 判定
 
-<!-- 2–4 行。run 判定（met / partially met / not met / inconclusive / invalid）及其理由，然后按编号
+<!-- 简要写：run 判定（met / partially met / not met / inconclusive / invalid）及其理由，然后按编号
      列出所有 blocker/major 观察。诚实，不打太极：`inconclusive` 与 `invalid` 都是答案。不虚高，
      也不危言耸听。 -->
 

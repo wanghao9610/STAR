@@ -105,7 +105,7 @@ Read the invocation arguments from the appended raw invocation line or its `<ski
 **Hand Step 5 to the EXEC tier.** With records and decisions settled, dispatch `agent` (`subagent_type: general-purpose`; use named `star-exec` when EXEC is configured with a model that is not an alias of this run's (conventions §10.8), never a raw per-call model) to read this manifest and resume from Step 5 with `involve=<level> tier=exec` and any valid `auto=unattended` grant. It may not edit EXEC_PLAN or improvise around a plan-level gap. Re-read EXEC_LOG on return; if unavailable, run Step 5 here.
 ### star-plan-executor/SKILL.md
 --- 1
-1. Dispatch an `agent` subagent (`subagent_type: general-purpose`, or `Explore` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
+1. Choose local execution or delegation per `references/agent_dispatch_spec.md`; when delegating, dispatch an `agent` subagent (`subagent_type: general-purpose`, or `Explore` when the step is read-only orientation) with the brief in `references/agent_dispatch_spec.md`: this step's goal, the exact files to touch, the resolved interpreter path, the step's own check, and "do **only** this step; return a structured result (changed / ran / check / blockers / handoff)".
 +++ 1
 1. Dispatch `agent` (`subagent_type: general-purpose`, or `Explore` for read-only orientation; use the matching named tier agent when configured) with `references/agent_dispatch_spec.md`, exact scope, interpreter, check, and structured return contract.
 ### star-plan-executor/SKILL.md

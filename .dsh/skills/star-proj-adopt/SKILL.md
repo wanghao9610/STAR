@@ -72,7 +72,7 @@ Write `metds/adopt.md` from `assets/adopt_template.md`. Then route, in order: `s
 
 ### Phase `backfill`
 
-This phase matches the work inventory against the decomposed plan tree and proposes the `exec_status` each match earns. Its steps, and the matching rules that were section 7 of `adopt_spec.md`, are in `references/backfill.md`, read where Step 0 resolved this phase and not before. A `survey` run reads none of it.
+This phase matches the work inventory against the decomposed plan tree and proposes the `exec_status` each match earns. Its steps and the matching rules are in `references/backfill.md`, read once the phase resolves to `backfill` and not before. A `survey` run reads none of it.
 
 ## State & File Rules
 

@@ -1,6 +1,6 @@
 # Sub-plan Quality Checklist
 
-Run this over each sub-plan you wrote. Rank failing items by importance and report at most 5 to the user, each naming the file and a concrete fix.
+Run this over each sub-plan you wrote. Rank failing items by importance and report them to the user, most important first, each naming the file and a concrete fix.
 
 1. **The objective is one coherent chunk, traced to the root** — §1 says in one or two sentences what this sub-plan delivers, and `traces_to` names the exact root section/claim it serves. No sub-plan re-opens the research question or method (that's the root plan's job).
 

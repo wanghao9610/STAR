@@ -16,7 +16,7 @@ Score each candidate with the rubric (`references/repo_rubric.md`): plan fit 30,
 
 ## Step A4: Confirmation point 1 — the user picks the repo
 
-Present the top 3–5 via `ask_user_question`, one option per candidate: one-line why-it-fits, license, stars, last update, main risk. Always include an escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
+Present the top 3–5 in the message above the question, one line per candidate: one-line why-it-fits, license, stars, last update, main risk. Then ask via `ask_user_question` which to use, in at most four options (conventions §7.13): up to three candidates, the highest-scoring first and marked as recommended, and always the escape option ("none of these — refine the search / start from scratch"). If invoked with a URL, still show that repo's license, activity, and risks, and confirm before cloning.
 
 ## Step A5: Put the clone in place
 

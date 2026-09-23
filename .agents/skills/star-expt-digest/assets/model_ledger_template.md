@@ -20,7 +20,7 @@ artifacts_without_trail: <n>
 
 ## 1. Summary
 
-<!-- Three or four sentences: how many artifacts were scanned, how many carried a trail, how many
+<!-- In brief: how many artifacts were scanned, how many carried a trail, how many
      distinct models appear, the date range covered, and how many artifacts are single-model versus
      multi-model. State plainly that a model with few write events is not evidence of anything —
      this is a provenance record, not a benchmark. -->

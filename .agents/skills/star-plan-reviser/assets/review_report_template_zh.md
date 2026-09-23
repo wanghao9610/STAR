@@ -6,7 +6,7 @@
 
 ## 1. 目标回顾
 
-<!-- 1–2 行目标。叶子：逐字引用其 §5 完成判据。
+<!-- 简要写目标。叶子：逐字引用其 §5 完成判据。
      根/内部：finalized 状态与计划所依赖的关键主张/假设。 -->
 
 ## 2. 实际发生了什么
@@ -44,7 +44,7 @@
 ## 7. 修订候选
 
 <!-- 编号。影响范围：local（本文件）/ structural（树形结构 → star-plan-decomposer）/
-     strategic（方向 → star-plan-coach）。每条候选由用户逐一裁决；
+     strategic（方向 → star-plan-coach）。整份候选清单由用户在一次提问中定下来（规约 §7.13）；
      被采纳的改动落在计划文件及其 Revision History 里，不落在这里。 -->
 
 1. [<local|structural|strategic>] §<n> — <改什么>

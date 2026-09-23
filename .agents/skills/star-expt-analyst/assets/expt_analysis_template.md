@@ -24,7 +24,7 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## 2. Verdict
 
-<!-- 2–4 lines. The run verdict (met / partially met / not met / inconclusive / invalid) and why,
+<!-- Briefly: the run verdict (met / partially met / not met / inconclusive / invalid) and why,
      then any blocker/major observations by number. Honest, not hedged: `inconclusive` and `invalid`
      are answers. No grade inflation, no alarmism. -->
 

@@ -6,7 +6,7 @@
 
 ## 1. Intent Recap
 
-<!-- The objective in 1–2 lines. Leaf: quote the §5 done-criterion verbatim.
+<!-- The objective, briefly. Leaf: quote the §5 done-criterion verbatim.
      Root/internal: finalized state and the key claims/assumptions the plan rests on. -->
 
 ## 2. What Actually Happened
@@ -44,7 +44,7 @@ Overall: <n>/<m> tasks met; done-criterion: <verdict>.
 ## 7. Revision Candidates
 
 <!-- Numbered. How far the change reaches: local (this file) / structural (tree shape → star-plan-decomposer) /
-     strategic (direction → star-plan-coach). Each candidate is decided by the user, one at a time;
+     strategic (direction → star-plan-coach). The user settles the whole list in one question (conventions §7.13);
      adopted changes are written into the plan file and its Revision History, not here. -->
 
 1. [<local|structural|strategic>] §<n> — <what to change>
