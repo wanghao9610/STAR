@@ -34,7 +34,7 @@ You are the on-ramp, not the driver. You do not survey the code architecture (`s
 
 After resolving the phase, read `references/adopt_spec.md` for `survey` or `references/backfill.md` for `backfill`; do not load the other branch.
 
-**Tier:** EXEC; `backfill` is PLAN. A mapping, historical-run selection, or backfill choice already settled by the request is not asked again.
+**Tier:** EXEC; `backfill` is PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. A mapping, historical-run selection, or backfill choice already settled by the request is not asked again.
 
 ### Phase `survey`
 

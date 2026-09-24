@@ -58,7 +58,7 @@ You survey and record; you do not set strategy, write or revise plans, implement
 
 ## Workflow
 
-**Tier:** EXEC; `synthesize` is PLAN. Existing selection or overwrite authorization counts and is not asked for again.
+**Tier:** EXEC; `synthesize` is PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing selection or overwrite authorization counts and is not asked for again.
 
 ### Step 0: Resolve the method source and the mode
 

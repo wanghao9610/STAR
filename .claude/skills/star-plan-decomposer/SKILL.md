@@ -65,7 +65,7 @@ Full rule, worked tree, and edge cases: `references/naming_convention.md`.
 
 ## Workflow
 
-**Tier:** PLAN. A decomposition axis, unit list, or expansion scope already settled by the request is not asked again.
+**Tier:** PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. A decomposition axis, unit list, or expansion scope already settled by the request is not asked again.
 
 ### Step 0: Resolve the target plan
 

@@ -34,7 +34,7 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 
 ## Workflow
 
-**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 
 ### Step 0: Resolve the target
 

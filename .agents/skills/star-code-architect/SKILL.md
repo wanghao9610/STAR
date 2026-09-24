@@ -31,7 +31,7 @@ Architect; do not implement research features. Feature work belongs to `star-pla
 
 ## Workflow
 
-**Tier:** PLAN; approved migration execution is handed to EXEC as described below.
+**Tier:** PLAN; approved migration execution is handed to EXEC as described below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
 
 ### Step 0: Orient & choose the branch
 

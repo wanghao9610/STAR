@@ -59,7 +59,7 @@ You compile and reorganize; you do not decide method, revise plans, read code, o
 
 ## Workflow
 
-**Tier:** PLAN. A clear request for a named output, draft, or scoped overwrite authorizes it.
+**Tier:** PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. A clear request for a named output, draft, or scoped overwrite authorizes it.
 
 ### Step 0: Resolve the targets
 

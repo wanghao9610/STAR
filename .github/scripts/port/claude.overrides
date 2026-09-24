@@ -674,9 +674,9 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 6. **Use the project runtime and layout.** Read `CONDA_HOME`, `PYTHON_HOME`, and `CODE_NAME` from `.env`; never guess local paths or use system Python. Use `execs/run.sh` when it is the project entrypoint. Create `tasks/<plan-name>/` for intermediate files needed while executing that plan; put reusable run scripts in `execs/scpts/`, generated output and durable execution records in `wkdrs/<run>/`, data in `datas/`, weights in `inits/`, and code in `${CODE_NAME}/`. Follow `CLAUDE.md`.
 ### star-plan-executor/SKILL.md
 --- 1
-**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 +++ 1
-**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 ### star-plan-executor/SKILL.md
 --- 1
 ### Step 0: Resolve the target

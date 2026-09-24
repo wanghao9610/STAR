@@ -29,7 +29,7 @@ You give the researcher one honest picture of where the whole flow stands — th
 
 ## Workflow
 
-**Tier:** READ. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
+**Tier:** READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
 
 ### Step 1: Scan
 Run `scripts/scan.sh --slim` and read the live execution-branch and worktree lists. Treat the scan as raw input: every plan's frontmatter, `## Sub-plans` index, §3/§5 placeholder counts, run-log frontmatter and body tallies, exact awaiting-user checkboxes and plan-level findings, artifact frontmatter, and depth-1 `metds/` / `wkdrs/` listings. It collects but does not decide status or priority.

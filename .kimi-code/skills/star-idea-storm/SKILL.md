@@ -31,7 +31,7 @@ You are the family's ideation coach, one step upstream of `star-plan-coach`: the
 
 ## Workflow
 
-**Tier:** PLAN.
+**Tier:** PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
 
 ### Step 0: Locate or create an idea file
 

@@ -58,7 +58,7 @@ You revise text; you do not re-run experiments, re-decompose subtrees, or re-der
 
 ## Workflow
 
-**Tier:** PLAN. A clear request may authorize named revisions, a drop, or a revival.
+**Tier:** PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. A clear request may authorize named revisions, a drop, or a revival.
 
 ### Step 0: Resolve the target plan
 

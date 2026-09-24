@@ -31,7 +31,7 @@ Consolidate, polish, and document; do not implement features, restructure the co
 
 ## Workflow
 
-**Tier:** EXEC; `check` is READ.
+**Tier:** EXEC; `check` is READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
 
 ### Step 0: Orient & resolve the phase
 

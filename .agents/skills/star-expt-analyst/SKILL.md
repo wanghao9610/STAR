@@ -32,7 +32,7 @@ Read and interpret; do not execute steps, fix code, revise plans, or flip plan s
 
 ## Workflow
 
-**Tier:** PLAN; `aggregate` and `watch` are READ. `watch` stays chat-only and ends without a writing successor.
+**Tier:** PLAN; `aggregate` and `watch` are READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. `watch` stays chat-only and ends without a writing successor.
 
 ### Step 0: Resolve the run
 

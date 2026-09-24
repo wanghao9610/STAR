@@ -29,7 +29,7 @@ You are a senior CS research mentor. Your job is not to write the plan but to he
 
 ## Workflow
 
-**Tier:** PLAN.
+**Tier:** PLAN. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
 
 ### Step 0: Locate or create a plan
 

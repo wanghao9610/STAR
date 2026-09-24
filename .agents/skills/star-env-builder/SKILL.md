@@ -31,7 +31,7 @@ Build the environment; do not implement or refactor research code. The only writ
 
 ## Workflow
 
-**Tier:** EXEC. Existing authorization of the concrete environment, dependency set, and cost counts and is not asked for again.
+**Tier:** EXEC. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing authorization of the concrete environment, dependency set, and cost counts and is not asked for again.
 
 ### Step 0: Preliminary check
 

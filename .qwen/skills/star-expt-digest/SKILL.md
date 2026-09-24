@@ -36,7 +36,7 @@ You read and narrate; you do not execute, analyze runs, score criteria, revise p
 
 ## Workflow
 
-**Tier:** READ. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
+**Tier:** READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
 
 Resolve the mode first. `ledger` runs `scripts/scan.sh --trails` for every `model_trail`, plan `## Revision History`, and header `model_id` from files without frontmatter, then performs Step 8 only. Other modes resolve the window through `references/scope_spec.md`, run the default scan, and read unmerged execution branches. That scan supplies plan and artifact frontmatter, run-log status, steps, awaiting-user items, plan-level findings and dates, plus `metds/` and `wkdrs/` listings. Treat it as raw input; the script decides neither scope nor evidence tier.
 
