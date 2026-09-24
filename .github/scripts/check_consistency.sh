@@ -1598,60 +1598,51 @@ for root in "${SKILL_ROOTS[@]}"; do
 done
 (( ref_errors == 0 )) && note "${ref_checked} reference paths resolve, and every reference file is named by the skill that ships it"
 
-# 25. Every skill but the two conventions §10.8 names has one "Where this run
-#     executes." paragraph at the head of its Workflow, before its first step: it
-#     says where the run executes and gives the one-line notice when the run's
-#     tier names another model, or a depth the harness applies only per dispatch.
-#     It may describe that skill's own tier, phase or mode; identical prose across
-#     different skills is not required. No manifest may carry a paragraph that
-#     hands a whole flow-status or digest run to a READ delegate (its lead is
-#     grepped below): §10.8 keeps a directly invoked run in the session that
-#     started it. Port checks own adaptation parity, while check_model_routing.sh
-#     checks installed model consumers.
-section "Where-this-run-executes paragraph"
-where_errors=0
-WHERE_EXEMPT="star-plan-coach star-idea-storm"
+# 25. Every skill names its tier on one "**Tier:**" line at the head of its
+#     Workflow, after its heading and before its first step, and that tier is
+#     the one the conventions §10 roster gives it. AGENTS.md and conventions
+#     §10.8 hold the one-line notice a directly invoked run gives from that
+#     tier; no manifest restates it in a paragraph of its own, and none hands a
+#     whole run to a READ delegate. Port checks own adaptation parity, while
+#     check_model_routing.sh checks installed model consumers.
+section "Tier line"
+tier_errors=0
+roster_tiers="$(sed -nE 's/^\| `(star-[a-z-]+)`( †)? \| (plan|exec|read) \|.*/\1 \3/p' docs/mds/star-workflow/research-workflow-conventions.md)"
 
-lead='^\*\*Where this run executes\.\*\*'
+lead='^\*\*Tier:\*\* '
 for root in "${SKILL_ROOTS[@]}"; do
     while IFS= read -r skill; do
         path="${root}/${skill}/SKILL.md"
         [[ -f "${path}" ]] || continue   # check 2 owns missing files
-        if grep -qF '**READ-tier entry on this harness.**' "${path}"; then
-            fail "${path}: still hands the whole run to a READ delegate; conventions §10.8 keeps a directly invoked run in its session"
-            where_errors=1
+        if grep -qE '^\*\*(Where this run executes\.|READ-tier entry on this harness\.)\*\*' "${path}"; then
+            fail "${path}: restates the run-location notice or hands the whole run to a READ delegate; AGENTS.md and conventions §10.8 hold that rule"
+            tier_errors=1
         fi
 
         n="$(grep -cE "${lead}" "${path}")"
-        if grep -qw "${skill}" <<< "${WHERE_EXEMPT}"; then
-            if (( n != 0 )); then
-                fail "${path}: carries the where-this-run-executes paragraph; conventions §10.8 exempts this skill (a direct run keeps the session's settings, and star-auto can start it on the PLAN tier)"
-                where_errors=1
-            fi
-            continue
-        fi
         if (( n != 1 )); then
-            fail "${path}: ${n} where-this-run-executes paragraphs, expected exactly 1"
-            where_errors=1
+            fail "${path}: ${n} Tier lines, expected exactly 1"
+            tier_errors=1
             continue
         fi
-        para="$(grep -E "${lead}" "${path}")"
-        if ! grep -qF '`star-auto`' <<< "${para}" || grep -qiE 'relocat|hand the complete run' <<< "${para}"; then
-            fail "${path}: the where-this-run-executes paragraph must name star-auto as the way to get the tier's model and must not relocate the run"
-            where_errors=1
+        want="$(awk -v s="${skill}" '$1 == s { print toupper($2) }' <<< "${roster_tiers}")"
+        got="$(grep -E "${lead}" "${path}" | sed -E 's/^\*\*Tier:\*\* ([A-Z]+).*/\1/')"
+        if [[ -z "${want}" || "${got}" != "${want}" ]]; then
+            fail "${path}: Tier line names ${got}, but the conventions §10 roster gives ${want:-no tier}"
+            tier_errors=1
         fi
 
         wf_at="$(grep -nE '^## Workflow' "${path}" | head -n 1 | cut -d: -f1)"
         at="$(grep -nE "${lead}" "${path}" | head -n 1 | cut -d: -f1)"
         first_step="$(awk -v s="${wf_at:-0}" 'NR>s && /^### /{print NR; exit}' "${path}")"
         if [[ -z "${wf_at}" ]] || (( at < wf_at )) || { [[ -n "${first_step}" ]] && (( at > first_step )); }; then
-            fail "${path}: the where-this-run-executes paragraph is not at the head of Workflow (after its heading, before its first step)"
-            where_errors=1
+            fail "${path}: the Tier line is not at the head of Workflow (after its heading, before its first step)"
+            tier_errors=1
         fi
     done < <(printf '%s\n' "${SKILLS}")
 done
 
-(( where_errors == 0 )) && note "every skill but star-plan-coach and star-idea-storm states at the head of its Workflow where its run executes and its one-line tier notice; no manifest hands a whole run to a READ delegate"
+(( tier_errors == 0 )) && note "every skill names its roster tier on one Tier line at the head of its Workflow; none restates the run-location notice"
 
 # 26. The versioned memory store ships as its template. STAR is the template
 #     every adopting project starts from — a clone or the GitHub template copies

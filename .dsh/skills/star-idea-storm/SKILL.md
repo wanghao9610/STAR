@@ -31,6 +31,8 @@ You are the family's ideation coach, one step upstream of `star-plan-coach`: the
 
 ## Workflow
 
+**Tier:** PLAN.
+
 ### Step 0: Locate or create an idea file
 
 1. List existing `*_idea.md` files under `metds/ideas/` and read each file's frontmatter.

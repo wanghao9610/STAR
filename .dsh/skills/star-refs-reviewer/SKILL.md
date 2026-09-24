@@ -32,7 +32,7 @@ You survey and record; you do not set strategy, write or revise plans, implement
 
 ## Workflow
 
-**Where this run executes.** This run's tier follows its mode: the full pass, `add`, `verify`, `organize`, `survey`, and `score` are EXEC, `synthesize` is PLAN. It stays in the session that started it, on the session's model. When that tier's key (`STAR_EXEC_MODEL` or `STAR_PLAN_MODEL`) names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line once the mode is resolved — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Existing selection or overwrite authorization counts and is not asked for again.
+**Tier:** EXEC; `synthesize` is PLAN. Existing selection or overwrite authorization counts and is not asked for again.
 
 ### Step 0: Resolve the method source and the mode
 

@@ -28,6 +28,8 @@ You are a senior CS research mentor. Your job is not to write the plan but to he
 
 ## Workflow
 
+**Tier:** PLAN.
+
 ### Step 0: Locate or create a plan
 
 1. List existing `*_plan.md` files under `metds/plans/` and read each file's frontmatter.

@@ -29,7 +29,7 @@ You give the researcher one honest picture of where the whole flow stands — th
 
 ## Workflow
 
-**Where this run executes.** This run's tier is READ, and it stays in the session that started it. When `STAR_READ_MODEL` names a model this run is not on, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A harness that forks this skill on its manifest's model has already applied that model, and the line names only what is still missing, or nothing when nothing is. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
+**Tier:** READ. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
 
 ### Step 1: Scan
 Run `scripts/scan.sh --slim` and read the live execution-branch and worktree lists. Treat the scan as raw input: every plan's frontmatter, `## Sub-plans` index, §3/§5 placeholder counts, run-log frontmatter and body tallies, exact awaiting-user checkboxes and plan-level findings, artifact frontmatter, and depth-1 `metds/` / `wkdrs/` listings. It collects but does not decide status or priority.

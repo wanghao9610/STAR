@@ -31,7 +31,7 @@ You **build the environment; you do not implement or refactor research code.** T
 
 ## Workflow
 
-**Where this run executes.** This run's tier is EXEC; it stays in the session that started it, on the session's model. When `STAR_EXEC_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Existing authorization of the concrete environment, dependency set, and cost counts and is not asked for again.
+**Tier:** EXEC. Existing authorization of the concrete environment, dependency set, and cost counts and is not asked for again.
 
 ### Step 0: Preliminary check
 

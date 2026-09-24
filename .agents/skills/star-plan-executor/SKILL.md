@@ -34,7 +34,7 @@ Execute; do not re-strategize or silently re-decompose. If §3 or §5 is too vag
 
 ## Workflow
 
-**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Its tier change is the hand-over of Step 4 (execute and verify) to EXEC below: existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 
 ### Step 0: Resolve the target
 

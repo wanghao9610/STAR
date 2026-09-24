@@ -34,7 +34,7 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 
 ## Workflow
 
-**Where this run executes.** This run's tier is PLAN; it stays in the session that started it, on the session's model. When `STAR_PLAN_MODEL` names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the one way to get them here: switch the session's model, since the shipped `subagent` tool selects no model and `star-auto` therefore cannot start the run on its tier either (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. Its tier change is the hand-over of the execute-and-verify phase (Step 5) to EXEC below: existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 
 ### Step 0: Resolve the target plan
 

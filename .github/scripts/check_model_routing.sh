@@ -149,8 +149,8 @@ while IFS= read -r file; do
 		fail "${file} does not route a same-model depth to a named agent"
 done < <(find -L "${ROOT_DIR}/.claude/skills" -type f -name SKILL.md)
 for skill in star-flow-status star-expt-digest; do
-	grep -Fq '**Where this run executes.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" ||
-		fail "${skill} does not say where its run executes"
+	grep -Eq '^\*\*Tier:\*\* READ\.' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" ||
+		fail "${skill} does not name its READ tier"
 	if grep -Fq '**READ-tier entry on this harness.**' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md"; then
 		fail "${skill} still hands the whole run to a READ delegate"
 	fi
@@ -370,10 +370,10 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 		grep -Fq 'Passing a tier model' "${file}" || fail "${file} lacks the tier-model entry"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL.md)
 	for skill in star-flow-status star-expt-digest; do
-		grep -Fq '**Where this run executes.**' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its where-this-run-executes paragraph"
+		grep -Eq '^\*\*Tier:\*\* READ\.' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its READ Tier line"
 	done
 done
-note "seven trees retain tier-model entries, and flow-status and digest say where their run executes"
+note "seven trees retain tier-model entries, and flow-status and digest name their READ tier"
 
 while IFS= read -r file; do
 	grep -Fq 'Pass the stamped id when this session'\''s selectable `Task` `model` list contains it' "${file}" ||

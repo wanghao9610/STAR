@@ -32,7 +32,7 @@ Read and interpret; do not execute steps, fix code, revise plans, or flip plan s
 
 ## Workflow
 
-**Where this run executes.** This run's tier follows its mode: normal analysis is PLAN, `aggregate` and `watch` are READ. It stays in the session that started it, on the session's model. When that tier's key (`STAR_PLAN_MODEL` or `STAR_READ_MODEL`) names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. `watch` stays chat-only and ends without a writing successor.
+**Tier:** PLAN; `aggregate` and `watch` are READ. `watch` stays chat-only and ends without a writing successor.
 
 ### Step 0: Resolve the run
 

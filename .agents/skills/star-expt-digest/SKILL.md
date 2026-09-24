@@ -33,7 +33,7 @@ Read and narrate; do not execute, analyze runs, score criteria, revise plans, or
 
 ## Workflow
 
-**Where this run executes.** This run's tier is READ, and it stays in the session that started it. When `STAR_READ_MODEL` names a model this run is not on, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line. A harness that forks this skill on its manifest's model has already applied that model, and the line names only what is still missing, or nothing when nothing is. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
+**Tier:** READ. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
 
 Resolve the mode first. `ledger` runs `scripts/scan.sh --trails` for every `model_trail`, plan `## Revision History`, and header `model_id` from files without frontmatter, then performs Step 8 only. Other modes resolve the window through `references/scope_spec.md`, run the default scan, and read unmerged execution branches. That scan supplies plan and artifact frontmatter, run-log status, steps, awaiting-user items, plan-level findings and dates, plus `metds/` and `wkdrs/` listings. Treat it as raw input; the script decides neither scope nor evidence tier.
 

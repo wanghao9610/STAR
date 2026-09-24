@@ -33,7 +33,7 @@ You consolidate, polish, and document; you do not implement features, restructur
 
 ## Workflow
 
-**Where this run executes.** This run's tier follows its mode: the full run and the `gather`, `polish`, and `readme` modes are EXEC, `check` is READ. It stays in the session that started it, on the session's model. When that tier's key (`STAR_EXEC_MODEL` or `STAR_READ_MODEL`) names a model the session is not running, or a depth this harness applies only per dispatch, say so in one line at the start — the tier, that model and depth, and the two ways to get them: switch the session's model, or start the run through `star-auto` (conventions §10.8) — then continue here. A run carrying `tier=` was already started on its tier and gives no such line.
+**Tier:** EXEC; `check` is READ.
 
 ### Step 0: Orient & resolve the phase
 
