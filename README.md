@@ -68,7 +68,7 @@ See [Research workflow](#research-workflow) for the fifteen skills grouped by re
 
 ```text
 STAR/
-├── code/                   # Core project source code (configured by CODE_NAME)
+├── ${CODE_NAME}/           # Core project source code, named by CODE_NAME in .env
 ├── docs/                   # Project documentation site
 │   ├── index.html          # Documentation entrypoint for GitHub Pages
 │   ├── htmls/              # HTML documentation pages
@@ -553,7 +553,7 @@ The full collaboration and implementation guidelines are defined in [`AGENTS.md`
 When starting a new research repository from STAR:
 
 - Replace the title and description with the new research project identity.
-- Set `CODE_NAME` and rename `code/` if a different source package name is preferred.
+- Set `CODE_NAME` in `.env` and create the source package directory under that name; STAR ships no source directory of its own.
 - Add the project's dependency specification and lock file.
 - Replace `execs/scpts/00_exp.sh` with the first meaningful experiment.
 - Document how datasets and pretrained weights are obtained; do not commit large artifacts directly.

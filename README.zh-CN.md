@@ -68,7 +68,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 
 ```text
 star-ai-research/
-├── code/                   # 项目核心代码（目录名由 CODE_NAME 配置）
+├── ${CODE_NAME}/           # 项目核心代码（目录名由 .env 的 CODE_NAME 指定）
 ├── docs/                   # 项目文档站点
 │   ├── index.html          # GitHub Pages 文档入口
 │   ├── htmls/              # HTML 文档页面
@@ -545,7 +545,7 @@ bash execs/configure.sh
 使用 STAR 创建新的研究仓库时，建议完成以下调整：
 
 - 将标题和项目简介替换为新研究项目的实际信息。
-- 设置 `CODE_NAME`；如果需要，也可以将 `code/` 重命名为实际的源码目录。
+- 在 `.env` 中设置 `CODE_NAME`，并按这个名字创建源码目录；STAR 本身不带源码目录。
 - 添加项目的依赖声明和锁文件。
 - 用第一个实际实验替换 `execs/scpts/00_exp.sh`。
 - 说明数据集和预训练权重的获取方式，不要直接提交大文件。
