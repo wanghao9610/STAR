@@ -526,7 +526,7 @@ bash execs/configure.sh
 
 接口缺失、模型不可用或命名代理配置过期时，会说明情况，不把请求模型当成已经运行的模型；报告记录受托者的实际模型。Claude Code 借状态查看与实验摘要自己的清单，以 READ 模型分叉运行它们；在其他宿主上，这两个技能和你敲下的其他技能一样在会话里跑。
 
-上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；更新范围内，仅存在于当前项目的自定义文件会保留。上游已不再提供的 STAR 文件——上游 skill 旁的每个 `SKILL_zh.md`，以及 `RETIRED_FILES` 列出的已退役文件——会被删除（`--diff` 中显示为 `removes`）；其余只存在于本地的文件，包括你自己的，都会保留。STAR 不再提供 `AGENTS.zh-CN.md` 与 `CLAUDE.zh-CN.md`：更新会保留你手上的这两个文件，若它们来自 STAR，可自行删除。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
+上游同路径文件会直接覆盖本地版本，上游新增文件也会被加入；更新范围内，只存在于本地的文件，包括你自己的，都会保留。STAR 在 v0.4.0 停止提供的文件，更新同样会保留：每个 `SKILL_zh.md`、`.agents/commands/star-auto.zh-CN.md`、并入规约的四份工作流规范（`memory_spec.md`、`model_id_spec.md`、`harness-adapters.md`、`human-writing-guide.md`）及其 `.zh-CN.md` 副本、`research-workflow-conventions.zh-CN.md`、`AGENTS.zh-CN.md` 与 `CLAUDE.zh-CN.md`。其中位于更新范围内的，`--diff` 会和你自己的文件、更早版本停止提供的文件一样列为 `extra`。来自 STAR 的这些文件请自行删除；旧规范已与规约不符。更新不会修改其他目录、当前分支、Git remote 或暂存区。建议更新前提交当前工作，更新后使用 `git status` 和 `git diff` 检查并提交结果。
 
 ## 项目约定
 

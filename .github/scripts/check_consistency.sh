@@ -538,7 +538,7 @@ for f in AGENTS.zh-CN.md CLAUDE.zh-CN.md .github/CONTRIBUTING.zh-CN.md .agents/c
         doc_errors=1
     fi
 done
-(( doc_errors == 0 )) && note "the skills user guide is paired en/zh; no other workflow doc has a Chinese edition, and none of the retired ones is back"
+(( doc_errors == 0 )) && note "the skills user guide is paired en/zh; no other workflow doc has a Chinese edition, nor do AGENTS.md, CLAUDE.md, CONTRIBUTING.md or the /star-auto command"
 
 # 9. The always-on Cursor rule body stays in sync with AGENTS.md.
 #    AGENTS.md: title + blank line, then the shared body.
