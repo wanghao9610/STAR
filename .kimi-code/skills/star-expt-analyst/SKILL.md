@@ -32,7 +32,7 @@ You read and interpret; you do not execute steps, fix code, revise plans, or fli
 
 ## Workflow
 
-**Tier:** PLAN; `aggregate` and `watch` are READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. `watch` stays chat-only and ends without a writing successor.
+**Tier:** PLAN; `aggregate` and `watch` are READ. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. `watch` stays chat-only and ends without a writing successor.
 
 ### Step 0: Resolve the run
 

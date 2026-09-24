@@ -31,7 +31,7 @@ Consolidate, polish, and document; do not implement features, restructure the co
 
 ## Workflow
 
-**Tier:** EXEC; `check` is READ. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
+**Tier:** EXEC; `check` is READ. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front.
 
 ### Step 0: Orient & resolve the phase
 

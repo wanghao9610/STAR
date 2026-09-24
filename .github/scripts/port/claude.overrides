@@ -427,6 +427,11 @@ You read and narrate; you do not execute, analyze runs, score criteria, revise p
 6. **Strictly read-only outside your own files; the STOP line applies.** You write only `wkdrs/digests/EXPT_DIGEST_<date>.md` and, in `ledger` mode, `wkdrs/digests/MODEL_LEDGER.md`. Never touch plans, `exec_status`, `EXEC_PLAN.md`, `EXEC_LOG.md`, any `EXPT_ANALYSIS` report, or the results table `wkdrs/results/*`. Never re-run training, evaluation, or a costly call to fill a gap — an unmeasured thing is a listed gap with a routing command, not a task you take on.
 ### star-expt-digest/SKILL.md
 --- 1
+**Tier:** READ. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
++++ 1
+**Tier:** READ. Digest and `ledger` write only their own summary artifact and do not continue into a writing successor.
+### star-expt-digest/SKILL.md
+--- 1
 - Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (this skill's input, never its output); `wkdrs/results/results.md` and `wkdrs/results/results_<slug>.md` (the results table is `star-expt-analyst aggregate`'s; a digest number must never reach it); `${CODE_NAME}/`; `.env`.
 +++ 1
 - Never touch: `metds/plans/*` (including `exec_status`, `exec_runs`, `updated`); `wkdrs/<run>/EXEC_PLAN.md` and `EXEC_LOG.md`; any `EXPT_ANALYSIS_<date>.md` (your input, never your output); `wkdrs/results/results.md` and `wkdrs/results/results_<slug>.md` (the results table is `star-expt-analyst aggregate`'s; a digest number must never reach it); `${CODE_NAME}/`; `.env`.
@@ -465,6 +470,11 @@ Because this skill runs with `context: fork`, read its load-time arguments from 
 1. **Strictly read-only.** Never create, edit, or delete any file — not plans, logs, or frontmatter. Do not use your plan tool or your question tool. If the user wants to act on what you show, point them at the right skill (`star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-metd-summarize`, `star-code-release`).
 +++ 1
 1. **Strictly read-only.** Never create, edit, or delete any file — not plans, logs, or frontmatter. Do not use AskUserQuestion or enter plan mode. If the user wants to act on what you show, point them at the right skill (`star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-refs-reviewer`, `star-code-architect`, `star-env-builder`, `star-plan-decomposer`, `star-plan-executor`, `star-code-reviewer`, `star-expt-analyst`, `star-expt-digest`, `star-plan-reviser`, `star-metd-summarize`, `star-code-release`).
+### star-flow-status/SKILL.md
+--- 1
+**Tier:** READ. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
++++ 1
+**Tier:** READ. The run remains strictly read-only. Follow `references/status_spec.md` (Chinese: `references/status_spec_zh.md`) for status, coverage, and priority.
 ### star-flow-status/SKILL.md
 --- 1
 The plan inventory must remain project-wide because `parent:` resolution needs every node. After resolving a requested subtree, `--runs <dirs>` may narrow run bodies while retaining all plan frontmatter and project listings; use it only when needed. Re-open only content the scan omitted or a section that must be quoted. If the script fails, read the same files directly and state the fallback.
@@ -674,9 +684,9 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 6. **Use the project runtime and layout.** Read `CONDA_HOME`, `PYTHON_HOME`, and `CODE_NAME` from `.env`; never guess local paths or use system Python. Use `execs/run.sh` when it is the project entrypoint. Create `tasks/<plan-name>/` for intermediate files needed while executing that plan; put reusable run scripts in `execs/scpts/`, generated output and durable execution records in `wkdrs/<run>/`, data in `datas/`, weights in `inits/`, and code in `${CODE_NAME}/`. Follow `CLAUDE.md`.
 ### star-plan-executor/SKILL.md
 --- 1
-**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; Step 4 (execute and verify) is handed to EXEC below. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 +++ 1
-**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 ### star-plan-executor/SKILL.md
 --- 1
 ### Step 0: Resolve the target

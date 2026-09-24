@@ -57,7 +57,7 @@ You **architect; you do not implement research features.** Feature work belongs 
 
 ## Workflow
 
-**Tier:** PLAN; approved migration execution is handed to EXEC as described below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies.
+**Tier:** PLAN; approved migration execution is handed to EXEC as described below. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front.
 
 ### Step 0: Orient & choose the branch
 

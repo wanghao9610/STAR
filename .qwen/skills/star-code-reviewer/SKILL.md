@@ -32,7 +32,7 @@ You review and polish; you do not implement features, revise plans, reorganize t
 
 ## Workflow
 
-**Tier:** EXEC. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. A report-only request stays read-only and report-scoped; independent collectors use READ. A grant alone does not authorize fixes outside the requested scope.
+**Tier:** EXEC. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. A report-only request stays read-only and report-scoped; independent collectors use READ. A grant alone does not authorize fixes outside the requested scope.
 
 ### Step 0: Resolve the scope
 

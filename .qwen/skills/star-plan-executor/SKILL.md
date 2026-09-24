@@ -35,7 +35,7 @@ You **execute; you do not re-plan the research or re-decompose.** If §3 or §5 
 
 ## Workflow
 
-**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Before the first step, give the one-line tier notice (AGENTS.md §5) where it applies. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
+**Tier:** PLAN; the execute-and-verify phase (Step 5) is handed to EXEC below. Where the tier notice of AGENTS.md §5 applies, make it the first line of the final reply, in plain words with no label in front. Existing execution authorization counts as settled when judging which decisions remain before that hand-over, and a `tier=` delegate never re-hands that phase.
 
 ### Step 0: Resolve the target plan
 
