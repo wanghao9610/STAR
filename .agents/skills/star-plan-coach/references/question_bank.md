@@ -91,11 +91,11 @@ How to use: when entering a stage, read only that stage's section. Core question
 
 **Core questions**
 - What is the smallest experiment (MVP) that validates feasibility? How soon can it produce a result?
-- What is the target venue and submission date? Work the milestones backward from the deadline.
+- Where does this work end: a submission, or a fixed period? A submission names the venue and deadline; a period names its length, start date, and what is delivered when it ends — a working system, an internal report, a thesis chapter, a demo. Both can hold: the period drives the timeline, and submitting is one option at its end. Work the milestones backward from the end date.
 - What is the completion criterion for each milestone? It must be verifiable ("get X running and reach Z on Y", not "explore X").
 
 **Follow-ups**
 - Which parts can run in parallel? Where is the critical path?
 - What resources are needed (compute / data / annotation / collaborators)? What is still missing, and by when must it be in place?
 
-**When stuck**: scaffold a default timeline in four segments — "minimal validation → core method working → full experiments → writing and submission" — and let the user fill in dates and adjust.
+**When stuck**: scaffold a default timeline in four segments — "minimal validation → core method working → full experiments → delivery" — where delivery is writing and submission for a submission goal, or the period's deliverable plus the continue / submit / stop decision for a period goal; let the user fill in dates and adjust.

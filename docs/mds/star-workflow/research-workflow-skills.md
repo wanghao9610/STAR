@@ -234,7 +234,7 @@ An idea name (slug or filename under `metds/ideas/`) resumes that exploration; n
 
 The skill discusses one question at a time and moves through five stages — diverge before converge:
 
-1. Seed and constraints: what drives the interest, and the compute / data / time / venue box the topic must fit;
+1. Seed and constraints: what drives the interest, and the compute / data / time (a deadline or a planned period) / venue-or-outcome box the topic must fit;
 2. Diverge: 3–5 genuinely distinct candidate directions (different problem, bet, or setting), of which you keep 2–4;
 3. Landscape scan: per kept direction, an abstract-level scan — 8–15 papers with venue, year, citations, and record URL, how crowded the area is, the 3 closest works, and the apparent gap. Every named paper is transcribed from a record fetched during the run and cached under `wkdrs/ideas_<date>/raw/` — nothing from memory, and Google Scholar is never scraped;
 4. Converge: each scanned direction scored on six dimensions (novelty, impact, feasibility, crowdedness/scoop-risk, personal fit, evaluability) with a Pursue / Refine / Park verdict — advice, not a ruling: you decide, and overruled verdicts are recorded with their reason;

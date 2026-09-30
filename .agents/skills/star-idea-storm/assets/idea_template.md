@@ -19,7 +19,7 @@ status:
 
 ## 1. Seed & Constraints
 
-<!-- the seed, verbatim as the user first said it; motivation and origin; constraints: compute, data, time to the deadline that matters, target venue or outcome; strengths and stated energy -->
+<!-- the seed, verbatim as the user first said it; motivation and origin; constraints: compute, data, time to the deadline that matters or the period planned for it, target venue or outcome; strengths and stated energy -->
 
 ## 2. Candidate Directions
 

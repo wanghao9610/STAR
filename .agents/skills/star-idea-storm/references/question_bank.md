@@ -8,7 +8,7 @@ How to use: when entering a stage, read only that stage's section. Core question
 
 **Core questions**
 - What drew you to this — a paper that annoyed you, a failure you keep hitting, a capability you wish existed? The origin usually points at the real question.
-- What do you have to work with: how much compute for how long, what data you already hold, how many months until the deadline that matters?
+- What do you have to work with: how much compute for how long, what data you already hold, how many months until the deadline that matters — or how many weeks or months you mean to give it?
 - Which outcome would satisfy you: a top-venue paper, a working system, a thesis chapter, a demo that wins users? Different outcomes favor different topics.
 - What are you unusually well positioned for that the average lab is not — an infrastructure, a dataset, a collaboration, a hard-won skill?
 

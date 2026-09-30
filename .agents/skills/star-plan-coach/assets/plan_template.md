@@ -44,4 +44,4 @@ status:
 
 ## 6. Milestones & Deliverables
 
-<!-- minimal validation experiment; timeline (backward from target deadline); target venue; resource needs -->
+<!-- minimal validation experiment; end point: submission (venue + deadline), period (length + start date + what is delivered when it ends + the continue / submit / stop decision then), or both (the period drives the timeline, submission is an option at its end); timeline (backward from the end date: the deadline, or the period's last day); resource needs -->

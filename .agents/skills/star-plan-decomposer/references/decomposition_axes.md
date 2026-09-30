@@ -24,7 +24,7 @@ Different provenance is fine: units from different axes can still be peers (see 
 
 Split along the root's §6 timeline stages. Each milestone becomes one sub-plan.
 
-- **Use when** the root's milestones are already well-formed (they usually are — the coach front-loads the cheap ones, a baseline implementation and the smallest experiment validating feasibility, then backs the rest out from the deadline).
+- **Use when** the root's milestones are already well-formed (they usually are — the coach front-loads the cheap ones, a baseline implementation and the smallest experiment validating feasibility, then backs the rest out from the end date — the deadline, or the period's last day).
 - **Gives** a temporally ordered chain of sub-plans; dependencies are mostly linear (each phase hands off to the next).
 - **Example** (`0_open-vocab-det-seg`): `00_baseline-impl` → `01_mvp-verify` → `02_core-method` → `03_final-rets`.
 
