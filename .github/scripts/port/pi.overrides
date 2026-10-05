@@ -379,9 +379,9 @@ Propose 2–3 axes (one question, recommend the first). Details and how to pick:
 A lone weak signal is one sentence in the reply, never a question — interrupting a right-sized leaf costs more than missing an oversized one. Where the check fires, follow `references/sizing_check.md`: the split preview that goes above the question, the question itself and what each answer costs, and where the verdict is recorded.
 ### star-plan-executor/SKILL.md
 --- 1
-1. Use `EnterPlanMode` only when the plan contains a material choice that still needs the user. At `low`, or whenever target, research scope, acceptance, key inputs, cost, and authority are already settled, draft EXEC_PLAN outside plan mode and do not manufacture an approval gate.
+1. Draft EXEC_PLAN in the current mode when target, research scope, acceptance, key inputs, cost, and authority are settled. Use `EnterPlanMode` for material workflow choices still needing the user, and follow any active host approval requirement.
 +++ 1
-1. `/star-plan` is the user's switch and cannot be invoked here. Draft in the current mode; use `star_questionnaire` only when the plan contains a material choice that still needs the user, and do not manufacture a general approval gate.
+1. `/star-plan` is the user's switch and cannot be invoked here. Draft in the current mode; use `star_questionnaire` for material workflow choices still needing the user, and follow any active host approval requirement.
 ### star-plan-executor/SKILL.md
 --- 1
 **Before implementation, run the design check.** Send `references/design_check.md` to one read-only `star_subagent` subagent (`subagent_type: Explore`, `model:` the PLAN tier value, omitted when empty) with exactly the EXEC_PLAN, leaf plan, and root plan §4. Re-open cited evidence for every `fail`; correct execution-plan defects within the authorized plan and ask only when a confirmed finding leaves research scope, acceptance, key input, or cost unresolved. If `star_subagent` is unavailable, run the checklist locally once, record the missing independent view, and do not repeatedly ask for unavailable machinery.

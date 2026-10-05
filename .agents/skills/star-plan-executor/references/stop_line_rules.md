@@ -2,6 +2,8 @@
 
 The agent and any delegate may write code and run **light validation**. Anything **heavy, costly, or irreversible** crosses the STOP line. Prepare the exact command and record it in EXEC_LOG's "Awaiting user" area unless a launch is already specifically authorized. An ordinary request to implement the plan, an EXEC_PLAN approval, or confidence in the command is not launch authorization. A valid `star-auto` run is the one standing exception for heavy or costly commands: its launcher may run a prepared command after review when the command's stated, bounded cost is within its `stop=` line, or when that invocation set no stop line. A separate explicit user instruction may authorize the same exact or clearly bounded launch in an ordinary run; cite and reuse that instruction rather than asking again. Neither form covers a command whose cost cannot be judged against a user-set limit, nor deletion, overwrite, `sudo`, system/driver installation, or another irreversible action unless the user separately and specifically authorizes that exact action.
 
+**Model-generated training material.** When an action proposes using a provider's inputs or responses as training examples, labels or teacher targets, verify the applicable provider terms for the intended model and use before collecting that material or launching training. Record the source, intended reuse and applicable permission or allowed use in the run. A research plan or compute approval supplies no provider-policy exception; check the current harness's policy guidance in conventions §13 when relevant.
+
 ## Agent runs (light validation)
 
 - Unit tests / runnable checks, import checks, a forward pass on a tiny batch.

@@ -110,9 +110,9 @@ Because this skill runs with `context: fork`, read its load-time arguments from 
 3. **Delegate what benefits from it.** For bounded independent work, dispatch `Agent` with `subagent_type: coder` for implementation or `explore` for read-only orientation. Pass the resolved tier `model` only when the current Agent/AgentSwarm schema and configured secondary pool expose it, as described above. The main agent owns integration and verified checks.
 ### star-plan-executor/SKILL.md
 --- 1
-1. Use `EnterPlanMode` only when the plan contains a material choice that still needs the user. At `low`, or whenever target, research scope, acceptance, key inputs, cost, and authority are already settled, draft EXEC_PLAN outside plan mode and do not manufacture an approval gate.
+1. Draft EXEC_PLAN in the current mode when target, research scope, acceptance, key inputs, cost, and authority are settled. Use `EnterPlanMode` for material workflow choices still needing the user, and follow any active host approval requirement.
 +++ 1
-1. Use `EnterPlanMode` only when the plan contains a material choice that still needs the user. At `low`, or when target, scope, acceptance, key inputs, cost, and authority are settled, draft outside plan mode and do not manufacture an approval gate.
+1. Draft EXEC_PLAN in the current mode when target, scope, acceptance, key inputs, cost, and authority are settled. Use `EnterPlanMode` for material workflow choices still needing the user, and follow any active host approval requirement.
 ### star-plan-executor/SKILL.md
 --- 1
 **Before implementation, run the design check.** Send `references/design_check.md` to one read-only `Agent` subagent (`subagent_type: explore`, `model:` the PLAN tier value, omitted when empty) with exactly the EXEC_PLAN, leaf plan, and root plan §4. Re-open cited evidence for every `fail`; correct execution-plan defects within the authorized plan and ask only when a confirmed finding leaves research scope, acceptance, key input, or cost unresolved. If `Agent` is unavailable, run the checklist locally once, record the missing independent view, and do not repeatedly ask for unavailable machinery.
