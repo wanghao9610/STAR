@@ -1,6 +1,6 @@
 ---
 name: star-flow-status
-argument-hint: "[PLAN_NAME] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME] [DESCRIPTION] [involve=<level>]"
 description: >-
   Show the current research plan tree, progress, stale follow-ups, blockers, and the single next
   action. Use for status, remaining-work, or plan-tree questions. This is read-only and never starts

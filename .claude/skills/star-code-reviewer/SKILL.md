@@ -1,6 +1,6 @@
 ---
 name: star-code-reviewer
-argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION] [involve=<level>]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

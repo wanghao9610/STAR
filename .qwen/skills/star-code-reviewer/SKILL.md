@@ -1,6 +1,6 @@
 ---
 name: star-code-reviewer
-argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION] [involve=<level>]"
 description: >-
   Review a requested code scope for quality, correctness, project conventions, and plan conformance;
   write an evidence-backed report and apply authorized mechanical fixes. Use for a path, diff, git

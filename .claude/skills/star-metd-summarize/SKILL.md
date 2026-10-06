@@ -1,6 +1,6 @@
 ---
 name: star-metd-summarize
-argument-hint: "[overview | dataset | framework | training | evaluation] [DESCRIPTION]"
+argument-hint: "[overview | dataset | framework | training | evaluation] [DESCRIPTION] [involve=<level>]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

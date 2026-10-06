@@ -1,6 +1,6 @@
 ---
 description: Review code against the conventions and against what a plan promised
-argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | PATH | diff | GIT_RANGE] [DESCRIPTION] [involve=<level>]"
 ---
 Read `.pi/skills/star-code-reviewer/SKILL.md` in full and follow it as this run's instructions. This command is the skill's only entry point here: `.pi/settings.json` sets `enableSkillCommands: false`, so no `/skill:` command stands beside it. Everything that file says about the files it reads first, the conventions it reads, the involve level and its own steps applies unchanged.
 

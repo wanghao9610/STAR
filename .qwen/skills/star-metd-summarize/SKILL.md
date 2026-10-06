@@ -1,6 +1,6 @@
 ---
 name: star-metd-summarize
-argument-hint: "[overview | dataset | framework | training | evaluation] [DESCRIPTION]"
+argument-hint: "[overview | dataset | framework | training | evaluation] [DESCRIPTION] [involve=<level>]"
 description: >-
   Compile a finished research plan tree into paper-ready overview, dataset, framework, training, and
   evaluation method documents. Use after planning and execution are settled; plans are the only

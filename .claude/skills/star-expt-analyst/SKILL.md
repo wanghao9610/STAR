@@ -1,6 +1,6 @@
 ---
 name: star-expt-analyst
-argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [DESCRIPTION] [involve=<level>]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

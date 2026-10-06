@@ -1,6 +1,6 @@
 ---
 name: star-env-builder
-argument-hint: "[ENV_NAME | add <package>…] [DESCRIPTION] [involve=low]"
+argument-hint: "[ENV_NAME | add <package>...] [DESCRIPTION] [involve=low]"
 description: >-
   Create, repair, or extend the project's conda environment or venv from existing dependency sources,
   then verify imports, framework support, and entrypoints. Use when execution lacks a working

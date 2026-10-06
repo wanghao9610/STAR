@@ -1,7 +1,7 @@
 ---
 name: star-code-release
 disable-model-invocation: true
-argument-hint: "[gather | polish | readme | check] [DESCRIPTION]"
+argument-hint: "[gather | polish | readme | check] [DESCRIPTION] [involve=low]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

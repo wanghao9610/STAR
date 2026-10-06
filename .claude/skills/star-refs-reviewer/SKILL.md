@@ -1,6 +1,6 @@
 ---
 name: star-refs-reviewer
-argument-hint: "[PLAN_NAME | TOPIC | ARXIV_ID | verify | organize | synthesize | survey | score | add PAPER…] [involve=low]"
+argument-hint: "[PLAN_NAME | TOPIC | ARXIV_ID | verify | organize | synthesize | survey | score | add <paper>...] [involve=low]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

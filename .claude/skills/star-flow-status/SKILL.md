@@ -4,7 +4,7 @@ model: sonnet
 effort: medium
 context: fork
 background: false
-argument-hint: "[PLAN_NAME] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME] [DESCRIPTION] [involve=<level>]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

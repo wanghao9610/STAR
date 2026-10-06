@@ -4,7 +4,7 @@ model: sonnet
 effort: medium
 context: fork
 background: false
-argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION] [involve=<level>]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

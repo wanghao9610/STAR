@@ -1,6 +1,6 @@
 ---
 name: star-env-builder
-argument-hint: "[ENV_NAME | add <package>…] [DESCRIPTION] [involve=low]"
+argument-hint: "[ENV_NAME | add <package>...] [DESCRIPTION] [involve=low]"
 allowed-tools:
   - Bash(grep:*)
   - Bash(echo:*)

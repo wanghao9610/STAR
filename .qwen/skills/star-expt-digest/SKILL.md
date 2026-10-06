@@ -1,6 +1,6 @@
 ---
 name: star-expt-digest
-argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | <N>d | <YYYY-MM-DD> | all | ledger] [DESCRIPTION] [involve=<level>]"
 description: >-
   Summarize experiment progress over an incremental, dated, plan-scoped, or complete window, and build
   a model provenance ledger. Use for periodic progress reporting; unanalysed runs stay provisional,

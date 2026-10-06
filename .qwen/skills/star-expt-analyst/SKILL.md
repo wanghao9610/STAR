@@ -1,6 +1,6 @@
 ---
 name: star-expt-analyst
-argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [DESCRIPTION]"
+argument-hint: "[PLAN_NAME | RUN_DIR | aggregate | watch] [DESCRIPTION] [involve=<level>]"
 description: >-
   Analyze an experiment run against its plan, verify logged metrics and artifacts, score done
   criteria, or aggregate verified results across runs. Use for run interpretation, results tables, or

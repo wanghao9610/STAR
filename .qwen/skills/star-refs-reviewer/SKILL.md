@@ -1,6 +1,6 @@
 ---
 name: star-refs-reviewer
-argument-hint: "[PLAN_NAME | TOPIC | ARXIV_ID | verify | organize | synthesize | survey | score | add PAPER…] [involve=low]"
+argument-hint: "[PLAN_NAME | TOPIC | ARXIV_ID | verify | organize | synthesize | survey | score | add <paper>...] [involve=low]"
 description: >-
   Build and maintain an auditable literature base with paper notes, verified BibTeX, topic surveys,
   related-work synthesis, and impact-score refreshes. Use for literature review or citation work;

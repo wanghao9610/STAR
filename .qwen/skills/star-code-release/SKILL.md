@@ -1,7 +1,7 @@
 ---
 name: star-code-release
 disable-model-invocation: true
-argument-hint: "[gather | polish | readme | check] [DESCRIPTION]"
+argument-hint: "[gather | polish | readme | check] [DESCRIPTION] [involve=low]"
 description: >-
   Prepare a repository for open-source release by gathering evidence-backed code, polishing public
   files, compiling README.md from verified artifacts, and checking secrets, paths, licenses, and

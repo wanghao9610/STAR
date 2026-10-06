@@ -1,6 +1,6 @@
 ---
 description: Prepare the repository for release; it never publishes one
-argument-hint: "[gather | polish | readme | check] [DESCRIPTION]"
+argument-hint: "[gather | polish | readme | check] [DESCRIPTION] [involve=low]"
 ---
 Read `.pi/skills/star-code-release/SKILL.md` in full and follow it as this run's instructions. This command is the skill's only entry point here: `.pi/settings.json` sets `enableSkillCommands: false`, so no `/skill:` command stands beside it. Everything that file says about the files it reads first, the conventions it reads, the involve level and its own steps applies unchanged.
 
