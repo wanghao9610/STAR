@@ -6,6 +6,10 @@
 <meta name="description" content="STAR — Systematic Toolchain for AI Research. STAR takes the STAGE to tell a STORY.">
 <title>STAR — Systematic Toolchain for AI Research</title>
 <link rel="icon" href="./srcs/star-project-icon.png">
+<script>
+  /* apply the saved theme before first paint; shared by STAR, STAGE and STORY */
+  try { if (localStorage.getItem("star-family-theme") === "light") document.documentElement.setAttribute("data-theme", "light"); } catch (e) {}
+</script>
 <style>
   /* ============================================================
      STAR landing page — dark, cinematic, constellation-themed.
@@ -730,6 +734,82 @@
     outline-offset: 3px;
   }
 
+  /* ---------- theme toggle + light (day) theme ---------- */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px; height: 38px;
+    padding: 0;
+    border: 1px solid var(--line-hi);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--gold); color: var(--gold); background: rgba(255, 216, 107, 0.08); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .theme-toggle svg { width: 17px; height: 17px; }
+  .theme-toggle .i-moon { display: none; }
+  [data-theme="light"] .theme-toggle .i-sun { display: none; }
+  [data-theme="light"] .theme-toggle .i-moon { display: block; }
+  /* phone widths: the GitHub pill drops its label so the toggle still fits */
+  @media (max-width: 420px) { .nav-gh { gap: 0; padding: 0.42rem 0.62rem; font-size: 0; } }
+
+  [data-theme="light"] {
+    --bg-0: #f5f6fb;
+    --bg-1: #eceff8;
+    --bg-2: #e2e7f3;
+    --panel: rgba(255, 255, 255, 0.62);
+    --panel-hi: rgba(255, 255, 255, 0.92);
+    --line: rgba(52, 64, 112, 0.14);
+    --line-hi: rgba(52, 64, 112, 0.3);
+    --text: #161b2e;
+    --text-dim: #48516e;
+    --text-faint: #767f9c;
+    --gold: #b0711a;
+    --gold-deep: #d97706;
+    --violet: #5257d4;
+    --blue: #0a76bb;
+    --teal: #0b8f73;
+    --rose: #cf3a77;
+  }
+  [data-theme="light"] ::selection { background: rgba(176, 113, 26, 0.2); }
+  [data-theme="light"] nav {
+    background: rgba(245, 246, 251, 0.62);
+    border-bottom-color: rgba(52, 64, 112, 0.1);
+  }
+  [data-theme="light"] nav.scrolled {
+    background: rgba(245, 246, 251, 0.9);
+    box-shadow: 0 10px 30px rgba(30, 40, 80, 0.08);
+  }
+  /* the canvas sky already fades; the dark-theme bottom veil would leave a seam */
+  [data-theme="light"] .hero::after { display: none; }
+  [data-theme="light"] .hero h1 {
+    background-image: linear-gradient(100deg, #1b2240 10%, var(--gold) 38%, var(--violet) 68%, var(--blue) 92%);
+  }
+  [data-theme="light"] .btn-primary { color: #fff; box-shadow: 0 6px 24px rgba(217, 119, 6, 0.28); }
+  [data-theme="light"] .btn-primary:hover { box-shadow: 0 10px 32px rgba(217, 119, 6, 0.38); }
+  [data-theme="light"] .btn-ghost { background: var(--panel); }
+  [data-theme="light"] .card:hover,
+  [data-theme="light"] .skill:hover { box-shadow: 0 12px 34px rgba(30, 40, 80, 0.12); }
+  /* inline accent colours are tuned for the dark sky; deepen them where they colour text */
+  [data-theme="light"] .family-step,
+  [data-theme="light"] .family-links a:hover,
+  [data-theme="light"] .card-icon { color: color-mix(in srgb, var(--card-c, var(--gold)) 68%, #1b2240); }
+  [data-theme="light"] .skill code { color: color-mix(in srgb, var(--phase-c, var(--gold)) 75%, #1b2240); }
+  /* the pale "read across" phase would vanish on a light sky; inline styles need !important */
+  [data-theme="light"] .phase[style*="#c8d2f2"] { --phase-c: #8590b4 !important; --phase-glow: rgba(133, 144, 180, 0.4) !important; }
+  [data-theme="light"] .tree-window,
+  [data-theme="light"] .term {
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 20px 56px rgba(30, 40, 80, 0.12);
+  }
+  [data-theme="light"] .window-bar { background: rgba(52, 64, 112, 0.04); }
+  [data-theme="light"] .workflow-map { background: rgba(255, 255, 255, 0.7); }
+  [data-theme="light"] body::after { opacity: 0.025; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .reveal { opacity: 1; transform: none; }
@@ -761,6 +841,10 @@
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       GitHub
     </a>
+    <button class="theme-toggle" type="button" aria-label="Switch to the light theme" title="Switch to the light theme">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z"/></svg>
+    </button>
   </div>
   <span class="nav-progress" aria-hidden="true"></span>
 </nav>
@@ -1195,6 +1279,8 @@
         speed: Math.random() * 0.9 + 0.35,
         hue: Math.random() < 0.16 ? "255,216,107" : (Math.random() < 0.5 ? "165,180,252" : "226,232,255")
       });
+      var sd = stars[stars.length - 1];
+      sd.hueDay = sd.hue === "255,216,107" ? "196,128,24" : (sd.hue === "165,180,252" ? "96,104,200" : "84,96,148");
     }
   }
 
@@ -1210,7 +1296,7 @@
   }
 
   /* constellation: connect nearby stars with faint lines */
-  function drawLinks() {
+  function drawLinks(light) {
     var linkDist = 110;
     ctx.lineWidth = 0.5;
     for (var i = 0; i < stars.length; i++) {
@@ -1222,7 +1308,7 @@
         var d2 = dx * dx + dy * dy;
         if (d2 < linkDist * linkDist) {
           var alpha = (1 - Math.sqrt(d2) / linkDist) * 0.14;
-          ctx.strokeStyle = "rgba(148,163,216," + alpha.toFixed(3) + ")";
+          ctx.strokeStyle = (light ? "rgba(84,96,160," : "rgba(148,163,216,") + alpha.toFixed(3) + ")";
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -1238,35 +1324,37 @@
     if (t - last < 1000 / 45) return; /* cap ~45fps */
     last = t;
     var time = t / 1000;
+    var light = document.documentElement.getAttribute("data-theme") === "light";
 
-    /* deep-space gradient backdrop */
+    /* deep-space gradient backdrop (a pale morning sky in the light theme) */
     var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#04060f");
-    g.addColorStop(0.5, "#070b1a");
-    g.addColorStop(1, "#04060f");
+    g.addColorStop(0, light ? "#f5f6fb" : "#04060f");
+    g.addColorStop(0.5, light ? "#eef1fa" : "#070b1a");
+    g.addColorStop(1, light ? "#f5f6fb" : "#04060f");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 
     /* soft violet nebula glow */
     var neb = ctx.createRadialGradient(W * 0.5, H * 0.32, 0, W * 0.5, H * 0.32, Math.max(W, H) * 0.5);
-    neb.addColorStop(0, "rgba(99,102,241,0.075)");
-    neb.addColorStop(0.5, "rgba(76,195,255,0.03)");
+    neb.addColorStop(0, light ? "rgba(255,196,92,0.12)" : "rgba(99,102,241,0.075)");
+    neb.addColorStop(0.5, light ? "rgba(120,140,255,0.05)" : "rgba(76,195,255,0.03)");
     neb.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = neb;
     ctx.fillRect(0, 0, W, H);
 
-    drawLinks();
+    drawLinks(light);
 
     for (var i = 0; i < stars.length; i++) {
       var s = stars[i];
       var tw = reduced ? 1 : (0.55 + 0.45 * Math.sin(time * s.speed + s.phase));
-      var alpha = s.base * tw;
+      var alpha = s.base * tw * (light ? 0.7 : 1);
+      var hue = light ? s.hueDay : s.hue;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(" + s.hue + "," + alpha.toFixed(3) + ")";
+      ctx.fillStyle = "rgba(" + hue + "," + alpha.toFixed(3) + ")";
       ctx.fill();
       if (s.r > 1.15) { /* bright stars get a cross flare */
-        ctx.strokeStyle = "rgba(" + s.hue + "," + (alpha * 0.35).toFixed(3) + ")";
+        ctx.strokeStyle = "rgba(" + hue + "," + (alpha * 0.35).toFixed(3) + ")";
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(s.x - s.r * 3.2, s.y); ctx.lineTo(s.x + s.r * 3.2, s.y);
@@ -1282,8 +1370,9 @@
       mt.x += mt.vx; mt.y += mt.vy; mt.life -= 0.012;
       if (mt.life <= 0) { meteors.splice(m, 1); continue; }
       var grad = ctx.createLinearGradient(mt.x, mt.y, mt.x - mt.vx * 14, mt.y - mt.vy * 14);
-      grad.addColorStop(0, "rgba(255,240,200," + (0.85 * mt.life).toFixed(3) + ")");
-      grad.addColorStop(1, "rgba(255,240,200,0)");
+      var mc = light ? "196,128,24," : "255,240,200,";
+      grad.addColorStop(0, "rgba(" + mc + (0.85 * mt.life).toFixed(3) + ")");
+      grad.addColorStop(1, "rgba(" + mc + "0)");
       ctx.strokeStyle = grad;
       ctx.lineWidth = 1.4;
       ctx.beginPath();
@@ -1291,6 +1380,27 @@
       ctx.lineTo(mt.x - mt.vx * 14, mt.y - mt.vy * 14);
       ctx.stroke();
     }
+  }
+
+  /* ---------- theme toggle ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.querySelector(".theme-toggle");
+  var themeLabels = ["Switch to the light theme", "Switch to the dark theme"];
+  function syncThemeBtn() {
+    var label = themeLabels[root.getAttribute("data-theme") === "light" ? 1 : 0];
+    themeBtn.setAttribute("aria-label", label);
+    themeBtn.setAttribute("title", label);
+  }
+  if (themeBtn) {
+    syncThemeBtn();
+    themeBtn.addEventListener("click", function () {
+      var light = root.getAttribute("data-theme") !== "light";
+      if (light) root.setAttribute("data-theme", "light"); else root.removeAttribute("data-theme");
+      try { localStorage.setItem("star-family-theme", light ? "light" : "dark"); } catch (e) {}
+      syncThemeBtn();
+      /* the static (reduced-motion) sky has no loop, so repaint it once */
+      if (!running) requestAnimationFrame(function (t) { frame(t + 1000); });
+    });
   }
 
   document.addEventListener("visibilitychange", function () {
