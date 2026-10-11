@@ -560,13 +560,15 @@ bash execs/configure.sh
 
 按日期列出要点，最新在前。`bash execs/update.sh` 跟随 `main`。
 
+- **2026-10-06** —— 参数提示与 STAGE、STORY 统一为同一种写法：位置占位符用大写，`key=` 或模式之后的值用小写 `<占位符>`（如 `add <paper>...`），必填参数不加方括号，重复用 `...` 表示。每个提示都写出值得切换到的 involve 档位，`star-flow-status` 这类只读 skill 写 `<level>`；`star-auto` 现在需要一个必填的 `GOAL`。
+- **2026-10-05** —— 规约把用户的请求及其限制与宿主自身的审批分开：STAR 的默认值、确认点和控制标记在宿主的策略、工具权限与沙箱之内组织工作；某个操作被拒绝时，报告拒绝原因并继续其他已授权的独立工作；只有用户提出时才修改权限设置。`star-auto` 承载用户的工作流请求，`auto=unattended` 只有连同它所记录的原始请求，才赋予 `star-code-reviewer` 与 `star-plan-executor` 修复或实现的范围。技术故障可以走规定的重试或本地路线；策略或权限拒绝则暂停该操作，重试、委派或换模型都不能把它变成已授权的工作。规约开头还写明第三方代码、数据与模型输出在什么条件下可以复用，以及论文、网页或日志中夹带的指令只是证据，绝不当作要执行的指令。
 - **2026-09-29** —— 研究计划的终点现在可以是一个固定周期，而不只是投稿：`star-plan-coach` 会问 venue 和截稿日、周期的长度、起始日和到期交付物，或两者都写，再从截稿日或周期最后一天倒推里程碑。两者都写时，周期驱动时间线，投稿是到期时的一个选项；`star-idea-storm` 也会问计划投入的周期。`execs/update.sh` 不再删除 STAR 停止提供的文件，改由 README 列出、自行删除。
-- **2026-09-23** —— 直接调用的 skill 留在会话模型上运行：本档位的键设了值时，最终回复的第一行会写明该档位的模型，以及得到它的两种办法——切换会话模型，或经 `star-auto` 启动——档位取自每份清单新增的那一行 `**Tier:**`。项目记忆改为随仓库的 `.star/memory/` 加 git 忽略的 `local/`，索引由各文件 frontmatter 的 `summary` 生成；四份工作流规范并入[规约](docs/mds/star-workflow/research-workflow-conventions.md)的 §7、§8、§12、§13，没人读的中文副本已删除。Claude Code 的受托者现在可嵌套三层，交给受托者的执行阶段要等它完成才进入验证。
-- **2026-09-07** —— 模型配置从更新器里搬出来：`bash execs/configure.sh` 从 `.env` 读三个档位键，离线写入各宿主支持的模型与深度字段，`--kimi-pool` 把配置好的别名注册进 Kimi 自己的配置文件，`bash execs/update.sh --models` 随之取消。各宿主的具体机制——Cursor 的扁平 id 写法、Claude Code 的清单盖章、Codex 的 `reasoning_effort`——移入新的[宿主适配器](docs/mds/star-workflow/research-workflow-conventions.md#13-harness-adapters)，规约只留共享规则和一个链接。`star-flow-status` 现在以 `effort: medium` 发布，与 `star-expt-digest` 已有的深度一致。
 
 <details>
 <summary>更早的更新</summary>
 
+- **2026-09-23** —— 直接调用的 skill 留在会话模型上运行：本档位的键设了值时，最终回复的第一行会写明该档位的模型，以及得到它的两种办法——切换会话模型，或经 `star-auto` 启动——档位取自每份清单新增的那一行 `**Tier:**`。项目记忆改为随仓库的 `.star/memory/` 加 git 忽略的 `local/`，索引由各文件 frontmatter 的 `summary` 生成；四份工作流规范并入[规约](docs/mds/star-workflow/research-workflow-conventions.md)的 §7、§8、§12、§13，没人读的中文副本已删除。Claude Code 的受托者现在可嵌套三层，交给受托者的执行阶段要等它完成才进入验证。
+- **2026-09-07** —— 模型配置从更新器里搬出来：`bash execs/configure.sh` 从 `.env` 读三个档位键，离线写入各宿主支持的模型与深度字段，`--kimi-pool` 把配置好的别名注册进 Kimi 自己的配置文件，`bash execs/update.sh --models` 随之取消。各宿主的具体机制——Cursor 的扁平 id 写法、Claude Code 的清单盖章、Codex 的 `reasoning_effort`——移入新的[宿主适配器](docs/mds/star-workflow/research-workflow-conventions.md#13-harness-adapters)，规约只留共享规则和一个链接。`star-flow-status` 现在以 `effort: medium` 发布，与 `star-expt-digest` 已有的深度一致。
 - **2026-09-07** —— Cursor 现在也把档位的 `@深度` 写进具名代理：`bash execs/update.sh --models` 把 `cursor:cursor-grok-4.6@xhigh` 盖成未加引号的 `model: cursor-grok-4.6-xhigh`，分别落在 `star-plan`、`star-exec`、`star-read` 上——用的是它目录里那种一个深度一个 id 的扁平写法，因为带参数的 `id[effort=<深度>]` 解析不了——于是 PLAN、EXEC、READ 可以共用一个模型、只用深度区分。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Claude Code、Codex 已有的规则一致——Qwen 仍只取模型名、不取后缀。`check_model_routing.sh` 覆盖这一编码；盖章后仍须开新会话。
 - **2026-09-06** —— Claude Code 现在也能逐次派发指定档位的 `@深度`：`bash execs/update.sh --models` 把它盖进新增的 `.claude/agents/` 受托者 `star-plan`、`star-exec`、`star-read`，迁移整次运行或交接某个阶段时就派发成其中之一，于是 `STAR_PLAN_MODEL=claude:opus@xhigh` 配 `STAR_EXEC_MODEL=claude:opus@high` 能让执行阶段真正跑在 `high` 上。配置了深度，即使档位模型就是当前正在跑的那个也足以构成派发理由——与 Codex 自下面那一条起的规则一致——而以普通 subagent 类型派出的受托者仍继承调用方的深度。`check_model_routing.sh` 覆盖新增的盖章，`check_consistency.sh` 拒绝 `.claude/agents/` 里没有的 `subagent_type`。
 - **2026-09-06** —— Codex 现在把各档受支持的 `@深度` 传给 `reasoning_effort`，使 PLAN、EXEC、READ 可通过 `star-auto`、直接 READ 入口和执行阶段交接使用同模型的不同 effort。不需要写入静态模型配置或重启；直接调用的规划问答仍沿用主线程 effort。回归检查补齐 READ 入口，并确保全零后缀保留在模型名中。
