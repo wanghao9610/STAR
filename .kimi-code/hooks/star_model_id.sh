@@ -28,12 +28,6 @@ input=$(cat)
 # --- session_id, for once-per-session dedup ---
 if command -v jq >/dev/null 2>&1; then
   sid=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
-elif command -v python3 >/dev/null 2>&1; then
-  sid=$(printf '%s' "$input" | python3 -c 'import sys, json
-try:
-    print(json.load(sys.stdin).get("session_id") or "")
-except Exception:
-    print("")' 2>/dev/null)
 else
   sid=$(printf '%s' "$input" | grep -oE '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')
 fi

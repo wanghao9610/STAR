@@ -6,7 +6,7 @@
 # A Markdown body is adapted in two stages.  The Claude rules and overrides turn
 # the neutral source into Claude wording; another harness then applies its own
 # existing Claude-to-harness rules and overrides.  Frontmatter stays owned by
-# each harness.  Shell scripts are copied without prose substitutions.
+# each harness. Shell helpers are copied without prose substitutions.
 use strict;
 use warnings;
 use File::Basename qw(dirname);
@@ -252,6 +252,12 @@ for my $tree (@trees) {
     for my $rel (@rels) {
         my $target = "$ROOT/.$tree/skills/$rel";
         my $current = slurp($target);
+        if (!defined $current && $mode eq 'write' && $rel =~ /\.sh\z/) {
+            # Helpers have no harness-owned frontmatter to preserve.
+            replace_with_link($target, $rel);
+            $current = slurp($target);
+            $relinked++;
+        }
         if (!defined $current) {
             $missing++;
             push @errors, "$tree  $rel\n      no such file in this harness tree";

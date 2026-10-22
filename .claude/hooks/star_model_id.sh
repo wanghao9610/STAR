@@ -84,28 +84,6 @@ if [ "${1:-}" = "--resolve" ]; then
             fi
             resolved=$(jq -r "${filter}" \
                 "${transcript}" 2>/dev/null | grep -vx '<synthetic>' | tail -1)
-        elif command -v python3 >/dev/null 2>&1; then
-            resolved=$(python3 - "${transcript}" "${delegate}" <<'PY' 2>/dev/null
-import json, sys
-
-path, delegate = sys.argv[1], sys.argv[2] == "true"
-last = ""
-with open(path, errors="replace") as fh:
-    for line in fh:
-        try:
-            entry = json.loads(line)
-        except Exception:
-            continue
-        if entry.get("type") != "assistant":
-            continue
-        if not delegate and entry.get("isSidechain"):
-            continue
-        model = (entry.get("message") or {}).get("model")
-        if model and model != "<synthetic>":
-            last = model
-print(last)
-PY
-            )
         fi
     fi
 
@@ -130,12 +108,6 @@ input=$(cat)
 payload_field() {
     if command -v jq >/dev/null 2>&1; then
         printf '%s' "${input}" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-    elif command -v python3 >/dev/null 2>&1; then
-        printf '%s' "${input}" | python3 -c 'import sys, json
-try:
-    print(json.load(sys.stdin).get(sys.argv[1]) or "")
-except Exception:
-    print("")' "$1" 2>/dev/null
     else
         printf '%s' "${input}" \
             | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
@@ -149,10 +121,6 @@ emit_context() { # $1 = hook event name, $2 = the context text
     if command -v jq >/dev/null 2>&1; then
         jq -cn --arg e "$1" --arg c "$2" \
             '{hookSpecificOutput: {hookEventName: $e, additionalContext: $c}}'
-    elif command -v python3 >/dev/null 2>&1; then
-        python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": sys.argv[1], "additionalContext": sys.argv[2]}}))' \
-            "$1" "$2"
     else
         printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
             "$1" "$(printf '%s' "$2" | tr -d '"\\')"

@@ -14,14 +14,9 @@ expect_plain_model() { grep -Fqx "model: $2" "$1" || fail "$1 should have unquot
 expect_effort() { grep -Fqx "effort: \"$2\"" "$1" || fail "$1 should have effort $2"; }
 run_models() { (cd "${PROJECT}" && bash execs/configure.sh "$@") >/dev/null; }
 models_output() { (cd "${PROJECT}" && bash execs/configure.sh "$@") 2>&1; }
-test_python_home="$(sed -n 's/^PYTHON_HOME=//p' "${ROOT_DIR}/.env" | tail -1)"
-if [[ -z "${test_python_home}" ]]; then
-	test_conda_home="$(sed -n 's/^CONDA_HOME=//p' "${ROOT_DIR}/.env" | tail -1)"
-	test_env_name="$(sed -n 's/^ENV_NAME=//p' "${ROOT_DIR}/.env" | tail -1)"
-	[[ -n "${test_conda_home}" && -n "${test_env_name}" ]] || fail "configure the project Python in .env"
-	test_python_home="${test_conda_home}/envs/${test_env_name}"
-fi
-test_python="${test_python_home}/bin/python"
+# A literal fixture path exercises .env parsing without any runtime dependency.
+test_python_home="${TMP_DIR}/unused interpreter path"
+unset STAR_HARNESSES STAR_REPOSITORY STAR_PLAN_MODEL STAR_EXEC_MODEL STAR_READ_MODEL
 
 mkdir -p "${PROJECT}/execs"
 cp "${ROOT_DIR}/execs/configure.sh" "${PROJECT}/execs/configure.sh"
@@ -60,6 +55,67 @@ snapshot() {
 		find .claude .cursor .qwen -type f | LC_ALL=C sort | while IFS= read -r file; do cksum "${file}"; done
 	)
 }
+
+# Quoted values use the same literals as a sourced .env, including spaces and
+# backslashes. CRLF and comments after a value do not become part of it.
+printf 'PYTHON_HOME="%s"\r\nSTAR_HARNESSES="cursor" # selected tree\r\nSTAR_READ_MODEL='"'"'cursor:quoted\\model'"'"' # literal slash\r\n' \
+	"${test_python_home}" > "${PROJECT}/.env"
+run_models
+expect_plain_model "${PROJECT}/.cursor/agents/star-read.md" 'quoted\model'
+write_env 'STAR_HARNESSES=qwen' 'STAR_READ_MODEL="qwen:double\"quote\$dollar"'
+run_models
+grep -Fqx 'model: "double\"quote$dollar"' "${PROJECT}/.qwen/agents/star-read.md" ||
+	fail "double-quoted .env escapes did not match sourced shell literals"
+write_env 'STAR_HARNESSES=qwen' 'STAR_READ_MODEL=qwen:space\ model'
+run_models
+expect_model "${PROJECT}/.qwen/agents/star-read.md" 'space model'
+write_env 'STAR_HARNESSES=qwen' 'STAR_READ_MODEL="qwen:literal;(&|<>~)"'
+run_models
+expect_model "${PROJECT}/.qwen/agents/star-read.md" 'literal;(&|<>~)'
+note "quoted .env values, escapes, paths, trailing comments, backslashes and CRLF parse as literals"
+
+# Dynamic shell syntax must fail as configuration and must never run. Malformed
+# quoting must also fail instead of becoming an unknown harness or empty value.
+expansion_marker="${TMP_DIR}/env-expansion-ran"
+printf '%s\n' "PYTHON_HOME=${test_python_home}" \
+	"STAR_HARNESSES=\"\$(touch ${expansion_marker})\"" > "${PROJECT}/.env"
+if expansion_output="$(models_output)"; then
+	fail "configure.sh accepted shell expansion syntax in .env"
+fi
+[[ ! -e "${expansion_marker}" ]] || fail "configure.sh executed shell expansion syntax in .env"
+grep -Fq 'shell expansion is unsupported' <<<"${expansion_output}" ||
+	fail "configure.sh did not explain rejected shell expansion syntax"
+control_marker="${TMP_DIR}/env-control-ran"
+printf '%s\n' "PYTHON_HOME=${test_python_home}" \
+	"STAR_HARNESSES=cursor;touch ${control_marker}" > "${PROJECT}/.env"
+if control_output="$(models_output)"; then
+	fail "configure.sh accepted unquoted shell control syntax in .env"
+fi
+[[ ! -e "${control_marker}" ]] || fail "configure.sh executed shell control syntax in .env"
+grep -Fq 'unquoted shell syntax is unsupported' <<<"${control_output}" ||
+	fail "configure.sh did not explain rejected shell control syntax"
+write_env 'STAR_HARNESSES=~cursor'
+if tilde_output="$(models_output)"; then
+	fail "configure.sh accepted unquoted tilde expansion in .env"
+fi
+grep -Fq 'unquoted tilde expansion is unsupported' <<<"${tilde_output}" ||
+	fail "configure.sh did not explain rejected tilde expansion"
+plan_before_malformed="$(cksum "${PROJECT}/.cursor/agents/star-plan.md")"
+write_env 'STAR_PLAN_MODEL=cursor:must-not-stamp' 'STAR_READ_MODEL="cursor:unterminated'
+if malformed_output="$(models_output --harnesses cursor)"; then
+	fail "configure.sh accepted an unterminated quoted .env value"
+fi
+grep -Fq 'unterminated double-quoted value' <<<"${malformed_output}" ||
+	fail "configure.sh did not explain an unterminated quoted .env value"
+[[ "$(cksum "${PROJECT}/.cursor/agents/star-plan.md")" == "${plan_before_malformed}" ]] ||
+	fail "configure.sh stamped a valid tier before rejecting a later malformed value"
+write_env 'STAR_HARNESSES="unterminated' 'STAR_READ_MODEL=cursor:flag-override-read'
+run_models --harnesses cursor
+expect_plain_model "${PROJECT}/.cursor/agents/star-read.md" flag-override-read
+write_env 'STAR_HARNESSES="unterminated' 'STAR_READ_MODEL=cursor:env-override-read'
+(cd "${PROJECT}" && STAR_HARNESSES=cursor bash execs/configure.sh >/dev/null)
+expect_plain_model "${PROJECT}/.cursor/agents/star-read.md" env-override-read
+note "invalid active .env syntax fails without execution or partial stamps; flag and environment harness overrides skip the unused file value"
 
 # Tagged values beat the bare fallback; qwen's EXEC value exercises the fallback,
 # while its READ value retains a provider-style colon after the qwen tag.
@@ -212,17 +268,22 @@ write_env \
 (cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null)
 cfg="${KIMI_HOME}/config.toml"
 expect_pool() { grep -Fq "$2" "${cfg}" || fail "--kimi-pool: $1"; }
-"${test_python}" - "${cfg}" <<'PY'
-import sys
-import tomllib
-from pathlib import Path
-config = tomllib.loads(Path(sys.argv[1]).read_text())
-for depth in ('max', 'high'):
-    variant = config['models'][f'kimi-k3-{depth}']
-    assert variant['provider'] == 'managed:kimi-code'
-    assert variant['model'] == 'k3'
-    assert variant['overrides']['default_effort'] == depth
-PY
+expect_toml_field() { # exact canonical header, field name, literal value
+	awk -v header="$1" -v key="$2" -v expected="$3" '
+		function trim(s) {gsub(/^[ \t]+|[ \t\r]+$/, "",s);return s}
+		/^[ \t]*\[/ {inside=(trim($0)==header);next}
+		inside {
+			at=index($0,"="); name=trim(substr($0,1,at-1)); gsub(/^"|"$/,"",name)
+			if(name==key && trim(substr($0,at+1))==expected) found=1
+		}
+		END {exit !found}
+	' "${cfg}" || fail "--kimi-pool: missing $1 $2 = $3"
+}
+for depth in max high; do
+	expect_toml_field "[\"models\".\"kimi-k3-${depth}\"]" provider '"managed:kimi-code"'
+	expect_toml_field "[\"models\".\"kimi-k3-${depth}\"]" model '"k3"'
+	expect_toml_field "[\"models\".\"kimi-k3-${depth}\".\"overrides\"]" default_effort "\"${depth}\""
+done
 expect_pool "plan pool key missing"        '"kimi-k3-max" = "STAR plan tier: kimi-k3 at max effort."'
 expect_pool "exec pool key missing"        '"kimi-k3-high" = "STAR exec tier: kimi-k3 at high effort."'
 expect_pool "user pool key overwritten"    'kimi-k3-low = "User'"'"'s own hint, kept."'
@@ -275,26 +336,82 @@ before="$(cksum "${cfg}")"
 (cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null)
 [[ "$(cksum "${cfg}")" == "${before}" ]] || fail "--kimi-pool created a pool for a missing model"
 
-# A missing interpreter must fail before writing, even for a registered plain model.
+# Pool registration is independent of the project interpreter configuration.
+cp "${cfg}" "${cfg}.expected-backup"
 write_env "PYTHON_HOME=${TMP_DIR}/missing-python" 'STAR_PLAN_MODEL=kimi:kimi-k3'
-if (cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1); then
-	fail "--kimi-pool ran without its parser runtime"
-fi
-[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "--kimi-pool wrote without its parser runtime"
-write_env 'STAR_PLAN_MODEL=kimi:kimi-k3' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
 (cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null)
-"${test_python}" - "${cfg}" <<'PY'
-import sys
-import tomllib
-from pathlib import Path
-path = Path(sys.argv[1])
-config = tomllib.loads(path.read_text())
-assert config['secondary_model']['default_model'] == 'kimi-k3'
-assert config['secondary_model']['models'] == {'kimi-k3': 'STAR plan tier: kimi-k3.'}
-backup = sorted(path.parent.glob('config.toml.star-bak-*'))[-1]
-assert backup.read_bytes() == b'[models.kimi-k3]\nmodel = "k3"\n'
-PY
-note "--kimi-pool handles missing pools, requires its parser, and preserves a complete backup"
+expect_toml_field '["secondary_model"]' default_model '"kimi-k3"'
+expect_toml_field '["secondary_model"."models"]' kimi-k3 '"STAR plan tier: kimi-k3."'
+backup_found=false
+for backup in "${cfg}".star-bak-*; do
+	if cmp -s "${backup}" "${cfg}.expected-backup"; then backup_found=true; fi
+done
+[[ "${backup_found}" == true ]] || fail "--kimi-pool did not preserve a complete backup"
+note "--kimi-pool handles missing pools without Python and preserves a complete backup"
+
+# A canonical quoted model name containing dots stays one table component;
+# cloned variants retain comments, provider fields and nested user overrides.
+cat > "${cfg}" <<'EOF'
+# User configuration stays.
+[models."vendor.k3"]
+provider = "managed:kimi-code"
+model = "k3"
+support_efforts = ["high", "max"]
+default_effort = "high"
+custom_flag = true # kept in the variant
+[models."vendor.k3".overrides]
+temperature = 0.25
+default_effort = "high"
+[secondary_model]
+force = true
+EOF
+write_env 'STAR_PLAN_MODEL=kimi:vendor.k3@max' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+cp "${cfg}" "${cfg}.quoted-original"
+pool_output="$(cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool 2>&1)"
+grep -Fq 'secondary_model.force overrides per-alias routing' <<<"${pool_output}" || fail "missing pool override warning"
+expect_toml_field '["models"."vendor.k3-max"]' provider '"managed:kimi-code"'
+expect_toml_field '["models"."vendor.k3-max"."overrides"]' temperature '0.25'
+expect_toml_field '["models"."vendor.k3-max"."overrides"]' default_effort '"max"'
+grep -Fq 'custom_flag = true # kept in the variant' "${cfg}" || fail "variant lost custom field/comment"
+sed '/^"default_model" =/d' "${cfg}" | head -n "$(wc -l < "${cfg}.quoted-original" | tr -d ' ')" > "${cfg}.prefix"
+cmp -s "${cfg}.prefix" "${cfg}.quoted-original" || fail "original comments or fields changed"
+before="$(cksum "${cfg}")"
+(cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1)
+[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "quoted model config is not idempotent"
+write_env 'STAR_PLAN_MODEL=kimi:vendor.k3@low' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+(cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1)
+[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "unsupported depth changed config"
+write_env 'STAR_PLAN_MODEL=kimi:vendor.k3@unknown' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+(cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1)
+[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "unknown depth suffix created a dangling alias"
+note "--kimi-pool preserves quoted dotted names, provider fields, nested overrides and comments; unsupported depths leave no aliases"
+
+# Unsupported forms are rejected as a whole, without either a partial update or
+# a backup. Lack of a final newline does not change a no-op configuration.
+for layout in inline multiline dotted array-table invalid-number invalid-date; do
+	case "${layout}" in
+		inline) printf '[models.k3]\nmodel = "k3"\nextra = { enabled = true }\n' > "${cfg}" ;;
+		multiline) printf '[models.k3]\nmodel = "k3"\nsupport_efforts = [\n"high"\n]\n' > "${cfg}" ;;
+		dotted) printf 'models.k3.model = "k3"\n' > "${cfg}" ;;
+		array-table) printf '[[models.k3]]\nmodel = "k3"\n' > "${cfg}" ;;
+		invalid-number) printf '[models.k3]\nmodel = "k3"\nsize = 01\n' > "${cfg}" ;;
+		invalid-date) printf '[models.k3]\nmodel = "k3"\ncreated = 2026-02-30\n' > "${cfg}" ;;
+	esac
+	write_env 'STAR_PLAN_MODEL=kimi:k3' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+	before="$(cksum "${cfg}")"
+	backup_count="$(find "${KIMI_HOME}" -name 'config.toml.star-bak-*' | wc -l)"
+	if (cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1); then
+		fail "--kimi-pool accepted unsupported ${layout} layout"
+	fi
+	[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "--kimi-pool changed unsupported ${layout} layout"
+	[[ "$(find "${KIMI_HOME}" -name 'config.toml.star-bak-*' | wc -l)" == "${backup_count}" ]] || fail "unsupported layout made a backup"
+done
+printf '[models.k3]\nmodel = "k3"' > "${cfg}"
+write_env 'STAR_PLAN_MODEL=kimi:ghost' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+before="$(cksum "${cfg}")"
+(cd "${PROJECT}" && KIMI_CODE_HOME="${KIMI_HOME}" bash execs/configure.sh --kimi-pool >/dev/null 2>&1)
+[[ "$(cksum "${cfg}")" == "${before}" ]] || fail "no-op added a final newline"
+note "--kimi-pool rejects unsupported layouts unchanged and preserves no-op files without a final newline"
 
 # --kimi-pool refuses a missing config rather than inventing one.
 if (cd "${PROJECT}" && KIMI_CODE_HOME="${TMP_DIR}/nowhere" bash execs/configure.sh --kimi-pool >/dev/null 2>&1); then
@@ -418,30 +535,67 @@ done
 note "Pi single, parallel, and chain schemas expose model"
 
 # Exercise the updater's actual install paths against a local upstream snapshot.
-UPSTREAM="${TMP_DIR}/upstream"
+UPSTREAM="${TMP_DIR}/upstream with space"
 UPDATE_PROJECT="${TMP_DIR}/update-project"
 mkdir -p "${UPSTREAM}" "${UPDATE_PROJECT}"
 git -C "${ROOT_DIR}" archive HEAD | tar -x -C "${UPSTREAM}"
-cp -p "${ROOT_DIR}/execs/update.sh" "${ROOT_DIR}/execs/configure.sh" "${UPSTREAM}/execs/"
+cp -p "${ROOT_DIR}/execs/update.sh" "${ROOT_DIR}/execs/configure.sh" "${ROOT_DIR}/execs/run.sh" "${UPSTREAM}/execs/"
+cp -p "${ROOT_DIR}/execs/scpts/.gitkeep" "${UPSTREAM}/execs/scpts/"
+review_scripts=".agents/skills/star-code-reviewer/scripts"
+mkdir -p "${UPSTREAM}/${review_scripts}"
+cp -p "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPSTREAM}/${review_scripts}/"
 git -C "${UPSTREAM}" init -q -b main
 git -C "${UPSTREAM}" add -f .
 git -C "${UPSTREAM}" -c core.hooksPath=/dev/null -c user.name=Test \
 	-c user.email=test@example.invalid commit -qm fixture
 git -C "${UPDATE_PROJECT}" init -q
-printf '%s\n' 'STAR_HARNESSES=cursor' 'STAR_READ_MODEL=cursor:fixture-read' > "${UPDATE_PROJECT}/.env"
 run_update() {
-	(cd "${UPDATE_PROJECT}" && STAR_REPOSITORY="${UPSTREAM}" bash "$@") \
+	(cd "${UPDATE_PROJECT}" && bash "$@") \
 		> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "updater integration"; }
 }
-run_update "${UPSTREAM}/execs/update.sh" --adopt --harnesses cursor
+update_expansion_marker="${TMP_DIR}/update-env-expansion-ran"
+printf 'STAR_REPOSITORY="$(touch %s)"\n' "${update_expansion_marker}" > "${UPDATE_PROJECT}/.env"
+if (cd "${UPDATE_PROJECT}" && bash "${UPSTREAM}/execs/update.sh" --adopt --harnesses cursor) \
+		> "${TMP_DIR}/update.log" 2>&1; then
+	fail "update.sh accepted shell expansion syntax in .env"
+fi
+[[ ! -e "${update_expansion_marker}" ]] || fail "update.sh executed shell expansion syntax in .env"
+grep -Fq 'shell expansion is unsupported' "${TMP_DIR}/update.log" ||
+	fail "update.sh did not explain rejected shell expansion syntax"
+printf 'STAR_REPOSITORY="$(touch %s)"\nSTAR_HARNESSES="unterminated\nSTAR_READ_MODEL=cursor:fixture-read\n' \
+	"${update_expansion_marker}" > "${UPDATE_PROJECT}/.env"
+if ! (cd "${UPDATE_PROJECT}" && STAR_REPOSITORY="file://${UPSTREAM}" \
+		bash "${UPSTREAM}/execs/update.sh" --adopt --harnesses cursor) \
+		> "${TMP_DIR}/update.log" 2>&1; then
+	cat "${TMP_DIR}/update.log"
+	fail "updater overrides did not bypass unused malformed .env values"
+fi
+[[ ! -e "${update_expansion_marker}" ]] || fail "update.sh evaluated an overridden repository value"
 [[ -f "${UPDATE_PROJECT}/execs/configure.sh" ]] || fail "adopt omitted configure.sh"
+[[ -f "${UPDATE_PROJECT}/execs/scpts/.gitkeep" ]] || fail "adopt omitted the empty experiment directory marker"
+[[ ! -e "${UPDATE_PROJECT}/execs/scpts/00_exp.sh" ]] || fail "adopt installed the removed example experiment"
+adopt_usage="$(cd "${UPDATE_PROJECT}" && bash execs/run.sh)"
+[[ "${adopt_usage}" == *'Usage:'* ]] || fail "fresh adoption does not show launcher help without an experiment"
 expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-read
+
+printf 'STAR_REPOSITORY='"'"'%s'"'"' # local fixture\r\nSTAR_HARNESSES="unterminated\r\nSTAR_READ_MODEL='"'"'cursor:fixture-read'"'"'\r\n' \
+	"file://${UPSTREAM}" > "${UPDATE_PROJECT}/.env"
 printf '# stale test fixture\n' > "${UPDATE_PROJECT}/execs/configure.sh"
-run_update execs/update.sh --force --harnesses cursor
+(cd "${UPDATE_PROJECT}" && STAR_HARNESSES=cursor bash execs/update.sh --force) \
+	> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "updater environment override"; }
 cmp -s "${UPSTREAM}/execs/configure.sh" "${UPDATE_PROJECT}/execs/configure.sh" || fail "update omitted configure.sh"
 expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-read
+printf 'STAR_REPOSITORY='"'"'%s'"'"' # local fixture\r\nSTAR_HARNESSES="cursor" # selected tree\r\nSTAR_READ_MODEL='"'"'cursor:fixture-read'"'"'\r\n' \
+	"file://${UPSTREAM}" > "${UPDATE_PROJECT}/.env"
 rm "${UPDATE_PROJECT}/execs/configure.sh"
+rm "${UPDATE_PROJECT}/${review_scripts}/review_state.sh"
 run_update execs/update.sh --force --skill star-flow-status --harnesses cursor
 [[ -f "${UPDATE_PROJECT}/execs/configure.sh" ]] || fail "skill update omitted configure.sh"
+cmp -s "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPDATE_PROJECT}/${review_scripts}/review_state.sh" ||
+	fail "status-only update omitted its shared review-validity helper"
 expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-read
-note "adopt, ordinary update and skill update install configure.sh and reapply model settings"
+rm "${UPDATE_PROJECT}/${review_scripts}/review_state.sh"
+run_update execs/update.sh --force --skill star-plan-executor --harnesses cursor
+cmp -s "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPDATE_PROJECT}/${review_scripts}/review_state.sh" ||
+	fail "executor-only update omitted its shared review-validity helper"
+note "the updater honors flag and environment overrides, parses quoted paths without execution, and reapplies model settings"

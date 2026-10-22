@@ -11,13 +11,6 @@ input=$(cat)
 
 if command -v jq >/dev/null 2>&1; then
   model=$(printf '%s' "$input" | jq -r '.model_id // .model // empty' 2>/dev/null)
-elif command -v python3 >/dev/null 2>&1; then
-  model=$(printf '%s' "$input" | python3 -c 'import sys, json
-try:
-    d = json.load(sys.stdin)
-    print(d.get("model_id") or d.get("model") or "")
-except Exception:
-    print("")' 2>/dev/null)
 else
   model=$(printf '%s' "$input" | grep -oE '"model_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')
   [ -z "$model" ] && model=$(printf '%s' "$input" | grep -oE '"model"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')

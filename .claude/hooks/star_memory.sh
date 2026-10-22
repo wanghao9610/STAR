@@ -93,10 +93,6 @@ ${machine}"
 if command -v jq >/dev/null 2>&1; then
     jq -cn --arg e "${event}" --arg c "${ctx}" \
         '{hookSpecificOutput: {hookEventName: $e, additionalContext: $c}}'
-elif command -v python3 >/dev/null 2>&1; then
-    python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": sys.argv[1], "additionalContext": sys.argv[2]}}))' \
-        "${event}" "${ctx}"
 else
     printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
         "${event}" \

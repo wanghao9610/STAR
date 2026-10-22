@@ -29,6 +29,13 @@ Overall: <n>/<m> tasks met; done-criterion: <verdict>.
 
 ## 4. Divergences
 
+<!-- For every numbered plan-level finding considered, preserve its id and source log. A resolved row needs a completed, verified disposition or an explicit no-action decision, with inspectable evidence. A proposed change, pending handoff or unresolved choice remains deferred. Omit the table if no finding was considered. -->
+
+| finding_id | source_log | disposition | decision | evidence |
+| --- | --- | --- | --- | --- |
+| <run>:PF1 | wkdrs/<run>/EXEC_LOG.md | deferred | <decision or outstanding action> | <root-relative evidence path> |
+
+
 <!-- Plan said X, the run did Y; extra work not in the plan; assumptions the evidence contradicts;
      kill-criteria hits and plan-level findings quoted from the log. -->
 

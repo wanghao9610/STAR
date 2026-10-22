@@ -28,9 +28,10 @@ SCPT_DIR="${EXEC_DIR}/scpts"
 # who has not configured .env yet can still discover what this launcher does.
 usage() {
     cat <<EOF
-Usage: bash execs/run.sh [experiment] [arguments...]
+Usage: bash execs/run.sh <experiment> [arguments...]
 
-Launch an experiment from execs/scpts/. The default experiment is 00_exp.sh.
+Launch a named experiment from execs/scpts/.
+Without arguments, show help and the available experiment scripts.
 
 Options:
   -h, --help    Show this help message.
@@ -38,7 +39,7 @@ Options:
 
 Examples:
   bash execs/run.sh
-  bash execs/run.sh 00_exp --config config.yaml
+  bash execs/run.sh baseline --config config.yaml
 EOF
 }
 
@@ -58,6 +59,12 @@ list_experiments() {
 }
 
 case "${1:-}" in
+    '')
+        usage
+        printf '\n'
+        list_experiments
+        exit 0
+        ;;
     -h|--help)
         usage
         exit 0
@@ -123,8 +130,7 @@ fi
 # Experiment scripts call `python`. When PYTHON_HOME names a python3-only
 # install, that directory has no `python` and the call silently falls through
 # to whatever else is on PATH — a different interpreter than the one reported
-# above. PYTHON_BIN is exported so scripts can be explicit, and is what the
-# stock 00_exp.sh reports.
+# above. PYTHON_BIN is exported so scripts can name the selected interpreter explicitly.
 export PYTHON_BIN
 
 #######################################################################
@@ -144,10 +150,8 @@ cd "${ROOT_DIR}"
 #######################################################################
 #                          PART 3  Launcher                           #
 #######################################################################
-EXPERIMENT_NAME="${1:-00_exp}"
-if (( $# > 0 )); then
-    shift
-fi
+EXPERIMENT_NAME="$1"
+shift
 
 [[ "${EXPERIMENT_NAME}" != */* ]] || fail "Experiment must be a script name under execs/scpts/."
 [[ "${EXPERIMENT_NAME}" == *.sh ]] || EXPERIMENT_NAME="${EXPERIMENT_NAME}.sh"

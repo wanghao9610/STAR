@@ -227,7 +227,7 @@ PYTHON_HOME=/path/to/conda/envs/your-env
 
 ### 3. 添加实验
 
-将可复用的项目代码放在 `CODE_NAME` 指定的目录中，再在 `execs/scpts/` 下添加实验脚本。例如：
+将可复用的项目代码放在 `CODE_NAME` 指定的目录中，再在 `execs/scpts/` 下添加实验脚本。例如，将以下内容保存为 `execs/scpts/baseline.sh`：
 
 ```bash
 #!/usr/bin/env bash
@@ -254,14 +254,14 @@ ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR WORK_DIR  SCPT_DIR
 # 查看可用的实验脚本
 bash execs/run.sh --list
 
-# 运行默认实验 execs/scpts/00_exp.sh
+# 查看用法和可用的实验脚本
 bash execs/run.sh
 
 # 运行指定实验，并将其余参数传递给实验脚本
-bash execs/run.sh 00_exp --config config.yaml
+bash execs/run.sh baseline --config config.yaml
 ```
 
-自带的 `00_exp.sh` 不做任何实际计算。它打印启动器解析出的解释器和六个导出路径，让全新检出的仓库有一条能跑出成功的命令，也便于确认 `.env` 配置无误。实验名称和输出目录应能区分不同任务、实验或重复运行，生成的文件放在 `wkdrs/<运行名称>/` 下。
+`execs/scpts/` 初始为空，请在其中添加自己的实验脚本。查看用法或列出脚本无需配置运行环境；启动指定实验时才会使用 `.env` 中配置的运行环境。实验名称和输出目录应能区分不同任务、实验或重复运行，生成的文件放在 `wkdrs/<运行名称>/` 下。
 
 ### 5. 启动研究工作流
 
@@ -547,7 +547,7 @@ bash execs/configure.sh
 - 将标题和项目简介替换为新研究项目的实际信息。
 - 在 `.env` 中设置 `CODE_NAME`，并按这个名字创建源码目录；STAR 本身不带源码目录。
 - 添加项目的依赖声明和锁文件。
-- 用第一个实际实验替换 `execs/scpts/00_exp.sh`。
+- 在 `execs/scpts/` 下添加第一个实际实验脚本。
 - 说明数据集和预训练权重的获取方式，不要直接提交大文件。
 - 明确预期输出、评估指标和复现命令。
 - 更新 `LICENSE` 中的年份和版权所有者。

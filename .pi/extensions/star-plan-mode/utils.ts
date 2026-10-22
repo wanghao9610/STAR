@@ -3,101 +3,142 @@
  * Extracted for testability.
  */
 
-// Destructive commands blocked in plan mode
-const DESTRUCTIVE_PATTERNS = [
-	/\brm\b/i,
-	/\brmdir\b/i,
-	/\bmv\b/i,
-	/\bcp\b/i,
-	/\bmkdir\b/i,
-	/\btouch\b/i,
-	/\bchmod\b/i,
-	/\bchown\b/i,
-	/\bchgrp\b/i,
-	/\bln\b/i,
-	/\btee\b/i,
-	/\btruncate\b/i,
-	/\bdd\b/i,
-	/\bshred\b/i,
-	/(^|[^<])>(?!>)/,
-	/>>/,
-	/\bnpm\s+(install|uninstall|update|ci|link|publish)/i,
-	/\byarn\s+(add|remove|install|publish)/i,
-	/\bpnpm\s+(add|remove|install|publish)/i,
-	/\bpip\s+(install|uninstall)/i,
-	/\bapt(-get)?\s+(install|remove|purge|update|upgrade)/i,
-	/\bbrew\s+(install|uninstall|upgrade)/i,
-	/\bgit\s+(add|commit|push|pull|merge|rebase|reset|checkout|branch\s+-[dD]|stash|cherry-pick|revert|tag|init|clone)/i,
-	/\bsudo\b/i,
-	/\bsu\b/i,
-	/\bkill\b/i,
-	/\bpkill\b/i,
-	/\bkillall\b/i,
-	/\breboot\b/i,
-	/\bshutdown\b/i,
-	/\bsystemctl\s+(start|stop|restart|enable|disable)/i,
-	/\bservice\s+\S+\s+(start|stop|restart)/i,
-	/\b(vim?|nano|emacs|code|subl)\b/i,
-];
+// Parse one literal command. Shell expansion, redirection and compound commands
+// need a shell parser and are deliberately outside this argument guard.
+function commandWords(command: string): string[] | null {
+	const words: string[] = [];
+	let word = "";
+	let quote = "";
+	let started = false;
+	for (const char of command) {
+		if (/[\r\n\0]/.test(char)) return null;
+		if (quote) {
+			if (char === quote) quote = "";
+			else {
+				if (quote === '"' && /[$`\\]/.test(char)) return null;
+				word += char;
+			}
+		} else if (char === "'" || char === '"') {
+			quote = char;
+			started = true;
+		} else if (char === " " || char === "\t") {
+			if (started) words.push(word);
+			word = "";
+			started = false;
+		} else {
+			if (/\s/.test(char)) return null;
+			if (/[\\$`;&|<>(){}*?\[\]~#]/.test(char)) return null;
+			word += char;
+			started = true;
+		}
+	}
+	if (quote) return null;
+	if (started) words.push(word);
+	return words;
+}
 
-// Safe read-only commands allowed in plan mode
-const SAFE_PATTERNS = [
-	/^\s*cat\b/,
-	/^\s*head\b/,
-	/^\s*tail\b/,
-	/^\s*less\b/,
-	/^\s*more\b/,
-	/^\s*grep\b/,
-	/^\s*find\b/,
-	/^\s*ls\b/,
-	/^\s*pwd\b/,
-	/^\s*echo\b/,
-	/^\s*printf\b/,
-	/^\s*wc\b/,
-	/^\s*sort\b/,
-	/^\s*uniq\b/,
-	/^\s*diff\b/,
-	/^\s*file\b/,
-	/^\s*stat\b/,
-	/^\s*du\b/,
-	/^\s*df\b/,
-	/^\s*tree\b/,
-	/^\s*which\b/,
-	/^\s*whereis\b/,
-	/^\s*type\b/,
-	/^\s*env\b/,
-	/^\s*printenv\b/,
-	/^\s*uname\b/,
-	/^\s*whoami\b/,
-	/^\s*id\b/,
-	/^\s*date\b/,
-	/^\s*cal\b/,
-	/^\s*uptime\b/,
-	/^\s*ps\b/,
-	/^\s*top\b/,
-	/^\s*htop\b/,
-	/^\s*free\b/,
-	/^\s*git\s+(status|log|diff|show|branch|remote|config\s+--get)/i,
-	/^\s*git\s+ls-/i,
-	/^\s*npm\s+(list|ls|view|info|search|outdated|audit)/i,
-	/^\s*yarn\s+(list|info|why|audit)/i,
-	/^\s*node\s+--version/i,
-	/^\s*python\s+--version/i,
-	/^\s*curl\s/i,
-	/^\s*wget\s+-O\s*-/i,
-	/^\s*jq\b/,
-	/^\s*sed\s+-n/i,
-	/^\s*awk\b/,
-	/^\s*rg\b/,
-	/^\s*fd\b/,
-	/^\s*bat\b/,
-	/^\s*eza\b/,
-];
+// Unknown options are rejected, including abbreviated long options. An option
+// that consumes a value must consume exactly one word before checking resumes.
+function readOnlyArgs(args: string[], flags: string, values = "", maxOperands = Infinity): boolean {
+	const switches = new Set(flags.split(" "));
+	const valued = new Set(values.split(" ").filter(Boolean));
+	let operands = 0;
+	let optionsEnded = false;
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (optionsEnded || !arg.startsWith("-") || arg === "-") {
+			if (++operands > maxOperands) return false;
+		} else if (arg === "--") optionsEnded = true;
+		else if (switches.has(arg)) continue;
+		else if (valued.has(arg)) {
+			if (++i === args.length) return false;
+		} else if (arg.startsWith("--")) {
+			if (!arg.includes("=") || !valued.has(arg.slice(0, arg.indexOf("=")))) return false;
+		} else {
+			for (let j = 1; j < arg.length; j++) {
+				const flag = `-${arg[j]}`;
+				if (valued.has(flag)) {
+					if (j === arg.length - 1 && ++i === args.length) return false;
+					break;
+				}
+				if (!switches.has(flag)) return false;
+			}
+		}
+	}
+	return true;
+}
 
+// Only programs and options whose arguments have been checked for writes or
+// command execution belong here. Interactive pagers, interpreters, network
+// clients and general wrappers stay unavailable until their arguments are checked.
+const READ_COMMANDS: Record<string, [string, string?, number?]> = {
+	cat: ["-b -e -n -s -t -u -v -A -E -T --number --number-nonblank --squeeze-blank"],
+	head: ["-q -v --quiet --verbose", "-n -c --lines --bytes"],
+	tail: ["-q -v --quiet --verbose", "-n -c --lines --bytes"],
+	ls: ["-a -A -l -h -d -R -r -t -S -F -p -i -n -1 --all --almost-all --directory --recursive"],
+	pwd: ["-L -P", "", 0],
+	wc: ["-c -m -l -w -L --bytes --chars --lines --words --max-line-length"],
+	grep: ["-E -F -G -P -i -v -w -x -n -H -h -l -L -c -q -s -r -R -o -a -I", "-e -f -m -A -B -C --regexp --file --max-count --after-context --before-context --context"],
+	rg: ["--files --hidden --no-ignore --no-ignore-vcs --follow --glob-case-insensitive --no-heading --heading --line-number --files-with-matches --files-without-match --count --count-matches --fixed-strings --ignore-case --smart-case --word-regexp --only-matching --multiline -n -H -l -L -c -i -s -S -F -w -o -v -q -a -u -U -0", "-e -f -g -t -T -m -A -B -C --regexp --file --glob --iglob --type --type-not --max-count --max-depth --after-context --before-context --context --color --sort --sortr"],
+	sort: ["-b -d -f -g -h -i -M -n -R -r -s -u -V -c -C --reverse --unique --stable --numeric-sort --human-numeric-sort", "-k -t --key --field-separator"],
+	uniq: ["-c -d -u -i --count --repeated --unique --ignore-case", "-f -s -w --skip-fields --skip-chars --check-chars", 1],
+	diff: ["-u -c -q -r -s -w -b -B -i --unified --brief --recursive --ignore-all-space", "-U -C --context", 2],
+	du: ["-a -c -h -k -m -s -x --all --total --human-readable --summarize", "-d --max-depth"],
+	df: ["-a -h -H -i -k -m -P -T --human-readable"],
+	which: ["-a -s"],
+	type: ["-a -f -p -P -t"],
+	printenv: ["-0 --null"],
+	uname: ["-a -s -n -r -v -m -p -i -o --all", "", 0],
+	whoami: ["", "", 0],
+	id: ["-u -g -G -n -r -p", "", 1],
+	uptime: ["-p -s", "", 0],
+	ps: ["-a -A -e -f -l -u -x -w", "-p -o -U"],
+};
+
+/** Allow a supported literal read command, rejecting unverified shell syntax and options. */
 export function isSafeCommand(command: string): boolean {
-	const isDestructive = DESTRUCTIVE_PATTERNS.some((p) => p.test(command));
-	const isSafe = SAFE_PATTERNS.some((p) => p.test(command));
-	return !isDestructive && isSafe;
+	const words = commandWords(command);
+	if (!words?.length) return false;
+	const [program, ...args] = words;
+	if (program === "node" || program === "python" || program === "python3") {
+		return args.length === 1 && args[0] === "--version";
+	}
+	if (program !== "git") {
+		const spec = Object.hasOwn(READ_COMMANDS, program) ? READ_COMMANDS[program] : undefined;
+		return spec !== undefined && readOnlyArgs(args, ...spec);
+	}
+	while (args[0] === "--no-pager" || args[0] === "--no-optional-locks" || args[0] === "-C") {
+		if (args.shift() === "-C" && !args.shift()) return false;
+	}
+	const subcommand = args.shift();
+	switch (subcommand) {
+		case "status":
+			return readOnlyArgs(args, "-s -b -u -uno -unormal -uall --short --branch --porcelain --porcelain=v1 --porcelain=v2 --ignored --untracked-files --untracked-files=no --untracked-files=normal --untracked-files=all");
+		case "diff":
+		case "log":
+		case "show":
+			// Git's optional values (notably --pretty and -U) do not consume
+			// the following word, which must still be checked as an option.
+			return readOnlyArgs(args.map((arg) => {
+				if (/^--(max-count|format|pretty|since|until)=/.test(arg)) return arg.slice(0, arg.indexOf("="));
+				return /^-U\d+$/.test(arg) ? "-U" : arg;
+			}), "--oneline --all --decorate --graph --stat --shortstat --numstat --name-only --name-status --no-patch --no-color --color=never --no-ext-diff --no-textconv --cached --staged --check --reverse --raw --max-count --format --pretty --since --until -p -s -w -b -U", "-n");
+		case "branch": {
+			const optionEnd = args.includes("--") ? args.indexOf("--") : args.length;
+			const listsBranches = args.slice(0, optionEnd).includes("--list");
+			return readOnlyArgs(args, "-a -r -v --all --remotes --verbose --list --show-current", "", listsBranches ? Infinity : 0);
+		}
+		case "remote":
+			return readOnlyArgs(args, "-v --verbose", "", 0);
+		case "config":
+			return args[0] === "--get" && args.length === 2 && !args[1].startsWith("-");
+		case "ls-files":
+			return readOnlyArgs(args, "-z -c -d -m -o -i -s --cached --deleted --modified --others --ignored --stage --exclude-standard");
+		case "ls-tree":
+			return readOnlyArgs(args, "-d -r -t -l -z --name-only --name-status --full-name --full-tree");
+		default:
+			return false;
+	}
 }
 
 export interface TodoItem {

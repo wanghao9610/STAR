@@ -39,8 +39,14 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 <!-- Commands the user must run (heavy experiments). Move a step here instead of running it when it
      crosses the STOP line. Each item: the exact command — `bash execs/scpts/<run>.sh`, the launch
      script the launch guard recognizes (references/stop_line_rules.md) — what it produces, and what
-     output to bring back for done-criterion verification. Tick the item (`- [x]`) once its output is
-     bound to this record; an item left un-ticked still reads as waiting on the user. -->
+     output to bring back for done-criterion verification. Bind launch argv, code/review versions,
+     attempt ID, PID, raw log and expected outputs through scripts/launch_state.sh; on return verify
+     the matching exit and outputs, then acknowledge collection into this existing log before removing
+     markers (references/resume_rules.md). The helper appends a star-launch-receipt with that identity,
+     exit code and verification evidence; reuse it after interruption instead of collecting twice.
+     Tick the item (`- [x]`) only after verified success and durable acknowledgment, naming its receipt
+     and outputs. A nonzero exit is a failed result, not completion; legacy unknown provenance stays
+     explicit and its evidence is retained. An un-ticked item still reads as awaiting successful output. -->
 
 - [ ] `bash execs/scpts/<run>.sh` → produces `wkdrs/<run>/…`; bring back <metric/output> for the done-criterion.
 
@@ -66,6 +72,11 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 - [ ] ENRICHED §3.<n>: <what the plan left open> → <the value execution settled> — cited by: <document §>
 
 ## Notes / decisions
+
+<!-- Assign a run-scoped PF number when a finding is recorded; never reuse or retarget it. A changed claim gets a new id citing the old one. The reviser report owns the resolved/deferred decision (conventions §8); a later report date does not settle this entry. Omit the example when there is no finding. -->
+
+- **Plan-level finding** `<run>:PF1` — <claim>; evidence: `<path[:line]>`.
+
 
 <!-- Anything a resuming session needs: assumptions made, blockers hit and how they were resolved, and for a step left `blocked`, what became of its edits — restored, or kept by an explicit decision, with the paths named either way
      (material deviations from the sub-plan go under "Pending amendments" above, not here).

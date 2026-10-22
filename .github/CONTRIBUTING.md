@@ -258,9 +258,13 @@ omissions: it restructures. `stop_line_rules.md` was the eighth and ninth until 
 a harness: it was titled "what **Codex** runs", and now says "what the agent runs", which is what
 `.claude` says, so those two files agree heading for heading.
 
-It is therefore **exempt from the six-output structural check**. Claude remains that check's internal
-comparison baseline only because the other five harness adapters preserve its expanded structure;
-this does not make Claude an authored source. The exemption is still a known hole: see below.
+It is therefore **exempt from exact heading-sequence parity with the six generated trees**. Claude
+remains their internal comparison baseline only because the other five harness adapters preserve its
+expanded structure; this does not make Claude an authored source. Check 14 still compares the set of
+`##` sections in every `.agents` manifest with its generated Claude manifest, and generation checks
+ensure the six outputs reproduce from `.agents/skills/`. Those checks cannot decide whether a section
+deleted from the authored source and regenerated everywhere was still required, or whether retained
+headings preserve the required meaning; see below.
 
 ## Skill frontmatter does not port
 
@@ -344,15 +348,18 @@ Catalog truncation depends on the harness and installed version. Historical meas
 
 ## What the checks catch
 
-`.github/scripts/port.sh --check` first proves that the six harness trees reproduce from
-`.agents/skills/`. `.github/scripts/check_consistency.sh`, also run by
-`.github/workflows/consistency.yml` on push and PR, then checks semantic invariants:
+`.github/scripts/port.sh --check` first proves that the six generated harness trees reproduce from
+`.agents/skills/`. `.github/scripts/check_consistency.sh` then checks semantic invariants, and
+`.github/scripts/check_model_routing.sh` checks installed model-routing consumers. The Node.js 24+
+offline behavior suite runs with `node --test .github/scripts/tests/*.test.mjs`. The shell suite `bash .github/scripts/check_workflow.sh` covers review validity, launch recovery, finding resolution and plan-state fixtures. CI runs all five
+entrypoints on both Ubuntu and macOS for pushes and pull requests. Repository-owned workflow tools and their regression suites use bash, awk and jq; the port generator continues to use Perl. They do not require a Python environment. Experiment launchers still select the research runtime from `.env`. The consistency check covers:
 
-1. The six roots carry the same set of skill directories.
+
+1. The authored root and six generated roots carry the same set of skill directories.
 2. Frontmatter `name:` matches the directory name.
-3. Per-skill file inventory is identical across trees (`.agents`' `agents/` links to Codex's
+3. Per-skill file inventory is identical across all seven trees (`.agents`' `agents/` links to Codex's
    manifests aside).
-4. Slash-only guards match the conventions §10 roster in both directions, in all six trees; the shared `.agents/commands/star.md` router and its Chinese edition list exactly the same skills and † set, while the Codex, Kimi and DSH router packages point back to that source.
+4. Slash-only guards match the conventions §10 roster in both directions, in all seven trees; the shared `.agents/commands/star.md` router and its Chinese edition list exactly the same skills and † set, while the Codex, Kimi and DSH router packages point back to that source.
 5. Every reference and asset `.md` has its `_zh.md` twin, because a Chinese run writes its documents from
    the `_zh` templates; `SKILL.md` has no Chinese edition, in the skill trees or the router plugins.
 6. Every `SKILL.md` references the conventions document.
@@ -363,15 +370,16 @@ Catalog truncation depends on the harness and installed version. Historical meas
    workflow doc has a Chinese edition, and neither do `AGENTS.md`, this guide or the `/star-auto` command.
 9. `.cursor/rules/agent-instructions.mdc` matches the `AGENTS.md` body byte for byte.
 10. Both session hooks — model-id provenance and project memory — exist, are executable, and are
-    registered in all six harnesses' registration files.
-11. **Heading structure matches across `.claude`, `.cursor`, `.kimi-code`, `.pi` and `.qwen`** — 1054
-    headings per tree, compared after stripping parentheticals (both `(...)` and `（...）`) and
+    registered in all seven harness roots' registration files.
+11. **Heading structure matches across all six generated trees** — `.claude`, `.cursor`, `.dsh`,
+    `.kimi-code`, `.pi` and `.qwen` — with headings compared after stripping parentheticals (both
+    `(...)` and `（...）`) and
     inline code, so harness vocabulary inside a heading is allowed to differ. Currently exact, with
     no exception list.
 12. **Every tree's `SKILL.md` descriptions stay within the 1024-character spec limit** — counted in
     characters, with the folded-block indicator excluded. See above; a harness truncating earlier than
     the spec is not checkable here.
-13. **Skill helper scripts are byte-identical across the six trees, and executable.** A script names no
+13. **Skill helpers are byte-identical across all seven trees.** Shell entrypoints are executable and use the shell tools named in their headers. A script names no
     harness, so it has nothing to adapt; a copy that has drifted is a bug, not a variant.
 14. **Claude manifests carry the same `##` sections as the authored `.agents` source** — the set, not
     the sequence, since check 11 compares only generated harnesses and content had already been lost
@@ -432,10 +440,13 @@ Be honest with yourself about this list; it is where the real drift lives.
 
 - **Prose content.** Nothing compares the body text of a section. Reversing a rule — "you never publish
   one" to "you may publish one" — passes every check.
-- **`.agents` structure**, by the exemption above. Content has been lost there before: `##
-  Dialogue Discipline` was missing from 7 of 15 `SKILL.md`, taking an honesty rule in
-  `star-refs-reviewer` and the executor's non-interactive fallback with it (restored in `042ece5`).
-  Nothing would have caught it, and nothing would catch the next one.
+- **Synchronized deletion or semantic omission in `.agents`.** Generation checks catch drift in any
+  of the six outputs, and check 14 catches a `##` section present in `.agents` but missing from Claude.
+  They cannot tell that a section deleted from `.agents` and regenerated everywhere was required, or
+  that a retained heading lost a required rule. `## Dialogue Discipline` was once missing from 7 of
+  15 `SKILL.md`, taking an honesty rule in `star-refs-reviewer` and the executor's non-interactive
+  fallback with it (restored in `042ece5`); preventing that class of semantic omission still requires
+  review.
 - **Chinese/English divergence in meaning.** Check 5 proves the `_zh.md` file exists; nothing proves it
   says the same thing or how it is sectioned.
 - **`docs/htmls/`.** The landing page is not compared against the READMEs or the workflow guide, and
@@ -465,7 +476,10 @@ Be honest with yourself about this list; it is where the real drift lives.
 
 - Edit shared skill semantics only under `.agents/skills/`, then run
   `bash .github/scripts/port.sh --write` and `bash .github/scripts/port.sh --check`.
-- Run `bash .github/scripts/check_consistency.sh`. It exits non-zero on failure and is fast.
+- With Node.js 24 or newer, run `bash .github/scripts/check_consistency.sh`,
+  `bash .github/scripts/check_model_routing.sh`, `bash .github/scripts/check_workflow.sh` and
+  `node --test .github/scripts/tests/*.test.mjs`. They are offline checks; CI repeats them on Ubuntu
+  and macOS.
 - Editing `AGENTS.md` means editing `.cursor/rules/agent-instructions.mdc` in the same commit — check 9
   compares their bodies directly.
 - Editing a numbered section of the conventions document: do not renumber. Section 7.7 alone has 305

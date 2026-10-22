@@ -86,9 +86,6 @@ ${machine}"
 # to hand, and joins the lines itself because a raw newline is invalid in JSON.
 if command -v jq >/dev/null 2>&1; then
   jq -cn --arg c "${ctx}" '{additional_context: $c}'
-elif command -v python3 >/dev/null 2>&1; then
-  python3 -c 'import sys, json
-print(json.dumps({"additional_context": sys.argv[1]}))' "${ctx}"
 else
   printf '{"additional_context":"%s"}\n' \
     "$(printf '%s' "${ctx}" | tr -d '"\\' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')"

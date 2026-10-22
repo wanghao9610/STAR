@@ -235,7 +235,7 @@ The local `.env` file is ignored by Git, so machine-specific paths are not commi
 
 ### 3. Add an experiment
 
-Put reusable project code under the directory named by `CODE_NAME`, then add an experiment script under `execs/scpts/`. For example:
+Put reusable project code under the directory named by `CODE_NAME`, then add an experiment script under `execs/scpts/`. For example, save this as `execs/scpts/baseline.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -262,14 +262,14 @@ ROOT_DIR  CODE_DIR  DATA_DIR  INIT_DIR WORK_DIR  SCPT_DIR
 # Show available experiment scripts
 bash execs/run.sh --list
 
-# Run the default experiment: execs/scpts/00_exp.sh
+# Show usage and available experiment scripts
 bash execs/run.sh
 
 # Run a named experiment and forward additional arguments
-bash execs/run.sh 00_exp --config config.yaml
+bash execs/run.sh baseline --config config.yaml
 ```
 
-The stock `00_exp.sh` runs no science. It prints the interpreter the launcher resolved and the six exported paths, so a fresh checkout has one command that visibly succeeds and confirms `.env` is wired correctly. Run names and output directories should distinguish tasks, experiments, or repetitions, and generated artifacts belong under `wkdrs/<run-name>/`.
+`execs/scpts/` starts empty; add your own experiment scripts there. Showing usage or listing scripts needs no runtime setup. Launching a named experiment uses the runtime configured in `.env`. Run names and output directories should distinguish tasks, experiments, or repetitions, and generated artifacts belong under `wkdrs/<run-name>/`.
 
 ### 5. Start the research workflow
 
@@ -555,7 +555,7 @@ When starting a new research repository from STAR:
 - Replace the title and description with the new research project identity.
 - Set `CODE_NAME` in `.env` and create the source package directory under that name; STAR ships no source directory of its own.
 - Add the project's dependency specification and lock file.
-- Replace `execs/scpts/00_exp.sh` with the first meaningful experiment.
+- Add the first actual experiment script under `execs/scpts/`.
 - Document how datasets and pretrained weights are obtained; do not commit large artifacts directly.
 - Define the expected outputs, metrics, and reproduction commands for the project.
 - Update the copyright holder and year in `LICENSE`.

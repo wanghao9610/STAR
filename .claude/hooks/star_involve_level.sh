@@ -91,48 +91,6 @@ star__latest_star_command_args() { # $1 = transcript path
                     | select(test("involve=(low|medium|high)")))
                  else empty end' \
             "${transcript}" 2>/dev/null | tail -1
-    elif command -v python3 >/dev/null 2>&1; then
-        python3 - "${transcript}" <<'PY' 2>/dev/null
-import json, re, sys
-
-name = re.compile(r"<command-name>\s*/?star")
-args = re.compile(r"<command-args>(.*?)</command-args>", re.S)
-token = re.compile(r"involve=(low|medium|high)")
-last = ""
-with open(sys.argv[1], errors="replace") as fh:
-    for line in fh:
-        try:
-            entry = json.loads(line)
-        except Exception:
-            continue
-        if entry.get("isSidechain"):
-            continue
-        content = (entry.get("message") or {}).get("content")
-        if entry.get("type") == "user":
-            if isinstance(content, str):
-                text = content
-            elif isinstance(content, list):
-                text = " ".join(b.get("text", "") for b in content
-                                if isinstance(b, dict) and b.get("type") == "text")
-            else:
-                continue
-            if not name.search(text):
-                continue
-            found = args.search(text)
-            if found:
-                last = found.group(1)
-        elif entry.get("type") == "assistant" and isinstance(content, list):
-            for block in content:
-                if not (isinstance(block, dict)
-                        and block.get("type") == "tool_use"
-                        and block.get("name") == "Skill"):
-                    continue
-                params = block.get("input") or {}
-                if (str(params.get("skill") or "").startswith("star")
-                        and token.search(str(params.get("args") or ""))):
-                    last = str(params.get("args") or "")
-print(last)
-PY
     fi
 }
 

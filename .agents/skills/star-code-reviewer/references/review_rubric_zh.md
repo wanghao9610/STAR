@@ -30,7 +30,7 @@
 - `naming_rules`——`codearc.md` §3 的命名与风格约定,原文照录。
 - `residual_names`——`codearc.md` §7 的残留清单,原文照录。它们被**改动**才触发 blocker,仅仅还存在绝不是问题。
 - `absent_rules`——本项目没有的那些依据,好让每个收集器以同样的方式退回默认(Step 1 已记下)。
-- `style_baseline`——`codearc.md` 没说的地方,PEP 8 加周边代码的 upstream 风格。
+- `style_baseline`——`codearc.md` 没说的地方,对应语言约定加周边代码的 upstream 风格（Python 使用 PEP 8）。
 - `language`——报告语言,由主 agent 解析。收集器绝不自己选。
 
 ## 执行证据与复核
@@ -50,16 +50,18 @@
 
 ## A. Docstring 与注释
 
-- 每个公共 class 有 docstring 说明职责；构造参数/属性不自明时一并说明。
-- 每个公共函数/方法至少一行 docstring 说明做什么或返回什么；签名复杂的按周边代码已用的风格（Google / NumPy / reST——绝不互相转换）写 Args/Returns。
-- 暴露公共 API 的模块带模块级 docstring。
+按语言使用适合的文档：Python docstring、shell 用法/契约注释、项目要求的 JS/TS API 注释、配置 schema/默认值说明。不把 Python 语法与命名要求套给其他语言。
+
+- 每个公共 Python class 有 docstring 说明职责；构造参数/属性不自明时一并说明。
+- 每个公共 Python 函数/方法至少一行 docstring 说明做什么或返回什么；签名复杂的按周边代码已用的风格（Google / NumPy / reST——绝不互相转换）写 Args/Returns。
+- 暴露公共 API 的 Python 模块带模块级 docstring。
 - 注释解释**为什么**（约束、不明显的决策），而不是下一行**是什么**；没有与代码矛盾的过期注释；没有被注释掉的代码块。
 
 不算问题项：几行长、名字即文档的 `_private` 辅助函数；名字说明测试内容的测试函数。
 
 ## B. 命名
 
-- PEP 8：函数/变量 `snake_case`，class `PascalCase`，模块常量 `UPPER_CASE`，模块/包名小写。
+- Python 遵循 PEP 8；其他语言遵循项目约定和周边风格。Python 函数/变量 `snake_case`，class `PascalCase`，模块常量 `UPPER_CASE`，模块/包名小写。
 - 名字表意：没有 `data2`、`tmp_fn`、`do_stuff`；布尔量读作谓词（`is_`、`has_`）；有歧义的量带单位（`timeout_s`）。
 - 遵循 metds/codearc.md 记录的命名约定与周边代码的 upstream 风格（§3：匹配现有风格，即便不是你的选择）。
 
@@ -78,18 +80,27 @@
 - **禁止硬编码机器本地路径**（`/Users/...`、`/home/...`、`C:\...`）；机器相关根路径来自 `.env` / 环境变量 / 配置（§9）。一律 blocker。
 - 数据从 `datas/` 读、权重从 `inits/` 读、生成输出写 `wkdrs/`；运行时不写 `metds/`、不写包自身（§8）。
 - 新模块放在 codearc.md 放置规则与计划组件映射指定的位置。
-- 运行时假设与项目一致：入口按 `.env` 的解释器（规约 §3）/ `execs/run.sh` 运行；不假设系统 python shebang；可复用启动脚本放 `execs/scpts/`。
+- 运行时假设与项目一致：Python 入口按 `.env` 的解释器（规约 §3）/ `execs/run.sh` 运行，其他语言使用其声明的运行时；不假设系统 python shebang；可复用启动脚本放 `execs/scpts/`。
 - 改名残留（codearc.md §7）——registry 字符串、config `type:` 键、checkpoint `state_dict` 前缀、logger/项目名——原样不动。
 
 ## E. 正确性可疑写法（仅报高置信）
 
-只报眼前代码能证明的：
+所有语言都须对照用户任务、成文接口与实际调用方审查可观察行为；即使没有计划，这些也是明确的正确性依据。沿具体输入追踪输出、状态变更与失败路径，跨文件核对参数名称/类型、默认值、退出/错误传播与持久化契约。已确认的行为缺陷须给出复现输入及预期与实际结果；可行时运行窄范围现有检查或安全轻量复现。缺少工具不免除任何语言的阅读与行为审查。
+
+- **Python：** 控制流与边界条件、参数/默认值、异常传播、文件/进程清理、可变状态与返回契约、导入方和副作用。
+- **shell：** 引号、分词/glob、空参数与含空格参数；管道/子 shell 状态、`set -e`/`pipefail`；退出码传播、trap/清理；解释器兼容、命令/载荷解析；路径/worktree 解析与失败时放行的分支。
+- **JavaScript/TypeScript：** 异步顺序、await/拒绝与取消；null/undefined 与 false/零默认值；类型与运行时 schema 一致性；事件处理/进程生命周期、资源清理；模块导出/导入与调用契约。类型检查本身不证明运行行为。
+- **配置（JSON/YAML/TOML 等）：** 解析与 schema/类型有效性、默认值/优先级、以调用方为基准的路径/环境展开、引用脚本/文件、键名与跨文件接线、危险或被静默忽略的设置。须阅读消费配置的代码，不能只检查解析通过。
+
+只用已安装的窄范围证据：`.env` Python 编译/lint、声明解释器的 shell 语法检查和可用 ShellCheck、Node 语法检查、现有 TypeScript 编译器的 `--noEmit`、可用配置解析/schema 检查。不得安装或使用可能下载工具的包运行器；shell/JS/配置审查不依赖 Python。记录跳过项及其是否留下必要行为未验证。
+
+以下 Python 写法也只报眼前代码能证明的：
 
 - 未使用的 import/变量（有 ruff/flake8 输出时相互印证；先确认"未用"的 import 不是副作用导入再标）。
 - 可变默认参数；裸 `except:` / `except Exception: pass` 吞错误；不用上下文管理器打开文件/进程；`== None` 比较；没有占位符的 f-string；明显写反或差一的条件。
 - 范围内的签名/调用不匹配（compileall 和 ruff 抓一部分；其余读调用点）。
 
-不算这里的问题项：假想的竞态、性能猜测、说不出具体输入的"如果…可能失败"。需要调试器才能确认的，至多进报告的 Unconfirmed 列表。
+不算这里的问题项：假想的竞态、性能猜测、说不出具体输入的"如果…可能失败"。能证明的跨语言行为/契约缺陷属于范围，绝不限于 Python 语法或风格。需要调试器才能确认的，至多进报告的 Unconfirmed 列表。
 
 ## F. 计划符合度（仅计划模式）
 

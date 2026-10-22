@@ -37,6 +37,8 @@ You give the researcher one honest picture of where the whole flow stands — th
 ### Step 1: Scan
 Run `scripts/scan.sh --slim` and read the live execution-branch and worktree lists. Treat the scan as raw input: every plan's frontmatter, `## Sub-plans` index, §3/§5 placeholder counts, run-log frontmatter and body tallies, exact awaiting-user checkboxes and plan-level findings, artifact frontmatter, and depth-1 `metds/` / `wkdrs/` listings. It collects but does not decide status or priority.
 
+Run `bash scripts/validate.sh --root <project-root> --json` when its shell tools are available; it needs no Python environment or `.env`. The validator is read-only; use its findings as deterministic evidence alongside the scan, and report its unknowns as incomplete checks (exit 0: no findings or unknowns; 1: findings; 2: unreadable or unsupported state). It resolves live and dropped records and explicitly named run worktrees/branches without switching branches. If a required tool is unavailable, continue the read-only status report from the files and state that validation was unavailable; do not install packages or claim that unsupported fields were completely checked.
+
 The plan inventory must remain project-wide because `parent:` resolution needs every node. After resolving a requested subtree, `--runs <dirs>` may narrow run bodies while retaining all plan frontmatter and project listings; use it only when needed. Use `read_file` to re-open only content the scan omitted or a section that must be quoted. If the script fails, read the same files directly and state the fallback.
 
 ### Step 2: Build the tree

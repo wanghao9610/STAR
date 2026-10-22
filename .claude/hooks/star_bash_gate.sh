@@ -39,12 +39,6 @@ involve="$(star_involve_level "${input}" "${root}")"
 command_text() {
     if command -v jq >/dev/null 2>&1; then
         printf '%s' "${input}" | jq -r '.tool_input.command // empty' 2>/dev/null
-    elif command -v python3 >/dev/null 2>&1; then
-        printf '%s' "${input}" | python3 -c 'import sys, json
-try:
-    print((json.load(sys.stdin).get("tool_input") or {}).get("command") or "")
-except Exception:
-    print("")' 2>/dev/null
     else
         # No parser on PATH: an allow read out of a misparsed payload could
         # cover a red line, so an unreadable command keeps its prompt.

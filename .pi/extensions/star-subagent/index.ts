@@ -11,7 +11,7 @@
  *
  * Uses JSON mode to capture structured output from subagents.
  *
- * Vendored from pi's own examples/extensions/subagent (pi 0.84.1, MIT), with three
+ * Vendored from pi's own examples/extensions/subagent (pi 0.84.1, MIT), with four
  * deviations from upstream:
  *
  * 1. The tool is star_subagent, not subagent, so a user-level copy of the same example
@@ -23,6 +23,8 @@
  * 3. agentScope defaults to "project", not "user", because the roster this tool exists
  *    to reach is the one this repository ships in .pi/agents/. On the upstream default a
  *    fresh clone finds no agents at all.
+ * 4. Signal termination is a failure, and cancellation escalates while the child is
+ *    still running, clearing its timer and abort listener when the child exits.
  */
 
 import { spawn } from "node:child_process";
@@ -42,6 +44,7 @@ import {
 import { Container, Markdown, Spacer, Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { type AgentConfig, type AgentScope, discoverAgents } from "./agents.ts";
+import { waitForChildProcess } from "./process-lifecycle.ts";
 
 const MAX_PARALLEL_TASKS = 8;
 const MAX_CONCURRENCY = 4;
@@ -354,89 +357,74 @@ async function runSingleAgent(
 		}
 
 		args.push(`Task: ${task}`);
-		let wasAborted = false;
+		const invocation = getPiInvocation(args);
+		const proc = spawn(invocation.command, invocation.args, {
+			cwd: cwd ?? defaultCwd,
+			shell: false,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		let buffer = "";
 
-		const exitCode = await new Promise<number>((resolve) => {
-			const invocation = getPiInvocation(args);
-			const proc = spawn(invocation.command, invocation.args, {
-				cwd: cwd ?? defaultCwd,
-				shell: false,
-				stdio: ["ignore", "pipe", "pipe"],
-			});
-			let buffer = "";
-
-			const processLine = (line: string) => {
-				if (!line.trim()) return;
-				let event: any;
-				try {
-					event = JSON.parse(line);
-				} catch {
-					return;
-				}
-
-				if (event.type === "message_end" && event.message) {
-					const msg = event.message as Message;
-					currentResult.messages.push(msg);
-
-					if (msg.role === "assistant") {
-						currentResult.usage.turns++;
-						const usage = msg.usage;
-						if (usage) {
-							currentResult.usage.input += usage.input || 0;
-							currentResult.usage.output += usage.output || 0;
-							currentResult.usage.cacheRead += usage.cacheRead || 0;
-							currentResult.usage.cacheWrite += usage.cacheWrite || 0;
-							currentResult.usage.cost += usage.cost?.total || 0;
-							currentResult.usage.contextTokens = usage.totalTokens || 0;
-						}
-						if (msg.model) currentResult.model = msg.model;
-						if (msg.stopReason) currentResult.stopReason = msg.stopReason;
-						if (msg.errorMessage) currentResult.errorMessage = msg.errorMessage;
-					}
-					emitUpdate();
-				}
-
-				if (event.type === "tool_result_end" && event.message) {
-					currentResult.messages.push(event.message as Message);
-					emitUpdate();
-				}
-			};
-
-			proc.stdout.on("data", (data) => {
-				buffer += data.toString();
-				const lines = buffer.split("\n");
-				buffer = lines.pop() || "";
-				for (const line of lines) processLine(line);
-			});
-
-			proc.stderr.on("data", (data) => {
-				currentResult.stderr += data.toString();
-			});
-
-			proc.on("close", (code) => {
-				if (buffer.trim()) processLine(buffer);
-				resolve(code ?? 0);
-			});
-
-			proc.on("error", () => {
-				resolve(1);
-			});
-
-			if (signal) {
-				const killProc = () => {
-					wasAborted = true;
-					proc.kill("SIGTERM");
-					setTimeout(() => {
-						if (!proc.killed) proc.kill("SIGKILL");
-					}, 5000);
-				};
-				if (signal.aborted) killProc();
-				else signal.addEventListener("abort", killProc, { once: true });
+		const processLine = (line: string) => {
+			if (!line.trim()) return;
+			let event: any;
+			try {
+				event = JSON.parse(line);
+			} catch {
+				return;
 			}
+
+			if (event.type === "message_end" && event.message) {
+				const msg = event.message as Message;
+				currentResult.messages.push(msg);
+
+				if (msg.role === "assistant") {
+					currentResult.usage.turns++;
+					const usage = msg.usage;
+					if (usage) {
+						currentResult.usage.input += usage.input || 0;
+						currentResult.usage.output += usage.output || 0;
+						currentResult.usage.cacheRead += usage.cacheRead || 0;
+						currentResult.usage.cacheWrite += usage.cacheWrite || 0;
+						currentResult.usage.cost += usage.cost?.total || 0;
+						currentResult.usage.contextTokens = usage.totalTokens || 0;
+					}
+					if (msg.model) currentResult.model = msg.model;
+					if (msg.stopReason) currentResult.stopReason = msg.stopReason;
+					if (msg.errorMessage) currentResult.errorMessage = msg.errorMessage;
+				}
+				emitUpdate();
+			}
+
+			if (event.type === "tool_result_end" && event.message) {
+				currentResult.messages.push(event.message as Message);
+				emitUpdate();
+			}
+		};
+
+		proc.stdout.on("data", (data) => {
+			buffer += data.toString();
+			const lines = buffer.split("\n");
+			buffer = lines.pop() || "";
+			for (const line of lines) processLine(line);
 		});
 
-		currentResult.exitCode = exitCode;
-		if (wasAborted) throw new Error("Subagent was aborted");
+		proc.stderr.on("data", (data) => {
+			currentResult.stderr += data.toString();
+		});
+
+		proc.on("close", () => {
+			if (buffer.trim()) processLine(buffer);
+		});
+
+		const completion = await waitForChildProcess(proc, signal);
+
+		currentResult.exitCode = completion.exitCode;
+		if (completion.diagnostic) {
+			if (currentResult.stderr && !currentResult.stderr.endsWith("\n")) currentResult.stderr += "\n";
+			currentResult.stderr += completion.diagnostic;
+		}
+		if (completion.wasAborted) throw new Error("Subagent was aborted");
 		return currentResult;
 	} finally {
 		if (tmpPromptPath)

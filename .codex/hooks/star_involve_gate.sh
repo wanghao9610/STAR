@@ -31,16 +31,10 @@ involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 
 # apply_patch arrives as the shell command that carries the patch envelope, so
 # the paths are the envelope's own headers rather than a field. Decoding a
-# multi-line JSON string needs a parser; with neither at hand the hook declines.
+# multi-line JSON string needs jq; without it the hook declines.
 patch_text() {
     if command -v jq >/dev/null 2>&1; then
         printf '%s' "${input}" | jq -r '.tool_input.command // empty' 2>/dev/null
-    elif command -v python3 >/dev/null 2>&1; then
-        printf '%s' "${input}" | python3 -c 'import sys, json
-try:
-    print((json.load(sys.stdin).get("tool_input") or {}).get("command") or "")
-except Exception:
-    print("")' 2>/dev/null
     fi
 }
 

@@ -211,7 +211,8 @@ You are in plan mode - a read-only exploration mode for safe code analysis.
 Restrictions:
 - Built-in edit and write tools are disabled
 - Other currently active tools remain available
-- Bash is restricted to an allowlist of read-only commands
+- Bash accepts supported literal read commands and options, one command at a time
+- Pipes, redirection, shell expansion and unverified command options are blocked; use the read tools instead
 
 Ask clarifying questions using the star_questionnaire tool.
 

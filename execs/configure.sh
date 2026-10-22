@@ -26,8 +26,8 @@ use STAR_HARNESSES (environment, then .env), defaulting to all.
 
 --kimi-pool registers the configured Kimi aliases in its user config instead
 of stamping project files. It preserves existing entries and backs up before
-writing. Requires the project Python configured in .env with tomllib
-(Python 3.11+); unsupported layouts leave the config unchanged.
+writing. Supports canonical TOML tables with single-line fields;
+unsupported layouts leave the config unchanged.
 
 Harness details: docs/mds/star-workflow/research-workflow-conventions.md §13.
 EOF
@@ -52,10 +52,100 @@ while (( $# > 0 )); do
     shift
 done
 
-env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
-    [[ -f "${ENV_DIR}/.env" ]] || return 0
-    sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
+parse_env_literal() { # $1 = key, $2 = raw value; print a literal without evaluating shell code
+    local key="$1" raw="$2" value="" state=unquoted char next i
+    if [[ "${raw}" == "'"* ]]; then
+        state=single
+        raw="${raw:1}"
+    elif [[ "${raw}" == '"'* ]]; then
+        state=double
+        raw="${raw:1}"
+    fi
+
+    for (( i = 0; i < ${#raw}; i++ )); do
+        char="${raw:i:1}"
+        case "${state}" in
+            single)
+                if [[ "${char}" == "'" ]]; then state=closed; else value+="${char}"; fi ;;
+            double)
+                case "${char}" in
+                    '"') state=closed ;;
+                    '$'|'`')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: shell expansion is unsupported; use single quotes for a literal value." ;;
+                    $'\\')
+                        (( ++i < ${#raw} )) || fail "Invalid ${key} in ${ENV_DIR}/.env: trailing backslash in a double-quoted value."
+                        next="${raw:i:1}"
+                        case "${next}" in
+                            '$'|'`'|'"'|$'\\') value+="${next}" ;;
+                            *) value+="\\${next}" ;;
+                        esac ;;
+                    $'\r'|$'\n')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: values must stay on one line." ;;
+                    *) value+="${char}" ;;
+                esac ;;
+            unquoted)
+                case "${char}" in
+                    '$'|'`')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: shell expansion is unsupported; use single quotes for a literal value." ;;
+                    '~')
+                        if [[ -z "${value}" || "${value}" == *: ]]; then
+                            fail "Invalid ${key} in ${ENV_DIR}/.env: unquoted tilde expansion is unsupported; quote or escape the literal value."
+                        fi
+                        value+="${char}" ;;
+                    ';'|'&'|'|'|'<'|'>'|'('|')')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: unquoted shell syntax is unsupported; quote or escape the literal value." ;;
+                    "'"|'"')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: quotes must enclose the whole value." ;;
+                    $'\\')
+                        (( ++i < ${#raw} )) || fail "Invalid ${key} in ${ENV_DIR}/.env: trailing backslash in an unquoted value."
+                        value+="${raw:i:1}" ;;
+                    ' '|$'\t') state=after ;;
+                    $'\r'|$'\n')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: values must stay on one line." ;;
+                    *) value+="${char}" ;;
+                esac ;;
+            closed)
+                case "${char}" in
+                    ' '|$'\t') state=after ;;
+                    *) fail "Invalid ${key} in ${ENV_DIR}/.env: unexpected text after the quoted value." ;;
+                esac ;;
+            after)
+                case "${char}" in
+                    ' '|$'\t') ;;
+                    '#') break ;;
+                    *) fail "Invalid ${key} in ${ENV_DIR}/.env: unexpected text after the literal value." ;;
+                esac ;;
+        esac
+    done
+    case "${state}" in
+        single|double)
+            fail "Invalid ${key} in ${ENV_DIR}/.env: unterminated ${state}-quoted value." ;;
+    esac
+    printf '%s' "${value}"
 }
+
+env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
+    local key="$1" line="" current found=false
+    [[ -f "${ENV_DIR}/.env" ]] || return 0
+    while IFS= read -r current || [[ -n "${current}" ]]; do
+        current="${current%$'\r'}"
+        if [[ "${current}" == "${key}="* ]]; then
+            line="${current#*=}"
+            found=true
+        fi
+    done < "${ENV_DIR}/.env"
+    [[ "${found}" == true ]] || return 0
+    parse_env_literal "${key}" "${line}"
+}
+
+# Validate every effective file value before any manifest is changed. A flag or
+# environment harness selection outranks .env and leaves its file value unused.
+if [[ -z "${HARNESSES_ARG}" && -z "${STAR_HARNESSES:-}" ]]; then
+    env_value STAR_HARNESSES >/dev/null
+fi
+for env_key in STAR_PLAN_MODEL STAR_EXEC_MODEL STAR_READ_MODEL; do
+    env_value "${env_key}" >/dev/null
+done
 
 is_selected() { # $1 = harness name
     local name
@@ -71,8 +161,9 @@ is_selected() { # $1 = harness name
 # no harness in ALL_HARNESSES answers to is skipped, which is what leaves an entry
 # written for a harness this version does not ship unread instead of misapplied.
 tier_entry_for() { # $1 = harness token, $2 = the raw key value
-    awk -v want="$1" -v known="${ALL_HARNESSES[*]}" -v raw="$2" '
+    RAW_VALUE="$2" awk -v want="$1" -v known="${ALL_HARNESSES[*]}" '
         BEGIN {
+            raw = ENVIRON["RAW_VALUE"]
             n = split(known, k, " ")
             for (i = 1; i <= n; i++) is_tag[k[i]] = 1
             n = split(raw, entry, ",")
@@ -376,150 +467,274 @@ model_stamp_summary() {
 # [models] variants and pool keys the configured kimi tier entries need (workflow
 # conventions §10.8). Additive and idempotent — an entry already there, whatever
 # it says, is kept as the user wrote it; the file is backed up before any write.
-write_kimi_pool() {
+write_kimi_pool() (
     local config="${KIMI_CODE_HOME:-${HOME}/.kimi-code}/config.toml"
     [[ -f "${config}" ]] || fail "--kimi-pool: ${config} does not exist. Run kimi once, then re-run."
-    local tier key model depth python_home conda_home env_name
-    local -a entries=()
+    local tier key model depth entries="" temporary="" backup=""
     for tier in plan exec read; do
         key="$(tier_model_key "${tier}")"
         model="$(tier_model_for kimi "$(env_value "${key}")")"
         [[ -n "${model}" ]] || continue
+        [[ "${model}" != *[$'\001'-$'\037'$'\177']* ]] || fail "--kimi-pool: control characters in model name; config unchanged."
         depth="$(tier_depth_for kimi "$(env_value "${key}")")"
-        entries+=("${tier}" "${model}" "${depth}")
+        entries+="${tier}"$'\034'"${model}"$'\034'"${depth}"$'\n'
     done
-    (( ${#entries[@]} > 0 )) || { log "--kimi-pool: no kimi tier entry in .env; nothing to register."; return 0; }
-    python_home="$(env_value PYTHON_HOME)"
-    if [[ -z "${python_home}" ]]; then
-        conda_home="$(env_value CONDA_HOME)"; env_name="$(env_value ENV_NAME)"
-        [[ -n "${conda_home}" && -n "${env_name}" ]] || fail "--kimi-pool: set PYTHON_HOME or CONDA_HOME and ENV_NAME in .env."
-        python_home="${conda_home}/envs/${env_name}"
+    [[ -n "${entries}" ]] || { log "--kimi-pool: no kimi tier entry in .env; nothing to register."; return 0; }
+    temporary="$(mktemp "${config}.star-tmp-XXXXXX")"
+    trap '[[ -z "${temporary}" ]] || rm -f -- "${temporary}"' EXIT
+    cp -p "${config}" "${temporary}"
+    # A deliberately bounded TOML reader: canonical tables and single-line
+    # scalar/array fields. Original lines are retained byte-for-byte apart from
+    # a final newline. Inline tables, dotted assignments, multiline values and
+    # array tables are rejected before writing, rather than interpreted loosely.
+    if ! STAR_KIMI_ENTRIES="${entries}" awk '
+        function trim(s) {gsub(/^[ \t]+|[ \t\r]+$/, "", s); return s}
+        function die(message) {print "--kimi-pool: " message "; config unchanged." > "/dev/stderr"; bad=1; exit 2}
+        function quote(s,    i,c,r) {
+            r="\""
+            for(i=1;i<=length(s);i++) {c=substr(s,i,1); if(c=="\\" || c=="\"") r=r "\\"; r=r c}
+            return r "\""
+        }
+        function unquote(s,    q,i,c,r) {
+            q=substr(s,1,1)
+            if(q!="\"" && q!=sprintf("%c",39)) return s
+            if(substr(s,length(s),1)!=q) die("unsupported quoted key")
+            r=""
+            for(i=2;i<length(s);i++) {
+                c=substr(s,i,1)
+                if(c=="\\" && q=="\"") {
+                    c=substr(s,++i,1)
+                    if(c!="\\" && c!="\"") die("escaped table/key names require a canonical literal spelling")
+                }
+                r=r c
+            }
+            return r
+        }
+        function pathparts(s, a,    n,i,start,q,c,escaped,token) {
+            n=0; i=1
+            while(i<=length(s)) {
+                while(substr(s,i,1)~/[ \t]/) i++
+                start=i; q=substr(s,i,1)
+                if(q=="\"" || q==sprintf("%c",39)) {
+                    i++; escaped=0
+                    while(i<=length(s)) {
+                        c=substr(s,i,1)
+                        if(c==q && !escaped) break
+                        if(c=="\\" && q=="\"" && !escaped) escaped=1; else escaped=0
+                        i++
+                    }
+                    if(i>length(s)) die("unterminated quoted key")
+                    token=substr(s,start,i-start+1); i++
+                } else {
+                    while(substr(s,i,1)~/[A-Za-z0-9_-]/ && i<=length(s)) i++
+                    token=substr(s,start,i-start)
+                    if(token=="") die("unsupported table/key syntax")
+                }
+                a[++n]=unquote(token)
+                if(a[n] ~ /[[:cntrl:]]/) die("control characters in table/key name")
+                while(substr(s,i,1)~/[ \t]/ && i<=length(s)) i++
+                if(i>length(s)) return n
+                if(substr(s,i,1)!=".") die("unsupported table/key syntax")
+                i++; if(i>length(s)) die("trailing dot in table/key")
+            }
+            return n
+        }
+        function pathtext(path,    n,a,i,r) {
+            n=split(path,a,SUBSEP); r=""
+            for(i=1;i<=n;i++) r=r (i>1?".":"") quote(a[i])
+            return r
+        }
+        function uncomment(s,    i,c,q,r,escaped) {
+            q=""; r=""; escaped=0
+            for(i=1;i<=length(s);i++) {
+                c=substr(s,i,1)
+                if(q=="") {if(c=="#") break; if(c=="\"" || c==sprintf("%c",39)) q=c}
+                else if(c==q && !escaped) q=""
+                r=r c
+                if(c=="\\" && q=="\"" && !escaped) escaped=1; else escaped=0
+            }
+            if(q!="") die("multiline or unterminated string is unsupported")
+            return trim(r)
+        }
+        function skipspace() {while(substr(value,pos,1)~/[ \t]/ && pos<=length(value)) pos++}
+        function datevalid(s,    year,month,day,days) {
+            if(s!~/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) return 0
+            year=substr(s,1,4)+0;month=substr(s,6,2)+0;day=substr(s,9,2)+0
+            split("31 28 31 30 31 30 31 31 30 31 30 31",days," ")
+            if(year%4==0 && (year%100!=0 || year%400==0)) days[2]=29
+            return year>0 && month>=1 && month<=12 && day>=1 && day<=days[month]
+        }
+        function timevalid(s,zone,    suffix) {
+            if(s!~/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9](\.[0-9]+)?([Zz]|[+-][0-9][0-9]:[0-9][0-9])?$/) return 0
+            if(substr(s,1,2)+0>23 || substr(s,4,2)+0>59 || substr(s,7,2)+0>59) return 0
+            suffix=substr(s,9);sub(/^\.[0-9]+/,"",suffix)
+            if(suffix=="") return 1
+            if(!zone) return 0
+            return suffix~/^[Zz]$/ || (substr(suffix,2,2)+0<24 && substr(suffix,5,2)+0<60)
+        }
+        function atom(    start,q,c,token,digits,n,j,code) {
+            skipspace(); start=pos; q=substr(value,pos,1)
+            if(q=="\"" || q==sprintf("%c",39)) {
+                if(substr(value,pos,3)==q q q) die("multiline strings are unsupported")
+                pos++
+                while(pos<=length(value)) {
+                    c=substr(value,pos++,1)
+                    if(c==q) return
+                    if(c=="\\" && q=="\"") {
+                        c=substr(value,pos++,1)
+                        if(c=="u" || c=="U") {
+                            n=(c=="u"?4:8); digits=substr(value,pos,n)
+                            if(length(digits)!=n || digits~/[^0-9a-fA-F]/) die("invalid Unicode string escape")
+                            code=0
+                            for(j=1;j<=n;j++) code=code*16+index("0123456789abcdef",tolower(substr(digits,j,1)))-1
+                            if(code>1114111 || (code>=55296 && code<=57343)) die("invalid Unicode scalar in string escape")
+                            pos+=n
+                        } else if(index("btnfr\"\\",c)==0 || c=="") die("invalid string escape")
+                    } else if(c~/[[:cntrl:]]/ && c!="\t") die("control character in string")
+                }
+                die("unterminated string")
+            }
+            if(q=="[") {
+                pos++; skipspace(); if(substr(value,pos,1)=="]") {pos++; return}
+                while(pos<=length(value)) {
+                    atom(); skipspace(); c=substr(value,pos++,1)
+                    if(c=="]") return
+                    if(c!=",") die("unsupported array syntax")
+                    skipspace(); if(substr(value,pos,1)=="]") {pos++; return}
+                }
+                die("multiline arrays are unsupported")
+            }
+            while(pos<=length(value) && substr(value,pos,1)!~/[ \t,\]]/) pos++
+            token=substr(value,start,pos-start)
+            if(token=="true" || token=="false" || token~/^[+-]?(inf|nan)$/) return
+            if(token~/^[+-]?(0|[1-9](_?[0-9])*)$/) return
+            if(token~/^[+-]?(0|[1-9](_?[0-9])*)\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)?$/) return
+            if(token~/^[+-]?(0|[1-9](_?[0-9])*)[eE][+-]?[0-9](_?[0-9])*$/) return
+            if(token~/^0x[0-9a-fA-F](_?[0-9a-fA-F])*$/ || token~/^0o[0-7](_?[0-7])*$/ || token~/^0b[01](_?[01])*$/) return
+            if(datevalid(token) || timevalid(token,0)) return
+            if(length(token)>10 && substr(token,11,1)~/[Tt]/ && datevalid(substr(token,1,10)) && timevalid(substr(token,12),1)) return
+            die("unsupported value (use canonical single-line scalar/array fields, not inline tables)")
+        }
+        function validvalue(s) {value=s;pos=1;atom();skipspace();if(pos<=length(value)) die("unsupported value suffix")}
+        function supports(raw,depth,    n,a,i,item) {
+            if(substr(raw,1,1)!="[" || substr(raw,length(raw),1)!="]") return 0
+            raw=substr(raw,2,length(raw)-2); n=split(raw,a,",")
+            for(i=1;i<=n;i++) {
+                item=trim(a[i])
+                if((substr(item,1,1)=="\"" || substr(item,1,1)==sprintf("%c",39)) && unquote(item)==depth) return 1
+            }
+            return 0
+        }
+        function insert(path,key,raw,    line) {
+            changed=1
+            line=quote(key) " = " raw "\n"
+            if(path in sections) inserts[sections[path]]=inserts[sections[path]] line
+            else additions=additions "\n[" pathtext(path) "]\n" line
+        }
+        function clone(base,alias,depth,    bp,ap,i,path,override,found) {
+            bp="models" SUBSEP base; ap="models" SUBSEP alias; override=bp SUBSEP "overrides"
+            if(kind[override]=="value" || kind[override SUBSEP "default_effort"]=="table" || kind[bp SUBSEP "default_effort"]=="table") die("variant overrides must use canonical scalar fields and tables")
+            changed=1
+            additions=additions "\n"
+            for(i=1;i<=NR;i++) {
+                path=sectionpath[i]
+                if(path!=bp && index(path,bp SUBSEP)!=1) continue
+                if(header[i]) {
+                    additions=additions "[" pathtext(ap substr(path,length(bp)+1)) "]\n"
+                    if(path==override) {additions=additions "default_effort = " quote(depth) "\n"; found=1}
+                } else if(!((path==bp || path==override) && field[i]=="default_effort")) additions=additions lines[i] "\n"
+            }
+            if(!found) additions=additions "\n[" pathtext(ap SUBSEP "overrides") "]\ndefault_effort = " quote(depth) "\n"
+        }
+        {
+            lines[NR]=$0; text=uncomment($0)
+            if(substr(text,1,1)=="[") {
+                if(substr(text,1,2)=="[[" || substr(text,length(text),1)!="]") die("array tables or malformed headers are unsupported")
+                n=pathparts(substr(text,2,length(text)-2),parts)
+                if(!n) die("empty table path")
+                current=""
+                for(i=1;i<=n;i++) {
+                    current=current (i>1?SUBSEP:"") parts[i]
+                    if(kind[current]=="value") die("table conflicts with an existing value")
+                    kind[current]="table"
+                }
+                if(current in sections) die("duplicate table")
+                sections[current]=NR; header[NR]=1
+                if(n>=2 && parts[1]=="models") models[parts[2]]=1
+            } else if(text!="") {
+                # Find the assignment after a possibly quoted key.
+                q=""; escaped=0; equals=0
+                for(i=1;i<=length(text);i++) {
+                    c=substr(text,i,1)
+                    if(q=="") {if(c=="=") {equals=i;break}; if(c=="\"" || c==sprintf("%c",39)) q=c}
+                    else if(c==q && !escaped) q=""
+                    if(c=="\\" && q=="\"" && !escaped) escaped=1; else escaped=0
+                }
+                if(!equals) die("unsupported assignment")
+                n=pathparts(trim(substr(text,1,equals-1)),parts)
+                if(n!=1) die("dotted assignments are unsupported; use explicit tables")
+                key=parts[1]; field[NR]=key; raw=trim(substr(text,equals+1)); validvalue(raw)
+                path=(current==""?key:current SUBSEP key)
+                if(path in kind) die("duplicate or conflicting key")
+                kind[path]="value"; values[path]=raw
+                if(current=="" && (key=="models" || key=="secondary_model")) die("models and secondary_model must use explicit tables")
+            }
+            sectionpath[NR]=current
+        }
+        END {
+            if(bad) exit 2
+            secondary="secondary_model"; pool=secondary SUBSEP "models"
+            if(kind[secondary]=="value" || kind[pool]=="value") die("secondary model pool must use an explicit table")
+            for(setting_index=1;setting_index<=2;setting_index++) {
+                setting=(setting_index==1?"force":"default_effort"); raw=values[secondary SUBSEP setting]
+                if(raw!="" && raw!="false" && raw!="0" && raw!="\"\"" && raw!=sprintf("%c%c",39,39))
+                    print "--kimi-pool: warning: secondary_model." setting " overrides per-alias routing." > "/dev/stderr"
+            }
+            nentries=split(ENVIRON["STAR_KIMI_ENTRIES"],entry,"\n")
+            for(e=1;e<=nentries;e++) {
+                if(entry[e]=="") continue
+                split(entry[e],item,sprintf("%c",28)); tier=item[1]; model=item[2]; depth=item[3]; alias=model (depth!=""?"-" depth:"")
+                if(!(alias in models)) {
+                    if(depth=="" || !(model in models) || !("models" SUBSEP model in sections) || !supports(values["models" SUBSEP model SUBSEP "support_efforts"],depth)) {
+                        print "--kimi-pool: skipping unavailable model/depth " alias "." > "/dev/stderr"; continue
+                    }
+                    clone(model,alias,depth); models[alias]=1
+                }
+                if(!(alias in aliases)) {
+                    aliases[alias]="STAR " tier " tier: " model (depth!=""?" at " depth " effort.":".")
+                    ordered[++alias_count]=alias
+                }
+                if(tier=="exec") default_alias=alias
+            }
+            if(!alias_count) exit
+            if(!(secondary SUBSEP "default_model" in kind)) insert(secondary,"default_model",quote(default_alias!=""?default_alias:ordered[1]))
+            pool_block=""
+            for(i=1;i<=alias_count;i++) {
+                alias=ordered[i]
+                if(!(pool SUBSEP alias in kind)) pool_block=pool_block quote(alias) " = " quote(aliases[alias]) "\n"
+            }
+            if(pool_block!="") {
+                changed=1
+                if(pool in sections) inserts[sections[pool]]=inserts[sections[pool]] pool_block
+                else additions=additions "\n[" pathtext(pool) "]\n" pool_block
+            }
+            if(!changed) exit
+            for(i=1;i<=NR;i++) {print lines[i]; if(i in inserts) printf "%s",inserts[i]}
+            printf "%s",additions
+        }
+    ' "${config}" > "${temporary}"; then
+        fail "--kimi-pool: unsupported TOML layout; original config was preserved."
     fi
-    "${python_home}/bin/python" - "${config}" "${entries[@]}" <<'PY'
-import copy
-import datetime
-import json
-import os
-from pathlib import Path
-import shutil
-import sys
-import tempfile
-
-try:
-    import tomllib
-except ImportError:
-    sys.exit('--kimi-pool: the project Python needs tomllib (Python 3.11+); config unchanged.')
-
-
-def value_text(value):
-    """Serialize new TOML values without reformatting the original document."""
-    if isinstance(value, str):
-        return json.dumps(value, ensure_ascii=False)
-    if isinstance(value, dict):
-        return '{ ' + ', '.join(f'{value_text(k)} = {value_text(v)}' for k, v in value.items()) + ' }'
-    if isinstance(value, list):
-        return '[ ' + ', '.join(map(value_text, value)) + ' ]'
-    if isinstance(value, (datetime.date, datetime.time)):
-        return value.isoformat()
-    return str(value).lower()
-
-
-config = Path(sys.argv[1])
-original = config.read_bytes().decode('utf-8')
-try:
-    parsed = tomllib.loads(original)
-    expected = copy.deepcopy(parsed)
-    models = expected.setdefault('models', {})
-    secondary = expected.setdefault('secondary_model', {})
-    pool = secondary.setdefault('models', {})
-    lines = original.splitlines(keepends=True)
-    sections = {}
-    for i, line in enumerate(lines):
-        if not line.lstrip().startswith('['):
-            continue
-        try:
-            table = tomllib.loads(line)
-        except tomllib.TOMLDecodeError:
-            continue
-        path = []
-        while isinstance(table, dict) and len(table) == 1:
-            key, table = next(iter(table.items()))
-            path.append(key)
-        if table == {}:
-            sections[tuple(path)] = i
-    if pool and ('secondary_model', 'models') not in sections:
-        raise ValueError('pool must use a [secondary_model.models] table; config unchanged')
-    for setting in ('force', 'default_effort'):
-        if secondary.get(setting):
-            print(f'--kimi-pool: warning: secondary_model.{setting} overrides per-alias routing.')
-
-    inserts = {}
-    additions = []
-
-    def add_keys(path, values):
-        """Insert new keys into an existing table, or append a new table."""
-        block = ''.join(f'{value_text(k)} = {value_text(v)}\n' for k, v in values.items())
-        if path in sections:
-            inserts[sections[path]] = block
-        else:
-            header = '.'.join(value_text(part) for part in path)
-            additions.append(f'\n[{header}]\n{block}')
-
-    aliases = {}
-    default_alias = None
-    args = sys.argv[2:]
-    for tier, model, depth in zip(args[::3], args[1::3], args[2::3]):
-        alias = f'{model}-{depth}' if depth else model
-        if alias not in models:
-            base = models.get(model)
-            if not depth or not base or depth not in base.get('support_efforts', []):
-                print(f'--kimi-pool: skipping unavailable model/depth {alias}.')
-                continue
-            variant = copy.deepcopy(base)
-            variant.pop('default_effort', None)
-            overrides = variant.setdefault('overrides', {})
-            overrides['default_effort'] = depth
-            models[alias] = variant
-            add_keys(('models', alias), {k: v for k, v in variant.items() if k != 'overrides'})
-            add_keys(('models', alias, 'overrides'), overrides)
-        aliases.setdefault(alias, f'STAR {tier} tier: {model}' + (f' at {depth} effort.' if depth else '.'))
-        if tier == 'exec':
-            default_alias = alias
-    if not aliases:
-        print('--kimi-pool: no registered aliases to add; config unchanged.')
-        sys.exit(0)
-    if 'default_model' not in secondary:
-        secondary['default_model'] = default_alias or next(iter(aliases))
-        add_keys(('secondary_model',), {'default_model': secondary['default_model']})
-    missing = {alias: hint for alias, hint in aliases.items() if alias not in pool}
-    if missing:
-        pool.update(missing)
-        add_keys(('secondary_model', 'models'), missing)
-    if not inserts and not additions:
-        print('--kimi-pool: everything already registered; config unchanged.')
-        sys.exit(0)
-    updated = ''.join(line + ('\n' if not line.endswith('\n') else '') + inserts[i]
-                      if i in inserts else line for i, line in enumerate(lines))
-    updated += ('\n' if not updated.endswith('\n') else '') + ''.join(additions)
-    if tomllib.loads(updated) != expected:
-        raise ValueError('unsupported table layout; config unchanged')
-except (ValueError, TypeError, AttributeError) as error:
-    sys.exit(f'--kimi-pool: {error}')
-
-backup = str(config) + '.star-bak-' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
-shutil.copy2(config, backup)
-with tempfile.NamedTemporaryFile(dir=config.parent, prefix='config.toml.star-tmp-', delete=False) as tmp:
-    temporary = Path(tmp.name)
-    tmp.write(updated.encode('utf-8'))
-try:
-    shutil.copymode(config, temporary)
-    os.replace(temporary, config)
-finally:
-    temporary.unlink(missing_ok=True)
-print(f'--kimi-pool: updated {config}; backup at {backup}. Start a new Kimi session.')
-PY
-}
-
+    if [[ ! -s "${temporary}" ]] || cmp -s "${config}" "${temporary}"; then
+        log "--kimi-pool: everything already registered or unavailable; config unchanged."
+        return 0
+    fi
+    backup="$(mktemp "${config}.star-bak-$(date '+%Y%m%d-%H%M%S')-XXXXXX")"
+    cp -p "${config}" "${backup}"
+    mv -f "${temporary}" "${config}"
+    temporary=""
+    log "--kimi-pool: updated ${config}; backup at ${backup}. Start a new Kimi session."
+)
 HARNESSES_SPEC="${HARNESSES_ARG:-${STAR_HARNESSES:-$(env_value STAR_HARNESSES)}}"
 HARNESSES_SPEC="${HARNESSES_SPEC:-all}"
 SELECTED_HARNESSES=()

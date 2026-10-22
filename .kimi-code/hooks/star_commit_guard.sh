@@ -28,9 +28,9 @@
 # prepared STOP-line command launches after its code review. A launch is the
 # run's script, `execs/scpts/<run>.sh`, in command position — past nohup,
 # bash -c and the other wrappers — or a redirect into the `wkdrs/<run>/.await`
-# marker a star-auto launch writes; either is declined while wkdrs/<run>/ holds
-# no CODE_REVIEW_<date>.md, or its newest one is dated before the newest date
-# in EXEC_LOG.md. The run dir is looked up in this checkout first, then in the
+# marker a star-auto launch writes; either requires current content-based review
+# metadata and a passed review gate. Log dates do not determine validity.
+# The run dir is looked up in this checkout first, then in the
 # run's worktree at ../<root-dirname>--wt/<run>/ (§11.8), where a worktree run
 # keeps its records until the merge. Writing the script, reading the marker, and
 # light validation through execs/run.sh pass: none of them is the launch.
@@ -53,12 +53,6 @@ input=$(cat)
 command_text() {
     if command -v jq >/dev/null 2>&1; then
         printf '%s' "${input}" | jq -r '.tool_input.command // empty' 2>/dev/null
-    elif command -v python3 >/dev/null 2>&1; then
-        printf '%s' "${input}" | python3 -c 'import sys, json
-try:
-    print((json.load(sys.stdin).get("tool_input") or {}).get("command") or "")
-except Exception:
-    print("")' 2>/dev/null
     else
         # No parser on PATH. Reading the field out of the raw JSON stops at the
         # first escaped quote, so a command carrying one is read only up to it —
@@ -100,23 +94,27 @@ staged_oversize() {
     printf '%s' "${out}"
 }
 
-# Why the prepared command of run $1 may not launch yet: no review in its run
-# dir, or a review dated before the log's newest date (the staleness rule the
-# status skill applies). Empty when it may launch, and for a directory that is
-# not a STAR run at all.
+# Resolve the run's actual checkout before checking its content-based review.
+# No run log means this is not a recognized STAR launch. A missing helper in a
+# recognized run fails closed so old installations cannot bypass the review.
 unreviewed_run() {
-    local dir="${root}/wkdrs/$1" review review_date log_date
-    [[ -f "${dir}/EXEC_LOG.md" ]] || dir="$(dirname "${root}")/$(basename "${root}")--wt/$1/wkdrs/$1"
+    local run_root="${root}" dir="${root}/wkdrs/$1" helper reason
+    if [[ ! -f "${dir}/EXEC_LOG.md" ]]; then
+        run_root="$(dirname "${root}")/$(basename "${root}")--wt/$1"
+        dir="${run_root}/wkdrs/$1"
+    fi
     [[ -f "${dir}/EXEC_LOG.md" ]] || return 0
-    review="$(ls "${dir}"/CODE_REVIEW_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md 2>/dev/null | sort | tail -1)"
-    if [[ -z "${review}" ]]; then
-        printf 'STAR conventions §2: wkdrs/%s/ holds no CODE_REVIEW_<date>.md, and a prepared command launches only after its review' "$1"
+    helper="${run_root}/.agents/skills/star-code-reviewer/scripts/review_state.sh"
+    if [[ ! -f "${helper}" ]]; then
+        printf 'STAR conventions §2: review-state helper missing for wkdrs/%s/; update STAR and verify the review before launch' "$1"
         return 0
     fi
-    review_date="${review##*/CODE_REVIEW_}"; review_date="${review_date%.md}"
-    log_date="$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' "${dir}/EXEC_LOG.md" 2>/dev/null | sort | tail -1)"
-    [[ -n "${log_date}" && "${review_date}" < "${log_date}" ]] && \
-        printf 'STAR conventions §2: the newest review of wkdrs/%s/ (%s) is dated before its EXEC_LOG.md (%s), so the code it approved may have changed since' "$1" "${review_date}" "${log_date}"
+    if ! reason="$(bash "${helper}" --root "${run_root}" check "$1" 2>/dev/null)"; then
+        # Hook JSON reasons must not contain raw path quoting or control bytes.
+        reason="${reason//\\/}"; reason="${reason//\"/}"
+        reason="${reason//$'\n'/ }"; reason="${reason//$'\r'/ }"; reason="${reason//$'\t'/ }"
+        printf 'STAR conventions §2: wkdrs/%s/ review does not authorize launch: %s' "$1" "${reason:-invalid review state; refresh the review}"
+    fi
     return 0
 }
 
@@ -137,8 +135,11 @@ while IFS= read -r segment; do
         lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
         case "${lt##*/}" in
             env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|sh|bash|zsh) li=$((li + 1)) ;;
-            *=*|-*|[0-9]*) li=$((li + 1)) ;;
-            *) break ;;
+            *=*|-*) li=$((li + 1)) ;;
+            *)
+                # Numeric wrapper arguments are skipped; numbered run scripts
+                # are commands, not numeric arguments.
+                if [[ ${lt} =~ ^[0-9]+$ ]]; then li=$((li + 1)); else break; fi ;;
         esac
     done
     if [[ ${li} -lt ${#tok[@]} ]]; then

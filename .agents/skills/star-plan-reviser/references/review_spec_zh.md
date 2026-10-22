@@ -78,3 +78,5 @@ star-plan-reviser 如何收集证据、报告各节必须包含什么。收集�
 **影响范围**：`local`（本文件的正文/frontmatter）/ `structural`（树形结构或跨兄弟依赖边 → star-plan-decomposer）/ `strategic`（研究问题、方法关键假设或 kill-criteria 被推翻 → star-plan-coach）。
 
 无话可说的节压成一行（"None observed."）——绝不注水。
+
+方向性发现的处理结论使用报告第 4 节中稳定编号与来源日志的表格（规约 §8）。采集器连同原文返回编号；主审查者核对证据与决定后，才记录有依据的 `resolved` 或 `deferred`。

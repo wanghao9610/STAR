@@ -33,25 +33,6 @@ if [ "${1:-}" = "--resolve" ]; then
     if command -v jq >/dev/null 2>&1; then
       resolved=$(jq -r 'select(.type == "turn_context") | .payload.model // empty' \
         "${transcript}" 2>/dev/null | tail -1)
-    elif command -v python3 >/dev/null 2>&1; then
-      resolved=$(python3 - "${transcript}" <<'PY' 2>/dev/null
-import json, sys
-
-last = ""
-with open(sys.argv[1], errors="replace") as fh:
-    for line in fh:
-        try:
-            entry = json.loads(line)
-        except Exception:
-            continue
-        if entry.get("type") != "turn_context":
-            continue
-        model = (entry.get("payload") or {}).get("model")
-        if model:
-            last = model
-print(last)
-PY
-      )
     fi
   fi
 
@@ -137,12 +118,6 @@ input=$(cat)
 payload_field() {
   if command -v jq >/dev/null 2>&1; then
     printf '%s' "$input" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-  elif command -v python3 >/dev/null 2>&1; then
-    printf '%s' "$input" | python3 -c 'import sys, json
-try:
-    print(json.load(sys.stdin).get(sys.argv[1]) or "")
-except Exception:
-    print("")' "$1" 2>/dev/null
   else
     printf '%s' "$input" \
       | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
@@ -164,9 +139,6 @@ ctx="STAR provenance: session_model_id = ${model:-unrecorded}. This is the exact
 if command -v jq >/dev/null 2>&1; then
   jq -cn --arg c "${ctx}" \
     '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-elif command -v python3 >/dev/null 2>&1; then
-  python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": sys.argv[1]}}))' "${ctx}"
 else
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
     "$(printf '%s' "${ctx}" | tr -d '"\\')"

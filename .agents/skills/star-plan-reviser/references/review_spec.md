@@ -78,3 +78,5 @@ Never promote `unverifiable` to `met` on the log's word alone.
 **How far the change reaches**: `local` (this file's prose/frontmatter) / `structural` (tree shape or cross-sibling dependency edges → star-plan-decomposer) / `strategic` (research question, method bet, or kill-criteria overturned → star-plan-coach).
 
 Sections with nothing to say collapse to a single line ("None observed.") — never pad.
+
+Plan-level finding dispositions use the stable id and source-log table in report §4 (conventions §8). Collectors return the id with the quoted finding; only the main reviewer records a supported `resolved` or `deferred` disposition after checking its evidence and decision.

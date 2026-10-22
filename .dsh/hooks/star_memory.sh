@@ -89,9 +89,6 @@ ${machine}"
 if command -v jq >/dev/null 2>&1; then
     jq -cn --arg c "${ctx}" \
         '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-elif command -v python3 >/dev/null 2>&1; then
-    python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": sys.argv[1]}}))' "${ctx}"
 else
     printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
         "$(printf '%s' "${ctx}" | tr -d '"\\' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')"

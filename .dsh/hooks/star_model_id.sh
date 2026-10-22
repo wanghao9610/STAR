@@ -58,27 +58,6 @@ if [ "${1:-}" = "--resolve" ]; then
             | select(.model != null)
             | if .provider == null or .provider == "" then .model else "\(.provider)/\(.model)" end' \
             2>/dev/null | tail -1)
-    elif command -v python3 >/dev/null 2>&1; then
-        resolved=$(decode | python3 -c 'import json, sys
-
-last = ""
-for line in sys.stdin:
-    try:
-        entry = json.loads(line)
-    except Exception:
-        continue
-    if entry.get("type") == "request/context":
-        route = entry.get("data") or {}
-    elif entry.get("type") == "request/header":
-        route = ((entry.get("data") or {}).get("header") or {}).get("config") or {}
-    else:
-        continue
-    model = route.get("model")
-    if not model:
-        continue
-    provider = route.get("provider")
-    last = f"{provider}/{model}" if provider else model
-print(last)' 2>/dev/null)
     else
         resolved=""
     fi
@@ -93,12 +72,6 @@ input=$(cat)
 payload_field() {
     if command -v jq >/dev/null 2>&1; then
         printf '%s' "${input}" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-    elif command -v python3 >/dev/null 2>&1; then
-        printf '%s' "${input}" | python3 -c 'import sys, json
-try:
-    print(json.load(sys.stdin).get(sys.argv[1]) or "")
-except Exception:
-    print("")' "$1" 2>/dev/null
     else
         printf '%s' "${input}" \
             | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
@@ -123,9 +96,6 @@ fi
 if command -v jq >/dev/null 2>&1; then
     jq -cn --arg c "${ctx}" \
         '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-elif command -v python3 >/dev/null 2>&1; then
-    python3 -c 'import sys, json
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": sys.argv[1]}}))' "${ctx}"
 else
     printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
         "$(printf '%s' "${ctx}" | tr -d '"\\')"

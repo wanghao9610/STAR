@@ -7,19 +7,25 @@ on:
 
 jobs:
   consistency:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
-      - name: Configure the project Python for offline checks
-        run: printf 'PYTHON_HOME=%s\n' "$pythonLocation" > .env
+          node-version: '24'
       # First, because it names the likeliest mistake outright: a tree was edited
-      # instead of .claude/skills, so it is no longer what the port rules produce.
-      - name: Check the seven skill trees against .claude/skills
+      # instead of .agents/skills, so it is no longer what the port rules produce.
+      - name: Check the six generated skill trees against .agents/skills
         run: bash .github/scripts/port.sh
       - name: Run consistency checks
         run: bash .github/scripts/check_consistency.sh
       - name: Check offline model routing
         run: bash .github/scripts/check_model_routing.sh
+      - name: Check offline workflow state and recovery
+        run: bash .github/scripts/check_workflow.sh
+      - name: Run offline behavior regression tests
+        run: node --test .github/scripts/tests/*.test.mjs

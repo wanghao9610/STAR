@@ -642,7 +642,7 @@ The skill needs specific launch authority before starting:
 - Operations that may overwrite valuable artifacts;
 - Work whose duration or cost cannot be bounded.
 
-It first prepares the exact command, records it under “Awaiting user” in the execution log, and starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, caught after it costs the compute and the re-run too. If launch authority is still missing, it hands the command to you and stops; an earlier explicit instruction for that command and resource scope, or a matching `star-auto` grant within its `stop=` boundary, supplies the authority without another question. Nothing skips the review — the launch guard declines the command until the run's review exists and is no older than its log. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them before launch. After the command finishes, invoking the same plan resumes from the log and verifies the result instead of starting over.
+It first prepares the exact command, records it under “Awaiting user” in the execution log, and starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, caught after it costs the compute and the re-run too. If launch authority is still missing, it hands the command to you and stops; an earlier explicit instruction for that command and resource scope, or a matching `star-auto` grant within its `stop=` boundary, supplies the authority without another question. Nothing skips the review — the launch guard declines the command until the run has a passing review whose `REVIEW_STATE.md` matches the current source/configuration and relevant plan constraints. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them before launch. After the command finishes, invoking the same plan resumes from the log and verifies the result instead of starting over.
 
 ### Main outputs
 
@@ -693,7 +693,7 @@ A plan argument accepts the usual slug / numeric prefix / filename forms; a `wkd
 ### What it does
 
 1. Resolves the scope and loads the review rules: the project guidelines, `metds/codearc.md` when present, and — in plan mode — the plan's §2–§5 plus its execution log;
-2. Gathers relevant static evidence through the `.env` environment, using the narrowest checks that cover the requested scope (`compileall`, ruff, or flake8 when applicable and already installed — it installs no tools); it does not run an unconditional whole-tree check;
+2. Checks applicable behavior across Python, shell, JavaScript/TypeScript and configuration, using the narrowest installed syntax, lint or regression tools; Python uses the `.env` interpreter, while other languages use their own available tools. Missing tools are reported, never installed;
 3. Collects findings against a six-dimension rubric: docstrings & comments, naming, simplicity, STAR project conventions (hardcoded paths, layout, placement rules), high-confidence suspicious correctness patterns, and in plan mode plan conformance;
 4. Re-verifies every blocker/major finding against the code before reporting; unconfirmed suspicions are listed separately, never counted;
 5. Writes the report under `wkdrs/` and gives a short digest with routing: feature gaps → `star-plan-executor`, plan-text divergence → `star-plan-reviser`, restructuring → `star-code-architect`;

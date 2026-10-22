@@ -30,7 +30,7 @@ One block, built by the main agent at Step 1 and handed to every collector **ver
 - `naming_rules` — `codearc.md` §3 naming and style conventions, verbatim.
 - `residual_names` — `codearc.md` §7's do-not-rename list, verbatim. These trigger a blocker when **edited**, never when merely present.
 - `absent_rules` — which yardsticks this project does not have, so every collector falls back the same way (Step 1 records them).
-- `style_baseline` — PEP 8 plus the surrounding upstream style, wherever `codearc.md` is silent.
+- `style_baseline` — the language's conventions plus surrounding upstream style (PEP 8 for Python), wherever `codearc.md` is silent.
 - `language` — the report's language, resolved by the main agent. A collector never picks one.
 
 ## Execution evidence and re-verification
@@ -50,16 +50,18 @@ When severity is in doubt, grade down and say why in `issue`.
 
 ## A. Docstrings & comments
 
-- Every public class has a docstring stating its responsibility, plus key constructor args/attributes when they are not self-evident.
-- Every public function/method has at least a one-line docstring saying what it does or returns; non-trivial signatures document Args/Returns in the style the surrounding code already uses (Google / NumPy / reST — never convert between styles).
-- Modules exposing public API carry a module docstring.
+Apply language-appropriate documentation: Python docstrings; shell usage/contract comments; JS/TS API comments where the project requires them; config schema/default documentation. Do not impose Python syntax or naming rules on other languages.
+
+- Every public Python class has a docstring stating its responsibility, plus key constructor args/attributes when they are not self-evident.
+- Every public Python function/method has at least a one-line docstring saying what it does or returns; non-trivial signatures document Args/Returns in the style the surrounding code already uses (Google / NumPy / reST — never convert between styles).
+- Python modules exposing public API carry a module docstring.
 - Comments explain **why** (constraints, non-obvious decisions), not **what** the next line does; no stale comments contradicting the code; no commented-out code blocks.
 
 Not a finding: `_private` helpers a few lines long whose name is the documentation; test functions named for what they test.
 
 ## B. Naming
 
-- PEP 8: `snake_case` functions/variables, `PascalCase` classes, `UPPER_CASE` module constants, lowercase module/package names.
+- Python uses PEP 8; other languages follow their project conventions and surrounding style. Python: `snake_case` functions/variables, `PascalCase` classes, `UPPER_CASE` module constants, lowercase module/package names.
 - Names say what things are: no `data2`, `tmp_fn`, `do_stuff`; booleans read as predicates (`is_`, `has_`); ambiguous quantities carry units (`timeout_s`).
 - Follow the naming conventions recorded in metds/codearc.md and the upstream style of the surrounding code (§3: match existing style, even one you would not choose).
 
@@ -78,18 +80,27 @@ Not a finding: conventional short names in tight scopes (`i`, `x`, `df`, `cfg`);
 - **No hardcoded machine-local paths** (`/Users/...`, `/home/...`, `C:\...`) in code; machine-specific roots come from `.env` / environment variables / config (§9). Always a blocker.
 - Data is read from `datas/`, weights from `inits/`, generated outputs go to `wkdrs/`; nothing writes into `metds/` or into the package itself at runtime (§8).
 - New modules sit where codearc.md's placement rules and plan-component map assign them.
-- Runtime assumptions match the project: entrypoints documented to run via `.env`'s interpreter (conventions §3) / `execs/run.sh`; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
+- Runtime assumptions match the project: Python entrypoints documented to run via `.env`'s interpreter (conventions §3) / `execs/run.sh`, other languages via their declared runtimes; no system-python shebang assumptions; reusable launch scripts live under `execs/scpts/`.
 - Names left unchanged on purpose (codearc.md §7) — registry strings, config `type:` keys, checkpoint `state_dict` prefixes, logger/project names — are untouched.
 
 ## E. Suspicious correctness patterns (high-confidence only)
 
-Report only what the code in front of you demonstrates:
+Review observable behavior in every language against the requested task, documented interface and actual consumers; these are written correctness rules, even when a plan is absent. Trace concrete inputs to outputs, state changes and failures. Follow cross-file contracts far enough to verify argument names/types, defaults, exit/error handling and persistence. For a confirmed behavioral failure, name a reproducing input and expected versus observed result; run a narrow existing check or safe lightweight reproduction when feasible. Missing tools do not exempt a language from reading and behavioral review.
+
+- **Python:** control flow and boundary conditions; argument/default handling; exception propagation; file/process cleanup; mutation and return contracts; imported consumers and side effects.
+- **shell:** quoting, word splitting/globs and empty/space-bearing arguments; pipeline/subshell status, `set -e`/`pipefail` behavior; exit-code propagation, traps/cleanup; interpreter portability and command/payload parsing; safe path/worktree resolution and fail-open branches.
+- **JavaScript/TypeScript:** async ordering, awaited/rejected promises and cancellation; null/undefined and false/zero defaults; type/runtime-schema agreement; event-handler/process lifecycle and resource cleanup; module exports/imports and caller contracts. Type checking alone does not verify runtime behavior.
+- **Configuration (JSON/YAML/TOML and similar):** parse and schema/type validity; defaults/precedence; path and environment expansion relative to the consumer; referenced scripts/files, key names and cross-file wiring; unsafe or silently ignored settings. Verify the consuming code, not merely a valid parse.
+
+Use narrow already-installed evidence only: `.env` Python compile/lint checks, declared shell syntax checks and optional installed ShellCheck, Node syntax checks, existing TypeScript compiler with `--noEmit`, and available config parsers/schema checks. No installation or downloading package runners; no Python dependency for shell/JS/config reviews. Record omissions and whether they leave a required behavior unverified.
+
+Also report these concrete Python patterns when the code demonstrates them:
 
 - Unused imports/variables (corroborate with ruff/flake8 output when available; verify an "unused" import is not a side-effect import before flagging).
 - Mutable default arguments; bare `except:` / `except Exception: pass` swallowing errors; files or processes opened without context managers; `== None` comparisons; f-strings without placeholders; obviously inverted or off-by-one conditions.
 - Signature/call mismatches within the scope (compileall and ruff catch part; read the call sites for the rest).
 
-Not a finding here: hypothetical races, performance guesses, "might fail if …" scenarios with no concrete input you can name. What needs a debugger to confirm goes to the report's Unconfirmed list at most.
+Not a finding here: hypothetical races, performance guesses, "might fail if …" scenarios with no concrete input you can name. A demonstrated language-independent behavior or contract defect is in scope, not merely Python syntax or style. What needs a debugger to confirm goes to the report's Unconfirmed list at most.
 
 ## F. Plan conformance (plan mode only)
 

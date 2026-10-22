@@ -125,6 +125,7 @@ is_optional_path() {
         ".kimi-code/plugins")   return 0 ;;
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
+        ".agents/skills/star-code-reviewer/scripts") return 0 ;;
         "execs/configure.sh")      return 0 ;;
     esac
     return 1
@@ -441,10 +442,101 @@ done
 ENV_DIR="${ROOT_DIR}"
 [[ "${ADOPT}" == false ]] || ENV_DIR="$(pwd -P)"
 
-env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
-    [[ -f "${ENV_DIR}/.env" ]] || return 0
-    sed -n "s/^$1=//p" "${ENV_DIR}/.env" | tail -1
+parse_env_literal() { # $1 = key, $2 = raw value; print a literal without evaluating shell code
+    local key="$1" raw="$2" value="" state=unquoted char next i
+    if [[ "${raw}" == "'"* ]]; then
+        state=single
+        raw="${raw:1}"
+    elif [[ "${raw}" == '"'* ]]; then
+        state=double
+        raw="${raw:1}"
+    fi
+
+    for (( i = 0; i < ${#raw}; i++ )); do
+        char="${raw:i:1}"
+        case "${state}" in
+            single)
+                if [[ "${char}" == "'" ]]; then state=closed; else value+="${char}"; fi ;;
+            double)
+                case "${char}" in
+                    '"') state=closed ;;
+                    '$'|'`')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: shell expansion is unsupported; use single quotes for a literal value." ;;
+                    $'\\')
+                        (( ++i < ${#raw} )) || fail "Invalid ${key} in ${ENV_DIR}/.env: trailing backslash in a double-quoted value."
+                        next="${raw:i:1}"
+                        case "${next}" in
+                            '$'|'`'|'"'|$'\\') value+="${next}" ;;
+                            *) value+="\\${next}" ;;
+                        esac ;;
+                    $'\r'|$'\n')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: values must stay on one line." ;;
+                    *) value+="${char}" ;;
+                esac ;;
+            unquoted)
+                case "${char}" in
+                    '$'|'`')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: shell expansion is unsupported; use single quotes for a literal value." ;;
+                    '~')
+                        if [[ -z "${value}" || "${value}" == *: ]]; then
+                            fail "Invalid ${key} in ${ENV_DIR}/.env: unquoted tilde expansion is unsupported; quote or escape the literal value."
+                        fi
+                        value+="${char}" ;;
+                    ';'|'&'|'|'|'<'|'>'|'('|')')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: unquoted shell syntax is unsupported; quote or escape the literal value." ;;
+                    "'"|'"')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: quotes must enclose the whole value." ;;
+                    $'\\')
+                        (( ++i < ${#raw} )) || fail "Invalid ${key} in ${ENV_DIR}/.env: trailing backslash in an unquoted value."
+                        value+="${raw:i:1}" ;;
+                    ' '|$'\t') state=after ;;
+                    $'\r'|$'\n')
+                        fail "Invalid ${key} in ${ENV_DIR}/.env: values must stay on one line." ;;
+                    *) value+="${char}" ;;
+                esac ;;
+            closed)
+                case "${char}" in
+                    ' '|$'\t') state=after ;;
+                    *) fail "Invalid ${key} in ${ENV_DIR}/.env: unexpected text after the quoted value." ;;
+                esac ;;
+            after)
+                case "${char}" in
+                    ' '|$'\t') ;;
+                    '#') break ;;
+                    *) fail "Invalid ${key} in ${ENV_DIR}/.env: unexpected text after the literal value." ;;
+                esac ;;
+        esac
+    done
+    case "${state}" in
+        single|double)
+            fail "Invalid ${key} in ${ENV_DIR}/.env: unterminated ${state}-quoted value." ;;
+    esac
+    printf '%s' "${value}"
 }
+
+env_value() { # $1 = key; its last assignment in the target .env, empty when it has none
+    local key="$1" line="" current found=false
+    [[ -f "${ENV_DIR}/.env" ]] || return 0
+    while IFS= read -r current || [[ -n "${current}" ]]; do
+        current="${current%$'\r'}"
+        if [[ "${current}" == "${key}="* ]]; then
+            line="${current#*=}"
+            found=true
+        fi
+    done < "${ENV_DIR}/.env"
+    [[ "${found}" == true ]] || return 0
+    parse_env_literal "${key}" "${line}"
+}
+
+# Reject malformed effective file values before fetching or writing. Explicit
+# flags and environment variables outrank .env, so their unused file values do
+# not block the requested update.
+if [[ -z "${HARNESSES_ARG}" && -z "${STAR_HARNESSES:-}" ]]; then
+    env_value STAR_HARNESSES >/dev/null
+fi
+if [[ -z "${STAR_REPOSITORY:-}" ]]; then
+    env_value STAR_REPOSITORY >/dev/null
+fi
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,
 # then every one of them.
@@ -545,7 +637,7 @@ if [[ "${ADOPT}" == true ]]; then
         "execs/run.sh"
         "execs/update.sh"
         "execs/configure.sh"
-        "execs/scpts/00_exp.sh"
+        "execs/scpts/.gitkeep"
         "${EXTENSION_FILES[@]}"
         "${HOOK_FILES[@]}"
         "${INSTALL_CONFIGS[@]}"
@@ -579,6 +671,11 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     # dispatch for its complete run or phase.
     SYNC_PATHS+=("${MODEL_AGENT_TREES[@]}")
     SYNC_PATHS+=("${PI_SKILL_RUNTIME_PATHS[@]}" "execs/configure.sh")
+    # These consumers share the review-validity helper even in a skill-only update.
+    case "${SKILL_NAME}" in
+        star-flow-status|star-plan-executor)
+            SYNC_PATHS+=(".agents/skills/star-code-reviewer/scripts") ;;
+    esac
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
     (( ${#SYNC_PATHS[@]} > 0 )) || \

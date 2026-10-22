@@ -29,6 +29,13 @@
 
 ## 4. 偏差清单
 
+<!-- 对每条纳入审查的编号发现，保留 finding_id 与来源日志。只有已核实完成的处理或明确的不行动决定，且证据可检查，才记 resolved；提议、待交接或未决选择记 deferred。没有此类发现时省略表格。 -->
+
+| finding_id | source_log | disposition | decision | evidence |
+| --- | --- | --- | --- | --- |
+| <run>:PF1 | wkdrs/<run>/EXEC_LOG.md | deferred | <decision or outstanding action> | <root-relative evidence path> |
+
+
 <!-- 计划说 X、run 做了 Y；计划之外的额外工作；被证据推翻的假设；
      kill-criteria 命中与日志中原文引用的方向性信号。 -->
 

@@ -237,7 +237,7 @@ elif ! cmp -s "${DISCOVERY}" "${MARKETPLACE}"; then
     fail "${DISCOVERY} does not resolve to ${MARKETPLACE}"
     plugin_errors=1
 fi
-if ! python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); e=m["plugins"]; assert m["name"] == "star" and len(e) == 1 and e[0]["name"] == "star" and e[0]["source"] == {"source": "local", "path": "./.codex/plugins/star"}; assert p["name"] == "star" and p["skills"] == "./skills/"' "${MARKETPLACE}" "${PLUGIN_ROOT}/.codex-plugin/plugin.json"; then
+if ! jq -e -s 'length == 2 and (.[0] as $m | .[1] as $p | $m.name == "star" and ($m.plugins | length) == 1 and $m.plugins[0].name == "star" and $m.plugins[0].source == {source: "local", path: "./.codex/plugins/star"} and $p.name == "star" and $p.skills == "./skills/")' "${MARKETPLACE}" "${PLUGIN_ROOT}/.codex-plugin/plugin.json" >/dev/null; then
     fail "Codex STAR plugin or marketplace metadata is invalid"
     plugin_errors=1
 fi
@@ -250,7 +250,7 @@ if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
 fi
 KIMI_MARKETPLACE=".kimi-code/plugins/marketplace.json"
 KIMI_PLUGIN_ROOT=".kimi-code/plugins/star"
-if ! python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); p=json.load(open(sys.argv[2])); e=m["plugins"]; assert m["version"] == "2" and len(e) == 1 and e[0]["id"] == "star" and e[0]["source"] == "./.kimi-code/plugins/star"; assert p["name"] == "star" and p["skills"] == "./skills/"' "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json"; then
+if ! jq -e -s 'length == 2 and (.[0] as $m | .[1] as $p | $m.version == "2" and ($m.plugins | length) == 1 and $m.plugins[0].id == "star" and $m.plugins[0].source == "./.kimi-code/plugins/star" and $p.name == "star" and $p.skills == "./skills/")' "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json" >/dev/null; then
     fail "Kimi STAR plugin or marketplace metadata is invalid"
     plugin_errors=1
 fi
@@ -289,7 +289,7 @@ if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
 fi
 
 DSH_PLUGIN_ROOT=".dsh/commands/star"
-if ! python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["name"] == "star" and p["main"] == "lib/index.js" and p["dsh"]["bundle"]["patch"] == "./cordis.patch.yml"' "${DSH_PLUGIN_ROOT}/package.json"; then
+if ! jq -e -s 'length == 1 and (.[0] | .name == "star" and .main == "lib/index.js" and .dsh.bundle.patch == "./cordis.patch.yml")' "${DSH_PLUGIN_ROOT}/package.json" >/dev/null; then
     fail "DSH STAR package metadata is invalid"
     plugin_errors=1
 fi
@@ -433,7 +433,14 @@ check_absent() { # $1 = tree, $2 = literal token
     # manifests, which .codex/skills holds — and its default_prompt is written in
     # Codex's own invocation syntax on purpose. Check 3 excludes it from the
     # inventory baseline for the same reason.
-    hits="$(find -L "$1" -type f ! -path '*/agents/*' -exec grep -nHF -- "$2" {} + || true)"
+    # Canonical helper paths name files, not slash commands. Remove only those
+    # spans before deciding, so a foreign invocation on the same line still fails.
+    hits="$(find -L "$1" -type f ! -path '*/agents/*' -exec grep -nHF -- "$2" {} + |
+        CHECK_TOKEN="$2" perl -ne '
+            $body = $_; $body =~ s/^[^:]*:[0-9]+://;
+            $body =~ s{\.agents/skills/star-[a-z-]+/scripts/[A-Za-z0-9_.-]+}{}g;
+            print if index($body, $ENV{CHECK_TOKEN}) >= 0;
+        ' || true)"
     if [[ -n "${hits}" ]]; then
         fail "$1 contains foreign invocation token '$2':"
         printf '%s\n' "${hits}" | sed 's/^/      /'
@@ -923,23 +930,26 @@ section "Skill script parity"
 script_errors=0
 while IFS= read -r rel; do
     baseline="${SKILL_ROOTS[0]}/${rel}"
-    [[ -x "${baseline}" ]] || { fail "${baseline} is not executable"; script_errors=1; }
+    if [[ "${rel}" == *.sh && ! -x "${baseline}" ]]; then
+        fail "${baseline} is not executable"; script_errors=1
+    fi
     for root in "${SKILL_ROOTS[@]:1}"; do
         other="${root}/${rel}"
         [[ -f "${other}" ]] || continue   # inventory parity is check 3's job
-        [[ -x "${other}" ]] || { fail "${other} is not executable"; script_errors=1; }
+        if [[ "${rel}" == *.sh && ! -x "${other}" ]]; then
+            fail "${other} is not executable"; script_errors=1
+        fi
         if ! cmp -s "${baseline}" "${other}"; then
             fail "${other} differs from ${baseline}; skill scripts must be byte-identical"
             script_errors=1
         fi
     done
-done < <(cd "${SKILL_ROOTS[0]}" && find -L . -type f -name '*.sh' | sed 's|^\./||' | sort)
+done < <(cd "${SKILL_ROOTS[0]}" && find -L . -type f \( -name '*.sh' -o -name '*.py' \) | sed 's|^\./||' | sort)
 
-# Same-named scripts are one shared file, not per-skill forks. A skill cannot
-# reference another skill's copy — the path would carry a foreign invocation
-# token and `update.sh --skill` would not guarantee the other skill is even
-# installed — so a shared collector is duplicated into each consumer instead,
-# and this is what keeps the duplicates honest.
+# Same-named scripts are one shared file, not per-skill forks. Collectors stay
+# self-contained by shipping in each consumer. The canonical review-validity
+# helper is an explicit runtime dependency: update.sh also installs it for a
+# status/executor-only update. This check keeps any duplicated helpers honest.
 while IFS= read -r base; do
     first=""
     while IFS= read -r path; do
@@ -950,9 +960,9 @@ while IFS= read -r base; do
             script_errors=1
         fi
     done < <(find -L "${SKILL_ROOTS[@]}" -type f -name "${base}" | sort)
-done < <(find -L "${SKILL_ROOTS[@]}" -type f -name '*.sh' -exec basename {} \; | sort -u)
+done < <(find -L "${SKILL_ROOTS[@]}" -type f \( -name '*.sh' -o -name '*.py' \) -exec basename {} \; | sort -u)
 
-(( script_errors == 0 )) && note "skill scripts are byte-identical and executable in all ${#SKILL_ROOTS[@]} trees"
+(( script_errors == 0 )) && note "skill helpers are byte-identical in all ${#SKILL_ROOTS[@]} trees; shell entrypoints are executable"
 
 # 14. Top-level section parity between the authored source and Claude manifests.
 #     Check 11 excludes .agents on purpose: it is the neutral source, not a

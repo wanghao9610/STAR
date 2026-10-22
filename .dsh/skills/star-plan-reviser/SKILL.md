@@ -62,6 +62,8 @@ A collector's `suspect` or `inconsistent` is a lead, not a finding. Before it be
 
 Fill `assets/review_report_template.md` (Chinese plans: `assets/review_report_template_zh.md`), seven sections: ① intent recap ② what actually happened ③ completion scorecard (per §3 task plus the §5 done-criterion: `met` / `partial` / `unmet` / `unverifiable`, each with evidence) ④ divergences ⑤ blockers & leftovers ⑥ knock-on effects ⑦ revision candidates, each graded **local / structural / strategic**.
 
+For each numbered plan-level finding, fill the resolution table in report §4 with its unchanged `finding_id`, `source_log`, `disposition`, `decision` and evidence path (conventions §8). Start unsettled rows as `deferred`. After the revision decisions and authorized edits, update only rows whose disposition is established: a proposed or delegated change remains deferred until its supporting result is inspectable. A verified rejection of a finding, or an explicit no-action decision with its authority and reason, may resolve it without a plan edit. Never edit EXEC_LOG to close a finding or treat a later report date as its resolution.
+
 Write it to `wkdrs/<run>/REVIEW_<YYYY-MM-DD>.md` (real date, never invented). If the plan has no run, use `wkdrs/reviews/<prefix>_<slug>_<YYYY-MM-DD>.md`. In chat, give a digest: verdict, top divergences, and the candidate list as one-liners.
 
 ### Step 4: Revision Q&A (the whole list, then one question)
@@ -95,7 +97,7 @@ After the last edit:
 
 ### Step 7: Report & handoff
 
-Lead with the outcome: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `star-plan-decomposer <slug>` (structure changed / children stale), `star-plan-coach <slug>` (strategy pivot), `star-plan-executor <leaf>` (re-run a revised leaf), `star-code-reviewer <leaf>` (audit the implementation's code), `star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
+Before reporting, reconcile the report’s finding-resolution rows with the actual decisions and completed edits; retain `deferred` for remaining work. Lead with the outcome: the evidence base (what was read and verified), the completion verdict, changes applied per section, candidates skipped, knock-on effects to watch. End with the next command: `star-plan-decomposer <slug>` (structure changed / children stale), `star-plan-coach <slug>` (strategy pivot), `star-plan-executor <leaf>` (re-run a revised leaf), `star-code-reviewer <leaf>` (audit the implementation's code), `star-flow-status` (see the whole tree). If nothing was edited, say so plainly — the report file remains. If edits were applied, offer once to commit them (State & File Rules).
 
 ### Dropping a plan, and taking one back
 
