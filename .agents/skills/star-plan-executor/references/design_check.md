@@ -1,5 +1,15 @@
 # Pre-compute Design Check
 
+## Applicability and dispatch
+
+Before implementation, read the completed EXEC_PLAN and leaf plan. Run this check if the work reports experimental results supporting a research claim, sets or changes metrics, benchmarks, data splits or selection, preprocessing that affects evaluation, weights or their training-data assumptions, seeds/repeats, baseline or ablation comparisons, or prepares a heavy/costly command across the STOP line. An already-authorized launch still needs this check. Small experiments and data-preparation tasks can qualify; the task's label or size is not an exemption.
+
+Skip only when the recorded actions clearly involve none of those conditions, such as an isolated packaging fix with import tests and no experimental effect. Record `design check: not applicable` and the concrete reason in EXEC_PLAN. Missing information is not evidence of inapplicability: inspect the relevant plan content, and if applicability remains unclear, run the check and report the uncertainty. Action checks, code review and launch authority still apply. On resume, reassess before executing changed actions that introduce or alter these conditions; unchanged, previously checked design needs no repeat.
+
+When applicable, record the reason in EXEC_PLAN and request one independent read on the PLAN tier under conventions §6 (scope and independence), §10.8 (tier selection) and §13 (the current harness's dispatch controls). Give the reader this checklist, the completed EXEC_PLAN, the leaf plan and only the root plan's §4 (metrics and compute budget), without the producing conversation. Use the checklist language matching the leaf's frontmatter. The reader reads only those three evidence files, returns the entries below, and never writes, ranks, decides or runs commands. Re-open the cited evidence for every `fail`, correct authorized execution-plan defects, and ask only about unresolved research scope, acceptance, key inputs or cost. With no permitted independent reader, check locally once and record the limitation.
+
+## Checklist
+
 Run this against the completed EXEC_PLAN before implementation, not against the sub-plan as written. The root plan and the leaf passed their own checklists (`star-plan-coach`'s `plan_rubric.md`, `star-plan-decomposer`'s `subplan_rubric.md`); this asks whether the concrete run now on the page still satisfies them, plus two things neither checklist covers. Evidence is the EXEC_PLAN, the leaf sub-plan, and the root plan's §4 — nothing else. An item whose evidence is not in those three files is `unclear`, never `pass`.
 
 Return one entry per item — `item`, `verdict: pass | fail | unclear`, `evidence` (the quoted line, or the exact statement of what is absent), `fix` — and nothing else. Do not rank, do not decide, do not run anything.
@@ -18,4 +28,4 @@ Return one entry per item — `item`, `verdict: pass | fail | unclear`, `evidenc
 
 7. **What crosses the STOP line has a stated cost, and the plan can afford it** — every action handed back carries GPU×hours or call count and spend, and the root §4 compute budget is stated. A cost this run cannot fund is a decision for the user, not a surprise for the cost table afterwards.
 
-What this check is not: it does not judge whether the research question is worth asking, does not re-open a settled §5 threshold, and does not stop a run. It reports; the executor fixes in-scope execution-plan defects under existing authority and asks only when research scope, acceptance, key inputs, or cost remains unresolved. A leaf that reports no number and launches nothing — data readiness, pure implementation — returns `unclear` or `pass` on items 1–6; that is the expected result, not a defect to fix.
+This check reports execution-design evidence; it does not reconsider the research question or a settled §5 threshold. An `unclear` item states what evidence is missing rather than passing the design by assumption.

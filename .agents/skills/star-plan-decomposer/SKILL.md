@@ -10,11 +10,11 @@ description: >-
 
 Invocation: `star-plan-decomposer PLAN_NAME [DESCRIPTION]`. Resolve the slug, numeric prefix, or filename before scanning. Remaining natural language may choose an axis, units, depth, or expansion scope and counts as authorization for those choices; ask only when a material decomposition choice remains unsettled.
 
-**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
+**Shared conventions.** Follow `docs/mds/star-workflow/research-workflow-conventions.md` for scope, authority, `.env` controls (`STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`), runtime, language and provenance. Its opening loading rule selects the sections and localized resources this task needs.
 
 After resolving the target, run `scripts/scan.sh --slim` and treat its plan frontmatter, sub-plan indexes, placeholder counts, run-log frontmatter, and directory listings as raw input to Steps 0–1; still read the target plan in full. If it fails, read the plan files directly and report the fallback.
 
-**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` was started on its tier and records its actual model from its own session provenance.
+**Passing a tier model.** Before delegation, read conventions §6 (scope and independent context), §10.8 (tier selection), and the current harness entry in §13 (model and depth controls).
 
 ## Role
 

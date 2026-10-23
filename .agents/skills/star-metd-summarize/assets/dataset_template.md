@@ -10,6 +10,8 @@ sources:
     updated: <YYYY-MM-DD>
 ---
 
+<!-- After final content and source verification, record the shared source_state binding; dates do not establish freshness. -->
+
 <!-- Compiled by star-metd-summarize from metds/plans/. Hand edits are overwritten on the next
      run — to change this document, change the plan it came from. -->
 

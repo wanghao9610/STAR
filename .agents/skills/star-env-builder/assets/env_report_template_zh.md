@@ -1,5 +1,6 @@
 ---
 env_name: <ENV_NAME>
+interpreter: "<实际完成检查的 ENV_PY 绝对路径>"
 backend: conda            # conda / venv
 created: <YYYY-MM-DD>     # 运行时真实日期（date +%Y-%m-%d），绝不编造
 status: verified          # verified / partial / blocked
@@ -9,6 +10,8 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 ---
 
 # 环境报告——<ENV_NAME>
+
+<!-- 所需检查和获授权配置更新结束后，使用已核验解释器及全部依赖定义记录 environment 绑定。partial/blocked 报告不能通过。 -->
 
 一个全新的会话应当仅凭这份文件就能使用——或重建——这个环境。
 

@@ -27,7 +27,7 @@
 
 执行分支用 `git branch --list '[0-9]*_*'` 列出，worktree 用 `git worktree list --porcelain` 列出——扫描两样都不列（规约 §11）。某个分支匹配到一个叶子、而这个叶子的 run 目录在当前 checkout 里不存在，就是一次正在该分支上进行的 run：基础分支始终是准据（§11.3），所以这边叶子的 frontmatter 读作未完成是对的——渲染这个叶子时点出分支名，不是只当它 pending；分支侧状态只在下面某一行需要时才读，用只读的 `git show <run>:wkdrs/<run>/EXEC_LOG.md`（§1 的只读清单涵盖 `show`）。worktree 清单同样读法（§11.7–9）：路径以某个 run 名结尾的树就是那个 run 的家——渲染叶子时挨着分支一并点出，那个 run 的分支侧状态也就在树里原地读——既没有叶子、也没有 run 记录认领的树，不归我们提。
 
-覆盖检查只读取每行需要的字段：代码审查使用共享内容校验，方向性发现读取编号条目和修订报告的处理表；其它已登记产物仍按各自约定的存在/日期字段读取，不通读正文。产物登记表见规约 §8；下面覆盖表逐行写明用哪个字段。
+覆盖检查按产物类型核对：代码审查使用 review_state；分析、结果表、方法文档、环境和工程豁免按 `references/source_state_zh.md` 使用 source_state 的只读 check；方向性发现读取编号和处理表。以当前来源清单要求覆盖，不从旧报告反推范围；日期保留为来源信息，不替代内容校验。其它产物仍用登记的字段（规约 §8，产物归属）。
 
 ## 节点分类
 
@@ -94,31 +94,33 @@
 | 2 | 文献缺失 | 至少存在一份根计划 **且** `metds/refs/refs_index.md` 不存在 | `star-refs-reviewer` |
 | 3 | 缺代码审查 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `CODE_REVIEW_<date>.md` | `star-code-reviewer <叶子>` |
 | 4 | 代码审查过期 | run 已有审查，且共享 `review_state.sh --root <run-checkout> check <run>` 检查发现记录缺失/无效，或报告、源码、配置、计划正文已变；内容仍有效的 `blocked` 属于待修复问题，不算过期 | `star-code-reviewer <叶子>` |
-| 5 | 缺实验分析 | 某叶子 `exec_status: done` **且** 其当前 run 目录存在 **且** 该目录下没有 `EXPT_ANALYSIS_<date>.md` | `star-expt-analyst <叶子>` |
-| 6 | 结果汇总表过期 | ≥2 个叶子有 `EXPT_ANALYSIS_<date>.md` **且** `wkdrs/results/results.md` 与（限定到 `PLAN_NAME` 时的）`wkdrs/results/results_<slug>.md` 都不存在、或其 `generated:` 都早于这些报告里最新的日期 | `star-expt-analyst aggregate` |
-| 7 | 方法文档过期 | 某个编译出的 `metds/*.md`（带 `type:` + `generated:` + `sources:`）在 `sources:` 里记录的某计划 `updated`，早于该计划当前的 `updated` | `star-metd-summarize` |
+| 5 | 缺分析或豁免未核验 | 叶子已完成、当前 run 存在，没有当前有效的工程豁免且没有分析报告；已有豁免声明但绑定检查未通过时需执行器重新分类 | 豁免无效时 `star-plan-executor <叶子>`，否则 `star-expt-analyst <叶子>` |
+| 6 | 结果表缺失、过期或未知 | 已有适用结果表，但 results 绑定或当前必需报告覆盖检查未通过；或者结果表缺失且至少两个未获豁免的叶子有分析报告 | `star-expt-analyst aggregate` |
+| 7 | 方法文档过期或未知 | 已有生成的方法文档，对当前范围内有效计划的 method 绑定检查未通过，包括 `--require` 指定的新增计划 | `star-metd-summarize` |
 | 8 | 方法文档缺失 | 每个叶子都处于终态（`done` / `abandoned`）**且** 没有任何 `## Sub-plans` 索引还带概要行 **且** 每个总体计划都带 `finalized:` **且** 没有任何 `metds/*.md` 带 `type:` + `generated:` | `star-metd-summarize` |
 | 9 | 接入未回填 | `metds/adopt.md` 存在 **且** 其 `backfilled:` 缺失或为 `—` **且** 至少存在 1 个带 `parent:` 的子计划 | `star-proj-adopt backfill` |
 | 10 | Digest 过期 | `wkdrs/digests/` 里至少有 1 份 `EXPT_DIGEST_<date>.md` **且** 范围内至少有 1 个 run 的 `EXPT_ANALYSIS_<date>.md` 日期晚于最新那份**序列** digest 的 `covers.through` | `star-expt-digest` |
 | 11 | 缺代码库规范 | 存在 ≥1 个可执行叶子 **且** `metds/codearc.md` 不存在 | `star-code-architect` |
-| 12 | 缺运行环境 | 存在 ≥1 个可执行叶子 **且** 不存在任何 `wkdrs/env_*/ENV_REPORT.md` | `star-env-builder` |
+| 12 | 环境验证缺失、过期或未知 | 存在可执行叶子，当前 `.env` 解释器最新相关报告缺失、为 partial/blocked，或对当前依赖定义的 environment 绑定检查未通过；已知运行失败同样触发 | `star-env-builder`（验证或修复，不自动重建） |
 | 13 | 缺发布准备 | 每个叶子都处于终态（`done` / `abandoned`）**且** 没有任何 `## Sub-plans` 索引还带概要行 **且** 已有带 `type:` + `generated:` 的 `metds/*.md` **且** `wkdrs/release/` 下没有 `RELEASE_<date>.md` | `star-code-release` |
 | 14 | 待合并 | 某叶子当前 run 记录了 `branch:` 而 `merged:` 仍是 `pending` **且** 该叶子在那个分支上 `exec_status: done` **且** 该 run 最新的 `CODE_REVIEW_<date>.md` 存在、没有其日志里悬而未决的 blocker/major 问题项 | `star-plan-executor <叶子>`（抵达合并确认点——规约 §11） |
-| 15 | 判据在打分之后改过 | 某叶子 `exec_status: done` **且** 其当前 run 目录里有 `EXPT_ANALYSIS_<date>.md` **且** 该叶子 frontmatter 的 `updated` 晚于这些报告里最新的那个日期 | `star-expt-analyst <叶子>`（这次 run 被打分之后计划又改了——按计划今天写的判据重新打分） |
+| 15 | 分析过期或未知 | 已完成叶子有分析报告、没有当前有效的工程豁免，且对当前叶子/祖先约束或证据的 analysis 绑定检查未通过 | `star-expt-analyst <叶子>`（先核对变化的来源再重新打分） |
 | 16 | 方向性发现尚未处理 | 活动叶子的当前 EXEC_LOG 记录了 `<run>:PF<n>`，但相关修订报告中没有同一 `finding_id`、同一 `source_log` 且 `disposition: resolved`、决定明确、证据可检查的处理行；`deferred` 仍为未处理 | `star-plan-reviser <叶子>`（仅明确调用，或在 `star-auto` 授权下执行） |
 
 有八行特别容易做错：
 
 - **第 4 行比较内容，不比较日期或 mtime。** 在 run 所在 checkout 使用与启动守卫、审查器相同的辅助脚本。仅日志或计划状态/日期/来源字段变化不会令记录过期；源码、配置、依赖或相关计划正文变化即使在同一天也会。旧报告缺少 `REVIEW_STATE.md` 时，需要核对源码后补录一次。内容仍有效但 gate 为 `blocked` 时交给执行器修复，不靠刷新报告消掉问题。
-- **第 7 行是精确对账，不是拿 mtime 猜。** `star-metd-summarize` 逐个源计划记下"读取时该计划带的 `updated` 值"。拿那个记录值和计划当前的 `updated` 比——绝不用文件 mtime，它会因无关的事变动（一次 checkout、一次格式化）。
+- **第 7 行比较计划内容与验证状态。** 使用 method 绑定并要求当前范围全部所查有效计划；正文、语义关系、执行验证状态或新增来源都会触发，即使日期相同。日期与模型记录单独变化不触发；旧文档缺绑定时标为未知，交给方法编译者核验。
 - **第 8 行要等整棵树。** summarizer 编译的是已确定的方法——只要还有活着的叶子未到终态、某个 `## Sub-plans` 索引里还有概要行、或总体计划未定稿，它自身的就绪门槛就不会放行——所以覆盖检查只在每个活着的叶子都到终态（`done` / `abandoned`）、不再有概要行、每个总体计划都带 `finalized:` 之后才推荐它，无论更早完成了多少叶子。
 - **第 10 行只对已经在记 digest 的项目触发。** 与第 2、8 行不同，产物缺失并不触发它：digest 是工作辅助，不是研究欠下的交付物，从没跑过 `star-expt-digest` 的项目并不欠账。所以这一行只问“已有的序列有没有落后”。“最新那份序列 digest”指 `mode` 为 `incremental`、`window` 或 `all` 的最新一份——`plan` 模式的 digest 是回溯性阅读，它的 `covers.through` 不能当作续接点，这与该 skill 自己的 `scope_spec_zh.md` 对上次覆盖日期的定义一致。
 - **第 14 行去记录所在的地方读。** 在分支 checkout 上，记录就在工作区里；从基础 checkout 看，执行分支清单是触发器，只读的 `git show` 是读取手段。它的审查条件是分支侧的 `CODE_REVIEW_<date>.md`；一份都没有时，改由第 3 行在分支侧状态上触发，而且它在这一档里本来就排在前面。住在 worktree 里的 run，工作文件在树里，就到记录的 `worktree:` 路径下原地读，和别的读取一样；`git show` 只用于没有现存工作树的分支。合并本身仍走 executor，它会在树里续跑（§11.8）。
 - **第 1 行是这里最弱的信号。** `star-plan-coach` 把种子记在计划 §1 的正文里（"Seeded from `metds/ideas/<slug>_idea.md`"），不是 frontmatter 字段，所以检测靠 slug 匹配加上对想法文件名的正文 grep。一份由想法长出来、后来改名的计划会被读成"未立项"。只有第 1 行触发时，说明这条检查是启发式的。
-- **第 15 行是个粗筛，不是对账。** 第 7 行比的是记录下来的那个 `updated` 值；分析报告没有这样的记录值，所以这一行只能比日期先后、会多报：改一句 §1 措辞和调低一个 §5 阈值触发得一样。这是有意的——reviser 的 `exec_status` 复位只是一次提议；提议被拒，就留下一个 `done` 叶子，它最新那份分析打的是计划已不再写的判据。比的是计划的 `updated` 与报告文件名里的*日期*，永远不看文件 mtime。重新打分确认什么都没变，代价是一份报告；不这么做，代价是一个没人追得回判据的判定。
+- **第 15 行核对分析所依据的当前约束和证据。** 不能只比较计划 updated 与报告文件名日期。失效或缺失的绑定需分析技能核验；行 5 的当前工程豁免可免去自动分析，但不能免去审查或显式分析请求。
 - **第 16 行按发现编号和处理结论判断。** 只读日志中的编号发现，以及 run 内或 `wkdrs/reviews/` 下该叶子/祖先修订报告的处理表。报告日期较晚不代表问题已处理；`resolved` 必须匹配编号、来源、决定和证据。缺失、格式错误或互相矛盾的行仍算未处理或未知。旧的无编号条目由执行器在获准续跑时补齐；明确报告缺口，不从日期推断结案。
 
 第 16 行使用 shell 工具运行 `bash scripts/findings.sh --root <run-checkout> --log <source-log> --report <relevant-review>`；多份相关叶子/祖先报告重复传 `--report`。结果包含 `open`、`resolved`、`unknowns`；退出码 2 表示证据不完整，open 是正常待办。不得用报告日期替代，也不能省略未知项。
+
+**分析与环境检查。** 按 `references/source_state_zh.md` 逐项检查。先看日志最新的明确分析决定：已改为 required 时按需要分析处理；仍声明 not applicable 但绑定无效时交回执行器；没有豁免则默认需要分析。状态查询不得补录绑定。环境从当前 .env 解析解释器，读取其最新相关报告并检查全部当前依赖定义；过期报告或相互矛盾的验证不能由较旧的通过报告替代。指纹一致也不推翻已知导入失败，实际可运行检查留给执行前。
 
 ## 下一步动作（唯一的建议）
 

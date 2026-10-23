@@ -126,6 +126,8 @@ is_optional_path() {
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
         ".agents/skills/star-code-reviewer/scripts") return 0 ;;
+        ".agents/skills/star-flow-status/scripts/source_state.sh") return 0 ;;
+        .agents/skills/star-flow-status/references/source_state*.md) return 0 ;;
         "execs/configure.sh")      return 0 ;;
     esac
     return 1
@@ -676,6 +678,12 @@ elif [[ -n "${SKILL_NAME}" ]]; then
         star-flow-status|star-plan-executor)
             SYNC_PATHS+=(".agents/skills/star-code-reviewer/scripts") ;;
     esac
+    case "${SKILL_NAME}" in
+        star-flow-status|star-plan-executor|star-expt-analyst|star-expt-digest|star-metd-summarize|star-env-builder|star-code-release)
+            SYNC_PATHS+=(".agents/skills/star-flow-status/scripts/source_state.sh" \
+                ".agents/skills/star-flow-status/references/source_state.md" \
+                ".agents/skills/star-flow-status/references/source_state_zh.md") ;;
+    esac
     filter_paths "${SYNC_PATHS[@]}"
     SYNC_PATHS=(${FILTERED[@]+"${FILTERED[@]}"})
     (( ${#SYNC_PATHS[@]} > 0 )) || \
@@ -791,8 +799,8 @@ if [[ "${ADOPT}" == false ]]; then
         # project only when codex is selected.
         SPARSE_PATHS=()
         for path in "${SYNC_PATHS[@]}"; do
-            # Cone-mode checkout takes directories; sync still copies only the command.
-            [[ "${path}" != execs/configure.sh ]] || path=execs
+            # Cone-mode checkout takes directories; sync still copies only named files.
+            case "${path}" in *.sh|*.md) path="${path%/*}" ;; esac
             SPARSE_PATHS+=("${path}")
         done
         git -C "${SOURCE_DIR}" sparse-checkout set "${SPARSE_PATHS[@]}" \

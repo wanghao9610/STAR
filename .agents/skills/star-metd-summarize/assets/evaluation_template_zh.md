@@ -10,6 +10,8 @@ sources:
     updated: <YYYY-MM-DD>
 ---
 
+<!-- 最终内容写定并核验来源后，按共享 source_state 约定记录内容绑定；日期不替代时效检查。 -->
+
 <!-- 由 star-metd-summarize 从 metds/plans/ 编译而成。手工编辑会在下次运行时被覆盖——要改这份
      文档，请改它的来源计划。本文档定义协议；某个 run 实际测出了什么在
      wkdrs/<run>/EXPT_ANALYSIS_<date>.md 里。 -->

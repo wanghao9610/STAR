@@ -9,6 +9,10 @@ trap 'rm -rf -- "${TMP_DIR}"' EXIT
 
 fail() { printf 'FAIL  %s\n' "$*" >&2; exit 1; }
 note() { printf 'ok    %s\n' "$*"; }
+harness_adapter() {
+	awk -v heading="#### $1" '$0 == heading { active=1; next } active && /^#### / { exit } active' \
+		"${ROOT_DIR}/docs/mds/star-workflow/research-workflow-conventions.md"
+}
 expect_model() { grep -Fqx "model: \"$2\"" "$1" || fail "$1 should have model $2"; }
 expect_plain_model() { grep -Fqx "model: $2" "$1" || fail "$1 should have unquoted model $2"; }
 expect_effort() { grep -Fqx "effort: \"$2\"" "$1" || fail "$1 should have effort $2"; }
@@ -200,10 +204,11 @@ grep -Fq 'omit `model` so the file stamp is not overridden' \
 	fail "harness adapters do not leave an unlisted Cursor Task model unpassed"
 grep -Fq 'or carries a depth' "${ROOT_DIR}/.claude/commands/star-auto.md" ||
 	fail "Claude star-auto does not route an explicit same-model depth"
-while IFS= read -r file; do
-	grep -Fq 'a configured depth is reason enough to dispatch' "${file}" ||
-		fail "${file} does not route a same-model depth to a named agent"
-done < <(find -L "${ROOT_DIR}/.claude/skills" -type f -name SKILL.md)
+claude_adapter=$(harness_adapter 'Claude Code')
+grep -Fq 'a configured depth is a routing difference even when the tier model aliases the active model' <<<"${claude_adapter}" ||
+	fail "Claude shared adapter does not route a same-model depth"
+grep -Fq 'subagent_type: star-plan' <<<"${claude_adapter}" ||
+	fail "Claude shared adapter does not select a named agent for depth"
 for skill in star-flow-status star-expt-digest; do
 	grep -Eq '^\*\*Tier:\*\* READ\.' "${ROOT_DIR}/.agents/skills/${skill}/SKILL.md" ||
 		fail "${skill} does not name its READ tier"
@@ -226,10 +231,11 @@ for expected in \
 	'STAR_READ_MODEL in .env gives Kimi Code at dispatch: model alias kimi-k3;'; do
 	grep -Fq "${expected}" <<<"${kimi_output}" || fail "Kimi model/depth summary lacks: ${expected}"
 done
-while IFS= read -r file; do
-	grep -Fq 'a configured depth is reason enough to dispatch' "${file}" ||
-		fail "${file} does not route a same-model depth to a pool alias"
-done < <(find -L "${ROOT_DIR}/.kimi-code/skills" -type f -name SKILL.md)
+kimi_adapter=$(harness_adapter 'Kimi Code')
+grep -Fq 'A configured depth is thus a routing difference even when the tier model aliases the active model' <<<"${kimi_adapter}" ||
+	fail "Kimi shared adapter does not route a same-model depth"
+grep -Fq 'dispatched as the pool alias binding that model at that depth' <<<"${kimi_adapter}" ||
+	fail "Kimi shared adapter does not select a pool alias for depth"
 note "Kimi summaries name the pool alias per depth; skills route a same-model depth"
 
 # --kimi-pool registers the variants and pool keys the kimi tier entries need in
@@ -485,6 +491,7 @@ note "the depth-stamp tier lists match the conventions §10 roster"
 for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 	while IFS= read -r file; do
 		grep -Fq 'Passing a tier model' "${file}" || fail "${file} lacks the tier-model entry"
+		grep -Eq '^\*\*Passing a tier model.*§6.*§10\.8.*§13' "${file}" || fail "${file} does not route delegation to shared scope, tier and harness rules"
 	done < <(find -L "${ROOT_DIR}/${tree}/skills" -type f -name SKILL.md)
 	for skill in star-flow-status star-expt-digest; do
 		grep -Eq '^\*\*Tier:\*\* READ\.' "${ROOT_DIR}/${tree}/skills/${skill}/SKILL.md" || fail "${tree} ${skill} lacks its READ Tier line"
@@ -492,22 +499,15 @@ for tree in .agents .claude .cursor .dsh .kimi-code .pi .qwen; do
 done
 note "seven trees retain tier-model entries, and flow-status and digest name their READ tier"
 
-while IFS= read -r file; do
-	grep -Fq 'Pass the stamped id when this session'\''s selectable `Task` `model` list contains it' "${file}" ||
-		fail "${file} does not pass the stamped Cursor id when Task lists it"
-	grep -Fq 'scan that list for a slug of the same model family that already carries the wanted depth' "${file}" ||
-		fail "${file} does not map Cursor @depth onto a listed variant"
-	grep -Fq 'omit `model` so the file stamp is not overridden' "${file}" ||
-		fail "${file} does not leave an unlisted Cursor Task model unpassed"
-	grep -Fq 'appends a configured `@<depth>` as `-<depth>` and writes that flat id' "${file}" ||
-		fail "${file} does not keep Cursor's flat -<depth> id as the stamp"
-	if grep -Fq 'Do not pass an undocumented per-call' "${file}"; then
-		fail "${file} still forbids passing Task model"
-	fi
-	if grep -Fq 'the file is not the routing' "${file}"; then
-		fail "${file} still denies the official Cursor stamp"
-	fi
-done < <(find -L "${ROOT_DIR}/.cursor/skills" -type f -name SKILL.md)
+# Dispatch policy lives once in the harness adapter; manifests link to it above.
+cursor_adapter=$(harness_adapter Cursor)
+for rule in \
+	'pass the stamped id when this session'\''s selectable `Task` `model` list contains it' \
+	'scan that list for a slug of the same model family that already carries the wanted depth' \
+	'omit `model` so the file stamp is not overridden' \
+	'appends a configured `@<depth>` to the model as `-<depth>`'; do
+	grep -Fq "${rule}" <<<"${cursor_adapter}" || fail "Cursor shared adapter lacks dispatch rule: ${rule}"
+done
 grep -Fq 'Pass the stamped id when this session'\''s selectable `Task` `model` list contains it' \
 	"${ROOT_DIR}/.cursor/commands/star-auto.md" ||
 	fail "Cursor star-auto does not pass the stamped id when Task lists it"
@@ -544,6 +544,10 @@ cp -p "${ROOT_DIR}/execs/scpts/.gitkeep" "${UPSTREAM}/execs/scpts/"
 review_scripts=".agents/skills/star-code-reviewer/scripts"
 mkdir -p "${UPSTREAM}/${review_scripts}"
 cp -p "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPSTREAM}/${review_scripts}/"
+source_skill=".agents/skills/star-flow-status"
+mkdir -p "${UPSTREAM}/${source_skill}/scripts" "${UPSTREAM}/${source_skill}/references"
+cp -p "${ROOT_DIR}/${source_skill}/scripts/source_state.sh" "${UPSTREAM}/${source_skill}/scripts/"
+cp -p "${ROOT_DIR}/${source_skill}/references/source_state.md" "${ROOT_DIR}/${source_skill}/references/source_state_zh.md" "${UPSTREAM}/${source_skill}/references/"
 git -C "${UPSTREAM}" init -q -b main
 git -C "${UPSTREAM}" add -f .
 git -C "${UPSTREAM}" -c core.hooksPath=/dev/null -c user.name=Test \
@@ -598,4 +602,10 @@ rm "${UPDATE_PROJECT}/${review_scripts}/review_state.sh"
 run_update execs/update.sh --force --skill star-plan-executor --harnesses cursor
 cmp -s "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPDATE_PROJECT}/${review_scripts}/review_state.sh" ||
 	fail "executor-only update omitted its shared review-validity helper"
-note "the updater honors flag and environment overrides, parses quoted paths without execution, and reapplies model settings"
+rm "${UPDATE_PROJECT}/${source_skill}/scripts/source_state.sh" "${UPDATE_PROJECT}/${source_skill}/references/source_state.md"
+run_update execs/update.sh --force --skill star-expt-analyst --harnesses cursor
+cmp -s "${ROOT_DIR}/${source_skill}/scripts/source_state.sh" "${UPDATE_PROJECT}/${source_skill}/scripts/source_state.sh" ||
+	fail "analyst-only update omitted its shared source-validity helper"
+cmp -s "${ROOT_DIR}/${source_skill}/references/source_state.md" "${UPDATE_PROJECT}/${source_skill}/references/source_state.md" ||
+	fail "analyst-only update omitted its source-validity contract"
+note "the updater honors overrides, installs shared validity helpers, and reapplies model settings"

@@ -39,6 +39,10 @@ model_trail:                    # append-only: one entry per write session, newe
 
 ## Actions
 
+<!-- Record the commit choice and work units here: member action numbers and each unit's final check.
+     One verified unit per commit is recommended; honor an existing per-action or no-commit choice
+     subject to branch rules. Keep every action's own check and split units at STOP-line boundaries. -->
+
 <!-- Ordered. Each action binds a check. `run by` = `agent` (executes here) or `stop → user`
      (agent prepares the command, user runs it — see STOP line). Commands go through the interpreter
      .env names (conventions §3); artifacts are written under wkdrs/<run>/.

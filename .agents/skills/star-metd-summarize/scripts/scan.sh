@@ -197,7 +197,8 @@ function body_index(n,   i, line, heading, printed, incomment) {
         if (line ~ /^## /) { heading = line; printed = 0; continue }
         if (heading == "") continue
         if (line ~ /^\|/ || line ~ /^[ \t]*- \[/ || line ~ /Plan-level finding/ ||
-            line ~ /方向性信号/ || line ~ /Strategy signal/ || line ~ /战略信号/) {
+            line ~ /方向性信号/ || line ~ /Strategy signal/ || line ~ /战略信号/ ||
+            line ~ /analysis:[ \t]*(not applicable|required)/) {
             if (!printed) { print heading; printed = 1 }
             print line
         }
@@ -294,7 +295,8 @@ function body_tally(n,   i, line, incomment) {
             continue
         }
         if (line ~ /Plan-level finding/ || line ~ /方向性信号/ ||
-            line ~ /Strategy signal/ || line ~ /战略信号/) tverb[++tverbn] = line
+            line ~ /Strategy signal/ || line ~ /战略信号/ ||
+            line ~ /analysis:[ \t]*(not applicable|required)/) tverb[++tverbn] = line
     }
     tally_flush()
 }

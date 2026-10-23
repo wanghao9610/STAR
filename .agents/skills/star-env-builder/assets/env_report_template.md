@@ -3,6 +3,7 @@ env_name: <ENV_NAME>
 backend: conda            # conda / venv
 created: <YYYY-MM-DD>     # real run date (date +%Y-%m-%d), never invented
 status: verified          # verified / partial / blocked
+interpreter: "<absolute ENV_PY actually checked>"
 model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/research-workflow-conventions.md §8>
 model_trail:                    # append-only: one entry per write session, newest last, never rewritten
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
@@ -11,6 +12,9 @@ model_trail:                    # append-only: one entry per write session, newe
 # Environment Report — <ENV_NAME>
 
 A fresh session should be able to use — or rebuild — this environment from this file alone.
+
+<!-- After final checks and authorized configuration changes, record an environment source binding
+     with the checked interpreter and every dependency definition. Partial/blocked reports never pass. -->
 
 ## Identity
 

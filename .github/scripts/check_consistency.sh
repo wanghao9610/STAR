@@ -433,12 +433,12 @@ check_absent() { # $1 = tree, $2 = literal token
     # manifests, which .codex/skills holds — and its default_prompt is written in
     # Codex's own invocation syntax on purpose. Check 3 excludes it from the
     # inventory baseline for the same reason.
-    # Canonical helper paths name files, not slash commands. Remove only those
+    # Canonical helper/reference paths name files, not slash commands. Remove only those
     # spans before deciding, so a foreign invocation on the same line still fails.
     hits="$(find -L "$1" -type f ! -path '*/agents/*' -exec grep -nHF -- "$2" {} + |
         CHECK_TOKEN="$2" perl -ne '
             $body = $_; $body =~ s/^[^:]*:[0-9]+://;
-            $body =~ s{\.agents/skills/star-[a-z-]+/scripts/[A-Za-z0-9_.-]+}{}g;
+            $body =~ s{\.agents/skills/star-[a-z-]+/(?:scripts|references)/[A-Za-z0-9_.-]+}{}g;
             print if index($body, $ENV{CHECK_TOKEN}) >= 0;
         ' || true)"
     if [[ -n "${hits}" ]]; then
@@ -1031,6 +1031,8 @@ LITERAL_REGISTRY=(
     "Sub-plans|star-plan-decomposer/SKILL.md"
     "Revision History|star-plan-reviser/references/revision_rules.md"
     "Plan-level finding|star-plan-executor/assets/exec_log_template.md"
+    "analysis:|star-plan-executor/assets/exec_log_template.md"
+    "star-source-state|star-flow-status/scripts/source_state.sh"
     "方向性信号|star-plan-executor/assets/exec_log_template_zh.md"
     "[TBD]|star-plan-decomposer/SKILL.md"
     "【待定】|star-plan-decomposer/SKILL.md"

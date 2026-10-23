@@ -54,10 +54,11 @@ Nothing is *executed* beyond imports and `--help`. Verifying that a training com
 
 ## 5. Numbers & claims
 
-The three README rules nothing else checks: families 3 and 4 re-check every printed command, image, relative link and anchor, but not where a number came from.
+The README rules nothing else checks: families 3 and 4 re-check every printed command, image, relative link and anchor, but not where a number came from.
 
 | Check | How | Fix |
 |---|---|---|
+| Backing facts and numbers are current | Check method/results bindings against current scoped inputs; match each README value and split to its current table row | Stale/unknown backing evidence is a blocker for asserted facts or numbers; refresh via the producer or mark the unsupported claim TODO |
 | Every figure traces to the results table | For each number in `README.md`, name the `wkdrs/results/results.md` row it was copied from | No row → the number does not ship. A number traceable to an `EXPT_ANALYSIS` or a digest instead of the results table is a **blocker**: those are per-run and provisional, and the README is neither |
 | Every superlative is carried by a verdict | For each "state-of-the-art", "outperforms", "best", "significantly", name the results-table verdict that carries it | No verdict carries it → drop the word, or quote the comparison it actually rests on |
 | Unverified numbers are marked | A number the results table does not hold appears as a TODO, never as a result | Route to `star-expt-analyst aggregate`; never produce the number to fill the gap (the STOP line, conventions §2) |

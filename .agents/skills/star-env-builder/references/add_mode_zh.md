@@ -12,3 +12,4 @@
 6. 把每个装好的包追加进所属的 requirements 文件，保留布局既有的顺序与锁定。在最新的 `wkdrs/env_<ENV_NAME>_<日期>/ENV_REPORT.md` 追加一个 `## Added <日期>` 块（没有报告就新写一份）。提交：`star-env-builder: add <包名>`，只暂存 `${CODE_NAME}/requirements*`。
 7. 汇报，作为 `## Added` 块的简短摘要：装了什么、各 requirements 文件增加了什么、跑通性检查证据、blocked 或待用户处理的项。
 
+安装前核对已有环境绑定；安装后更新报告的 interpreter、整体 status 和版本清单。新增包检查仅在旧基线有效、且没有未核验的传递依赖变化时足够；否则补做受影响的可运行检查，或保留 partial/blocked。全部所需检查通过后，按共享来源绑定约定记录 environment，使用实际已核验的解释器及全部当前依赖定义。

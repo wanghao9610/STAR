@@ -10,11 +10,13 @@ description: >-
 
 Invocation: `star-metd-summarize [overview | dataset | framework | training | evaluation] [DESCRIPTION]`. Resolve the output first; no output compiles all five in dependency order, with `overview` last. Natural language may authorize a draft or overwrite when it clearly names that operation and scope; otherwise preserve the readiness and overwrite gates.
 
-**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
+**Shared conventions.** Follow `docs/mds/star-workflow/research-workflow-conventions.md` for scope, authority, `.env` controls (`STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`), runtime, language and provenance. Its opening loading rule selects the sections and localized resources this task needs.
 
 Resolve the output mode before running `scripts/scan.sh --slim`; treat its plan frontmatter, sub-plan indexes, and placeholder counts as the readiness check's input, and its `metds/` artifact frontmatter as the input to Step 5's stale check. The run-log and `wkdrs/` lines the scan also prints are not read (Principle 1). If it fails, read the plan files directly and report the fallback.
 
-**Passing a tier model.** Resolve the `dsh` entry, or the untagged fallback. The shipped `subagent` tool exposes no per-dispatch model selector. A model setting supported by an underlying provider is not a callable tool parameter: do not invent `model` or `agentOptions`, rewrite a global profile, or launch another CLI to bypass this. Retain the existing execution and delegation route; when a tier key is set, state that this tool cannot select it. If a later installed tool explicitly exposes model selection, use only that documented interface and a transport that supports it. Empty keys change nothing. Preserve the role, blind-read isolation and write limits below; provenance always names the actual running model, never the configured but unused tier value.
+**Passing a tier model.** Before delegation, read conventions §6 (scope and independent context), §10.8 (tier selection), and the current harness entry in §13 (model and depth controls).
+
+**Source bindings.** Follow `.agents/skills/star-flow-status/references/source_state.md` (Chinese: `source_state_zh.md`) for method-document freshness. Record `method` against every live plan consulted for content, readiness or source selection using `--method-plan`; bind configuration files that supplied facts too. On reuse, require the current scoped plan inventory so added sources cannot be missed. Record only after final authorized writes and source verification; dates remain provenance. The shell helper writes only the current method document and runs no experiment or interpreter.
 
 ## Role
 
@@ -70,7 +72,7 @@ Where Step 2 fanned out, reconcile before merging: every plan dispatched comes b
 
 Before drafting, apply the human-writing contract (`docs/mds/star-workflow/research-workflow-conventions.md` §7). Treat plan provenance, measured values, paths, `TODO` markers, verification labels, unresolved conflicts, uncertainty, and negative results as protected content; the prose pass may merge and order them, but may not strengthen or invent a conclusion.
 
-Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), `sources:` — every plan that fed this document with the `updated` date it carried when read, making staleness detectable on the next run — and the `model_id` and `model_trail` provenance every artifact carries (conventions §8).
+Fill `assets/<OPT>_template.md` (Chinese: `assets/<OPT>_template_zh.md`). Keep the template's sections and order; a section with no coverage keeps its heading and carries the `TODO` — never drop it, and never pad it. Frontmatter records `type`, `language`, `generated` (a real date, never invented), `sources:` — every plan that fed this document with the `updated` date it carried when read, retained as readable provenance; the source binding decides freshness — and the `model_id` and `model_trail` provenance every artifact carries (conventions §8).
 
 ### Step 5: Write, comparing against what is already there
 
@@ -79,7 +81,7 @@ For each target, in dependency order:
 - **Missing** → write it.
 - **Exists, generated by this skill** → compare against the fresh compile. Leave an unchanged file untouched. Show one section-level change list for substantive differences; an explicit request to update this output authorizes the listed overwrite, otherwise ask once via ask_user_question under conventions §7.13.
 - **Exists without that frontmatter** → hand-authored. Identify what it contains and overwrite only under specific existing or newly obtained authority; otherwise leave it alone or compile to a user-named path.
-- **Stale check**: compare each existing doc's recorded `sources:` dates against those plans' current `updated`. A doc whose sources moved is stale — report it even for targets this run did not compile.
+- **Stale check**: use `source_state.sh check <document> --kind method` with the current scoped plan inventory required, as the source-binding contract specifies. Changed content, execution verification state, added inputs or missing legacy metadata require source verification; dates and mtimes never establish freshness. Report stale/unknown targets even when this run did not compile them.
 
 ### Step 6: Report
 
@@ -90,9 +92,9 @@ The reply is the digest and the documents carry the detail (conventions §7.1). 
 - The only writes are `metds/overview.md`, `metds/dataset.md`, `metds/framework.md`, `metds/training.md`, `metds/evaluation.md` — the five OPT targets.
 - Never touch `metds/plans/*` — plan text belongs to `star-plan-coach`, `star-plan-decomposer`, `star-plan-executor`, `star-plan-reviser`; a gap or a wrong statement is reported and routed, never fixed in place. Never touch `metds/codearc.md` (`star-code-architect`'s), `metds/refs/*` (`star-refs-reviewer`'s), `wkdrs/*` (including `star-expt-analyst`'s results table `wkdrs/results/`), `${CODE_NAME}/`, `datas/`, `inits/`, `.env`.
 - Reads are `metds/plans/*_plan.md`, `.env`, and the five target docs. `wkdrs/` is deliberately not read: if a run's detail is missing here, the fix is a plan sync, not a wider read.
-- This skill runs nothing: no python, no training, no evaluation, no installs.
+- Only the read-only scan and source-binding shell helper run; no Python, training, evaluation or installs.
 - Git: read-only; this skill never commits (conventions §1).
-- It sets no plan frontmatter and creates no run directories; each document's frontmatter — its `sources:` block and `model_trail` — is the whole audit trail.
+- It sets no plan frontmatter and creates no run directories; each document carries its `sources:`, `model_trail` and producer-owned source binding as the audit trail.
 
 ## Dialogue Discipline
 

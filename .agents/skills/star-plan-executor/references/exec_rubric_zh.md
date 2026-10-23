@@ -12,7 +12,7 @@
 
 5. **运行走项目环境**——命令都走 `.env` 的解释器(规约 §3);没有系统 python、没有硬编码本地路径。
 
-6. **状态可续跑**——`wkdrs/<run>/EXEC_LOG.md` 反映真实的逐步状态,子计划 frontmatter 有 `exec_status` + `exec_runs`,本轮是追加而非替换上一项。全新 session 能仅凭日志续跑。
+6. **状态可续跑**——`wkdrs/<run>/EXEC_LOG.md` 反映真实的逐步状态,子计划 frontmatter 有 `exec_status` + `exec_runs`,本轮是追加而非替换上一项。全新 session 能仅凭日志续跑，并区分未完成的检查与已验证但尚待授权提交的工作单元。
 
 7. **改动是精准克制的**——代码 diff 都能追溯到 EXEC_PLAN 的步骤;没有对邻近代码做无关重构或"改进"(`AGENTS.md` §3)。
 

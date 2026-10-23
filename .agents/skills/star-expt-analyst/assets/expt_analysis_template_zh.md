@@ -8,6 +8,8 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 ---
 
+<!-- 最终内容写定并核验来源后，按共享 source_state 约定记录内容绑定；日期不替代时效检查。 -->
+
 # 实验分析 — <run>（<YYYY-MM-DD>）
 
 <!-- 由 star-expt-analyst 写入。对这个 run 的产出做只读审计，对照计划的预期打分。这里的每个数字

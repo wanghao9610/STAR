@@ -22,6 +22,10 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 
 ## Step status
 
+<!-- Use the existing note column to name each action's work unit, its pending final check or commit,
+     and identify committed actions in the commit message. Record action results immediately, before committing.
+     A failed later action preserves earlier verified, uncommitted changes and their evidence. -->
+
 <!-- One row per EXEC_PLAN action. `check result` is filled by the main agent re-running or
      independently inspecting the action's own check, not by a delegate's self-report. `model` is the
      model the row's action ran on: the delegate's own reported id when its return carries one; for an
@@ -72,6 +76,11 @@ able to resume from this file alone: skip `done` steps, continue from the first 
 - [ ] ENRICHED §3.<n>: <what the plan left open> → <the value execution settled> — cited by: <document §>
 
 ## Notes / decisions
+
+<!-- Only verified engineering-only work may record `analysis: not applicable`, with its concrete
+     reason and check evidence, followed by an analysis-exemption binding from source_state.sh.
+     If the actual run needs analysis, record `analysis: required` and clear the obsolete binding.
+     This never waives code review, completion checks or launch authority. -->
 
 <!-- Assign a run-scoped PF number when a finding is recorded; never reuse or retarget it. A changed claim gets a new id citing the old one. The reviser report owns the resolved/deferred decision (conventions §8); a later report date does not settle this entry. Omit the example when there is no finding. -->
 

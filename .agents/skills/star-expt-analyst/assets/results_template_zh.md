@@ -8,9 +8,11 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
   - { date: <YYYY-MM-DD>, model: <模型 id 或 "unrecorded">, skill: <star-…>, scope: <本次会话写了什么> }
 sources:
   - run: <prefix>_<slug>
-    report: EXPT_ANALYSIS_<YYYY-MM-DD>.md
-    verdict: <met|partially met|not met|inconclusive|invalid>
+    report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md | none for engineering>
+    verdict: <met|partially met|not met|inconclusive|invalid|— for engineering>
 ---
+
+<!-- 最终内容写定并核验来源后，按共享 source_state 约定记录内容绑定；日期不替代时效检查。 -->
 
 # 结果
 
@@ -37,9 +39,7 @@ sources:
 |---|---|---|---|---|---|---|---|
 | `<prefix>_<slug>` | <…> | <值> | <n 或 1> | <std、min–max，或 —（单次）> | test | met / not met | `<path:line 或键名>` @ EXPT_ANALYSIS_<日期> |
 
-<!-- 判定所依据的判据若已不是计划今天写的那一条，判定加一个剑标——`met †`——并在表下加一行脚注：
-     `† 这次 run 设计时 §5 写的是 "<旧>"，今天写的是 "<新>"。` 该 run 的 EXEC_PLAN `done_criterion:`
-     就是它当初被设计针对的判据；写这一行之前先拿它和叶子的 §5 对一下。没有剑标即表示两者一致。 -->
+<!-- 当前计划约束改变而令分析绑定失效时，先由 analyst 核验；旧判定不能仅加 † 就进入当前表。历史判据可在重新分析的报告中说明，表内使用其当前判定。 -->
 
 ## 3. 消融
 
@@ -58,6 +58,14 @@ sources:
 
 <!-- 根 §4 既没映射到主张、也没映射到消融的 run。连同其关键指标数字列出来，绝不丢掉。
      全部都映射上了则写"无"。 -->
+
+## 工程工作（无实验指标）
+
+<!-- 当前豁免有效的工程 run 单列，不编造指标，不计为缺分析或实验样本。 -->
+
+| Run | 已核验工程工作 | 豁免记录 |
+|---|---|---|
+| `<run>` | <工作及检查> | `wkdrs/<run>/EXEC_LOG.md` |
 
 ## 5. 已排除
 

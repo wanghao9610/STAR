@@ -4,15 +4,20 @@ Per-run analysis answers *did this run meet its plan*. Aggregate answers *what d
 
 This file defines scope, the destination, the trust model, the axis, what the results table never does, exclusion, and the write rules.
 
+**Content validity and engineering work.** Before treating a run without an analysis as a gap, check its current engineering exemption under `.agents/skills/star-flow-status/references/source_state.md`. A current exemption is listed separately as engineering work with no metrics, not as unmeasured or a numeric result. Stale/unknown exemption claims return to the executor. Check every analysis binding with the current leaf/ancestor plans required before using it; a legacy or stale analysis routes to its producer. After the table's final authorized write, record a results binding with `--report` for every eligible analysis considered, including excluded analyses, `--exemption` for every listed engineering log, and `--file` for evidence whose absence is part of an exclusion. Require the current report set on reuse, so newly added runs are detected. The raw-number verification below still applies; a binding never substitutes for it.
+
 ## Scope
 
 `aggregate` with no plan name covers all plan trees; with a plan name, that node's subtree. Collect every leaf under the scope, then **every run in its `exec_runs`** — a leaf re-run for a second seed or a fixed bug has several, and the results table shows them all, not only the last. Per run, first match wins:
 
-- the newest `wkdrs/<run>/EXPT_ANALYSIS_<date>.md` in it → an aggregatable run, one table row;
-- a run directory with no analysis report → **gap**: list it and route to `star-expt-analyst <run dir>`. Do not read its logs here — aggregate reads reports, not raw runs;
+- a current engineering exemption → list engineering work without metrics, never a missing-analysis gap;
+- a still-claimed but invalid exemption → return to the executor for reclassification;
+- the newest analysis with a current binding against current constraints/evidence → one aggregatable experimental run;
+- a legacy or stale analysis → its producer verifies it first; never carry old numbers or verdicts into the table;
+- a non-exempt run directory with no analysis report → **gap**: list it and route to `star-expt-analyst <run dir>`. Do not read its logs here — aggregate reads reports, not raw runs;
 - a leaf with no `exec_runs` at all → never executed; list it as a gap and route to `star-plan-executor <slug>`.
 
-A scope where no leaf has a report is a valid answer: say so and stop. Never compile a results table from nothing.
+With no usable experimental analysis, list verified engineering work and genuine gaps in chat, then stop without manufacturing a numeric results table. Engineering exemptions are not missing analyses.
 
 ## The destination follows the scope
 
@@ -88,17 +93,17 @@ generated: <YYYY-MM-DD>          # a real date; never invented
 scope: <the subtree these numbers come from, or "all plan trees">
 sources:                          # every run that fed this results table
   - run: <prefix>_<slug>
-    report: EXPT_ANALYSIS_<YYYY-MM-DD>.md
-    verdict: <met|partially met|not met|inconclusive|invalid>
+    report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md | none for engineering>
+    verdict: <met|partially met|not met|inconclusive|invalid|— for engineering>
 ---
 ```
 
-`type: results` + `generated:` mark the file compiled and therefore safe to regenerate. `sources:` is the staleness check: a run whose newest report post-dates the one recorded here means the results table is stale.
+`type: results` identifies compiled output; `generated:` and report dates remain provenance. Freshness comes from source_state against current analyses and engineering exemptions, including same-day changes.
 
 ## Write rules
 
 Applied to the destination the scope selected above — never to the other one.
 
 - **Missing** → write it.
-- **Exists with `type: results`** → confirm its `scope:` matches the scope being compiled. It does → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → rewrite only the frontmatter's `generated:` and `sources:`, with no question, since no number a reader quotes moved; the body stays byte-identical. It does **not** match — a wider scope than this one — → stop and say so rather than narrow it; that is the overwrite the filename rule exists to prevent.
+- **Exists with `type: results`** → confirm its `scope:` matches the scope being compiled. It does → compare against the freshly compiled content, show the change list (one line per table: `added` / `rewritten` / `removed` / `unchanged`, and what moved), and ask to overwrite or skip. Every table `unchanged` → refresh provenance and the source binding after verifying current inputs, without another question; the narrative and numeric body stay unchanged. It does **not** match — a wider scope than this one — → stop and say so rather than narrow it; that is the overwrite the filename rule exists to prevent.
 - **Exists without that frontmatter** → hand-authored. Say what it holds and what compiling would replace it with, and ask. Leaving it alone is a valid outcome; so is compiling to a path the user names.

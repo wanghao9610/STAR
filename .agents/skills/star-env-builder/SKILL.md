@@ -10,9 +10,11 @@ description: >-
 
 Invocation: `star-env-builder [ENV_NAME | add <package>…] [DESCRIPTION]`. Resolve `add` first; every following package token belongs to that mode. Otherwise use the given environment name, else `.env`'s `ENV_NAME`, else its `CODE_NAME`. Natural language may set requirements or authorize the build; ask only when the environment target, dependency choice, cost, or destructive handling remains unresolved.
 
-**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
+**Shared conventions.** Follow `docs/mds/star-workflow/research-workflow-conventions.md` for scope, authority, `.env` controls (`STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`), runtime, language and provenance. Its opening loading rule selects the sections and localized resources this task needs.
 
-**Passing a tier model.** For each delegate, resolve the tier its work belongs to under conventions §10.8 — READ for a collector, EXEC for an implementer, PLAN for a blind read — for the current harness. Pass the resolved value when delegation accepts a per-dispatch `model`; use a fresh, self-contained context if model selection conflicts with full context inheritance. Neither a READ-tier collector nor a PLAN-tier blind reader inherits the producer's conversation. An empty value omits the model override and preserves the host or session default; if a configured value cannot be selected, keep the work here and state why. Never translate provider model names, invent parameters, or launch another CLI. A delegate carrying `tier=` was started on its tier and records its actual model from its own session provenance.
+**Passing a tier model.** Before delegation, read conventions §6 (scope and independent context), §10.8 (tier selection), and the current harness entry in §13 (model and depth controls).
+
+**Source bindings.** Follow `.agents/skills/star-flow-status/references/source_state.md` (Chinese: `source_state_zh.md`) after runnable checks and the last authorized configuration/report write. Record `environment` only for a verified report, using `--runtime` with the actually checked ENV_PY and all dependency definitions/lock files. A partial or blocked report never receives a passing binding. The currently configured interpreter must match before handing off as ready. Add mode preserves verification only when its prior baseline was current and checks cover every installed change, including transitive upgrades; otherwise perform the affected checks or retain partial/blocked.
 
 ## Role
 
@@ -93,7 +95,7 @@ A failed layer → diagnose from the traceback, fix (a missing transitive dep go
 2. `uv pip freeze --python $ENV_PY` (or `$ENV_PY -m pip freeze`) → `freeze.txt` alongside the report.
 3. Requirements files generated this run (including deps added while diagnosing runnable-check failures) are committed now: `star-env-builder: add requirements layout`, staging only `${CODE_NAME}/requirements*`.
 4. `.env`'s `PYTHON_HOME` does not resolve to the verified `ENV_PY` → update it when that exact configuration change was authorized; otherwise show the proposed one-line change and ask because it changes a key runtime input.
-5. Chat report, a short digest of `ENV_REPORT.md`: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `star-plan-executor <leaf>` now has a runtime; `star-flow-status` shows what to run next.
+5. Chat report, a short digest of `ENV_REPORT.md`: what was verified (with evidence), failures, awaiting-user commands. **Hand off downstream:** `star-plan-executor <leaf>` has a verified runtime only when the current `.env` interpreter matches this report and its content binding; otherwise name the mismatch; `star-flow-status` shows what to run next.
 
 ### Step 8: Add packages (add mode only)
 

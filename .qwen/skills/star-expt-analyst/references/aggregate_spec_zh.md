@@ -4,15 +4,20 @@
 
 本文件定义范围、写入目标、信任模型、分组轴、结果汇总表绝不做的事、排除，以及写入规则。
 
+**内容有效性与工程工作。** 把缺分析的 run 记为缺口前，按 `.agents/skills/star-flow-status/references/source_state_zh.md` 检查其当前工程豁免。有效豁免单独列为无指标的工程工作，不计为未测量或数值结果；过期/未知的豁免声明交回执行器。使用分析报告前，核对其绑定并要求覆盖当前叶子及祖先计划；旧式或过期分析转给生产者核验。结果表最终获授权写入后，用 `--report` 绑定所有应纳入考虑的分析，包括被排除的分析，并用 `--exemption` 绑定所列工程日志；若某证据缺失构成排除原因，用 `--file` 绑定其缺失状态。复用时要求覆盖当前报告清单，以发现新增 run。下述原始数字复核继续适用，绑定不替代它。
+
 ## 范围
 
 `aggregate` 不带计划名时覆盖所有计划树；带计划名时覆盖该节点的子树。收集范围内每个叶子，以及**它 `exec_runs` 里的每一个 run**——一个叶子若为换 seed 或修 bug 重跑过，就有好几个；结果汇总表全都呈现，不只是最后一个。逐 run 取首个匹配：
 
-- 该 run 目录里最新的 `wkdrs/<run>/EXPT_ANALYSIS_<日期>.md` → 一个可汇总的 run，占表里一行；
-- run 目录没有分析报告 → **缺口**：列出它，转交给 `star-expt-analyst <run 目录>`。不要在这里读它的日志——aggregate 读的是报告，不是原始 run；
+- 当前有效的工程豁免 → 单列无指标工程工作，不计缺分析；
+- 仍声明豁免但绑定未通过 → 转回执行器重新分类；
+- 最新分析的绑定对当前约束及证据有效 → 一个可汇总的实验 run；
+- 最新分析缺绑定或已失效 → 分析生产者先核验，不把旧数字或旧判定带入结果表；
+- 未获当前工程豁免、且 run 目录没有分析报告 → **缺口**：列出它，转交给 `star-expt-analyst <run 目录>`。不要在这里读它的日志——aggregate 读的是报告，不是原始 run；
 - 叶子压根没有 `exec_runs` → 从未执行；列为缺口，转交给 `star-plan-executor <slug>`。
 
-范围内没有任何叶子有报告，是一个合法答案：如实说明并停止。绝不凭空编译结果汇总表。
+没有可用实验分析时，先在聊天中列出已核验工程工作及真正缺口，再停止；不伪造数值结果表，也不把工程豁免计作缺分析。
 
 ## 写入目标跟随范围
 
@@ -88,17 +93,17 @@ generated: <YYYY-MM-DD>          # 真实日期；绝不编造
 scope: <这些数字来自哪个子树，或 "all plan trees">
 sources:                          # 输入给这份结果汇总表的每一个 run
   - run: <prefix>_<slug>
-    report: EXPT_ANALYSIS_<YYYY-MM-DD>.md
-    verdict: <met|partially met|not met|inconclusive|invalid>
+    report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md | none for engineering>
+    verdict: <met|partially met|not met|inconclusive|invalid|— for engineering>
 ---
 ```
 
-`type: results` + `generated:` 把文件标记为"编译产物、因而可安全重生成"。`sources:` 是陈旧检查：某个 run 的最新报告比这里记录的更新，就说明结果汇总表陈旧了。
+`type: results` 标识编译产物；`generated:` 与 `sources:` 日期保留为来源信息。时效由 source_state 对当前报告和工程豁免清单的内容绑定判断，同日变化也会使其失效。
 
 ## 写入规则
 
 只作用于上面由范围选定的那个目标——绝不作用于另一个。
 
 - **不存在** → 写。
-- **存在且带 `type: results`** → 先确认它的 `scope:` 与本次编译的范围一致。一致 → 与新编译内容比对，展示变更清单（每张表一行：`added` / `rewritten` / `removed` / `unchanged`，以及变了什么），再问覆盖还是跳过。所有表都 `unchanged` → 只改写 frontmatter 的 `generated:` 与 `sources:`，不发问，因为读者引用的数字一个都没动；正文逐字节不变。**不**一致——文件范围比本次更宽——→ 停下并说明，绝不收窄；那正是文件名规则要防的那种冲掉。
+- **存在且带 `type: results`** → 先确认它的 `scope:` 与本次编译的范围一致。一致 → 与新编译内容比对，展示变更清单（每张表一行：`added` / `rewritten` / `removed` / `unchanged`，以及变了什么），再问覆盖还是跳过。所有表都 `unchanged` → 核验当前输入后刷新来源信息和内容绑定，不发问，因为读者引用的数字一个都没动；正文逐字节不变。**不**一致——文件范围比本次更宽——→ 停下并说明，绝不收窄；那正是文件名规则要防的那种冲掉。
 - **存在但没有该 frontmatter** → 人工撰写的。说清它现在有什么、编译会用什么替换它，然后询问。放着不动是合法结果；编译到用户指定的另一个路径也是。

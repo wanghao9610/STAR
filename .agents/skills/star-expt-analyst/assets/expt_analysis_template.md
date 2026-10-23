@@ -8,6 +8,8 @@ model_trail:                    # append-only: one entry per write session, newe
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 ---
 
+<!-- After final content and source verification, record the shared source_state binding; dates do not establish freshness. -->
+
 # Experiment Analysis — <run> (<YYYY-MM-DD>)
 
 <!-- Written by star-expt-analyst. Read-only audit of what this run produced, scored against what

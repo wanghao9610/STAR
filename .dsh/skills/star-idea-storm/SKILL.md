@@ -11,9 +11,9 @@ description: >-
 
 Invocation: `star-idea-storm [IDEA | IDEA_NAME]`. Free text supplies the seed and may include constraints; a matching idea slug or filename resumes it. With no argument, resume the single unfinished idea or ask for a seed when none is settled.
 
-**Shared conventions.** Resolve the invocation target and mode first. Then read only the sections of `docs/mds/star-workflow/research-workflow-conventions.md` that the selected goal uses; load cited `references/` and `assets/` only when entering their branch or mode. Read `.env` once for the needed `STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`, and runtime values; reuse values and convention text still visible verbatim. Resolve language under conventions §7.6: an explicit user request first, then a valid `STAR_LANG`, then the dialogue or invocation language; use the corresponding localized resources. Preserve an existing document's frontmatter language. Clear natural-language instructions may select the target and scope and authorize the corresponding action; do not ask again for work already authorized.
+**Shared conventions.** Follow `docs/mds/star-workflow/research-workflow-conventions.md` for scope, authority, `.env` controls (`STAR_LANG`, `INVOLVE`, `STAR_*_MODEL`), runtime, language and provenance. Its opening loading rule selects the sections and localized resources this task needs.
 
-**Passing a tier model.** Resolve the `dsh` entry, or the untagged fallback. The shipped `subagent` tool exposes no per-dispatch model selector. A model setting supported by an underlying provider is not a callable tool parameter: do not invent `model` or `agentOptions`, rewrite a global profile, or launch another CLI to bypass this. Retain the existing execution and delegation route; when a tier key is set, state that this tool cannot select it. If a later installed tool explicitly exposes model selection, use only that documented interface and a transport that supports it. Empty keys change nothing. Preserve the role, blind-read isolation and write limits below; provenance always names the actual running model, never the configured but unused tier value.
+**Passing a tier model.** Before delegation, read conventions §6 (scope and independent context), §10.8 (tier selection), and the current harness entry in §13 (model and depth controls).
 
 ## Role
 

@@ -70,7 +70,7 @@ previous: <EXPT_DIGEST_<YYYY-MM-DD>.md or "—">
 sources:                          # every run this digest reported, both tiers
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md or "none">
-    tier: <report-backed|provisional>
+    tier: <report-backed|provisional|engineering-only>
     verdict: <met|partially met|not met|inconclusive|invalid|—>
 ---
 ```

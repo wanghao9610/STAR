@@ -14,7 +14,7 @@ model_trail:                    # 只追加：每次写入会话一条，新的�
 sources:
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md 或 "none">
-    tier: <report-backed|provisional>
+    tier: <report-backed|provisional|engineering-only>
     verdict: <met|partially met|not met|inconclusive|invalid|—>
 ---
 
@@ -28,7 +28,7 @@ sources:
 ## 1. 周期与范围
 
 <!-- 简述：窗口是怎么定的（自上一份 digest 续接 / 显式窗口 / 计划家族）、范围、窗内有多少 run、
-     有报告依据的与临时各占多少。plan 模式下列出为取主张语境而读过的祖先。若没有上一份 digest，说明
+     有报告依据、临时实验及纯工程各占多少。plan 模式下列出为取主张语境而读过的祖先。若没有上一份 digest，说明
      序列从此开始。若周期为空，写明这一点并附最新 run 日期与上次覆盖到的日期，下面每段都写"无"，然后收尾。 -->
 
 ## 2. 核心结论 —— 学到了什么
@@ -39,7 +39,7 @@ sources:
 
 ## 3. 本周期的 run —— 有报告依据的
 
-<!-- 每个有 EXPT_ANALYSIS 报告的 run 一行；判定与数字均引自该报告。"来源"是报告记录下来的东西，
+<!-- 每个未获豁免且最新分析绑定有效的 run 一行；判定与数字均引自该报告。"来源"是报告记录下来的东西，
      原样转录以便读者自查。若范围内没有任何 run 被分析过，写"无"。 -->
 
 | Run | 计划 | 判定 | 关键指标 | 种子数 / n | Split | 来源 | 报告 |
@@ -48,13 +48,21 @@ sources:
 
 ## 4. 本周期的 run —— 临时（未核实）
 
-<!-- 有目录但没有分析报告的 run。只读 EXEC_LOG；只有日志本身写明了数字及其文件，数字才出现在
+<!-- 未获工程豁免且没有当前分析的 run。已有分析但绑定过期/未知时只列进展，不引用数字。只读 EXEC_LOG；仅完全没有分析报告的 run，且日志本身写明数字及其文件时，数字才出现在
      这里（references/digest_rubric_zh.md 第二层）。无判定、不评分、不出图。这些数字不得被引用、
      比较，或进入结果汇总表。若范围内每个 run 都已被分析，写"无"。 -->
 
 | Run | 计划 | 日志状态 | 步数 | 日志报告的数字（临时） | 来源 | 下一步 |
 |---|---|---|---|---|---|---|
 | `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | in_progress | 3/5 | <值> —— provisional (unverified) | `<path:line>` | `star-expt-analyst <run dir>` |
+
+## 纯工程工作
+
+<!-- 当前工程豁免有效的 run；sources tier 为 engineering-only，verdict 为 —。无指标和缺分析欠账，引用原因及已核验检查。 -->
+
+| Run | 工程进展 | 豁免证据 |
+|---|---|---|
+| `<run>` | <已核验工作> | `wkdrs/<run>/EXEC_LOG.md` |
 
 ## 5. 发生了什么变化
 
@@ -83,8 +91,8 @@ sources:
 
 ## 8. 缺口与欠账
 
-<!-- 本周期还欠着什么：范围内没有分析报告的 run、没有 exec_runs 的叶子、EXEC_LOG 里有未勾选"待用户
-     执行"红线命令的叶子，以及比范围内最新分析报告更旧的结果汇总表。每条一行，附上能关闭它的命令。
+<!-- 本周期还欠着什么：范围内未获工程豁免且缺当前分析的 run、没有 exec_runs 的叶子、EXEC_LOG 里有未勾选"待用户
+     执行"红线命令的叶子，以及对当前分析及豁免记录的内容绑定未通过的结果汇总表。每条一行，附上能关闭它的命令。
      周期干净则写"无"。 -->
 
 - <欠着什么> —— `<prefix>_<slug>` → `<命令>`

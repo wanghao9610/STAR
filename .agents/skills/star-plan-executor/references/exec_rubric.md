@@ -12,7 +12,7 @@ Run at finalization, before calling a run done. Report failing items, ranked by 
 
 5. **Runtime is the project env** — commands went through `.env`'s interpreter (conventions §3); no system python, no hardcoded local paths.
 
-6. **State is resumable** — `wkdrs/<run>/EXEC_LOG.md` reflects true per-step status and the sub-plan frontmatter has `exec_status` + `exec_runs`, this run appended, not replacing the last. A fresh session could resume from the log alone.
+6. **State is resumable** — `wkdrs/<run>/EXEC_LOG.md` reflects true per-step status and the sub-plan frontmatter has `exec_status` + `exec_runs`, this run appended, not replacing the last. A fresh session could resume from the log alone, distinguishing unfinished checks from a verified unit still awaiting its authorized commit.
 
 7. **Changes are surgical** — code diffs trace to EXEC_PLAN steps; no unrelated refactors or "improvements" to adjacent code (`AGENTS.md` §3).
 

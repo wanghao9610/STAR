@@ -1,14 +1,16 @@
 # Digest Rubric — the two tiers, what moved, and what a digest never does
 
+**Engineering-only records.** Apply the current exemption check before the two evidence tiers below. A current exemption is listed separately as engineering progress with no metrics, not as a provisional experiment or missing-analysis gap. Invalid exemption claims route to the executor. These records never enter numeric comparisons, and a period containing only such work says that no experimental results were produced.
+
 The digest is a **progress record**, not a results table. `wkdrs/results/results.md` is the verified results table; `metds/evaluation.md` is the protocol; this is the narrative of what happened between two dates. This file defines what may enter it, at what level of trust, and where the line is.
 
 ## The two tiers
 
-Every run in scope belongs to exactly one tier, and the tiers never share a table.
+Current engineering exemptions are listed separately; every remaining experimental run belongs to one of the following tiers, which never share a numeric table.
 
 ### Tier 1 — report-backed
 
-The run holds an `EXPT_ANALYSIS_<date>.md`. Take the **newest**. From it, and from nothing else — sections **2, 3 and 7** of the report carry all of it, which is why the second scan runs `--bodies 2,3,7 --runs <the in-scope runs>`; a report that renumbers its sections changes this line and nothing in the script:
+The newest analysis must first pass source_state with current leaf/ancestor constraints required. Only then read sections 2, 3 and 7 (verdict, scorecard, interpretation). A stale/unknown binding allows a progress note and refresh route, never copied numbers/verdicts or a numeric fallback from the log. The helper checks evidence bytes; metric interpretation and re-verification remain the analyst’s work.
 
 - the run verdict (`met` / `partially met` / `not met` / `inconclusive` / `invalid`);
 - the §5 done-criteria scorecard, condensed to one line;
@@ -21,9 +23,9 @@ Numbers are copied **with provenance, not re-verified** (`SKILL.md` Core Princip
 
 ### Tier 2 — provisional
 
-The run has a directory but no analysis report. It exists in the digest so a week's work is **visible**, not so it can be graded.
+An experimental run without a current analysis or engineering exemption is provisional. If an existing report has a stale/unknown binding, show progress and its refresh need without numbers.
 
-**Read only `EXEC_LOG.md`.** From it: the log `status`, steps done / total, any `blocked` step, any unchecked "Awaiting user" STOP-line command, any recorded plan-level finding. If the log itself names a headline number **and** the file it came from, quote it with `path:line`; otherwise the cell is `not measured`.
+**Read only `EXEC_LOG.md`.** From it: the log `status`, steps done / total, any `blocked` step, any unchecked "Awaiting user" STOP-line command, any recorded plan-level finding. Only for a run with no analysis report at all, if the log itself names a headline number **and** the file it came from, quote it with `path:line`; otherwise the cell is `not measured`. An existing stale/unknown analysis never uses this numeric fallback.
 
 Hard bounds on this tier:
 
@@ -71,6 +73,8 @@ No previous digest → the section is omitted, and §1 says the series starts he
 - **Never reports an empty period as an achievement.** No runs in the window is written as "no runs in this period", with the newest run date and the last covered date, and nothing else. Padding an empty digest with the state of the tree is `star-flow-status`'s output, not this one's.
 
 ## Writing the headline
+
+With no current experimental analysis, the headline states engineering/provisional progress and pending work, without a scientific claim or numeric comparison.
 
 One short paragraph. It answers *what did we learn in this period* using only report-backed evidence:
 

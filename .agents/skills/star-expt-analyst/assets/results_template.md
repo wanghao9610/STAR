@@ -8,9 +8,11 @@ model_trail:                    # append-only: one entry per write session, newe
   - { date: <YYYY-MM-DD>, model: <model id or "unrecorded">, skill: <star-…>, scope: <what this session wrote> }
 sources:
   - run: <prefix>_<slug>
-    report: EXPT_ANALYSIS_<YYYY-MM-DD>.md
-    verdict: <met|partially met|not met|inconclusive|invalid>
+    report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md | none for engineering>
+    verdict: <met|partially met|not met|inconclusive|invalid|— for engineering>
 ---
+
+<!-- After final content and source verification, record the shared source_state binding; dates do not establish freshness. -->
 
 # Results
 
@@ -38,10 +40,7 @@ sources:
 |---|---|---|---|---|---|---|---|
 | `<prefix>_<slug>` | <…> | <value> | <n or 1> | <std, min–max, or — (single run)> | test | met / not met | `<path:line or key>` @ EXPT_ANALYSIS_<date> |
 
-<!-- A verdict scored against a criterion the plan no longer states carries a dagger — `met †` — and
-     one footnote line under the table: `† §5 read "<old>" when this run was designed; it reads
-     "<new>" today.` The run's EXEC_PLAN `done_criterion:` is the criterion it was designed against;
-     compare it with the leaf's §5 before writing the row. No dagger means the two agree. -->
+<!-- Changed constraints require analyst verification before aggregation. A stale verdict cannot enter the current table merely with a dagger. Historical criteria may be explained in the refreshed analysis; use its current verdict. -->
 
 ## 3. Ablations
 
@@ -60,6 +59,14 @@ sources:
 
 <!-- Runs root §4 maps to no claim and no ablation. Listed with their headline number, never dropped.
      Write "None" if every run mapped. -->
+
+## Engineering Work (no experimental metrics)
+
+<!-- Current exempt runs only: no metric placeholders, missing-analysis gaps or experimental sample counts. -->
+
+| Run | Verified engineering work | Exemption record |
+|---|---|---|
+| `<run>` | <work and check> | `wkdrs/<run>/EXEC_LOG.md` |
 
 ## 5. Excluded
 

@@ -14,7 +14,7 @@ model_trail:                    # append-only: one entry per write session, newe
 sources:
   - run: <prefix>_<slug>
     report: <EXPT_ANALYSIS_<YYYY-MM-DD>.md or "none">
-    tier: <report-backed|provisional>
+    tier: <report-backed|provisional|engineering-only>
     verdict: <met|partially met|not met|inconclusive|invalid|—>
 ---
 
@@ -29,8 +29,7 @@ sources:
 ## 1. Period & Scope
 
 <!-- In brief: the window and how it was set (resumed from the previous digest / explicit
-     window / plan family), the scope, how many runs fell in it, and the report-backed vs provisional
-     split. In plan mode, name the ancestors read for claim context. If there is no previous digest,
+     window / plan family), the scope, how many runs fell in it, and the report-backed, provisional and engineering-only counts. In plan mode, name the ancestors read for claim context. If there is no previous digest,
      say the series starts here. If the period is empty, say so with the newest run date and the
      last covered date, write "None" under every section below, and stop. -->
 
@@ -43,7 +42,7 @@ sources:
 
 ## 3. Runs in Period — report-backed
 
-<!-- One row per run holding an EXPT_ANALYSIS report; the verdict and numbers are quoted from it.
+<!-- One row per non-exempt run whose latest analysis has a current binding; the verdict and numbers are quoted from it.
      "Source" is what the report recorded, carried over so a reader can check it. Write "None" if no
      in-scope run has been analyzed. -->
 
@@ -53,7 +52,7 @@ sources:
 
 ## 4. Runs in Period — provisional (unverified)
 
-<!-- Runs with a directory but no analysis report. EXEC_LOG only; a number appears here ONLY if the
+<!-- Non-exempt runs without a current analysis. Stale/unknown existing reports get progress-only rows with no numbers. EXEC_LOG only; a number appears here ONLY for a run with no analysis report at all, when the
      log itself names it and its file (references/digest_rubric.md, Tier 2). No verdict, no scoring,
      no figures. These numbers must not be quoted, compared, or entered into the results table. Write "None"
      if every in-scope run has been analyzed. -->
@@ -61,6 +60,14 @@ sources:
 | Run | Plan | Log status | Steps | Reported number (provisional) | Source | Next |
 |---|---|---|---|---|---|---|
 | `<prefix>_<slug>` | `<prefix>_<slug>_plan.md` | in_progress | 3/5 | <value> — provisional (unverified) | `<path:line>` | `star-expt-analyst <run dir>` |
+
+## Engineering-only Work
+
+<!-- Current exemptions only: source tier engineering-only, verdict —. No metrics or missing-analysis follow-up; cite the executor’s reason and checks. -->
+
+| Run | Engineering progress | Exemption evidence |
+|---|---|---|
+| `<run>` | <verified work> | `wkdrs/<run>/EXEC_LOG.md` |
 
 ## 5. What Moved
 
@@ -92,9 +99,8 @@ sources:
 
 ## 8. Gaps & Outstanding Follow-ups
 
-<!-- What the period still leaves to do: in-scope runs with no analysis report, leaves with no exec_runs,
-     leaves with an unchecked "Awaiting user" STOP-line command, and a results table older than the newest
-     in-scope analysis report. One line each with the command that closes it. Write "None" if the
+<!-- What the period still leaves to do: non-exempt runs lacking a current analysis, leaves with no exec_runs,
+     leaves with an unchecked "Awaiting user" STOP-line command, and a results table whose binding fails against current analyses/exemptions. One line each with the command that closes it. Write "None" if the
      period is clean. -->
 
 - <the outstanding follow-up> — `<prefix>_<slug>` → `<command>`

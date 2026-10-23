@@ -15,10 +15,10 @@ vague research interest
   → star-code-architect: give the plan a place for the code to live and record the architecture
   → star-env-builder: build and verify the runtime environment
   → star-plan-decomposer: split it into execution sub-plans with dependencies
-  → star-plan-executor: implement and verify one leaf sub-plan
-  → star-code-reviewer: audit the implementation against conventions and the plan
-  → star-expt-analyst: audit the run's results against what the plan expected
-  → star-plan-reviser: review a plan against execution evidence and revise it
+  → star-plan-executor: implement, verify, arrange review, and collect one leaf run
+      star-code-reviewer: called by the executor before heavy launch or merge; also available independently
+  → star-expt-analyst: audit experimental results; verified engineering-only work records an explicit exemption
+  → star-plan-reviser: revise when the evidence requires a plan change
   → star-metd-summarize: once every leaf is executed and the plans finalized, compile them into method documents
   → star-code-release: consolidate the code and compile the project's README
 
@@ -28,7 +28,7 @@ vague research interest
     where things stand, what follow-up is outstanding, and the one next action
 ```
 
-The list reads as one pass, but the workflow is not linear: `star-proj-adopt` runs only when an existing project is adopted (never for one started from the template), `star-idea-storm` only while the topic is open (skip it when one is chosen), `star-code-architect` and `star-env-builder` only on the first pass; `star-plan-executor` through `star-plan-reviser` is a loop re-entered per leaf sub-plan, with `star-expt-digest` run regularly across it rather than inside it, `star-metd-summarize` only once the loop has closed — every leaf executed, the plans finalized — and `star-code-release` last, once the work is ready for someone else to read. `star-flow-status` names the next leaf each round, and the audits route what they find back into the plans:
+Once a leaf plan is ready, the usual sequence is **execute and finalize → analyze results → revise the plan when needed**. The executor owns implementation, validation, code review, authorized launches and result collection; you do not need to call the reviewer separately. Use `star-flow-status` when resuming with unknown state or choosing the next task. Adoption, topic selection, architecture and environment setup run when their prerequisites are missing; digests summarize a period on request, and method compilation and release follow completed research. The diagram below maps responsibilities and artifacts, rather than commands to run one by one:
 
 ![STAR research workflow: thirteen skills in the order they run in plus two that read across them, what each one writes, and how the per-leaf loop closes](../../srcs/star-research-workflow.png)
 
@@ -40,8 +40,8 @@ The list reads as one pass, but the workflow is not linear: `star-proj-adopt` ru
 | Write the plan, reading the field as you position it | `star-plan-coach`, breaking out to `star-refs-reviewer` | `metds/plans/<digit>_<slug>_plan.md`; `metds/refs/`: one note per core paper, `reference.bib`, `refs_index.md` | Problem, positioning, method, experiments, risks and milestones, positioned against work read rather than recalled — plus the baselines the field expects, and the `finalized` date that lets the plan be split |
 | Give the code and the runtime somewhere to live | `star-code-architect`, then `star-env-builder` | `${CODE_NAME}/` and `metds/codearc.md`; `wkdrs/env_<ENV_NAME>_<date>/ENV_REPORT.md` | Modules a leaf can name by path, and an interpreter that has already imported them |
 | Split it into separately answerable questions | `star-plan-decomposer` | one sub-plan per unit, flat under `metds/plans/` | One leaf per question, each with its own deliverables and one runnable done-criterion |
-| Run the experiment | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and the run's own artifacts | Code, its light-validation evidence, and the training or evaluation command handed back for you to run |
-| Check the code the numbers will rest on | `star-code-reviewer` | `wkdrs/<run>/CODE_REVIEW_<date>.md` | Findings by severity, caught before the compute is spent rather than after |
+| Execute and finalize the run | `star-plan-executor` | `wkdrs/<run>/EXEC_PLAN.md`, `EXEC_LOG.md`, and the run's own artifacts | Verified code and collected outputs; an exact handoff command when launch authority is missing |
+| Check the code before heavy launch or merge | `star-code-reviewer`, called by the executor or invoked independently | `wkdrs/<run>/CODE_REVIEW_<date>.md` | Findings for the executor to resolve before proceeding |
 | Read what came back | `star-expt-analyst` | `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`; `wkdrs/results/results.md` in `aggregate` mode | Every done-criterion scored `met` / `not met` / `unmeasurable`, with the source behind each number |
 | Take the result back into the plan | `star-plan-reviser` | the plan revised in place, plus `wkdrs/<run>/REVIEW_<date>.md` | A plan that matches the evidence, and a tree no longer recommending a direction the evidence closed |
 | Write the whole thing up | `star-metd-summarize`, then `star-code-release` | `metds/overview.md`, `dataset.md`, `framework.md`, `training.md`, `evaluation.md`; `README.md` | The method in prose and the numbers in one table — what a paper's method and results sections are written from |
@@ -628,9 +628,11 @@ A leaf can pass every other check and still be too big for one run — split wee
 5. Runs the narrowest light validation and records evidence in the log;
 6. Sets the execution status to `done` once the sub-plan's done-criterion is satisfied.
 
-Ordinary in-scope implementation and light validation proceed under the active tool's permission model. The skill stops for direction when a choice would materially change the scope.
+Before implementation, the executor checks whether the actions involve experimental results, metrics, data selection or splits, evaluation-affecting preprocessing, weights, repeats, comparisons, or heavy commands. These require an independent design check; clearly unrelated engineering work records why the check is unnecessary. Action checks, code review and launch authority still apply. Ordinary in-scope implementation and light validation proceed under the active tool's permission model; unresolved material scope changes need direction. A design-check exemption and an analysis exemption are separate decisions: the latter is recorded only after engineering deliverables have been verified.
 
-**The execute-and-verify phase can run on another model.** The implementation and light-validation loop is where the run acts rather than judges, so where `STAR_EXEC_MODEL` names a model that phase goes to one delegate on it: the delegate picks the run up at the first unfinished action and returns when the loop ends, while everything around it — the gap list, the `EXEC_PLAN` and any decision it still needs, finalization, and the write-back into the sub-plan — stays on PLAN. It is kept narrow on purpose: it may not edit `EXEC_PLAN.md`, an action it cannot do as written stops and comes back rather than being improvised, a STOP-line command is recorded in `EXEC_LOG.md` and ends its turn there, and finalizing is never its to do. The dispatching run inspects the changed artifacts and accepts check evidence when the command, result, scope, and code version are clear; it re-runs a check only when that evidence is missing or uncertain, integration changed the behavior, or an acceptance check remains. With the key empty, the run already on that model or an alias of it with no per-dispatch depth to apply, or on a harness with no delegate to hand the phase to, the loop runs in place exactly as before; the hand-over is not a question at any involve level, since it changes which model executes the work and not what the work does.
+**The execute-and-verify phase can run on another model.** When the configured EXEC model or supported depth requires a hand-off, the PLAN run delegates this phase once. That EXEC owner performs sequential actions locally; implementing delegates, including those doing mechanical edits, use EXEC. Only independent scopes that benefit from parallel work or a separate context are delegated further, with disjoint file ownership. READ handles read-only collection and PLAN handles independent design review. Planning, material decisions and finalization remain with the PLAN run; the EXEC owner returns on a STOP-line command or unresolved plan-level gap. Empty or unavailable overrides keep the available execution route. The caller accepts inspectable command/result evidence and repeats only missing, stale or integration-affected checks.
+
+**Commit a verified work unit.** The default recommendation is one commit for a coherent change made by one or several adjacent actions. EXEC_PLAN names the members and final check; EXEC_LOG still records each action's result immediately. Commit after all member checks and the final check pass, including the associated run-record updates. Keep an existing per-action choice: commit each locally executed dependent action after its own check, and retain the broader integration check before completion. Preserve uncommitted verified work if a later action fails. Choosing an execution branch requires scoped commits before switching or merging, without forcing one commit per action.
 
 ### The STOP line
 
@@ -642,7 +644,7 @@ The skill needs specific launch authority before starting:
 - Operations that may overwrite valuable artifacts;
 - Work whose duration or cost cannot be bounded.
 
-It first prepares the exact command, records it under “Awaiting user” in the execution log, and starts `star-code-reviewer <leaf>` itself, named above that command: a defect caught before the compute costs a review, caught after it costs the compute and the re-run too. If launch authority is still missing, it hands the command to you and stops; an earlier explicit instruction for that command and resource scope, or a matching `star-auto` grant within its `stop=` boundary, supplies the authority without another question. Nothing skips the review — the launch guard declines the command until the run has a passing review whose `REVIEW_STATE.md` matches the current source/configuration and relevant plan constraints. Blocker or major findings go back through `star-plan-executor`, which reopens the affected steps, fixes and verifies them before launch. After the command finishes, invoking the same plan resumes from the log and verifies the result instead of starting over.
+The executor records the exact command under “Awaiting user” in `EXEC_LOG.md` and obtains or reuses a passing code review. It calls `star-code-reviewer <leaf>` only when that review is missing or stale; blocker or major findings return to the executor for remediation and verification. The launch guard requires `REVIEW_STATE.md` to match the current source/configuration and relevant plan constraints. Missing launch authority leaves the command for you to run; an earlier explicit authorization covering its command and resources, or a matching `star-auto` grant within `stop=`, is reused. After the command finishes, the executor collects and verifies the result from the existing log.
 
 ### Main outputs
 
@@ -763,7 +765,7 @@ wkdrs/results/results.md              # aggregate mode only: the cross-run resul
 
 ### The results table (`aggregate`)
 
-`star-expt-analyst aggregate [PLAN_NAME]` answers what a single run cannot: *what does the whole experiment programme show?* It collects every leaf's newest analysis report, **re-opens each number at the source that report cites** before letting it in, and compiles `wkdrs/results/results.md` — `wkdrs/results/results_<slug>.md` when scoped to a subtree, so a scoped run never overwrites the project results table. One table per claim and per ablation, taken from the root's §4 claim→experiment map, not from the plan tree; every number carries its run, source, and verdict. Runs verdicted `invalid` or `inconclusive`, and numbers that fail re-verification, move to an excluded section naming them and why; a `not met` run stays in its table. The table reports numbers, never explains them: *why* a variant won needs a controlled comparison this skill does not run. With `metds/evaluation.md`, which defines the protocol and carries no scores, it is the pair a paper's results section is written from.
+`star-expt-analyst aggregate [PLAN_NAME]` answers what a single run cannot: *what does the whole experiment programme show?* It collects every run in each leaf's exec_runs, using its newest current analysis, **re-opens each number at the source that report cites** before letting it in, and compiles `wkdrs/results/results.md` — `wkdrs/results/results_<slug>.md` when scoped to a subtree, so a scoped run never overwrites the project results table. One table per claim and per ablation, taken from the root's §4 claim→experiment map, not from the plan tree; every number carries its run, source, and verdict. Runs verdicted `invalid` or `inconclusive`, and numbers that fail re-verification, move to an excluded section naming them and why; a `not met` run stays in its table. The table reports numbers, never explains them: *why* a variant won needs a controlled comparison this skill does not run. With `metds/evaluation.md`, which defines the protocol and carries no scores, it is the pair a paper's results section is written from. Current engineering exemptions are listed without metrics or missing-analysis gaps; stale analyses must be verified before their numbers enter.
 
 The report records the scope and evidence base, a run verdict, the done-criteria scorecard, the artifact inventory and completion, log health, metrics with their sources, any cross-run comparison, the interpretation, and the routing.
 
@@ -989,7 +991,7 @@ star-metd-summarize
 | `metds/training.md` | Stage pipeline, per-stage recipe, hyperparameter table, practical notes, reproduction commands |
 | `metds/evaluation.md` | Protocol overview, benchmark detail with meaningful margins, baselines, ablation design, evaluation commands |
 
-Each document records in its frontmatter the plans it was compiled from and the `updated` date each carried — how the next run detects a stale document.
+Each document retains its source-plan dates as readable provenance. Its content binding is checked against the current scoped plans, including added inputs and execution-verification changes; same-day edits can make it stale.
 
 ### The fabrication boundary
 
@@ -1137,20 +1139,20 @@ The status read picks the leaf: among those whose `depends_on` upstreams are com
 star-plan-executor 00_baseline-impl_plan.md
 ```
 
-### Step 6: read what came back, then resume
+### Step 6: collect and finalize, then analyze
 
-If the log contains a training command that the user must run:
+For a command handed back to you, complete the run in this order. An authorized `star-auto` run handles launch and collection within its goal and stop line:
 
-1. Run the command recorded in `wkdrs/00_baseline-impl/EXEC_LOG.md`;
-2. While it runs, `star-expt-analyst watch 00` reports log health without scoring anything;
-3. Confirm that its artifacts were written to the recorded paths;
-4. `star-expt-analyst 00` scores the run against the leaf's done-criterion and says what the numbers mean — the step deciding whether the direction held;
-5. Invoke `star-plan-executor 00` again;
-6. The skill reads the existing log and resumes at done-criterion verification.
+1. Run the exact command recorded in `wkdrs/00_baseline-impl/EXEC_LOG.md` after its required review;
+2. While it runs, use `star-expt-analyst watch 00` only when a health check is needed;
+3. Retain the raw logs, exit result and artifacts at the recorded paths;
+4. Resume `star-plan-executor 00` to verify and collect the outputs, then check the done-criterion and finalize;
+5. Use `star-expt-analyst 00` to audit the numbers and explain what they mean;
+6. Return to the executor only if analysis identifies unfinished or invalid work; revise the plan when the evidence calls for it.
 
-### Step 7: repeat — the light path or the full path
+### Step 7: continue, revising only when needed
 
-After each leaf, `star-flow-status` gives the single next recommendation. A result that contradicts the plan goes back into the plan text through `star-plan-reviser` before the next leaf starts, so the tree stops recommending a direction the evidence has closed. How much of the loop each leaf needs depends on what it is for; see [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
+After each leaf, follow the returned next action within the authorized execution goal. Use `star-flow-status` when state or the next task is unclear. Evidence that invalidates the plan must be addressed before dependent work proceeds; invoke `star-plan-reviser` explicitly or through the authorized `star-auto` workflow. See [How much of the loop does each leaf need?](#how-much-of-the-loop-does-each-leaf-need).
 
 ### Step 8: compile the method for the paper
 
@@ -1196,26 +1198,26 @@ The scattered code lands in `${CODE_NAME}/` where `metds/codearc.md` says it bel
 
 ### How much of the loop does each leaf need?
 
-Two paths. Choose per leaf, not per project.
+Use one execution path; analyze experimental results and revise the plan when the evidence requires it. Verified engineering-only work may record an explicit analysis exemption.
 
-**The light path — `star-flow-status` → `star-plan-executor` → `star-expt-analyst`.** For an exploratory leaf: a probe, a feasibility check, an MVP whose only job is to say whether the direction is worth pursuing. The executor's step checks, the review it starts on its own, and the analyst's done-criteria scorecard are enough. Skip the plan revision — the plan text has not been contradicted, only tested.
+**Execute and finalize — `star-plan-executor`.** It implements, verifies, obtains or reuses the required code review, and collects authorized experiment outputs. For engineering-only work without metrics, research conclusions, evaluation-changing inputs or experimental execution, it may record a reason and verified evidence in EXEC_LOG and bind an analysis exemption. The exemption expires when relevant inputs change; it never waives code review or an explicit analysis request.
 
-**The full path — `star-flow-status` → `star-plan-executor` → `star-code-reviewer` → (STOP line: you run the command, `star-expt-analyst watch <leaf>` while it runs) → `star-expt-analyst` → `star-plan-reviser`.** For a leaf whose numbers will be quoted in the paper, whose code later leaves build on, or whose result changes the top-level plan. Here the review earns its keep: it catches the bug before it costs GPU-hours and before a wrong number reaches a table; the reviser folds what the run taught back into the plan the method documents compile from.
+**Analyze, then revise if needed — `star-expt-analyst` → optional `star-plan-reviser`.** Experimental results need an evidence-backed interpretation, including exploratory MVPs. Revise when evidence contradicts the plan, changes its assumptions, or leaves method details that execution write-back has not settled. A clean result consistent with the plan does not require a revision pass merely because it will appear in a paper.
 
-Two rules cut across both:
+Two rules apply throughout:
 
-- **A result that contradicts the plan promotes a light leaf to the full path.** A root kill-criterion hit, or a refuted MVP assumption, is a plan-level finding — route it to `star-plan-reviser` whichever path you started on.
+- **A root kill-criterion hit or a refuted MVP assumption requires plan review.** Record and route the finding to `star-plan-reviser` before depending on that direction again.
 - **`star-metd-summarize` compiles from plans, not runs.** A value an exploratory leaf settled that a method document will cite still needs the executor to write it back into the plan, or it never reaches the paper.
 
-When in doubt, ask what happens if the leaf's result is wrong. If the answer is "I lose an afternoon", take the light path. If it is "a number in the paper is wrong", take the full one.
+The executor owns result collection and run finalization; analysis and plan review retain their independent evidence checks and write limits. Query status when needed rather than inserting it between every two steps.
 
 ### Why will the executor not run the plan I selected?
 
-Usually: the target is not a leaf, an entry in `depends_on` is unfinished, the task breakdown or done-criterion still holds too many `[TBD]` items, or the `.env` environment itself is unusable — `star-env-builder` rebuilds it. `star-flow-status` first usually reveals the exact reason.
+Usually: the target is not a leaf, a dependency is unfinished, the task breakdown or done-criterion contains too many `[TBD]` items, or the configured runtime needs verification. `star-flow-status` names the recorded blocker. An old ENV_REPORT alone is insufficient: the interpreter and dependencies must match its binding, and execution still checks the imports/entrypoint it needs. `star-env-builder` verifies and repairs an existing environment before proposing a rebuild.
 
 ### Why was a training command recorded instead of executed?
 
-Full training, full-dataset evaluation, and high-cost calls cross the STOP line. The skill makes the command and output paths reproducible; when to spend those resources stays the user's decision.
+Full training, full-dataset evaluation and costly calls require a prepared command, known resource scope and a current passing code review. If that launch is already explicitly authorized, or covered by the active `star-auto` goal and stop line, it proceeds within those limits. Missing authority or unassessable cost leaves an exact handoff command; the same authorization is not requested twice.
 
 ### I have been away for two weeks — how do I pick the work back up?
 
@@ -1226,11 +1228,11 @@ Nothing depends on the conversation still being open: each stage records its pro
 - The refs reviewer resumes from `metds/refs/`: existing notes and verified `reference.bib` entries are the baseline, and a re-run fills only the gaps;
 - The decomposer resumes from parent-child links and existing sub-plans;
 - The executor resumes from the `EXEC_LOG.md` referenced by the last `exec_runs` entry;
-- The env builder resumes via *verify & repair in place* from the latest `wkdrs/env_*/ENV_REPORT.md`;
+- The env builder resolves the current interpreter and checks its latest relevant ENV_REPORT binding, then verifies or repairs in place; a stale or partial report does not trigger an automatic rebuild;
 - The code reviewer's reports stay under `wkdrs/` (the run directory or `wkdrs/reviews/`), and applied fixes live in git;
 - The experiment analyst's reports stay under `wkdrs/<run>/EXPT_ANALYSIS_<date>.md`, alongside any figures it rendered;
 - The reviser's report stays under `wkdrs/`, and every applied change is recorded in the plan's `## Revision History`;
-- The method summarizer needs no memory: it recompiles from the plans, and each document's `sources:` frontmatter records which plans it came from and how fresh they were;
+- The method summarizer checks recorded source fingerprints against the current scoped plans, including additions and verification-state changes; `sources:` dates remain readable provenance;
 - The status skill can reconstruct the global state read-only at any time.
 
 
@@ -1238,13 +1240,13 @@ Nothing depends on the conversation still being open: each stage records its pro
 
 Two different questions; this section answers only the second. **Who may start a skill** is the roster ([conventions §10](research-workflow-conventions.md)): seven are slash-only, while the agent may pick up the other eight when the request plainly matches, and may start one as a next action only when it advances an already authorized execution goal. A status, explanation, or read-only request ends with its result and recommendation; a named next action alone does not authorize a writing successor. A `star-auto <goal>` invocation you typed extends pickup to all fifteen for that pursuit (§1, Invoking the skills). **How far a run gets before it needs you** depends on authority already given: an ordinary run asks only for a consequential decision or operation still unresolved, while auto supplies a standing launch and clean-merge grant within the goal and `stop=` boundary. Headless or scripted execution never treats silence as approval. In practice:
 
-- **Safe on a timer**: `star-flow-status` (read-only, asks nothing); `star-expt-analyst <leaf | run-dir>` with an explicit target, and `star-expt-analyst watch <leaf>` (chat-only); a `star-metd-summarize` recompile — an unready tree stops at its readiness check, documents whose sources have not moved are left untouched, a substantive overwrite stops at its change-list question instead.
-- **Runs until its confirmation point**: `star-refs-reviewer` stops at the mandatory core-set confirmation, its `verify` on any mismatch until the diff is confirmed, its `survey` at one judgment call (profile, taxonomy axis, tiered reading list) that `involve=low` takes on its recommendation — leaving only the overwrite of an existing survey file to stop for; `star-expt-analyst aggregate` stops at the change-list question once `wkdrs/results/results.md` exists and a table changed; `star-code-release check` is read-only apart from its report, so it is safe on a timer, while its other three phases stop at their confirmation points.
-- **Needs you at the wheel once it is running**: `star-idea-storm`, `star-plan-coach`, `star-plan-decomposer`, `star-code-architect`, `star-env-builder`, `star-plan-executor`, `star-code-reviewer`, `star-plan-reviser`, `star-code-release` (its gather, polish and readme phases) — their questions and confirmation points are the design; scripting a "yes" past them defeats the audit trail they protect. Three — the environment builder, the executor, the code reviewer — the agent may nonetheless start on its own: starting a run is not finishing one unattended.
+- **Read-only observation**: use `star-flow-status` for state and `star-expt-analyst watch <leaf>` for an on-demand health check. These do not start implementation, install packages or produce a run verdict. Recurring checks run only when the user requests that schedule; they are not the default experiment-wait loop.
+- **Report and document production**: analysis, aggregation, method compilation and release checks can proceed with a settled target and sufficient write authority. A substantive update uses existing specific authorization; an unresolved source, root, overwrite scope or research decision is returned to the user. Source bindings determine freshness, including same-day changes; legacy metadata is unknown until verified.
+- **Authorized execution**: the executor, environment builder and reviewer continue their in-scope work without repeating settled decisions. The seven explicitly invoked skills retain that entry boundary; `star-auto` may start them within its named goal. New research scope, acceptance criteria, key inputs, resource commitments or destructive actions still need an applicable decision or authority.
 
-The involve level (conventions §7.7–7.8) controls unresolved judgment calls; it neither revokes existing approval nor creates new authority. With `INVOLVE=low` in `.env` — or `involve=low` on one invocation — a skill takes the recommended safe choice and logs it. Runs stretch further before needing you: `star-plan-decomposer` can take its recommended axis and sub-plan list, and `star-plan-executor`, pointed at a parent under an execution goal, can start the first ready leaf and proceed with its concrete execution plan. At `low`, authorized in-scope commits also proceed and are named afterward. `high` asks judgment calls one at a time. Changes to the research objective, acceptance criteria, key inputs, or cost/authority boundary still need an explicit decision; so do destructive operations that were not already specifically authorized. `star-auto` additionally authorizes prepared heavy commands and, after a clean review, the guarded squash merge and worktree cleanup described above, subject to its goal and `stop=` line.
+The involve level (conventions §7.7–7.8) controls unresolved routine choices. `low` takes the recommended choice and records it; `high` asks at the stated granularity. It neither revokes existing approval nor invents new authority. With a settled leaf and authorized execution goal, the executor proceeds under its plan; ambiguous targets and material decisions remain unresolved until answered. Authorized commits follow the recorded granularity. `star-auto` additionally covers prepared launches and guarded clean merges within its goal and stop line.
 
-A practical unattended pattern: run the STOP-line training command, keep `star-expt-analyst watch <leaf>` on a timer while it trains, and leave scoring and revision for when you are back.
+For unattended execution, give `star-auto` a concrete goal and resource boundary. It waits for command completion, then lets the executor collect and verify outputs. Request `watch` when a stall or another concrete diagnostic need arises; continuous polling is not a prerequisite for unattended work.
 
 ### What is deliberately outside STAR?
 
