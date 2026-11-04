@@ -66,6 +66,48 @@ if [ "${1:-}" = "--check" ]; then
     exit 1
   fi
 
+  # Machine-generated receipts inherit provenance from their bound report.
+  # Verify the binding before reading model metadata; this is independent of
+  # review_state.sh's source/plan freshness and launch-gate checks.
+  if [ "${artifact##*/}" = REVIEW_STATE.md ]; then
+    receipt_error() {
+      printf '%s\n' "star_model_id.sh: invalid review receipt ${artifact}: $1" >&2
+      exit 1
+    }
+    run_dir=$(cd -- "$(dirname -- "${artifact}")" && pwd -P) || receipt_error 'cannot resolve directory'
+    root=$(cd -- "${run_dir}/../.." && pwd -P) || receipt_error 'cannot resolve root'
+    run=${run_dir##*/}
+    [ "${run_dir}" = "${root}/wkdrs/${run}" ] || receipt_error 'expected wkdrs/<run>/REVIEW_STATE.md'
+    version='' report='' report_hash='' gate=''
+    while IFS=$'\t' read -r key value digest extra || [ -n "${key}" ]; do
+      [ -z "${extra}" ] || receipt_error 'invalid metadata'
+      case "${key}" in
+        version|report|report_hash|gate)
+          [ -n "${value}" ] && [ -z "${digest}" ] || receipt_error 'invalid metadata'
+          case "${key}" in
+            version) [ -z "${version}" ] || receipt_error 'duplicate version'; version=$value ;;
+            report) [ -z "${report}" ] || receipt_error 'duplicate report'; report=$value ;;
+            report_hash) [ -z "${report_hash}" ] || receipt_error 'duplicate report_hash'; report_hash=$value ;;
+            gate) [ -z "${gate}" ] || receipt_error 'duplicate gate'; gate=$value ;;
+          esac ;;
+        path|plan) [ -n "${value}" ] && [ -n "${digest}" ] || receipt_error 'invalid scope metadata' ;;
+        *) receipt_error 'unknown metadata' ;;
+      esac
+    done < "${artifact}"
+    [ "${version}" = 1 ] || receipt_error 'unsupported version'
+    case "${gate}" in passed|blocked) ;; *) receipt_error 'invalid gate' ;; esac
+    case "${report}" in
+      "wkdrs/${run}/CODE_REVIEW_"*.md) ;;
+      *) receipt_error 'invalid report path' ;;
+    esac
+    report_name=${report#"wkdrs/${run}/"}
+    case "${report_name}" in */*) receipt_error 'invalid report path' ;; esac
+    [ -f "${root}/${report}" ] && [ -r "${root}/${report}" ] || receipt_error 'missing report'
+    bound_hash=$(git -C "${root}" hash-object --no-filters -- "${root}/${report}" 2>/dev/null) || receipt_error 'cannot hash report'
+    [ -n "${report_hash}" ] && [ "${bound_hash}" = "${report_hash}" ] || receipt_error 'report content changed'
+    artifact="${root}/${report}"
+  fi
+
   expected=$(bash "$0" --resolve "${transcript}")
   [ -n "${expected}" ] || expected="${session_model}"
   [ -n "${expected}" ] || expected="unrecorded"
