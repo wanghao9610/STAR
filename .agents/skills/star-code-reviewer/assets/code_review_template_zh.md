@@ -1,6 +1,7 @@
 # 代码审查 — <scope>（<YYYY-MM-DD>）
 
-<!-- 由 star-code-reviewer 写出（model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/research-workflow-conventions.md §8>）。模式：full | plan | path | diff；目标：<原样的参数>；
+<!-- 由 star-code-reviewer 写出。模式：full | plan | path | diff；目标：<原样的参数>；
+     model_id: <模型 id，写入时由运行时自报；运行时未提供则写 "unrecorded"——见 docs/mds/star-workflow/research-workflow-conventions.md §8>
      review_gate: blocked
      仅在已核实无未解决的 blocker/major 且行为与约束覆盖充分时改为 passed；审查者负责判定。
      使用 scripts/review_state.sh 记录最终报告及明确的源码/配置/计划范围；报告变更或修复验证后重新记录。

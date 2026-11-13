@@ -258,7 +258,7 @@ Where an artifact already has per-event rows, those carry the model too and are 
 
 Two properties of this table matter more than its contents:
 
-1. **`sources:` on a compiled document records each source plan's `updated` as it was when read.** It makes staleness detectable by exact comparison rather than by file mtime.
+1. **`sources:` on a compiled document records each source plan's `updated` as it was when read.** These dates remain readable provenance; freshness is determined by the content binding against the current required source inventory, never by dates or file mtime.
 2. **Nothing enforces this table.** `star-flow-status` ends its report with a count of report-shaped files matching no row here.
 
 A dropped subtree's artifacts keep every name in this table; only the directory changes, to the `dropped/` locations §9 lists.

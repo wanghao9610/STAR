@@ -119,6 +119,13 @@ model_id: gpt-current
     run 0 '' "$hook" --check "$project/artifact" "$project/codex.jsonl" gpt-old
     assert_equal ''
 done
+for template in code_review_template.md code_review_template_zh.md; do
+    sed 's/model_id: <[^>]*>/model_id: gpt-current/' \
+        "$repo/.agents/skills/star-code-reviewer/assets/$template" > "$project/artifact"
+    case_ "Codex verifies rendered review template $template"
+    run 0 '' "$hook" --check "$project/artifact" "$project/codex.jsonl" gpt-old
+    assert_equal ''
+done
 case_ 'Codex rejects mismatched model metadata'
 write artifact 'model_id: gpt-old'
 run 1 '' "$hook" --check "$project/artifact" "$project/codex.jsonl" gpt-old

@@ -120,7 +120,7 @@ sources:                          # every plan that fed this document, with the 
 ---
 ```
 
-`type:` + `generated:` mark a file as compiled and safe to regenerate; a file without them is hand-authored. `sources:` is the staleness check: a recorded `updated` older than that plan's current `updated` means the document is stale.
+`type:` + `generated:` mark a file as compiled and safe to regenerate; a file without them is hand-authored. Dates in `sources:` remain readable provenance. Freshness comes from the content binding checked against the current scoped source inventory under the shared source_state contract; dates alone cannot establish validity.
 
 ## Extraction format (structured return)
 
@@ -158,4 +158,4 @@ When regenerating a compiled document, report one line per section before writin
 | 3. Preprocessing | rewritten | tokenization step added from `01_..._plan.md` §3.4 |
 | 5. Statistics | unchanged | — |
 
-`added` / `rewritten` / `removed` / `unchanged`. A run where every section is `unchanged` writes nothing — leave the file, and its `generated` date, alone. A `removed` row always names why the source went away (a plan section deleted, a leaf re-scoped); a removal nobody asked for signals that a plan lost content, worth reporting even when the overwrite is approved.
+`added` / `rewritten` / `removed` / `unchanged`. Follow `SKILL.md` Step 5 (compare and write existing documents) for unchanged bodies, binding refresh and overwrite authority. A `removed` row always names why the source went away (a plan section deleted, a leaf re-scoped); a removal nobody asked for signals that a plan lost content, worth reporting even when the overwrite is approved.

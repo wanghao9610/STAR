@@ -1,6 +1,7 @@
 # Code Review — <scope> (<YYYY-MM-DD>)
 
-<!-- Written by star-code-reviewer (model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/research-workflow-conventions.md §8>). Mode: full | plan | path | diff; target: <argument as given>;
+<!-- Written by star-code-reviewer. Mode: full | plan | path | diff; target: <argument as given>;
+     model_id: <model id, self-reported at write time; "unrecorded" if the runtime states none — docs/mds/star-workflow/research-workflow-conventions.md §8>
      review_gate: blocked
      Set passed only after verifying no unresolved blocker/major and adequate behavior/constraint coverage;
      the reviewer owns this decision. Record the completed report and explicit source/config/plan scope

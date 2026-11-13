@@ -136,6 +136,36 @@ helper record "$method" --kind method --method-plan "$plan" >/dev/null
 sed 's/accuracy >= 0.8/accuracy >= 0.95/' "$project/$plan" > "$scratch/plan"; cp "$scratch/plan" "$project/$plan"
 check 1 check "$method" --kind method; note 'method content changes within a day'
 
+# Exercise whole method artifacts, including frontmatter, when only bindings change.
+for state in current stale legacy; do
+    reset_case; method=metds/framework.md
+    write "$method" $'---\ntype: framework\nlanguage: en\ngenerated: 2026-10-22\nmodel_id: fixture\nmodel_trail:\n  - {date: 2026-10-22, model: fixture, skill: star-metd-summarize, scope: initial}\nsources:\n  - plan: 01_demo_plan.md\n    updated: 2026-10-22\n---\n# Framework\n\nA fixed component.\n'
+    cp "$project/$method" "$scratch/method-original"
+    if [[ $state != legacy ]]; then
+        helper record "$method" --kind method --method-plan "$plan" >/dev/null
+    fi
+    case "$state" in
+        current)
+            before=$(git -C "$project" hash-object "$project/$method")
+            check 0 check "$method" --kind method --require "$plan"
+            [[ $(git -C "$project" hash-object "$project/$method") == "$before" ]] || fail 'current method check wrote document'
+            ;;
+        stale)
+            printf '\n## Scheduling\nOwner handoff is complete.\n' >> "$project/$plan"
+            check 1 check "$method" --kind method --require "$plan"
+            ;;
+        legacy) check 2 check "$method" --kind method --require "$plan" ;;
+    esac
+    # The fixture's added scheduling fact does not change its method claim.
+    helper record "$method" --kind method --method-plan "$plan" >/dev/null
+    check 0 check "$method" --kind method --require "$plan"
+    head -c "$(wc -c < "$scratch/method-original" | tr -d ' ')" "$project/$method" | cmp -s - "$scratch/method-original" || fail "$state method refresh changed body or frontmatter"
+    if [[ $state == current ]]; then
+        [[ $(git -C "$project" hash-object "$project/$method") == "$before" ]] || fail 'current method record is not idempotent'
+    fi
+    note "$state method binding preserves body, generation date and provenance"
+done
+
 reset_case; helper record "$log" --kind analysis-exemption --reason 'Packaging only; import checks verified.' --plan "$plan" --file code/main.sh >/dev/null
 check 0 check "$log" --kind analysis-exemption
 write code/main.sh 'echo changed'; check 1 check "$log" --kind analysis-exemption
