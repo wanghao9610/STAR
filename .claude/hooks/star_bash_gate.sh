@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # Skip Claude's permission prompt for shell commands while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7) — the shell counterpart of
 # star_involve_gate.sh, so a goal-driven run (goal mode re-invoking star-auto)
@@ -36,15 +37,7 @@ involve="$(star_involve_level "${input}" "${root}")"
 [[ "${involve}" == "low" ]] || exit 0
 
 # The shell command, from Bash's tool_input.
-command_text() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r '.tool_input.command // empty' 2>/dev/null
-    else
-        # No parser on PATH: an allow read out of a misparsed payload could
-        # cover a red line, so an unreadable command keeps its prompt.
-        printf ''
-    fi
-}
+command_text() { printf '%s' "$input" | star_json_field 'tool_input.command' 2>/dev/null; }
 
 cmd="$(command_text)"
 [[ -n "${cmd}" ]] || exit 0

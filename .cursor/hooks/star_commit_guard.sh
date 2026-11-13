@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR beforeShellExecution hook (Cursor) — decline the git commands that break the
 # workflow conventions §1 in the ways that are expensive to undo. It is the floor
 # under INVOLVE=low, which answers the commit offer itself (§1.5, §7.7): with
@@ -49,20 +50,7 @@ input=$(cat)
 
 # The shell command. Cursor names it at the top level of the payload, not inside
 # a tool_input object.
-command_text() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r '.command // empty' 2>/dev/null
-    else
-        # No parser on PATH. Reading the field out of the raw JSON stops at the
-        # first escaped quote, so a command carrying one is read only up to it —
-        # shorter than the truth, never different from it, and the flags this
-        # guard matches sit in the leading tokens of each segment. Without this
-        # branch the guard reads an empty command and declines nothing.
-        printf '%s' "${input}" \
-            | grep -oE '"command"[[:space:]]*:[[:space:]]*"[^"]*"' \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+command_text() { printf '%s' "$input" | star_json_field 'command' 2>/dev/null; }
 
 cmd="$(command_text)"
 case "${cmd}" in

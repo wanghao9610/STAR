@@ -2,6 +2,7 @@
 # Resolve stable findings from explicitly selected reports without changing inputs.
 set -u
 export LC_ALL=C
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh"
 root='' log=''
 reports=()
 while [ "$#" -gt 0 ]; do
@@ -22,7 +23,6 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 [ -n "$root" ] && [ -n "$log" ] || { echo '--root and --log are required' >&2; exit 2; }
-command -v jq >/dev/null || { echo 'jq is required' >&2; exit 2; }
 root=$(cd "$root" 2>/dev/null && pwd -P) || { echo 'Cannot read root' >&2; exit 2; }
 work=$(mktemp -d "${TMPDIR:-/tmp}/star-findings.XXXXXX") || exit 2
 trap 'rm -rf "$work"' EXIT
@@ -32,9 +32,9 @@ trap 'rm -rf "$work"' EXIT
 : > "$work/unknowns"
 unknown() {
     if [ "$#" -eq 3 ]; then
-        jq -nc --arg path "$1" --arg message "$2" --arg finding_id "$3" '{path:$path,message:$message,finding_id:$finding_id}' >> "$work/unknowns"
+        star_json_object path "$1" message "$2" finding_id "$3" >> "$work/unknowns"
     else
-        jq -nc --arg path "$1" --arg message "$2" '{path:$path,message:$message}' >> "$work/unknowns"
+        star_json_object path "$1" message "$2" >> "$work/unknowns"
     fi
 }
 # Parse one quoted or unquoted root-relative reference with optional line/anchor.
@@ -198,7 +198,9 @@ for report in ${reports[@]+"${reports[@]}"}; do
     END {if(header==1) bad("")}' > "$work/report-events"
     while IFS= read -r event; do
         origin='' disposition='' decision='' evidence=''
-        eval "$(printf '%s\n' "$event" | jq -r 'to_entries | map(.key + "=" + (.value|@sh)) | join(" ")')"
+        type=$(star_json_get type <<<"$event"); finding=$(star_json_get finding <<<"$event")
+        origin=$(star_json_field origin <<<"$event"); disposition=$(star_json_field disposition <<<"$event")
+        decision=$(star_json_field decision <<<"$event"); evidence=$(star_json_field evidence <<<"$event")
         if [ "$type" = bad ]; then
             [ -z "$finding" ] || printf '%s\n' "$finding" >> "$work/invalid"
             unknown "$relative" 'Unsupported finding decision table; use the five exact machine column names.'
@@ -221,16 +223,20 @@ for report in ${reports[@]+"${reports[@]}"}; do
             unknown "$relative" "$error" "$finding"
             continue
         fi
-        jq -nc --arg finding "$finding" --arg disposition "$disposition" --arg decision "$decision" '{finding:$finding,disposition:$disposition,decision:$decision}' >> "$work/rows"
+        star_json_object finding "$finding" disposition "$disposition" decision "$decision" >> "$work/rows"
     done < "$work/report-events"
 done
-jq -n --rawfile origins "$work/origins" --rawfile invalid "$work/invalid" --slurpfile rows "$work/rows" --slurpfile unknowns "$work/unknowns" --arg source "$source" '
-  ($origins|split("\n")|map(select(length>0))|unique) as $ids |
-  ($invalid|split("\n")) as $bad |
-  [$ids[] as $id | ([$rows[]|select(.finding==$id and .disposition=="resolved")|.decision]|unique) as $decisions |
-    {id:$id, decisions:$decisions, invalid: (($bad|index($id))!=null or ($decisions|length)>1)}] as $findings |
-  {open:[$findings[]|select(.invalid|not)|select(.decisions|length==0)|.id],
-   resolved:[$findings[]|select(.invalid|not)|select(.decisions|length>0)|.id],
-   unknowns:($unknowns + [$findings[]|select(.decisions|length>1)|{path:$source,finding_id:.id,message:"Conflicting resolved decisions; reconcile explicit decisions."}] | unique | sort_by(.path,.finding_id // "",.message))}' > "$work/result"
+star_json_new '
+    ids=array(); n=split(a(1),lines,"\n"); for(i=1;i<=n;i++) if(lines[i]!="") {x=string(lines[i]); if(!contains(ids,x)) add(ids,x)}
+    ids=sorted(ids,"",0); n=split(a(2),lines,"\n"); for(i=1;i<=n;i++) bad[lines[i]]=1
+    rows=stream(a(3)); unknowns=stream(a(4)); open=array(); resolved=array()
+    for(i=0;i<size(ids);i++) {
+        id=val(get(ids,i)); decisions=array()
+        for(j=0;j<size(rows);j++) { row=get(rows,j); x=get(row,"decision"); if(field(row,"finding")==id && field(row,"disposition")=="resolved" && !contains(decisions,x)) add(decisions,x) }
+        if(size(decisions)>1) { x=object(); put(x,"path",string(a(5))); put(x,"finding_id",string(id)); put(x,"message",string("Conflicting resolved decisions; reconcile explicit decisions.")); add(unknowns,x) }
+        else if(!bad[id]) add(size(decisions) ? resolved : open,string(id))
+    }
+    r=object(); put(r,"open",open); put(r,"resolved",resolved); put(r,"unknowns",sorted(unknowns,"path,finding_id,message",1)); print json(r)
+' "$(cat "$work/origins")" "$(cat "$work/invalid")" "$(cat "$work/rows")" "$(cat "$work/unknowns")" "$source" > "$work/result"
 cat "$work/result"
-jq -e '.unknowns|length==0' "$work/result" >/dev/null || exit 2
+star_json_eval 'if(size(get(r,"unknowns"))) exit 1' < "$work/result" >/dev/null || exit 2

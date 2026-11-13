@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR SessionStart hook (Qwen Code) — inject the runtime-reported model id into
 # session context so skills record a real model_id instead of "unrecorded".
 #
@@ -39,10 +40,7 @@ if [ "${1:-}" = "--resolve" ]; then
     session_model="${3:-}"
     resolved=""
     if [ -n "${transcript}" ] && [ -r "${transcript}" ]; then
-        if command -v jq >/dev/null 2>&1; then
-            resolved=$(jq -r 'select(.type == "assistant") | .model // empty' \
-                "${transcript}" 2>/dev/null | tail -1)
-        fi
+        resolved=$(star_json_models qwen < "$transcript" 2>/dev/null)
     fi
 
     if [ -n "${resolved}" ]; then
@@ -56,15 +54,7 @@ fi
 input=$(cat)
 
 # Read one top-level string field from the payload.
-payload_field() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-    else
-        printf '%s' "${input}" \
-            | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+payload_field() { printf '%s' "$input" | star_json_field "$1" 2>/dev/null; }
 
 model=$(payload_field model)
 transcript=$(payload_field transcript_path)
@@ -78,12 +68,5 @@ else
     ctx="STAR provenance: the runtime stated no model id for this session and named no transcript to recover it from. When a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), write 'unrecorded' and do not guess."
 fi
 
-# ctx now embeds a filesystem path, so encode it as JSON rather than assuming it
-# is quote-free; the last branch sanitizes instead, having no encoder to hand.
-if command -v jq >/dev/null 2>&1; then
-    jq -cn --arg c "${ctx}" \
-        '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-else
-    printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
-        "$(printf '%s' "${ctx}" | tr -d '"\\')"
-fi
+# Encode context without losing quotes, backslashes or line breaks.
+star_json_context hook "${event:-SessionStart}" "$ctx"

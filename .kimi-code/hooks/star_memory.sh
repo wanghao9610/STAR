@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR UserPromptSubmit hook (Kimi Code) — inject the project's memory index into
 # context once per session, so a session starts knowing what earlier sessions in
 # this repository learned.
@@ -79,11 +80,7 @@ if $list; then
 fi
 
 # --- session_id, for once-per-session dedup ---
-if command -v jq >/dev/null 2>&1; then
-  sid=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
-else
-  sid=$(printf '%s' "$input" | grep -oE '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')
-fi
+sid=$(printf '%s' "$input" | star_json_field session_id 2>/dev/null)
 
 # Dedup only when we actually have a session id. Without one, every session would
 # share a single marker: the first would create it and every later one would exit

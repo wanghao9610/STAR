@@ -352,7 +352,7 @@ Catalog truncation depends on the harness and installed version. Historical meas
 `.agents/skills/`. `.github/scripts/check_consistency.sh` then checks semantic invariants, and
 `.github/scripts/check_model_routing.sh` checks installed model-routing consumers. The Node.js 24+
 offline behavior suite runs with `node --test .github/scripts/tests/*.test.mjs`. The shell suite `bash .github/scripts/check_workflow.sh` covers review validity, launch recovery, finding resolution and plan-state fixtures. CI runs all five
-entrypoints on both Ubuntu and macOS for pushes and pull requests. Repository-owned workflow tools and their regression suites use bash, awk and jq; the port generator continues to use Perl. They do not require a Python environment. Experiment launchers still select the research runtime from `.env`. The consistency check covers:
+entrypoints on both Ubuntu and macOS for pushes and pull requests. Repository-owned workflow tools and their regression suites use Bash and awk with the shared JSON reader in `.agents/scripts/`; the port generator continues to use Perl. They do not require a Python environment. Experiment launchers still select the research runtime from `.env`. The consistency check covers:
 
 
 1. The authored root and six generated roots carry the same set of skill directories.

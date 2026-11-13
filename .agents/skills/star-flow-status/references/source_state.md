@@ -1,6 +1,6 @@
 # Source bindings and analysis applicability
 
-Use this contract when a producer finishes an analysis, results table, method document, environment report, or engineering-only execution record, and when a consumer decides whether to reuse it. The helper is `bash .agents/skills/star-flow-status/scripts/source_state.sh --root <run-checkout>`. It requires shell tools, jq and git, never a Python environment. The producer owns the decision and writes only its existing artifact; status checks never record or repair metadata.
+Use this contract when a producer finishes an analysis, results table, method document, environment report, or engineering-only execution record, and when a consumer decides whether to reuse it. The helper is `bash .agents/skills/star-flow-status/scripts/source_state.sh --root <run-checkout>`. It requires shell tools (`bash` and `awk`) and git, never a Python environment. The producer owns the decision and writes only its existing artifact; status checks never record or repair metadata.
 
 ## Record after verification
 

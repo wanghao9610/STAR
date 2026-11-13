@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Offline launch metadata regressions. Recorded commands are never executed.
 set -e
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 set -o pipefail
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd -P)
 TOOL="$ROOT/.agents/skills/star-plan-executor/scripts/launch_state.sh"
@@ -10,7 +11,7 @@ trap 'find "$TEMP" -depth -delete' EXIT
 count=0
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 eq() { [ "$1" = "$2" ] || fail "${3:-values differ}: [$1] != [$2]"; }
-json() { printf '%s\n' "$result" | jq -e "$1" >/dev/null || fail "JSON assertion: $1"; }
+json() { printf '%s\n' "$result" | star_json_eval "$1" >/dev/null || fail "JSON assertion: $1"; }
 exists() { [ -e "$1" ] || fail "missing $1"; }
 absent() { [ ! -e "$1" ] || fail "unexpected $1"; }
 setup() {
@@ -48,13 +49,13 @@ receipt_fixture() {
     cp "$run/.await" "$run/saved-marker"
     cp "$run/.await.exit" "$run/saved-exit"
     collect
-    printf '%s\n' "$result" | jq -c .receipt > "$run/receipt.json"
+    printf '%s\n' "$result" | star_json_eval 'print json(get(r,"receipt"))' > "$run/receipt.json"
     cp "$run/saved-marker" "$run/.await"
     cp "$run/saved-exit" "$run/.await.exit"
 }
 replace_receipt() {
     local receipt
-    receipt=$(jq -c "$1" "$run/receipt.json")
+    receipt=$(star_json_eval "$1; print json(r)" < "$run/receipt.json")
     printf '# Existing execution record\n\nHistorical evidence stays.\n\n```star-launch-receipt\n%s\n```\n' "$receipt" > "$run/EXEC_LOG.md"
 }
 pass() { printf 'ok %s - %s\n' "$count" "$1"; }
@@ -80,31 +81,31 @@ setup; prepare; finish 1
 cli acknowledge --attempt "$attempt" --evidence "$evidence"
 crlf "$run/EXEC_LOG.md"; cp "$run/EXEC_LOG.md" "$run/log-collected"
 cli acknowledge --attempt "$attempt" --evidence "$evidence"
-json '.status=="already_collected" and .receipt.exit_code==1'
+json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")) && equal(at(r,".receipt.exit_code"),parse("1")))) exit 1'
 cmp -s "$run/EXEC_LOG.md" "$run/log-collected" || fail 'CRLF receipt history overwritten on replay'
 absent "$run/.await"; absent "$run/.await.exit"
 pass 'CRLF receipt history replays without a marker or rewriting the log'
 
 setup; prepare; finish 1
 crlf "$run/.await"; crlf "$run/.await.exit"; snapshot
-cli inspect; json '.status=="exited" and .exit.exit_code==1'
+cli inspect; json 'if(!(equal(at(r,".status"),parse("\"exited\"")) && equal(at(r,".exit.exit_code"),parse("1")))) exit 1'
 reject prepare --pid 456 --log log --output out --code-version new --review-version new -- bash other
 preserved
 cli acknowledge --attempt "$attempt" --evidence "$evidence"
-json '.status=="acknowledged" and .receipt.result=="failed"'
+json 'if(!(equal(at(r,".status"),parse("\"acknowledged\"")) && equal(at(r,".receipt.result"),parse("\"failed\"")))) exit 1'
 absent "$run/.await"; absent "$run/.await.exit"
 pass 'CRLF active marker and exit remain bound and cannot be overwritten'
 
 setup; receipt_fixture
 crlf "$run/.await"; crlf "$run/.await.exit"; crlf "$run/EXEC_LOG.md"; snapshot
-cli inspect; json '.status=="already_collected"'
+cli inspect; json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")))) exit 1'
 preserved
-collect; json '.status=="already_collected"'
+collect; json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")))) exit 1'
 cmp -s "$run/EXEC_LOG.md" "$run/log-before" || fail 'CRLF cleanup rewrote receipt history'
 absent "$run/.await"; absent "$run/.await.exit"
 pass 'CRLF receipt and active files support cleanup after interruption'
 
-setup; receipt_fixture; replace_receipt '{attempt:.attempt}'
+setup; receipt_fixture; replace_receipt 'x=object(); put(x,"attempt",get(r,"attempt")); r=x'
 crlf "$run/EXEC_LOG.md"; crlf "$run/.await"; crlf "$run/.await.exit"; snapshot
 reject inspect; reject acknowledge --attempt "$attempt" --evidence "$evidence" --verified-output "$output"; preserved
 pass 'incomplete CRLF receipt fails without altering raw launch evidence'
@@ -114,15 +115,15 @@ mv "$evidence" "$run/verification evidence.txt"; evidence="$run/verification evi
 result=$(bash "$TOOL" prepare --run="$run" --pid=123 --log="$run/raw log.txt" --output="$output" --code-version=source:abc123 --review-version=review:def456 -- bash '--arg=value' '--run=literal' '--help')
 attempt=$result
 result=$(state)
-json '.command_argv==["bash","--arg=value","--run=literal","--help"]'
+json 'if(!(equal(at(r,".command_argv"),parse("[\"bash\",\"--arg=value\",\"--run=literal\",\"--help\"]")))) exit 1'
 eq "$(sed -n '3p' "$run/.await")" "$output"
 printf result > "$output"
 result=$(bash "$TOOL" exited --run="$run" --attempt="$attempt" --exit-code=0)
-json '.exit_code==0'
+json 'if(!(equal(at(r,".exit_code"),parse("0")))) exit 1'
 result=$(bash "$TOOL" inspect --run="$run")
-json '.status=="exited"'
+json 'if(!(equal(at(r,".status"),parse("\"exited\"")))) exit 1'
 result=$(bash "$TOOL" acknowledge --run="$run" --attempt="$attempt" --evidence="$evidence" --verified-output="$output")
-json '.status=="acknowledged" and .receipt.result=="collected"'
+json 'if(!(equal(at(r,".status"),parse("\"acknowledged\"")) && equal(at(r,".receipt.result"),parse("\"collected\"")))) exit 1'
 absent "$run/.await"; absent "$run/.await.exit"
 pass 'equals-form options preserve spaced paths and literal command options after separator'
 
@@ -131,15 +132,15 @@ marker=$(cat "$run/.await")
 eq "$(sed -n '1p' "$run/.await")" 123
 eq "$(sed -n '2p' "$run/.await")" "$run/raw.log"
 eq "$(sed -n '3p' "$run/.await")" "$output"
-result=$(state); json '.schema==1 and .code_version=="source:abc123" and .review_version=="review:def456" and .command_argv[-1]=="" and .command_argv[-2]=="literal $(touch should-not-exist); argument"'
+result=$(state); json 'if(!(equal(at(r,".schema"),parse("1")) && equal(at(r,".code_version"),parse("\"source:abc123\"")) && equal(at(r,".review_version"),parse("\"review:def456\"")) && equal(at(r,".command_argv[-1]"),parse("\"\"")) && equal(at(r,".command_argv[-2]"),parse("\"literal $(touch should-not-exist); argument\"")))) exit 1'
 absent "$ROOT/should-not-exist"
 reject prepare --pid 456 --log log --output out --code-version new --review-version new -- bash other
 eq "$(cat "$run/.await")" "$marker"
 pass 'exact argv and identity; duplicate preparation preserves marker'
 
 setup; receipt_fixture
-cli inspect; json '.status=="already_collected"'
-collect; json '.status=="already_collected"'
+cli inspect; json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")))) exit 1'
+collect; json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")))) exit 1'
 absent "$run/.await"; absent "$run/.await.exit"
 cp "$run/EXEC_LOG.md" "$run/log-collected"
 collect; cmp -s "$run/EXEC_LOG.md" "$run/log-collected" || fail 'duplicate receipt'
@@ -148,12 +149,12 @@ pass 'receipt persists before cleanup; repeated collection is idempotent'
 
 setup; prepare; finish 17
 cli acknowledge --attempt "$attempt" --evidence "$evidence"
-json '.receipt.exit_code==17 and .receipt.result=="failed" and .receipt.verified_outputs==[]'
+json 'if(!(equal(at(r,".receipt.exit_code"),parse("17")) && equal(at(r,".receipt.result"),parse("\"failed\"")) && equal(at(r,".receipt.verified_outputs"),parse("[]")))) exit 1'
 ! rg -q 'status: done' "$run/EXEC_LOG.md" || fail 'failed attempt marked done'
 pass 'failed exit remains failed without outputs'
 
 setup; prepare
-cli inspect; json '.status=="waiting"'
+cli inspect; json 'if(!(equal(at(r,".status"),parse("\"waiting\"")))) exit 1'
 reject acknowledge --attempt "$attempt" --evidence "$evidence" --verified-output "$output"
 exists "$run/.await"
 ! rg -q '^```star-launch-receipt' "$run/EXEC_LOG.md" || fail 'waiting attempt collected'
@@ -170,19 +171,19 @@ setup; mkdir "$run/work" "$run/outputs"
 old_pwd=$PWD; cd "$run/work"; output=../outputs/latest
 prepare; target="$run/result.json"; printf result > "$target"; ln -s "$target" "$output"
 finish; collect
-json '.receipt.outputs==.receipt.verified_outputs'
-eq "$(printf '%s\n' "$result" | jq -r '.receipt.outputs[0]')" "$run/outputs/latest"
+json 'if(!(equal(at(r,".receipt.outputs"),at(r,".receipt.verified_outputs")))) exit 1'
+eq "$(printf '%s\n' "$result" | star_json_get 'receipt.outputs[0]')" "$run/outputs/latest"
 cd "$old_pwd"
 pass 'relative output symlink created after preparation keeps lexical identity'
 
 setup; printf old > "$run/old.json"; output="$run/latest"; ln -s "$run/old.json" "$output"
 prepare; unlink "$output"; printf new > "$run/new.json"; ln -s "$run/new.json" "$output"
 finish; collect
-eq "$(printf '%s\n' "$result" | jq -r '.receipt.outputs[0]')" "$output"
+eq "$(printf '%s\n' "$result" | star_json_get 'receipt.outputs[0]')" "$output"
 pass 'retargeted output symlink keeps lexical identity'
 
 setup; prepare; printf result > "$output"; finish; collect
-eq "$(printf '%s\n' "$result" | jq -r '.receipt.outputs[0]')" "$output"
+eq "$(printf '%s\n' "$result" | star_json_get 'receipt.outputs[0]')" "$output"
 pass 'normal output file keeps identity'
 
 setup; printf result > "$run/target.json"; ln -s "$run/target.json" "$output"; prepare
@@ -205,7 +206,7 @@ pass 'old exit cannot satisfy new attempt'
 
 setup; prepare; first=$attempt; printf result > "$output"; finish; collect; prepare
 second=$attempt; cli acknowledge --attempt "$first" --evidence "$evidence"
-eq "$(state | jq -r .attempt)" "$second"
+eq "$(state | star_json_get attempt)" "$second"
 pass 'repeated old acknowledgment cannot remove new attempt'
 
 setup; printf '123\nraw.log\nresult.json\n' > "$run/.await"; printf '0\n' > "$run/.await.exit"; snapshot
@@ -219,7 +220,7 @@ pass 'plain exit cannot complete versioned attempt'
 setup; receipt_fixture; unlink "$run/.await.exit"
 # Historical evidence/output files may legitimately disappear after collection.
 unlink "$evidence"; unlink "$output"
-cli inspect; json '.status=="already_collected"'
+cli inspect; json 'if(!(equal(at(r,".status"),parse("\"already_collected\"")))) exit 1'
 collect; absent "$run/.await"; collect
 pass 'cleanup after exit removal uses receipt without rechecking historical files'
 
@@ -231,36 +232,36 @@ pass 'unknown versions and missing execution log are rejected'
 setup; prepare
 reject exited --attempt wrong --exit-code 0
 finish 3; finish 3; reject exited --attempt "$attempt" --exit-code 0
-eq "$(jq -r .exit_code "$run/.await.exit")" 3
+eq "$(star_json_get exit_code < "$run/.await.exit")" 3
 pass 'exit identity is checked and exit code is immutable'
 
 # Every malformed receipt must fail both inspection and acknowledgment before
 # either marker, exit evidence, or the execution log can change.
 for mutation in \
-    '{attempt:.attempt}' \
-    'del(.schema)' \
-    '.schema="1"' \
-    '.command_argv="bash"' \
-    '.pid="123"' \
-    '.outputs=[17]' \
-    '.exit_code="0"' \
-    '.result="failed"' \
-    '.verified_outputs=[]' \
-    '.verified_outputs=["/unrelated"]' \
-    '.verification_evidence=null' \
-    '.evidence_sha256="bad"' \
-    'del(.exited_at)' \
-    '.collected_at=17' \
-    '.code_version="unknown"' \
-    '.review_version=null' \
-    '.prepared_at=false' \
-    '.cwd="relative"'; do
+    'x=object(); put(x,"attempt",get(r,"attempt")); r=x' \
+    'x=object(); for(i=1;i<=size(r);i++) {key=keys[r,i]; if(key!="schema") put(x,key,get(r,key))}; r=x' \
+    'put(r,"schema",parse("\"1\""))' \
+    'put(r,"command_argv",parse("\"bash\""))' \
+    'put(r,"pid",parse("\"123\""))' \
+    'put(r,"outputs",parse("[17]"))' \
+    'put(r,"exit_code",parse("\"0\""))' \
+    'put(r,"result",parse("\"failed\""))' \
+    'put(r,"verified_outputs",parse("[]"))' \
+    'put(r,"verified_outputs",parse("[\"/unrelated\"]"))' \
+    'put(r,"verification_evidence",parse("null"))' \
+    'put(r,"evidence_sha256",parse("\"bad\""))' \
+    'x=object(); for(i=1;i<=size(r);i++) {key=keys[r,i]; if(key!="exited_at") put(x,key,get(r,key))}; r=x' \
+    'put(r,"collected_at",parse("17"))' \
+    'put(r,"code_version",parse("\"unknown\""))' \
+    'put(r,"review_version",parse("null"))' \
+    'put(r,"prepared_at",parse("false"))' \
+    'put(r,"cwd",parse("\"relative\""))'; do
     setup; receipt_fixture; replace_receipt "$mutation"; snapshot
     reject inspect; reject acknowledge --attempt "$attempt" --evidence "$evidence" --verified-output "$output"; preserved
     pass "invalid receipt preserves all evidence: $mutation"
 done
 
-for mutation in '.code_version="source:other"' '.exit_code=17 | .result="failed"' '.exited_at="different"'; do
+for mutation in 'put(r,"code_version",parse("\"source:other\""))' 'put(r,"exit_code",parse("17")); put(r,"result",parse("\"failed\""))' 'put(r,"exited_at",parse("\"different\""))'; do
     setup; receipt_fixture; replace_receipt "$mutation"; snapshot
     reject inspect; reject acknowledge --attempt "$attempt" --evidence "$evidence" --verified-output "$output"; preserved
     pass "receipt binding mismatch preserves all evidence: $mutation"
@@ -282,14 +283,14 @@ if command -v flock >/dev/null 2>&1; then
     bash -c 'exec 9>> "$1/.await.lock"; flock 9; printf ready > "$1/ready"; while :; do read -r -t 1 unused || :; done' _ "$run" & holder=$!
     for wait_iteration in $(seq 1 100); do [ ! -f "$run/ready" ] || break; sleep 0.02; done
     exists "$run/ready"; reject inspect; kill -KILL "$holder"; wait "$holder" 2>/dev/null || :
-    cli inspect; json '.status=="waiting"'
+    cli inspect; json 'if(!(equal(at(r,".status"),parse("\"waiting\"")))) exit 1'
 else
     printf '%s\n' "$$" > "$run/.await.lock.pid"
     reject inspect; eq "$(cat "$run/.await.lock.pid")" "$$"
     # Use a real exited child's PID rather than guessing a high unused PID.
     bash -c 'exit 0' & dead_pid=$!; wait "$dead_pid"
     printf '%s\n' "$dead_pid" > "$run/.await.lock.pid"
-    cli inspect; json '.status=="waiting"'; absent "$run/.await.lock.pid"
+    cli inspect; json 'if(!(equal(at(r,".status"),parse("\"waiting\"")))) exit 1'; absent "$run/.await.lock.pid"
 fi
 pass 'active writer blocks access; dead owner lock is recovered'
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Review receipts and real hook behavior, using disposable repositories only.
 set -euo pipefail
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$TMP_DIR"' EXIT
@@ -18,7 +19,8 @@ note() { cases=$((cases + 1)); printf 'ok review state: %s\n' "$*"; }
 write() { mkdir -p "$(dirname -- "$project/$1")"; printf '%s' "$2" > "$project/$1"; }
 reset_case() {
     project="$TMP_DIR/case-$cases/project"
-    mkdir -p "$project"
+    mkdir -p "$project/.agents/scripts"
+    cp "$ROOT_DIR/.agents/scripts/"* "$project/.agents/scripts/"
     git init -q "$project"
     for file in "$HELPER" "${HOOKS[@]}"; do
         mkdir -p "$(dirname -- "$project/$file")"
@@ -45,7 +47,7 @@ check() {
 }
 hooks() {
     local reason="${1:-}" command="${2:-bash execs/scpts/$RUN.sh}" output rc payload hook
-    payload=$(jq -cn --arg c "$command" '{command:$c,tool_input:{command:$c}}')
+    payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"command",string(a(1))); put(r,"tool_input",x); print json(r)' "$command")
     for hook in "${HOOKS[@]}"; do
         if [[ $hook == .pi/* ]]; then
             if output=$(bash "$project/$hook" "$command"); then rc=0; else rc=$?; fi
@@ -58,8 +60,8 @@ hooks() {
             [[ $output == *"$reason"* ]] || fail "$hook missing reason: $output"
             case "$hook" in
                 .pi/*) [[ $rc -eq 1 ]] || fail "$hook exit" ;;
-                .cursor/*) [[ $rc -eq 2 ]] && jq -e '.permission == "deny"' <<<"$output" >/dev/null || fail "$hook deny" ;;
-                *) [[ $rc -eq 0 ]] && jq -e '.hookSpecificOutput.permissionDecision == "deny"' <<<"$output" >/dev/null || fail "$hook deny" ;;
+                .cursor/*) [[ $rc -eq 2 ]] && star_json_eval 'if(field(r,"permission")!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
+                *) [[ $rc -eq 0 ]] && star_json_eval 'if(val(at(r,"hookSpecificOutput.permissionDecision"))!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
             esac
         fi
     done

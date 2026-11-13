@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Bind an owned Markdown artifact to explicit source contents. Bash 3.2, awk, jq, git.
+# Bind an owned Markdown artifact to explicit source contents. Bash 3.2, awk, git.
 # check is read-only and never starts the interpreter: 0 current, 1 stale, 2 unknown.
 set -euo pipefail
 export LC_ALL=C
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh"
 
-result() { jq -nc --arg status "$1" --arg reason "$2" '{status:$status,reason:$reason}'; }
+result() { star_json_object status "$1" reason "$2"; }
 unknown() { result unknown "$1"; exit 2; }
 stale() { result stale "$1"; exit 1; }
 usage() {
@@ -17,7 +18,6 @@ usage() {
         'Paths are root-relative files. Results check --report analyses and --exemption execution records recursively.'
 }
 [[ ${1:-} != --help && ${1:-} != -h ]] || { usage; exit 0; }
-command -v jq >/dev/null 2>&1 || { echo 'source_state.sh requires jq' >&2; exit 2; }
 [[ ${1:-} == --root && -n ${2:-} ]] || unknown '--root is required'
 root=$(cd -- "$2" 2>/dev/null && pwd -P) || unknown 'root is unavailable'
 shift 2
@@ -70,7 +70,7 @@ metadata() {
         inside && $0 == "-->" { inside=0; next }
         inside { print }
         END { if (inside || seen != 1) exit 2 }
-    ' "$1" | jq -ces 'if length == 1 and (.[0]|type == "object") then .[0] else error("one metadata object required") end' 2>/dev/null
+    ' "$1" | star_json_eval 'if(type(r)!="object") exit 2; print json(r)' 2>/dev/null
 }
 canonical() {
     local mode=$1
@@ -115,7 +115,7 @@ frontmatter_value() {
         END { if (front || count != 1) exit 2 }
     ' "$1") || return 2
     case "$raw" in
-        \"*) printf '%s\n' "$raw" | jq -er 'select(type == "string")' ;;
+        \"*) printf '%s\n' "$raw" | star_json_eval 'if(type(r)!="string") exit 2; raw(r)' ;;
         \') return 2 ;;
         \'*) [[ $raw == *\' ]] || return 2; raw=${raw#\'}; raw=${raw%\'}; printf '%s\n' "$raw" | sed "s/''/'/g" ;;
         *) printf '%s\n' "$raw" | sed 's/[[:space:]]#.*$//; s/[[:space:]]*$//' ;;
@@ -123,14 +123,7 @@ frontmatter_value() {
 }
 existing_metadata_valid() {
     if grep -q '^<!-- star-source-state' "$root/$artifact"; then
-        metadata "$root/$artifact" | jq -e --arg kind "$kind" --arg artifact "$artifact" '
-            def digest: type == "string" and test("^([0-9a-f]{40}|[0-9a-f]{64})$");
-            type == "object" and .schema == 1 and .kind == $kind and .artifact == $artifact and
-            (.digest|digest) and (.reason|type == "string") and
-            (.runtime|type == "string") and (.runtime_digest|type == "string") and
-            (.sources|type == "array" and length > 0 and length == (map(.path)|unique|length)) and
-            all(.sources[]; (.path|type == "string") and (.mode|IN("file","document","plan","method-plan","report","exemption")) and (.digest|digest))
-        ' >/dev/null 2>&1 || return 2
+        metadata "$root/$artifact" | binding_valid basic >/dev/null 2>&1 || return 2
     fi
 }
 hash_stream() { git -C "$root" hash-object --stdin 2>/dev/null; }
@@ -155,7 +148,7 @@ source_hash() {
             bash "${BASH_SOURCE[0]}" --root "$root" check "$path" --kind "$source_kind" >/dev/null || return 2
             # A refreshed analysis may retain rounded values but bind new evidence.
             digest=$(document_hash "$root/$path" document) || return 2
-            binding=$(metadata "$root/$path" | jq -cS '.sources |= sort_by(.path,.mode)') || return 2
+            binding=$(metadata "$root/$path" | star_json_eval 'put(r,"sources",sorted(get(r,"sources"),"path,mode",0)); print json(r)') || return 2
             printf '%s\n%s\n' "$digest" "$binding" | hash_stream ;;
         *) return 2 ;;
     esac
@@ -180,14 +173,31 @@ runtime_hash() {
         done
     } | hash_stream
 }
+binding_valid() {
+    star_json_awk '
+    function digest(id) { return type(id)=="string" && val(id) ~ /^([0-9a-f]{40}|[0-9a-f]{64})$/ }
+    END {
+        r=document(); src=get(r,"sources")
+        if(type(r)!="object" || type(get(r,"schema"))!="number" || field(r,"schema")!=1 || field(r,"kind")!=a(1) || field(r,"artifact")!=a(2) || !digest(get(r,"digest")) || type(get(r,"reason"))!="string" || type(get(r,"runtime"))!="string" || type(get(r,"runtime_digest"))!="string" || type(src)!="array" || !size(src)) exit 1
+        for(i=0;i<size(src);i++) {
+            x=get(src,i); path=field(x,"path"); mode=field(x,"mode")
+            if(type(get(x,"path"))!="string" || mode !~ /^(file|document|plan|method-plan|report|exemption)$/ || !digest(get(x,"digest")) || seen[path]++) exit 1
+        }
+        if(a(3)=="basic") exit 0
+        if(a(1)=="analysis-exemption" && field(r,"reason")=="") exit 1
+        if(a(1)=="environment") { if(substr(field(r,"runtime"),1,1)!="/" || !digest(get(r,"runtime_digest"))) exit 1 }
+        else if(field(r,"runtime")!="" || field(r,"runtime_digest")!="") exit 1
+    }' "$kind" "$artifact" "${1:-check}"
+}
 scope_valid() {
-    jq -e --arg kind "$kind" '
-        if $kind == "method" then any(.sources[]; .mode == "method-plan") and all(.sources[]; .mode == "method-plan" or .mode == "file")
-        elif $kind == "results" then any(.sources[]; .mode == "report")
-        elif $kind == "analysis" or $kind == "analysis-exemption" then
-            any(.sources[]; .mode == "plan") and any(.sources[]; .mode == "file" or .mode == "document") and all(.sources[]; .mode != "report" and .mode != "exemption")
-        else all(.sources[]; .mode == "file" or .mode == "document") end
-    ' >/dev/null
+    star_json_eval '
+        src=get(r,"sources"); for(i=0;i<size(src);i++) modes[field(get(src,i),"mode")]++
+        kind=a(1)
+        if(kind=="method") { if(!modes["method-plan"] || modes["method-plan"]+modes["file"]!=size(src)) exit 1 }
+        else if(kind=="results") { if(!modes["report"]) exit 1 }
+        else if(kind=="analysis" || kind=="analysis-exemption") { if(!modes["plan"] || !(modes["file"]+modes["document"]) || modes["report"] || modes["exemption"]) exit 1 }
+        else if(modes["file"]+modes["document"]!=size(src)) exit 1
+    ' "$kind"
 }
 
 case "$action" in
@@ -215,10 +225,10 @@ case "$action" in
         entries='[]'
         for ((i=0; i<${#sources[@]}; i++)); do
             digest=$(source_hash "${sources[i]}" "${modes[i]}") || unknown "cannot bind source: ${sources[i]}"
-            entries=$(jq -nc --argjson entries "$entries" --arg path "${sources[i]}" --arg mode "${modes[i]}" --arg digest "$digest" '$entries+[{path:$path,mode:$mode,digest:$digest}]')
+            entries=$(star_json_new 'r=parse(a(1)); x=object(); put(x,"path",string(a(2))); put(x,"mode",string(a(3))); put(x,"digest",string(a(4))); add(r,x); print json(r)' "$entries" "${sources[i]}" "${modes[i]}" "$digest")
         done
-        jq -e 'length == (map(.path)|unique|length)' <<<"$entries" >/dev/null || unknown 'duplicate sources'
-        entries=$(jq -c 'sort_by(.path,.mode)' <<<"$entries")
+        star_json_eval 'for(i=0;i<size(r);i++) if(seen[field(get(r,i),"path")]++) exit 1' <<<"$entries" >/dev/null || unknown 'duplicate sources'
+        entries=$(star_json_eval 'print json(sorted(r,"path,mode",0))' <<<"$entries")
         runtime_digest=''
         if [[ $kind == environment ]]; then
             [[ $(frontmatter_value "$root/$artifact" status) == verified ]] || unknown 'only a verified environment can be recorded'
@@ -228,7 +238,7 @@ case "$action" in
         fi
         original=$(hash_file "$root/$artifact") || unknown 'artifact unreadable'
         digest=$(document_hash "$root/$artifact" document) || unknown 'invalid existing source block'
-        state=$(jq -nc --arg kind "$kind" --arg artifact "$artifact" --arg digest "$digest" --arg reason "$reason" --arg runtime "$runtime" --arg runtime_digest "$runtime_digest" --argjson sources "$entries" '{schema:1,kind:$kind,artifact:$artifact,digest:$digest,reason:$reason,sources:$sources,runtime:$runtime,runtime_digest:$runtime_digest}')
+        state=$(star_json_new 'r=object(); put(r,"schema",number(1)); put(r,"kind",string(a(1))); put(r,"artifact",string(a(2))); put(r,"digest",string(a(3))); put(r,"reason",string(a(4))); put(r,"runtime",string(a(5))); put(r,"runtime_digest",string(a(6))); put(r,"sources",parse(a(7))); print json(r)' "$kind" "$artifact" "$digest" "$reason" "$runtime" "$runtime_digest" "$entries")
         scope_valid <<<"$state" || unknown 'source modes do not cover this artifact kind'
         temporary=$(mktemp "$(dirname -- "$root/$artifact")/.source-state.XXXXXX")
         trap 'rm -f -- "$temporary"' EXIT
@@ -241,35 +251,27 @@ case "$action" in
         ;;
     check)
         state=$(metadata "$root/$artifact") || unknown 'missing or malformed source binding; producer verification is required'
-        jq -e --arg kind "$kind" --arg artifact "$artifact" '
-            def digest: type == "string" and test("^([0-9a-f]{40}|[0-9a-f]{64})$");
-            .schema == 1 and .kind == $kind and .artifact == $artifact and (.digest|digest) and
-            (.reason|type == "string") and (.runtime|type == "string") and (.runtime_digest|type == "string") and
-            (.sources|type == "array" and length > 0 and length == (map(.path)|unique|length)) and
-            all(.sources[]; (.path|type == "string") and (.mode|IN("file","document","plan","method-plan","report","exemption")) and (.digest|digest)) and
-            (if $kind == "analysis-exemption" then .reason|length > 0 else true end) and
-            (if $kind == "environment" then (.runtime|startswith("/")) and (.runtime_digest|digest) else .runtime == "" and .runtime_digest == "" end)
-        ' <<<"$state" >/dev/null 2>&1 || unknown 'invalid source binding'
+        binding_valid <<<"$state" >/dev/null 2>&1 || unknown 'invalid source binding'
         scope_valid <<<"$state" || unknown 'invalid source coverage'
         digest=$(document_hash "$root/$artifact" document) || unknown 'malformed artifact content'
-        [[ $digest == "$(jq -r .digest <<<"$state")" ]] || stale 'artifact content changed'
+        [[ $digest == "$(star_json_get .digest <<<"$state")" ]] || stale 'artifact content changed'
         for path in ${required[@]+"${required[@]}"}; do
-            jq -e --arg path "$path" 'any(.sources[]; .path == $path)' <<<"$state" >/dev/null || stale "new or uncovered source: $path"
+            star_json_eval 'src=get(r,"sources"); for(i=0;i<size(src);i++) if(field(get(src,i),"path")==a(1)) exit 0; exit 1' "$path" <<<"$state" >/dev/null || stale "new or uncovered source: $path"
         done
-        count=$(jq '.sources|length' <<<"$state")
+        count=$(star_json_eval 'print size(get(r,"sources"))' <<<"$state")
         for ((i=0; i<count; i++)); do
-            path=$(jq -r ".sources[$i].path" <<<"$state"); mode=$(jq -r ".sources[$i].mode" <<<"$state")
+            path=$(star_json_get ".sources[$i].path" <<<"$state"); mode=$(star_json_get ".sources[$i].mode" <<<"$state")
             valid_path "$path" && [[ $path != "$artifact" ]] || unknown 'invalid source path'
             digest=$(source_hash "$path" "$mode") || unknown "source missing, unreadable or unverified: $path"
-            [[ $digest == "$(jq -r ".sources[$i].digest" <<<"$state")" ]] || stale "source content changed: $path"
+            [[ $digest == "$(star_json_get ".sources[$i].digest" <<<"$state")" ]] || stale "source content changed: $path"
         done
         if [[ $kind == environment ]]; then
             [[ -n $runtime ]] || unknown 'pass the interpreter currently resolved from .env'
             declared_runtime=$(frontmatter_value "$root/$artifact" interpreter) || unknown 'report interpreter is missing or malformed'
-            [[ $(frontmatter_value "$root/$artifact" status) == verified && $declared_runtime == "$(jq -r .runtime <<<"$state")" ]] || unknown 'report does not verify the bound interpreter'
-            [[ $runtime == "$(jq -r .runtime <<<"$state")" ]] || stale 'configured interpreter changed'
+            [[ $(frontmatter_value "$root/$artifact" status) == verified && $declared_runtime == "$(star_json_get .runtime <<<"$state")" ]] || unknown 'report does not verify the bound interpreter'
+            [[ $runtime == "$(star_json_get .runtime <<<"$state")" ]] || stale 'configured interpreter changed'
             digest=$(runtime_hash "$runtime") || unknown 'current interpreter or package metadata unavailable'
-            [[ $digest == "$(jq -r .runtime_digest <<<"$state")" ]] || stale 'interpreter or installed package metadata changed'
+            [[ $digest == "$(star_json_get .runtime_digest <<<"$state")" ]] || stale 'interpreter or installed package metadata changed'
         elif [[ -n $runtime ]]; then
             unknown 'runtime is only valid for environment checks'
         fi

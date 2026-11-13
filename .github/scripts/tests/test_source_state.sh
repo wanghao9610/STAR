@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Source freshness, environment identity and engineering exemptions; no Python runs.
 set -euo pipefail
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 HELPER="$ROOT_DIR/.agents/skills/star-flow-status/scripts/source_state.sh"
 scratch=$(mktemp -d)
@@ -14,7 +15,7 @@ check() {
     local want=$1 actual=0 output; shift
     output=$(helper "$@") || actual=$?
     [[ $actual == "$want" ]] || fail "expected $want, got $actual: $output"
-    jq -e '.status == "current" or .status == "stale" or .status == "unknown"' <<<"$output" >/dev/null || fail 'invalid check response'
+    star_json_eval 'if(field(r,"status") !~ /^(current|stale|unknown)$/) exit 1' <<<"$output" >/dev/null || fail 'invalid check response'
 }
 reset_case() {
     project="$scratch/case-$cases"

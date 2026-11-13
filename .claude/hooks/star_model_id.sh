@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR SessionStart and SubagentStart hook — inject the runtime-reported model id
 # into context so skills record a real model_id instead of "unrecorded".
 #
@@ -76,15 +77,7 @@ if [ "${1:-}" = "--resolve" ]; then
         *) delegate=false ;;
     esac
     if [ -n "${transcript}" ] && [ -r "${transcript}" ]; then
-        if command -v jq >/dev/null 2>&1; then
-            if [ "${delegate}" = true ]; then
-                filter='select(.type == "assistant") | .message.model // empty'
-            else
-                filter='select(.type == "assistant" and (.isSidechain | not)) | .message.model // empty'
-            fi
-            resolved=$(jq -r "${filter}" \
-                "${transcript}" 2>/dev/null | grep -vx '<synthetic>' | tail -1)
-        fi
+        resolved=$(star_json_models claude "$delegate" < "$transcript" 2>/dev/null)
     fi
 
     if [ -z "${resolved}" ]; then
@@ -105,27 +98,10 @@ event="SessionStart"
 input=$(cat)
 
 # Read one top-level string field from the payload.
-payload_field() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-    else
-        printf '%s' "${input}" \
-            | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+payload_field() { printf '%s' "$input" | star_json_field "$1" 2>/dev/null; }
 
-# ctx embeds a filesystem path, so encode it as JSON rather than assuming it is
-# quote-free; the last branch sanitizes instead, having no encoder to hand.
-emit_context() { # $1 = hook event name, $2 = the context text
-    if command -v jq >/dev/null 2>&1; then
-        jq -cn --arg e "$1" --arg c "$2" \
-            '{hookSpecificOutput: {hookEventName: $e, additionalContext: $c}}'
-    else
-        printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
-            "$1" "$(printf '%s' "$2" | tr -d '"\\')"
-    fi
-}
+# Encode context without losing quotes, backslashes or line breaks.
+emit_context() { star_json_context hook "$1" "$2"; }
 
 # The path the injected command carries is relative to the project root, not
 # absolute: `permissions.allow` in .claude/settings.json matches a command by

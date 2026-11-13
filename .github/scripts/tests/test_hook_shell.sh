@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run the seven hosts' hooks in a disposable project with Python blocked.
 set -eu
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 repo=$(cd "$(dirname "$0")/../../.." && pwd -P)
 sandbox=$(mktemp -d "${TMPDIR:-/tmp}/star-hook-tests.XXXXXX")
 trap 'rm -rf "$sandbox"' EXIT
@@ -19,6 +20,8 @@ export PATH="$sandbox/bin:$PATH"
 export TMPDIR=$sandbox/tmp
 export KIMI_CODE_HOME=$sandbox/kimi
 export CLAUDE_PROJECT_DIR=$project QWEN_PROJECT_DIR=$project
+mkdir -p "$project/.agents/scripts"
+cp "$repo/.agents/scripts/"* "$project/.agents/scripts/"
 hosts='claude codex qwen dsh cursor kimi-code pi'
 for host in $hosts; do
     if [ "$host" = pi ]; then directory=.pi/extensions/star-hooks; else directory=.$host/hooks; fi
@@ -34,7 +37,7 @@ assert_json() {
     local expression=$1
     shift
     assertions=$((assertions + 1))
-    printf '%s\n' "$data" | jq -e "$@" "$expression" >/dev/null || fail "$expression"
+    printf '%s\n' "$data" | star_json_eval "$expression" "$@" >/dev/null || fail "$expression"
 }
 hook_path() {
     if [ "$1" = pi ]; then hook=$project/.pi/extensions/star-hooks/$2.sh
@@ -69,12 +72,12 @@ case_ 'Claude delegate resolves workflow layout and sidechain turns'
 run 0 '' "$hook" --resolve "$project/sessions/sid/subagents/agent-a1.jsonl"
 assert_equal claude-delegate
 case_ 'Claude subagent payload points at its own transcript'
-payload=$(jq -nc --arg p "$project/sessions/session.jsonl" '{session_id:"sid",transcript_path:$p,agent_id:"a1"}')
+payload=$(star_json_object session_id sid transcript_path "$project/sessions/session.jsonl" agent_id a1)
 run 0 "$payload" "$hook" --subagent
-assert_json '.hookSpecificOutput.hookEventName=="SubagentStart" and (.hookSpecificOutput.additionalContext|contains("/sid/subagents/agent-a1.jsonl"))'
+assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SubagentStart\"")))) exit 1; if(!index(val(at(r,".hookSpecificOutput.additionalContext")),"/sid/subagents/agent-a1.jsonl")) exit 1'
 case_ 'Claude incomplete delegate payload makes no provenance claim'
 run 0 '{"agent_id":"a1"}' "$hook" --subagent
-assert_json '. == {}'
+assert_json 'if(!equal(r,parse("{}"))) exit 1'
 # Payload strings are data: quotes, backslashes, and shell-looking text must
 # round-trip through JSON without invoking the text they carry.
 model_literal='model "quoted" \ $(touch payload-executed)'
@@ -82,15 +85,15 @@ transcript_literal="$project/trace \"quoted\" \\ \$(touch payload-executed).json
 for host in claude codex qwen dsh; do
     hook_path "$host" star_model_id
     case_ "$host payload extraction and JSON encoding"
-    payload=$(jq -nc --arg model "$model_literal" --arg path "$transcript_literal" '{model:$model,transcript_path:$path}')
+    payload=$(star_json_object model "$model_literal" transcript_path "$transcript_literal")
     run 0 "$payload" "$hook"
-    assert_json '.hookSpecificOutput.hookEventName=="SessionStart" and (.hookSpecificOutput.additionalContext|type=="string")'
+    assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SessionStart\"")) && (type(at(r,".hookSpecificOutput.additionalContext"))=="string"))) exit 1'
     if [ "$host" = codex ]; then
-        assert_json '.hookSpecificOutput.additionalContext|contains($value)' --arg value "session_model_id = $model_literal"
-    else assert_json '.hookSpecificOutput.additionalContext|contains($value)' --arg value "$transcript_literal"; fi
+        assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "session_model_id = $model_literal"
+    else assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "$transcript_literal"; fi
     case_ "$host absent model and transcript remain unrecorded"
     run 0 '{}' "$hook"
-    assert_json '.hookSpecificOutput.additionalContext|contains("unrecorded")'
+    assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),"unrecorded")) exit 1'
 done
 # Codex resolves turn_context records and checks all registered artifact headers.
 write codex.jsonl '{"type":"turn_context","payload":{"model":"gpt-old"}}
@@ -160,13 +163,13 @@ assert_equal ''
 hook_path cursor star_model_id
 case_ 'Cursor model_id takes precedence'
 run 0 '{"model_id":"cursor-exact","model":"cursor-generic"}' "$hook"
-assert_json '.additional_context|contains("cursor-exact") and (contains("cursor-generic")|not)'
+assert_json 'if(!index(val(at(r,".additional_context")),"cursor-exact") || index(val(at(r,".additional_context")),"cursor-generic")) exit 1'
 case_ 'Cursor falls back to model'
 run 0 '{"model_id":null,"model":"cursor-fallback"}' "$hook"
-assert_json '.additional_context|contains("cursor-fallback")'
+assert_json 'if(!index(val(at(r,".additional_context")),"cursor-fallback")) exit 1'
 case_ 'Cursor missing model remains unrecorded'
 run 0 '{}' "$hook"
-assert_json '.additional_context|contains("unrecorded")'
+assert_json 'if(!index(val(at(r,".additional_context")),"unrecorded")) exit 1'
 # Kimi reads only a disposable KIMI_CODE_HOME and places dedup markers in TMPDIR.
 printf '%s\n' 'default_model = "kimi-test-model" # fixture' > "$KIMI_CODE_HOME/config.toml"
 hook_path kimi-code star_model_id
@@ -234,15 +237,15 @@ for host in $hosts; do
     case_ "$host injects memory in its native output format"
     run 0 '{"session_id":"memory-session"}' "$hook"
     case "$host" in
-        cursor) assert_json '.additional_context|contains($summary)' --arg summary "$summary" ;;
+        cursor) assert_json 'if(!index(val(at(r,".additional_context")),a(1))) exit 1' "$summary" ;;
         kimi-code|pi) assert_contains "$summary" ;;
-        *) assert_json '.hookSpecificOutput.hookEventName=="SessionStart" and (.hookSpecificOutput.additionalContext|contains($summary))' --arg summary "$summary" ;;
+        *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SessionStart\"")))) exit 1; if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "$summary" ;;
     esac
 done
 hook_path claude star_memory
 case_ 'Claude delegate receives memory with SubagentStart event'
 run 0 '{}' "$hook" --subagent
-assert_json '.hookSpecificOutput.hookEventName=="SubagentStart"'
+assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SubagentStart\"")))) exit 1'
 hook_path kimi-code star_memory
 case_ 'Kimi memory deduplicates its session'
 run 0 '{"session_id":"memory-session"}' "$hook"
@@ -256,7 +259,7 @@ star_involve_level "$2" "$3"
 LEVEL
 write .env 'INVOLVE=high'
 level_helper=$project/.claude/hooks/star_involve_level.sh
-level_payload=$(jq -nc --arg p "$project/involve.jsonl" '{transcript_path:$p}')
+level_payload=$(star_json_object transcript_path "$project/involve.jsonl")
 case_ 'Involve defaults to project environment'
 run 0 '' "$sandbox/level.sh" "$level_helper" '{}' "$project"
 assert_equal high
@@ -287,12 +290,12 @@ write .env 'INVOLVE=low'
 for host in claude qwen; do
     hook_path "$host" star_involve_gate
     case_ "$host edit gate allows ordinary project file"
-    payload=$(jq -nc --arg p "$project/src/quoted file.txt" '{tool_input:{file_path:$p}}')
+    payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
     run 0 "$payload" "$hook"
-    assert_json '.hookSpecificOutput.permissionDecision=="allow"'
+    assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"allow\"")))) exit 1'
     for edited in "$project/.env" "$project/src/../outside" "$sandbox/outside"; do
         case_ "$host edit gate leaves protected or outside path undecided"
-        payload=$(jq -nc --arg p "$edited" '{tool_input:{file_path:$p}}')
+        payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$edited")
         run 0 "$payload" "$hook"
         assert_equal ''
     done
@@ -305,22 +308,22 @@ patch='*** Begin Patch
 -old
 +new
 *** End Patch'
-payload=$(jq -nc --arg p "$patch" '{tool_input:{command:$p}}')
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$patch")
 run 0 "$payload" "$hook"
-assert_json '.hookSpecificOutput.hookEventName=="PermissionRequest" and .hookSpecificOutput.decision.behavior=="allow"'
+assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"PermissionRequest\"")) && equal(at(r,".hookSpecificOutput.decision.behavior"),parse("\"allow\"")))) exit 1'
 for patch in '*** Delete File: src/example.sh' '*** Update File: .env' '*** Update File: src/../../outside'; do
     case_ 'Codex patch gate leaves deletion or protected paths undecided'
-    payload=$(jq -nc --arg p "$patch" '{tool_input:{command:$p}}')
+    payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$patch")
     run 0 "$payload" "$hook"
     assert_equal ''
 done
 hook_path claude star_bash_gate
 case_ 'Claude shell gate allows ordinary inspection'
 run 0 '{"tool_input":{"command":"rg --files src"}}' "$hook"
-assert_json '.hookSpecificOutput.permissionDecision=="allow"'
+assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"allow\"")))) exit 1'
 for command_text in 'rm old-file' 'git push origin main' 'sudo make install' 'find . -delete'; do
     case_ 'Claude shell gate leaves destructive or privileged command undecided'
-    payload=$(jq -nc --arg command "$command_text" '{tool_input:{command:$command}}')
+    payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text")
     run 0 "$payload" "$hook"
     assert_equal ''
 done
@@ -332,24 +335,24 @@ for host in $hosts; do
     for command_text in 'git add -A' 'git rebase main' 'git reset --hard' 'git branch -D research' 'bash execs/scpts/run.sh'; do
         case_ "$host guard declines $command_text"
         case "$host" in
-            cursor) expected=2; payload=$(jq -nc --arg c "$command_text" '{command:$c}') ;;
+            cursor) expected=2; payload=$(star_json_object command "$command_text") ;;
             pi) expected=1; payload='' ;;
-            *) expected=0; payload=$(jq -nc --arg c "$command_text" '{tool_input:{command:$c}}') ;;
+            *) expected=0; payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text") ;;
         esac
         if [ "$host" = pi ]; then run "$expected" '' "$hook" "$command_text"
         else run "$expected" "$payload" "$hook"; fi
         case "$host" in
-            cursor) assert_json '.permission=="deny" and (.agent_message|length>0)' ;;
+            cursor) assert_json 'if(!(equal(at(r,".permission"),parse("\"deny\"")) && (length(val(at(r,".agent_message")))>0))) exit 1' ;;
             pi) assert_contains declined ;;
-            *) assert_json '.hookSpecificOutput.permissionDecision=="deny"' ;;
+            *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"deny\"")))) exit 1' ;;
         esac
     done
     case_ "$host guard permits named staging without executing payload"
     command_text='git add src/example.sh; touch payload-executed'
     if [ "$host" = pi ]; then run 0 '' "$hook" "$command_text"
     else
-        if [ "$host" = cursor ]; then payload=$(jq -nc --arg c "$command_text" '{command:$c}')
-        else payload=$(jq -nc --arg c "$command_text" '{tool_input:{command:$c}}'); fi
+        if [ "$host" = cursor ]; then payload=$(star_json_object command "$command_text")
+        else payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text"); fi
         run 0 "$payload" "$hook"
     fi
     assert_equal ''

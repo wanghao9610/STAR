@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR SessionStart and SubagentStart hook — inject the project's memory index
 # into context so a run starts knowing what earlier sessions in this repository
 # learned.
@@ -87,14 +88,5 @@ ${shared}"
 Machine-local (.star/memory/local/):
 ${machine}"
 
-# ctx carries text this repository's own memories wrote, so it is encoded rather
-# than assumed quote-free; the last branch sanitizes instead, having no encoder
-# to hand, and joins the lines itself because a raw newline is invalid in JSON.
-if command -v jq >/dev/null 2>&1; then
-    jq -cn --arg e "${event}" --arg c "${ctx}" \
-        '{hookSpecificOutput: {hookEventName: $e, additionalContext: $c}}'
-else
-    printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
-        "${event}" \
-        "$(printf '%s' "${ctx}" | tr -d '"\\' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')"
-fi
+# Encode context without losing quotes, backslashes or line breaks.
+star_json_context hook "${event:-SessionStart}" "$ctx"

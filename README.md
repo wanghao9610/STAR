@@ -189,7 +189,7 @@ unchanged.
 
 ### 2. Configure the local runtime
 
-**Prerequisites.** STAR needs `git` and `bash`; `execs/update.sh` also needs `curl`. The session hooks parse their JSON payload with `jq`, falling back to `python3`, then to `grep` / `sed`, so a machine with neither parser still gets project memory, the commit guard, and a model id. DSH also needs `zstd` for model-id recovery (see [Per-harness setup (optional)](#per-harness-setup-optional)); installing its repo-local `/star` router through `dsh plugin` needs `pnpm` on `PATH`.
+**Prerequisites.** STAR needs `git`, Bash 3.2 or newer, and standard Unix tools including `awk`; downloading the updater uses `curl`, and running it uses `git` and `tar`. Workflow tools and session hooks use the bundled Bash/awk JSON reader in `.agents/scripts/`, with no `jq` or Python dependency. Recoverable experiment launches also need `flock` (Linux) or `shlock` (macOS). DSH also needs `zstd` for model-id recovery (see [Per-harness setup (optional)](#per-harness-setup-optional)); installing its repo-local `/star` router through `dsh plugin` needs `pnpm` on `PATH`.
 
 Copy the example environment file:
 

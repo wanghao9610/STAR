@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Disposable local Git repositories exercise the read-only shell validator.
 set -eu
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 export GIT_OPTIONAL_LOCKS=0 LC_ALL=C
 SCRIPT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/.agents/skills/star-flow-status/scripts/validate.sh
 suite=$(mktemp -d "${TMPDIR:-/tmp}/star-workflow-state.XXXXXX")
@@ -36,15 +37,13 @@ check() {
     after=$(snapshot)
     [ "$before" = "$after" ] || fail 'validator changed fixture files or Git state'
     [ "$actual" -eq "$expected" ] || fail "expected exit $expected, got $actual: $output"
-    printf '%s' "$output" | jq -e '
-      (keys == ["findings","unknowns"]) and
-      all(.[]; . == sort_by(.path,.code,.message))' >/dev/null || fail "invalid or unsorted result: $output"
+    printf '%s' "$output" | star_json_eval 'if(size(r)!=2 || !has(r,"findings") || !has(r,"unknowns")) exit 1; for(i=1;i<=size(r);i++) {x=get(r,keys[r,i]); if(!equal(x,sorted(x,"path,code,message",0))) exit 1}' >/dev/null || fail "invalid or unsorted result: $output"
 }
-has_code() { printf '%s' "$output" | jq -e --arg code "$1" --arg kind "${2:-findings}" 'any(.[$kind][];.code==$code)' >/dev/null || fail "missing $1: $output"; }
-no_code() { printf '%s' "$output" | jq -e --arg code "$1" --arg kind "${2:-findings}" 'all(.[$kind][];.code!=$code)' >/dev/null || fail "unexpected $1: $output"; }
-codes_are() { printf '%s' "$output" | jq -e --argjson expected "$1" --arg kind "${2:-findings}" '([.[$kind][].code]|unique)==($expected|sort)' >/dev/null || fail "wrong codes: $output"; }
+has_code() { printf '%s' "$output" | star_json_eval 'rows=get(r,a(2)); for(i=0;i<size(rows);i++) if(field(get(rows,i),"code")==a(1)) exit 0; exit 1' "$1" "${2:-findings}" >/dev/null || fail "missing $1: $output"; }
+no_code() { printf '%s' "$output" | star_json_eval 'rows=get(r,a(2)); for(i=0;i<size(rows);i++) if(field(get(rows,i),"code")==a(1)) exit 1' "$1" "${2:-findings}" >/dev/null || fail "unexpected $1: $output"; }
+codes_are() { printf '%s' "$output" | star_json_eval 'rows=get(r,a(2)); expected=parse(a(1)); codes=array(); for(i=0;i<size(rows);i++) add(codes,get(get(rows,i),"code")); if(!equal(sorted(codes,"",1),sorted(expected,"",0))) exit 1' "$1" "${2:-findings}" >/dev/null || fail "wrong codes: $output"; }
 only_stop() {
-    printf '%s' "$output" | jq -e --arg name "$1" '[.findings[]|[.code,(.path|split("/")[-2])]]==[["terminal_open_stop",$name]]' >/dev/null || fail "wrong STOP findings: $output"
+    printf '%s' "$output" | star_json_eval 'rows=get(r,"findings"); x=get(rows,0); n=split(field(x,"path"),parts,"/"); if(size(rows)!=1 || field(x,"code")!="terminal_open_stop" || parts[n-1]!=a(1)) exit 1' "$1" >/dev/null || fail "wrong STOP findings: $output"
 }
 graph() {
     plan 0_root_plan.md 'prefix: "0"\nchildren:\n  - "00_a_plan.md"\n  - '\''01_b_plan.md'\''\n'

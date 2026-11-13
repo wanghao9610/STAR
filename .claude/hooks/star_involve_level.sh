@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # Resolve the involve level a gate hook should act on: the `involve=<level>`
 # token of the session's most recent STAR command, or `.env`'s INVOLVE when that
 # invocation carried none (workflow conventions §7.7, §7.12).
@@ -39,15 +40,7 @@ star__involve_token() { # $1 = the <command-args> text
     printf '%s' "${token#involve=}"
 }
 
-star__payload_field() { # $1 = payload JSON, $2 = top-level field name
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "$1" | jq -r --arg k "$2" '.[$k] // empty' 2>/dev/null
-    else
-        printf '%s' "$1" \
-            | grep -oE "\"$2\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+star__payload_field() { printf '%s' "$1" | star_json_field "$2" 2>/dev/null; }
 
 # The <command-args> of the last STAR invocation in the transcript, read from
 # two forms and taking whichever comes last in the file:
@@ -75,23 +68,7 @@ star__payload_field() { # $1 = payload JSON, $2 = top-level field name
 star__latest_star_command_args() { # $1 = transcript path
     local transcript="$1"
     [ -n "${transcript}" ] && [ -r "${transcript}" ] || return 0
-    if command -v jq >/dev/null 2>&1; then
-        jq -r 'select(.isSidechain | not)
-               | if .type == "user" then
-                   ((.message.content) as $c
-                    | (if ($c | type) == "string" then $c
-                       else ([$c[]? | select(.type? == "text") | .text] | join(" ")) end)
-                    | select(test("<command-name>[[:space:]]*/?star"))
-                    | capture("<command-args>(?<a>.*?)</command-args>"; "s").a)
-                 elif .type == "assistant" then
-                   (.message.content[]?
-                    | select(.type? == "tool_use" and .name? == "Skill")
-                    | select((.input.skill // "") | test("^star"))
-                    | (.input.args // "")
-                    | select(test("involve=(low|medium|high)")))
-                 else empty end' \
-            "${transcript}" 2>/dev/null | tail -1
-    fi
+    star_json_invocations < "$transcript" 2>/dev/null
 }
 
 star__env_involve() { # $1 = project root

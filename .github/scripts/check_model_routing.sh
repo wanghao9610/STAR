@@ -548,6 +548,9 @@ source_skill=".agents/skills/star-flow-status"
 mkdir -p "${UPSTREAM}/${source_skill}/scripts" "${UPSTREAM}/${source_skill}/references"
 cp -p "${ROOT_DIR}/${source_skill}/scripts/source_state.sh" "${UPSTREAM}/${source_skill}/scripts/"
 cp -p "${ROOT_DIR}/${source_skill}/references/source_state.md" "${ROOT_DIR}/${source_skill}/references/source_state_zh.md" "${UPSTREAM}/${source_skill}/references/"
+mkdir -p "${UPSTREAM}/.agents/scripts"
+cp -p "${ROOT_DIR}/.agents/scripts/"* "${UPSTREAM}/.agents/scripts/"
+cp -p "${ROOT_DIR}/.cursor/hooks/star_model_id.sh" "${UPSTREAM}/.cursor/hooks/"
 git -C "${UPSTREAM}" init -q -b main
 git -C "${UPSTREAM}" add -f .
 git -C "${UPSTREAM}" -c core.hooksPath=/dev/null -c user.name=Test \
@@ -556,6 +559,14 @@ git -C "${UPDATE_PROJECT}" init -q
 run_update() {
 	(cd "${UPDATE_PROJECT}" && bash "$@") \
 		> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "updater integration"; }
+}
+check_json_runtime() {
+    local file output
+    for file in json.sh json.awk launch.awk workflow.awk; do
+        cmp -s "${ROOT_DIR}/.agents/scripts/$file" "${UPDATE_PROJECT}/.agents/scripts/$file" || fail "update omitted shared JSON helper $file"
+    done
+    output=$(printf '%s' '{"model_id":"fixture-runtime"}' | bash "${UPDATE_PROJECT}/.cursor/hooks/star_model_id.sh")
+    [[ $output == *fixture-runtime* ]] || fail "installed hook cannot load the shared JSON reader"
 }
 update_expansion_marker="${TMP_DIR}/update-env-expansion-ran"
 printf 'STAR_REPOSITORY="$(touch %s)"\n' "${update_expansion_marker}" > "${UPDATE_PROJECT}/.env"
@@ -575,6 +586,7 @@ if ! (cd "${UPDATE_PROJECT}" && STAR_REPOSITORY="file://${UPSTREAM}" \
 	fail "updater overrides did not bypass unused malformed .env values"
 fi
 [[ ! -e "${update_expansion_marker}" ]] || fail "update.sh evaluated an overridden repository value"
+check_json_runtime
 [[ -f "${UPDATE_PROJECT}/execs/configure.sh" ]] || fail "adopt omitted configure.sh"
 [[ -f "${UPDATE_PROJECT}/execs/scpts/.gitkeep" ]] || fail "adopt omitted the empty experiment directory marker"
 [[ ! -e "${UPDATE_PROJECT}/execs/scpts/00_exp.sh" ]] || fail "adopt installed the removed example experiment"
@@ -587,13 +599,16 @@ printf 'STAR_REPOSITORY='"'"'%s'"'"' # local fixture\r\nSTAR_HARNESSES="untermin
 printf '# stale test fixture\n' > "${UPDATE_PROJECT}/execs/configure.sh"
 (cd "${UPDATE_PROJECT}" && STAR_HARNESSES=cursor bash execs/update.sh --force) \
 	> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "updater environment override"; }
+check_json_runtime
 cmp -s "${UPSTREAM}/execs/configure.sh" "${UPDATE_PROJECT}/execs/configure.sh" || fail "update omitted configure.sh"
 expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-read
 printf 'STAR_REPOSITORY='"'"'%s'"'"' # local fixture\r\nSTAR_HARNESSES="cursor" # selected tree\r\nSTAR_READ_MODEL='"'"'cursor:fixture-read'"'"'\r\n' \
 	"file://${UPSTREAM}" > "${UPDATE_PROJECT}/.env"
 rm "${UPDATE_PROJECT}/execs/configure.sh"
 rm "${UPDATE_PROJECT}/${review_scripts}/review_state.sh"
+rm -rf "${UPDATE_PROJECT}/.agents/scripts"
 run_update execs/update.sh --force --skill star-flow-status --harnesses cursor
+check_json_runtime
 [[ -f "${UPDATE_PROJECT}/execs/configure.sh" ]] || fail "skill update omitted configure.sh"
 cmp -s "${ROOT_DIR}/${review_scripts}/review_state.sh" "${UPDATE_PROJECT}/${review_scripts}/review_state.sh" ||
 	fail "status-only update omitted its shared review-validity helper"

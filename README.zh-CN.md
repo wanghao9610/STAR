@@ -181,7 +181,7 @@ bash /tmp/star-update.sh --adopt
 
 ### 2. 配置本地运行环境
 
-**环境依赖。** STAR 需要 `git` 与 `bash`；`execs/update.sh` 还需要 `curl`。会话钩子解析 JSON 载荷时优先用 `jq`，退回 `python3`，再退回 `grep` / `sed`，所以两个解析器都没有的机器照样能拿到项目记忆、提交守卫和模型 id。DSH 还需要 `zstd` 才能恢复模型 id（见[分宿主配置（可选）](#分宿主配置可选)）；通过 `dsh plugin` 安装仓库内的 `/star` 分流包时，`PATH` 上还须有 `pnpm`。
+**环境依赖。** STAR 需要 `git`、Bash 3.2 或更新版本，以及包含 `awk` 的标准 Unix 工具；下载更新脚本使用 `curl`，运行更新脚本使用 `git` 和 `tar`。工作流工具与会话钩子使用仓库自带的 Bash/awk JSON 解析脚本（位于 `.agents/scripts/`），无需安装 `jq` 或 Python。可恢复的实验启动还需要 `flock`（Linux）或 `shlock`（macOS）。DSH 还需要 `zstd` 才能恢复模型 id（见[分宿主配置（可选）](#分宿主配置可选)）；通过 `dsh plugin` 安装仓库内的 `/star` 分流包时，`PATH` 上还须有 `pnpm`。
 
 复制环境配置示例文件：
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR SessionStart hook (Codex CLI) — inject the runtime-reported model id into
 # session context so skills record a real model_id instead of "unrecorded".
 #
@@ -30,10 +31,7 @@ if [ "${1:-}" = "--resolve" ]; then
   session_model="${3:-}"
   resolved=""
   if [ -n "${transcript}" ] && [ -r "${transcript}" ]; then
-    if command -v jq >/dev/null 2>&1; then
-      resolved=$(jq -r 'select(.type == "turn_context") | .payload.model // empty' \
-        "${transcript}" 2>/dev/null | tail -1)
-    fi
+    resolved=$(star_json_models codex < "$transcript" 2>/dev/null)
   fi
 
   if [ -z "${resolved}" ]; then
@@ -157,15 +155,7 @@ fi
 input=$(cat)
 
 # Read one top-level string field from the payload.
-payload_field() {
-  if command -v jq >/dev/null 2>&1; then
-    printf '%s' "$input" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-  else
-    printf '%s' "$input" \
-      | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
-      | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-  fi
-}
+payload_field() { printf '%s' "$input" | star_json_field "$1" 2>/dev/null; }
 
 model=$(payload_field model)
 transcript=$(payload_field transcript_path)
@@ -176,12 +166,5 @@ printf -v transcript_arg '%q' "${transcript:-}"
 printf -v model_arg '%q' "${model:-}"
 ctx="STAR provenance: session_model_id = ${model:-unrecorded}. This is the exact id SessionStart reported, stated directly even when a rollout exists. Before a STAR skill records a model_id or model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${transcript_arg} ${model_arg}. Copy its output verbatim; if it prints nothing, use session_model_id, and use 'unrecorded' only when both are absent. Never infer an id from a family description such as 'GPT-5 family'. After writing each artifact, run: bash ${self} --check <artifact> ${transcript_arg} ${model_arg}, replacing <artifact> with its path. A nonzero result blocks reporting completion or committing."
 
-# ctx now embeds a filesystem path, so encode it as JSON rather than assuming it
-# is quote-free; the last branch sanitizes instead, having no encoder to hand.
-if command -v jq >/dev/null 2>&1; then
-  jq -cn --arg c "${ctx}" \
-    '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-else
-  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
-    "$(printf '%s' "${ctx}" | tr -d '"\\')"
-fi
+# Encode context without losing quotes, backslashes or line breaks.
+star_json_context hook "${event:-SessionStart}" "$ctx"

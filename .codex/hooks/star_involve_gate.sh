@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR PermissionRequest hook (Codex CLI) — skip the approval prompt for a file
 # edit while the project runs at INVOLVE=low (.env, workflow conventions §7.7).
 # Confirmation points are untouched: the STOP line, deletions and plan approval
@@ -31,12 +32,8 @@ involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 
 # apply_patch arrives as the shell command that carries the patch envelope, so
 # the paths are the envelope's own headers rather than a field. Decoding a
-# multi-line JSON string needs jq; without it the hook declines.
-patch_text() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r '.tool_input.command // empty' 2>/dev/null
-    fi
-}
+# multi-line JSON string uses the shared JSON reader.
+patch_text() { printf '%s' "$input" | star_json_field tool_input.command 2>/dev/null; }
 
 # Every path the patch names must sit in the project, or in a run's worktree
 # beside it at ../<root-dirname>--wt/<run>/ (conventions §11.8), and outside the

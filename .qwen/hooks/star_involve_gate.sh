@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # Skip Qwen Code's permission prompt for file edits while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7). Confirmation points are
 # untouched: the STOP line, deletions and plan approval are questions a skill
@@ -23,16 +24,7 @@ involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 
 # The edited path, from edit/write_file (file_path) or notebook_edit
 # (notebook_path).
-edited_path() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" \
-            | jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' 2>/dev/null
-    else
-        printf '%s' "${input}" \
-            | grep -oE '"(file_path|notebook_path)"[[:space:]]*:[[:space:]]*"[^"]*"' \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+edited_path() { printf '%s' "$input" | star_json_eval 'x=at(r,"tool_input.file_path"); if(type(x)=="null" || !x) x=at(r,"tool_input.notebook_path"); if(type(x)=="string") raw(x)' 2>/dev/null; }
 
 # A run's worktree sits beside the project, at ../<root-dirname>--wt/<run>/
 # (conventions §11.8), and its edits are the run's own as much as edits in the

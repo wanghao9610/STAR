@@ -125,6 +125,7 @@ is_optional_path() {
         ".kimi-code/plugins")   return 0 ;;
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
+        ".agents/scripts") return 0 ;;
         ".agents/skills/star-code-reviewer/scripts") return 0 ;;
         ".agents/skills/star-flow-status/scripts/source_state.sh") return 0 ;;
         .agents/skills/star-flow-status/references/source_state*.md) return 0 ;;
@@ -605,6 +606,7 @@ if [[ "${ADOPT}" == true ]]; then
     ADOPT_TREES=(
         # The shared root first: every project gets it, whichever harnesses it picks.
         ".agents/skills"
+        ".agents/scripts"
         ".agents/commands"
         # Codex's own half of it — the per-skill manifests .agents/skills links
         # to upstream — installed with the rest of the Codex tree and only then.
@@ -665,7 +667,7 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     [[ "${SKILL_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || \
         fail "Invalid skill name '${SKILL_NAME}'."
 
-    SYNC_PATHS=()
+    SYNC_PATHS=(".agents/scripts")
     for root in "${SKILL_ROOTS[@]}"; do
         SYNC_PATHS+=("${root}/${SKILL_NAME}")
     done
@@ -698,6 +700,7 @@ else
     SYNC_PATHS=(
         # The shared root first: every run syncs it, whichever harnesses were named.
         ".agents/skills"
+        ".agents/scripts"
         # The one neutral /star router every harness-owned command delegates to.
         ".agents/commands"
         # Codex's own half of it, installed and updated with the Codex tree.
@@ -819,7 +822,7 @@ if [[ "${ADOPT}" == false ]]; then
         # .codex/skills is listed for the same reason from the other side: it
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/commands .agents/plugins .codex/skills)
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/scripts .agents/commands .agents/plugins .codex/skills)
         for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
             read -ra harness_roots <<<"$(harness_dirs "${harness}")"
             SPARSE_PATHS+=("${harness_roots[@]}")

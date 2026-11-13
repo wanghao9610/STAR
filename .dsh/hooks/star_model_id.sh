@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
 # STAR SessionStart hook (DeepSeek Harness) — inject the runtime-reported model
 # id into session context so skills record a real model_id instead of "unrecorded".
 #
@@ -50,17 +51,7 @@ if [ "${1:-}" = "--resolve" ]; then
 
     # Both record shapes, newest wins. A line that is not JSON — a packed chunk
     # row, a partial tail — is skipped rather than ending the scan.
-    if command -v jq >/dev/null 2>&1; then
-        resolved=$(decode | jq -rR 'fromjson?
-            | if .type == "request/context" then .data
-              elif .type == "request/header" then .data.header.config
-              else empty end
-            | select(.model != null)
-            | if .provider == null or .provider == "" then .model else "\(.provider)/\(.model)" end' \
-            2>/dev/null | tail -1)
-    else
-        resolved=""
-    fi
+    resolved=$(decode | star_json_models dsh 2>/dev/null)
 
     [ -n "${resolved}" ] && printf '%s\n' "${resolved}"
     exit 0
@@ -69,15 +60,7 @@ fi
 input=$(cat)
 
 # Read one top-level string field from the payload.
-payload_field() {
-    if command -v jq >/dev/null 2>&1; then
-        printf '%s' "${input}" | jq -r --arg k "$1" '.[$k] // empty' 2>/dev/null
-    else
-        printf '%s' "${input}" \
-            | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" \
-            | head -1 | sed -E 's/.*"([^"]*)"$/\1/'
-    fi
-}
+payload_field() { printf '%s' "$input" | star_json_field "$1" 2>/dev/null; }
 
 transcript=$(payload_field transcript_path)
 # CLAUDE_PROJECT_DIR is the bridge's own variable, set from its projectDir config
@@ -91,12 +74,5 @@ else
     ctx="STAR provenance: DSH named no session log for this session, so the model id cannot be recovered from it. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), try: bash ${self} --resolve — with no argument it reads DSH_SESSION_JSONL from the shell environment. Write 'unrecorded' if it prints nothing, and do not guess."
 fi
 
-# ctx embeds a filesystem path, so encode it as JSON rather than assuming it is
-# quote-free; the last branch sanitizes instead, having no encoder to hand.
-if command -v jq >/dev/null 2>&1; then
-    jq -cn --arg c "${ctx}" \
-        '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
-else
-    printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
-        "$(printf '%s' "${ctx}" | tr -d '"\\')"
-fi
+# Encode context without losing quotes, backslashes or line breaks.
+star_json_context hook "${event:-SessionStart}" "$ctx"

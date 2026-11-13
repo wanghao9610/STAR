@@ -10,6 +10,7 @@ set -uo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "${ROOT_DIR}"
+source "${ROOT_DIR}/.agents/scripts/json.sh"
 
 SKILL_ROOTS=(.agents/skills .claude/skills .cursor/skills .dsh/skills .kimi-code/skills .pi/skills .qwen/skills)
 FAILURES=0
@@ -237,7 +238,7 @@ elif ! cmp -s "${DISCOVERY}" "${MARKETPLACE}"; then
     fail "${DISCOVERY} does not resolve to ${MARKETPLACE}"
     plugin_errors=1
 fi
-if ! jq -e -s 'length == 2 and (.[0] as $m | .[1] as $p | $m.name == "star" and ($m.plugins | length) == 1 and $m.plugins[0].name == "star" and $m.plugins[0].source == {source: "local", path: "./.codex/plugins/star"} and $p.name == "star" and $p.skills == "./skills/")' "${MARKETPLACE}" "${PLUGIN_ROOT}/.codex-plugin/plugin.json" >/dev/null; then
+if ! cat "${MARKETPLACE}" "${PLUGIN_ROOT}/.codex-plugin/plugin.json" | star_json_awk 'END { r=stream(input); m=get(r,0); p=get(r,1); plugins=get(m,"plugins"); x=get(plugins,0); src=get(x,"source"); if(size(r)!=2 || field(m,"name")!="star" || size(plugins)!=1 || field(x,"name")!="star" || size(src)!=2 || field(src,"source")!="local" || field(src,"path")!="./.codex/plugins/star" || field(p,"name")!="star" || field(p,"skills")!="./skills/") exit 1 }' >/dev/null; then
     fail "Codex STAR plugin or marketplace metadata is invalid"
     plugin_errors=1
 fi
@@ -250,7 +251,7 @@ if [[ ! -f "${PLUGIN_ROOT}/skills/star/SKILL.md" ]] || \
 fi
 KIMI_MARKETPLACE=".kimi-code/plugins/marketplace.json"
 KIMI_PLUGIN_ROOT=".kimi-code/plugins/star"
-if ! jq -e -s 'length == 2 and (.[0] as $m | .[1] as $p | $m.version == "2" and ($m.plugins | length) == 1 and $m.plugins[0].id == "star" and $m.plugins[0].source == "./.kimi-code/plugins/star" and $p.name == "star" and $p.skills == "./skills/")' "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json" >/dev/null; then
+if ! cat "${KIMI_MARKETPLACE}" "${KIMI_PLUGIN_ROOT}/.kimi-plugin/plugin.json" | star_json_awk 'END {r=stream(input); m=get(r,0); p=get(r,1); plugins=get(m,"plugins"); x=get(plugins,0); if(size(r)!=2 || type(get(m,"version"))!="string" || field(m,"version")!="2" || size(plugins)!=1 || field(x,"id")!="star" || field(x,"source")!="./.kimi-code/plugins/star" || field(p,"name")!="star" || field(p,"skills")!="./skills/") exit 1 }' >/dev/null; then
     fail "Kimi STAR plugin or marketplace metadata is invalid"
     plugin_errors=1
 fi
@@ -289,7 +290,7 @@ if [[ ! -f "${KIMI_PLUGIN_ROOT}/skills/star-auto/SKILL.md" ]] || \
 fi
 
 DSH_PLUGIN_ROOT=".dsh/commands/star"
-if ! jq -e -s 'length == 1 and (.[0] | .name == "star" and .main == "lib/index.js" and .dsh.bundle.patch == "./cordis.patch.yml")' "${DSH_PLUGIN_ROOT}/package.json" >/dev/null; then
+if ! star_json_eval 'if(field(r,"name")!="star" || field(r,"main")!="lib/index.js" || val(at(r,"dsh.bundle.patch"))!="./cordis.patch.yml") exit 1' < "${DSH_PLUGIN_ROOT}/package.json" >/dev/null; then
     fail "DSH STAR package metadata is invalid"
     plugin_errors=1
 fi

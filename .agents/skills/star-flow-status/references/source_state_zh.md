@@ -1,6 +1,6 @@
 # 来源绑定与分析适用性
 
-分析报告、结果表、方法文档、环境报告或纯工程执行记录写完后，以及消费者决定能否复用它们时，使用本约定。工具为 `bash .agents/skills/star-flow-status/scripts/source_state.sh --root <运行所在checkout>`，仅需 shell 工具、jq 和 git，不需要 Python 环境。判断及写入归各产物的生产者；状态查询不记录或修复元数据。
+分析报告、结果表、方法文档、环境报告或纯工程执行记录写完后，以及消费者决定能否复用它们时，使用本约定。工具为 `bash .agents/skills/star-flow-status/scripts/source_state.sh --root <运行所在checkout>`，仅需 shell 工具（`bash` 和 `awk`）及 git，不需要 Python 环境。判断及写入归各产物的生产者；状态查询不记录或修复元数据。
 
 ## 核验后记录
 

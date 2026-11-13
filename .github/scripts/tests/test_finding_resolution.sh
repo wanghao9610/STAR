@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Finding closure requires an explicit matching decision, never report chronology.
 set -eu
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 script_dir=$(cd "$(dirname "$0")" && pwd -P)
 script=$script_dir/../../../.agents/skills/star-flow-status/scripts/findings.sh
 sandbox=$(mktemp -d "${TMPDIR:-/tmp}/star-finding-tests.XXXXXX")
@@ -30,7 +31,7 @@ report() {
 fail() { echo "FAIL case $cases: $*" >&2; [ -z "${data:-}" ] || printf '%s\n' "$data" >&2; exit 1; }
 assert() {
     assertions=$((assertions + 1))
-    printf '%s\n' "$data" | jq -e "$1" >/dev/null || fail "$1"
+    printf '%s\n' "$data" | star_json_eval "$1" >/dev/null || fail "$1"
 }
 snapshot() {
     { find "$root" -print; find "$root" -type f -exec cksum {} \;; find "$root" -type l -exec readlink {} \;; } | LC_ALL=C sort | cksum
@@ -45,7 +46,7 @@ check_cli() {
     after=$(snapshot)
     assertions=$((assertions + 1))
     [ "$before" = "$after" ] || fail 'resolver changed input files'
-    assert 'keys == ["open","resolved","unknowns"]'
+    assert 'if(size(r)!=3 || !has(r,"open") || !has(r,"resolved") || !has(r,"unknowns")) exit 1'
 }
 check() {
     local expected=$1 selected
@@ -58,37 +59,37 @@ check() {
 fixture
 report 2099_review.md other:PF1 wkdrs/other/EXEC_LOG.md
 check 0 2099_review.md
-assert '. == {open:["run:PF1"], resolved:[], unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[\"run:PF1\"],\"resolved\":[],\"unknowns\":[]}"))) exit 1'
 check 0
-assert '.open == ["run:PF1"]'
+assert 'if(!(equal(at(r,".open"),parse("[\"run:PF1\"]")))) exit 1'
 # 2. Exact decisions close findings regardless of date or unrelated reports.
 fixture
 report 1900_review.md
 check 0 1900_review.md
-assert '. == {open:[], resolved:["run:PF1"], unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 report 2099_review.md other:PF1
 check 0 2099_review.md 1900_review.md
-assert '.resolved == ["run:PF1"]'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 # 3. The same ID with a different source stays open.
 fixture
 report review.md run:PF1 wkdrs/other/EXEC_LOG.md
 check 0 review.md
-assert '.open == ["run:PF1"]'
+assert 'if(!(equal(at(r,".open"),parse("[\"run:PF1\"]")))) exit 1'
 # 4. Deferred findings remain open.
 fixture
 report review.md run:PF1 "$log" deferred
 check 0 review.md
-assert '.open == ["run:PF1"]'
+assert 'if(!(equal(at(r,".open"),parse("[\"run:PF1\"]")))) exit 1'
 # 5. Missing evidence or decisions are unknown.
 fixture
 for evidence in '`absent.md`' ''; do
     report review.md run:PF1 "$log" resolved 'Revise objective' "$evidence"
     check 2 review.md
-    assert '.resolved == [] and (.unknowns|length>0)'
+    assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 done
 report review.md run:PF1 "$log" resolved ''
 check 2 review.md
-assert '.resolved == [] and (.unknowns|length>0)'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 # 6. Resolved supersedes deferred without date or argument-order inference.
 fixture
 for pair in '1900_deferred.md 2099_resolved.md' '2099_deferred.md 1900_resolved.md'; do
@@ -96,23 +97,23 @@ for pair in '1900_deferred.md 2099_resolved.md' '2099_deferred.md 1900_resolved.
     report "$deferred" run:PF1 "$log" deferred 'Await objective review'
     report "$resolved"
     check 0 "$deferred" "$resolved"
-    assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+    assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
     check 0 "$resolved" "$deferred"
-    assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+    assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 done
 # 7. Multiple deferred notes remain open.
 fixture
 report first.md run:PF1 "$log" deferred 'Await review'
 report second.md run:PF1 "$log" deferred 'Await additional evidence'
 check 0 first.md second.md
-assert '. == {open:["run:PF1"],resolved:[],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[\"run:PF1\"],\"resolved\":[],\"unknowns\":[]}"))) exit 1'
 # 8. Conflicting resolved decisions are unknown in either order.
 fixture
 report first.md
 report second.md run:PF1 "$log" resolved 'Keep original objective'
 check 2 first.md second.md
 first_result=$data
-assert '.resolved == [] and .open == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")) && equal(at(r,".open"),parse("[]")))) exit 1'
 check 2 second.md first.md
 assertions=$((assertions + 1))
 [ "$data" = "$first_result" ] || fail 'report order changed conflict result'
@@ -124,10 +125,10 @@ $finding
 ### Resume 2026-10-21
 - Continued verification."
 check 0
-assert '.open == ["run:PF1"]'
+assert 'if(!(equal(at(r,".open"),parse("[\"run:PF1\"]")))) exit 1'
 report
 check 0 review.md
-assert '.resolved == ["run:PF1"]'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 # 10. Comments, fences, and non-Notes sections are ignored.
 fixture
 hidden='- **Plan-level finding** `run:PF2` — example; evidence: `missing`.'
@@ -152,7 +153,7 @@ cat >> "$root/review.md" <<'HIDDEN'
 ```
 HIDDEN
 check 0 review.md
-assert '.resolved == ["run:PF1"]'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 # 11. Dropped aliases, Chinese labels, and numbered sections are supported.
 fixture
 log=wkdrs/dropped/run/EXEC_LOG.md
@@ -162,7 +163,7 @@ report review.md run:PF1 ./wkdrs/run/EXEC_LOG.md
 sed 's/## 4. Divergences/## 4、偏差/' "$root/review.md" > "$sandbox/translated"
 mv "$sandbox/translated" "$root/review.md"
 check 0 review.md
-assert '.resolved == ["run:PF1"]'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 # 12. Legacy, duplicate, malformed, zero, and foreign origin IDs stay unknown.
 fixture
 for body in '- **Plan-level finding** old claim; evidence: `metds/evidence.md`.' "$finding
@@ -172,24 +173,24 @@ $finding" "$finding
 $body"
     report
     check 2 review.md
-    assert '.resolved == [] and ([.unknowns[].message]|join(" ")|contains("executor"))'
+    assert 'found=0; u=get(r,"unknowns"); for(i=0;i<size(u);i++) if(index(field(get(u,i),"message"),"executor")) found=1; if(size(get(r,"resolved")) || !found) exit 1'
 done
 # 13. Evidence references are exact and contained, including symlinks and suffixes.
 fixture
 for evidence in 'text `metds/evidence.md`' '`../outside.md`' '`/etc/passwd`' '`https://example.com`' '`metds/evidence.md` and more'; do
     report review.md run:PF1 "$log" resolved 'Revise objective' "$evidence"
     check 2 review.md
-    assert '.resolved == []'
+    assert 'if(!(equal(at(r,".resolved"),parse("[]")))) exit 1'
 done
 mkdir -p "$sandbox/outside"
 ln -s "$sandbox/outside" "$root/linked"
 report review.md run:PF1 "$log" resolved 'Revise objective' linked
 check 2 review.md
-assert '.resolved == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")))) exit 1'
 for evidence in '`metds/evidence.md:12`' '`metds/evidence.md`#decision' '"metds/evidence.md":12#decision'; do
     report review.md run:PF1 "$log" resolved 'Revise objective' "$evidence"
     check 0 review.md
-    assert '.resolved == ["run:PF1"]'
+    assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 done
 # 14. Historical evidence survives actual drops and revivals in every owned layout.
 fixture
@@ -203,17 +204,17 @@ for live in metds/plans/01_other_plan.md wkdrs/other/results/decision.md tasks/o
     write "$live" 'verified evidence'
     report review.md run:PF1 "$log" resolved 'Revise objective' "\`$live\`:12#decision"
     check 0 review.md
-    assert '.resolved == ["run:PF1"]'
+    assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
     mkdir -p "$(dirname "$root/$dropped")"
     mv "$root/$live" "$root/$dropped"
     check 0 review.md
-    assert '.resolved == ["run:PF1"]'
+    assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
     report review.md run:PF1 "$log" resolved 'Revise objective' "\`$dropped\`"
     check 0 review.md
-    assert '.resolved == ["run:PF1"]'
+    assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
     mv "$root/$dropped" "$root/$live"
     check 0 review.md
-    assert '.resolved == ["run:PF1"]'
+    assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 done
 # 15. Existing evidence takes precedence over unsafe dropped aliases.
 fixture
@@ -222,7 +223,7 @@ mkdir -p "$root/metds/plans/dropped"
 ln -s "$sandbox/outside/missing.md" "$root/metds/plans/dropped/01_other_plan.md"
 report review.md run:PF1 "$log" resolved 'Revise objective' '`metds/plans/01_other_plan.md`'
 check 0 review.md
-assert '.resolved == ["run:PF1"]'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")))) exit 1'
 # 16. Alias fallback cannot escape through symlinks in either direction.
 fixture
 write_external=$sandbox/outside/evidence.md
@@ -236,7 +237,7 @@ for cited in metds/plans/01_other_plan.md metds/plans/dropped/02_other_plan.md; 
     ln -s "$write_external" "$root/$alternate"
     report review.md run:PF1 "$log" resolved 'Revise objective' "\`$cited\`"
     check 2 review.md
-    assert '.resolved == [] and (.unknowns|length>0)'
+    assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 done
 # 17. Missing unrelated paths are never rebound into dropped layouts.
 fixture
@@ -244,7 +245,7 @@ while IFS='|' read -r cited unrelated; do
     write "$unrelated" 'unrelated evidence'
     report review.md run:PF1 "$log" resolved 'Revise objective' "\`$cited\`"
     check 2 review.md
-    assert '.resolved == [] and (.unknowns|length>0)'
+    assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 done <<'PATHS'
 metds/missing.md|metds/dropped/missing.md
 metds/plans/notes.md|metds/plans/dropped/notes.md
@@ -260,30 +261,30 @@ write bad.md '## 4. Divergences
 | id | decision |
 | run:PF1 | done |'
 check 2 bad.md
-assert '.unknowns|length>0'
+assert 'if(!(size(at(r,".unknowns"))>0)) exit 1'
 write bad.md '## 4. Divergences
 | finding_id | source_log | disposition | decision | evidence |
 | run:PF1 | wkdrs/run/EXEC_LOG.md | resolved | done | metds/evidence.md |'
 check 2 bad.md
-assert '.unknowns|length>0'
+assert 'if(!(size(at(r,".unknowns"))>0)) exit 1'
 check 2 missing.md
-assert '.unknowns|length>0'
+assert 'if(!(size(at(r,".unknowns"))>0)) exit 1'
 # 19. A malformed matching row cannot be hidden by a valid report.
 fixture
 report
 write malformed.md "$header
 | run:PF1 | wkdrs/run/EXEC_LOG.md | resolved | done | metds/evidence.md | extra |"
 check 2 review.md malformed.md
-assert '.resolved == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")))) exit 1'
 check 2 malformed.md review.md
-assert '.resolved == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")))) exit 1'
 # 20. Ordinary pipe-bearing prose does not become decision data.
 fixture
 write prose.md '## 4. Divergences
 The expression a | b describes the shell pipeline.
 A quoted `one | two` example remains ordinary prose.'
 check 0 prose.md
-assert '. == {open:["run:PF1"],resolved:[],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[\"run:PF1\"],\"resolved\":[],\"unknowns\":[]}"))) exit 1'
 # 21. Unrelated tables do not become owned decision tables.
 fixture
 write unrelated.md '## 4. Divergences
@@ -295,23 +296,23 @@ write unrelated.md '## 4. Divergences
 | --- | --- |
 | other | done |'
 check 0 unrelated.md
-assert '. == {open:["run:PF1"],resolved:[],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[\"run:PF1\"],\"resolved\":[],\"unknowns\":[]}"))) exit 1'
 # 22. A report without a decision table contributes no resolution or error.
 fixture
 report
 write no-table.md '## 4. Divergences
 No finding was considered.'
 check 0 review.md no-table.md
-assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 check 0 no-table.md review.md
-assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 # 23. All reports without decision tables leave findings open, including section 3.
 fixture
 write first.md '## 4. Divergences
 No finding considered.'
 write second.md "${header/## 4./## 3.}"
 check 0 first.md second.md
-assert '. == {open:["run:PF1"],resolved:[],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[\"run:PF1\"],\"resolved\":[],\"unknowns\":[]}"))) exit 1'
 # 24. Prose and unrelated tables after an owned table are also independent.
 fixture
 report
@@ -323,28 +324,28 @@ The expression a | b describes a pipeline.
 | result | checked |
 PROSE
 check 0 review.md
-assert '.resolved == ["run:PF1"] and .unknowns == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")) && equal(at(r,".unknowns"),parse("[]")))) exit 1'
 # 25. Read paths and source aliases must stay inside the root as well.
 fixture
 ln -s "$sandbox/outside" "$root/external"
 report review.md run:PF1 external/EXEC_LOG.md
 check 2 review.md
-assert '.resolved == [] and (.unknowns|length>0)'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 check 2 ../outside/evidence.md
-assert '.open == ["run:PF1"] and (.unknowns|length>0)'
+assert 'if(!(equal(at(r,".open"),parse("[\"run:PF1\"]")) && (size(at(r,".unknowns"))>0))) exit 1'
 # 26. Quoted space-bearing evidence and JSON-sensitive decisions are preserved.
 fixture
 write 'metds/evidence file.md' checked
 report first.md run:PF1 "$log" resolved 'Keep "quoted" \ decision' '"metds/evidence file.md"'
 report second.md run:PF1 "$log" resolved 'Keep "quoted" \ decision' '"metds/evidence file.md"'
 check 0 first.md second.md
-assert '.resolved == ["run:PF1"] and .unknowns == []'
+assert 'if(!(equal(at(r,".resolved"),parse("[\"run:PF1\"]")) && equal(at(r,".unknowns"),parse("[]")))) exit 1'
 # 27. Different backslash-bearing decisions must still conflict.
 fixture
 report first.md run:PF1 "$log" resolved 'Keep \ decision'
 report second.md run:PF1 "$log" resolved 'Keep \\ decision'
 check 2 first.md second.md
-assert '.resolved == [] and (.unknowns|length>0)'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 # 28. Malformed attempted separators cannot be hidden by a valid report.
 fixture
 report
@@ -353,7 +354,7 @@ write malformed.md '## 4. Divergences
 | ---:- | --- | --- | --- | --- |
 | run:PF1 | wkdrs/run/EXEC_LOG.md | resolved | done | metds/evidence.md |'
 check 2 review.md malformed.md
-assert '.resolved == [] and (.unknowns|length>0)'
+assert 'if(!(equal(at(r,".resolved"),parse("[]")) && (size(at(r,".unknowns"))>0))) exit 1'
 # 29. Equals-form options preserve space-bearing roots and repeated reports.
 fixture
 mv "$root" "$root with spaces"
@@ -361,20 +362,20 @@ root="$root with spaces"
 report resolved.md
 report deferred.md run:PF1 "$log" deferred 'Await additional review'
 check_cli 0 "--root=$root" "--log=$log" --report=resolved.md --report=deferred.md
-assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 # 30. Equals-form report values preserve the resolver quoted-path syntax.
 fixture
 report 'review with spaces.md'
 write 'no table.md' '## 4. Divergences
 No finding considered.'
 check_cli 0 "--root=$root" "--log=$log" '--report="review with spaces.md"' '--report=`no table.md`'
-assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 # 31. Separate and equals-form options can be mixed without losing reports.
 fixture
 report resolved.md
 report deferred.md run:PF1 "$log" deferred 'Await additional review'
 check_cli 0 --root "$root" "--log=$log" --report resolved.md --report=deferred.md
-assert '. == {open:[],resolved:["run:PF1"],unknowns:[]}'
+assert 'if(!equal(r,parse("{\"open\":[],\"resolved\":[\"run:PF1\"],\"unknowns\":[]}"))) exit 1'
 # 32-33. Both help forms succeed without requiring root or log options.
 for option in -h --help; do
     fixture
