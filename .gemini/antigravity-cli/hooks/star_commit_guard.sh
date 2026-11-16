@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh"
+# STAR PreToolUse hook (Antigravity) — decline the git commands that break the
+# workflow conventions §1 in the ways that are expensive to undo, and hold the
+# STOP-line review gate from conventions §2.
+#
+# Registered under PreToolUse matching run_command in .agents/hooks.json
+# pointing to .gemini/antigravity-cli/hooks/star_commit_guard.sh.
+set -uo pipefail
+
+root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
+
+input=$(cat)
+
+command_text() { printf '%s' "$input" | star_json_field 'toolCall.args.CommandLine' 2>/dev/null; }
+
+cmd="$(command_text)"
+case "${cmd}" in
+    *git*|*execs/scpts/*|*.await*) ;;
+    *) exit 0 ;;
+esac
+
+deny() { # $1 = one-line reason, $2 = what to do instead (default: hand it to the user)
+    printf '{"decision":"deny","reason":"%s (declined by .gemini/antigravity-cli/hooks/star_commit_guard.sh — %s)"}\n' "$1" "${2:-hand it to the user to run}"
+    exit 0
+}
+
+size_limit=$((10 * 1024 * 1024))
+
+staged_oversize() {
+    local f size out=""
+    while IFS= read -r -d '' f; do
+        [[ -f "${root}/${f}" ]] || continue
+        size="$(wc -c < "${root}/${f}" 2>/dev/null)" || continue
+        size="${size//[[:space:]]/}"
+        case "${size}" in ''|*[!0-9]*) continue ;; esac
+        (( size > size_limit )) && out="${out:+${out}, }${f} ($((size / 1024 / 1024)) MB)"
+    done < <(git -C "${root}" diff --cached --name-only -z 2>/dev/null)
+    printf '%s' "${out}"
+}
+
+unreviewed_run() {
+    local run_root="${root}" dir="${root}/wkdrs/$1" helper reason
+    if [[ ! -f "${dir}/EXEC_LOG.md" ]]; then
+        run_root="$(dirname "${root}")/$(basename "${root}")--wt/$1"
+        dir="${run_root}/wkdrs/$1"
+    fi
+    [[ -f "${dir}/EXEC_LOG.md" ]] || return 0
+    helper="${run_root}/.agents/skills/star-code-reviewer/scripts/review_state.sh"
+    if [[ ! -f "${helper}" ]]; then
+        printf 'STAR conventions §2: review-state helper missing for wkdrs/%s/; update STAR and verify the review before launch' "$1"
+        return 0
+    fi
+    if ! reason="$(bash "${helper}" --root "${run_root}" check "$1" 2>/dev/null)"; then
+        reason="${reason//\\/}"; reason="${reason//\"/}"
+        reason="${reason//$'\n'/ }"; reason="${reason//$'\r'/ }"; reason="${reason//$'\t'/ }"
+        printf 'STAR conventions §2: wkdrs/%s/ review does not authorize launch: %s' "$1" "${reason:-invalid review state; refresh the review}"
+    fi
+    return 0
+}
+
+while IFS= read -r segment; do
+    read -ra tok <<< "${segment}"
+    [[ ${#tok[@]} -gt 0 ]] || continue
+
+    launch_run=""
+    li=0
+    lt=""
+    while [[ ${li} -lt ${#tok[@]} ]]; do
+        lt="${tok[li]}"
+        lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
+        case "${lt##*/}" in
+            env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|sh|bash|zsh) li=$((li + 1)) ;;
+            *=*|-*) li=$((li + 1)) ;;
+            *)
+                if [[ ${lt} =~ ^[0-9]+$ ]]; then li=$((li + 1)); else break; fi ;;
+        esac
+    done
+    if [[ ${li} -lt ${#tok[@]} ]]; then
+        case "${lt}" in
+            execs/scpts/*.sh|*/execs/scpts/*.sh)
+                launch_run="${lt##*execs/scpts/}"; launch_run="${launch_run%.sh}" ;;
+        esac
+    fi
+    if [[ -z "${launch_run}" ]]; then
+        for ((lj = 0; lj < ${#tok[@]}; lj++)); do
+            lt="${tok[lj]}"
+            case "${lt}" in
+                \>*) lt="${lt#>}"; lt="${lt#>}" ;;
+                *) (( lj > 0 )) && [[ "${tok[lj - 1]}" == *\> ]] || continue ;;
+            esac
+            lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
+            case "${lt}" in
+                wkdrs/*/.await|wkdrs/*/.await.*|*/wkdrs/*/.await|*/wkdrs/*/.await.*)
+                    launch_run="${lt##*wkdrs/}"; launch_run="${launch_run%%/*}" ;;
+            esac
+        done
+    fi
+    if [[ -n "${launch_run}" && "${launch_run}" != */* ]]; then
+        launch_reason="$(unreviewed_run "${launch_run}")"
+        [[ -n "${launch_reason}" ]] && \
+            deny "${launch_reason}" "run star-code-reviewer on that run first; the launch follows the review"
+    fi
+
+    case "${tok[0]}" in
+        git|*/git) ;;
+        *) continue ;;
+    esac
+
+    i=1
+    while [[ ${i} -lt ${#tok[@]} ]]; do
+        case "${tok[i]}" in
+            -C|-c|--git-dir|--work-tree|--namespace|--exec-path) i=$((i + 2)) ;;
+            -*) i=$((i + 1)) ;;
+            *) break ;;
+        esac
+    done
+    [[ ${i} -lt ${#tok[@]} ]] || continue
+
+    case "${tok[i]}" in
+        add)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -A|--all|-u|--update|--no-ignore-removal|.|:/|:/*|'*')
+                        deny "STAR conventions §1.1: a blanket add stages work this run did not do, and in a research repository it sweeps in checkpoints, datasets and scratch. Stage the paths this run wrote, by name." ;;
+                    -f|--force)
+                        deny "STAR conventions §1.6: a force-add puts a git-ignored path — .env, datas/, inits/ — into history. Stage a tracked path instead." ;;
+                    --*) ;;
+                    -*[Auf]*)
+                        deny "STAR conventions §1.1 and §1.6: this flag cluster carries a blanket or forced add. Stage the paths this run wrote, by name." ;;
+                esac
+            done
+            ;;
+        commit)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -m|--message|-F|--file|-t|--template|--fixup|--squash|-C|--reuse-message|--reedit-message|-m*|--message=*|--file=*)
+                        break ;;
+                    --amend)
+                        deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote. Make a new commit instead." ;;
+                    --all)
+                        deny "STAR conventions §1.1: commit --all stages every tracked modification, including work this run did not do. Stage the paths this run wrote, by name, then commit without it." ;;
+                    --*) ;;
+                    -*a*)
+                        deny "STAR conventions §1.1: commit -a stages every tracked modification, including work this run did not do. Stage the paths this run wrote, by name, then commit without -a." ;;
+                esac
+            done
+            big="$(staged_oversize)"
+            [[ -n "${big}" ]] && \
+                deny "STAR conventions §1.6: staged over 10 MB — ${big}. Clearing a large file back out of history needs a rewrite §1.3 forbids, so unstage it first."
+            ;;
+        rebase)
+            deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote." ;;
+        filter-branch|filter-repo)
+            deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote." ;;
+        reset)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                [[ "${tok[j]}" == --hard ]] && \
+                    deny "STAR conventions §1.3: reset --hard discards uncommitted work, including anything the user had in the tree."
+            done
+            ;;
+        branch)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -D|--delete-force)
+                        deny "STAR conventions §11: a force-deleted branch takes its unmerged commits and run records with it. Merge or discard at the confirmation point first; a merged branch deletes with -d." ;;
+                    -f|--force)
+                        deny "STAR conventions §1.3: forcing a branch onto another commit rewrites where its history points. Create a new branch instead." ;;
+                    --*) ;;
+                    -*[Df]*)
+                        deny "STAR conventions §1.3 and §11: this flag cluster carries a forced branch delete or move. Merge or discard at the confirmation point first." ;;
+                esac
+            done
+            ;;
+        switch)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    -C|--force-create)
+                        deny "STAR conventions §1.3: switch -C resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
+                    -f|--force|--discard-changes)
+                        deny "STAR conventions §1.3: a forced switch discards uncommitted work, including anything the user had in the tree." ;;
+                esac
+            done
+            ;;
+        checkout)
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    --) break ;;
+                    -B)
+                        deny "STAR conventions §1.3: checkout -B resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
+                    -f|--force)
+                        deny "STAR conventions §1.3: a forced checkout discards uncommitted work, including anything the user had in the tree." ;;
+                esac
+            done
+            ;;
+        worktree)
+            wt_remove=0
+            for ((j = i + 1; j < ${#tok[@]}; j++)); do
+                arg="${tok[j]}"
+                case "${arg}" in
+                    \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
+                esac
+                case "${arg}" in
+                    remove) wt_remove=1 ;;
+                    -f|--force)
+                        (( wt_remove )) && \
+                            deny "STAR conventions §11.9: a forced worktree removal deletes the tree's untracked artifacts. Move them to the main checkout first — a clean tree removes without --force." ;;
+                esac
+            done
+            ;;
+    esac
+done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n')
+
+exit 0

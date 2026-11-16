@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh"
+# STAR SessionStart hook (Antigravity) — inject the project's memory index into
+# session context so a session starts knowing what earlier sessions in this
+# repository learned.
+#
+# The store is .star/memory/ in the project, not the harness's own memory: one
+# file per fact, with a git-ignored local/ beside it (like .env) holding what
+# stays on this machine: the machine: scoped facts, and any memory the user
+# keeps off the repository. What is injected is an index built here from each
+# file's frontmatter — type, scope, verified, summary — one line per memory,
+# newest first: the lines are pointers, and the fact itself is read from its
+# file when it matters. What belongs in the store, and the file format, is
+# docs/mds/star-workflow/research-workflow-conventions.md section 12.
+#
+# `--list` prints that index as plain text and reads no payload: the form a
+# person, a test, or the consistency check calls by hand.
+#
+# Registered under SessionStart in .agents/hooks.json pointing to
+# .gemini/antigravity-cli/hooks/star_memory.sh.
+
+list=false
+[ "${1:-}" = "--list" ] && list=true
+$list || cat >/dev/null 2>&1
+
+root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
+
+cutoff="$(date -v-180d +%Y-%m-%d 2>/dev/null || date -d '180 days ago' +%Y-%m-%d 2>/dev/null || true)"
+
+entries() { # $1 = store directory -> one index line per memory file, newest first
+  [ -d "$1" ] || return 0
+  set -- "$1"/*.md
+  [ -f "$1" ] || return 0
+  awk -v cutoff="${cutoff}" '
+    FNR == 1 { if (pending) emit(); cur = FILENAME; infm = 0; pending = 0; split("", f) }
+    /^---$/ { if (infm < 2) { infm++; if (infm == 2) { if (f["summary"] != "") emit(); else pending = 1 } }; next }
+    infm == 1 && match($0, /^[a-z_]+: */) { f[substr($0, 1, index($0, ":") - 1)] = substr($0, RLENGTH + 1) }
+    pending && infm == 2 && NF { f["summary"] = $0; emit(); pending = 0 }
+    END { if (pending) emit() }
+    function emit(    slug, line) {
+      slug = cur; sub(/.*\//, "", slug); sub(/\.md$/, "", slug)
+      line = "- " f["type"] " · " f["scope"] " · " f["verified"] " · [" slug "](" slug ".md) — " f["summary"]
+      if (f["type"] == "env" && cutoff != "" && f["verified"] < cutoff)
+        line = line "  [stale: verify before relying on it]"
+      print f["verified"] "\t" line
+    }
+  ' "$@" | LC_ALL=C sort -r | cut -f2-
+}
+
+shared="$(entries "${root}/.star/memory")"
+machine="$(entries "${root}/.star/memory/local")"
+[ -n "${shared}${machine}" ] || exit 0
+if $list; then
+  [ -n "${shared}" ] && printf 'Shared (.star/memory/):\n%s\n' "${shared}"
+  [ -n "${machine}" ] && printf 'Machine-local (.star/memory/local/):\n%s\n' "${machine}"
+  exit 0
+fi
+
+ctx="STAR project memory — what earlier sessions in this repository learned, recorded under .star/memory/ rather than in your own memory store. Each line is a pointer, not the fact: type · scope · last verified · file — summary. Open the file under .star/memory/ before acting on one. A scope naming a machine or a plan applies only there, and where a memory disagrees with a file in the repository, the file wins. Recording a new one: docs/mds/star-workflow/research-workflow-conventions.md section 12."
+[ -n "${shared}" ] && ctx="${ctx}
+Shared (.star/memory/):
+${shared}"
+[ -n "${machine}" ] && ctx="${ctx}
+Machine-local (.star/memory/local/):
+${machine}"
+
+star_json_context agy "${event:-SessionStart}" "$ctx"

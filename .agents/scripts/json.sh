@@ -18,7 +18,7 @@ star_json_object() {
 }
 star_json_field() { star_json_eval 'x=at(r,a(1)); if(type(x)=="string") raw(x)' "$1"; }
 star_json_context() {
-    star_json_new 'r=object(); if(a(1)=="cursor") put(r,"additional_context",string(a(3))); else { x=object(); put(x,"hookEventName",string(a(2))); put(x,"additionalContext",string(a(3))); put(r,"hookSpecificOutput",x) }; print json(r)' "$@"
+    star_json_new 'r=object(); if(a(1)=="cursor") put(r,"additional_context",string(a(3))); else if(a(1)=="agy") { s=object(); put(s,"systemMessage",string(a(3))); m=object(); put(m,"systemMessage",s); arr=array(); add(arr,m); put(r,"injectSteps",arr) } else { x=object(); put(x,"hookEventName",string(a(2))); put(x,"additionalContext",string(a(3))); put(r,"hookSpecificOutput",x) }; print json(r)' "$@"
 }
 star_json_models() {
     star_json_awk '

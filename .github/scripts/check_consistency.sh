@@ -570,15 +570,16 @@ hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
          .dsh/hooks/star_model_id.sh .pi/extensions/star-hooks/star_model_id.sh \
-         .qwen/hooks/star_model_id.sh \
+         .qwen/hooks/star_model_id.sh .gemini/antigravity-cli/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
          .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
          .dsh/hooks/star_commit_guard.sh .pi/extensions/star-hooks/star_commit_guard.sh \
-         .qwen/hooks/star_commit_guard.sh \
+         .qwen/hooks/star_commit_guard.sh .gemini/antigravity-cli/hooks/star_commit_guard.sh \
+         .gemini/antigravity-cli/hooks/star_involve_gate.sh \
          .dsh/hooks/install.sh .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
@@ -589,7 +590,7 @@ done
 #     STAR's own file, and the row that points DSH at it lives in the machine's
 #     $DSH_HOME — .dsh/cordis.patch.yml is the reference copy of that row and
 #     .dsh/hooks/install.sh is what writes it.
-for f in .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
+for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
          .kimi-code/hooks.example.toml .pi/extensions/star-hooks/index.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
         fail "${f} is missing"
@@ -629,6 +630,8 @@ for f in .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
     grep -qF '"hookEventName":"PreToolUse","permissionDecision":"deny"' "${f}" || \
         { fail "${f} no longer emits a PreToolUse deny decision"; hook_errors=1; }
 done
+grep -qF '"decision":"deny"' .gemini/antigravity-cli/hooks/star_commit_guard.sh || \
+    { fail ".gemini/antigravity-cli/hooks/star_commit_guard.sh no longer emits Antigravity's deny shape"; hook_errors=1; }
 grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/star_commit_guard.sh || \
     { fail ".kimi-code/hooks/star_commit_guard.sh no longer emits Kimi's deny shape"; hook_errors=1; }
 { grep -qF '"permission":"deny"' .cursor/hooks/star_commit_guard.sh && \
@@ -656,7 +659,7 @@ grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh \
          docs/mds/star-workflow/research-workflow-conventions.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
@@ -669,7 +672,7 @@ done
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh; do
     { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
         { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
     grep -qF 'f["type"] == "env"' "${f}" || \
@@ -688,7 +691,7 @@ printf -- '---\ntype: pref\nscope: global\nverified: 2026-09-01\n---\n\nThe firs
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh; do
     mkdir -p "${memory_fixture}/$(dirname "${f}")"
     cp "${f}" "${memory_fixture}/${f}"
     listed="$(bash "${memory_fixture}/${f}" --list 2>/dev/null)"

@@ -35,6 +35,7 @@ HOOK_TREES=(
     ".codex/hooks"
     ".cursor/hooks"
     ".dsh/hooks"
+    ".gemini/antigravity-cli/hooks"
     ".kimi-code/hooks"
     # Pi keeps its scripts beside the extension that runs them: .pi/hooks/ is
     # the old name for the extensions directory, and Pi warns whenever it exists.
@@ -86,6 +87,7 @@ HOOK_FILES=(
 # Hook registration configs a project may have extended with its own settings;
 # installed only when missing, never overwritten.
 HOOK_CONFIGS=(
+    ".agents/hooks.json"
     ".claude/settings.json"
     ".codex/hooks.json"
     ".cursor/hooks.json"
@@ -136,7 +138,7 @@ is_optional_path() {
 # The harness trees --harnesses and STAR_HARNESSES name, one entry per agent harness. Which paths
 # belong to which is decided by path_harness below, not by a list here, so a path added
 # upstream reaches the right tree without being registered anywhere.
-ALL_HARNESSES=(claude codex cursor dsh kimi pi qwen)
+ALL_HARNESSES=(agy claude codex cursor dsh kimi pi qwen)
 
 log() {
     printf '[STAR update] %s\n' "$*"
@@ -181,6 +183,7 @@ link_codex_marketplace() {
 # added upstream is classified without being listed here.
 path_harness() { # $1 = path relative to the project root
     case "$1" in
+        .agents/hooks.json|.gemini/antigravity-cli/*) printf 'agy' ;;
         # This one .agents entry only exposes Codex's private marketplace. Keep
         # the rest of .agents shared so future harness conventions can grow
         # there without inheriting Codex's plugin tree.
@@ -202,6 +205,7 @@ harness_dirs() { # $1 = harness name
     case "$1" in
         # .agents is not here: it is in the unconditional sparse set below,
         # because every run syncs it.
+        agy)    printf '.gemini/antigravity-cli' ;;
         codex)  printf '.codex' ;;
         claude) printf '.claude' ;;
         cursor) printf '.cursor' ;;
@@ -279,7 +283,7 @@ missing_hooks() { # $1 = registration config path
     # whose harness lets a hook decide one — Cursor has no event that gates a
     # file edit, and Kimi's only observes the prompt it fires beside.
     case "$1" in
-        */.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
+        */.agents/hooks.json|*/.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
     # The commit guard declines a shell command before it runs, which every
@@ -331,14 +335,14 @@ an updater that never replaced itself would keep updating the path list it shipp
 replacement takes effect from the next run — the current one finishes with the copy it started
 from — so when the command reports that it replaced itself, run it once more.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
-body), the hook registration configs (.claude/settings.json, .codex/hooks.json,
+body), the hook registration configs (.agents/hooks.json, .claude/settings.json, .codex/hooks.json,
 .cursor/hooks.json, .qwen/settings.json) and the project config .pi/settings.json are
 installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
 Qwen Code skill directories.
 
---harnesses limits the run to the named harness trees, comma separated: claude, codex, cursor, dsh,
+--harnesses limits the run to the named harness trees, comma separated: agy, claude, codex, cursor, dsh,
 kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
 keeps whatever it already has there. Without the flag the list comes from STAR_HARNESSES
@@ -822,7 +826,7 @@ if [[ "${ADOPT}" == false ]]; then
         # .codex/skills is listed for the same reason from the other side: it
         # holds the per-skill manifests Codex reads, which .agents/skills links
         # to at the path Codex scans.
-        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents/skills .agents/scripts .agents/commands .agents/plugins .codex/skills)
+        SPARSE_PATHS=(docs/mds/star-workflow docs/srcs execs .agents .codex/skills)
         for harness in ${SELECTED_HARNESSES[@]+"${SELECTED_HARNESSES[@]}"}; do
             read -ra harness_roots <<<"$(harness_dirs "${harness}")"
             SPARSE_PATHS+=("${harness_roots[@]}")

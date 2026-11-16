@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 ENV_DIR="${ROOT_DIR}"
-ALL_HARNESSES=(claude codex cursor dsh kimi pi qwen)
+ALL_HARNESSES=(agy claude codex cursor dsh kimi pi qwen)
 KIMI_POOL=false
 HARNESSES_ARG=""
 
@@ -401,8 +401,30 @@ stamp_models() {
 
 model_stamp_summary() {
     local harness tier key value depth any=false
-    for harness in claude codex cursor qwen kimi; do
+    for harness in agy claude codex cursor qwen kimi; do
         is_selected "${harness}" || continue
+        if [[ "${harness}" == agy ]]; then
+            for tier in plan exec read; do
+                key="$(tier_model_key "${tier}")"
+                value="$(tier_model_for agy "$(env_value "${key}")")"
+                [[ -n "${value}" ]] || continue
+                depth="$(tier_depth_for agy "$(env_value "${key}")")"
+                case "${value}" in
+                    inherit|flash_lite|flash|pro)
+                        if [[ -n "${depth}" ]]; then
+                            log "${key} in .env gives Antigravity at dispatch: Model=${value}; @${depth} is ignored because invoke_subagent exposes no per-dispatch depth; no file stamp is required."
+                        else
+                            log "${key} in .env gives Antigravity at dispatch: Model=${value}; no file stamp is required."
+                        fi
+                        ;;
+                    *)
+                        log "WARNING: ${key} in .env resolves to '${value}' for Antigravity, but invoke_subagent Model accepts only inherit, flash_lite, flash, or pro; dispatch will fall back to inherit."
+                        ;;
+                esac
+                any=true
+            done
+            continue
+        fi
         if [[ "${harness}" == claude ]]; then
             value="$(tier_model_for claude "$(env_value STAR_READ_MODEL)")"
             if [[ -n "${value}" ]]; then
@@ -459,7 +481,7 @@ model_stamp_summary() {
             fi
         done
     done
-    [[ "${any}" == true ]] || log "No selected Claude Code, Codex, Cursor, Qwen, or Kimi tier key names a model or a depth in .env; nothing was stamped."
+    [[ "${any}" == true ]] || log "No selected Antigravity, Claude Code, Codex, Cursor, Qwen, or Kimi tier key names a model or a depth in .env; nothing was stamped."
 }
 
 # Kimi Code keeps its subagent model pool in the user's own config, which no skill

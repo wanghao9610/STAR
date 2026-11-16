@@ -1,0 +1,44 @@
+{
+  "star-session-init": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "../.gemini/antigravity-cli/hooks/star_model_id.sh",
+        "timeout": 10
+      },
+      {
+        "type": "command",
+        "command": "../.gemini/antigravity-cli/hooks/star_memory.sh",
+        "timeout": 10
+      }
+    ]
+  },
+  "star-commit-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "../.gemini/antigravity-cli/hooks/star_commit_guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "star-involve-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "edit_file|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "../.gemini/antigravity-cli/hooks/star_involve_gate.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

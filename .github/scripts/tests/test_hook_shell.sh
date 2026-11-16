@@ -22,9 +22,11 @@ export KIMI_CODE_HOME=$sandbox/kimi
 export CLAUDE_PROJECT_DIR=$project QWEN_PROJECT_DIR=$project
 mkdir -p "$project/.agents/scripts"
 cp "$repo/.agents/scripts/"* "$project/.agents/scripts/"
-hosts='claude codex qwen dsh cursor kimi-code pi'
+hosts='claude codex qwen dsh cursor kimi-code pi agy'
 for host in $hosts; do
-    if [ "$host" = pi ]; then directory=.pi/extensions/star-hooks; else directory=.$host/hooks; fi
+    if [ "$host" = pi ]; then directory=.pi/extensions/star-hooks
+    elif [ "$host" = agy ]; then directory=.gemini/antigravity-cli/hooks
+    else directory=.$host/hooks; fi
     mkdir -p "$project/$directory"
     cp "$repo/$directory/"*.sh "$project/$directory/"
 done
@@ -41,6 +43,7 @@ assert_json() {
 }
 hook_path() {
     if [ "$1" = pi ]; then hook=$project/.pi/extensions/star-hooks/$2.sh
+    elif [ "$1" = agy ]; then hook=$project/.gemini/antigravity-cli/hooks/$2.sh
     else hook=$project/.$1/hooks/$2.sh; fi
 }
 run() {
@@ -245,6 +248,7 @@ for host in $hosts; do
     run 0 '{"session_id":"memory-session"}' "$hook"
     case "$host" in
         cursor) assert_json 'if(!index(val(at(r,".additional_context")),a(1))) exit 1' "$summary" ;;
+        agy) assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),a(1))) exit 1' "$summary" ;;
         kimi-code|pi) assert_contains "$summary" ;;
         *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SessionStart\"")))) exit 1; if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "$summary" ;;
     esac
@@ -324,6 +328,22 @@ for patch in '*** Delete File: src/example.sh' '*** Update File: .env' '*** Upda
     run 0 "$payload" "$hook"
     assert_equal ''
 done
+hook_path agy star_model_id
+case_ 'Antigravity SessionStart injects concrete modelName via injectSteps'
+run 0 '{"modelName":"gemini-4-hydrogen"}' "$hook"
+assert_json 'if(type(at(r,".injectSteps[0].systemMessage.systemMessage"))!="string" || !index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"gemini-4-hydrogen")) exit 1'
+case_ 'Antigravity SessionStart treats auto modelName as unrecorded fallback'
+run 0 '{"modelName":"auto"}' "$hook"
+assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"unrecorded")) exit 1'
+hook_path agy star_involve_gate
+case_ 'Antigravity involve gate allows project file edits at INVOLVE=low'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/example.sh")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"allow\"")))) exit 1'
+case_ 'Antigravity involve gate leaves dot-directories undecided'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/.env")
+run 0 "$payload" "$hook"
+assert_equal ''
 hook_path claude star_bash_gate
 case_ 'Claude shell gate allows ordinary inspection'
 run 0 '{"tool_input":{"command":"rg --files src"}}' "$hook"
@@ -344,6 +364,7 @@ for host in $hosts; do
         case "$host" in
             cursor) expected=2; payload=$(star_json_object command "$command_text") ;;
             pi) expected=1; payload='' ;;
+            agy) expected=0; payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$command_text") ;;
             *) expected=0; payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text") ;;
         esac
         if [ "$host" = pi ]; then run "$expected" '' "$hook" "$command_text"
@@ -351,6 +372,7 @@ for host in $hosts; do
         case "$host" in
             cursor) assert_json 'if(!(equal(at(r,".permission"),parse("\"deny\"")) && (length(val(at(r,".agent_message")))>0))) exit 1' ;;
             pi) assert_contains declined ;;
+            agy) assert_json 'if(!(equal(at(r,".decision"),parse("\"deny\"")) && (length(val(at(r,".reason")))>0))) exit 1' ;;
             *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"deny\"")))) exit 1' ;;
         esac
     done
@@ -359,6 +381,7 @@ for host in $hosts; do
     if [ "$host" = pi ]; then run 0 '' "$hook" "$command_text"
     else
         if [ "$host" = cursor ]; then payload=$(star_json_object command "$command_text")
+        elif [ "$host" = agy ]; then payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$command_text")
         else payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text"); fi
         run 0 "$payload" "$hook"
     fi

@@ -372,14 +372,15 @@ This is the one section of this file that names a harness: everything above hold
 
 ### Invocation and tags
 
-The skills are invoked as `/star-<name>` in Claude Code, Cursor, Pi and Qwen Code, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code and DSH. The tag below is what `STAR_HARNESSES` and a tagged model entry (§10.8) use; model names keep their harness spelling (`pi:anthropic/claude-fable-5`, `claude:claude-opus-5[1m]`), and an alias comparison ignores the context-window suffix — `opus` for `claude-opus-5[1m]` — while artifacts record the id verbatim.
+The skills are invoked as `/star-<name>` in Claude Code, Cursor, Pi and Qwen Code, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code and DSH, and by `star-<name>` or natural-language skill activation in Antigravity. The tag below is what `STAR_HARNESSES` and a tagged model entry (§10.8) use; model names keep their harness spelling (`pi:anthropic/claude-fable-5`, `claude:claude-opus-5[1m]`), and an alias comparison ignores the context-window suffix — `opus` for `claude-opus-5[1m]` — while artifacts record the id verbatim.
 
 ### Hooks and model provenance
 
-Each tree's `hooks/` directory (Pi: `.pi/extensions/star-hooks/`) holds `star_model_id.sh`, `star_memory.sh` (§12) and `star_commit_guard.sh` (§1); the memory hook fires on the provenance hook's event.
+Each tree's `hooks/` directory (Pi: `.pi/extensions/star-hooks/`, Antigravity: `.gemini/antigravity-cli/hooks/`) holds `star_model_id.sh`, `star_memory.sh` (§12) and `star_commit_guard.sh` (§1); the memory hook fires on the provenance hook's event.
 
 | Harness | Tag | Registered in | Provenance line: event → injects → read |
 |---|---|---|---|
+| Antigravity | `agy` | `.agents/hooks.json` | `SessionStart` → `modelName` when concrete, else session context / `unrecorded` → at session start |
 | Claude Code | `claude` | `.claude/settings.json` | `SessionStart`, `SubagentStart` for a delegate → a `--resolve` command over the session transcript or the delegate's own; the id itself when none was named → as you write |
 | Codex | `codex` | `.codex/hooks.json` | `SessionStart` → the exact `session_model_id`, a `--resolve` command over the rollout, the `--check` command → as you write, then after |
 | Cursor | `cursor` | `.cursor/hooks.json` | `sessionStart` → the id → at session start |
@@ -395,6 +396,10 @@ A value read as you write cannot be stale; Cursor's and Kimi's can, and Pi's las
 ### Model and thinking depth
 
 `bash execs/configure.sh` writes the tier keys (§10.8) into the static fields each harness supports, `--kimi-pool` registers Kimi's aliases, and a running skill never rewrites harness configuration. Qwen Code's named agents take the model without the suffix; DSH and Pi apply only the model and depth controls their delegation interface exposes.
+
+#### Antigravity
+
+Resolve the `agy` entry or untagged fallback. `invoke_subagent`'s `Model` parameter accepts only `inherit`, `flash_lite`, `flash` or `pro`, and exposes no per-dispatch thinking depth. Pass a non-empty value only when it matches one of those four literals; for any other model name or any `@<depth>` suffix, keep `inherit`, preserve the brief's read-only (`TypeName: "research"`) or write-scope (`TypeName: "self"` with `Workspace: "share"` / `"branch"` as needed) settings, and state once that the interface cannot select a custom model id or per-dispatch depth. Empty keys omit `Model` and use `inherit`. Use `ask_question` for structured questions and `run_command` / `schedule` for event-driven background waits instead of shell `sleep` loops.
 
 #### Claude Code
 
