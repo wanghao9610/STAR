@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR SessionStart and SubagentStart hook — inject the project's memory index
 # into context so a run starts knowing what earlier sessions in this repository
 # learned.

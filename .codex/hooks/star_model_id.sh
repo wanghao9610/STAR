@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR SessionStart hook (Codex CLI) — inject the runtime-reported model id into
 # session context so skills record a real model_id instead of "unrecorded".
 #

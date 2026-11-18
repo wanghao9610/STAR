@@ -3,7 +3,7 @@
 # check is read-only and never starts the interpreter: 0 current, 1 stale, 2 unknown.
 set -euo pipefail
 export LC_ALL=C
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 2; }
 
 result() { star_json_object status "$1" reason "$2"; }
 unknown() { result unknown "$1"; exit 2; }

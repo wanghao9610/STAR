@@ -7,7 +7,7 @@
 # conservatively reports busy. shlock is for a local filesystem, not shared NFS.
 set -e
 set -o pipefail
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 2; }
 LAUNCH_JSON=$(cat "${STAR_JSON_LIB%/*}/launch.awk")
 launch_json() { local program=$1; shift; star_json_awk "$LAUNCH_JSON
 END { r=document(); $program }" "$@"; }

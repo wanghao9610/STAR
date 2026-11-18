@@ -684,7 +684,9 @@ done
 #     and mark exactly one, so a copy whose parsing breaks fails here rather than
 #     silently injecting nothing into every session of that harness.
 memory_fixture="$(mktemp -d)"
-mkdir -p "${memory_fixture}/.star/memory/local"
+mkdir -p "${memory_fixture}/.star/memory/local" "${memory_fixture}/.agents"
+# The hooks load the shared JSON helpers, as they would in a real project.
+cp -R .agents/scripts "${memory_fixture}/.agents/scripts"
 printf -- '---\ntype: env\nscope: machine:box\nsummary: needs driver 535\nverified: 2025-01-01\n---\nbody\n' > "${memory_fixture}/.star/memory/old-driver.md"
 printf -- '---\ntype: insight\nscope: plan:03\nsummary: seed 7 is the outlier\nverified: 2025-01-01\n---\nbody\n' > "${memory_fixture}/.star/memory/keep-seed.md"
 printf -- '---\ntype: pref\nscope: global\nverified: 2026-09-01\n---\n\nThe first body line stands in.\n' > "${memory_fixture}/.star/memory/local/legacy.md"

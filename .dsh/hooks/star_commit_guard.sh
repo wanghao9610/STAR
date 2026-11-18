@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR PreToolUse hook (DeepSeek Harness) — decline the git commands that break the
 # workflow conventions §1 in the ways that are expensive to undo. It is the floor
 # under INVOLVE=low, which answers the commit offer itself (§1.5, §7.7): with

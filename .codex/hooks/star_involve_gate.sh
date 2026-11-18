@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR PermissionRequest hook (Codex CLI) — skip the approval prompt for a file
 # edit while the project runs at INVOLVE=low (.env, workflow conventions §7.7).
 # Confirmation points are untouched: the STOP line, deletions and plan approval

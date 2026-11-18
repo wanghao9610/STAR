@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # Resolve the involve level a gate hook should act on: the `involve=<level>`
 # token of the session's most recent STAR command, or `.env`'s INVOLVE when that
 # invocation carried none (workflow conventions §7.7, §7.12).

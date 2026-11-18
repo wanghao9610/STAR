@@ -2,7 +2,7 @@
 # Resolve stable findings from explicitly selected reports without changing inputs.
 set -u
 export LC_ALL=C
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 2; }
 root='' log=''
 reports=()
 while [ "$#" -gt 0 ]; do

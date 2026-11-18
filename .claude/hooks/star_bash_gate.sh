@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # Skip Claude's permission prompt for shell commands while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7) — the shell counterpart of
 # star_involve_gate.sh, so a goal-driven run (goal mode re-invoking star-auto)
