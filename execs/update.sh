@@ -99,8 +99,14 @@ HOOK_CONFIGS=(
 # — the loser is still reported on every start. Excluding it silences that and
 # leaves the shared root alone for the agents that read it as their own — Codex
 # has no other, and any agent following the AGENTS.md convention finds it there.
+#
+# .agents/skills.json registers .gemini/antigravity-cli/skills with Antigravity,
+# which reads skills only from .agents/skills and the folders this file lists. The
+# two wrappers there give it /star and /star-auto; keeping them out of
+# .agents/skills keeps every other harness that scans that root from loading them.
 PROJECT_CONFIGS=(
     ".pi/settings.json"
+    ".agents/skills.json"
 )
 # Everything installed when missing and never overwritten, whichever kind it is.
 INSTALL_CONFIGS=(
@@ -125,6 +131,7 @@ is_optional_path() {
         ".cursor/agents")      return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
+        ".gemini/antigravity-cli/skills") return 0 ;;
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
         ".agents/scripts") return 0 ;;
@@ -178,15 +185,15 @@ link_codex_marketplace() {
 # own — and a project that has it can be handed to a harness STAR ships no tree
 # for at all. It is part of the shared skeleton now, updated whichever trees
 # --harnesses names, and updated first. .codex stays Codex's: its hooks,
-# per-skill manifests, and plugins. Three paths sit outside their harness's own
+# per-skill manifests, and plugins. Four paths sit outside their harness's own
 # directory and are listed here by name: .cursorignore (Cursor), .agents/hooks.json
-# (Antigravity, whose tree is .gemini/antigravity-cli/) and
+# and .agents/skills.json (Antigravity, whose tree is .gemini/antigravity-cli/) and
 # .agents/plugins/marketplace.json (Codex). Every other path starts with its
 # harness's own directory, so one added upstream is classified without being
 # listed here.
 path_harness() { # $1 = path relative to the project root
     case "$1" in
-        .agents/hooks.json|.gemini/antigravity-cli/*) printf 'agy' ;;
+        .agents/hooks.json|.agents/skills.json|.gemini/antigravity-cli/*) printf 'agy' ;;
         # This one .agents entry only exposes Codex's private marketplace. Keep
         # the rest of .agents shared so future harness conventions can grow
         # there without inheriting Codex's plugin tree.
@@ -320,6 +327,15 @@ note_resolver_rule() { # $1 = config path relative to the project root
     log "      Copy \"Bash(bash .claude/hooks/star_model_id.sh --resolve:*)\" from upstream $1 into its permissions.allow."
 }
 
+# A kept .agents/skills.json that does not list STAR's wrapper folder leaves
+# Antigravity without /star and /star-auto, and nothing else reports it.
+note_agy_skills() { # $1 = config path relative to the project root
+    [[ "$1" == ".agents/skills.json" && -e "${ROOT_DIR}/$1" ]] || return 0
+    grep -qF '.gemini/antigravity-cli/skills' "${ROOT_DIR}/$1" 2>/dev/null && return 0
+    log "NOTE: $1 was kept and does not list .gemini/antigravity-cli/skills, so Antigravity has no /star or /star-auto."
+    log "      Add {\"path\": \".gemini/antigravity-cli/skills\"} to its entries, as upstream $1 does."
+}
+
 usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
@@ -339,8 +355,8 @@ replacement takes effect from the next run — the current one finishes with the
 from — so when the command reports that it replaced itself, run it once more.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
 body), the hook registration configs (.agents/hooks.json, .claude/settings.json, .codex/hooks.json,
-.cursor/hooks.json, .qwen/settings.json) and the project config .pi/settings.json are
-installed only when missing and never overwritten,
+.cursor/hooks.json, .qwen/settings.json) and the project configs .pi/settings.json and
+.agents/skills.json are installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
 Qwen Code skill directories.
@@ -356,8 +372,8 @@ execs/run.sh, execs/configure.sh and this script — are updated whichever trees
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
-The generic router packages live under .codex/plugins, .dsh/commands and .kimi-code/plugins;
-each is updated only when its harness is selected. Codex's one discovery link under
+The generic router packages live under .codex/plugins, .dsh/commands, .kimi-code/plugins and
+.gemini/antigravity-cli/skills; each is updated only when its harness is selected. Codex's one discovery link under
 .agents/plugins follows the same selection.
 
 --diff previews an update without changing anything: it lists upstream files that are new
@@ -636,6 +652,9 @@ if [[ "${ADOPT}" == true ]]; then
         # entry points; installation into the host remains a per-machine step.
         ".dsh/commands"
         ".kimi-code/plugins"
+        # Antigravity's /star and /star-auto wrapper skills, which
+        # .agents/skills.json registers; no install step.
+        ".gemini/antigravity-cli/skills"
         "${SKILL_ROOTS[@]:1}"
         "${MODEL_AGENT_TREES[@]}"
         "${HOOK_TREES[@]}"
@@ -733,6 +752,9 @@ else
         # to their own trees and are installed into each host separately.
         ".dsh/commands"
         ".kimi-code/plugins"
+        # Antigravity's /star and /star-auto wrapper skills, registered by
+        # .agents/skills.json (PROJECT_CONFIGS above).
+        ".gemini/antigravity-cli/skills"
         # Which skill root each harness owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
@@ -1086,6 +1108,7 @@ if [[ "${ADOPT}" == false ]]; then
                 log "      Merge the missing hook entry from upstream ${cfg} to enable it."
             fi
             note_resolver_rule "${cfg}"
+            note_agy_skills "${cfg}"
         done
     fi
 
@@ -1229,6 +1252,7 @@ for cfg in "${INSTALL_CONFIGS[@]}"; do
         log "      Until then model_id stays unrecorded in every report, with nothing to see."
     fi
     note_resolver_rule "${cfg}"
+    note_agy_skills "${cfg}"
 done
 
 log "Next: copy .env.example to .env, then run /star-proj-adopt to wire the project up."

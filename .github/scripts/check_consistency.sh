@@ -222,7 +222,7 @@ if [[ "${FORKED_MANIFESTS}" != "${STAMPED_MANIFESTS}" ]]; then
 fi
 (( tier_errors == 0 )) && note "all $(printf '%s\n' "${TIERS_EN}" | wc -l | tr -d ' ') §10 rows carry a tier, and the $(printf '%s\n' "${FORKED_MANIFESTS}" | wc -l | tr -d ' ') forked manifests are the ones execs/configure.sh stamps"
 
-# 4b. Codex, Kimi and DSH need harness-owned packages for the generic router.
+# 4b. Codex, Kimi, DSH and Antigravity need harness-owned packages for the generic router.
 #     Codex alone exposes one marketplace file through .agents; the other two
 #     packages remain entirely inside their harness trees.
 section "Harness-owned STAR router packages"
@@ -312,13 +312,37 @@ if ! grep -qF 'name: "star-auto",' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
     fail "${DSH_PLUGIN_ROOT} does not also register /star-auto forwarding to the shared auto procedure"
     plugin_errors=1
 fi
-for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins"; do
+# Antigravity reads skills only from .agents/skills and the folders
+# .agents/skills.json lists, so its two wrappers sit in its own tree and that file
+# registers them. Skill frontmatter there has no invocation switch, so the
+# description is what keeps each one explicit-only.
+AGY_SKILL_ROOT=".gemini/antigravity-cli/skills"
+if ! star_json_eval 'e=get(r,"entries"); ok=0; for(i=0;i<size(e);i++) if(field(get(e,i),"path")==".gemini/antigravity-cli/skills") ok=1; if(!ok) exit 1' < .agents/skills.json >/dev/null; then
+    fail ".agents/skills.json does not register ${AGY_SKILL_ROOT}"
+    plugin_errors=1
+fi
+for agy_command in star star-auto; do
+    agy_file="${AGY_SKILL_ROOT}/${agy_command}/SKILL.md"
+    if [[ ! -f "${agy_file}" ]] || \
+       ! frontmatter_has_line "${agy_file}" "name: ${agy_command}" || \
+       ! grep -qF "Do not use unless the user typed /${agy_command}" "${agy_file}" || \
+       ! grep -qF "Read \`.agents/commands/${agy_command}.md\`" "${agy_file}"; then
+        fail "${agy_file} is not the explicit-only wrapper around .agents/commands/${agy_command}.md"
+        plugin_errors=1
+    fi
+done
+if ! grep -qF 'STAR_LANG=zh' "${AGY_SKILL_ROOT}/star/SKILL.md" || \
+   ! grep -qF '.agents/commands/star.zh-CN.md' "${AGY_SKILL_ROOT}/star/SKILL.md"; then
+    fail "${AGY_SKILL_ROOT}/star/SKILL.md does not apply STAR's Chinese router wording"
+    plugin_errors=1
+fi
+for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}"; do
     if [[ "$(grep -Fxc "        \"${router_tree}\"" execs/update.sh)" -ne 2 ]]; then
         fail "execs/update.sh must carry ${router_tree} in both adopt and full-update paths"
         plugin_errors=1
     fi
 done
-for optional_tree in ".dsh/commands" ".kimi-code/plugins"; do
+for optional_tree in ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}"; do
     if ! grep -qF "\"${optional_tree}\")" execs/update.sh; then
         fail "execs/update.sh does not allow an older ref to omit ${optional_tree}"
         plugin_errors=1
@@ -358,7 +382,7 @@ for readme in README.md README.zh-CN.md; do
         fi
     done
 done
-(( plugin_errors == 0 )) && note "Codex, Kimi and DSH router packages all delegate to the shared /star roster"
+(( plugin_errors == 0 )) && note "Codex, Kimi, DSH and Antigravity router packages all delegate to the shared /star roster"
 
 # 5. Bilingual twins: every reference and asset .md has its _zh.md counterpart
 # and vice versa, because a Chinese run writes its documents from the _zh

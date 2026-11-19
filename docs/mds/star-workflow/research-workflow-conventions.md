@@ -372,7 +372,7 @@ This is the one section of this file that names a harness: everything above hold
 
 ### Invocation and tags
 
-The skills are invoked as `/star-<name>` in Claude Code, Cursor, Pi and Qwen Code, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code and DSH, and by `star-<name>` or natural-language skill activation in Antigravity. The tag below is what `STAR_HARNESSES` and a tagged model entry (§10.8) use; model names keep their harness spelling (`pi:anthropic/claude-fable-5`, `claude:claude-opus-5[1m]`), and an alias comparison ignores the context-window suffix — `opus` for `claude-opus-5[1m]` — while artifacts record the id verbatim.
+The skills are invoked as `/star-<name>` in Claude Code, Cursor, Pi and Qwen Code, `$star-<name>` in Codex, `/skill:star-<name>` in Kimi Code and DSH, and `/star-<name>` in Antigravity, which loads every project skill as a slash command. Antigravity reads no command files — its workflows are deprecated in favour of skills — so its `/star` and `/star-auto` are two wrapper skills in `.gemini/antigravity-cli/skills/`, registered by `.agents/skills.json` and kept out of `.agents/skills/` so that no other harness loads them; its skill frontmatter has no switch that turns off model invocation, so each wrapper's description limits it to the typed command. The tag below is what `STAR_HARNESSES` and a tagged model entry (§10.8) use; model names keep their harness spelling (`pi:anthropic/claude-fable-5`, `claude:claude-opus-5[1m]`), and an alias comparison ignores the context-window suffix — `opus` for `claude-opus-5[1m]` — while artifacts record the id verbatim.
 
 ### Hooks and model provenance
 
