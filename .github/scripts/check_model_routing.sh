@@ -145,13 +145,15 @@ note "three tiers route to Cursor, Devin and Qwen; Claude stamps only the READ m
 
 # A tier entry may end in @<depth>. Claude Code takes the depth into every manifest
 # of that tier, Cursor appends it as -<depth> on the named agent's model field —
-# the flat one-id-per-depth form its catalog lists — Qwen keeps a non-depth suffix
-# in the name, and a suffix spelling no depth stays part of the name.
+# the flat one-id-per-depth form its catalog lists — Devin does the same on its
+# quoted model field, Qwen keeps a non-depth suffix in the name, and a suffix
+# spelling no depth stays part of the name. Devin's READ entry is the untagged
+# fallback.
 write_env \
-	'STAR_PLAN_MODEL=claude:claude-plan@xhigh' \
+	'STAR_PLAN_MODEL=claude:claude-plan@xhigh,devin:devin-plan@high' \
 	'STAR_EXEC_MODEL=claude:claude-exec@high,cursor:cursor-exec@high' \
-	'STAR_READ_MODEL=claude:claude-read@medium,qwen:qwen-read@keep'
-run_models
+	'STAR_READ_MODEL=bare-read,claude:claude-read@medium,qwen:qwen-read@keep'
+devin_log="$(models_output)"
 
 expect_effort "${PROJECT}/.claude/skills/star-plan-executor/SKILL.md" xhigh
 expect_effort "${PROJECT}/.claude/skills/star-code-reviewer/SKILL.md" high
@@ -167,7 +169,14 @@ expect_effort "${PROJECT}/.claude/agents/star-exec.md" high
 expect_effort "${PROJECT}/.claude/agents/star-read.md" medium
 expect_plain_model "${PROJECT}/.cursor/agents/star-exec.md" 'cursor-exec-high'
 expect_model "${PROJECT}/.qwen/agents/star-read.md" qwen-read@keep
-note "a depth suffix reaches Claude Code as effort, Cursor as a -<depth> id, and leaves other model names clean"
+expect_model "${PROJECT}/.devin/agents/star-plan.md" devin-plan-high
+expect_model "${PROJECT}/.devin/agents/star-read.md" bare-read
+if grep -q '^effort:' "${PROJECT}/.devin/agents/star-plan.md"; then
+	fail "Devin takes its depth in the model id, not an effort field"
+fi
+grep -Fq 'STAR_PLAN_MODEL in .env gives Devin: devin-plan-high stamped into .devin/agents/star-plan.md' <<< "${devin_log}" ||
+	fail "configure.sh does not report the Devin depth it stamped"
+note "a depth suffix reaches Claude Code as effort, Cursor and Devin as a -<depth> id, and leaves other model names clean"
 
 # Codex consumes both halves at dispatch rather than through a static manifest.
 # This checks the parsed summary and instruction contracts, not a live dispatch.
@@ -459,10 +468,13 @@ expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
 expect_model "${PROJECT}/.qwen/agents/star-exec.md" bare-exec
 note "unknown tags and empty values leave existing stamps alone"
 
-write_env 'STAR_PLAN_MODEL=cursor:cursor-only,qwen:qwen-only' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+write_env 'STAR_PLAN_MODEL=cursor:cursor-only,devin:devin-only,qwen:qwen-only' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+devin_before="$(cat "${PROJECT}/.devin/agents/star-plan.md")"
 run_models --harnesses cursor
 expect_plain_model "${PROJECT}/.cursor/agents/star-plan.md" cursor-only
 expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
+[[ "$(cat "${PROJECT}/.devin/agents/star-plan.md")" == "${devin_before}" ]] ||
+	fail "--harnesses cursor stamped the unselected Devin tree"
 expect_model "${PROJECT}/.claude/skills/star-flow-status/SKILL.md" claude-read
 note "--harnesses changes only the selected tree"
 

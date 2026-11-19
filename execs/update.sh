@@ -55,8 +55,8 @@ EXTENSION_TREES=(
     ".pi/extensions/star-plan-mode"
     ".pi/extensions/star-subagent"
 )
-# Claude Code, Cursor and Qwen load named subagents from their project trees. These
-# three dispatch roles are STAR-owned like Pi's roster: a model or depth stamp can
+# Claude Code, Cursor, Devin and Qwen load named subagents from their project trees.
+# These three dispatch roles are STAR-owned like Pi's roster: a model or depth stamp can
 # change their frontmatter, but a normal update replaces their prompt bodies from
 # upstream. Claude Code's copies are what give a delegate a thinking depth of its
 # own: the depth is frontmatter, so naming one per dispatch means naming the agent.
@@ -139,9 +139,10 @@ is_optional_path() {
         ".claude/agents")      return 0 ;;
         ".cursor/agents")      return 0 ;;
         ".devin/agents")        return 0 ;;
-        ".devin/config.json")   return 0 ;;
         ".devin/rules")         return 0 ;;
         ".devin/skills")        return 0 ;;
+        # A --skill run asks for .devin/skills/<name>, which only a † skill has.
+        .devin/skills/*)        return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
         ".gemini/antigravity-cli/skills") return 0 ;;
@@ -352,14 +353,19 @@ note_agy_skills() { # $1 = config path relative to the project root
 }
 
 # A kept .devin/config.json that does not turn the compatibility imports off
-# leaves Devin reading .claude/skills beside .agents/skills and firing the
-# .claude/settings.json SessionStart hooks beside .devin/hooks.v1.json's —
-# duplicate skills, and the memory index injected twice.
+# leaves Devin reading .claude/skills beside .agents/skills, firing the
+# .claude/settings.json SessionStart hooks beside .devin/hooks.v1.json's, and
+# applying .cursor/rules/skill-roots.mdc, which points it at .cursor/skills —
+# duplicate skills, the memory index injected twice, and a wrong skill root.
 note_devin_imports() { # $1 = config path relative to the project root
     [[ "$1" == ".devin/config.json" && -e "${ROOT_DIR}/$1" ]] || return 0
-    grep -qF '"read_config_from"' "${ROOT_DIR}/$1" 2>/dev/null && \
-        grep -q '"claude"[[:space:]]*:[[:space:]]*false' "${ROOT_DIR}/$1" 2>/dev/null && return 0
-    log "NOTE: $1 was kept and does not disable Devin's claude/codex/cursor skill and hook imports."
+    local key off=true
+    grep -qF '"read_config_from"' "${ROOT_DIR}/$1" 2>/dev/null || off=false
+    for key in claude codex cursor; do
+        grep -q "\"${key}\"[[:space:]]*:[[:space:]]*false" "${ROOT_DIR}/$1" 2>/dev/null || off=false
+    done
+    [[ "${off}" == true ]] && return 0
+    log "NOTE: $1 was kept and does not disable all of Devin's claude, codex and cursor imports."
     log "      Add the read_config_from entries from upstream $1, or the .claude/ tree's hooks and skills run beside .devin's."
 }
 
@@ -740,6 +746,8 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     done
     # Codex's per-skill manifest; filter_paths below drops it unless codex is selected.
     SYNC_PATHS+=(".codex/skills/${SKILL_NAME}")
+    # Devin's user-only wrapper, present upstream only for a † skill.
+    SYNC_PATHS+=(".devin/skills/${SKILL_NAME}")
     # A skill-only update still needs the named model agent the harness will
     # dispatch for its complete run or phase.
     SYNC_PATHS+=("${MODEL_AGENT_TREES[@]}")
@@ -787,8 +795,10 @@ else
         ".gemini/antigravity-cli/skills"
         # Devin's /star and /star-auto wrapper skills: skills are slash
         # commands there, so the two shared procedures need no command files.
+        # Beside them, one user-only wrapper per † skill, which shadows the
+        # shared manifest of the same name so Devin never starts it unasked.
         ".devin/skills"
-        # Which skill root each harness owns, for the two hosts that discover more
+        # Which skill root each harness owns, for the three hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
         # installed when missing rather than overwritten.

@@ -406,9 +406,9 @@ for command_text in 'rm -rf build' 'git push origin main' 'sudo make install'; d
 done
 case_ 'Devin hooks.v1.json registers its own hook copies on the documented matchers'
 assertions=$((assertions + 1))
-grep -qF '"matcher": "exec"' "$repo/.devin/hooks.v1.json" || fail 'devin exec matcher'
+grep -qF '"matcher": "^exec$"' "$repo/.devin/hooks.v1.json" || fail 'devin exec matcher is not anchored'
 assertions=$((assertions + 1))
-grep -qF '"matcher": "edit|write|notebook_edit"' "$repo/.devin/hooks.v1.json" || fail 'devin edit matcher'
+grep -qF '"matcher": "^(edit|write|notebook_edit)$"' "$repo/.devin/hooks.v1.json" || fail 'devin edit matcher is not anchored'
 assertions=$((assertions + 1))
 grep -qF '.devin/hooks/star_commit_guard.sh' "$repo/.devin/hooks.v1.json" || fail 'devin guard registration'
 hook_path claude star_bash_gate
@@ -442,6 +442,7 @@ for host in $hosts; do
             agy) expected=0; payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$command_text") ;;
             *) expected=0; payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text") ;;
         esac
+        [ "$host" = devin ] && expected=2
         if [ "$host" = pi ]; then run "$expected" '' "$hook" "$command_text"
         else run "$expected" "$payload" "$hook"; fi
         case "$host" in
@@ -465,6 +466,21 @@ for host in $hosts; do
         assert_equal ''
     done
 done
+# Devin's exec input may name the directory the command runs in (workdir). The
+# 10 MB check must read that checkout, and fall back to the project root without it.
+hook_path devin star_commit_guard
+big_tree=$sandbox/devin-big
+git init -q "$big_tree"
+dd if=/dev/zero of="$big_tree/big.bin" bs=1048576 count=11 2>/dev/null
+git -C "$big_tree" add big.bin
+case_ 'Devin guard sizes the commit in tool_input.workdir'
+payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(x,"workdir",string(a(2))); put(r,"tool_input",x); print json(r)' "git commit -m big" "$big_tree")
+run 2 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"block\"")) && index(val(at(r,".reason")),"10 MB"))) exit 1'
+case_ 'Devin guard without workdir reads the project root'
+payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"tool_input",x); print json(r)' "git commit -m big")
+run 0 "$payload" "$hook"
+assert_equal ''
 case_ 'Payload commands were never executed'
 assertions=$((assertions + 1))
 [ ! -e "$project/payload-executed" ] || fail 'hook executed payload text'

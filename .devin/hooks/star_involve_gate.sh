@@ -12,8 +12,11 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # means "no decision", so every other level, every path this declines, and a
 # project that sets none fall through to the normal permission flow.
 #
-# Registered under PreToolUse matching edit|write|notebook_edit in
-# .devin/hooks.v1.json.
+# Registered under PreToolUse matching ^(edit|write|notebook_edit)$ in
+# .devin/hooks.v1.json — anchored, because Devin matches a regex anywhere in the
+# tool name, and todo_write or an MCP tool such as mcp__<server>__write_file must
+# not inherit this approve. apply_patch is left out: its input field is not
+# documented, so its edits keep their prompt at every level.
 set -uo pipefail
 
 root="${DEVIN_PROJECT_DIR:-${PWD}}"

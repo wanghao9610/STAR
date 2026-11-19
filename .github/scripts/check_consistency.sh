@@ -44,6 +44,13 @@ frontmatter_has_line() { # $1 = file, $2 = exact line expected inside the leadin
     awk -v want="$2" 'NR == 1 { next } /^---[ \t]*$/ { exit } $0 == want { found = 1; exit } END { exit !found }' "$1"
 }
 
+# Devin's `triggers` list defaults to [user, model]; a skill is user-only when the
+# list is written and names user and not model.
+devin_user_only() { # $1 = SKILL.md
+    [[ -f "$1" ]] && frontmatter_has_line "$1" "triggers:" && \
+        frontmatter_has_line "$1" "  - user" && ! frontmatter_has_line "$1" "  - model"
+}
+
 # 1. The seven roots carry the same, non-empty set of skill directories.
 section "Skill directory sets"
 SKILLS="$(list_skills "${SKILL_ROOTS[0]}")"
@@ -98,7 +105,10 @@ done < <(printf '%s\n' "${SKILLS}")
 # 4. Slash-only guards: the conventions roster (§10) marks that set with †, and
 #    the seven trees enforce it — Codex via its own .codex/skills manifests,
 #    which .agents links to at the path Codex scans, the other six via
-#    disable-model-invocation frontmatter. Checked both ways: a † whose
+#    disable-model-invocation frontmatter. Devin loads the shared .agents/skills
+#    manifests, so each † skill gets a user-only wrapper of the same name under
+#    .devin/skills that shadows it, and no other skill may have one (it would
+#    shadow a skill the agent may pick up). Checked both ways: a † whose
 #    guard is missing runs unrequested on exactly the harness that forgot it,
 #    and a guard carrying no † withholds a skill the roster says the agent may
 #    pick up. Both failures are silent in use, which is what this check is for.
@@ -184,8 +194,21 @@ while IFS= read -r skill; do
             guard_errors=1
         fi
     done
+
+    devin_wrapper=".devin/skills/${skill}/SKILL.md"
+    if [[ "${want_guarded}" == true ]]; then
+        if ! devin_user_only "${devin_wrapper}" || \
+           ! frontmatter_has_line "${devin_wrapper}" "name: ${skill}" || \
+           ! grep -qF "Read \`.agents/skills/${skill}/SKILL.md\`" "${devin_wrapper}"; then
+            fail "${devin_wrapper}: slash-only in the roster but not a user-only wrapper reading .agents/skills/${skill}/SKILL.md"
+            guard_errors=1
+        fi
+    elif [[ -e ".devin/skills/${skill}" ]]; then
+        fail ".devin/skills/${skill} shadows a skill that carries no † in the roster"
+        guard_errors=1
+    fi
 done < <(printf '%s\n' "${SKILLS}")
-(( guard_errors == 0 )) && note "conventions and shared /star router (en/zh) list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees"
+(( guard_errors == 0 )) && note "conventions and shared /star router (en/zh) list all $(printf '%s\n' "${SKILLS}" | wc -l | tr -d ' ') skills; $(printf '%s\n' "${SLASH_ONLY}" | wc -l | tr -d ' ') slash-only skills guarded identically in all ${#SKILL_ROOTS[@]} trees and by user-only Devin wrappers"
 
 # 4a. The roster's second column, and the one part of the tier mechanism that is
 #     static. Conventions §10.8 sends a run to the model named by the tier this
@@ -342,7 +365,7 @@ fi
 DEVIN_SKILL_ROOT=".devin/skills"
 for devin_command in star star-auto; do
     devin_file="${DEVIN_SKILL_ROOT}/${devin_command}/SKILL.md"
-    if [[ ! -f "${devin_file}" ]] || \
+    if ! devin_user_only "${devin_file}" || \
        ! frontmatter_has_line "${devin_file}" "name: ${devin_command}" || \
        ! grep -qF "Do not use unless the user typed /${devin_command}" "${devin_file}" || \
        ! grep -qF "Read \`.agents/commands/${devin_command}.md\`" "${devin_file}"; then
@@ -353,6 +376,22 @@ done
 if ! grep -qF 'STAR_LANG=zh' "${DEVIN_SKILL_ROOT}/star/SKILL.md" || \
    ! grep -qF '.agents/commands/star.zh-CN.md' "${DEVIN_SKILL_ROOT}/star/SKILL.md"; then
     fail "${DEVIN_SKILL_ROOT}/star/SKILL.md does not apply STAR's Chinese router wording"
+    plugin_errors=1
+fi
+# The rest of Devin's tree that is not a hook: the rule naming its skill root, and
+# the config that keeps the claude, codex and cursor imports from loading those
+# trees' skills, hooks and rules beside .devin's. update.sh must ship both.
+if [[ ! -f .devin/rules/skill-roots.md ]] || ! frontmatter_has_line .devin/rules/skill-roots.md "trigger: always_on"; then
+    fail ".devin/rules/skill-roots.md is missing or not always_on"
+    plugin_errors=1
+fi
+if ! star_json_eval 'x=get(r,"read_config_from"); if(field(x,"claude")!="false" || field(x,"codex")!="false" || field(x,"cursor")!="false") exit 1' < .devin/config.json >/dev/null; then
+    fail ".devin/config.json does not turn off Devin's claude, codex and cursor imports"
+    plugin_errors=1
+fi
+if [[ "$(grep -Fxc '        ".devin/rules"' execs/update.sh)" -ne 2 ]] || \
+   ! grep -Fxq '    ".devin/config.json"' execs/update.sh; then
+    fail "execs/update.sh must carry .devin/rules in both adopt and full-update paths and install .devin/config.json"
     plugin_errors=1
 fi
 for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}" "${DEVIN_SKILL_ROOT}"; do
@@ -401,7 +440,7 @@ for readme in README.md README.zh-CN.md; do
         fi
     done
 done
-(( plugin_errors == 0 )) && note "Codex, Kimi, DSH and Antigravity router packages all delegate to the shared /star roster"
+(( plugin_errors == 0 )) && note "Codex, Kimi, DSH, Antigravity and Devin router packages all delegate to the shared /star roster"
 
 # 5. Bilingual twins: every reference and asset .md has its _zh.md counterpart
 # and vice versa, because a Chinese run writes its documents from the _zh

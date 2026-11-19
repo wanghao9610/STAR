@@ -2,8 +2,6 @@
   "read_config_from": {
     "claude": false,
     "codex": false,
-    "copilot": false,
-    "kiro": false,
     "cursor": false
   }
 }

@@ -227,10 +227,11 @@ tier_depth_for() { # $1 = harness token, $2 = the raw key value; the depth, or n
 }
 
 # Some hosts need a static file to select a delegate's model. Claude Code reads
-# its READ-tier model from these two forked-skill manifests; Cursor and Qwen read
-# their plan, exec, and read models from named agents below. Cursor resolves only
-# the flat ids its model catalog lists, one per depth, so a configured @depth is
-# appended as -<depth> rather than written as a parameter.
+# its READ-tier model from these two forked-skill manifests; Cursor, Devin and Qwen
+# read their plan, exec, and read models from named agents below. Cursor and Devin
+# resolve only the flat ids their model catalogs list, one per depth
+# (claude-opus-5-5-high, swe-2-max), so a configured @depth is appended as
+# -<depth> rather than written as a parameter.
 # The files cannot read
 # `.env` themselves, so the updater stamps them after install. An empty key writes
 # nothing, leaving each shipped value in place (workflow conventions §10.8).
@@ -282,7 +283,7 @@ yaml_plain_field_line() { # $1 = field name, $2 = its value; unquoted (Cursor mo
     printf '%s: %s' "$1" "${value}"
 }
 
-cursor_model_stamp() { # $1 = model id, $2 = depth or empty; Cursor's model: encoding
+cursor_model_stamp() { # $1 = model id, $2 = depth or empty; Cursor's and Devin's model: encoding
     local model="$1" depth="$2"
     if [[ -n "${depth}" && "${model}" != *"-${depth}" ]]; then
         printf '%s-%s' "${model}" "${depth}"
@@ -396,6 +397,9 @@ stamp_named_models() { # $1 = cursor, devin, or qwen
         if [[ "${harness}" == cursor ]]; then
             value="$(cursor_model_stamp "${value}" "$(tier_depth_for cursor "${raw}")")"
             style=plain
+        elif [[ "${harness}" == devin ]]; then
+            # Devin's model: takes the same ids as --model, one per depth.
+            value="$(cursor_model_stamp "${value}" "$(tier_depth_for devin "${raw}")")"
         fi
         path=".${harness}/agents/star-${tier}.md"
         stamp_frontmatter_field "${path}" model "${value}" "${style}"
@@ -470,7 +474,8 @@ model_stamp_summary() {
                 [[ -n "${value}" ]] || continue
                 depth="$(tier_depth_for devin "$(env_value "${key}")")"
                 if [[ -n "${depth}" ]]; then
-                    log "${key} in .env gives Devin: ${value} stamped into .devin/agents/star-${tier}.md; @${depth} is ignored — Devin exposes no per-agent thinking depth."
+                    value="$(cursor_model_stamp "${value}" "${depth}")"
+                    log "${key} in .env gives Devin: ${value} stamped into .devin/agents/star-${tier}.md; Devin names a depth by model id, so check that \`devin models list\` lists ${value}."
                 else
                     log "${key} in .env gives Devin: ${value} stamped into .devin/agents/star-${tier}.md."
                 fi

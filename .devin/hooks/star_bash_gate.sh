@@ -11,8 +11,9 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # stays silent on those, and the normal permission flow takes over.
 # Confirmation points are untouched: the STOP line and the questions a skill
 # must ask are model turns, not permission prompts a hook can answer.
-# star_commit_guard.sh runs beside this gate on the same matcher and its block
-# outranks this approve, so a blanket add is still declined, not allowed.
+# star_commit_guard.sh runs beside this gate on the same matcher and blocks by
+# exit code 2, which Devin honours whatever this approve says, so a blanket add
+# is still declined, not allowed.
 #
 # Devin's hook payload names the tool call and its input but no transcript
 # path, so the `involve=` token of the most recent STAR command cannot reach
@@ -25,7 +26,9 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # every red line, every other level, a payload it cannot read, and a project
 # that sets no level all fall through to the normal permission flow.
 #
-# Registered under PreToolUse matching exec in .devin/hooks.v1.json.
+# Registered under PreToolUse matching ^exec$ in .devin/hooks.v1.json — anchored,
+# because Devin matches a regex anywhere in the tool name and an MCP tool such as
+# mcp__<server>__exec_command must not inherit this approve.
 set -uo pipefail
 
 root="${DEVIN_PROJECT_DIR:-${PWD}}"

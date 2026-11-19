@@ -20,7 +20,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # `push` is deliberately absent: no rule here makes a skill likelier to push, and
 # a user who asks for one directly should get it.
 #
-# Registered under PreToolUse matching exec in .devin/hooks.v1.json. One copy
+# Registered under PreToolUse matching ^exec$ in .devin/hooks.v1.json. One copy
 # per harness tree (conventions §1, "The guard"), each differing only in how its
 # harness names the command and working directory on the way in and the decision
 # on the way out.
@@ -42,6 +42,14 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # past where it stops reading. Silence means "no decision", so that case, an
 # unfamiliar spelling, and a payload no branch below can read all fall through to
 # the normal permission flow. What it declines is the user's to run.
+#
+# Devin treats any exit other than 0 and 2, and a timeout, as a logged error that
+# does not block. So a missing .agents/scripts/json.sh (exit 1, non-blocking on
+# purpose, so a broken install never stops every shell call) and a run past the
+# 60 s timeout in .devin/hooks.v1.json let the command through. Devin's documented
+# exec payload names no working directory either: without tool_input.workdir or
+# cwd, the size check reads the project root, not a directory an earlier `cd`
+# left the shell in.
 set -uo pipefail
 
 # Every harness registers this script by its own path inside the project, so the
@@ -63,9 +71,14 @@ case "${cmd}" in
 esac
 
 # The reason reaches the agent as JSON, so it carries no quote and no backslash.
+# Exit 2 is Devin's documented block, which holds whatever star_bash_gate.sh
+# answers on the same call: Devin's docs do not say how a JSON block and another
+# hook's approve combine. The reason goes to stderr too, where Devin reads an
+# exit-2 block's reason.
 deny() { # $1 = one-line reason, $2 = what to do instead (default: hand it to the user)
     printf '{"decision":"block","reason":"%s (declined by .devin/hooks/star_commit_guard.sh — %s)"}\n' "$1" "${2:-hand it to the user to run}"
-    exit 0
+    printf '%s (declined by .devin/hooks/star_commit_guard.sh — %s)\n' "$1" "${2:-hand it to the user to run}" >&2
+    exit 2
 }
 
 # 10 MB. No source file, plan, or report comes near it; a checkpoint clears it by
