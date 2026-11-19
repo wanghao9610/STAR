@@ -13,7 +13,9 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # must ask are model turns, not permission prompts a hook can answer.
 # star_commit_guard.sh runs beside this gate on the same matcher and blocks by
 # exit code 2, which Devin honours whatever this approve says, so a blanket add
-# is still declined, not allowed.
+# is still declined, not allowed (confirmed in a live run). A PreToolUse
+# approve does skip Devin's permission prompt: the same run showed a write the
+# auto permission mode rejects going through at INVOLVE=low.
 #
 # Devin's hook payload names the tool call and its input but no transcript
 # path, so the `involve=` token of the most recent STAR command cannot reach

@@ -428,6 +428,8 @@ Resolve the `devin` entry or untagged fallback. `run_subagent` dispatches the na
 
 Devin's event table has no `SubagentStart`, so a delegate receives neither the provenance line nor the memory index the session got; the dispatch brief carries what the delegate needs instead (§10.8). The session's own id stays `unrecorded` — the hook reads a `model` field if a payload ever carries one, but the documented `SessionStart` payload does not.
 
+What Devin's documentation leaves open about its hooks was settled in a live run (devin 3000.14.30821). A PreToolUse `{"decision":"approve"}` skips the permission prompt, so the `INVOLVE=low` gates take effect. The commit guard's exit-2 block holds when the bash gate approves the same call. Payloads carry no `cwd`, `transcript_path` or `model`; hooks run in the project root, and each `exec` call starts in a fresh shell there. A project-level `read_config_from.claude: false` also keeps `.claude/settings.json`'s hooks from firing.
+
 #### Kimi Code
 
 Resolve the `kimi` entry or untagged fallback. Pass a non-empty value only when the current `Agent` / `AgentSwarm` schema exposes `model` and the configured secondary-model pool accepts the alias. Empty keys omit the parameter. With no selectable pool, forced pool selection or an unavailable alias, retain the current execution route and state why when the key is set; never edit the user's global configuration from a skill run.
