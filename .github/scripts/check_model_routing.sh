@@ -33,7 +33,7 @@ for flag in --models --kimi-pool; do
 	grep -Fq "Unknown option: ${flag}" <<<"${output}" || fail "unexpected rejection of ${flag}"
 done
 note "update.sh rejects model operations; configure.sh owns the offline entry points"
-for harness in cursor qwen; do
+for harness in cursor qwen devin; do
 	for tier in plan exec read; do
 		mkdir -p "${PROJECT}/.${harness}/agents"
 		cp "${ROOT_DIR}/.${harness}/agents/star-${tier}.md" "${PROJECT}/.${harness}/agents/"
@@ -56,7 +56,7 @@ write_env() { printf '%s\n' "PYTHON_HOME=${test_python_home}" "$@" > "${PROJECT}
 snapshot() {
 	(
 		cd "${PROJECT}"
-		find .claude .cursor .qwen -type f | LC_ALL=C sort | while IFS= read -r file; do cksum "${file}"; done
+		find .claude .cursor .devin .qwen -type f | LC_ALL=C sort | while IFS= read -r file; do cksum "${file}"; done
 	)
 }
 
@@ -124,21 +124,24 @@ note "invalid active .env syntax fails without execution or partial stamps; flag
 # Tagged values beat the bare fallback; qwen's EXEC value exercises the fallback,
 # while its READ value retains a provider-style colon after the qwen tag.
 write_env \
-	'STAR_PLAN_MODEL=bare-plan,unknown:ignored,cursor:cursor-plan,qwen:qwen-plan' \
-	'STAR_EXEC_MODEL=unknown:ignored,bare-exec,cursor:cursor-exec' \
-	'STAR_READ_MODEL=bare-read,claude:claude-read,cursor:cursor-read,qwen:authType:model-id'
+	'STAR_PLAN_MODEL=bare-plan,unknown:ignored,cursor:cursor-plan,devin:devin-plan,qwen:qwen-plan' \
+	'STAR_EXEC_MODEL=unknown:ignored,bare-exec,cursor:cursor-exec,devin:swe' \
+	'STAR_READ_MODEL=bare-read,claude:claude-read,cursor:cursor-read,devin:devin-read,qwen:authType:model-id'
 run_models
 
 for tier in plan exec read; do
 	expect_plain_model "${PROJECT}/.cursor/agents/star-${tier}.md" "cursor-${tier}"
 done
+expect_model "${PROJECT}/.devin/agents/star-plan.md" devin-plan
+expect_model "${PROJECT}/.devin/agents/star-exec.md" swe
+expect_model "${PROJECT}/.devin/agents/star-read.md" devin-read
 expect_model "${PROJECT}/.qwen/agents/star-plan.md" qwen-plan
 expect_model "${PROJECT}/.qwen/agents/star-exec.md" bare-exec
 expect_model "${PROJECT}/.qwen/agents/star-read.md" authType:model-id
 for skill in star-flow-status star-expt-digest; do
 	expect_model "${PROJECT}/.claude/skills/${skill}/SKILL.md" claude-read
 done
-note "three tiers route to Cursor and Qwen; Claude stamps only the READ model"
+note "three tiers route to Cursor, Devin and Qwen; Claude stamps only the READ model"
 
 # A tier entry may end in @<depth>. Claude Code takes the depth into every manifest
 # of that tier, Cursor appends it as -<depth> on the named agent's model field —

@@ -77,7 +77,7 @@ Idea framing, plan sections, literature notes and synthesis, experiment digests,
 
 ## 1. Invoking the skills
 
-This guide names a skill plainly, without a prefix, because each tool supplies its own: `/` in Claude Code, Cursor, Pi and Qwen Code, `$` in Codex, `/skill:` in Kimi Code and DSH.
+This guide names a skill plainly, without a prefix, because each tool supplies its own: `/` in Claude Code, Cursor, Devin, Pi and Qwen Code, `$` in Codex, `/skill:` in Kimi Code and DSH.
 
 ```text
 star-proj-adopt
@@ -96,7 +96,7 @@ star-metd-summarize framework
 star-code-release
 ```
 
-Seven skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release` — are slash-only: they run only when named explicitly, because each sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). Each harness enforces it, rather than convention — `disable-model-invocation: true` in the Claude, Cursor, DSH, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in Codex's `.agents/skills/<name>/agents/openai.yaml`. Describing one in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge, producing plan-shaped files with none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The agent may pick the other eight up when the task plainly matches and the target is unambiguous — naming one explicitly still works, and is how you say which you meant. Selection stays within what you asked: a status, explanation, or read-only review ends with its result and a recommendation, not an automatic writing successor. A successor runs in the same turn only when it advances an already authorized execution goal.
+Seven skills — `star-proj-adopt`, `star-idea-storm`, `star-plan-coach`, `star-code-architect`, `star-plan-decomposer`, `star-plan-reviser`, `star-code-release` — are slash-only: they run only when named explicitly, because each sits on a decision that belongs to the researcher ([conventions §10](research-workflow-conventions.md)). Each harness enforces it, rather than convention — `disable-model-invocation: true` in the Claude, Cursor, DSH, Kimi, Pi and Qwen Code manifests, `allow_implicit_invocation: false` in Codex's `.agents/skills/<name>/agents/openai.yaml`; Devin reads the shared `.agents/` manifests, which carry no such switch, so there the limit is the description and §10 rather than an enforced gate. Describing one in prose (“Break this research plan into executable sub-plans.”) will not start it: the agent answers from general knowledge, producing plan-shaped files with none of the `parent:` / `children:` / `traces_to` frontmatter the rest of the workflow reads. The agent may pick the other eight up when the task plainly matches and the target is unambiguous — naming one explicitly still works, and is how you say which you meant. Selection stays within what you asked: a status, explanation, or read-only review ends with its result and a recommendation, not an automatic writing successor. A successor runs in the same turn only when it advances an already authorized execution goal.
 
 One command stands outside the roster: `star-auto <goal> [stop=<stop line>] [involve=<level>]` drives the workflow toward a stated goal — status first, then the next action each run names, the slash-only seven included, because typing the command is the researcher's decision, made once for the pursuit. Each started run follows its normal workflow, while auto supplies the standing execution authority described here; prepared heavy commands within the goal and `stop=` boundary launch by default. `stop=` draws, in your own words to the end of the invocation, the line the run must not cross — say `stop=any single training over 4 hours, or any paid API call` — and a command that crosses it, or cannot be judged against it, is printed and the run stops there. Unresolved research decisions and new authority still come back to you. Destructive operations and overwrites remain outside the grant except, at `low`, for the guarded removal of an empty worktree after a clean reviewed merge. With no `involve=` token and no `INVOLVE` in `.env`, an auto run resolves to `low`. Full rule: [conventions §10.7](research-workflow-conventions.md); the procedure: [`.agents/commands/star-auto.md`](../../../.agents/commands/star-auto.md).
 
@@ -1273,6 +1273,7 @@ Every skill directory has the same shape in all seven roots: `SKILL.md` is the r
 | Any `AGENTS.md` agent | `.agents/skills/` | each tool's own |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
+| Devin | `.agents/skills/` natively, plus its two wrappers in `.devin/skills/` | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 | Pi | `.pi/skills/` | `/star-*` |

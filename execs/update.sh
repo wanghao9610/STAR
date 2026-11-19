@@ -34,6 +34,7 @@ HOOK_TREES=(
     ".claude/hooks"
     ".codex/hooks"
     ".cursor/hooks"
+    ".devin/hooks"
     ".dsh/hooks"
     ".gemini/antigravity-cli/hooks"
     ".kimi-code/hooks"
@@ -62,6 +63,7 @@ EXTENSION_TREES=(
 MODEL_AGENT_TREES=(
     ".claude/agents"
     ".cursor/agents"
+    ".devin/agents"
     ".qwen/agents"
 )
 # A Pi skill's whole-run hand-off needs the generic runner and the extension
@@ -91,6 +93,7 @@ HOOK_CONFIGS=(
     ".claude/settings.json"
     ".codex/hooks.json"
     ".cursor/hooks.json"
+    ".devin/hooks.v1.json"
     ".qwen/settings.json"
 )
 # Project config that is not a hook registration, installed on the same terms.
@@ -104,9 +107,15 @@ HOOK_CONFIGS=(
 # which reads skills only from .agents/skills and the folders this file lists. The
 # two wrappers there give it /star and /star-auto; keeping them out of
 # .agents/skills keeps every other harness that scans that root from loading them.
+#
+# .devin/config.json keeps Devin's compatibility imports off the other harness
+# trees: without it Devin also reads .claude/skills, .codex/skills and
+# .claude/settings.json, surfacing duplicate skills and double-firing the
+# SessionStart hooks .devin/hooks.v1.json registers its own copy of.
 PROJECT_CONFIGS=(
     ".pi/settings.json"
     ".agents/skills.json"
+    ".devin/config.json"
 )
 # Everything installed when missing and never overwritten, whichever kind it is.
 INSTALL_CONFIGS=(
@@ -129,6 +138,10 @@ is_optional_path() {
         .*/hooks*)              return 0 ;;
         ".claude/agents")      return 0 ;;
         ".cursor/agents")      return 0 ;;
+        ".devin/agents")        return 0 ;;
+        ".devin/config.json")   return 0 ;;
+        ".devin/rules")         return 0 ;;
+        ".devin/skills")        return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
         ".gemini/antigravity-cli/skills") return 0 ;;
@@ -145,7 +158,7 @@ is_optional_path() {
 # The harness trees --harnesses and STAR_HARNESSES name, one entry per agent harness. Which paths
 # belong to which is decided by path_harness below, not by a list here, so a path added
 # upstream reaches the right tree without being registered anywhere.
-ALL_HARNESSES=(agy claude codex cursor dsh kimi pi qwen)
+ALL_HARNESSES=(agy claude codex cursor devin dsh kimi pi qwen)
 
 log() {
     printf '[STAR update] %s\n' "$*"
@@ -201,6 +214,7 @@ path_harness() { # $1 = path relative to the project root
         .agents/*)               printf '' ;;
         .claude/*)               printf 'claude' ;;
         .cursor/*|.cursorignore) printf 'cursor' ;;
+        .devin/*)               printf 'devin' ;;
         .dsh/*)                  printf 'dsh' ;;
         .kimi-code/*)            printf 'kimi' ;;
         .pi/*)                   printf 'pi' ;;
@@ -219,6 +233,7 @@ harness_dirs() { # $1 = harness name
         codex)  printf '.codex' ;;
         claude) printf '.claude' ;;
         cursor) printf '.cursor' ;;
+        devin)  printf '.devin' ;;
         dsh)    printf '.dsh' ;;
         kimi)   printf '.kimi-code' ;;
         pi)     printf '.pi' ;;
@@ -293,7 +308,7 @@ missing_hooks() { # $1 = registration config path
     # whose harness lets a hook decide one — Cursor has no event that gates a
     # file edit, and Kimi's only observes the prompt it fires beside.
     case "$1" in
-        */.agents/hooks.json|*/.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
+        */.agents/hooks.json|*/.claude/settings.json|*/.codex/hooks.json|*/.devin/hooks.v1.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
     # The commit guard declines a shell command before it runs, which every
@@ -336,6 +351,18 @@ note_agy_skills() { # $1 = config path relative to the project root
     log "      Add {\"path\": \".gemini/antigravity-cli/skills\"} to its entries, as upstream $1 does."
 }
 
+# A kept .devin/config.json that does not turn the compatibility imports off
+# leaves Devin reading .claude/skills beside .agents/skills and firing the
+# .claude/settings.json SessionStart hooks beside .devin/hooks.v1.json's —
+# duplicate skills, and the memory index injected twice.
+note_devin_imports() { # $1 = config path relative to the project root
+    [[ "$1" == ".devin/config.json" && -e "${ROOT_DIR}/$1" ]] || return 0
+    grep -qF '"read_config_from"' "${ROOT_DIR}/$1" 2>/dev/null && \
+        grep -q '"claude"[[:space:]]*:[[:space:]]*false' "${ROOT_DIR}/$1" 2>/dev/null && return 0
+    log "NOTE: $1 was kept and does not disable Devin's claude/codex/cursor skill and hook imports."
+    log "      Add the read_config_from entries from upstream $1, or the .claude/ tree's hooks and skills run beside .devin's."
+}
+
 usage() {
     cat <<'EOF'
 Usage: bash execs/update.sh [ref] [--harnesses LIST] [--skill NAME] [--force]
@@ -355,14 +382,14 @@ replacement takes effect from the next run — the current one finishes with the
 from — so when the command reports that it replaced itself, run it once more.
 The agent instructions (AGENTS.md and .cursor/rules/agent-instructions.mdc, which carries its
 body), the hook registration configs (.agents/hooks.json, .claude/settings.json, .codex/hooks.json,
-.cursor/hooks.json, .qwen/settings.json) and the project configs .pi/settings.json and
-.agents/skills.json are installed only when missing and never overwritten,
+.cursor/hooks.json, .devin/hooks.v1.json, .qwen/settings.json) and the project configs
+.pi/settings.json, .agents/skills.json and .devin/config.json are installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
 Qwen Code skill directories.
 
---harnesses limits the run to the named harness trees, comma separated: agy, claude, codex, cursor, dsh,
-kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
+--harnesses limits the run to the named harness trees, comma separated: agy, claude, codex, cursor, devin,
+dsh, kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
 keeps whatever it already has there. Without the flag the list comes from STAR_HARNESSES
 (environment first, then .env), and from every harness when that is unset too. The shared paths —
@@ -372,8 +399,8 @@ execs/run.sh, execs/configure.sh and this script — are updated whichever trees
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
-The generic router packages live under .codex/plugins, .dsh/commands, .kimi-code/plugins and
-.gemini/antigravity-cli/skills; each is updated only when its harness is selected. Codex's one discovery link under
+The generic router packages live under .codex/plugins, .dsh/commands, .kimi-code/plugins,
+.gemini/antigravity-cli/skills and .devin/skills; each is updated only when its harness is selected. Codex's one discovery link under
 .agents/plugins follows the same selection.
 
 --diff previews an update without changing anything: it lists upstream files that are new
@@ -655,6 +682,8 @@ if [[ "${ADOPT}" == true ]]; then
         # Antigravity's /star and /star-auto wrapper skills, which
         # .agents/skills.json registers; no install step.
         ".gemini/antigravity-cli/skills"
+        # Devin's same two wrappers, discovered natively under .devin/skills.
+        ".devin/skills"
         "${SKILL_ROOTS[@]:1}"
         "${MODEL_AGENT_TREES[@]}"
         "${HOOK_TREES[@]}"
@@ -664,6 +693,7 @@ if [[ "${ADOPT}" == true ]]; then
         ".qwen/commands"
         ".pi/prompts"
         ".cursor/rules"
+        ".devin/rules"
         "docs/mds/star-workflow"
         "docs/srcs"
     )
@@ -755,11 +785,15 @@ else
         # Antigravity's /star and /star-auto wrapper skills, registered by
         # .agents/skills.json (PROJECT_CONFIGS above).
         ".gemini/antigravity-cli/skills"
+        # Devin's /star and /star-auto wrapper skills: skills are slash
+        # commands there, so the two shared procedures need no command files.
+        ".devin/skills"
         # Which skill root each harness owns, for the two hosts that discover more
         # than one and need telling which copy to act on. Only these: the other
         # Cursor rule, agent-instructions.mdc, is in INSTRUCTION_FILES above,
         # installed when missing rather than overwritten.
         ".cursor/rules/skill-roots.mdc"
+        ".devin/rules"
         ".pi/APPEND_SYSTEM.md"
         # /star, which routes a described request to a skill, and /star-auto,
         # which drives the workflow toward a typed goal, in the three hosts
@@ -1109,6 +1143,7 @@ if [[ "${ADOPT}" == false ]]; then
             fi
             note_resolver_rule "${cfg}"
             note_agy_skills "${cfg}"
+            note_devin_imports "${cfg}"
         done
     fi
 
@@ -1253,6 +1288,7 @@ for cfg in "${INSTALL_CONFIGS[@]}"; do
     fi
     note_resolver_rule "${cfg}"
     note_agy_skills "${cfg}"
+    note_devin_imports "${cfg}"
 done
 
 log "Next: copy .env.example to .env, then run /star-proj-adopt to wire the project up."

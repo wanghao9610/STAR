@@ -19,10 +19,10 @@ done
 export PATH="$sandbox/bin:$PATH"
 export TMPDIR=$sandbox/tmp
 export KIMI_CODE_HOME=$sandbox/kimi
-export CLAUDE_PROJECT_DIR=$project QWEN_PROJECT_DIR=$project
+export CLAUDE_PROJECT_DIR=$project QWEN_PROJECT_DIR=$project DEVIN_PROJECT_DIR=$project
 mkdir -p "$project/.agents/scripts"
 cp "$repo/.agents/scripts/"* "$project/.agents/scripts/"
-hosts='claude codex qwen dsh cursor kimi-code pi agy'
+hosts='claude codex qwen dsh cursor kimi-code pi agy devin'
 for host in $hosts; do
     if [ "$host" = pi ]; then directory=.pi/extensions/star-hooks
     elif [ "$host" = agy ]; then directory=.gemini/antigravity-cli/hooks
@@ -373,6 +373,44 @@ done
 case_ 'Antigravity hooks.json registers the documented file tools'
 assertions=$((assertions + 1))
 grep -qF '"matcher": "write_to_file|replace_file_content|multi_replace_file_content"' "$repo/.agents/hooks.json" || fail 'agy involve gate matcher'
+# Devin reports no model field in its SessionStart payload; the hook tolerates a
+# `model` if a future event carries one, and stays unrecorded until then.
+hook_path devin star_model_id
+case_ 'Devin SessionStart without model stays unrecorded'
+run 0 '{"source":"startup","session_id":"devin-s1"}' "$hook"
+assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SessionStart\"")) && index(val(at(r,".hookSpecificOutput.additionalContext")),"unrecorded"))) exit 1'
+case_ 'Devin SessionStart injects a model field it happens to carry'
+run 0 '{"model":"swe-2"}' "$hook"
+assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "swe-2"
+hook_path devin star_involve_gate
+case_ 'Devin involve gate approves an ordinary project file'
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+for edited in "$project/.env" "$project/src/../outside" "$sandbox/outside"; do
+    case_ 'Devin involve gate leaves protected or outside path undecided'
+    payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$edited")
+    run 0 "$payload" "$hook"
+    assert_equal ''
+done
+hook_path devin star_bash_gate
+case_ 'Devin shell gate approves ordinary inspection at INVOLVE=low'
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "rg --files src")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+for command_text in 'rm -rf build' 'git push origin main' 'sudo make install'; do
+    case_ "Devin shell gate leaves destructive or privileged command undecided: $command_text"
+    payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text")
+    run 0 "$payload" "$hook"
+    assert_equal ''
+done
+case_ 'Devin hooks.v1.json registers its own hook copies on the documented matchers'
+assertions=$((assertions + 1))
+grep -qF '"matcher": "exec"' "$repo/.devin/hooks.v1.json" || fail 'devin exec matcher'
+assertions=$((assertions + 1))
+grep -qF '"matcher": "edit|write|notebook_edit"' "$repo/.devin/hooks.v1.json" || fail 'devin edit matcher'
+assertions=$((assertions + 1))
+grep -qF '.devin/hooks/star_commit_guard.sh' "$repo/.devin/hooks.v1.json" || fail 'devin guard registration'
 hook_path claude star_bash_gate
 case_ 'Claude shell gate allows ordinary inspection'
 run 0 '{"tool_input":{"command":"rg --files src"}}' "$hook"
@@ -410,6 +448,7 @@ for host in $hosts; do
             cursor) assert_json 'if(!(equal(at(r,".permission"),parse("\"deny\"")) && (length(val(at(r,".agent_message")))>0))) exit 1' ;;
             pi) assert_contains declined ;;
             agy) assert_json 'if(!(equal(at(r,".decision"),parse("\"deny\"")) && (length(val(at(r,".reason")))>0))) exit 1' ;;
+            devin) assert_json 'if(!(equal(at(r,".decision"),parse("\"block\"")) && (length(val(at(r,".reason")))>0))) exit 1' ;;
             *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"deny\"")))) exit 1' ;;
         esac
     done

@@ -6,7 +6,7 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 # The .env to read; update.sh --diff points it at the project while stamping its
 # scratch copy of upstream, so the preview compares like with like.
 ENV_DIR="${STAR_ENV_DIR:-${ROOT_DIR}}"
-ALL_HARNESSES=(agy claude codex cursor dsh kimi pi qwen)
+ALL_HARNESSES=(agy claude codex cursor devin dsh kimi pi qwen)
 KIMI_POOL=false
 HARNESSES_ARG=""
 
@@ -383,7 +383,7 @@ tier_model_key() { # $1 = plan, exec, or read
     esac
 }
 
-stamp_named_models() { # $1 = cursor or qwen
+stamp_named_models() { # $1 = cursor, devin, or qwen
     local harness="$1" tier key raw value path style
     is_selected "${harness}" || return 0
 
@@ -406,12 +406,13 @@ stamp_models() {
     stamp_read_model
     stamp_claude_depths
     stamp_named_models cursor
+    stamp_named_models devin
     stamp_named_models qwen
 }
 
 model_stamp_summary() {
     local harness tier key value depth any=false
-    for harness in agy claude codex cursor qwen kimi; do
+    for harness in agy claude codex cursor devin qwen kimi; do
         is_selected "${harness}" || continue
         if [[ "${harness}" == agy ]]; then
             for tier in plan exec read; do
@@ -462,6 +463,21 @@ model_stamp_summary() {
             done
             continue
         fi
+        if [[ "${harness}" == devin ]]; then
+            for tier in plan exec read; do
+                key="$(tier_model_key "${tier}")"
+                value="$(tier_model_for devin "$(env_value "${key}")")"
+                [[ -n "${value}" ]] || continue
+                depth="$(tier_depth_for devin "$(env_value "${key}")")"
+                if [[ -n "${depth}" ]]; then
+                    log "${key} in .env gives Devin: ${value} stamped into .devin/agents/star-${tier}.md; @${depth} is ignored — Devin exposes no per-agent thinking depth."
+                else
+                    log "${key} in .env gives Devin: ${value} stamped into .devin/agents/star-${tier}.md."
+                fi
+                any=true
+            done
+            continue
+        fi
         if [[ "${harness}" == kimi ]]; then
             # Kimi stamps nothing: a depth reaches the dispatch as the secondary-model
             # pool alias binding it, which only the user's own config can register.
@@ -491,7 +507,7 @@ model_stamp_summary() {
             fi
         done
     done
-    [[ "${any}" == true ]] || log "No selected Antigravity, Claude Code, Codex, Cursor, Qwen, or Kimi tier key names a model or a depth in .env; nothing was stamped."
+    [[ "${any}" == true ]] || log "No selected Antigravity, Claude Code, Codex, Cursor, Devin, Qwen, or Kimi tier key names a model or a depth in .env; nothing was stamped."
 }
 
 # Kimi Code keeps its subagent model pool in the user's own config, which no skill

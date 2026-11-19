@@ -1,0 +1,46 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "exec",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_commit_guard.sh",
+          "timeout": 10
+        },
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_bash_gate.sh",
+          "timeout": 10
+        }
+      ]
+    },
+    {
+      "matcher": "edit|write|notebook_edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_involve_gate.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_model_id.sh",
+          "timeout": 10
+        },
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_memory.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}

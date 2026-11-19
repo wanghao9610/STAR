@@ -336,13 +336,32 @@ if ! grep -qF 'STAR_LANG=zh' "${AGY_SKILL_ROOT}/star/SKILL.md" || \
     fail "${AGY_SKILL_ROOT}/star/SKILL.md does not apply STAR's Chinese router wording"
     plugin_errors=1
 fi
-for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}"; do
+# Devin reads .agents/skills natively too, so its tree is the same two wrappers
+# under .devin/skills — no registration file at all: skills there are slash
+# commands, and `triggers: [user]` keeps each one explicit-only.
+DEVIN_SKILL_ROOT=".devin/skills"
+for devin_command in star star-auto; do
+    devin_file="${DEVIN_SKILL_ROOT}/${devin_command}/SKILL.md"
+    if [[ ! -f "${devin_file}" ]] || \
+       ! frontmatter_has_line "${devin_file}" "name: ${devin_command}" || \
+       ! grep -qF "Do not use unless the user typed /${devin_command}" "${devin_file}" || \
+       ! grep -qF "Read \`.agents/commands/${devin_command}.md\`" "${devin_file}"; then
+        fail "${devin_file} is not the explicit-only wrapper around .agents/commands/${devin_command}.md"
+        plugin_errors=1
+    fi
+done
+if ! grep -qF 'STAR_LANG=zh' "${DEVIN_SKILL_ROOT}/star/SKILL.md" || \
+   ! grep -qF '.agents/commands/star.zh-CN.md' "${DEVIN_SKILL_ROOT}/star/SKILL.md"; then
+    fail "${DEVIN_SKILL_ROOT}/star/SKILL.md does not apply STAR's Chinese router wording"
+    plugin_errors=1
+fi
+for router_tree in ".codex/plugins" ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}" "${DEVIN_SKILL_ROOT}"; do
     if [[ "$(grep -Fxc "        \"${router_tree}\"" execs/update.sh)" -ne 2 ]]; then
         fail "execs/update.sh must carry ${router_tree} in both adopt and full-update paths"
         plugin_errors=1
     fi
 done
-for optional_tree in ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}"; do
+for optional_tree in ".dsh/commands" ".kimi-code/plugins" "${AGY_SKILL_ROOT}" "${DEVIN_SKILL_ROOT}"; do
     if ! grep -qF "\"${optional_tree}\")" execs/update.sh; then
         fail "execs/update.sh does not allow an older ref to omit ${optional_tree}"
         plugin_errors=1
@@ -422,7 +441,7 @@ done
 
 # Shared policy names capabilities; concrete hosts and their APIs live in §13
 # (harness adapters), the one section of the conventions allowed to name them.
-if awk '/^## 13\. /{exit} {print}' "${CONVENTIONS}" | grep -niE 'claude|codex|cursor|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort'; then
+if awk '/^## 13\. /{exit} {print}' "${CONVENTIONS}" | grep -niE 'claude|codex|cursor|devin|kimi|qwen|(^|[^[:alnum:]_])(pi|dsh)([^[:alnum:]_]|$)|spawn_agent|reasoning_effort|AgentSwarm|SessionStart|default_effort'; then
     fail "${CONVENTIONS}: harness-specific wording belongs in §13 (harness adapters)"
     conv_errors=1
 fi
@@ -594,20 +613,24 @@ fi
 section "Session hooks"
 hook_errors=0
 for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
-         .cursor/hooks/star_model_id.sh .kimi-code/hooks/star_model_id.sh \
+         .cursor/hooks/star_model_id.sh .devin/hooks/star_model_id.sh \
+         .kimi-code/hooks/star_model_id.sh \
          .dsh/hooks/star_model_id.sh .pi/extensions/star-hooks/star_model_id.sh \
          .qwen/hooks/star_model_id.sh .gemini/antigravity-cli/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
-         .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
+         .cursor/hooks/star_memory.sh .devin/hooks/star_memory.sh \
+         .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
-         .cursor/hooks/star_commit_guard.sh .kimi-code/hooks/star_commit_guard.sh \
+         .cursor/hooks/star_commit_guard.sh .devin/hooks/star_commit_guard.sh \
+         .kimi-code/hooks/star_commit_guard.sh \
          .dsh/hooks/star_commit_guard.sh .pi/extensions/star-hooks/star_commit_guard.sh \
          .qwen/hooks/star_commit_guard.sh .gemini/antigravity-cli/hooks/star_commit_guard.sh \
          .gemini/antigravity-cli/hooks/star_involve_gate.sh \
          .claude/hooks/star_involve_gate.sh .codex/hooks/star_involve_gate.sh \
-         .qwen/hooks/star_involve_gate.sh .claude/hooks/star_bash_gate.sh \
+         .devin/hooks/star_involve_gate.sh .qwen/hooks/star_involve_gate.sh \
+         .claude/hooks/star_bash_gate.sh .devin/hooks/star_bash_gate.sh \
          .claude/hooks/star_involve_level.sh \
          .dsh/hooks/install.sh .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
@@ -629,8 +652,8 @@ own_hook_dir() { # $1 = registration config
         *) printf '%s/hooks/' "${1%%/*}" ;;
     esac
 }
-for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
-         .kimi-code/hooks.example.toml .pi/extensions/star-hooks/index.ts .qwen/settings.json; do
+for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hooks.json .devin/hooks.v1.json \
+         .dsh/hooks.json .kimi-code/hooks.example.toml .pi/extensions/star-hooks/index.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
         fail "${f} is missing"
         hook_errors=1
@@ -638,7 +661,7 @@ for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hook
     fi
     hooks_here="star_model_id.sh star_memory.sh star_commit_guard.sh"
     case "${f}" in
-        .claude/*) hooks_here="${hooks_here} star_involve_gate.sh star_bash_gate.sh" ;;
+        .claude/*|.devin/*) hooks_here="${hooks_here} star_involve_gate.sh star_bash_gate.sh" ;;
         .agents/*|.codex/*|.qwen/*) hooks_here="${hooks_here} star_involve_gate.sh" ;;
     esac
     for hook in ${hooks_here}; do
@@ -676,6 +699,8 @@ for f in .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
 done
 grep -qF '"decision":"deny"' .gemini/antigravity-cli/hooks/star_commit_guard.sh || \
     { fail ".gemini/antigravity-cli/hooks/star_commit_guard.sh no longer emits Antigravity's deny shape"; hook_errors=1; }
+grep -qF '"decision":"block"' .devin/hooks/star_commit_guard.sh || \
+    { fail ".devin/hooks/star_commit_guard.sh no longer emits Devin's block shape"; hook_errors=1; }
 grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/star_commit_guard.sh || \
     { fail ".kimi-code/hooks/star_commit_guard.sh no longer emits Kimi's deny shape"; hook_errors=1; }
 { grep -qF '"permission":"deny"' .cursor/hooks/star_commit_guard.sh && \
