@@ -93,7 +93,14 @@ for host in claude codex qwen dsh; do
     assert_json 'if(!(equal(at(r,".hookSpecificOutput.hookEventName"),parse("\"SessionStart\"")) && (type(at(r,".hookSpecificOutput.additionalContext"))=="string"))) exit 1'
     if [ "$host" = codex ]; then
         assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "session_model_id = $model_literal"
-    else assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "$transcript_literal"; fi
+    elif [ "$host" = dsh ]; then
+        assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1))) exit 1' "$transcript_literal"
+    else
+        # The injected resolver command carries its arguments shell-quoted.
+        printf -v quoted_transcript '%q' "$transcript_literal"
+        printf -v quoted_model '%q' "$model_literal"
+        assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),a(1) " " a(2))) exit 1' "$quoted_transcript" "$quoted_model"
+    fi
     case_ "$host absent model and transcript remain unrecorded"
     run 0 '{}' "$hook"
     assert_json 'if(!index(val(at(r,".hookSpecificOutput.additionalContext")),"unrecorded")) exit 1'
@@ -335,21 +342,47 @@ assert_json 'if(type(at(r,".injectSteps[0].systemMessage.systemMessage"))!="stri
 case_ 'Antigravity SessionStart treats auto modelName as unrecorded fallback'
 run 0 '{"modelName":"auto"}' "$hook"
 assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"unrecorded")) exit 1'
-hook_path agy star_involve_gate
-case_ 'Antigravity involve gate allows project file edits at INVOLVE=low'
-payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/example.sh")
+case_ 'Antigravity payload extraction and JSON encoding'
+payload=$(star_json_object modelName "$model_literal")
 run 0 "$payload" "$hook"
-assert_json 'if(!(equal(at(r,".decision"),parse("\"allow\"")))) exit 1'
-case_ 'Antigravity involve gate leaves dot-directories undecided'
-payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/.env")
+assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),a(1))) exit 1' "$model_literal"
+case_ 'Antigravity SessionStart without modelName stays unrecorded'
+run 0 '{}' "$hook"
+assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"unrecorded")) exit 1'
+hook_path agy star_involve_gate
+case_ 'Antigravity involve gate auto-approves a run worktree file'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "${project}--wt/run1/src/example.sh")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
+case_ 'Antigravity involve gate leaves a worktree dot-directory undecided'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "${project}--wt/run1/.env")
 run 0 "$payload" "$hook"
 assert_equal ''
+for tool in write_to_file replace_file_content multi_replace_file_content; do
+    case_ "Antigravity involve gate auto-approves $tool on a project file at INVOLVE=low"
+    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"name",string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/quoted file.txt" "$tool")
+    run 0 "$payload" "$hook"
+    assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
+done
+for edited in "$project/.env" "$project/src/../outside" "$sandbox/outside"; do
+    case_ 'Antigravity involve gate leaves protected or outside path undecided'
+    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$edited")
+    run 0 "$payload" "$hook"
+    assert_equal ''
+done
+case_ 'Antigravity hooks.json registers the documented file tools'
+assertions=$((assertions + 1))
+grep -qF '"matcher": "write_to_file|replace_file_content|multi_replace_file_content"' "$repo/.agents/hooks.json" || fail 'agy involve gate matcher'
 hook_path claude star_bash_gate
 case_ 'Claude shell gate allows ordinary inspection'
 run 0 '{"tool_input":{"command":"rg --files src"}}' "$hook"
 assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"allow\"")))) exit 1'
-for command_text in 'rm old-file' 'git push origin main' 'sudo make install' 'find . -delete'; do
-    case_ 'Claude shell gate leaves destructive or privileged command undecided'
+heredoc_in_quotes='echo "use cat <<EOF for that"
+rm -rf wkdrs/old'
+for command_text in 'rm old-file' 'git push origin main' 'sudo make install' 'find . -delete' \
+    'if true; then git push origin main; fi' '{ rm -rf build; }' 'for f in a b; do rm -f "$f"; done' \
+    'if rm -rf build; then echo ok; fi' '! rm -rf build' "$heredoc_in_quotes"; do
+    case_ "Claude shell gate leaves destructive or privileged command undecided: $command_text"
     payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text")
     run 0 "$payload" "$hook"
     assert_equal ''
@@ -359,7 +392,11 @@ done
 write wkdrs/run/EXEC_LOG.md '## Notes'
 for host in $hosts; do
     hook_path "$host" star_commit_guard
-    for command_text in 'git add -A' 'git rebase main' 'git reset --hard' 'git branch -D research' 'bash execs/scpts/run.sh'; do
+    for command_text in 'git add -A' 'git rebase main' 'git reset --hard' 'git branch -D research' 'bash execs/scpts/run.sh' \
+        'env git add -A' '{ git add -A; }' 'if true; then git add -A; fi' 'git stage -A' 'echo x | xargs git add -A' \
+        'GIT_DIR=.git git commit --amend' 'time git rebase main' 'git add ./' 'git checkout -fB main origin/main' \
+        'git switch -fC topic' 'git worktree remove -ff ../tree' 'timeout 12h bash execs/scpts/run.sh' \
+        'source execs/scpts/run.sh' '. execs/scpts/run.sh' 'sudo bash execs/scpts/run.sh' 'echo go 1>wkdrs/run/.await'; do
         case_ "$host guard declines $command_text"
         case "$host" in
             cursor) expected=2; payload=$(star_json_object command "$command_text") ;;
@@ -376,16 +413,18 @@ for host in $hosts; do
             *) assert_json 'if(!(equal(at(r,".hookSpecificOutput.permissionDecision"),parse("\"deny\"")))) exit 1' ;;
         esac
     done
-    case_ "$host guard permits named staging without executing payload"
-    command_text='git add src/example.sh; touch payload-executed'
-    if [ "$host" = pi ]; then run 0 '' "$hook" "$command_text"
-    else
-        if [ "$host" = cursor ]; then payload=$(star_json_object command "$command_text")
-        elif [ "$host" = agy ]; then payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$command_text")
-        else payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text"); fi
-        run 0 "$payload" "$hook"
-    fi
-    assert_equal ''
+    for command_text in 'git add src/example.sh; touch payload-executed' 'git add :/docs/example.md' \
+        'git commit -uall -m message' 'git commit -Sabc123 -m message' 'bash -n execs/scpts/run.sh'; do
+        case_ "$host guard permits $command_text without executing payload"
+        if [ "$host" = pi ]; then run 0 '' "$hook" "$command_text"
+        else
+            if [ "$host" = cursor ]; then payload=$(star_json_object command "$command_text")
+            elif [ "$host" = agy ]; then payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$command_text")
+            else payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "$command_text"); fi
+            run 0 "$payload" "$hook"
+        fi
+        assert_equal ''
+    done
 done
 case_ 'Payload commands were never executed'
 assertions=$((assertions + 1))

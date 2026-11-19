@@ -3,6 +3,26 @@
  * Extracted for testability.
  */
 
+export interface SubagentInput {
+	agent?: string;
+	agentScope?: "user" | "project" | "both";
+	tasks?: { agent?: string }[];
+	chain?: { agent?: string }[];
+}
+
+// The agents a star_subagent call names that could edit files: an edit or write
+// tool in their roster, or no roster at all, which gives them pi's full default.
+// An unknown name is left to star_subagent, which reports it itself.
+export function writeCapableAgents(input: SubagentInput, agents: { name: string; tools?: string[] }[]): string[] {
+	const names = [input.agent, ...(input.tasks ?? []).map((t) => t.agent), ...(input.chain ?? []).map((s) => s.agent)]
+		.filter((name): name is string => typeof name === "string" && name.length > 0);
+	return [...new Set(names)].filter((name) => {
+		const agent = agents.find((a) => a.name === name);
+		if (!agent) return false;
+		return !agent.tools || agent.tools.some((tool) => tool === "edit" || tool === "write");
+	});
+}
+
 // Parse one literal command. Shell expansion, redirection and compound commands
 // need a shell parser and are deliberately outside this argument guard.
 function commandWords(command: string): string[] | null {

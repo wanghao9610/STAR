@@ -2,8 +2,10 @@
 # STAR upstream consistency check.
 #
 # Guards the invariants the seven per-tool skill trees (.agents/.claude/.cursor/
-# .dsh/.kimi-code/.pi/.qwen) and the shared docs are supposed to keep while being
-# maintained by hand. Run from anywhere inside the repo: bash .github/scripts/check_consistency.sh
+# .dsh/.kimi-code/.pi/.qwen) and the shared docs are supposed to keep. Six of the
+# trees are generated from .agents/skills by port.sh, which proves byte equality;
+# this script holds the invariants port.sh does not — hooks, registrations, docs
+# and cross-file contracts. Run from anywhere inside the repo: bash .github/scripts/check_consistency.sh
 # Exits non-zero if any check fails. Upstream-maintainer tooling only — this
 # directory is not synced to downstream projects by execs/update.sh.
 set -uo pipefail
@@ -580,6 +582,9 @@ for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .dsh/hooks/star_commit_guard.sh .pi/extensions/star-hooks/star_commit_guard.sh \
          .qwen/hooks/star_commit_guard.sh .gemini/antigravity-cli/hooks/star_commit_guard.sh \
          .gemini/antigravity-cli/hooks/star_involve_gate.sh \
+         .claude/hooks/star_involve_gate.sh .codex/hooks/star_involve_gate.sh \
+         .qwen/hooks/star_involve_gate.sh .claude/hooks/star_bash_gate.sh \
+         .claude/hooks/star_involve_level.sh \
          .dsh/hooks/install.sh .kimi-code/hooks/install.sh; do
     [[ -x "${f}" ]] || { fail "${f} is missing or not executable"; hook_errors=1; }
 done
@@ -590,6 +595,16 @@ done
 #     STAR's own file, and the row that points DSH at it lives in the machine's
 #     $DSH_HOME — .dsh/cordis.patch.yml is the reference copy of that row and
 #     .dsh/hooks/install.sh is what writes it.
+#     Each config must name its own harness's copy: a registration pointing at
+#     another tree's guard parses that tree's payload and never decides anything.
+#     Pi's extension joins the bare name onto its own directory.
+own_hook_dir() { # $1 = registration config
+    case "$1" in
+        .agents/hooks.json) printf '.gemini/antigravity-cli/hooks/' ;;
+        .pi/*) printf '' ;;
+        *) printf '%s/hooks/' "${1%%/*}" ;;
+    esac
+}
 for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hooks.json .dsh/hooks.json \
          .kimi-code/hooks.example.toml .pi/extensions/star-hooks/index.ts .qwen/settings.json; do
     if [[ ! -f "${f}" ]]; then
@@ -597,8 +612,13 @@ for f in .agents/hooks.json .claude/settings.json .codex/hooks.json .cursor/hook
         hook_errors=1
         continue
     fi
-    for hook in star_model_id.sh star_memory.sh star_commit_guard.sh; do
-        grep -qF "${hook}" "${f}" || { fail "${f} does not register ${hook}"; hook_errors=1; }
+    hooks_here="star_model_id.sh star_memory.sh star_commit_guard.sh"
+    case "${f}" in
+        .claude/*) hooks_here="${hooks_here} star_involve_gate.sh star_bash_gate.sh" ;;
+        .agents/*|.codex/*|.qwen/*) hooks_here="${hooks_here} star_involve_gate.sh" ;;
+    esac
+    for hook in ${hooks_here}; do
+        grep -qF "$(own_hook_dir "${f}")${hook}" "${f}" || { fail "${f} does not register its own ${hook}"; hook_errors=1; }
     done
 done
 #     Kimi loads no project-level config, so its registration snippet is only a
@@ -653,7 +673,7 @@ grep -qF 'block: true' .pi/extensions/star-hooks/index.ts || \
 grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
     { fail ".dsh/hooks.json no longer matches DSH's lowercase bash tool"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
-#     seven memory hooks build their lines with, and what the spec documents as
+#     eight memory hooks build their lines with, and what the spec documents as
 #     the shape a session reads. Reword it in one place and the hooks and the spec
 #     describe two different lines: same failure mode as check 15's registry.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
@@ -756,7 +776,7 @@ if [[ -n "${model_check_dir}" ]]; then
 
     rm -rf "${model_check_dir}"
 fi
-(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all seven harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
+(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all eight harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the six trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a
@@ -809,11 +829,27 @@ norm_headings() { # $1 = file; prints one normalized heading per line
 # emit a heading. Nine files per tree carry no h2-h4 heading; a version that
 # records only heading-emitting files never compares them, so a non-baseline
 # file that lost all of its headings passes silently, which is the exact drift
-# this section exists to catch.
+# this section exists to catch. Registration therefore runs from the file list in
+# BEGIN, before any file is read: an empty file has no first record, so FNR == 1
+# never fires for it. awk opens the files itself from that list, so no xargs
+# batch can split the comparison into passes that each see only part of it.
 struct_errors=0
 struct_mismatch="$(mktemp)"
-find -L "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
-  | xargs -0 awk -v baseline="${STRUCT_ROOTS[0]}" '
+struct_list="$(mktemp)"
+find -L "${STRUCT_ROOTS[@]}" -type f -name '*.md' > "${struct_list}"
+awk -v baseline="${STRUCT_ROOTS[0]}" -v list="${struct_list}" '
+    function register(p,    i, t, r) {
+        i = index(p, "/skills/")
+        t = substr(p, 1, i - 1)
+        r = substr(p, i + 8)
+        seen[t] = 1
+        seq[t SUBSEP r] = ""
+        if (t "/skills" == baseline) base[r] = 1
+    }
+    BEGIN {
+        while ((getline p < list) > 0) { register(p); ARGV[ARGC++] = p }
+        close(list)
+    }
     function flush() {
         if (path != "") seq[tree SUBSEP rel] = acc
     }
@@ -854,7 +890,8 @@ find -L "${STRUCT_ROOTS[@]}" -type f -name '*.md' -print0 \
                 if (seq[k] != seq[b SUBSEP rel]) print tree "/skills/" rel
             }
     }
-' | sort > "${struct_mismatch}"
+' | sort > "${struct_mismatch}" || { fail "the heading-structure pass did not run to completion"; struct_errors=1; }
+rm -f "${struct_list}"
 struct_files="$(cd "${STRUCT_ROOTS[0]}" && find -L . -type f -name '*.md' | wc -l | tr -d " ")"
 while IFS= read -r other; do
     [[ -n "${other}" ]] || continue

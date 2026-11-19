@@ -3,7 +3,8 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || {
 # Skip Antigravity's permission prompt for file edits while the project runs at
 # INVOLVE=low (.env, workflow conventions §7.7).
 #
-# Registered under PreToolUse matching edit_file|write_file in
+# Registered under PreToolUse matching the documented file tools
+# (write_to_file|replace_file_content|multi_replace_file_content) in
 # .agents/hooks.json pointing to .gemini/antigravity-cli/hooks/star_involve_gate.sh.
 set -uo pipefail
 
@@ -19,7 +20,7 @@ value="${value%%#*}"
 involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
 [[ "${involve}" == "low" ]] || exit 0
 
-edited_path() { printf '%s' "$input" | star_json_field 'toolCall.args.Path' 2>/dev/null; }
+edited_path() { printf '%s' "$input" | star_json_field 'toolCall.args.TargetFile' 2>/dev/null; }
 
 wt_logical="$(dirname "${root_logical}")/$(basename "${root_logical}")--wt"
 wt_physical="$(dirname "${root_physical}")/$(basename "${root_physical}")--wt"
@@ -35,4 +36,4 @@ esac
 
 [[ "${rel}" == .* || "${rel}" == */../* || "${rel}" == */.. ]] && exit 0
 
-printf '{"decision":"allow","reason":"INVOLVE=low"}\n'
+printf '{"decision":"auto_approve","reason":"INVOLVE=low"}\n'

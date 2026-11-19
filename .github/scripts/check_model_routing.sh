@@ -624,3 +624,58 @@ cmp -s "${ROOT_DIR}/${source_skill}/scripts/source_state.sh" "${UPDATE_PROJECT}/
 cmp -s "${ROOT_DIR}/${source_skill}/references/source_state.md" "${UPDATE_PROJECT}/${source_skill}/references/source_state.md" ||
 	fail "analyst-only update omitted its source-validity contract"
 note "the updater honors overrides, installs shared validity helpers, and reapplies model settings"
+
+# A stamped project previews as current, and neither an uncommitted stamp nor a
+# project-own untracked file blocks the next update.
+printf 'STAR_REPOSITORY='"'"'%s'"'"'\n  export STAR_HARNESSES=cursor\nSTAR_READ_MODEL='"'"'cursor:fixture-read'"'"'\n' \
+	"file://${UPSTREAM}" > "${UPDATE_PROJECT}/.env"
+run_update execs/update.sh --force
+expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-read
+git -C "${UPDATE_PROJECT}" add -A
+git -C "${UPDATE_PROJECT}" -c core.hooksPath=/dev/null -c user.name=Test -c user.email=test@example.invalid commit -qm stamped
+if ! (cd "${UPDATE_PROJECT}" && bash execs/update.sh --diff) > "${TMP_DIR}/update.log" 2>&1; then
+	cat "${TMP_DIR}/update.log"; fail "update.sh --diff reports a stamped project as changed"
+fi
+! grep -q '\.claude/' "${TMP_DIR}/update.log" || fail "an exported STAR_HARNESSES line was ignored"
+printf 'STAR_REPOSITORY='"'"'%s'"'"'\nSTAR_HARNESSES=cursor\nSTAR_READ_MODEL='"'"'cursor:fixture-other'"'"'\n' \
+	"file://${UPSTREAM}" > "${UPDATE_PROJECT}/.env"
+(cd "${UPDATE_PROJECT}" && bash execs/configure.sh) > "${TMP_DIR}/update.log" 2>&1 || fail "configure.sh restamp"
+mkdir -p "${UPDATE_PROJECT}/.cursor/skills/project-own"
+printf 'own\n' > "${UPDATE_PROJECT}/.cursor/skills/project-own/SKILL.md"
+run_update execs/update.sh
+expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-other
+[[ -f "${UPDATE_PROJECT}/.cursor/skills/project-own/SKILL.md" ]] || fail "update removed a project-own skill"
+note "a stamped project previews as current, and stamps or own files do not block an update"
+
+# A malformed tier key is refused before anything is fetched or overwritten.
+printf 'STAR_REPOSITORY='"'"'%s'"'"'\nSTAR_HARNESSES=cursor\nSTAR_PLAN_MODEL="$(touch %s)"\n' \
+	"file://${UPSTREAM}" "${update_expansion_marker}" > "${UPDATE_PROJECT}/.env"
+if (cd "${UPDATE_PROJECT}" && bash execs/update.sh --force) > "${TMP_DIR}/update.log" 2>&1; then
+	fail "update.sh accepted a malformed STAR_PLAN_MODEL"
+fi
+grep -q 'Invalid STAR_PLAN_MODEL' "${TMP_DIR}/update.log" || fail "malformed tier key diagnostic"
+! grep -q 'Fetching' "${TMP_DIR}/update.log" || fail "update.sh fetched before validating the tier keys"
+expect_plain_model "${UPDATE_PROJECT}/.cursor/agents/star-read.md" fixture-other
+note "a malformed tier key is refused before the fetch"
+
+# --adopt never runs a project's own execs/configure.sh.
+ADOPT_PROJECT="${TMP_DIR}/adopt-project"
+adopt_marker="${TMP_DIR}/project-configure-ran"
+mkdir -p "${ADOPT_PROJECT}/execs"
+git -C "${ADOPT_PROJECT}" init -q
+printf '#!/usr/bin/env bash\ntouch %q\n' "${adopt_marker}" > "${ADOPT_PROJECT}/execs/configure.sh"
+(cd "${ADOPT_PROJECT}" && STAR_REPOSITORY="file://${UPSTREAM}" bash "${UPSTREAM}/execs/update.sh" --adopt --harnesses cursor) \
+	> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "adopt with a project configure.sh"; }
+[[ ! -e "${adopt_marker}" ]] || fail "--adopt ran the project's own execs/configure.sh"
+grep -q "execs/configure.sh is the project's own" "${TMP_DIR}/update.log" || fail "--adopt did not report skipped stamping"
+note "--adopt never runs a project's own configure.sh"
+
+# Stamping refuses a manifest whose frontmatter never closes and leaves it intact.
+printf 'STAR_HARNESSES=cursor\nSTAR_READ_MODEL=cursor:fixture-third\n' > "${UPDATE_PROJECT}/.env"
+printf -- '---\nname: star-read\nmodel: fixture-other\n--- \nBody line.\n' > "${UPDATE_PROJECT}/.cursor/agents/star-read.md"
+before=$(cat "${UPDATE_PROJECT}/.cursor/agents/star-read.md")
+if (cd "${UPDATE_PROJECT}" && bash execs/configure.sh) > "${TMP_DIR}/update.log" 2>&1; then
+	fail "configure.sh stamped a manifest with unclosed frontmatter"
+fi
+[[ "$(cat "${UPDATE_PROJECT}/.cursor/agents/star-read.md")" == "${before}" ]] || fail "configure.sh truncated an unclosed manifest"
+note "stamping refuses unclosed frontmatter without truncating"

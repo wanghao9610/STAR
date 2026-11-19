@@ -46,6 +46,9 @@ run_one() { # $1=id $2=section $3=apply $4=must
     local W="${TMP}/w_${id}"
     mkdir -p "${W}"
     git -C "${ROOT}" archive HEAD | tar -x -C "${W}" || { echo "archive failed" > "${TMP}/out_${id}"; return; }
+    # The checker reads the index (check 26 lists the tracked memory files), and
+    # an archive carries none, so the copy gets one of its own.
+    { git -C "${W}" init -q && git -C "${W}" add --all; } >/dev/null 2>&1 || { echo "index failed" > "${TMP}/out_${id}"; return; }
     ( cd "${W}" && eval "${apply}" ) >/dev/null 2>&1
     local out rc
     out="$( cd "${W}" && bash .github/scripts/check_consistency.sh 2>&1 )"

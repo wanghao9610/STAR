@@ -17,9 +17,13 @@ exit 97
 BLOCK
 chmod +x "$probe/jq"
 export PATH="$probe:$PATH"
+suites=0
 for suite in "${ROOT_DIR}"/.github/scripts/tests/test_*.sh; do
     [[ -f "$suite" ]] || continue
     bash "$suite"
+    suites=$((suites + 1))
 done
+# A glob that matched nothing would otherwise pass having run no suite at all.
+(( suites > 0 )) || { printf 'No shell suites found under .github/scripts/tests/\n' >&2; exit 1; }
 [[ ! -e "$STAR_JQ_PROBE_LOG" ]] || { printf 'Unexpected jq invocation\n' >&2; exit 1; }
 printf 'PASS: shell suites ran without jq\n'

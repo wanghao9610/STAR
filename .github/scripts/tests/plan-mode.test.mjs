@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isSafeCommand } from "../../../.pi/extensions/star-plan-mode/utils.ts";
+import { isSafeCommand, writeCapableAgents } from "../../../.pi/extensions/star-plan-mode/utils.ts";
 
 test("plan mode permits common reads and treats quoted search text as data", () => {
 	for (const command of [
@@ -91,4 +91,19 @@ test("plan mode refuses unsupported shell syntax and malformed arguments", () =>
 		"g\\it status",
 		"constructor",
 	]) assert.equal(isSafeCommand(command), false, command);
+});
+
+test("plan mode refuses delegates that can edit, in every dispatch shape", () => {
+	const agents = [
+		{ name: "star-collector", tools: ["read", "grep", "find", "ls", "bash"] },
+		{ name: "star-auditor", tools: ["read", "grep", "find", "ls"] },
+		{ name: "star-implementer", tools: ["read", "bash", "edit", "write"] },
+		{ name: "untyped" },
+	];
+	assert.deepEqual(writeCapableAgents({ agent: "star-collector" }, agents), []);
+	assert.deepEqual(writeCapableAgents({ agent: "star-implementer" }, agents), ["star-implementer"]);
+	assert.deepEqual(writeCapableAgents({ agent: "untyped" }, agents), ["untyped"]);
+	assert.deepEqual(writeCapableAgents({ tasks: [{ agent: "star-auditor" }, { agent: "star-implementer" }] }, agents), ["star-implementer"]);
+	assert.deepEqual(writeCapableAgents({ chain: [{ agent: "star-collector" }, { agent: "untyped" }] }, agents), ["untyped"]);
+	assert.deepEqual(writeCapableAgents({ agent: "unknown" }, agents), []);
 });

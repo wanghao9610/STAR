@@ -6,17 +6,19 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # nobody reading the staged file list, blanket staging and history rewrites are
 # what turn a cheap local commit into one that needs surgery to unpick.
 #
-# Declined: blanket or forced staging (add -A / . / * / :/ / -u / -f, commit -a),
-# the history rewrites §1.3 names (commit --amend, rebase, reset --hard,
-# filter-branch, filter-repo), the forced branch operations §11 makes costly
-# (branch -D / -f, switch -C / -f / --discard-changes, checkout -B / -f — an
-# execution branch force-deleted before its records reach the base branch loses
-# them), a forced worktree removal (worktree remove --force, which deletes the
-# tree's untracked artifacts), and a commit whose staged files exceed 10 MB — a
-# checkpoint or a dataset in history is a research repository's one costly
-# mistake, since clearing it back out needs exactly those rewrites. `push` is
-# deliberately absent: no rule here makes a skill likelier to push, and a user
-# who asks for one directly should get it.
+# Declined: blanket or forced staging (add/stage -A / . / ./ / * / :/ / -u / -f,
+# commit -a), the history rewrites §1.3 names (commit --amend, rebase, reset
+# --hard, filter-branch, filter-repo), the forced branch operations §11 makes
+# costly (branch -D / -f, switch -C / -f / --discard-changes, checkout -B / -f —
+# an execution branch force-deleted before its records reach the base branch
+# loses them), a forced worktree removal (worktree remove --force, which deletes
+# the tree's untracked artifacts), and a commit that would record a file over
+# 10 MB — a checkpoint or a dataset in history is a research repository's one
+# costly mistake, since clearing it back out needs exactly those rewrites. The
+# size is read from the checkout the commit runs in (the payload's working
+# directory, a preceding `cd`, or git's -C), so a run worktree is checked too.
+# `push` is deliberately absent: no rule here makes a skill likelier to push, and
+# a user who asks for one directly should get it.
 #
 # Registered with event PreToolUse and matcher Bash. Kimi loads no project-level
 # config, so the entry lives in the global config and is written there by
@@ -28,13 +30,14 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # It also holds the order the executor's report states (conventions §2): a
 # prepared STOP-line command launches after its code review. A launch is the
 # run's script, `execs/scpts/<run>.sh`, in command position — past nohup,
-# bash -c and the other wrappers — or a redirect into the `wkdrs/<run>/.await`
-# marker a star-auto launch writes; either requires current content-based review
-# metadata and a passed review gate. Log dates do not determine validity.
-# The run dir is looked up in this checkout first, then in the
-# run's worktree at ../<root-dirname>--wt/<run>/ (§11.8), where a worktree run
-# keeps its records until the merge. Writing the script, reading the marker, and
-# light validation through execs/run.sh pass: none of them is the launch.
+# timeout, sudo, source, bash -c, shell keywords and the other wrappers — or a
+# redirect into the `wkdrs/<run>/.await` marker a star-auto launch writes; either
+# requires current content-based review metadata and a passed review gate. Log
+# dates do not determine validity. The run dir is looked up in this checkout
+# first, then in the run's worktree at ../<root-dirname>--wt/<run>/ (§11.8), where
+# a worktree run keeps its records until the merge. Writing the script, reading
+# the marker, a `bash -n` syntax check, and light validation through execs/run.sh
+# pass: none of them is the launch.
 #
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
 # quoting, so a flag written after a commit message (`commit -m x --amend`) is
@@ -52,6 +55,8 @@ input=$(cat)
 
 # The shell command, from Bash's tool_input.
 command_text() { printf '%s' "$input" | star_json_field 'tool_input.command' 2>/dev/null; }
+# The directory the command runs in, from the payload's cwd.
+payload_cwd() { printf '%s' "$input" | star_json_field 'cwd' 2>/dev/null; }
 
 cmd="$(command_text)"
 case "${cmd}" in
@@ -69,17 +74,43 @@ deny() { # $1 = one-line reason, $2 = what to do instead (default: hand it to th
 # orders of magnitude.
 size_limit=$((10 * 1024 * 1024))
 
-# Staged paths over the limit, as a printable list. Empty when none are.
-staged_oversize() {
-    local f size out=""
+# Append one path to over_list when its size exceeds the limit.
+add_over() { # $1 = path, $2 = size in bytes
+    local name="$1" size="${2//[[:space:]]/}"
+    case "${size}" in ''|*[!0-9]*) return 0 ;; esac
+    (( size > size_limit )) || return 0
+    # Reasons reach the agent as JSON: no quote, no backslash, no control byte.
+    name="${name//\\/}"; name="${name//\"/}"; name="${name//[[:cntrl:]]/ }"
+    over_list="${over_list:+${over_list}, }${name} ($((size / 1024 / 1024)) MB)"
+}
+
+# Paths over the limit that a commit run in $1 would record, left in over_list:
+# the staged blobs (a staged deletion records nothing, and an LFS pointer is
+# sized as the pointer it is), plus each pathspec named on the commit line,
+# whose working-tree content is what such a commit records.
+oversize() { # $1 = checkout directory, $2… = pathspecs from the commit line
+    local dir="$1" f size
+    shift
+    over_list=""
     while IFS= read -r -d '' f; do
-        [[ -f "${root}/${f}" ]] || continue
-        size="$(wc -c < "${root}/${f}" 2>/dev/null)" || continue
-        size="${size//[[:space:]]/}"
-        case "${size}" in ''|*[!0-9]*) continue ;; esac
-        (( size > size_limit )) && out="${out:+${out}, }${f} ($((size / 1024 / 1024)) MB)"
-    done < <(git -C "${root}" diff --cached --name-only -z 2>/dev/null)
-    printf '%s' "${out}"
+        size="$(git -C "${dir}" cat-file -s ":${f}" 2>/dev/null)" || continue
+        add_over "${f}" "${size}"
+    done < <(git -C "${dir}" diff --cached --name-only --diff-filter=d -z 2>/dev/null)
+    for f in "$@"; do
+        case "${f}" in /*) ;; *) f="${dir}/${f}" ;; esac
+        [[ -f "${f}" ]] || continue
+        size="$(wc -c < "${f}" 2>/dev/null)" || continue
+        add_over "${f#"${dir}"/}" "${size}"
+    done
+}
+
+# A directory named relative to another, quote-stripped and resolved; empty when
+# it does not exist.
+resolve_dir() { # $1 = base directory, $2 = path as written
+    local d="$2"
+    d="${d#\'}"; d="${d#\"}"; d="${d%\'}"; d="${d%\"}"
+    case "${d}" in /*) ;; *) d="$1/${d}" ;; esac
+    (cd -- "${d}" 2>/dev/null && pwd -P)
 }
 
 # Resolve the run's actual checkout before checking its content-based review.
@@ -106,41 +137,70 @@ unreviewed_run() {
     return 0
 }
 
+# The command a segment runs: past wrappers, shell keywords, assignments,
+# options, and a timeout's duration or a nice's count. Sets ci (its index, or
+# the token count when there is none) and cmd0 (its quote-stripped form), and
+# syntax_only when a shell wrapper carries -n, which reads a script without
+# running it.
+command_position() {
+    local t in_shell=0
+    ci=0; cmd0=""; syntax_only=0
+    while [[ ${ci} -lt ${#tok[@]} ]]; do
+        # A quote pair can span tokens (`bash -c "git add -A"` splits as `"git`),
+        # so each side strips on its own.
+        t="${tok[ci]}"
+        t="${t#\'}"; t="${t#\"}"; t="${t%\'}"; t="${t%\"}"
+        case "${t##*/}" in
+            env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|sudo|xargs|eval|source|.|if|then|do|else|elif|while|until|'{'|'!')
+                in_shell=0; ci=$((ci + 1)) ;;
+            sh|bash|zsh)
+                in_shell=1; ci=$((ci + 1)) ;;
+            --*|*=*)
+                ci=$((ci + 1)) ;;
+            -*)
+                (( in_shell )) && [[ ${t} == *n* ]] && syntax_only=1
+                ci=$((ci + 1)) ;;
+            *)
+                # Durations and counts are wrapper arguments; numbered run
+                # scripts are commands, not numeric arguments.
+                if [[ ${t} =~ ^[0-9]+(\.[0-9]+)?[smhd]?$ ]]; then ci=$((ci + 1)); else cmd0="${t}"; break; fi ;;
+        esac
+    done
+}
+
+# The checkout the line's git commands run in, moved by each `cd` before them.
+work_dir="$(payload_cwd)"
+work_dir="$(resolve_dir "${root}" "${work_dir:-.}")"
+[[ -n "${work_dir}" ]] || work_dir="${root}"
+
 # One shell line can carry several commands, so each is read on its own: `cd x &&
 # git add -A` is the add it looks like.
 while IFS= read -r segment; do
     read -ra tok <<< "${segment}"
     [[ ${#tok[@]} -gt 0 ]] || continue
+    command_position
+
+    if [[ "${cmd0}" == cd ]]; then
+        next_dir="$(resolve_dir "${work_dir}" "${tok[ci + 1]:-${HOME:-.}}")"
+        [[ -n "${next_dir}" ]] && work_dir="${next_dir}"
+        continue
+    fi
 
     # A prepared STOP-line command launches only after its review (conventions
     # §2; the header). The run whose launch this segment is, if any: the run's
     # script in command position, else a redirect into the run's .await marker.
     launch_run=""
-    li=0
-    lt=""
-    while [[ ${li} -lt ${#tok[@]} ]]; do
-        lt="${tok[li]}"
-        lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
-        case "${lt##*/}" in
-            env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|sh|bash|zsh) li=$((li + 1)) ;;
-            *=*|-*) li=$((li + 1)) ;;
-            *)
-                # Numeric wrapper arguments are skipped; numbered run scripts
-                # are commands, not numeric arguments.
-                if [[ ${lt} =~ ^[0-9]+$ ]]; then li=$((li + 1)); else break; fi ;;
-        esac
-    done
-    if [[ ${li} -lt ${#tok[@]} ]]; then
-        case "${lt}" in
+    if (( ! syntax_only )); then
+        case "${cmd0}" in
             execs/scpts/*.sh|*/execs/scpts/*.sh)
-                launch_run="${lt##*execs/scpts/}"; launch_run="${launch_run%.sh}" ;;
+                launch_run="${cmd0##*execs/scpts/}"; launch_run="${launch_run%.sh}" ;;
         esac
     fi
     if [[ -z "${launch_run}" ]]; then
         for ((lj = 0; lj < ${#tok[@]}; lj++)); do
             lt="${tok[lj]}"
             case "${lt}" in
-                \>*) lt="${lt#>}"; lt="${lt#>}" ;;
+                \>*|[0-9]\>*) lt="${lt#[0-9]}"; lt="${lt#>}"; lt="${lt#>}" ;;
                 *) (( lj > 0 )) && [[ "${tok[lj - 1]}" == *\> ]] || continue ;;
             esac
             lt="${lt#\'}"; lt="${lt#\"}"; lt="${lt%\'}"; lt="${lt%\"}"
@@ -156,24 +216,30 @@ while IFS= read -r segment; do
             deny "${launch_reason}" "run star-code-reviewer on that run first; the launch follows the review"
     fi
 
-    case "${tok[0]}" in
-        git|*/git) ;;
+    case "${cmd0##*/}" in
+        git) ;;
         *) continue ;;
     esac
 
     # Walk past git's own options — `git -C dir add` names its subcommand third.
-    i=1
+    git_dir="${work_dir}"
+    i=$((ci + 1))
     while [[ ${i} -lt ${#tok[@]} ]]; do
         case "${tok[i]}" in
-            -C|-c|--git-dir|--work-tree|--namespace|--exec-path) i=$((i + 2)) ;;
+            -C)
+                next_dir="$(resolve_dir "${git_dir}" "${tok[i + 1]:-}")"
+                [[ -n "${next_dir}" ]] && git_dir="${next_dir}"
+                i=$((i + 2)) ;;
+            -c|--git-dir|--work-tree|--namespace|--exec-path) i=$((i + 2)) ;;
             -*) i=$((i + 1)) ;;
             *) break ;;
         esac
     done
     [[ ${i} -lt ${#tok[@]} ]] || continue
+    sub="${tok[i]}"; sub="${sub#\'}"; sub="${sub#\"}"; sub="${sub%\'}"; sub="${sub%\"}"
 
-    case "${tok[i]}" in
-        add)
+    case "${sub}" in
+        add|stage)
             for ((j = i + 1; j < ${#tok[@]}; j++)); do
                 # `git add "."` is the instruction `git add .` is; word splitting
                 # keeps the quotes, so one pair comes off before matching.
@@ -182,7 +248,7 @@ while IFS= read -r segment; do
                     \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
                 esac
                 case "${arg}" in
-                    -A|--all|-u|--update|--no-ignore-removal|.|:/|:/*|'*')
+                    -A|--all|-u|--update|--no-ignore-removal|.|./|:/|:/.|':/*'|'*'|'./*')
                         deny "STAR conventions §1.1: a blanket add stages work this run did not do, and in a research repository it sweeps in checkpoints, datasets and scratch. Stage the paths this run wrote, by name." ;;
                     -f|--force)
                         deny "STAR conventions §1.6: a force-add puts a git-ignored path — .env, datas/, inits/ — into history. Stage a tracked path instead." ;;
@@ -193,6 +259,7 @@ while IFS= read -r segment; do
             done
             ;;
         commit)
+            paths=()
             for ((j = i + 1; j < ${#tok[@]}; j++)); do
                 arg="${tok[j]}"
                 case "${arg}" in
@@ -206,13 +273,18 @@ while IFS= read -r segment; do
                     --all)
                         deny "STAR conventions §1.1: commit --all stages every tracked modification, including work this run did not do. Stage the paths this run wrote, by name, then commit without it." ;;
                     --*) ;;
-                    -*a*)
-                        deny "STAR conventions §1.1: commit -a stages every tracked modification, including work this run did not do. Stage the paths this run wrote, by name, then commit without -a." ;;
+                    -*)
+                        # Only an a before the first value-taking letter is -a:
+                        # -uall and -Sabc carry the letter inside their value.
+                        cluster="${arg#-}"; cluster="${cluster%%[uSCcmFt]*}"
+                        [[ "${cluster}" == *a* ]] && \
+                            deny "STAR conventions §1.1: commit -a stages every tracked modification, including work this run did not do. Stage the paths this run wrote, by name, then commit without -a." ;;
+                    *) paths+=("${arg}") ;;
                 esac
             done
-            big="$(staged_oversize)"
-            [[ -n "${big}" ]] && \
-                deny "STAR conventions §1.6: staged over 10 MB — ${big}. Clearing a large file back out of history needs a rewrite §1.3 forbids, so unstage it first."
+            oversize "${git_dir}" ${paths[@]+"${paths[@]}"}
+            [[ -n "${over_list}" ]] && \
+                deny "STAR conventions §1.6: this commit records a file over 10 MB — ${over_list}. Clearing a large file back out of history needs a rewrite §1.3 forbids, so leave it out of the commit."
             ;;
         rebase)
             deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote." ;;
@@ -252,6 +324,9 @@ while IFS= read -r segment; do
                         deny "STAR conventions §1.3: switch -C resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
                     -f|--force|--discard-changes)
                         deny "STAR conventions §1.3: a forced switch discards uncommitted work, including anything the user had in the tree." ;;
+                    --*) ;;
+                    -*[Cf]*)
+                        deny "STAR conventions §1.3: this flag cluster carries a forced switch or a branch reset. Pick a fresh branch name, and keep uncommitted work." ;;
                 esac
             done
             ;;
@@ -267,6 +342,9 @@ while IFS= read -r segment; do
                         deny "STAR conventions §1.3: checkout -B resets an existing branch to another commit — a history rewrite in effect. Pick a fresh branch name." ;;
                     -f|--force)
                         deny "STAR conventions §1.3: a forced checkout discards uncommitted work, including anything the user had in the tree." ;;
+                    --*) ;;
+                    -*[Bf]*)
+                        deny "STAR conventions §1.3: this flag cluster carries a forced checkout or a branch reset. Pick a fresh branch name, and keep uncommitted work." ;;
                 esac
             done
             ;;
@@ -279,7 +357,9 @@ while IFS= read -r segment; do
                 esac
                 case "${arg}" in
                     remove) wt_remove=1 ;;
-                    -f|--force)
+                    --*) [[ "${arg}" == --force ]] && (( wt_remove )) && \
+                            deny "STAR conventions §11.9: a forced worktree removal deletes the tree's untracked artifacts. Move them to the main checkout first — a clean tree removes without --force." ;;
+                    -*f*)
                         (( wt_remove )) && \
                             deny "STAR conventions §11.9: a forced worktree removal deletes the tree's untracked artifacts. Move them to the main checkout first — a clean tree removes without --force." ;;
                 esac

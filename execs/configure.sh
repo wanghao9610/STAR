@@ -3,7 +3,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-ENV_DIR="${ROOT_DIR}"
+# The .env to read; update.sh --diff points it at the project while stamping its
+# scratch copy of upstream, so the preview compares like with like.
+ENV_DIR="${STAR_ENV_DIR:-${ROOT_DIR}}"
 ALL_HARNESSES=(agy claude codex cursor dsh kimi pi qwen)
 KIMI_POOL=false
 HARNESSES_ARG=""
@@ -129,6 +131,11 @@ env_value() { # $1 = key; its last assignment in the target .env, empty when it 
     [[ -f "${ENV_DIR}/.env" ]] || return 0
     while IFS= read -r current || [[ -n "${current}" ]]; do
         current="${current%$'\r'}"
+        # Indented and `export KEY=` assignments count, as run.sh's `source` reads them.
+        current="${current#"${current%%[![:space:]]*}"}"
+        case "${current}" in
+            export[[:space:]]*) current="${current#export}"; current="${current#"${current%%[![:space:]]*}"}" ;;
+        esac
         if [[ "${current}" == "${key}="* ]]; then
             line="${current#*=}"
             found=true
@@ -315,9 +322,12 @@ stamp_frontmatter_field() { # $1 = path, $2 = field, $3 = value, $4 = quoted|pla
         stage == 1 && $0 ~ "^" key ":[[:space:]]" { buf[++n] = ENVIRON["FIELD_LINE"]; stamped = 1; next }
         stage == 1 { buf[++n] = $0; next }
         { print }
+        # Frontmatter that never closes would leave its lines buffered, unprinted;
+        # fail so the file is kept as it is.
+        END { if (stage == 1) exit 3 }
     ' "${ROOT_DIR}/${path}" > "${tmp}" || {
         rm -f -- "${tmp}"
-        fail "Could not stamp the tier ${field} into ${path}."
+        fail "Could not stamp the tier ${field} into ${path}: its frontmatter must open and close with a --- line."
     }
     if cmp -s "${tmp}" "${ROOT_DIR}/${path}"; then
         rm -f -- "${tmp}"

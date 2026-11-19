@@ -79,6 +79,9 @@ case "${1:-}" in
 esac
 
 [[ -f "${ENV_FILE}" ]] || fail "Missing ${ENV_FILE}. Copy .env.example to .env and configure it first."
+# update.sh and configure.sh tolerate CRLF, but `source` would keep each \r in the
+# value; stop with the cause rather than a misleading path error later.
+! grep -q $'\r' "${ENV_FILE}" || fail "${ENV_FILE} has Windows (CRLF) line endings. Convert it to LF line endings first."
 
 set -a
 # shellcheck source=/dev/null
@@ -104,9 +107,10 @@ fi
 
 PYTHON_ENV="$(cd -- "$(dirname -- "${PYTHON_BIN}")/.." && pwd -P)"
 
-# Activate through Conda when CONDA_HOME is configured; otherwise run the
-# interpreter PYTHON_HOME names directly.
-if [[ -n "${CONDA_HOME:-}" ]]; then
+# Activate through Conda when CONDA_HOME is configured and the environment is a
+# Conda one (it has conda-meta); otherwise run the interpreter PYTHON_HOME names
+# directly, which is how an explicit venv or bare interpreter is used.
+if [[ -n "${CONDA_HOME:-}" && -d "${PYTHON_ENV}/conda-meta" ]]; then
     CONDA_BIN="${CONDA_HOME}/bin/conda"
     [[ -x "${CONDA_BIN}" ]] || fail "Conda executable not found at CONDA_HOME/bin/conda."
     # Capture stderr separately rather than discarding it: a broken CONDA_HOME

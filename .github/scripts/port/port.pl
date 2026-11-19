@@ -355,6 +355,12 @@ for my $tree (@trees) {
         write_file($path, "$tree.overrides", $text);
         printf "%-11s regen: %d override records over %d files\n",
             ".$tree", $records, scalar(@new_overrides);
+        # A stale Claude anchor or a missing file is as wrong here as in --check;
+        # a regen that hid it would record the wrong wording as an override.
+        for my $error (@errors) {
+            print "      ! $error\n";
+            $bad = 1;
+        }
         next;
     }
 

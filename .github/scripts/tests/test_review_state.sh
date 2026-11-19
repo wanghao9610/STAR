@@ -12,7 +12,8 @@ PLAN=metds/plans/01_example_plan.md
 HOOKS=(.claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh
     .cursor/hooks/star_commit_guard.sh .dsh/hooks/star_commit_guard.sh
     .kimi-code/hooks/star_commit_guard.sh .qwen/hooks/star_commit_guard.sh
-    .pi/extensions/star-hooks/star_commit_guard.sh)
+    .pi/extensions/star-hooks/star_commit_guard.sh
+    .gemini/antigravity-cli/hooks/star_commit_guard.sh)
 cases=0
 fail() { printf 'FAIL review state: %s\n' "$*" >&2; exit 1; }
 note() { cases=$((cases + 1)); printf 'ok review state: %s\n' "$*"; }
@@ -47,7 +48,7 @@ check() {
 }
 hooks() {
     local reason="${1:-}" command="${2:-bash execs/scpts/$RUN.sh}" output rc payload hook
-    payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"command",string(a(1))); put(r,"tool_input",x); print json(r)' "$command")
+    payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"command",string(a(1))); put(r,"tool_input",x); g=object(); y=object(); put(y,"CommandLine",string(a(1))); put(g,"args",y); put(r,"toolCall",g); print json(r)' "$command")
     for hook in "${HOOKS[@]}"; do
         if [[ $hook == .pi/* ]]; then
             if output=$(bash "$project/$hook" "$command"); then rc=0; else rc=$?; fi
@@ -61,6 +62,7 @@ hooks() {
             case "$hook" in
                 .pi/*) [[ $rc -eq 1 ]] || fail "$hook exit" ;;
                 .cursor/*) [[ $rc -eq 2 ]] && star_json_eval 'if(field(r,"permission")!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
+                .gemini/*) [[ $rc -eq 0 ]] && star_json_eval 'if(field(r,"decision")!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
                 *) [[ $rc -eq 0 ]] && star_json_eval 'if(val(at(r,"hookSpecificOutput.permissionDecision"))!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
             esac
         fi
@@ -149,7 +151,38 @@ note 'blocked review prevents launch'
 reset_case; record; write code/main.sh changed
 hooks 'source/config scope changed' "nohup bash execs/scpts/$RUN.sh > /tmp/fixture.log"
 hooks 'source/config scope changed' "printf ready > wkdrs/$RUN/.await"
-note 'every hook recognizes guarded launch forms'
+for command in "timeout 12h bash execs/scpts/$RUN.sh" "source execs/scpts/$RUN.sh" ". execs/scpts/$RUN.sh" \
+    "sudo bash execs/scpts/$RUN.sh" "echo go 1>wkdrs/$RUN/.await" "if true; then bash execs/scpts/$RUN.sh; fi"; do
+    hooks 'source/config scope changed' "$command"
+done
+hooks '' "bash -n execs/scpts/$RUN.sh"
+note 'every hook recognizes guarded launch forms and passes a syntax check'
+reset_case
+write "$PLAN" $'---\nparent: root_plan.md\n--- \n# Example\n## 3. Tasks\nTrain with lr 0.1 on the full set.\n'
+record; check; write "$PLAN" $'---\nparent: root_plan.md\n--- \n# Example\n## 3. Tasks\nTrain with lr 0.9 on the full set.\n'
+check 'plan constraints changed'; note 'closing fence with trailing whitespace keeps the body bound'
+reset_case; write "$PLAN" $'---\nparent: root_plan.md\n# Example\nNo closing fence.\n'
+if record >"$TMP_DIR/result"; then fail 'unclosed plan frontmatter accepted'; fi
+note 'unclosed plan frontmatter fails closed'
+big_file() { head -c $((11 * 1024 * 1024)) /dev/zero > "$1"; }
+git_fixture() { git -C "$1" -c user.name=Fixture -c user.email=fixture@example.invalid "${@:2}"; }
+reset_case
+worktree="${project}--wt/oversize"
+git_fixture "$project" commit -q --allow-empty -m base
+git -C "$project" worktree add --detach -q "$worktree" HEAD
+big_file "$worktree/ckpt.pt"; git -C "$worktree" add ckpt.pt
+hooks 'over 10 MB' "git -C $worktree commit -m checkpoint"
+hooks 'over 10 MB' "cd $worktree && git commit -m checkpoint"
+hooks '' 'git commit -m unrelated'
+note 'staged-size check reads the index of the checkout the commit targets'
+reset_case
+big_file "$project/big.pt"; git -C "$project" add big.pt; git_fixture "$project" commit -q -m big
+git -C "$project" rm -q --cached big.pt
+hooks '' 'git commit -m untrack'
+printf 'small\n' > "$project/small.bin"; git -C "$project" add small.bin; git_fixture "$project" commit -q -m small
+big_file "$project/small.bin"
+hooks 'over 10 MB' 'git commit small.bin -m update'
+note 'staged deletions pass and commit pathspecs are sized'
 reset_case; record; rm "$project/$HELPER"; hooks 'review-state helper missing'; note 'missing helper blocks launch'
 reset_case; hooks '' 'bash execs/scpts/unknown.sh'; hooks '' "cat wkdrs/$RUN/.await"; note 'unknown run and read-only marker access'
 reset_case

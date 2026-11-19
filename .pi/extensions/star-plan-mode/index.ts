@@ -23,7 +23,15 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { AssistantMessage, TextContent } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.ts";
+import { discoverAgents } from "../star-subagent/agents.ts";
+import {
+	extractTodoItems,
+	isSafeCommand,
+	markCompletedSteps,
+	type SubagentInput,
+	type TodoItem,
+	writeCapableAgents,
+} from "./utils.ts";
 
 // Tools
 const PLAN_MODE_TOOLS = ["read", "bash", "grep", "find", "ls", "star_questionnaire"];
@@ -162,9 +170,24 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 		},
 	});
 
-	// Block destructive bash commands in plan mode
-	pi.on("tool_call", async (event) => {
-		if (!planModeEnabled || event.toolName !== "bash") return;
+	// Block destructive bash commands, and delegates that can edit, in plan mode
+	pi.on("tool_call", async (event, ctx) => {
+		if (!planModeEnabled) return;
+
+		// A delegate runs as its own pi process with its own tool roster, so the
+		// tools plan mode disables here do not reach it. Refuse the ones that edit.
+		if (event.toolName === "star_subagent") {
+			const input = event.input as SubagentInput;
+			const writers = writeCapableAgents(input, discoverAgents(ctx.cwd, input.agentScope ?? "project").agents);
+			if (writers.length > 0) {
+				return {
+					block: true,
+					reason: `Plan mode: ${writers.join(", ")} can edit files. Delegate to a read-only agent, or use /star-plan to disable plan mode first.`,
+				};
+			}
+			return;
+		}
+		if (event.toolName !== "bash") return;
 
 		const command = event.input.command as string;
 		if (!isSafeCommand(command)) {

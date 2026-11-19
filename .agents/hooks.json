@@ -30,7 +30,7 @@
   "star-involve-gate": {
     "PreToolUse": [
       {
-        "matcher": "edit_file|write_file",
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
         "hooks": [
           {
             "type": "command",

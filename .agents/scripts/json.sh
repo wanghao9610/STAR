@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Portable JSON operations for STAR scripts. Requires Bash 3.2 and POSIX awk.
 STAR_JSON_LIB="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)/json.awk"
-star_json_awk() {
-    local program=$1 index=0 value
+# The arguments travel as environment variables, exported in a subshell so they
+# never stay behind in the caller's shell for its later commands to inherit.
+star_json_awk() (
+    program=$1 index=0
     shift
     for value in "$@"; do
         index=$((index + 1))
         export "STAR_JSON_ARG_$index=$value"
     done
-    LC_ALL=C STAR_JSON_ARG_COUNT=$index awk -f "$STAR_JSON_LIB" -f <(printf '%s\n' "$program")
-}
+    LC_ALL=C STAR_JSON_ARG_COUNT=$index exec awk -f "$STAR_JSON_LIB" -f <(printf '%s\n' "$program")
+)
 star_json_eval() { local program=$1; shift; star_json_awk "END { r = document(); $program }" "$@"; }
 star_json_new() { local program=$1; shift; star_json_awk "END { $program }" "$@" </dev/null; }
 star_json_get() { star_json_eval 'raw(at(r,a(1)))' "$1"; }
@@ -23,6 +25,9 @@ star_json_context() {
 star_json_models() {
     star_json_awk '
     BEGIN { streaming=1 }
+    # Only a line naming a "model" key can carry one; skipping the rest before the
+    # parse keeps a long transcript cheap.
+    index($0, "\"model\"") == 0 { next }
     { reset_json(); r=tryparse($0); if(!r) next; x=0
       if(a(1)=="claude" && field(r,"type")=="assistant" && (a(2)=="true" || field(r,"isSidechain")!="true")) x=at(r,"message.model")
       if(a(1)=="codex" && field(r,"type")=="turn_context") x=at(r,"payload.model")
@@ -39,6 +44,9 @@ star_json_models() {
 star_json_invocations() {
     star_json_awk '
     BEGIN { streaming=1 }
+    # Only a STAR command line or a Skill tool call can carry an invocation; this
+    # runs on every gated tool call, so the rest of the transcript is not parsed.
+    index($0, "command-name") == 0 && index($0, "\"Skill\"") == 0 { next }
     { reset_json(); r=tryparse($0); if(!r || field(r,"isSidechain")=="true") next
       c=at(r,"message.content")
       if(field(r,"type")=="user") {

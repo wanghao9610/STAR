@@ -12,7 +12,9 @@ LAUNCH_JSON=$(cat "${STAR_JSON_LIB%/*}/launch.awk")
 launch_json() { local program=$1; shift; star_json_awk "$LAUNCH_JSON
 END { r=document(); $program }" "$@"; }
 
-fail() { printf 'launch state: %s\n' "$*" >&2; exit 2; }
+# Inside $(...) fail exits with a reserved status, which the ERR trap below turns
+# into the documented exit 2 without adding its own, misleading message.
+fail() { printf 'launch state: %s\n' "$*" >&2; [ "$BASH_SUBSHELL" -gt 0 ] && exit 86; exit 2; }
 usage() {
     case "${1:-}" in
         prepare) printf '%s\n' 'Usage: launch_state.sh prepare --run RUN --pid PID --log LOG --output OUTPUT [--output OUTPUT ...] --code-version VERSION --review-version VERSION -- COMMAND [ARG ...]' ;;
@@ -32,7 +34,7 @@ release() {
 }
 trap release EXIT
 trap 'exit 2' HUP INT TERM
-trap 'fail "operation failed; preserve launch evidence and inspect filesystem permissions"' ERR
+trap '[ $? -eq 86 ] && exit 2; fail "operation failed; preserve launch evidence and inspect filesystem permissions"' ERR
 
 now() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 lexical_absolute() {

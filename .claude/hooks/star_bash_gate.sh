@@ -67,7 +67,9 @@ strip_heredocs() {
             [A-Za-z_]*) body=1 ;;
         esac
     done <<< "${cmd}"
-    printf '%s' "${out}"
+    # A body that never closes was no heredoc — a quoted `<<EOF` in an echo, say —
+    # so every line is read as written.
+    if (( body )); then printf '%s' "${cmd}"; else printf '%s' "${out}"; fi
 }
 cmd="$(strip_heredocs)"
 [[ -n "${cmd}" ]] || exit 0
@@ -78,9 +80,9 @@ while IFS= read -r segment; do
     read -ra tok <<< "${segment}"
     [[ ${#tok[@]} -gt 0 ]] || continue
 
-    # Walk past wrappers, assignments, flags, and a timeout's duration to the
-    # command itself, so `env rm`, `timeout 30 rm`, and `xargs rm` are the rm
-    # they carry.
+    # Walk past wrappers, shell keywords, assignments, flags, and a timeout's
+    # duration to the command itself, so `env rm`, `timeout 30 rm`, `xargs rm`
+    # and `if true; then rm` are the rm they carry.
     i=0
     while [[ ${i} -lt ${#tok[@]} ]]; do
         t="${tok[i]}"
@@ -88,7 +90,7 @@ while IFS= read -r segment; do
         # so each side strips on its own, not only as a pair.
         t="${t#\'}"; t="${t#\"}"; t="${t%\'}"; t="${t%\"}"
         case "${t##*/}" in
-            env|command|exec|nohup|time|nice|caffeinate|stdbuf|timeout|xargs|sh|bash|zsh)
+            env|command|exec|nohup|setsid|time|nice|caffeinate|stdbuf|timeout|xargs|eval|sh|bash|zsh|if|then|do|else|elif|while|until|'{'|'!')
                 i=$((i + 1)) ;;
             *=*|-*|[0-9]*)
                 i=$((i + 1)) ;;

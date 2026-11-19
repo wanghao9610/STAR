@@ -36,8 +36,10 @@ done
 mkdir -p "${home}"
 [ -f "${patch}" ] || : > "${patch}"
 
-if grep -qF "${bridge}" "${patch}" 2>/dev/null; then
-  echo "The hook bridge is already registered in ${patch} — left alone."
+# STAR's own row is what counts, not the bridge: a user may already load the same
+# bridge for hooks of their own, pointed at another config.
+if grep -qF 'configPath: ./.dsh/hooks.json' "${patch}" 2>/dev/null; then
+  echo "STAR's hook row is already registered in ${patch} — left alone."
 else
   cp "${patch}" "${patch}.star-bak"
   {

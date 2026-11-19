@@ -91,7 +91,7 @@ function merge(x,y,    result,i,key) {
     for(i=1;i<=size(y);i++) {key=keys[y,i]; put(result,key,get(y,key))}
     return result
 }
-function whitespace() { while(substr(source,pos,1) ~ /[ \t\r\n]/ && pos<=length(source)) pos++ }
+function whitespace() { while(substr(source,pos,1) ~ /[ \t\r\n]/ && pos<=srclen) pos++ }
 function hex4(    text,i,c,n) {
     text=substr(source,pos,4); if(length(text)!=4 || text ~ /[^0-9a-fA-F]/) return parse_error("invalid Unicode escape")
     pos+=4; n=0; for(i=1;i<=4;i++) {c=tolower(substr(text,i,1)); n=n*16+index("0123456789abcdef",c)-1}; return n
@@ -102,9 +102,17 @@ function utf8(n) {
     if(n<65536) return sprintf("%c%c%c",224+int(n/4096),128+int(n/64)%64,128+n%64)
     return sprintf("%c%c%c%c",240+int(n/262144),128+int(n/4096)%64,128+int(n/64)%64,128+n%64)
 }
-function readstring(    out,c,n,low) {
+function readstring(    out,c,n,low,rest,k,run,plain) {
     pos++; out=""
-    while(pos<=length(source)) {
+    while(pos<=srclen) {
+        # Take the run up to the next quote or backslash in one step. BWK awk's
+        # substr measures the whole string on every call, so reading a character
+        # at a time made a long string cost quadratic time.
+        rest=substr(source,pos); k=match(rest,/["\\]/)
+        run=k ? substr(rest,1,k-1) : rest
+        if(run ~ /[[:cntrl:]]/) { plain=run; gsub(/\177/,"",plain); if(plain ~ /[[:cntrl:]]/) return parse_error("unescaped control character") }
+        out=out run; pos+=length(run)
+        if(!k) break
         c=substr(source,pos++,1)
         if(c=="\"") return out
         if(c=="\\") {
@@ -148,7 +156,9 @@ function readvalue(depth,    c,id,key,value,token) {
     if(substr(token,1,4)=="null") {pos+=4; return null()}
     return parse_error("expected JSON value")
 }
-function tryparse(text,    id) { parse_failure=""; source=text; pos=1; id=readvalue(0); if(!id) return 0; whitespace(); if(pos<=length(source)) return parse_error("extra JSON data"); return id }
+# srclen caches length(source): BWK awk recomputes a length on every call, and the
+# parser asks once per character.
+function tryparse(text,    id) { parse_failure=""; source=text; srclen=length(source); pos=1; id=readvalue(0); if(!id) return 0; whitespace(); if(pos<=srclen) return parse_error("extra JSON data"); return id }
 function parse(text,    id) { id=tryparse(text); if(!id) die(parse_failure); return id }
-function stream(text,    result,value) { parse_failure=""; source=text; pos=1; result=array(); whitespace(); while(pos<=length(source)) {value=readvalue(0); if(!value) die(parse_failure); add(result,value); whitespace()}; return result }
+function stream(text,    result,value) { parse_failure=""; source=text; srclen=length(source); pos=1; result=array(); whitespace(); while(pos<=srclen) {value=readvalue(0); if(!value) die(parse_failure); add(result,value); whitespace()}; return result }
 function document() { return parse(input) }

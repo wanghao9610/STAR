@@ -130,16 +130,21 @@ if [ "${event}" = "SubagentStart" ]; then
         */subagents/*agent-*.jsonl) agent_transcript="${transcript}" ;;
         *) agent_transcript="$(dirname "${transcript}")/${session_id}/subagents/agent-${agent_id}.jsonl" ;;
     esac
-    ctx="STAR provenance: this run is a delegate; the model id you record is this delegate's, not the session's. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${agent_transcript} — at the moment you write, not earlier — then copy what it prints verbatim. Write 'unrecorded' only if it prints nothing, and do not guess."
+    # Shell-quoted, so a path with spaces or glob characters reaches --resolve intact.
+    printf -v agent_arg '%q' "${agent_transcript}"
+    ctx="STAR provenance: this run is a delegate; the model id you record is this delegate's, not the session's. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${agent_arg} — at the moment you write, not earlier — then copy what it prints verbatim. Write 'unrecorded' only if it prints nothing, and do not guess."
     emit_context "${event}" "${ctx}"
     exit 0
 fi
 
 model=$(payload_field model)
 transcript=$(payload_field transcript_path)
-
+# Shell-quoted: a model id such as claude-opus-5[1m] is a glob, and zsh aborts
+# an unmatched one; a transcript path may carry spaces.
+printf -v transcript_arg '%q' "${transcript:-}"
+printf -v model_arg '%q' "${model:-}"
 if [ -n "${transcript:-}" ]; then
-    ctx="STAR provenance: read this session's model id when you record it, not from memory — the runtime states it at session start only, and /model changes it afterwards without saying so. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${transcript}${model:+ ${model}} — then copy what it prints verbatim. Write 'unrecorded' only if it prints nothing, and do not guess."
+    ctx="STAR provenance: read this session's model id when you record it, not from memory — the runtime states it at session start only, and /model changes it afterwards without saying so. Before a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), run: bash ${self} --resolve ${transcript_arg}${model:+ ${model_arg}} — then copy what it prints verbatim. Write 'unrecorded' only if it prints nothing, and do not guess."
 elif [ -n "${model:-}" ]; then
     ctx="STAR provenance: this session's runtime-reported model id is ${model}, and the runtime named no transcript to check it against later. When a STAR skill records a model_id or a model_trail entry (research-workflow-conventions section 8), copy this exact string verbatim; do not write 'unrecorded'. If you switch models mid-session, this string is the one you started with, not the one writing."
 else

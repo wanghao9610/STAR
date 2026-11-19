@@ -107,6 +107,11 @@ export default function questionnaire(pi: ExtensionAPI) {
 				label: q.label || `Q${i + 1}`,
 				allowOther: q.allowOther !== false,
 			}));
+			// A question with no option and no free-text entry has nothing to select.
+			const unanswerable = questions.find((q) => q.options.length === 0 && !q.allowOther);
+			if (unanswerable) {
+				return errorResult(`Error: question "${unanswerable.id}" has no options and allowOther is false`);
+			}
 
 			const isMulti = questions.length > 1;
 			const totalTabs = questions.length + 1; // questions + Submit
@@ -249,6 +254,7 @@ export default function questionnaire(pi: ExtensionAPI) {
 					// Select option
 					if (matchesKey(data, Key.enter) && q) {
 						const opt = opts[optionIndex];
+						if (!opt) return;
 						if (opt.isOther) {
 							inputMode = true;
 							inputQuestionId = q.id;

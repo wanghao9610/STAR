@@ -63,10 +63,12 @@ path_hash() { scope_hash "$1" | hash_stream; }
 plan_hash() {
     [[ -f "$root/$1" ]] || return 1
     # Keep plan relationships and body constraints, not workflow bookkeeping.
+    # Fences may carry trailing whitespace, as validate.sh accepts; a frontmatter
+    # that never closes fails, so its body cannot drop out of the hash.
     awk '
         { sub(/\r$/, "") }
-        NR == 1 && $0 == "---" { front = 1; next }
-        front && $0 == "---" { front = 0; next }
+        NR == 1 && $0 ~ /^---[[:space:]]*$/ { front = 1; next }
+        front && $0 ~ /^---[[:space:]]*$/ { front = 0; next }
         front {
             # YAML permits sequence items at the same indentation as their key.
             if ($0 ~ /^-([[:space:]]|$)/) {
@@ -89,6 +91,7 @@ plan_hash() {
             if (title ~ /^([0-9]+[.)]?[[:space:]]+)?(Revision History|修订历史|修订记录)[[:space:]]*$/) skip = level
         }
         !skip { print }
+        END { if (front) exit 2 }
     ' "$root/$1" | hash_stream
 }
 report_gate() {

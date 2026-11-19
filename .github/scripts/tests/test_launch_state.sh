@@ -13,6 +13,9 @@ fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 eq() { [ "$1" = "$2" ] || fail "${3:-values differ}: [$1] != [$2]"; }
 json() { printf '%s\n' "$result" | star_json_eval "$1" >/dev/null || fail "JSON assertion: $1"; }
 exists() { [ -e "$1" ] || fail "missing $1"; }
+# Passes only when the pattern is searched for and not found: a missing file or
+# a grep error fails too, rather than reading as absence.
+lacks() { local rc=0; grep -q -- "$1" "$2" || rc=$?; [ "$rc" -eq 1 ] || fail "$3"; }
 absent() { [ ! -e "$1" ] || fail "unexpected $1"; }
 setup() {
     count=$((count + 1))
@@ -150,14 +153,14 @@ pass 'receipt persists before cleanup; repeated collection is idempotent'
 setup; prepare; finish 17
 cli acknowledge --attempt "$attempt" --evidence "$evidence"
 json 'if(!(equal(at(r,".receipt.exit_code"),parse("17")) && equal(at(r,".receipt.result"),parse("\"failed\"")) && equal(at(r,".receipt.verified_outputs"),parse("[]")))) exit 1'
-! rg -q 'status: done' "$run/EXEC_LOG.md" || fail 'failed attempt marked done'
+lacks 'status: done' "$run/EXEC_LOG.md" 'failed attempt marked done'
 pass 'failed exit remains failed without outputs'
 
 setup; prepare
 cli inspect; json 'if(!(equal(at(r,".status"),parse("\"waiting\"")))) exit 1'
 reject acknowledge --attempt "$attempt" --evidence "$evidence" --verified-output "$output"
 exists "$run/.await"
-! rg -q '^```star-launch-receipt' "$run/EXEC_LOG.md" || fail 'waiting attempt collected'
+lacks '^```star-launch-receipt' "$run/EXEC_LOG.md" 'waiting attempt collected'
 pass 'waiting cannot be collected'
 
 setup; prepare; finish

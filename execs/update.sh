@@ -178,9 +178,12 @@ link_codex_marketplace() {
 # own — and a project that has it can be handed to a harness STAR ships no tree
 # for at all. It is part of the shared skeleton now, updated whichever trees
 # --harnesses names, and updated first. .codex stays Codex's: its hooks,
-# per-skill manifests, and plugins. .cursorignore is Cursor's one path
-# outside .cursor/; every other path starts with its harness's own directory, so one
-# added upstream is classified without being listed here.
+# per-skill manifests, and plugins. Three paths sit outside their harness's own
+# directory and are listed here by name: .cursorignore (Cursor), .agents/hooks.json
+# (Antigravity, whose tree is .gemini/antigravity-cli/) and
+# .agents/plugins/marketplace.json (Codex). Every other path starts with its
+# harness's own directory, so one added upstream is classified without being
+# listed here.
 path_harness() { # $1 = path relative to the project root
     case "$1" in
         .agents/hooks.json|.gemini/antigravity-cli/*) printf 'agy' ;;
@@ -245,6 +248,16 @@ filter_paths() { # $@ = paths relative to the project root
     done
 }
 
+# How a log line should name an installed config, so a project config is not
+# announced as a hook registration.
+config_kind() { # $1 = config path (relative or absolute)
+    local entry
+    for entry in "${HOOK_CONFIGS[@]}"; do
+        [[ "$1" == "${entry}" || "$1" == *"/${entry}" ]] && { printf 'hook registration'; return 0; }
+    done
+    printf 'project config'
+}
+
 # Names of the STAR hooks a kept registration config does not register. Empty
 # when it registers every hook that applies to it. A config predating a hook
 # keeps its own entries — update never overwrites it — so this is what turns a
@@ -256,16 +269,6 @@ filter_paths() { # $@ = paths relative to the project root
 # fall behind. Neither carries an involve gate: that hook answers the permission
 # prompt before a file edit, and neither raises one — Pi ships no prompts at all,
 # and DSH's default workspace-write sandbox lets an in-project edit run unasked.
-# How a log line should name an installed config, so a project config is not
-# announced as a hook registration.
-config_kind() { # $1 = config path (relative or absolute)
-    local entry
-    for entry in "${HOOK_CONFIGS[@]}"; do
-        [[ "$1" == "${entry}" || "$1" == *"/${entry}" ]] && { printf 'hook registration'; return 0; }
-    done
-    printf 'project config'
-}
-
 missing_hooks() { # $1 = registration config path
     # Only a hook registration config can be missing a hook. A project config
     # installed beside them registers none, and asking would report all three as
@@ -347,8 +350,9 @@ kimi, pi or qwen — or all, which is the default, or none for the shared skelet
 tree left out is not touched at all: not installed, not updated, and never deleted, so a project
 keeps whatever it already has there. Without the flag the list comes from STAR_HARNESSES
 (environment first, then .env), and from every harness when that is unset too. The shared paths —
-.agents/skills, .agents/commands, the workflow documentation, execs/run.sh, this script, AGENTS.md —
-are updated whichever trees are selected, and .agents/skills is written first. It is in that list rather
+.agents/skills, .agents/scripts, .agents/commands, the workflow documentation and docs/srcs,
+execs/run.sh, execs/configure.sh and this script — are updated whichever trees are selected
+(AGENTS.md is installed when missing, never overwritten), and .agents/skills is written first. It is in that list rather
 than behind codex because it is where the AGENTS.md convention puts skills: every agent that
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
@@ -526,6 +530,11 @@ env_value() { # $1 = key; its last assignment in the target .env, empty when it 
     [[ -f "${ENV_DIR}/.env" ]] || return 0
     while IFS= read -r current || [[ -n "${current}" ]]; do
         current="${current%$'\r'}"
+        # Indented and `export KEY=` assignments count, as run.sh's `source` reads them.
+        current="${current#"${current%%[![:space:]]*}"}"
+        case "${current}" in
+            export[[:space:]]*) current="${current#export}"; current="${current#"${current%%[![:space:]]*}"}" ;;
+        esac
         if [[ "${current}" == "${key}="* ]]; then
             line="${current#*=}"
             found=true
@@ -544,6 +553,11 @@ fi
 if [[ -z "${STAR_REPOSITORY:-}" ]]; then
     env_value STAR_REPOSITORY >/dev/null
 fi
+# The tier keys are read by configure.sh after the extract; a malformed one found
+# only then would leave the stamps the extract just reset unrestored.
+for env_key in STAR_PLAN_MODEL STAR_EXEC_MODEL STAR_READ_MODEL; do
+    env_value "${env_key}" >/dev/null
+done
 
 # Which harness trees this run covers: the flag first, then the environment, then .env,
 # then every one of them.
@@ -675,6 +689,8 @@ elif [[ -n "${SKILL_NAME}" ]]; then
     for root in "${SKILL_ROOTS[@]}"; do
         SYNC_PATHS+=("${root}/${SKILL_NAME}")
     done
+    # Codex's per-skill manifest; filter_paths below drops it unless codex is selected.
+    SYNC_PATHS+=(".codex/skills/${SKILL_NAME}")
     # A skill-only update still needs the named model agent the harness will
     # dispatch for its complete run or phase.
     SYNC_PATHS+=("${MODEL_AGENT_TREES[@]}")
@@ -845,6 +861,25 @@ if [[ "${ADOPT}" == false ]]; then
         fi
     done
 
+    # A dereferenced scratch copy of the synced upstream paths, stamped with the
+    # project's tier models from its .env the way the update leaves them. Comparing
+    # against it rather than the raw checkout keeps a stamped project from reading
+    # as changed. SOURCE_DIR itself stays unstamped: the extract copies its links.
+    PREVIEW_DIR="${TEMP_DIR}/preview"
+    build_preview() {
+        mkdir -p "${PREVIEW_DIR}"
+        (cd "${SOURCE_DIR}" && tar -chf - "${SYNCED[@]}") | (cd "${PREVIEW_DIR}" && tar -xf -) || \
+            fail "Could not stage the upstream preview."
+        if [[ -f "${SOURCE_DIR}/execs/configure.sh" ]]; then
+            mkdir -p "${PREVIEW_DIR}/execs"
+            cp "${SOURCE_DIR}/execs/configure.sh" "${PREVIEW_DIR}/execs/configure.sh"
+            STAR_ENV_DIR="${ROOT_DIR}" STAR_HARNESSES="${HARNESSES_SPEC}" \
+                bash "${PREVIEW_DIR}/execs/configure.sh" >/dev/null || \
+                fail "Could not apply the project's tier models to the upstream preview."
+        fi
+    }
+    build_preview
+
     if [[ "${DIFF}" == true ]]; then
         changed=0
         added=0
@@ -859,7 +894,7 @@ if [[ "${ADOPT}" == false ]]; then
             if [[ ! -e "${ROOT_DIR}/${rel}" && ! -L "${ROOT_DIR}/${rel}" ]]; then
                 printf '  new      %s\n' "${rel}"
                 added=$(( added + 1 ))
-            elif ! cmp -s "${SOURCE_DIR}/${rel}" "${ROOT_DIR}/${rel}"; then
+            elif ! cmp -s "${PREVIEW_DIR}/${rel}" "${ROOT_DIR}/${rel}"; then
                 printf '  differs  %s\n' "${rel}"
                 changed=$(( changed + 1 ))
             fi
@@ -944,7 +979,20 @@ if [[ "${ADOPT}" == false ]]; then
             filter_paths "${INSTRUCTION_FILES[@]}" "${INSTALL_CONFIGS[@]}"
             DIRTY_PATHS+=(${FILTERED[@]+"${FILTERED[@]}"})
         fi
-        DIRTY="$(git -C "${ROOT_DIR}" status --porcelain -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)"
+        # Only what the extract would actually destroy: a path upstream has, whose
+        # content differs from what the update leaves. An untracked file of the
+        # project's own is never written, and an uncommitted tier stamp is put back
+        # by configure.sh, so neither stops the update.
+        DIRTY=""
+        while IFS= read -r -d '' entry; do
+            dirty_status="${entry:0:2}"; dirty_path="${entry:3}"
+            # A rename or copy carries its source path as the next field.
+            case "${dirty_status}" in R*|C*) IFS= read -r -d '' _ || true ;; esac
+            [[ -e "${SOURCE_DIR}/${dirty_path}" || -L "${SOURCE_DIR}/${dirty_path}" ]] || continue
+            [[ -f "${ROOT_DIR}/${dirty_path}" ]] && cmp -s "${PREVIEW_DIR}/${dirty_path}" "${ROOT_DIR}/${dirty_path}" && continue
+            DIRTY="${DIRTY}${dirty_status} ${dirty_path}"$'\n'
+        done < <(git -C "${ROOT_DIR}" status --porcelain -z --untracked-files=all -- "${DIRTY_PATHS[@]}" 2>/dev/null || true)
+        DIRTY="${DIRTY%$'\n'}"
         if [[ -n "${DIRTY}" ]]; then
             printf '%s\n' "${DIRTY}" | sed 's/^/      /' >&2
             if [[ "${FORCE}" == true ]]; then
@@ -1126,9 +1174,15 @@ elif [[ -e "${ROOT_DIR}/AGENTS.md" ]]; then
 fi
 
 # The project may have no .env yet — the last line below is what tells the user to
-# make one — in which case this reads no key and stamps nothing.
+# make one — in which case this reads no key and stamps nothing. Only STAR's own
+# configure.sh runs: a project's pre-existing execs/configure.sh was kept above,
+# and adopt modifies nothing that was already there.
 if [[ -f "${ROOT_DIR}/execs/configure.sh" ]]; then
-    STAR_HARNESSES="${HARNESSES_SPEC}" bash "${ROOT_DIR}/execs/configure.sh"
+    if cmp -s "${SOURCE_DIR}/execs/configure.sh" "${ROOT_DIR}/execs/configure.sh"; then
+        STAR_HARNESSES="${HARNESSES_SPEC}" bash "${ROOT_DIR}/execs/configure.sh"
+    else
+        log "Skipped tier-model stamping: execs/configure.sh is the project's own, not STAR's."
+    fi
 fi
 
 log "Adopted into ${ROOT_DIR}: ${installed} added, ${skipped} left alone."

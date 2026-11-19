@@ -114,7 +114,8 @@ SCAN_AWK='
 function readfile(path,   n, line) {
     n = 0
     split("", buf)
-    while ((getline line < path) > 0) buf[++n] = line
+    # CRLF files read like LF ones, as validate.sh and the other readers do.
+    while ((getline line < path) > 0) { sub(/\r$/, "", line); buf[++n] = line }
     close(path)
     return n
 }
@@ -494,12 +495,12 @@ sweep() {   # $1 = mode, $2 = what to say when the sweep found nothing; paths on
 # byte-identical whatever the caller ran it with.
 find_md() {   # $1 = dir, $2 = exact depth below it, $3 = name pattern
     [ -d "$1" ] || return 0
-    find -L "$1" -mindepth "$2" -maxdepth "$2" -type f -name "$3" 2>/dev/null | sort
+    find -L "$1" -mindepth "$2" -maxdepth "$2" -type f -name "$3" 2>/dev/null | LC_ALL=C sort
 }
 
 find_dirs() { # $1 = dir; immediate subdirectories, trailing slash kept
     [ -d "$1" ] || return 0
-    find -L "$1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|$|/|' | sort
+    find -L "$1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|$|/|' | LC_ALL=C sort
 }
 
 if [ ! -d metds ] && [ ! -d wkdrs ]; then
@@ -571,7 +572,7 @@ listing=$(
     find_md wkdrs/dropped 2 '*.md'
 )
 if [ -n "$listing" ]; then
-    printf '%s\n' "$listing" | sort
+    printf '%s\n' "$listing" | LC_ALL=C sort
 else
     say "(none)"
 fi
@@ -581,7 +582,7 @@ if [ "$TRAILS" = 0 ]; then
     say "## DIRS — metds/ and wkdrs/ subdirectories"
     dirs=$(find_dirs metds; find_dirs wkdrs)
     if [ -n "$dirs" ]; then
-        printf '%s\n' "$dirs" | sort
+        printf '%s\n' "$dirs" | LC_ALL=C sort
     else
         say "(none)"
     fi
