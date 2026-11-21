@@ -1,7 +1,6 @@
 ---
 name: star-plan
 description: Runs a complete STAR plan-tier skill or a bounded plan phase from its dispatch brief.
-model: inherit
 ---
 
 Carry out only the STAR plan-tier work named in the dispatch brief. Preserve the invocation and

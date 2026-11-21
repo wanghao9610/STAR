@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run the seven hosts' hooks in a disposable project with Python blocked.
+# Run the harness hooks in a disposable project with Python blocked.
 set -eu
 source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)/.agents/scripts/json.sh"
 repo=$(cd "$(dirname "$0")/../../.." && pwd -P)
@@ -470,6 +470,43 @@ for command_text in 'rm -rf build' 'git push origin main' 'sudo make install'; d
     run 0 "$payload" "$hook"
     assert_equal ''
 done
+# Both Devin gates take low only as the exact literal: a lookalike value, or a
+# later malformed line overriding an earlier low, stays undecided.
+for env_lines in 'INVOLVE=low1' 'INVOLVE=low!' 'INVOLVE=low
+INVOLVE=medium' 'INVOLVE=low
+INVOLVE="unterminated'; do
+    write .env "$env_lines"
+    for gate in star_involve_gate star_bash_gate; do
+        hook_path devin "$gate"
+        case_ "Devin $gate stays undecided on malformed INVOLVE: ${env_lines//$'\n'/ ; }"
+        if [ "$gate" = star_involve_gate ]; then
+            payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
+        else
+            payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "rg --files src")
+        fi
+        run 0 "$payload" "$hook"
+        assert_equal ''
+    done
+done
+# Quoting, export, indentation, a trailing comment and CRLF still count as low.
+write .env '  export INVOLVE="low" # comment'
+hook_path devin star_involve_gate
+case_ 'Devin involve gate accepts an exported quoted low with a comment'
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+hook_path devin star_bash_gate
+case_ 'Devin shell gate accepts an exported quoted low with a comment'
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" "rg --files src")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+printf 'INVOLVE=low\r\n' > "$project/.env"
+hook_path devin star_involve_gate
+case_ 'Devin involve gate accepts a CRLF low'
+payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+write .env 'INVOLVE=low'
 case_ 'Devin hooks.v1.json registers its own hook copies on the documented matchers'
 assertions=$((assertions + 1))
 grep -qF '"matcher": "^exec$"' "$repo/.devin/hooks.v1.json" || fail 'devin exec matcher is not anchored'
@@ -547,13 +584,28 @@ case_ 'Devin guard without workdir reads the project root'
 payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"tool_input",x); print json(r)' "git commit -m big")
 run 0 "$payload" "$hook"
 assert_equal ''
-case_ 'Payload commands were never executed'
-assertions=$((assertions + 1))
-[ ! -e "$project/payload-executed" ] || fail 'hook executed payload text'
-case_ 'No Python runtime was invoked'
-assertions=$((assertions + 1))
-[ ! -e "$PYTHON_PROBE_LOG" ] || fail "Python invoked: $(cat "$PYTHON_PROBE_LOG")"
-printf 'PASS: %s cases, %s assertions\n' "$cases" "$assertions"
+# A commit's message options carry values, and its `--` ends option parsing:
+# the pathspecs after them still reach the 10 MB check, while message text that
+# spells a flag is not read as one. No commit payload is ever run.
+pathspec_tree=$sandbox/devin-pathspec
+git init -q "$pathspec_tree"
+# The staged blob is small; what a pathspec commit records is the working copy.
+printf 'small\n' > "$pathspec_tree/big.bin"
+git -C "$pathspec_tree" add big.bin
+dd if=/dev/zero of="$pathspec_tree/big.bin" bs=1048576 count=11 2>/dev/null
+printf 'small\n' > "$pathspec_tree/small.txt"
+case_ 'Devin guard sizes an unstaged pathspec after a separated message'
+payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(x,"workdir",string(a(2))); put(r,"tool_input",x); print json(r)' 'git commit -m "two words" -- big.bin' "$pathspec_tree")
+run 2 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"block\"")) && index(val(at(r,".reason")),"10 MB"))) exit 1'
+case_ 'Devin guard sizes an unstaged pathspec after an attached message'
+payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(x,"workdir",string(a(2))); put(r,"tool_input",x); print json(r)' 'git commit -m"two words" -- big.bin' "$pathspec_tree")
+run 2 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"block\"")) && index(val(at(r,".reason")),"10 MB"))) exit 1'
+case_ 'Devin guard ignores flag text inside a commit message'
+payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(x,"workdir",string(a(2))); put(r,"tool_input",x); print json(r)' 'git commit -m "has --amend text" small.txt' "$pathspec_tree")
+run 0 "$payload" "$hook"
+assert_equal ''
 # Antigravity CLI passes the working directory in common top-level cwd (no Cwd
 # arg on run_command), while IDE surfaces may pass toolCall.args.Cwd.
 hook_path agy star_commit_guard
@@ -569,3 +621,10 @@ case_ 'Antigravity guard without Cwd or cwd reads the project root'
 payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "git commit -m big")
 run 0 "$payload" "$hook"
 assert_equal ''
+case_ 'Payload commands were never executed'
+assertions=$((assertions + 1))
+[ ! -e "$project/payload-executed" ] || fail 'hook executed payload text'
+case_ 'No Python runtime was invoked'
+assertions=$((assertions + 1))
+[ ! -e "$PYTHON_PROBE_LOG" ] || fail "Python invoked: $(cat "$PYTHON_PROBE_LOG")"
+printf 'PASS: %s cases, %s assertions\n' "$cases" "$assertions"

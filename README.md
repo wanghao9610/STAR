@@ -120,7 +120,7 @@ STAR/
 ├── .devin/rules/           # Always-on project rules for Devin
 ├── .claude/agents/         # Claude Code's named tier delegates: star-plan, star-exec, star-read
 ├── .cursor/agents/         # Cursor's named tier agents: star-plan, star-exec, star-read
-├── .devin/agents/          # Devin's named tier agents: star-plan, star-exec, star-read
+├── .devin/agents/          # Devin's named tier agents: star-plan, star-exec, star-read (+ read-only star-read-local, star-plan-blind)
 ├── .qwen/agents/           # Qwen Code's named tier agents: star-plan, star-exec, star-read
 ├── .pi/agents/             # Roster star_subagent dispatches to: collector, implementer, auditor, runner
 ├── .pi/prompts/            # Pi slash commands: /star-<name> per skill, /star to route, /star-auto to pursue a goal
@@ -547,7 +547,7 @@ bash execs/configure.sh
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | Passes an alias when the current tool exposes `model` through a selectable secondary-model pool. The user's Kimi configuration owns that pool. |
 | Pi | Passes `model` on single tasks or individual parallel/chain items through STAR's extension. |
 | [Cursor](https://cursor.com/docs/subagents) | Uses named agents; model selection and fallback rules live in [harness adapters](docs/mds/star-workflow/research-workflow-conventions.md#cursor). |
-| Devin | Selects the named agents `star-plan`, `star-exec` and `star-read`, whose `model:` `configure.sh` stamps; a depth rides the stamped id as `-<depth>`. There is no per-dispatch model; see [harness adapters](docs/mds/star-workflow/research-workflow-conventions.md#devin). |
+| Devin | Selects the named agents `star-plan`, `star-exec` and `star-read`, plus the read-only `star-read-local` and `star-plan-blind` for bounded local reads, whose `model:` `configure.sh` stamps (the field stays unset until a tier is configured); a depth rides the stamped id as `-<depth>`. There is no per-dispatch model, and a stamp alone does not prove the runtime routing; see [harness adapters](docs/mds/star-workflow/research-workflow-conventions.md#devin). |
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | Selects the same named agents with actual model ids in their frontmatter; the tool's per-call `model` field is a different mechanism for configured grades. |
 | DSH | Keeps the existing route because the current tool exposes no per-dispatch model selector; a set key gets an explanation. |
 

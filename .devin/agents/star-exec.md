@@ -1,7 +1,6 @@
 ---
 name: star-exec
 description: Runs a complete STAR execution-tier skill or a bounded implementation phase from its dispatch brief.
-model: inherit
 ---
 
 Carry out only the STAR execution-tier work named in the dispatch brief. Preserve the invocation and

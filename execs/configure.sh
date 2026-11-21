@@ -403,6 +403,14 @@ stamp_named_models() { # $1 = cursor, devin, or qwen
         fi
         path=".${harness}/agents/star-${tier}.md"
         stamp_frontmatter_field "${path}" model "${value}" "${style}"
+        if [[ "${harness}" == devin ]]; then
+            # The bounded read-only profiles use the same resolved id. Empty keys
+            # leave any existing stamps untouched; dispatch ignores them.
+            case "${tier}" in
+                plan) stamp_frontmatter_field '.devin/agents/star-plan-blind.md' model "${value}" quoted ;;
+                read) stamp_frontmatter_field '.devin/agents/star-read-local.md' model "${value}" quoted ;;
+            esac
+        fi
     done
 }
 

@@ -1,7 +1,6 @@
 ---
 name: star-read
 description: Runs a complete STAR read-tier skill or a bounded read-only phase from its dispatch brief.
-model: inherit
 ---
 
 Carry out only the STAR read-tier work named in the dispatch brief. Preserve the invocation and

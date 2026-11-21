@@ -38,10 +38,11 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # pass: none of them is the launch.
 #
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
-# quoting, so a flag written after a commit message (`commit -m x --amend`) is
-# past where it stops reading. Silence means "no decision", so that case, an
-# unfamiliar spelling, and a payload no branch below can read all fall through to
-# the normal permission flow. What it declines is the user's to run.
+# quoting: a quote that opens inside one token and closes in another is matched
+# only at its own edges, and a pathspec spelled with glob characters or
+# `:(...)` magic is read as the literal path it is not. Silence means "no
+# decision", so a spelling no branch below can read falls through to the normal
+# permission flow. What it declines is the user's to run.
 #
 # Devin treats any exit other than 0 and 2, and a timeout, as a logged error that
 # does not block. So a missing .agents/scripts/json.sh (exit 1, non-blocking on
@@ -187,6 +188,23 @@ work_dir="$(payload_cwd)"
 work_dir="$(resolve_dir "${root}" "${work_dir:-.}")"
 [[ -n "${work_dir}" ]] || work_dir="${root}"
 
+# The end index of an option's value: the token the option names, or — when the
+# value opens a quote it does not close on its own token — the token the quote
+# closes on. Reads `tok` (the segment's words), since a message can span words.
+commit_option_value_end() { # $1 = first token index, $2 = value or its first token
+    local k="$1" value="$2" quote
+    quote="${value:0:1}"
+    case "$quote" in
+        \"|\')
+            if [[ "${value:1}" != *"${quote}" ]]; then
+                while (( ++k < ${#tok[@]} )); do
+                    [[ "${tok[k]}" == *"${quote}" ]] && break
+                done
+            fi ;;
+    esac
+    printf '%s' "$k"
+}
+
 # One shell line can carry several commands, so each is read on its own: `cd x &&
 # git add -A` is the add it looks like.
 while IFS= read -r segment; do
@@ -273,15 +291,23 @@ while IFS= read -r segment; do
             done
             ;;
         commit)
-            paths=()
+            paths=(); path_only=0
             for ((j = i + 1; j < ${#tok[@]}; j++)); do
                 arg="${tok[j]}"
                 case "${arg}" in
                     \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
                 esac
+                if (( path_only )); then
+                    paths+=("${arg}"); continue
+                fi
                 case "${arg}" in
-                    -m|--message|-F|--file|-t|--template|--fixup|--squash|-C|--reuse-message|--reedit-message|-m*|--message=*|--file=*)
-                        break ;;
+                    --) path_only=1 ;;
+                    -m|--message|-F|--file|-t|--template|--fixup|--squash|-C|-c|--reuse-message|--reedit-message)
+                        j=$((j + 1)); j="$(commit_option_value_end "$j" "${tok[j]:-}")" ;;
+                    --message=*|--file=*|--template=*|--fixup=*|--squash=*|--reuse-message=*|--reedit-message=*)
+                        j="$(commit_option_value_end "$j" "${tok[j]#*=}")" ;;
+                    -m?*|-F?*|-t?*|-C?*|-c?*)
+                        j="$(commit_option_value_end "$j" "${tok[j]:2}")" ;;
                     --amend)
                         deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote. Make a new commit instead." ;;
                     --all)

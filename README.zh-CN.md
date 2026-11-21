@@ -120,7 +120,7 @@ star-ai-research/
 ├── .devin/rules/           # Devin 自动加载的项目规则
 ├── .claude/agents/         # Claude Code 的具名档位受托者：star-plan、star-exec、star-read
 ├── .cursor/agents/         # Cursor 的具名档位代理：star-plan、star-exec、star-read
-├── .devin/agents/          # Devin 的具名档位代理：star-plan、star-exec、star-read
+├── .devin/agents/          # Devin 的具名档位代理：star-plan、star-exec、star-read（另有只读的 star-read-local、star-plan-blind）
 ├── .qwen/agents/           # Qwen Code 的具名档位代理：star-plan、star-exec、star-read
 ├── .pi/agents/             # star_subagent 的派发花名册：收集者、执行者、复核者、运行者
 ├── .pi/prompts/            # Pi 的斜杠命令：每个技能一个 /star-<名>，外加分流用的 /star 与朝目标推进的 /star-auto
@@ -539,7 +539,7 @@ bash execs/configure.sh
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | 当前工具通过可选择的 secondary-model pool 提供 `model` 时，传入池接受的别名。模型池由用户自己的 Kimi 配置管理。 |
 | Pi | 通过 STAR 扩展给单任务、并行任务各项或串行步骤各项传 `model`。 |
 | [Cursor](https://cursor.com/docs/subagents) | 使用具名代理；模型选择与回退规则见[适配说明](docs/mds/star-workflow/research-workflow-conventions.md#cursor)。 |
-| Devin | 选择具名代理 `star-plan`、`star-exec`、`star-read`，其 `model:` 由 `configure.sh` 写入；深度以 `-<depth>` 接在写入的模型 id 后。没有按次选模参数；见[适配说明](docs/mds/star-workflow/research-workflow-conventions.md#devin)。 |
+| Devin | 选择具名代理 `star-plan`、`star-exec`、`star-read`，以及只读的 `star-read-local` 与 `star-plan-blind`（用于有界本地只读收集与盲审），其 `model:` 由 `configure.sh` 写入（未配置档位前该字段不盖章）；深度以 `-<depth>` 接在写入的模型 id 后。没有按次选模参数，盖章本身也不证明运行时派发已生效；见[适配说明](docs/mds/star-workflow/research-workflow-conventions.md#devin)。 |
 | [Qwen Code](https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/sub-agents.md#model-selection) | 选择同名代理，在 frontmatter 中填写实际模型 id；工具按次调用的 `model` 字段是另一套已配置等级机制。 |
 | DSH | 当前工具没有按次选模参数，保持原执行路径；键已设时说明原因。 |
 

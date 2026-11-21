@@ -25,11 +25,8 @@ root="${DEVIN_PROJECT_DIR:-${PWD}}"
 # reading stdin leaves the runtime's write to fail.
 input=$(cat)
 
-line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-value="${line#INVOLVE=}"
-value="${value%%#*}"
-involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
-[[ "${involve}" == "low" ]] || exit 0
+source "$(dirname -- "${BASH_SOURCE[0]}")/star_involve_level.sh" || exit 0
+star_devin_involve_low "${root}" || exit 0
 
 # The edited path, from edit/write (file_path) or notebook_edit (notebook_path).
 edited_path() { printf '%s' "$input" | star_json_eval 'x=at(r,"tool_input.file_path"); if(type(x)=="null" || !x) x=at(r,"tool_input.notebook_path"); if(type(x)=="string") raw(x)' 2>/dev/null; }

@@ -301,6 +301,10 @@ missing_hooks() { # $1 = registration config path
         [[ "$1" == *"/${entry}" ]] && is_hook_config=true
     done
     [[ "${is_hook_config}" == true ]] || return 0
+    # Devin's registrations drift in matcher and timeout as well as in presence,
+    # which a filename grep cannot see; note_devin_hooks compares them
+    # structurally instead.
+    [[ "$1" != */.devin/hooks.v1.json ]] || return 0
 
     local out=""
     grep -q 'star_model_id\.sh' "$1" 2>/dev/null || out="model-id provenance"
@@ -309,7 +313,7 @@ missing_hooks() { # $1 = registration config path
     # whose harness lets a hook decide one — Cursor has no event that gates a
     # file edit, and Kimi's only observes the prompt it fires beside.
     case "$1" in
-        */.agents/hooks.json|*/.claude/settings.json|*/.codex/hooks.json|*/.devin/hooks.v1.json|*/.qwen/settings.json)
+        */.agents/hooks.json|*/.claude/settings.json|*/.codex/hooks.json|*/.qwen/settings.json)
             grep -q 'star_involve_gate\.sh' "$1" 2>/dev/null || out="${out:+${out}, }involve gate" ;;
     esac
     # The commit guard declines a shell command before it runs, which every
@@ -343,10 +347,6 @@ note_resolver_rule() { # $1 = config path relative to the project root
     log "      Copy \"Bash(bash .claude/hooks/star_model_id.sh --resolve:*)\" from upstream $1 into its permissions.allow."
 }
 
-# A kept .agents/skills.json that does not list STAR's wrapper folder leaves
-# Antigravity without /star and /star-auto, and nothing else reports it.
-note_agy_skills() { # $1 = config path relative to the project root
-    [[ "$1" == ".agents/skills.json" && -e "${ROOT_DIR}/$1" ]] || return 0
 # A kept .agents/hooks.json may still register the hook basenames under a wrong
 # relative path, which missing_hooks (basename-only) would not catch.
 note_agy_hooks() { # $1 = config path relative to the project root
@@ -356,6 +356,10 @@ note_agy_hooks() { # $1 = config path relative to the project root
     log "      Update its hook commands to ../.agy/hooks/ (or re-run with --force)."
 }
 
+# A kept .agents/skills.json that does not list STAR's wrapper folder leaves
+# Antigravity without /star and /star-auto, and nothing else reports it.
+note_agy_skills() { # $1 = config path relative to the project root
+    [[ "$1" == ".agents/skills.json" && -e "${ROOT_DIR}/$1" ]] || return 0
     grep -qF '.agy/skills' "${ROOT_DIR}/$1" 2>/dev/null && return 0
     log "NOTE: $1 was kept and does not list .agy/skills, so Antigravity has no /star or /star-auto."
     log "      Add {\"path\": \".agy/skills\"} to its entries, as upstream $1 does."
@@ -376,6 +380,74 @@ note_devin_imports() { # $1 = config path relative to the project root
     [[ "${off}" == true ]] && return 0
     log "NOTE: $1 was kept and does not disable all of Devin's claude, codex and cursor imports."
     log "      Add the read_config_from entries from upstream $1, or the .claude/ tree's hooks and skills run beside .devin's."
+}
+
+# A kept .devin/hooks.v1.json can register every STAR script name and still
+# drift: an older release matched `exec` unanchored and gave the commit guard
+# ten seconds, and a file predating the shell gate never gained it at all.
+# missing_hooks compares filenames only, so this compares each STAR
+# registration's event, matcher, type, timeout and command against upstream's — a
+# missing, mismatched or duplicated STAR entry is reported by script name,
+# while the project's own custom entries and any reordering stay silent. The
+# file is the project's and is never overwritten; the note names the manual
+# merge.
+note_devin_hooks() { # $1 = config path relative to the project root
+    [[ "$1" == ".devin/hooks.v1.json" && -e "${ROOT_DIR}/$1" && -e "${SOURCE_DIR}/$1" ]] || return 0
+    local drift
+    if ! drift="$(
+        source "${SOURCE_DIR}/.agents/scripts/json.sh" 2>/dev/null && \
+        star_json_awk '
+            # Every registration of a STAR hook command under a root event array.
+            # want="expected" records upstream'"'"'s canonical tuple per script;
+            # want="local" checks each local entry against it.
+            function registrations(root, want,    e,ev,arr,i,entry,h,j,hk,cmd,s,rec) {
+                for(e=1;e<=size(root);e++) {
+                    ev=keys[root,e]; arr=get(root,ev)
+                    if(type(arr)!="array") continue
+                    for(i=0;i<size(arr);i++) {
+                        entry=get(arr,i); h=get(entry,"hooks")
+                        if(type(h)!="array") continue
+                        for(j=0;j<size(h);j++) {
+                            hk=get(h,j); cmd=field(hk,"command")
+                            if(index(cmd,".devin/hooks/")==0) continue
+                            if(!match(cmd,/star_[A-Za-z_]+\.sh/)) continue
+                            s=substr(cmd,RSTART,RLENGTH)
+                            rec=ev "\t" json(get(entry,"matcher")) "\t" json(get(hk,"type")) "\t" json(get(hk,"timeout")) "\t" json(get(hk,"command"))
+                            if(want=="expected") { if(!(s in canon)) canon[s]=rec }
+                            # A hook command naming a star_-looking script the
+                            # upstream file does not register belongs to the project.
+                            else if(!(s in canon)) continue
+                            else {
+                                seen[s]++
+                                if(seen[s]>1) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="duplicate or stale entry" }
+                                else if(rec!=canon[s]) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="outdated registration" }
+                            }
+                        }
+                    }
+                }
+            }
+            END {
+                r=document();
+                expected=parse(a(1));
+                if(type(r)!="object" || type(expected)!="object") exit 2
+                registrations(expected,"expected")
+                registrations(r,"local")
+                for(s in canon) if(!(s in seen) && !(s in bad)) { bad[s]=1; badlist[++nb]=s; desc[s]="missing" }
+                # Deterministic order: the five script names sort by insertion
+                # into a small list.
+                for(x=1;x<=nb;x++) for(y=x+1;y<=nb;y++) if(badlist[y]<badlist[x]) { t=badlist[x]; badlist[x]=badlist[y]; badlist[y]=t }
+                for(x=1;x<=nb;x++) print badlist[x] " (" desc[badlist[x]] ")"
+            }' \
+            "$(cat "${SOURCE_DIR}/$1")" < "${ROOT_DIR}/$1" 2>/dev/null
+    )"; then
+        log "NOTE: $1 was kept but could not be parsed; its STAR hook registrations were not validated."
+        log "      Compare it against upstream $1 by hand; keep your custom hooks."
+        return 0
+    fi
+    [[ -n "${drift}" ]] || return 0
+    drift="${drift//$'\n'/, }"
+    log "NOTE: $1 was kept; outdated or missing STAR hook registrations: ${drift}."
+    log "      Merge the affected STAR entries from upstream $1; keep your custom hooks."
 }
 
 usage() {
@@ -1020,6 +1092,7 @@ if [[ "${ADOPT}" == false ]]; then
                         changed=$(( changed + 1 ))
                     else
                         printf '  config   %s (differs from upstream; update never overwrites it)\n' "${cfg}"
+                        note_devin_hooks "${cfg}"
                     fi
                 fi
             done
@@ -1161,7 +1234,9 @@ if [[ "${ADOPT}" == false ]]; then
                 log "      Merge the missing hook entry from upstream ${cfg} to enable it."
             fi
             note_resolver_rule "${cfg}"
+            note_agy_hooks "${cfg}"
             note_agy_skills "${cfg}"
+            note_devin_hooks "${cfg}"
             note_devin_imports "${cfg}"
         done
     fi
@@ -1234,7 +1309,6 @@ for dir in "${ADOPT_DIRS[@]}"; do
     if [[ -e "${ROOT_DIR}/${dir}" || -L "${ROOT_DIR}/${dir}" ]]; then
         printf '  kept    %s/ (already present)\n' "${dir}"
         skipped=$(( skipped + 1 ))
-            note_agy_hooks "${cfg}"
     else
         mkdir -p "${ROOT_DIR}/${dir}"
         printf '  added   %s/\n' "${dir}"
@@ -1307,9 +1381,10 @@ for cfg in "${INSTALL_CONFIGS[@]}"; do
         log "      Until then model_id stays unrecorded in every report, with nothing to see."
     fi
     note_resolver_rule "${cfg}"
+    note_agy_hooks "${cfg}"
     note_agy_skills "${cfg}"
+    note_devin_hooks "${cfg}"
     note_devin_imports "${cfg}"
 done
 
 log "Next: copy .env.example to .env, then run /star-proj-adopt to wire the project up."
-    note_agy_hooks "${cfg}"

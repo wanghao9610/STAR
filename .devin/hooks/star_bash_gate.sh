@@ -39,11 +39,8 @@ root="${DEVIN_PROJECT_DIR:-${PWD}}"
 # reading stdin leaves the runtime's write to fail.
 input=$(cat)
 
-line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-value="${line#INVOLVE=}"
-value="${value%%#*}"
-involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
-[[ "${involve}" == "low" ]] || exit 0
+source "$(dirname -- "${BASH_SOURCE[0]}")/star_involve_level.sh" || exit 0
+star_devin_involve_low "${root}" || exit 0
 
 # The shell command, from exec's tool_input.
 command_text() { printf '%s' "$input" | star_json_field 'tool_input.command' 2>/dev/null; }

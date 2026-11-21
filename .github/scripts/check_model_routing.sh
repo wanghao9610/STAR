@@ -38,6 +38,11 @@ for harness in cursor qwen devin; do
 		mkdir -p "${PROJECT}/.${harness}/agents"
 		cp "${ROOT_DIR}/.${harness}/agents/star-${tier}.md" "${PROJECT}/.${harness}/agents/"
 	done
+	# Devin's two bounded read-only profiles take their tier's stamp too.
+	if [[ "${harness}" == devin ]]; then
+		cp "${ROOT_DIR}/.devin/agents/star-plan-blind.md" "${ROOT_DIR}/.devin/agents/star-read-local.md" \
+			"${PROJECT}/.devin/agents/"
+	fi
 done
 # The two READ manifests take the READ model; the other two stand in for the plan
 # and exec tiers, which take a depth and no model.
@@ -170,7 +175,9 @@ expect_effort "${PROJECT}/.claude/agents/star-read.md" medium
 expect_plain_model "${PROJECT}/.cursor/agents/star-exec.md" 'cursor-exec-high'
 expect_model "${PROJECT}/.qwen/agents/star-read.md" qwen-read@keep
 expect_model "${PROJECT}/.devin/agents/star-plan.md" devin-plan-high
+expect_model "${PROJECT}/.devin/agents/star-plan-blind.md" devin-plan-high
 expect_model "${PROJECT}/.devin/agents/star-read.md" bare-read
+expect_model "${PROJECT}/.devin/agents/star-read-local.md" bare-read
 if grep -q '^effort:' "${PROJECT}/.devin/agents/star-plan.md"; then
 	fail "Devin takes its depth in the model id, not an effort field"
 fi
@@ -250,13 +257,6 @@ grep -Fq 'dispatched as the pool alias binding that model at that depth' <<<"${k
 	fail "Kimi shared adapter does not select a pool alias for depth"
 note "Kimi summaries name the pool alias per depth; skills route a same-model depth"
 
-# --kimi-pool registers the variants and pool keys the kimi tier entries need in
-# Kimi Code's own config: additive, idempotent, never over an existing entry, and
-# a skipped variant never leaves a dangling pool key behind.
-KIMI_HOME="${TMP_DIR}/kimi-home"
-mkdir -p "${KIMI_HOME}"
-cat > "${KIMI_HOME}/config.toml" <<'EOF'
-[models.kimi-k3]
 # Antigravity consumes only the four invoke_subagent Model literals at dispatch,
 # ignores @<depth>, and warns on unsupported names.
 write_env \
@@ -293,6 +293,13 @@ grep -Fq 'note_agy_hooks' "${ROOT_DIR}/execs/update.sh" ||
 	fail "execs/update.sh lacks stale .agents/hooks.json migration note for .agy/hooks/"
 note "Antigravity summaries validate invoke_subagent Model literals, warn on invalid values, and document delegate routing"
 
+# --kimi-pool registers the variants and pool keys the kimi tier entries need in
+# Kimi Code's own config: additive, idempotent, never over an existing entry, and
+# a skipped variant never leaves a dangling pool key behind.
+KIMI_HOME="${TMP_DIR}/kimi-home"
+mkdir -p "${KIMI_HOME}"
+cat > "${KIMI_HOME}/config.toml" <<'EOF'
+[models.kimi-k3]
 provider = "managed:kimi-code"
 model = "k3"
 max_context_size = 1048576
@@ -602,6 +609,9 @@ cp -p "${ROOT_DIR}/${source_skill}/references/source_state.md" "${ROOT_DIR}/${so
 mkdir -p "${UPSTREAM}/.agents/scripts"
 cp -p "${ROOT_DIR}/.agents/scripts/"* "${UPSTREAM}/.agents/scripts/"
 cp -p "${ROOT_DIR}/.cursor/hooks/star_model_id.sh" "${UPSTREAM}/.cursor/hooks/"
+# The archive is HEAD's tree; the working tree's .devin — like execs/ and the
+# shared helpers above — is what the Devin cases below install and compare.
+cp -Rp "${ROOT_DIR}/.devin/." "${UPSTREAM}/.devin/"
 git -C "${UPSTREAM}" init -q -b main
 git -C "${UPSTREAM}" add -f .
 git -C "${UPSTREAM}" -c core.hooksPath=/dev/null -c user.name=Test \
@@ -730,3 +740,103 @@ if (cd "${UPDATE_PROJECT}" && bash execs/configure.sh) > "${TMP_DIR}/update.log"
 fi
 [[ "$(cat "${UPDATE_PROJECT}/.cursor/agents/star-read.md")" == "${before}" ]] || fail "configure.sh truncated an unclosed manifest"
 note "stamping refuses unclosed frontmatter without truncating"
+
+# A Devin adoption installs the whole .devin tree — the five registered hooks
+# plus the sourced level helper, nine user-only wrappers, five dispatch
+# profiles and configs that parse — and no sibling harness tree. The two
+# read-only profiles take the same stamp their tier's named profile does.
+DEVIN_PROJECT="${TMP_DIR}/devin-project"
+mkdir -p "${DEVIN_PROJECT}"
+git -C "${DEVIN_PROJECT}" init -q
+printf 'STAR_REPOSITORY='"'"'file://%s'"'"'\nSTAR_HARNESSES=devin\nSTAR_PLAN_MODEL=devin:devin-plan@high\nSTAR_READ_MODEL=devin:devin-read\n' \
+	"${UPSTREAM}" > "${DEVIN_PROJECT}/.env"
+(cd "${DEVIN_PROJECT}" && bash "${UPSTREAM}/execs/update.sh" --adopt --harnesses devin) \
+	> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "devin adopt"; }
+for hook in star_model_id star_memory star_commit_guard star_involve_gate star_bash_gate star_involve_level; do
+	[[ -f "${DEVIN_PROJECT}/.devin/hooks/${hook}.sh" ]] || fail "devin adopt omitted .devin/hooks/${hook}.sh"
+done
+[[ "$(find "${DEVIN_PROJECT}/.devin/skills" -name SKILL.md | wc -l | tr -d ' ')" == 9 ]] ||
+	fail "devin adopt did not install the nine user-only wrappers"
+for profile in star-plan star-exec star-read star-plan-blind star-read-local; do
+	[[ -f "${DEVIN_PROJECT}/.devin/agents/${profile}.md" ]] || fail "devin adopt omitted .devin/agents/${profile}.md"
+done
+for tree in .claude .codex .cursor .dsh .kimi-code .pi .qwen .agy; do
+	[[ ! -e "${DEVIN_PROJECT}/${tree}" ]] || fail "devin adopt installed sibling tree ${tree}"
+done
+expect_model "${DEVIN_PROJECT}/.devin/agents/star-plan.md" devin-plan-high
+expect_model "${DEVIN_PROJECT}/.devin/agents/star-plan-blind.md" devin-plan-high
+expect_model "${DEVIN_PROJECT}/.devin/agents/star-read-local.md" devin-read
+(cd "${DEVIN_PROJECT}" && source .agents/scripts/json.sh && \
+	star_json_eval 'x=1' < .devin/hooks.v1.json && star_json_eval 'x=1' < .devin/config.json) \
+	>/dev/null || fail "devin adopt installed a config that does not parse"
+note "devin adopt installs the .devin tree, no sibling harnesses, and stamps both read-only profiles"
+
+# A kept hooks.v1.json that drifted — unanchored matcher, old timeout, no shell
+# gate — is warned about by script name and preserved byte for byte. Drift is
+# generated from the canonical file through the shipped JSON library so the
+# kept file stays valid JSON throughout.
+git -C "${DEVIN_PROJECT}" add -A
+git -C "${DEVIN_PROJECT}" -c core.hooksPath=/dev/null -c user.name=Test \
+	-c user.email=test@example.invalid commit -qm devin
+kept="${DEVIN_PROJECT}/.devin/hooks.v1.json"
+(cd "${DEVIN_PROJECT}" && source .agents/scripts/json.sh && star_json_eval '
+	x=at(r,"PreToolUse[0]"); put(x,"matcher",string("exec"))
+	h=get(x,"hooks"); nh=array()
+	for(i=0;i<size(h);i++) {
+		hk=get(h,i)
+		if(index(field(hk,"command"),"star_bash_gate")) continue
+		put(hk,"timeout",number(10)); add(nh,hk)
+	}
+	put(x,"hooks",nh); print json(r)' < .devin/hooks.v1.json > .devin/hooks.v1.json.drifted) ||
+	fail "could not build the drifted hook config"
+mv "${kept}.drifted" "${kept}"
+drifted_sum="$(cksum "${kept}")"
+(cd "${DEVIN_PROJECT}" && bash execs/update.sh) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "devin update over a drifted kept config"; }
+grep -q 'outdated or missing STAR hook registrations' "${TMP_DIR}/update.log" ||
+	fail "a drifted kept hooks.v1.json drew no warning"
+for script in star_bash_gate.sh star_commit_guard.sh; do
+	grep -q "${script}" "${TMP_DIR}/update.log" || fail "warning omitted ${script}"
+done
+[[ "$(cksum "${kept}")" == "${drifted_sum}" ]] || fail "update overwrote the kept hooks.v1.json"
+note "a drifted kept hooks.v1.json warns by script name and is preserved"
+
+# A kept file that differs only in formatting, or adds a registration of the
+# project's own, warns nothing: neither is a missing or outdated STAR entry.
+# Built from upstream's canonical file, since the kept one still holds drift.
+(cd "${DEVIN_PROJECT}" && source .agents/scripts/json.sh && star_json_eval '
+	x=at(r,"SessionStart[0]"); h=get(x,"hooks")
+	hk=object(); put(hk,"type",string("command"))
+	put(hk,"command",string("bash .devin/hooks/star_project.sh")); put(hk,"timeout",number(5))
+	add(h,hk); print json(r)' < "${UPSTREAM}/.devin/hooks.v1.json" > .devin/hooks.v1.json.custom) ||
+	fail "could not build the custom kept config"
+mv "${kept}.custom" "${kept}"
+custom_sum="$(cksum "${kept}")"
+(cd "${DEVIN_PROJECT}" && bash execs/update.sh) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "devin update over a custom kept config"; }
+! grep -q 'outdated or missing STAR hook registrations' "${TMP_DIR}/update.log" ||
+	fail "formatting and a custom registration drew a drift warning"
+[[ "$(cksum "${kept}")" == "${custom_sum}" ]] || fail "update overwrote the custom kept config"
+note "a custom or reformatted kept hooks.v1.json warns nothing and is preserved"
+
+# Drift inside a canonical command — extra arguments on the same script — is
+# flagged for that script alone.
+(cd "${DEVIN_PROJECT}" && source .agents/scripts/json.sh && star_json_eval '
+	x=at(r,"SessionStart[0]"); h=get(x,"hooks")
+	for(i=0;i<size(h);i++) {
+		hk=get(h,i)
+		if(index(field(hk,"command"),"star_memory"))
+			put(hk,"command",string(field(hk,"command") " --changed"))
+	}
+	print json(r)' < "${UPSTREAM}/.devin/hooks.v1.json" > .devin/hooks.v1.json.cmdchange) ||
+	fail "could not build the command-drifted kept config"
+mv "${kept}.cmdchange" "${kept}"
+cmdchange_sum="$(cksum "${kept}")"
+(cd "${DEVIN_PROJECT}" && bash execs/update.sh) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "devin update over a command-drifted kept config"; }
+grep -q 'star_memory.sh' "${TMP_DIR}/update.log" || fail "a changed canonical command drew no per-script warning"
+if grep -q 'star_bash_gate.sh\|star_commit_guard.sh' "${TMP_DIR}/update.log"; then
+	fail "an unchanged registration was named alongside the changed command"
+fi
+[[ "$(cksum "${kept}")" == "${cmdchange_sum}" ]] || fail "update overwrote the command-drifted kept config"
+note "a changed canonical command warns on that script only and is preserved"
