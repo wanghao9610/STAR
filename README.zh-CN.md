@@ -58,7 +58,7 @@ STAR 不绑定具体框架：研究工作流只约定过程、文件位置和验
 - **研究的每一步各有一个 skill**：一共十五个，十三个按研究推进的顺序排列，另外两个任何时候都能调。
 - **可回溯、也能接着做的研究过程**：计划放在 `metds/plans/`，每个计划执行过程的中间文件放在 `tasks/`，一次 run 产生的东西放在 `wkdrs/`——重新上手时读的是文件，不是聊天记录。
 - **归项目所有的记忆**：一次会话学到、又没有任何计划或报告认领的事实——环境怪癖、长期偏好、走不通的路——记在 `.star/memory/` 里，并由钩子送到下一次会话面前，无论你用哪个宿主驱动 STAR。
-- **面向 AI 协作的规范**：为 Codex、Claude、Devin、DSH、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
+- **面向 AI 协作的规范**：为 Antigravity、Codex、Claude、Devin、DSH、Kimi Code、Cursor、Pi 和 Qwen Code 提供一致的项目约束和研究工作流，并支持中文与英文。
 - **受证据约束的自然行文**：覆盖回复、计划、文献笔记、进展 digest、方法文档和发布 README；改掉程式化表达，但不改事实、引用、数字、未确定性和负面结果。
 - **太大或只属于本机的东西不进版本库**：本地数据、模型权重、实验输出和环境配置默认不纳入版本控制。
 
@@ -88,11 +88,14 @@ star-ai-research/
 │   ├── update.sh           # 同步上游 STAR skill 与工作流指南
 │   └── scpts/              # 各实验对应的 Shell 脚本
 ├── .agents/skills/         # 凡遵循 AGENTS.md 约定的 agent 都会读的研究工作流技能
+├── .agents/hooks.json      # Antigravity 的生命周期钩子注册表
+├── .agents/skills.json     # 为 Antigravity 注册 /star 与 /star-auto 包装 skill
 ├── .claude/skills/         # Claude 使用的研究工作流技能
 ├── .cursor/skills/         # Cursor 使用的研究工作流技能
 ├── .devin/skills/          # Devin 的 /star 与 /star-auto 包装 skill；Devin 原生读取共享技能
 ├── .dsh/skills/            # DeepSeek Harness 使用的研究工作流技能
 ├── .dsh/commands/star/     # DSH 仓库内的 /star 与 /star-auto 命令包
+├── .agy/                   # Antigravity 的 /star 与 /star-auto 包装 skill 及生命周期钩子
 ├── .kimi-code/skills/      # Kimi Code 使用的研究工作流技能
 ├── .kimi-code/plugins/     # Kimi Code 仓库内的 /star 与 /star-auto 插件与 marketplace
 ├── .pi/skills/             # Pi 使用的研究工作流技能
@@ -288,6 +291,7 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 
 | 宿主 | 调用写法 | 示例 |
 | --- | --- | --- |
+| Antigravity | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Codex | `$star-<name>` | `$star-plan-coach 开放词汇检测` |
 | Claude Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 | Cursor | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
@@ -297,7 +301,7 @@ STAR 带十五个技能，覆盖从一个还说不清的兴趣到写得出的方
 | Pi | `/star-<名>` | `/star-plan-coach 开放词汇检测` |
 | Qwen Code | `/star-<name>` | `/star-plan-coach 开放词汇检测` |
 
-Claude Code、Cursor、Devin、Pi 与 Qwen Code 直接从项目文件提供 `/star [你想做什么]`——Devin 走的是 `.devin/skills/` 下那两个包装 skill，其余各家走命令文件。命令把请求交给 `.agents/commands/star.md`；空请求选择 `star-flow-status`，匹配到七个只能显式调用的 skill 之一时，则返回准确的 `/star-<name> <argument>` 命令并等待。同一批目录树还提供 `/star-auto <目标> [stop=<停止线>]`，在[规约 §10.7](docs/mds/star-workflow/research-workflow-conventions.md)定义的授权下朝敲下的目标自主推进。
+Antigravity、Claude Code、Cursor、Devin、Pi 与 Qwen Code 直接从项目文件提供 `/star [你想做什么]`——Antigravity 走的是由 `.agents/skills.json` 注册的 `.agy/skills/` 下两个包装 skill，Devin 走 `.devin/skills/`，其余各家走命令文件。命令把请求交给 `.agents/commands/star.md`；空请求选择 `star-flow-status`，匹配到七个只能显式调用的 skill 之一时，则返回准确的 `/star-<name> <argument>` 命令并等待。同一批目录树还提供 `/star-auto <目标> [stop=<停止线>]`，在[规约 §10.7](docs/mds/star-workflow/research-workflow-conventions.md)定义的授权下朝敲下的目标自主推进。
 
 Codex 把共享分流器打包成仓库内的 `star` 插件。在仓库根目录注册并安装一次，然后新开会话：
 
@@ -326,7 +330,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 不带参数的 `/star` 显示当前研究状态，也可以传入描述，例如 `/star 审查 030 计划的实现`。命令会从共享的 `.agents/commands/star.md` 名册发起一个后续轮次，因此 DSH 与其他宿主始终从同一来源分流；同一命令包的 `/star-auto <目标>` 朝敲下的目标自主推进。
 
-七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都涉及一个应由你做的决定。除 Antigravity 外各宿主都强制这一点；Antigravity 的 skill 文件没有这类开关，那里只能靠约定。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.md)（skill 名册）那张表为准，本节只是跟随它。
+七个 skill 是 slash-only——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`：只有被点名时才跑，因为每一个都涉及一个应由你做的决定。除 Antigravity 外各宿主都强制这一点；Antigravity 的 `/star` 与 `/star-auto` 包装带有 `disable-model-invocation: true`，而直接从共享 `.agents/skills/` 加载的这七个 skill 仍靠约定约束。另外八个，任务明显匹配、目标又没有歧义时 agent 也可以自行启动；任何 skill 显式点名都始终有效。哪七个、为什么，以[规约 §10](docs/mds/star-workflow/research-workflow-conventions.md)（skill 名册）那张表为准，本节只是跟随它。
 
 <div align="center">
   <img src="docs/srcs/star-research-workflow.png" alt="STAR 研究工作流：十三个 skill 的调用顺序与两个横向通读的 skill、各自的主要产物，以及每个叶子计划上的循环" width="100%">
@@ -402,7 +406,7 @@ dsh --profile YOUR_PROFILE --dump-config
 
 ### 会话钩子
 
-会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。在 Claude Code 里，子代理启动时这两个钩子会再跑一次——会话钩子在子代理里根本不触发：溯源钩子把解析该 delegate 自己转录的命令交给它，于是 delegate 写出的产物记录的是真正写下它的那个模型，而不是会话的模型；记忆钩子则为它重放一遍索引。Devin 的事件表里根本没有子代理事件，所以 Devin 派出的受托者两行都收不到——它要的东西由派发简报自己带去。Claude、Codex、Qwen Code 和 Devin 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。在 Devin 上它只覆盖 `edit`、`write` 与 `notebook_edit` 三个工具；经 `apply_patch` 做的编辑仍会弹窗。它和前两个一样随仓库注册好，分别在 `.claude/settings.json`、`.codex/hooks.json`、`.qwen/settings.json` 和 `.devin/hooks.v1.json` 里。Claude 与 Devin 还注册了 `star_bash_gate.sh`：`low` 档会放行普通本地 shell 命令，包括上面受守卫的 worktree 与提交流程；删除、`sudo`、系统改动、进程控制、`git push` 和强制复制/移动仍走宿主原有提示。Cursor、DSH、Kimi Code 和 Pi 没有文件编辑闸门：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因在它自己身上：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都只在运行的 worktree（`../<根目录名>--wt/<run>/`，规约 §11.8）里回答这种情况，项目根目录之外的其他路径它一概不管。何况那座桥也不会认 `allow`。每棵宿主树还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交——也会在一个 run 还没有代码审查、或审查早于它的日志时，拒掉该 run 备好命令（`execs/scpts/<run>.sh`）的启动。Claude、Codex、Devin、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Claude、Codex 与 Kimi Code 是 `Bash`，Devin 是 `^exec$`（加了锚点，因为 Devin 会在工具名的任意位置匹配），Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
+会话开始时有两个钩子：一个记录各 skill 写进每份产物的模型 id，另一个把[项目记忆](#项目记忆)的索引送到 agent 面前。在 Claude Code 里，子代理启动时这两个钩子会再跑一次——会话钩子在子代理里根本不触发：溯源钩子把解析该 delegate 自己转录的命令交给它，于是 delegate 写出的产物记录的是真正写下它的那个模型，而不是会话的模型；记忆钩子则为它重放一遍索引。Devin 的事件表里根本没有子代理事件，所以 Devin 派出的受托者两行都收不到——它要的东西由派发简报自己带去。Antigravity、Claude、Codex、Qwen Code 和 Devin 还各带第三个钩子，不是会话钩子：`.env` 写着 `INVOLVE=low` 时，它替你回答文件编辑前的权限弹窗，其他档位什么都不做。在 Antigravity 上它同时覆盖 CLI（`write_file`、`edit_file`）与 IDE（`write_to_file`、`replace_file_content`、`multi_replace_file_content`）文件工具；在 Devin 上它只覆盖 `edit`、`write` 与 `notebook_edit` 三个工具（经 `apply_patch` 做的编辑仍会弹窗）。它和前两个一样随仓库注册好，分别在 `.agents/hooks.json`、`.claude/settings.json`、`.codex/hooks.json`、`.qwen/settings.json` 和 `.devin/hooks.v1.json` 里。Claude 与 Devin 还注册了 `star_bash_gate.sh`：`low` 档会放行普通本地 shell 命令，包括上面受守卫的 worktree 与提交流程；删除、`sudo`、系统改动、进程控制、`git push` 和强制复制/移动仍走宿主原有提示。Cursor、DSH、Kimi Code 和 Pi 没有文件编辑闸门：Cursor 没有在文件编辑前触发的钩子，Kimi 的 `PermissionRequest` 只能旁观它旁边那个弹窗，Pi 根本不提供权限弹窗。DSH 也没有可回答的弹窗，原因在它自己身上：默认的 `workspace-write` 沙箱让项目内的编辑直接执行、不问；文件操作在那里唯一会发起的审批，是为写到工作区**之外**而一次性申请更宽的沙箱——而这个闸门在任何宿主上都只在运行的 worktree（`../<根目录名>--wt/<run>/`，规约 §11.8）里回答这种情况，项目根目录之外的其他路径它一概不管。何况那座桥也不会认 `allow`。每棵宿主树还各带一个钩子，同样不是会话钩子，且任何档位都在跑：`star_commit_guard.sh` 会拒掉[工作流规约](docs/mds/star-workflow/research-workflow-conventions.md) §1 明令禁止的 git 命令——整批或强制 stage、历史改写、以及暂存文件超过 10 MB 的提交——也会在一个 run 还没有代码审查、或审查早于它的日志时，拒掉该 run 备好命令（`execs/scpts/<run>.sh`）的启动。Antigravity、Claude、Codex、Devin、DSH、Kimi Code 与 Qwen Code 把它挂在 `PreToolUse` 上，Cursor 挂在 `beforeShellExecution`，Pi 挂在它的 `tool_call` 事件——那都是各家裁决一条 shell 命令的地方。matcher 用的是各家自己的工具名：Antigravity 是 `run_command`，Claude、Codex 与 Kimi Code 是 `Bash`，Devin 是 `^exec$`（加了锚点，因为 Devin 会在工具名的任意位置匹配），Qwen Code 是 `run_shell_command`（它的 matcher 读的是工具标识符，不是界面上显示的名字），DSH 与 Pi 是小写的 `bash`。它是 `INVOLVE=low` 自行回答提交提议之后垫在底下的那层地板：被它拒掉的命令，归你自己运行。
 
 用 **Kimi Code** 或 **DSH** 驱动 STAR 时，每台机器运行一次对应的安装脚本，把钩子注册上，各 skill 也才能记录真实的 `model_id` 而不是 `unrecorded`：
 
@@ -411,7 +415,7 @@ bash .kimi-code/hooks/install.sh   # Kimi Code
 bash .dsh/hooks/install.sh         # DSH
 ```
 
-两者各自先备份、再写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`；重复运行不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Codex、Claude、Cursor、Devin、Pi 和 Qwen Code 的钩子都随仓库一起注册好，用这几个 agent 可跳过本步。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在打开目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入，或把那个文件删掉。**Devin** 不需要任何安装步骤：`.devin/hooks.v1.json` 随仓库注册好，只是它的 `SessionStart` 载荷不带模型字段，所以在 Devin 上报之前 `model_id` 一律是 `unrecorded`。`.devin/config.json` 会关掉它对 Claude Code、Codex 与 Cursor 配置的兼容导入，于是它加载的每个 skill、钩子和规则都只有一份；同样这几个开关也让它不再读取这些工具配置的 MCP 服务器（`CLAUDE.md` 仍以 `AGENTS.md` 的形式送达），所以请把 Devin 要用的服务器写进 `.devin/mcp_config.json`。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问、运行 `/trust` 或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，`.pi/extensions/` 带来的子代理、计划模式和结构化提问也统统不存在——而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它 `model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。各运行时上报什么、取不到时退回什么，见[模型 id 溯源](docs/mds/star-workflow/research-workflow-conventions.md#hooks-and-model-provenance)。
+两者各自先备份、再写进本机的全局配置——Kimi 是 `~/.kimi-code/config.toml`，DSH 是 `$DSH_HOME/cordis.patch.yml`；重复运行不会有额外影响，运行一次即覆盖这台机器上的所有 STAR 项目。Antigravity、Codex、Claude、Cursor、Devin、Pi 和 Qwen Code 的钩子都随仓库一起注册好，用这几个 agent 可跳过本步。**Antigravity** 以 `.agents/` 为工作目录执行 `.agents/hooks.json` 中的命令，因此路径写成 `../.agy/hooks/`；当会话提供 `transcriptPath` 时，其溯源钩子会向 skill 注入 `--resolve` 命令，直接从转录中读取最近一次 `PLANNER_RESPONSE` 的模型 id。但在 Codex 上，注册好不等于会跑：项目级钩子要等项目被信任、钩子被批准之后才触发。请在 Codex CLI 里跑一次 `/hooks` 批准它们，之后每次钩子有改动都要重新批准。在那之前，每份报告里的 `model_id` 都是 `unrecorded`，记忆也一条都到不了会话，而且没有任何地方会提示你。在 Qwen Code 上，同样的坑只在打开目录信任（`security.folderTrust.enabled`，默认关闭）时才成立：未被信任的项目不会跑任何项目级钩子，同样没有任何地方提示你。另外 Qwen Code 优先读 `QWEN.md` 而不是 `AGENTS.md`，所以你的项目里若已有 `QWEN.md`，STAR 写在 `AGENTS.md` 里的规范就不会被装载——在 `QWEN.md` 里用 `@AGENTS.md` 引入，或把那个文件删掉。**Devin** 不需要任何安装步骤：`.devin/hooks.v1.json` 随仓库注册好，只是它的 `SessionStart` 载荷不带模型字段，所以在 Devin 上报之前 `model_id` 一律是 `unrecorded`。`.devin/config.json` 会关掉它对 Claude Code、Codex 与 Cursor 配置的兼容导入，于是它加载的每个 skill、钩子和规则都只有一份；同样这几个开关也让它不再读取这些工具配置的 MCP 服务器（`CLAUDE.md` 仍以 `AGENTS.md` 的形式送达），所以请把 Devin 要用的服务器写进 `.devin/mcp_config.json`。**Pi** 既不需要安装步骤，也没有注册文件：它自己就会发现 `.pi/extensions/star-hooks/index.ts`，由那个扩展把三个钩子全部接好——但要等项目获得信任之后，所以请回答 Pi 的信任提问、运行 `/trust` 或设置 `defaultProjectTrust`。在那之前，任何项目级扩展都不加载，`.pi/skills/` 也找不到，`model_id` 一律是 `unrecorded`，`.pi/extensions/` 带来的子代理、计划模式和结构化提问也统统不存在——而且没有任何地方提示你。Pi 也是唯一一个模型 id 不会过期的运行时：扩展在每次提问前读当前模型，`/model` 一换就再注入一行新的。**DSH** 在安装脚本之外还多一步：脚本写下的那一行要加载 DSH 的 Claude Code 钩子桥，它不是 dsh 的依赖，所以每个你会用到的 profile 都要执行一次 `dsh plugin --profile <名字> add @deepseek-ai/dsh-hooks-claude-code`——脚本会点名还缺它的 profile。那座桥解析配置路径时对齐的是启动 dsh 的目录，所以那一行能服务所有 STAR 项目；请在项目根目录启动 `dsh`，并用 `dsh --profile <名字> --dump-config` 核对。在那里恢复模型 id 需要 PATH 上有 `zstd`，因为 DSH 的会话日志按 Zstandard 分帧存放；没有它 `model_id` 就退回 `unrecorded`。在某个钩子出现之前就接入的项目，保留的是它自己的注册文件——`execs/update.sh` 从不覆盖它，只会把缺的那个钩子点名报出来；Pi 不受这一条影响，因为它的注册是代码，更新器每次都会替换。手动方式与细节见 [`.kimi-code/hooks.example.toml`](.kimi-code/hooks.example.toml)。各运行时上报什么、取不到时退回什么，见[模型 id 溯源](docs/mds/star-workflow/research-workflow-conventions.md#hooks-and-model-provenance)。
 
 ### 为状态收集脚本预先授权
 
@@ -443,6 +447,7 @@ bash .dsh/hooks/install.sh         # DSH
 
 | 宿主 | 在哪里预先授权 |
 |---|---|
+| Antigravity | 沙箱内的工作区命令免弹窗直接运行；沙箱外可在 `~/.gemini/antigravity-cli/settings.json` 的 `permissions.allow` 中加入 `command(...)` 规则 |
 | Codex | 其审批策略 / 沙箱设置（全局配置，非按项目） |
 | Cursor | 应用设置里的命令白名单 |
 | Devin | `.devin/config.json` 里的 `permissions.allow`——每个扫描脚本一条前缀规则，如 `Exec(bash .agents/skills/star-flow-status/scripts/scan.sh)` |
@@ -479,10 +484,10 @@ bash execs/update.sh
 - `.codex/skills/`——Codex 读的那份每技能一份的清单，随它那棵树一起安装；上游 `.agents/skills/` 用软链接指过去，项目拿到的两边都是实文件
 - `.codex/plugins/`——Codex 专属的 `$star` 分流插件与 marketplace 实体；`.agents/plugins/marketplace.json` 只是一条指向该 marketplace 的文件链接，绝不链接整个目录
 - `.dsh/commands/` 与 `.kimi-code/plugins/`——DSH 和 Kimi 的 `/star` 与 `/star-auto` 命令包，各自只在选中对应宿主时更新
-- `.agents/commands/`——唯一共享的 `/star` 分流名册与 `/star-auto` 流程——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`，以及 Devin 在 `.devin/skills/` 下的两个包装 skill
+- `.agents/commands/`——唯一共享的 `/star` 分流名册与 `/star-auto` 流程——然后是 `.claude/commands/`、`.cursor/commands/`、`.qwen/commands/` 与 `.pi/prompts/` 中的宿主薄包装，外加 Pi 那份每个 skill 一条的 `/star-<名>`、Antigravity 在 `.agy/skills/` 下的两个包装 skill（由 `.agents/skills.json` 注册），以及 Devin 在 `.devin/skills/` 下的包装 skill
 - `.claude/agents/`、`.cursor/agents/`、`.devin/agents/` 与 `.qwen/agents/`——这四个宿主派发一次档位运行所用的具名代理 `star-plan`、`star-exec`、`star-read`，由 `bash execs/configure.sh` 从 `.env` 盖章：Cursor、Devin 与 Qwen 盖该档的 `model`，Claude Code 盖它的 `effort`
 - `.pi/agents/`、`.pi/extensions/star-plan-mode/`、`.pi/extensions/star-subagent/`、`.pi/extensions/star-permission-gate.ts` 与 `.pi/extensions/star-questionnaire.ts`——Pi 内核不自带的子代理、计划模式与结构化提问；你项目自己的扩展就放在它们旁边，不会被动到
-- `.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.devin/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、INVOLVE=low 放行编辑三个钩子
+- `.agy/hooks/`、`.claude/hooks/`、`.codex/hooks/`、`.cursor/hooks/`、`.devin/hooks/`、`.dsh/hooks/`、`.kimi-code/hooks/`、`.pi/extensions/star-hooks/`、`.qwen/hooks/`，以及注册它们的那几个文件（注册不是自动的那几家）`.dsh/hooks.json` 与 `.dsh/cordis.patch.yml`、`.kimi-code/hooks.example.toml`、`.pi/extensions/star-hooks/index.ts`——model-id 溯源、项目记忆、提交守卫与 INVOLVE=low 放行编辑钩子
 - `docs/mds/star-workflow/` 与 `docs/srcs/`——工作流文档，以及 STAR 自有页面使用的图标和流程图
 - `execs/run.sh`——出厂的实验启动脚本；你对它的改动会被替换，而它所启动的实验脚本（`execs/scpts/` 下）属于项目自己，绝不会被动到
 - `execs/update.sh`——更新脚本自己，好让你的项目建好之后上游才新增的路径仍然能到达它
@@ -494,7 +499,7 @@ agent 协作规范归项目自己所有：`AGENTS.md` 与抄录其正文的 `.cu
 
 九棵宿主树里动哪几棵，由 `STAR_HARNESSES` 指定，取值顺序相同：环境变量、`.env`、默认全部。在 `.env` 里写 `STAR_HARNESSES=claude,pi` 就只维护这两棵；另外两个取值是 `all` 和 `none`，`none` 表示这次更新只剩共享骨架——`.agents/skills/`、`.agents/commands/`、工作流文档、`execs/run.sh`、更新脚本自己、`AGENTS.md`。没被选中的树完全不碰：不安装、不更新、也绝不删除，所以删掉了用不到的那几棵的项目，下次更新不会再被装回来；九棵都留着的项目不设这个键，行为和从前一样。收窄过的运行还只拉取它将要写入的那几棵，未提交改动的拦截也只覆盖这几棵。
 
-钩子注册配置——`.agents/hooks.json`、`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.devin/hooks.v1.json` 与 `.qwen/settings.json`——以及 Devin 切换兼容导入的 `.devin/config.json`，仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册 STAR 钩子——或保留下来的 `.devin/config.json` 还开着对 Claude Code、Codex、Cursor 任何一家的兼容导入——命令会打印提示。
+钩子注册配置——`.agents/hooks.json`、`.claude/settings.json`、`.codex/hooks.json`、`.cursor/hooks.json`、`.devin/hooks.v1.json` 与 `.qwen/settings.json`——以及项目配置（`.agents/skills.json`、`.devin/config.json`、`.pi/settings.json`），仅在缺失时安装，除非加 `--force`，否则绝不覆盖。若保留下来的配置没有注册某个 STAR 钩子——或保留下来的 `.agents/skills.json` 缺少 `.agy/skills`，或保留下来的 `.devin/config.json` 还开着对 Claude Code、Codex、Cursor 任何一家的兼容导入——命令会打印提示。对 Devin 的 `hooks.v1.json`，提示不止看注册与否：更新会把每条 STAR 注册的事件、matcher、超时与命令逐一与上游比对，按脚本名报出陈旧或缺失的条目——同时你的文件和自定义钩子保持原样，不会被替换。
 
 因此已有项目要手动补三件事，都是 2026-09-04 新增的。三个模型键：`.env.example` 只在 `--adopt` 时进入项目，更新不带它，何况你的 `.env` 本来就归你自己，所以请自行把 `STAR_PLAN_MODEL`、`STAR_EXEC_MODEL`、`STAR_READ_MODEL` 加进去——[上游的 `.env.example`](.env.example) 里有解释这三个键的注释。子代理注册：早于它写下的 `.claude/settings.json` 没有 `SubagentStart` 块，上面那条提示会把它点名为缺失的 `SubagentStart delegate context` 钩子，修法是把上游文件里那个块的两条钩子命令抄进你自己的配置。第三件是 `AGENTS.md` 里那条档位说明：写过自己那份指令的项目拥有它，更新会保留而不覆盖，且不作声，所以这一条也请自行抄过去。
 
@@ -528,6 +533,7 @@ bash execs/configure.sh
 
 | 宿主 | STAR 如何选择受托者模型 |
 | --- | --- |
+| Antigravity | 通过 `invoke_subagent` 按次传入 `Model`，仅接受 `inherit`、`flash_lite`、`flash` 或 `pro`；不支持按次思考深度，无需写入文件。 |
 | Claude Code | 按次传入模型；`configure.sh` 同步具名代理和技能清单中的模型与深度。 |
 | [Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) | 每次派发传入 `model` 与受支持的 `reasoning_effort`；显式深度即使不换模型，也会触发使用全新上下文的委派。
 | [Kimi Code](https://moonshotai.github.io/kimi-code/en/configuration/config-files.html#subagent-model-pool) | 当前工具通过可选择的 secondary-model pool 提供 `model` 时，传入池接受的别名。模型池由用户自己的 Kimi 配置管理。 |

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR PreToolUse hook (Antigravity) — decline the git commands that break the
 # workflow conventions §1 in the ways that are expensive to undo. It is the floor
 # under INVOLVE=low, which answers the commit offer itself (§1.5, §7.7): with
@@ -21,7 +21,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || {
 # a user who asks for one directly should get it.
 #
 # Registered under PreToolUse matching run_command in .agents/hooks.json,
-# pointing to .gemini/antigravity-cli/hooks/star_commit_guard.sh. One copy per
+# pointing to .agy/hooks/star_commit_guard.sh. One copy per
 # harness tree (conventions §1, "The guard"), each differing only in how its
 # harness names the command and working directory on the way in and the
 # decision on the way out.
@@ -46,16 +46,16 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || {
 set -uo pipefail
 
 # Every harness registers this script by its own path inside the project, so the
-# project root is three levels up from the script itself (.gemini/antigravity-cli/
-# hooks/) — no environment variable and no payload field, which differ per harness.
-root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
+# project root is two levels up from the script itself (.agy/hooks/) — no
+# environment variable and no payload field, which differ per harness.
+root="$(cd -- "$(dirname -- "$0")/../.." 2>/dev/null && pwd -P)" || exit 0
 
 input=$(cat)
 
 # The shell command, from run_command's arguments.
 command_text() { printf '%s' "$input" | star_json_field 'toolCall.args.CommandLine' 2>/dev/null; }
-# The directory the command runs in, from run_command's Cwd argument.
-payload_cwd() { printf '%s' "$input" | star_json_field 'toolCall.args.Cwd' 2>/dev/null; }
+# The directory the command runs in: run_command's Cwd argument when present, else the common payload cwd.
+payload_cwd() { printf '%s' "$input" | star_json_eval 'x=at(r,"toolCall.args.Cwd"); if(type(x)!="string") x=at(r,"cwd"); if(type(x)=="string") raw(x)' 2>/dev/null; }
 
 cmd="$(command_text)"
 case "${cmd}" in
@@ -65,7 +65,7 @@ esac
 
 # The reason reaches the agent as JSON, so it carries no quote and no backslash.
 deny() { # $1 = one-line reason, $2 = what to do instead (default: hand it to the user)
-    printf '{"decision":"deny","reason":"%s (declined by .gemini/antigravity-cli/hooks/star_commit_guard.sh — %s)"}\n' "$1" "${2:-hand it to the user to run}"
+    printf '{"decision":"deny","reason":"%s (declined by .agy/hooks/star_commit_guard.sh — %s)"}\n' "$1" "${2:-hand it to the user to run}"
     exit 0
 }
 

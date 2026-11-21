@@ -32,22 +32,40 @@ star_json_models() {
       if(a(1)=="claude" && field(r,"type")=="assistant" && (a(2)=="true" || field(r,"isSidechain")!="true")) x=at(r,"message.model")
       if(a(1)=="codex" && field(r,"type")=="turn_context") x=at(r,"payload.model")
       if(a(1)=="qwen" && field(r,"type")=="assistant") x=get(r,"model")
+      if(a(1)=="agy" && field(r,"type")=="PLANNER_RESPONSE") x=get(r,"model")
       if(a(1)=="dsh") {
           d=0; if(field(r,"type")=="request/context") d=get(r,"data")
           else if(field(r,"type")=="request/header") d=at(r,"data.header.config")
           x=get(d,"model"); if(type(x)=="string") { p=field(d,"provider"); if(p!="") x=string(p "/" val(x)) }
       }
-      if(type(x)=="string" && val(x)!="<synthetic>") last=val(x)
+      if(type(x)=="string" && val(x)!="<synthetic>" && val(x)!="auto") last=val(x)
     }
     END { if(last!="") print last }' "$@"
 }
 star_json_invocations() {
     star_json_awk '
-    BEGIN { streaming=1 }
+    BEGIN { streaming=1; agy=(a(1)=="agy") }
     # Only a STAR command line or a Skill tool call can carry an invocation; this
     # runs on every gated tool call, so the rest of the transcript is not parsed.
-    index($0, "command-name") == 0 && index($0, "\"Skill\"") == 0 { next }
-    { reset_json(); r=tryparse($0); if(!r || field(r,"isSidechain")=="true") next
+    agy && (index($0, "\"USER_INPUT\"") == 0 || index($0, "/star") == 0) { next }
+    !agy && index($0, "command-name") == 0 && index($0, "\"Skill\"") == 0 { next }
+    { reset_json(); r=tryparse($0); if(!r) next
+      if(agy) {
+          if(field(r,"type")!="USER_INPUT") next
+          text=field(r,"content")
+          if(match(text, /<USER_REQUEST>[[:space:]]*/)) {
+              text=substr(text, RSTART+RLENGTH)
+              end=index(text, "</USER_REQUEST>")
+              if(end) text=substr(text, 1, end-1)
+          }
+          sub(/^[[:space:]]+/, "", text)
+          sub(/[[:space:]]+$/, "", text)
+          if(match(text, /^\/star([a-z-]*)([[:space:]]+|$)/)) {
+              last=substr(text, RSTART+RLENGTH); found=1
+          }
+          next
+      }
+      if(field(r,"isSidechain")=="true") next
       c=at(r,"message.content")
       if(field(r,"type")=="user") {
           text=""; if(type(c)=="string") text=val(c)
@@ -60,5 +78,5 @@ star_json_invocations() {
           if(field(x,"type")=="tool_use" && field(x,"name")=="Skill" && val(at(x,"input.skill")) ~ /^star/ && args ~ /involve=(low|medium|high)/) {last=args; found=1}
       }
     }
-    END { if(found) print last }'
+    END { if(found) print last }' "$@"
 }

@@ -77,7 +77,7 @@ STAR 的十五个相互衔接的研究工作流 skill，把模糊的研究兴趣
 
 ## 1. 调用方式
 
-本文写 skill 名时不带前缀，因为前缀由各工具自己提供：Claude Code、Cursor、Devin、Pi 与 Qwen Code 是 `/`，Codex 是 `$`，Kimi Code 与 DSH 是 `/skill:`。
+本文写 skill 名时不带前缀，因为前缀由各工具自己提供：Antigravity、Claude Code、Cursor、Devin、Pi 与 Qwen Code 是 `/`，Codex 是 `$`，Kimi Code 与 DSH 是 `/skill:`。
 
 ```text
 star-proj-adopt
@@ -96,7 +96,7 @@ star-metd-summarize framework
 star-code-release
 ```
 
-七个 skill——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`——是 slash-only：只有被显式点名时才运行，因为每一个都涉及一个应由研究者做的决定（[规约 §10](research-workflow-conventions.md)）。除 Antigravity 外，这由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`，以及 Devin：它读的是 `.agents/` 下的共享清单，所以 `.devin/skills/` 里为这七个各放一份同名、仅限用户触发（`triggers: [user]`）的包装，把共享清单遮住。Antigravity 读的也是共享清单，而它的 skill frontmatter 没有这类开关，所以那里靠的是描述与 §10 的约定，而不是一道被强制的闸门。用自然语言描述其中一个（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标没有歧义时 agent 可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。拾起仍受你所提要求约束：状态、解释或只读审查到交付结果和推荐动作即止，不会自动启动会写文件的后继；只有在推进一个已获授权的执行目标时，后继才在同一轮继续运行。
+七个 skill——`star-proj-adopt`、`star-idea-storm`、`star-plan-coach`、`star-code-architect`、`star-plan-decomposer`、`star-plan-reviser`、`star-code-release`——是 slash-only：只有被显式点名时才运行，因为每一个都涉及一个应由研究者做的决定（[规约 §10](research-workflow-conventions.md)）。除 Antigravity 外，这由各宿主各自强制，不靠自觉——Claude、Cursor、DSH、Kimi、Pi、Qwen Code 六份清单里的 `disable-model-invocation: true`，Codex 的 `.agents/skills/<name>/agents/openai.yaml` 里的 `allow_implicit_invocation: false`，以及 Devin：它读的是 `.agents/` 下的共享清单，所以 `.devin/skills/` 里为这七个各放一份同名、仅限用户触发（`triggers: [user]`）的包装，把共享清单遮住。Antigravity 的 `/star` 与 `/star-auto` 包装带有 `disable-model-invocation: true`，但那七个 skill 读的是不写宿主专属 frontmatter 键且优先级高于 `.agents/skills.json` 的共享 `.agents/skills/` 清单，所以那里对这七个靠的是描述与 §10 的约定，而不是一道被强制的闸门。用自然语言描述其中一个（“帮我把这份研究计划拆成可执行子计划”）不会启动它：智能体只凭一般知识作答，生成的文件看着像计划，却不带后续工作流要读的 `parent:` / `children:` / `traces_to` frontmatter。另外八个，任务明显匹配、目标没有歧义时 agent 可以自行拾起——显式点名依然有效，也是你说清要跑哪一个的方式。拾起仍受你所提要求约束：状态、解释或只读审查到交付结果和推荐动作即止，不会自动启动会写文件的后继；只有在推进一个已获授权的执行目标时，后继才在同一轮继续运行。
 
 名册之外还有一条命令：`star-auto <目标> [stop=<停止线>] [involve=<档位>]` 朝给定目标自动推进工作流——先看状态，然后接着跑每次运行点名的下一步，slash-only 的七个也在内，因为敲下这条命令就是研究者的决定，为整场追逐一次做出。每次被启动的运行仍遵循自身流程，auto 则提供本节所述的持续执行授权；目标与 `stop=` 边界内备好的重命令默认直接启动。`stop=` 用你自己的话（从该 token 到调用末尾）画出运行不得越过的线——如 `stop=单次训练超过 4 小时、或任何付费 API 调用就停`——越线的命令、或无法对照判断的，打印出来、运行停在那里。尚未解决的研究决定和新增授权仍会交回给你；破坏性操作与覆盖仍在授权外，唯一例外是在 `low` 档下，干净且审查通过的合并之后按守卫规则移除空 worktree。没有 `involve=` token、`.env` 里也没有 `INVOLVE` 时，自动运行解析为 `low`。完整规则：[规约 §10.7](research-workflow-conventions.md)；流程：[`.agents/commands/star-auto.md`](../../../.agents/commands/star-auto.md)。
 
@@ -1271,6 +1271,7 @@ STAR 定义流程、文件位置与验证记录；不附带模型栈、追踪器
 | 工具 | 运行时目录 | 调用形式 |
 | --- | --- | --- |
 | 任何遵循 `AGENTS.md` 的 agent | `.agents/skills/` | 各工具自己的 |
+| Antigravity | `.agents/skills/`（原生），外加由 `.agents/skills.json` 注册的 `.agy/skills/` 下两个包装 skill | `/star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
 | Devin | `.agents/skills/`（原生），外加 `.devin/skills/` 下的两个包装 skill | `/star-*` |

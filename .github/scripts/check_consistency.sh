@@ -337,17 +337,22 @@ if ! grep -qF 'name: "star-auto",' "${DSH_PLUGIN_ROOT}/lib/index.js" || \
 fi
 # Antigravity reads skills only from .agents/skills and the folders
 # .agents/skills.json lists, so its two wrappers sit in its own tree and that file
-# registers them. Skill frontmatter there has no invocation switch, so the
-# description is what keeps each one explicit-only.
-AGY_SKILL_ROOT=".gemini/antigravity-cli/skills"
-if ! star_json_eval 'e=get(r,"entries"); ok=0; for(i=0;i<size(e);i++) if(field(get(e,i),"path")==".gemini/antigravity-cli/skills") ok=1; if(!ok) exit 1' < .agents/skills.json >/dev/null; then
+# registers them. Both carry disable-model-invocation: true so only the typed
+# command loads them.
+AGY_SKILL_ROOT=".agy/skills"
+if ! star_json_eval 'e=get(r,"entries"); ok=0; for(i=0;i<size(e);i++) if(field(get(e,i),"path")==".agy/skills") ok=1; if(!ok) exit 1' < .agents/skills.json >/dev/null; then
     fail ".agents/skills.json does not register ${AGY_SKILL_ROOT}"
+    plugin_errors=1
+fi
+if ! grep -Fxq '    ".agents/skills.json"' execs/update.sh; then
+    fail "execs/update.sh must install .agents/skills.json"
     plugin_errors=1
 fi
 for agy_command in star star-auto; do
     agy_file="${AGY_SKILL_ROOT}/${agy_command}/SKILL.md"
     if [[ ! -f "${agy_file}" ]] || \
        ! frontmatter_has_line "${agy_file}" "name: ${agy_command}" || \
+       ! frontmatter_has_line "${agy_file}" "disable-model-invocation: true" || \
        ! grep -qF "Do not use unless the user typed /${agy_command}" "${agy_file}" || \
        ! grep -qF "Read \`.agents/commands/${agy_command}.md\`" "${agy_file}"; then
         fail "${agy_file} is not the explicit-only wrapper around .agents/commands/${agy_command}.md"
@@ -603,7 +608,7 @@ if [[ -n "${mangled_paths}" ]]; then
     token_errors=1
 fi
 
-(( token_errors == 0 )) && note "invocation tokens are consistent per tree; all seven harness entry points delegate to the shared /star router"
+(( token_errors == 0 )) && note "invocation tokens are consistent per tree; all nine harness entry points delegate to the shared /star router"
 
 # 8. The workflow docs are English, apart from the skills user guide, which
 #    ships as an en/zh pair. The workflow reads only the English docs, so no
@@ -655,18 +660,18 @@ for f in .claude/hooks/star_model_id.sh .codex/hooks/star_model_id.sh \
          .cursor/hooks/star_model_id.sh .devin/hooks/star_model_id.sh \
          .kimi-code/hooks/star_model_id.sh \
          .dsh/hooks/star_model_id.sh .pi/extensions/star-hooks/star_model_id.sh \
-         .qwen/hooks/star_model_id.sh .gemini/antigravity-cli/hooks/star_model_id.sh \
+         .qwen/hooks/star_model_id.sh .agy/hooks/star_model_id.sh \
          .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .devin/hooks/star_memory.sh \
          .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh \
          .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
          .cursor/hooks/star_commit_guard.sh .devin/hooks/star_commit_guard.sh \
          .kimi-code/hooks/star_commit_guard.sh \
          .dsh/hooks/star_commit_guard.sh .pi/extensions/star-hooks/star_commit_guard.sh \
-         .qwen/hooks/star_commit_guard.sh .gemini/antigravity-cli/hooks/star_commit_guard.sh \
-         .gemini/antigravity-cli/hooks/star_involve_gate.sh \
+         .qwen/hooks/star_commit_guard.sh .agy/hooks/star_commit_guard.sh \
+         .agy/hooks/star_involve_gate.sh \
          .claude/hooks/star_involve_gate.sh .codex/hooks/star_involve_gate.sh \
          .devin/hooks/star_involve_gate.sh .qwen/hooks/star_involve_gate.sh \
          .claude/hooks/star_bash_gate.sh .devin/hooks/star_bash_gate.sh \
@@ -686,7 +691,9 @@ done
 #     Pi's extension joins the bare name onto its own directory.
 own_hook_dir() { # $1 = registration config
     case "$1" in
-        .agents/hooks.json) printf '.gemini/antigravity-cli/hooks/' ;;
+        # Antigravity runs .agents/hooks.json commands with .agents/ as cwd, so
+        # every command must carry the leading ../ into the project root.
+        .agents/hooks.json) printf '../.agy/hooks/' ;;
         .pi/*) printf '' ;;
         *) printf '%s/hooks/' "${1%%/*}" ;;
     esac
@@ -736,8 +743,8 @@ for f in .claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh \
     grep -qF '"hookEventName":"PreToolUse","permissionDecision":"deny"' "${f}" || \
         { fail "${f} no longer emits a PreToolUse deny decision"; hook_errors=1; }
 done
-grep -qF '"decision":"deny"' .gemini/antigravity-cli/hooks/star_commit_guard.sh || \
-    { fail ".gemini/antigravity-cli/hooks/star_commit_guard.sh no longer emits Antigravity's deny shape"; hook_errors=1; }
+grep -qF '"decision":"deny"' .agy/hooks/star_commit_guard.sh || \
+    { fail ".agy/hooks/star_commit_guard.sh no longer emits Antigravity's deny shape"; hook_errors=1; }
 grep -qF '"decision":"block"' .devin/hooks/star_commit_guard.sh || \
     { fail ".devin/hooks/star_commit_guard.sh no longer emits Devin's block shape"; hook_errors=1; }
 grep -qF '"hookSpecificOutput":{"permissionDecision":"deny"' .kimi-code/hooks/star_commit_guard.sh || \
@@ -767,7 +774,7 @@ grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh \
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh \
          docs/mds/star-workflow/research-workflow-conventions.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
@@ -780,7 +787,7 @@ done
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh; do
     { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
         { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
     grep -qF 'f["type"] == "env"' "${f}" || \
@@ -801,7 +808,7 @@ printf -- '---\ntype: pref\nscope: global\nverified: 2026-09-01\n---\n\nThe firs
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .gemini/antigravity-cli/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh; do
     mkdir -p "${memory_fixture}/$(dirname "${f}")"
     cp "${f}" "${memory_fixture}/${f}"
     listed="$(bash "${memory_fixture}/${f}" --list 2>/dev/null)"
@@ -864,7 +871,7 @@ if [[ -n "${model_check_dir}" ]]; then
 
     rm -rf "${model_check_dir}"
 fi
-(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all eight harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
+(( hook_errors == 0 )) && note "all three hooks present, executable, registered in all nine harnesses, each guard copy emitting its own harness's deny, and the session hooks agreed on the index separator and the 180-day aging rule"
 
 # 11. Heading structure matches across the six trees that share it.
 #     Checks 1-3 compare file *sets*; nothing compared what is inside them, so a

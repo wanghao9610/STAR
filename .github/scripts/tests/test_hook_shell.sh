@@ -25,7 +25,7 @@ cp "$repo/.agents/scripts/"* "$project/.agents/scripts/"
 hosts='claude codex qwen dsh cursor kimi-code pi agy devin'
 for host in $hosts; do
     if [ "$host" = pi ]; then directory=.pi/extensions/star-hooks
-    elif [ "$host" = agy ]; then directory=.gemini/antigravity-cli/hooks
+    elif [ "$host" = agy ]; then directory=.agy/hooks
     else directory=.$host/hooks; fi
     mkdir -p "$project/$directory"
     cp "$repo/$directory/"*.sh "$project/$directory/"
@@ -43,7 +43,7 @@ assert_json() {
 }
 hook_path() {
     if [ "$1" = pi ]; then hook=$project/.pi/extensions/star-hooks/$2.sh
-    elif [ "$1" = agy ]; then hook=$project/.gemini/antigravity-cli/hooks/$2.sh
+    elif [ "$1" = agy ]; then hook=$project/.agy/hooks/$2.sh
     else hook=$project/.$1/hooks/$2.sh; fi
 }
 run() {
@@ -336,13 +336,39 @@ for patch in '*** Delete File: src/example.sh' '*** Update File: .env' '*** Upda
     assert_equal ''
 done
 hook_path agy star_model_id
-case_ 'Antigravity SessionStart injects concrete modelName via injectSteps'
+write agy.jsonl '{"step_index":0,"type":"USER_INPUT","content":"hi"}
+{"step_index":1,"type":"PLANNER_RESPONSE","model":"gemini-4-old"}
+{"step_index":2,"type":"PLANNER_RESPONSE","model":"gemini-4-live"}
+{"step_index":3,"type":"PLANNER_RESPONSE","model":"auto"}'
+case_ 'Antigravity --resolve reads the latest concrete PLANNER_RESPONSE model'
+run 0 '' "$hook" --resolve "$project/agy.jsonl" gemini-4-old
+assert_equal gemini-4-live
+case_ 'Antigravity --resolve recovers concrete model when session started as auto'
+run 0 '' "$hook" --resolve "$project/agy.jsonl" auto
+assert_equal gemini-4-live
+case_ 'Antigravity --resolve falls back to concrete session model when transcript is unreadable'
+run 0 '' "$hook" --resolve "$project/absent" gemini-4-fallback
+assert_equal gemini-4-fallback
+case_ 'Antigravity --resolve stays empty for auto fallback when transcript is unreadable'
+run 0 '' "$hook" --resolve "$project/absent" auto
+assert_equal ''
+case_ 'Antigravity SessionStart with transcriptPath injects shell-quoted --resolve command'
+payload=$(star_json_object modelName "$model_literal" transcriptPath "$transcript_literal")
+run 0 "$payload" "$hook"
+printf -v quoted_transcript '%q' "$transcript_literal"
+printf -v quoted_model '%q' "$model_literal"
+assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),a(1) " " a(2))) exit 1' "$quoted_transcript" "$quoted_model"
+case_ 'Antigravity SessionStart with auto modelName and transcriptPath still injects --resolve'
+payload=$(star_json_object modelName auto transcriptPath "$project/agy.jsonl")
+run 0 "$payload" "$hook"
+assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"--resolve")) exit 1; if(index(val(at(r,".injectSteps[0].systemMessage.systemMessage"))," auto ")) exit 1'
+case_ 'Antigravity SessionStart injects concrete modelName via injectSteps when no transcriptPath'
 run 0 '{"modelName":"gemini-4-hydrogen"}' "$hook"
 assert_json 'if(type(at(r,".injectSteps[0].systemMessage.systemMessage"))!="string" || !index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"gemini-4-hydrogen")) exit 1'
-case_ 'Antigravity SessionStart treats auto modelName as unrecorded fallback'
+case_ 'Antigravity SessionStart treats auto modelName without transcriptPath as unrecorded fallback'
 run 0 '{"modelName":"auto"}' "$hook"
 assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"unrecorded")) exit 1'
-case_ 'Antigravity payload extraction and JSON encoding'
+case_ 'Antigravity payload extraction and JSON encoding without transcriptPath'
 payload=$(star_json_object modelName "$model_literal")
 run 0 "$payload" "$hook"
 assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),a(1))) exit 1' "$model_literal"
@@ -350,29 +376,69 @@ case_ 'Antigravity SessionStart without modelName stays unrecorded'
 run 0 '{}' "$hook"
 assert_json 'if(!index(val(at(r,".injectSteps[0].systemMessage.systemMessage")),"unrecorded")) exit 1'
 hook_path agy star_involve_gate
-case_ 'Antigravity involve gate auto-approves a run worktree file'
-payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "${project}--wt/run1/src/example.sh")
-run 0 "$payload" "$hook"
-assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
-case_ 'Antigravity involve gate leaves a worktree dot-directory undecided'
-payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "${project}--wt/run1/.env")
-run 0 "$payload" "$hook"
-assert_equal ''
+for arg_key in Path TargetFile; do
+    case_ "Antigravity involve gate auto-approves a run worktree file via $arg_key"
+    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,a(1),string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$arg_key" "${project}--wt/run1/src/example.sh")
+    run 0 "$payload" "$hook"
+    assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
+    case_ "Antigravity involve gate leaves a worktree dot-directory undecided via $arg_key"
+    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,a(1),string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$arg_key" "${project}--wt/run1/.env")
+    run 0 "$payload" "$hook"
+    assert_equal ''
+done
+for tool in write_file edit_file; do
+    case_ "Antigravity involve gate auto-approves CLI $tool on a project file at INVOLVE=low"
+    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"name",string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/quoted file.txt" "$tool")
+    run 0 "$payload" "$hook"
+    assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
+done
 for tool in write_to_file replace_file_content multi_replace_file_content; do
-    case_ "Antigravity involve gate auto-approves $tool on a project file at INVOLVE=low"
+    case_ "Antigravity involve gate auto-approves IDE $tool on a project file at INVOLVE=low"
     payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"name",string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/quoted file.txt" "$tool")
     run 0 "$payload" "$hook"
     assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
 done
-for edited in "$project/.env" "$project/src/../outside" "$sandbox/outside"; do
-    case_ 'Antigravity involve gate leaves protected or outside path undecided'
-    payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"TargetFile",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$edited")
-    run 0 "$payload" "$hook"
-    assert_equal ''
+for arg_key in Path TargetFile; do
+    for edited in "$project/.env" "$project/src/../outside" "$sandbox/outside"; do
+        case_ "Antigravity involve gate leaves protected or outside path undecided via $arg_key"
+        payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,a(1),string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$arg_key" "$edited")
+        run 0 "$payload" "$hook"
+        assert_equal ''
+    done
 done
-case_ 'Antigravity hooks.json registers the documented file tools'
+case_ 'Antigravity hooks.json registers both CLI and IDE file tools'
 assertions=$((assertions + 1))
-grep -qF '"matcher": "write_to_file|replace_file_content|multi_replace_file_content"' "$repo/.agents/hooks.json" || fail 'agy involve gate matcher'
+grep -qF '"matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content"' "$repo/.agents/hooks.json" || fail 'agy involve gate matcher'
+# Antigravity involve gate resolves the latest /star* invocation's involve=
+# token from transcriptPath, falling back to INVOLVE in .env.
+write .env 'INVOLVE=medium'
+write agy-involve-low.jsonl '{"type":"USER_INPUT","content":"<USER_REQUEST>\n/star-plan-executor 00 involve=low\n</USER_REQUEST>\n<ADDITIONAL_METADATA>x</ADDITIONAL_METADATA>"}'
+case_ 'Antigravity involve gate honors per-invocation involve=low over INVOLVE=medium in .env'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"transcriptPath",string(a(2))); print json(r)' "$project/src/example.sh" "$project/agy-involve-low.jsonl")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"auto_approve\"")))) exit 1'
+write agy-involve-stop.jsonl '{"type":"USER_INPUT","content":"<USER_REQUEST>\n/star-auto finish plan 00 stop=never run involve=low jobs\n</USER_REQUEST>"}'
+case_ 'Antigravity involve gate ignores involve=low inside stop= text'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"transcriptPath",string(a(2))); print json(r)' "$project/src/example.sh" "$project/agy-involve-stop.jsonl")
+run 0 "$payload" "$hook"
+assert_equal ''
+write agy-involve-chat.jsonl '{"type":"USER_INPUT","content":"<USER_REQUEST>\nplease explain /star-auto involve=low\n</USER_REQUEST>"}'
+case_ 'Antigravity involve gate ignores non-leading /star mention in plain chat'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"transcriptPath",string(a(2))); print json(r)' "$project/src/example.sh" "$project/agy-involve-chat.jsonl")
+run 0 "$payload" "$hook"
+assert_equal ''
+write agy-involve-reset.jsonl '{"type":"USER_INPUT","content":"<USER_REQUEST>\n/star-plan-executor 00 involve=low\n</USER_REQUEST>"}
+{"type":"USER_INPUT","content":"<USER_REQUEST>\n/star-plan-executor 00\n</USER_REQUEST>"}'
+case_ 'Antigravity involve gate falls back to .env after a later bare /star command'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"transcriptPath",string(a(2))); print json(r)' "$project/src/example.sh" "$project/agy-involve-reset.jsonl")
+run 0 "$payload" "$hook"
+assert_equal ''
+write .env 'INVOLVE=low'
+write agy-involve-high.jsonl '{"type":"USER_INPUT","content":"<USER_REQUEST>\n/star-plan-executor 00 involve=high\n</USER_REQUEST>"}'
+case_ 'Antigravity involve gate honors per-invocation involve=high over INVOLVE=low in .env'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"transcriptPath",string(a(2))); print json(r)' "$project/src/example.sh" "$project/agy-involve-high.jsonl")
+run 0 "$payload" "$hook"
+assert_equal ''
 # Devin reports no model field in its SessionStart payload; the hook tolerates a
 # `model` if a future event carries one, and stays unrecorded until then.
 hook_path devin star_model_id
@@ -488,3 +554,18 @@ case_ 'No Python runtime was invoked'
 assertions=$((assertions + 1))
 [ ! -e "$PYTHON_PROBE_LOG" ] || fail "Python invoked: $(cat "$PYTHON_PROBE_LOG")"
 printf 'PASS: %s cases, %s assertions\n' "$cases" "$assertions"
+# Antigravity CLI passes the working directory in common top-level cwd (no Cwd
+# arg on run_command), while IDE surfaces may pass toolCall.args.Cwd.
+hook_path agy star_commit_guard
+case_ 'Antigravity guard sizes the commit in toolCall.args.Cwd'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(args,"Cwd",string(a(2))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "git commit -m big" "$big_tree")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"deny\"")) && index(val(at(r,".reason")),"10 MB"))) exit 1'
+case_ 'Antigravity guard sizes the commit in top-level cwd when Cwd is absent'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); put(r,"cwd",string(a(2))); print json(r)' "git commit -m big" "$big_tree")
+run 0 "$payload" "$hook"
+assert_json 'if(!(equal(at(r,".decision"),parse("\"deny\"")) && index(val(at(r,".reason")),"10 MB"))) exit 1'
+case_ 'Antigravity guard without Cwd or cwd reads the project root'
+payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"CommandLine",string(a(1))); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "git commit -m big")
+run 0 "$payload" "$hook"
+assert_equal ''

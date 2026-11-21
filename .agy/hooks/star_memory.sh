@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
 # STAR SessionStart hook (Antigravity) — inject the project's memory index into
 # session context so a session starts knowing what earlier sessions in this
 # repository learned.
@@ -17,13 +17,13 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../../.agents/scripts/json.sh" || {
 # person, a test, or the consistency check calls by hand.
 #
 # Registered under SessionStart in .agents/hooks.json pointing to
-# .gemini/antigravity-cli/hooks/star_memory.sh.
+# .agy/hooks/star_memory.sh.
 
 list=false
 [ "${1:-}" = "--list" ] && list=true
 $list || cat >/dev/null 2>&1
 
-root="$(cd -- "$(dirname -- "$0")/../../.." 2>/dev/null && pwd -P)" || exit 0
+root="$(cd -- "$(dirname -- "$0")/../.." 2>/dev/null && pwd -P)" || exit 0
 
 cutoff="$(date -v-180d +%Y-%m-%d 2>/dev/null || date -d '180 days ago' +%Y-%m-%d 2>/dev/null || true)"
 

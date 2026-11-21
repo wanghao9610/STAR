@@ -3,12 +3,12 @@
     "SessionStart": [
       {
         "type": "command",
-        "command": "../.gemini/antigravity-cli/hooks/star_model_id.sh",
+        "command": "../.agy/hooks/star_model_id.sh",
         "timeout": 10
       },
       {
         "type": "command",
-        "command": "../.gemini/antigravity-cli/hooks/star_memory.sh",
+        "command": "../.agy/hooks/star_memory.sh",
         "timeout": 10
       }
     ]
@@ -20,8 +20,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "../.gemini/antigravity-cli/hooks/star_commit_guard.sh",
-            "timeout": 10
+            "command": "../.agy/hooks/star_commit_guard.sh",
+            "timeout": 60
           }
         ]
       }
@@ -30,11 +30,11 @@
   "star-involve-gate": {
     "PreToolUse": [
       {
-        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
+        "matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content",
         "hooks": [
           {
             "type": "command",
-            "command": "../.gemini/antigravity-cli/hooks/star_involve_gate.sh",
+            "command": "../.agy/hooks/star_involve_gate.sh",
             "timeout": 10
           }
         ]

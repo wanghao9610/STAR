@@ -1,5 +1,6 @@
 ---
 name: star
+disable-model-invocation: true
 description: Route an explicitly invoked /star request to exactly one STAR research workflow skill. With no request, show the current research status. Do not use unless the user typed /star, and not after a specific star-* skill has already been selected.
 ---
 

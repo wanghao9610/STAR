@@ -36,7 +36,7 @@ HOOK_TREES=(
     ".cursor/hooks"
     ".devin/hooks"
     ".dsh/hooks"
-    ".gemini/antigravity-cli/hooks"
+    ".agy/hooks"
     ".kimi-code/hooks"
     # Pi keeps its scripts beside the extension that runs them: .pi/hooks/ is
     # the old name for the extensions directory, and Pi warns whenever it exists.
@@ -103,7 +103,7 @@ HOOK_CONFIGS=(
 # leaves the shared root alone for the agents that read it as their own — Codex
 # has no other, and any agent following the AGENTS.md convention finds it there.
 #
-# .agents/skills.json registers .gemini/antigravity-cli/skills with Antigravity,
+# .agents/skills.json registers .agy/skills with Antigravity,
 # which reads skills only from .agents/skills and the folders this file lists. The
 # two wrappers there give it /star and /star-auto; keeping them out of
 # .agents/skills keeps every other harness that scans that root from loading them.
@@ -145,7 +145,7 @@ is_optional_path() {
         .devin/skills/*)        return 0 ;;
         ".dsh/commands")        return 0 ;;
         ".kimi-code/plugins")   return 0 ;;
-        ".gemini/antigravity-cli/skills") return 0 ;;
+        ".agy/skills") return 0 ;;
         ".pi/extensions/star-subagent") return 0 ;;
         ".qwen/agents")        return 0 ;;
         ".agents/scripts") return 0 ;;
@@ -201,13 +201,13 @@ link_codex_marketplace() {
 # --harnesses names, and updated first. .codex stays Codex's: its hooks,
 # per-skill manifests, and plugins. Four paths sit outside their harness's own
 # directory and are listed here by name: .cursorignore (Cursor), .agents/hooks.json
-# and .agents/skills.json (Antigravity, whose tree is .gemini/antigravity-cli/) and
+# and .agents/skills.json (Antigravity, whose tree is .agy/) and
 # .agents/plugins/marketplace.json (Codex). Every other path starts with its
 # harness's own directory, so one added upstream is classified without being
 # listed here.
 path_harness() { # $1 = path relative to the project root
     case "$1" in
-        .agents/hooks.json|.agents/skills.json|.gemini/antigravity-cli/*) printf 'agy' ;;
+        .agents/hooks.json|.agents/skills.json|.agy/*) printf 'agy' ;;
         # This one .agents entry only exposes Codex's private marketplace. Keep
         # the rest of .agents shared so future harness conventions can grow
         # there without inheriting Codex's plugin tree.
@@ -230,7 +230,7 @@ harness_dirs() { # $1 = harness name
     case "$1" in
         # .agents is not here: it is in the unconditional sparse set below,
         # because every run syncs it.
-        agy)    printf '.gemini/antigravity-cli' ;;
+        agy)    printf '.agy' ;;
         codex)  printf '.codex' ;;
         claude) printf '.claude' ;;
         cursor) printf '.cursor' ;;
@@ -347,9 +347,18 @@ note_resolver_rule() { # $1 = config path relative to the project root
 # Antigravity without /star and /star-auto, and nothing else reports it.
 note_agy_skills() { # $1 = config path relative to the project root
     [[ "$1" == ".agents/skills.json" && -e "${ROOT_DIR}/$1" ]] || return 0
-    grep -qF '.gemini/antigravity-cli/skills' "${ROOT_DIR}/$1" 2>/dev/null && return 0
-    log "NOTE: $1 was kept and does not list .gemini/antigravity-cli/skills, so Antigravity has no /star or /star-auto."
-    log "      Add {\"path\": \".gemini/antigravity-cli/skills\"} to its entries, as upstream $1 does."
+# A kept .agents/hooks.json may still register the hook basenames under a wrong
+# relative path, which missing_hooks (basename-only) would not catch.
+note_agy_hooks() { # $1 = config path relative to the project root
+    [[ "$1" == ".agents/hooks.json" && -e "${ROOT_DIR}/$1" ]] || return 0
+    grep -qF '../.agy/hooks/' "${ROOT_DIR}/$1" 2>/dev/null && return 0
+    log "NOTE: $1 was kept and does not point at ../.agy/hooks/."
+    log "      Update its hook commands to ../.agy/hooks/ (or re-run with --force)."
+}
+
+    grep -qF '.agy/skills' "${ROOT_DIR}/$1" 2>/dev/null && return 0
+    log "NOTE: $1 was kept and does not list .agy/skills, so Antigravity has no /star or /star-auto."
+    log "      Add {\"path\": \".agy/skills\"} to its entries, as upstream $1 does."
 }
 
 # A kept .devin/config.json that does not turn the compatibility imports off
@@ -406,7 +415,7 @@ than behind codex because it is where the AGENTS.md convention puts skills: ever
 follows the convention reads it, so a project has it whatever harness it runs today, including one
 STAR ships no tree for. Deleting it is therefore undone by the next update, unlike a harness tree.
 The generic router packages live under .codex/plugins, .dsh/commands, .kimi-code/plugins,
-.gemini/antigravity-cli/skills and .devin/skills; each is updated only when its harness is selected. Codex's one discovery link under
+.agy/skills and .devin/skills; each is updated only when its harness is selected. Codex's one discovery link under
 .agents/plugins follows the same selection.
 
 --diff previews an update without changing anything: it lists upstream files that are new
@@ -687,7 +696,7 @@ if [[ "${ADOPT}" == true ]]; then
         ".kimi-code/plugins"
         # Antigravity's /star and /star-auto wrapper skills, which
         # .agents/skills.json registers; no install step.
-        ".gemini/antigravity-cli/skills"
+        ".agy/skills"
         # Devin's same two wrappers, discovered natively under .devin/skills.
         ".devin/skills"
         "${SKILL_ROOTS[@]:1}"
@@ -792,7 +801,7 @@ else
         ".kimi-code/plugins"
         # Antigravity's /star and /star-auto wrapper skills, registered by
         # .agents/skills.json (PROJECT_CONFIGS above).
-        ".gemini/antigravity-cli/skills"
+        ".agy/skills"
         # Devin's /star and /star-auto wrapper skills: skills are slash
         # commands there, so the two shared procedures need no command files.
         # Beside them, one user-only wrapper per † skill, which shadows the
@@ -1225,6 +1234,7 @@ for dir in "${ADOPT_DIRS[@]}"; do
     if [[ -e "${ROOT_DIR}/${dir}" || -L "${ROOT_DIR}/${dir}" ]]; then
         printf '  kept    %s/ (already present)\n' "${dir}"
         skipped=$(( skipped + 1 ))
+            note_agy_hooks "${cfg}"
     else
         mkdir -p "${ROOT_DIR}/${dir}"
         printf '  added   %s/\n' "${dir}"
@@ -1302,3 +1312,4 @@ for cfg in "${INSTALL_CONFIGS[@]}"; do
 done
 
 log "Next: copy .env.example to .env, then run /star-proj-adopt to wire the project up."
+    note_agy_hooks "${cfg}"

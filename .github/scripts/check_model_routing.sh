@@ -257,6 +257,42 @@ KIMI_HOME="${TMP_DIR}/kimi-home"
 mkdir -p "${KIMI_HOME}"
 cat > "${KIMI_HOME}/config.toml" <<'EOF'
 [models.kimi-k3]
+# Antigravity consumes only the four invoke_subagent Model literals at dispatch,
+# ignores @<depth>, and warns on unsupported names.
+write_env \
+	'STAR_PLAN_MODEL=agy:pro@high' \
+	'STAR_EXEC_MODEL=agy:flash' \
+	'STAR_READ_MODEL=flash_lite'
+agy_output="$(models_output --harnesses agy)"
+for expected in \
+	'STAR_PLAN_MODEL in .env gives Antigravity at dispatch: Model=pro; @high is ignored because invoke_subagent exposes no per-dispatch depth' \
+	'STAR_EXEC_MODEL in .env gives Antigravity at dispatch: Model=flash; no file stamp is required.' \
+	'STAR_READ_MODEL in .env gives Antigravity at dispatch: Model=flash_lite; no file stamp is required.'; do
+	grep -Fq "${expected}" <<<"${agy_output}" || fail "Antigravity model summary lacks: ${expected}"
+done
+write_env 'STAR_PLAN_MODEL=agy:custom-model' 'STAR_EXEC_MODEL=' 'STAR_READ_MODEL='
+agy_warn="$(models_output --harnesses agy)"
+grep -Fq "WARNING: STAR_PLAN_MODEL in .env resolves to 'custom-model' for Antigravity, but invoke_subagent Model accepts only inherit, flash_lite, flash, or pro; dispatch will fall back to inherit." <<<"${agy_warn}" ||
+	fail "Antigravity invalid-model warning missing: ${agy_warn}"
+agy_adapter=$(harness_adapter Antigravity)
+for rule in \
+	'`invoke_subagent`'\''s `Model` parameter accepts only `inherit`, `flash_lite`, `flash` or `pro`' \
+	'Use `TypeName: "research"` for codebase-only read-only collection and blind reads' \
+	'star-refs-reviewer'; do
+	grep -Fq "${rule}" <<<"${agy_adapter}" || fail "Antigravity shared adapter lacks rule: ${rule}"
+done
+grep -Fq 'TypeName: "research"' "${ROOT_DIR}/.agy/skills/star-auto/SKILL.md" ||
+	fail "Antigravity star-auto lacks research delegate mapping"
+grep -Fq 'star-refs-reviewer' "${ROOT_DIR}/.agy/skills/star-auto/SKILL.md" ||
+	fail "Antigravity star-auto lacks network-fetching collector exception"
+grep -Fq '`inherit` means keep the active session'\''s model' "${ROOT_DIR}/.agy/skills/star-auto/SKILL.md" ||
+	fail "Antigravity star-auto does not treat inherit as keeping the active session model"
+grep -Fq 'WaitMsBeforeAsync: 500' "${ROOT_DIR}/.agy/skills/star-auto/SKILL.md" ||
+	fail "Antigravity star-auto does not use native run_command backgrounding for launch waits"
+grep -Fq 'note_agy_hooks' "${ROOT_DIR}/execs/update.sh" ||
+	fail "execs/update.sh lacks stale .agents/hooks.json migration note for .agy/hooks/"
+note "Antigravity summaries validate invoke_subagent Model literals, warn on invalid values, and document delegate routing"
+
 provider = "managed:kimi-code"
 model = "k3"
 max_context_size = 1048576
