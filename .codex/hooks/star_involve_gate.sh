@@ -24,10 +24,15 @@ root="${PWD}"
 # hook's stdin, and a hook that exits without reading leaves that write to fail.
 input=$(cat)
 
-line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-value="${line#INVOLVE=}"
-value="${value%%#*}"
-involve="$(printf '%s' "${value}" | tr -cd '[:alpha:]')"
+# Exact: low only as the literal (optionally quoted, exported, indented or
+# commented); a lookalike such as low1 sets no level.
+involve="$([ -r "${root}/.env" ] && LC_ALL=C awk '
+    /^[[:blank:]]*(export[[:blank:]]+)?INVOLVE=/ { sub(/^[^=]*=/, ""); sub(/\r$/, ""); value = $0 }
+    END {
+        q = sprintf("%c", 39); lv = "(low|medium|high)"
+        if (value !~ ("^(" lv "|\"" lv "\"|" q lv q ")([[:blank:]]+#[^\r]*)?[[:blank:]]*$")) exit
+        sub(/[[:blank:]].*$/, "", value); gsub(/"/, "", value); gsub(q, "", value); print value
+    }' "${root}/.env")"
 [[ "${involve}" == "low" ]] || exit 0
 
 # apply_patch arrives as the shell command that carries the patch envelope, so

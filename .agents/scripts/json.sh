@@ -60,7 +60,7 @@ star_json_invocations() {
           }
           sub(/^[[:space:]]+/, "", text)
           sub(/[[:space:]]+$/, "", text)
-          if(match(text, /^\/star([a-z-]*)([[:space:]]+|$)/)) {
+          if(match(text, /^\/star(-[a-z][a-z-]*)?([[:space:]]+|$)/)) {
               last=substr(text, RSTART+RLENGTH); found=1
           }
           next
@@ -70,7 +70,7 @@ star_json_invocations() {
       if(field(r,"type")=="user") {
           text=""; if(type(c)=="string") text=val(c)
           else for(i=0;i<size(c);i++) { x=get(c,i); if(field(x,"type")=="text") text=text (text!="" ? " " : "") field(x,"text") }
-          if(text ~ /<command-name>[[:space:]]*\/?star/ && match(text,/<command-args>/)) {
+          if(text ~ /<command-name>[[:space:]]*\/?star(-[a-z][a-z-]*)?[[:space:]]*<\/command-name>/ && match(text,/<command-args>/)) {
               args=substr(text,RSTART+RLENGTH); end=index(args,"</command-args>"); if(end) {last=substr(args,1,end-1); found=1}
           }
       } else if(field(r,"type")=="assistant") for(i=0;i<size(c);i++) {

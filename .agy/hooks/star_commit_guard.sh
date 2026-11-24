@@ -39,10 +39,16 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # pass: none of them is the launch.
 #
 # A floor, not a proof. It reads one shell line at a time and cannot resolve
-# quoting, so a flag written after a commit message (`commit -m x --amend`) is
-# past where it stops reading. Silence means "no decision", so that case, an
-# unfamiliar spelling, and a payload no branch below can read all fall through to
-# the normal permission flow. What it declines is the user's to run.
+# quoting: a quote that opens inside one token and closes in another is matched
+# only at its own edges, and a pathspec spelled with glob characters or
+# `:(...)` magic is read as the literal path it is not. Silence means "no
+# decision", so a spelling no branch below can read falls through to the normal
+# permission flow. What it declines is the user's to run.
+#
+# On agy a PreToolUse hook that fails blocks the call (conventions §13). So a
+# missing .agents/scripts/json.sh (exit 1) or a run past the 60 s timeout in
+# .agents/hooks.json declines the run_command call rather than letting it
+# through: this guard fails closed here, unlike on Devin.
 set -uo pipefail
 
 # Every harness registers this script by its own path inside the project, so the
@@ -54,7 +60,9 @@ input=$(cat)
 
 # The shell command, from run_command's arguments.
 command_text() { printf '%s' "$input" | star_json_field 'toolCall.args.CommandLine' 2>/dev/null; }
-# The directory the command runs in: run_command's Cwd argument when present, else the common payload cwd.
+# The directory the command runs in: the common payload cwd, which agy sends with
+# every event. agy's run_command carries no Cwd argument; it is read first only in
+# case a client sends one.
 payload_cwd() { printf '%s' "$input" | star_json_eval 'x=at(r,"toolCall.args.Cwd"); if(type(x)!="string") x=at(r,"cwd"); if(type(x)=="string") raw(x)' 2>/dev/null; }
 
 cmd="$(command_text)"
@@ -172,6 +180,45 @@ work_dir="$(payload_cwd)"
 work_dir="$(resolve_dir "${root}" "${work_dir:-.}")"
 [[ -n "${work_dir}" ]] || work_dir="${root}"
 
+# The end index of an option's value: the token the option names, or — when the
+# value opens a quote it does not close on its own token — the token the quote
+# closes on. Reads `tok` (the segment's words), since a message can span words.
+commit_option_value_end() { # $1 = first token index, $2 = value or its first token
+    local k="$1" value="$2" quote
+    quote="${value:0:1}"
+    case "$quote" in
+        \"|\')
+            if [[ "${value:1}" != *"${quote}" ]]; then
+                while (( ++k < ${#tok[@]} )); do
+                    [[ "${tok[k]}" == *"${quote}" ]] && break
+                done
+            fi ;;
+    esac
+    printf '%s' "$k"
+}
+
+# The command line with every ; & | ( ) inside a quoted string blanked, and a
+# quoted newline joined, so a commit message in the `type(scope): …` style no
+# longer cuts its own command in two. The plain split still runs as well: it is
+# what exposes a command quoted inside `bash -c "…"`, which this one keeps whole.
+quote_masked() {
+    awk '
+        {
+            out = ""; n = length($0)
+            for (i = 1; i <= n; i++) {
+                c = substr($0, i, 1)
+                if (esc) { esc = 0; out = out c; continue }
+                if (c == "\\" && q != "\047") { esc = 1; out = out c; continue }
+                if (q == "" && (c == "\"" || c == "\047")) q = c
+                else if (q != "" && c == q) q = ""
+                else if (q != "" && index(";&|()", c)) c = " "
+                out = out c
+            }
+            if (q != "") printf "%s ", out; else print out
+        }
+        END { if (q != "") print "" }'
+}
+
 # One shell line can carry several commands, so each is read on its own: `cd x &&
 # git add -A` is the add it looks like.
 while IFS= read -r segment; do
@@ -258,15 +305,23 @@ while IFS= read -r segment; do
             done
             ;;
         commit)
-            paths=()
+            paths=(); path_only=0
             for ((j = i + 1; j < ${#tok[@]}; j++)); do
                 arg="${tok[j]}"
                 case "${arg}" in
                     \'*\'|\"*\") arg="${arg#?}"; arg="${arg%?}" ;;
                 esac
+                if (( path_only )); then
+                    paths+=("${arg}"); continue
+                fi
                 case "${arg}" in
-                    -m|--message|-F|--file|-t|--template|--fixup|--squash|-C|--reuse-message|--reedit-message|-m*|--message=*|--file=*)
-                        break ;;
+                    --) path_only=1 ;;
+                    -m|--message|-F|--file|-t|--template|--fixup|--squash|-C|-c|--reuse-message|--reedit-message)
+                        j=$((j + 1)); j="$(commit_option_value_end "$j" "${tok[j]:-}")" ;;
+                    --message=*|--file=*|--template=*|--fixup=*|--squash=*|--reuse-message=*|--reedit-message=*)
+                        j="$(commit_option_value_end "$j" "${tok[j]#*=}")" ;;
+                    -m?*|-F?*|-t?*|-C?*|-c?*)
+                        j="$(commit_option_value_end "$j" "${tok[j]:2}")" ;;
                     --amend)
                         deny "STAR conventions §1.3: no history rewrites — the user owns the branch and the remote. Make a new commit instead." ;;
                     --all)
@@ -365,6 +420,6 @@ while IFS= read -r segment; do
             done
             ;;
     esac
-done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n')
+done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n'; printf '%s\n' "${cmd}" | quote_masked | tr ';&|()' '\n\n\n\n\n')
 
 exit 0

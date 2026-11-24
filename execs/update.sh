@@ -56,7 +56,8 @@ EXTENSION_TREES=(
     ".pi/extensions/star-subagent"
 )
 # Claude Code, Cursor, Devin and Qwen load named subagents from their project trees.
-# These three dispatch roles are STAR-owned like Pi's roster: a model or depth stamp can
+# These dispatch roles (three per tree; Devin adds two read-only profiles) are
+# STAR-owned like Pi's roster: a model or depth stamp can
 # change their frontmatter, but a normal update replaces their prompt bodies from
 # upstream. Claude Code's copies are what give a delegate a thinking depth of its
 # own: the depth is frontmatter, so naming one per dispatch means naming the agent.
@@ -347,19 +348,39 @@ note_resolver_rule() { # $1 = config path relative to the project root
     log "      Copy \"Bash(bash .claude/hooks/star_model_id.sh --resolve:*)\" from upstream $1 into its permissions.allow."
 }
 
-# A kept .agents/hooks.json may still register the hook basenames under a wrong
-# relative path, which missing_hooks (basename-only) would not catch.
+# A kept .agents/hooks.json can name every STAR hook and still drift: a project
+# adopted before 054532d2 points at ../.gemini/antigravity-cli/hooks/, and one
+# that only rewrote those paths keeps an edit-gate matcher without the agy CLI's
+# write_file|edit_file and the guard's old ten-second timeout. missing_hooks
+# compares filenames only, so this compares each STAR registration's event,
+# matcher, type, timeout and command against upstream, as note_devin_hooks does.
 note_agy_hooks() { # $1 = config path relative to the project root
-    [[ "$1" == ".agents/hooks.json" && -e "${ROOT_DIR}/$1" ]] || return 0
-    grep -qF '../.agy/hooks/' "${ROOT_DIR}/$1" 2>/dev/null && return 0
-    log "NOTE: $1 was kept and does not point at ../.agy/hooks/."
-    log "      Update its hook commands to ../.agy/hooks/ (or re-run with --force)."
+    [[ "$1" == ".agents/hooks.json" && -e "${ROOT_DIR}/$1" && -e "${SOURCE_DIR}/$1" ]] || return 0
+    local drift
+    if grep -qF '.gemini/antigravity-cli/hooks/' "${ROOT_DIR}/$1" 2>/dev/null; then
+        log "NOTE: $1 was kept and still runs hooks from the old .gemini/antigravity-cli/hooks/ tree."
+        log "      Point its commands at ../.agy/hooks/ as upstream $1 does, then delete .gemini/antigravity-cli/."
+    fi
+    if ! drift="$(star_hook_drift "$1" 1 '(\.agy|\.gemini/antigravity-cli)/hooks/')"; then
+        log "NOTE: $1 was kept but could not be parsed; its STAR hook registrations were not validated."
+        log "      Compare it against upstream $1 by hand; keep your custom hooks."
+        return 0
+    fi
+    [[ -n "${drift}" ]] || return 0
+    drift="${drift//$'\n'/, }"
+    log "NOTE: $1 was kept; outdated or missing STAR hook registrations: ${drift}."
+    log "      Merge the affected STAR entries from upstream $1; keep your custom hooks."
 }
 
 # A kept .agents/skills.json that does not list STAR's wrapper folder leaves
 # Antigravity without /star and /star-auto, and nothing else reports it.
 note_agy_skills() { # $1 = config path relative to the project root
     [[ "$1" == ".agents/skills.json" && -e "${ROOT_DIR}/$1" ]] || return 0
+    if grep -qF '.gemini/antigravity-cli/skills' "${ROOT_DIR}/$1" 2>/dev/null; then
+        log "NOTE: $1 was kept and still registers the old .gemini/antigravity-cli/skills wrappers."
+        log "      Replace that entry with {\"path\": \".agy/skills\"}, as upstream $1 does, then delete .gemini/antigravity-cli/."
+        return 0
+    fi
     grep -qF '.agy/skills' "${ROOT_DIR}/$1" 2>/dev/null && return 0
     log "NOTE: $1 was kept and does not list .agy/skills, so Antigravity has no /star or /star-auto."
     log "      Add {\"path\": \".agy/skills\"} to its entries, as upstream $1 does."
@@ -391,55 +412,68 @@ note_devin_imports() { # $1 = config path relative to the project root
 # while the project's own custom entries and any reordering stay silent. The
 # file is the project's and is never overwritten; the note names the manual
 # merge.
+# The STAR hook registrations in a kept config that differ from upstream's: one
+# "<script> (missing | outdated registration | duplicate or stale entry)" per
+# line, nothing when they all match, exit nonzero when either file does not parse.
+# $2 = 1 for Antigravity's layout (named groups, each holding events), 0 for a
+# file whose top level is the events (Devin). An entry is a {matcher, hooks}
+# pair or, in a matcherless event, the hook itself. $3 = an extended regex the
+# command must contain for the entry to count as STAR's.
+star_hook_drift() { # $1 = config path, $2 = grouped (0|1), $3 = command regex
+    source "${SOURCE_DIR}/.agents/scripts/json.sh" 2>/dev/null && \
+    star_json_awk '
+        # Every registration of a STAR hook command under an events object.
+        # want="expected" records upstream'"'"'s canonical tuple per script;
+        # want="local" checks each local entry against it.
+        function hook(ev, matcher, hk, want,    cmd, s, rec) {
+            cmd=field(hk,"command")
+            if(!match(cmd, a(3))) return
+            if(!match(cmd,/star_[A-Za-z_]+\.sh/)) return
+            s=substr(cmd,RSTART,RLENGTH)
+            rec=ev "\t" json(matcher) "\t" json(get(hk,"type")) "\t" json(get(hk,"timeout")) "\t" json(get(hk,"command"))
+            if(want=="expected") { if(!(s in canon)) canon[s]=rec }
+            # A hook command naming a star_-looking script the upstream file
+            # does not register belongs to the project.
+            else if(!(s in canon)) return
+            else {
+                seen[s]++
+                if(seen[s]>1) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="duplicate or stale entry" }
+                else if(rec!=canon[s]) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="outdated registration" }
+            }
+        }
+        function events(root, want,    e,ev,arr,i,entry,h,j) {
+            for(e=1;e<=size(root);e++) {
+                ev=keys[root,e]; arr=get(root,ev)
+                if(type(arr)!="array") continue
+                for(i=0;i<size(arr);i++) {
+                    entry=get(arr,i); h=get(entry,"hooks")
+                    if(type(h)=="array") { for(j=0;j<size(h);j++) hook(ev, get(entry,"matcher"), get(h,j), want) }
+                    else if(has(entry,"command")) hook(ev, 0, entry, want)
+                }
+            }
+        }
+        function registrations(root, want,    g) {
+            if(a(2)!="1") { events(root, want); return }
+            for(g=1;g<=size(root);g++) if(type(get(root,keys[root,g]))=="object") events(get(root,keys[root,g]), want)
+        }
+        END {
+            r=document();
+            expected=parse(a(1));
+            if(type(r)!="object" || type(expected)!="object") exit 2
+            registrations(expected,"expected")
+            registrations(r,"local")
+            for(s in canon) if(!(s in seen) && !(s in bad)) { bad[s]=1; badlist[++nb]=s; desc[s]="missing" }
+            # Deterministic order for a handful of script names.
+            for(x=1;x<=nb;x++) for(y=x+1;y<=nb;y++) if(badlist[y]<badlist[x]) { t=badlist[x]; badlist[x]=badlist[y]; badlist[y]=t }
+            for(x=1;x<=nb;x++) print badlist[x] " (" desc[badlist[x]] ")"
+        }' \
+        "$(cat "${SOURCE_DIR}/$1")" "$2" "$3" < "${ROOT_DIR}/$1" 2>/dev/null
+}
+
 note_devin_hooks() { # $1 = config path relative to the project root
     [[ "$1" == ".devin/hooks.v1.json" && -e "${ROOT_DIR}/$1" && -e "${SOURCE_DIR}/$1" ]] || return 0
     local drift
-    if ! drift="$(
-        source "${SOURCE_DIR}/.agents/scripts/json.sh" 2>/dev/null && \
-        star_json_awk '
-            # Every registration of a STAR hook command under a root event array.
-            # want="expected" records upstream'"'"'s canonical tuple per script;
-            # want="local" checks each local entry against it.
-            function registrations(root, want,    e,ev,arr,i,entry,h,j,hk,cmd,s,rec) {
-                for(e=1;e<=size(root);e++) {
-                    ev=keys[root,e]; arr=get(root,ev)
-                    if(type(arr)!="array") continue
-                    for(i=0;i<size(arr);i++) {
-                        entry=get(arr,i); h=get(entry,"hooks")
-                        if(type(h)!="array") continue
-                        for(j=0;j<size(h);j++) {
-                            hk=get(h,j); cmd=field(hk,"command")
-                            if(index(cmd,".devin/hooks/")==0) continue
-                            if(!match(cmd,/star_[A-Za-z_]+\.sh/)) continue
-                            s=substr(cmd,RSTART,RLENGTH)
-                            rec=ev "\t" json(get(entry,"matcher")) "\t" json(get(hk,"type")) "\t" json(get(hk,"timeout")) "\t" json(get(hk,"command"))
-                            if(want=="expected") { if(!(s in canon)) canon[s]=rec }
-                            # A hook command naming a star_-looking script the
-                            # upstream file does not register belongs to the project.
-                            else if(!(s in canon)) continue
-                            else {
-                                seen[s]++
-                                if(seen[s]>1) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="duplicate or stale entry" }
-                                else if(rec!=canon[s]) { if(!(s in bad)) { bad[s]=1; badlist[++nb]=s } desc[s]="outdated registration" }
-                            }
-                        }
-                    }
-                }
-            }
-            END {
-                r=document();
-                expected=parse(a(1));
-                if(type(r)!="object" || type(expected)!="object") exit 2
-                registrations(expected,"expected")
-                registrations(r,"local")
-                for(s in canon) if(!(s in seen) && !(s in bad)) { bad[s]=1; badlist[++nb]=s; desc[s]="missing" }
-                # Deterministic order: the five script names sort by insertion
-                # into a small list.
-                for(x=1;x<=nb;x++) for(y=x+1;y<=nb;y++) if(badlist[y]<badlist[x]) { t=badlist[x]; badlist[x]=badlist[y]; badlist[y]=t }
-                for(x=1;x<=nb;x++) print badlist[x] " (" desc[badlist[x]] ")"
-            }' \
-            "$(cat "${SOURCE_DIR}/$1")" < "${ROOT_DIR}/$1" 2>/dev/null
-    )"; then
+    if ! drift="$(star_hook_drift "$1" 0 '\.devin/hooks/')"; then
         log "NOTE: $1 was kept but could not be parsed; its STAR hook registrations were not validated."
         log "      Compare it against upstream $1 by hand; keep your custom hooks."
         return 0
@@ -473,7 +507,8 @@ body), the hook registration configs (.agents/hooks.json, .claude/settings.json,
 .pi/settings.json, .agents/skills.json and .devin/config.json are installed only when missing and never overwritten,
 so a project that has written its own keeps them and one that has none gets them. Use --skill
 to update only the named skill across the shared root and the Claude, Cursor, DSH, Kimi, Pi and
-Qwen Code skill directories.
+Qwen Code skill directories, plus Codex's per-skill manifest and, for a skill marked † in the
+conventions roster, Devin's user-only wrapper in .devin/skills/.
 
 --harnesses limits the run to the named harness trees, comma separated: agy, claude, codex, cursor, devin,
 dsh, kimi, pi or qwen — or all, which is the default, or none for the shared skeleton by itself. A
@@ -1002,6 +1037,8 @@ if [[ "${ADOPT}" == false ]]; then
         if [[ -e "${SOURCE_DIR}/${path}" ]]; then
             SYNCED+=("${path}")
         elif is_optional_path "${path}"; then
+            # Only a † skill has a Devin wrapper, so its absence is expected, not news.
+            [[ "${path}" == .devin/skills/* ]] || \
             log "Skipping ${path}: not present in ref '${STAR_REF}'."
         else
             fail "Upstream ref is missing ${path}."
@@ -1092,7 +1129,10 @@ if [[ "${ADOPT}" == false ]]; then
                         changed=$(( changed + 1 ))
                     else
                         printf '  config   %s (differs from upstream; update never overwrites it)\n' "${cfg}"
+                        note_agy_hooks "${cfg}"
+                        note_agy_skills "${cfg}"
                         note_devin_hooks "${cfg}"
+                        note_devin_imports "${cfg}"
                     fi
                 fi
             done

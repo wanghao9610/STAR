@@ -205,6 +205,28 @@ commit_option_value_end() { # $1 = first token index, $2 = value or its first to
     printf '%s' "$k"
 }
 
+# The command line with every ; & | ( ) inside a quoted string blanked, and a
+# quoted newline joined, so a commit message in the `type(scope): …` style no
+# longer cuts its own command in two. The plain split still runs as well: it is
+# what exposes a command quoted inside `bash -c "…"`, which this one keeps whole.
+quote_masked() {
+    awk '
+        {
+            out = ""; n = length($0)
+            for (i = 1; i <= n; i++) {
+                c = substr($0, i, 1)
+                if (esc) { esc = 0; out = out c; continue }
+                if (c == "\\" && q != "\047") { esc = 1; out = out c; continue }
+                if (q == "" && (c == "\"" || c == "\047")) q = c
+                else if (q != "" && c == q) q = ""
+                else if (q != "" && index(";&|()", c)) c = " "
+                out = out c
+            }
+            if (q != "") printf "%s ", out; else print out
+        }
+        END { if (q != "") print "" }'
+}
+
 # One shell line can carry several commands, so each is read on its own: `cd x &&
 # git add -A` is the add it looks like.
 while IFS= read -r segment; do
@@ -406,6 +428,6 @@ while IFS= read -r segment; do
             done
             ;;
     esac
-done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n')
+done < <(printf '%s\n' "${cmd}" | tr ';&|()' '\n\n\n\n\n'; printf '%s\n' "${cmd}" | quote_masked | tr ';&|()' '\n\n\n\n\n')
 
 exit 0

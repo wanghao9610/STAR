@@ -5,12 +5,13 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # untouched: the STOP line and deletions are questions a skill asks, not
 # permission prompts a hook can answer.
 #
-# Devin's hook payload names the tool call and its input but no transcript
-# path, so the `involve=` token of the most recent STAR command cannot reach
-# this hook the way Claude Code's can: the level is .env's INVOLVE, resolved
-# on each call so an edit to .env takes effect without a restart. Silence
-# means "no decision", so every other level, every path this declines, and a
-# project that sets none fall through to the normal permission flow.
+# The level is resolved on each call (star_involve_level.sh): the `involve=`
+# token of the session's most recent STAR command, which star_involve_record.sh
+# keeps from UserPromptSubmit because tool payloads carry no transcript, else
+# .env's INVOLVE. A new invocation or an edit to .env takes effect without a
+# restart. Silence means "no decision", so every other level, every path this
+# declines, and a project that sets none fall through to the normal permission
+# flow.
 #
 # Registered under PreToolUse matching ^(edit|write|notebook_edit)$ in
 # .devin/hooks.v1.json — anchored, because Devin matches a regex anywhere in the
@@ -26,7 +27,7 @@ root="${DEVIN_PROJECT_DIR:-${PWD}}"
 input=$(cat)
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/star_involve_level.sh" || exit 0
-star_devin_involve_low "${root}" || exit 0
+star_devin_involve_low "${root}" "$(printf '%s' "${input}" | star_json_field session_id 2>/dev/null)" || exit 0
 
 # The edited path, from edit/write (file_path) or notebook_edit (notebook_path).
 edited_path() { printf '%s' "$input" | star_json_eval 'x=at(r,"tool_input.file_path"); if(type(x)=="null" || !x) x=at(r,"tool_input.notebook_path"); if(type(x)=="string") raw(x)' 2>/dev/null; }

@@ -768,13 +768,14 @@ grep -qF 'block: true' .pi/extensions/star-hooks/index.ts || \
 grep -qE '"matcher"[[:space:]]*:[[:space:]]*"bash"' .dsh/hooks.json || \
     { fail ".dsh/hooks.json no longer matches DSH's lowercase bash tool"; hook_errors=1; }
 #     The memory index's field separator — space, middle dot, space — is what all
-#     eight memory hooks build their lines with, and what the spec documents as
+#     nine memory hooks build their lines with, and what the spec documents as
 #     the shape a session reads. Reword it in one place and the hooks and the spec
 #     describe two different lines: same failure mode as check 15's registry.
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
          .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh \
+         .devin/hooks/star_memory.sh \
          docs/mds/star-workflow/research-workflow-conventions.md; do
     grep -qF ' · ' "${f}" 2>/dev/null || \
         { fail "${f} no longer carries the memory index separator ' · '"; hook_errors=1; }
@@ -787,7 +788,8 @@ done
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh \
+         .devin/hooks/star_memory.sh; do
     { grep -qF -- '-v-180d' "${f}" && grep -qF '180 days ago' "${f}"; } || \
         { fail "${f} lost a spelling of the 180-day cutoff (-v-180d / '180 days ago')"; hook_errors=1; }
     grep -qF 'f["type"] == "env"' "${f}" || \
@@ -808,7 +810,8 @@ printf -- '---\ntype: pref\nscope: global\nverified: 2026-09-01\n---\n\nThe firs
 for f in .claude/hooks/star_memory.sh .codex/hooks/star_memory.sh \
          .cursor/hooks/star_memory.sh .kimi-code/hooks/star_memory.sh \
          .dsh/hooks/star_memory.sh .pi/extensions/star-hooks/star_memory.sh \
-         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh; do
+         .qwen/hooks/star_memory.sh .agy/hooks/star_memory.sh \
+         .devin/hooks/star_memory.sh; do
     mkdir -p "${memory_fixture}/$(dirname "${f}")"
     cp "${f}" "${memory_fixture}/${f}"
     listed="$(bash "${memory_fixture}/${f}" --list 2>/dev/null)"

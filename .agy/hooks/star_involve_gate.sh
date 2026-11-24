@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 1; }
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { echo "${0##*/}: cannot load .agents/scripts/json.sh; run execs/update.sh" >&2; exit 0; }
 # Skip Antigravity's permission prompt for file edits while the run resolves to
 # involve=low — from the session's most recent /star* invocation token outside
 # any stop= line, falling back to INVOLVE in .env (workflow conventions §7.7).
@@ -28,7 +28,7 @@ involve_token() { # $1 = STAR command args text -> low / medium / high / empty
 }
 
 resolve_involve() {
-    local transcript args level line value
+    local transcript args level
     transcript="$(printf '%s' "$input" | star_json_field 'transcriptPath' 2>/dev/null)"
     if [[ -n "${transcript}" && -r "${transcript}" ]]; then
         args="$(star_json_invocations agy < "${transcript}" 2>/dev/null)"
@@ -37,10 +37,14 @@ resolve_involve() {
             [[ -n "${level}" ]] && { printf '%s' "${level}"; return 0; }
         fi
     fi
-    line="$(grep -sE '^INVOLVE=' "${root}/.env" | tail -1)"
-    value="${line#INVOLVE=}"
-    value="${value%%#*}"
-    printf '%s' "${value}" | tr -cd '[:alpha:]'
+    [ -r "${root}/.env" ] || return 0
+    LC_ALL=C awk '
+        /^[[:blank:]]*(export[[:blank:]]+)?INVOLVE=/ { sub(/^[^=]*=/, ""); sub(/\r$/, ""); value = $0 }
+        END {
+            q = sprintf("%c", 39); lv = "(low|medium|high)"
+            if (value !~ ("^(" lv "|\"" lv "\"|" q lv q ")([[:blank:]]+#[^\r]*)?[[:blank:]]*$")) exit
+            sub(/[[:blank:]].*$/, "", value); gsub(/"/, "", value); gsub(q, "", value); print value
+        }' "${root}/.env"
 }
 
 involve="$(resolve_involve)"

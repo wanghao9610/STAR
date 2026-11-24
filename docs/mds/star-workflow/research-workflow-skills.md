@@ -1274,7 +1274,7 @@ Every skill directory has the same shape in all seven roots: `SKILL.md` is the r
 | Antigravity | `.agents/skills/` natively, plus its `/star` and `/star-auto` wrappers in `.agy/skills/` (registered by `.agents/skills.json`) | `/star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
-| Devin | `.agents/skills/` natively, plus its two wrappers in `.devin/skills/` | `/star-*` |
+| Devin | `.agents/skills/` natively, plus nine wrappers in `.devin/skills/`: `/star`, `/star-auto` and one user-only wrapper per † skill | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 | Pi | `.pi/skills/` | `/star-*` |

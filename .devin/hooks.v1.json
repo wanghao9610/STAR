@@ -26,6 +26,18 @@
       ]
     }
   ],
+  "UserPromptSubmit": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DEVIN_PROJECT_DIR\"/.devin/hooks/star_involve_record.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
   "SessionStart": [
     {
       "matcher": "",

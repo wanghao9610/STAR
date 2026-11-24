@@ -72,11 +72,14 @@ star__latest_star_command_args() { # $1 = transcript path
 }
 
 star__env_involve() { # $1 = project root
-    local line value
-    line="$(grep -sE '^INVOLVE=' "$1/.env" | tail -1)"
-    value="${line#INVOLVE=}"
-    value="${value%%#*}"
-    printf '%s' "${value}" | tr -cd '[:alpha:]'
+    [ -r "$1/.env" ] || return 0
+    LC_ALL=C awk '
+        /^[[:blank:]]*(export[[:blank:]]+)?INVOLVE=/ { sub(/^[^=]*=/, ""); sub(/\r$/, ""); value = $0 }
+        END {
+            q = sprintf("%c", 39); lv = "(low|medium|high)"
+            if (value !~ ("^(" lv "|\"" lv "\"|" q lv q ")([[:blank:]]+#[^\r]*)?[[:blank:]]*$")) exit
+            sub(/[[:blank:]].*$/, "", value); gsub(/"/, "", value); gsub(q, "", value); print value
+        }' "$1/.env"
 }
 
 star_involve_level() { # $1 = hook payload, $2 = project root

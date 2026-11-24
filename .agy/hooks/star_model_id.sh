@@ -6,7 +6,8 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # Antigravity passes `modelName` (which may be "auto" when model selection is
 # automatic) and `transcriptPath` on the SessionStart payload, and injects
 # `injectSteps` with a `systemMessage` object into the conversation. Every model
-# turn appended to `transcript.jsonl` records `type: "PLANNER_RESPONSE"` with
+# turn appended to the transcript transcriptPath names (`transcript_full.jsonl`)
+# records `type: "PLANNER_RESPONSE"` with
 # the concrete `model` that wrote it, so when `transcriptPath` is present this
 # hook hands skills a `--resolve` command that reads the live writing model at
 # artifact-write time — covering mid-session model switches and `auto` starts.

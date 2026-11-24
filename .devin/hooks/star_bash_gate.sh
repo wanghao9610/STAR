@@ -17,10 +17,11 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # approve does skip Devin's permission prompt: the same run showed a write the
 # auto permission mode rejects going through at INVOLVE=low.
 #
-# Devin's hook payload names the tool call and its input but no transcript
-# path, so the `involve=` token of the most recent STAR command cannot reach
-# this hook the way Claude Code's can: the level is .env's INVOLVE, resolved
-# on each call so an edit to .env takes effect without a restart.
+# The level is resolved on each call (star_involve_level.sh): the `involve=`
+# token of the session's most recent STAR command, which star_involve_record.sh
+# keeps from UserPromptSubmit because tool payloads carry no transcript, else
+# .env's INVOLVE. A new invocation or an edit to .env takes effect without a
+# restart.
 #
 # A floor, not a proof. It reads one shell line at a time, cannot resolve
 # quoting, and does not match redirection — `> file` overwrites pass, since the
@@ -40,7 +41,7 @@ root="${DEVIN_PROJECT_DIR:-${PWD}}"
 input=$(cat)
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/star_involve_level.sh" || exit 0
-star_devin_involve_low "${root}" || exit 0
+star_devin_involve_low "${root}" "$(printf '%s' "${input}" | star_json_field session_id 2>/dev/null)" || exit 0
 
 # The shell command, from exec's tool_input.
 command_text() { printf '%s' "$input" | star_json_field 'tool_input.command' 2>/dev/null; }

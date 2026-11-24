@@ -13,7 +13,8 @@ HOOKS=(.claude/hooks/star_commit_guard.sh .codex/hooks/star_commit_guard.sh
     .cursor/hooks/star_commit_guard.sh .dsh/hooks/star_commit_guard.sh
     .kimi-code/hooks/star_commit_guard.sh .qwen/hooks/star_commit_guard.sh
     .pi/extensions/star-hooks/star_commit_guard.sh
-    .agy/hooks/star_commit_guard.sh)
+    .agy/hooks/star_commit_guard.sh
+    .devin/hooks/star_commit_guard.sh)
 cases=0
 fail() { printf 'FAIL review state: %s\n' "$*" >&2; exit 1; }
 note() { cases=$((cases + 1)); printf 'ok review state: %s\n' "$*"; }
@@ -63,6 +64,7 @@ hooks() {
                 .pi/*) [[ $rc -eq 1 ]] || fail "$hook exit" ;;
                 .cursor/*) [[ $rc -eq 2 ]] && star_json_eval 'if(field(r,"permission")!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
                 .agy/*) [[ $rc -eq 0 ]] && star_json_eval 'if(field(r,"decision")!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
+                .devin/*) [[ $rc -eq 2 ]] && star_json_eval 'if(field(r,"decision")!="block") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
                 *) [[ $rc -eq 0 ]] && star_json_eval 'if(val(at(r,"hookSpecificOutput.permissionDecision"))!="deny") exit 1' <<<"$output" >/dev/null || fail "$hook deny" ;;
             esac
         fi

@@ -3,7 +3,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../../.agents/scripts/json.sh" || { ec
 # STAR SessionStart hook (Devin) — inject the runtime-reported model id into
 # session context so skills record a real model_id instead of "unrecorded".
 #
-# Devin's SessionStart payload carries `source`, `session_id` and `prompt_id`
+# Devin's SessionStart payload carries `source` and `session_id`
 # only: no model field, and no transcript path a --resolve command could read
 # later, so a session that reports no model stays "unrecorded" (conventions §8).
 # Registered under SessionStart in .devin/hooks.v1.json.

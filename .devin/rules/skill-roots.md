@@ -10,7 +10,7 @@ Guidelines for loading STAR skills from the several roots Devin scans without mi
 
 **When duplicate skills exist, Devin must use the copy under `.agents/skills/`.**
 
-- Devin has no adapted skill tree in this repo: `.agents/skills/` is the copy its own skill loader reads natively, and the wording there names no tool — "your plan tool", "a read-only sub-agent" / "a writing sub-agent", "your question tool" — which maps to Devin's plan mode, `subagent_explore` / `subagent_general` and `run_subagent` profiles, and `ask_user_question`.
+- Devin has no adapted skill tree in this repo: `.agents/skills/` is the copy its own skill loader reads natively, and the wording there names no tool — "your plan tool", "a read-only sub-agent" / "a writing sub-agent", "your question tool" — which maps to Devin's plan mode, the `run_subagent` profiles §2 below names for read-only and writing work, and `ask_user_question`.
 - Ignore sibling copies under `.claude/skills/`, `.codex/skills/` and any other imported root: they are written for those hosts' tool names and are not for Devin to act on. `.devin/config.json` turns off the documented import keys; whatever a loader still surfaces is cosmetic only.
 - `.devin/skills/` holds two kinds of wrapper. `star` and `star-auto` delegate to the shared roster under `.agents/commands/`. The seven skills marked † in the conventions §10 roster each have a user-only wrapper of the same name, which shadows the shared manifest and reads it in full, so Devin starts them only when the user types them. Every other `star-*` skill is loaded from `.agents/skills/` directly.
 

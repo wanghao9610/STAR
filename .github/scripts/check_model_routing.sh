@@ -289,8 +289,6 @@ grep -Fq '`inherit` means keep the active session'\''s model' "${ROOT_DIR}/.agy/
 	fail "Antigravity star-auto does not treat inherit as keeping the active session model"
 grep -Fq 'WaitMsBeforeAsync: 500' "${ROOT_DIR}/.agy/skills/star-auto/SKILL.md" ||
 	fail "Antigravity star-auto does not use native run_command backgrounding for launch waits"
-grep -Fq 'note_agy_hooks' "${ROOT_DIR}/execs/update.sh" ||
-	fail "execs/update.sh lacks stale .agents/hooks.json migration note for .agy/hooks/"
 note "Antigravity summaries validate invoke_subagent Model literals, warn on invalid values, and document delegate routing"
 
 # --kimi-pool registers the variants and pool keys the kimi tier entries need in
@@ -527,7 +525,7 @@ roster_tier_skills() { # $1 = plan, exec, or read
 	awk -v want="$1" -F'|' '
 		/^\| `star-/ {
 			name = $2; tier = $3
-			gsub(/[` \t\302\240]/, "", name); sub(/†/, "", name)
+			gsub(/\302\240/, "", name); gsub(/[` \t]/, "", name); sub(/†/, "", name)
 			gsub(/[ \t]/, "", tier)
 			if (tier == want) print name
 		}
@@ -840,3 +838,60 @@ if grep -q 'star_bash_gate.sh\|star_commit_guard.sh' "${TMP_DIR}/update.log"; th
 fi
 [[ "$(cksum "${kept}")" == "${cmdchange_sum}" ]] || fail "update overwrote the command-drifted kept config"
 note "a changed canonical command warns on that script only and is preserved"
+
+# Antigravity's kept .agents/hooks.json gets the same structural comparison. A
+# file whose paths were migrated to ../.agy/hooks/ but whose edit-gate matcher
+# and guard timeout are the pre-.agy ones is named per script; one still on the
+# old .gemini/antigravity-cli tree gets the legacy note too, in --diff as well;
+# a kept .agents/skills.json on the old wrapper folder is told to replace it.
+AGY_PROJECT="${TMP_DIR}/agy-project"
+mkdir -p "${AGY_PROJECT}"
+git -C "${AGY_PROJECT}" init -q
+printf 'STAR_REPOSITORY='"'"'file://%s'"'"'\nSTAR_HARNESSES=agy\n' "${UPSTREAM}" > "${AGY_PROJECT}/.env"
+(cd "${AGY_PROJECT}" && bash "${UPSTREAM}/execs/update.sh" --adopt --harnesses agy) \
+	> "${TMP_DIR}/update.log" 2>&1 || { cat "${TMP_DIR}/update.log"; fail "agy adopt"; }
+git -C "${AGY_PROJECT}" add -A
+git -C "${AGY_PROJECT}" -c core.hooksPath=/dev/null -c user.name=Test \
+	-c user.email=test@example.invalid commit -qm agy
+agy_kept="${AGY_PROJECT}/.agents/hooks.json"
+(cd "${AGY_PROJECT}" && bash execs/update.sh) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "agy update over the canonical config"; }
+! grep -q 'STAR hook registrations\|antigravity-cli' "${TMP_DIR}/update.log" ||
+	fail "a canonical .agents/hooks.json drew a warning"
+(cd "${AGY_PROJECT}" && source .agents/scripts/json.sh && star_json_eval '
+	for(g=1;g<=size(r);g++) {
+		grp=get(r,keys[r,g]); arr=get(grp,"PreToolUse")
+		if(type(arr)!="array") continue
+		for(i=0;i<size(arr);i++) {
+			x=get(arr,i); h=get(x,"hooks")
+			for(j=0;j<size(h);j++) {
+				hk=get(h,j)
+				if(index(field(hk,"command"),"star_involve_gate")) put(x,"matcher",string("write_to_file|replace_file_content|multi_replace_file_content"))
+				if(index(field(hk,"command"),"star_commit_guard")) put(hk,"timeout",number(10))
+			}
+		}
+	}
+	print json(r)' < .agents/hooks.json > .agents/hooks.json.migrated) ||
+	fail "could not build the path-only-migrated agy config"
+mv "${agy_kept}.migrated" "${agy_kept}"
+agy_sum="$(cksum "${agy_kept}")"
+(cd "${AGY_PROJECT}" && bash execs/update.sh) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "agy update over a path-only-migrated config"; }
+grep -F 'outdated or missing STAR hook registrations: star_commit_guard.sh (outdated registration), star_involve_gate.sh (outdated registration).' "${TMP_DIR}/update.log" >/dev/null ||
+	{ cat "${TMP_DIR}/update.log"; fail "a path-only-migrated .agents/hooks.json drew no per-script warning"; }
+[[ "$(cksum "${agy_kept}")" == "${agy_sum}" ]] || fail "update overwrote the kept .agents/hooks.json"
+sed 's#\.\./\.agy/hooks/#../.gemini/antigravity-cli/hooks/#g' "${UPSTREAM}/.agents/hooks.json" > "${agy_kept}"
+printf '{"entries":[{"path":".gemini/antigravity-cli/skills"}]}\n' > "${AGY_PROJECT}/.agents/skills.json"
+git -C "${AGY_PROJECT}" add -A
+git -C "${AGY_PROJECT}" -c core.hooksPath=/dev/null -c user.name=Test \
+	-c user.email=test@example.invalid commit -qm legacy
+(cd "${AGY_PROJECT}" && bash execs/update.sh --diff) > "${TMP_DIR}/update.log" 2>&1 ||
+	{ cat "${TMP_DIR}/update.log"; fail "agy --diff over a legacy config"; }
+for message in 'still runs hooks from the old .gemini/antigravity-cli/hooks/ tree' \
+	'still registers the old .gemini/antigravity-cli/skills wrappers'; do
+	grep -qF "${message}" "${TMP_DIR}/update.log" || { cat "${TMP_DIR}/update.log"; fail "--diff omitted: ${message}"; }
+done
+if grep -q 're-run with --force' "${TMP_DIR}/update.log"; then
+	fail "the agy note still suggests --force, which also replaces AGENTS.md"
+fi
+note "a kept .agents/hooks.json is compared per STAR script, legacy .gemini paths are named, and --diff gives the same notes"

@@ -1274,7 +1274,7 @@ STAR 定义流程、文件位置与验证记录；不附带模型栈、追踪器
 | Antigravity | `.agents/skills/`（原生），外加由 `.agents/skills.json` 注册的 `.agy/skills/` 下两个包装 skill | `/star-*` |
 | Claude | `.claude/skills/` | `/star-*` |
 | Cursor | `.cursor/skills/` | `/star-*` |
-| Devin | `.agents/skills/`（原生），外加 `.devin/skills/` 下的两个包装 skill | `/star-*` |
+| Devin | `.agents/skills/`（原生），外加 `.devin/skills/` 下的九个包装：`/star`、`/star-auto`，以及每个 † skill 一份仅限用户触发的包装 | `/star-*` |
 | DSH | `.dsh/skills/` | `/skill:star-*` |
 | Kimi | `.kimi-code/skills/` | `/skill:star-*` |
 | Pi | `.pi/skills/` | `/star-*` |

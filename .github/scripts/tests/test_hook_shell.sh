@@ -488,6 +488,32 @@ INVOLVE="unterminated'; do
         assert_equal ''
     done
 done
+# The other edit gates read .env's INVOLVE the same exact way: a lookalike such
+# as low1 is no level, while an exported quoted low with a comment still is.
+other_gate() { # $1 = host
+    hook_path "$1" star_involve_gate
+    case "$1" in
+        agy) payload=$(star_json_new 'r=object(); tc=object(); args=object(); put(args,"Path",string(a(1))); put(tc,"name",string("write_file")); put(tc,"args",args); put(r,"toolCall",tc); print json(r)' "$project/src/quoted file.txt") ;;
+        codex) payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "command" '*** Begin Patch
+*** Update File: src/example.sh
+@@
+-old
++new
+*** End Patch') ;;
+        *) payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt") ;;
+    esac
+    run 0 "$payload" "$hook"
+}
+for host in claude codex qwen agy; do
+    write .env 'INVOLVE=low1'
+    case_ "$host edit gate sets no level from a lookalike INVOLVE=low1"
+    other_gate "$host"
+    assert_equal ''
+    write .env '  export INVOLVE="low" # comment'
+    case_ "$host edit gate accepts an exported quoted low with a comment"
+    other_gate "$host"
+    assert_contains 'low'
+done
 # Quoting, export, indentation, a trailing comment and CRLF still count as low.
 write .env '  export INVOLVE="low" # comment'
 hook_path devin star_involve_gate
@@ -506,7 +532,59 @@ case_ 'Devin involve gate accepts a CRLF low'
 payload=$(star_json_new 'r=object(); x=object(); put(x,a(1),string(a(2))); put(r,"tool_input",x); print json(r)' "file_path" "$project/src/quoted file.txt")
 run 0 "$payload" "$hook"
 assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+# The run's own involve= token outranks .env (conventions §7.7): the recorder keeps
+# the last typed STAR command's token per session, and both gates read it first.
+devin_record() { # $1 = session_id, $2 = typed prompt
+    hook_path devin star_involve_record
+    payload=$(star_json_new 'r=object(); put(r,"hook_event_name",string("UserPromptSubmit")); put(r,"session_id",string(a(1))); put(r,"prompt",string(a(2))); print json(r)' "$1" "$2")
+    run 0 "$payload" "$hook"
+    assert_equal ''
+}
+devin_gate() { # $1 = gate, $2 = session_id
+    hook_path devin "$1"
+    if [ "$1" = star_involve_gate ]; then
+        payload=$(star_json_new 'r=object(); x=object(); put(x,"file_path",string(a(1))); put(r,"tool_input",x); put(r,"session_id",string(a(2))); print json(r)' "$project/src/a.txt" "$2")
+    else
+        payload=$(star_json_new 'r=object(); x=object(); put(x,"command",string(a(1))); put(r,"tool_input",x); put(r,"session_id",string(a(2))); print json(r)' "rg --files src" "$2")
+    fi
+    run 0 "$payload" "$hook"
+}
 write .env 'INVOLVE=low'
+case_ 'Devin recorder keeps involve=high from a typed STAR command'
+devin_record dv-high '/star-plan-executor 03 involve=high'
+for gate in star_involve_gate star_bash_gate; do
+    case_ "Devin $gate keeps its prompt under involve=high although .env says low"
+    devin_gate "$gate" dv-high
+    assert_equal ''
+    case_ "Devin $gate in another session still reads .env's low"
+    devin_gate "$gate" dv-other
+    assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+done
+case_ 'Devin recorder ignores a prompt that is not a STAR command'
+devin_record dv-high 'thanks, carry on involve=low'
+devin_gate star_involve_gate dv-high
+assert_equal ''
+case_ 'Devin recorder ignores a lookalike command such as /start'
+devin_record dv-start '/start something involve=high'
+devin_gate star_involve_gate dv-start
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+case_ 'Devin STAR command without a token hands the level back to .env'
+devin_record dv-high '/star-flow-status'
+devin_gate star_involve_gate dv-high
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+write .env 'INVOLVE=medium'
+case_ 'Devin involve=low on the typed command approves under .env medium'
+devin_record dv-low '/star-auto finish leaf 03 stop=any paid API call involve=low'
+devin_gate star_involve_gate dv-low
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+case_ 'Devin token before stop= still counts, one after it is the stop line text'
+devin_record dv-stop '/star-auto goal involve=low stop=ask before involve=high runs'
+devin_gate star_involve_gate dv-stop
+assert_json 'if(!(equal(at(r,".decision"),parse("\"approve\"")))) exit 1'
+write .env 'INVOLVE=low'
+case_ 'Devin hooks.v1.json registers the involve recorder on UserPromptSubmit'
+assertions=$((assertions + 1))
+star_json_eval 'x=at(r,"UserPromptSubmit.0.hooks.0.command"); if(!index(val(x),".devin/hooks/star_involve_record.sh")) exit 1' < "$repo/.devin/hooks.v1.json" >/dev/null || fail 'devin recorder registration'
 case_ 'Devin hooks.v1.json registers its own hook copies on the documented matchers'
 assertions=$((assertions + 1))
 grep -qF '"matcher": "^exec$"' "$repo/.devin/hooks.v1.json" || fail 'devin exec matcher is not anchored'
@@ -537,7 +615,9 @@ for host in $hosts; do
         'env git add -A' '{ git add -A; }' 'if true; then git add -A; fi' 'git stage -A' 'echo x | xargs git add -A' \
         'GIT_DIR=.git git commit --amend' 'time git rebase main' 'git add ./' 'git checkout -fB main origin/main' \
         'git switch -fC topic' 'git worktree remove -ff ../tree' 'timeout 12h bash execs/scpts/run.sh' \
-        'source execs/scpts/run.sh' '. execs/scpts/run.sh' 'sudo bash execs/scpts/run.sh' 'echo go 1>wkdrs/run/.await'; do
+        'source execs/scpts/run.sh' '. execs/scpts/run.sh' 'sudo bash execs/scpts/run.sh' 'echo go 1>wkdrs/run/.await' \
+        'git commit -m wip --amend' 'git commit -m "fix(scope): x" --amend' 'git commit -m "a; b" -a' \
+        'bash -c "git add -A; echo done"'; do
         case_ "$host guard declines $command_text"
         case "$host" in
             cursor) expected=2; payload=$(star_json_object command "$command_text") ;;
@@ -557,7 +637,8 @@ for host in $hosts; do
         esac
     done
     for command_text in 'git add src/example.sh; touch payload-executed' 'git add :/docs/example.md' \
-        'git commit -uall -m message' 'git commit -Sabc123 -m message' 'bash -n execs/scpts/run.sh'; do
+        'git commit -uall -m message' 'git commit -Sabc123 -m message' 'bash -n execs/scpts/run.sh' \
+        'git commit -m "fix(scope): keep -a and --amend; out"'; do
         case_ "$host guard permits $command_text without executing payload"
         if [ "$host" = pi ]; then run 0 '' "$hook" "$command_text"
         else
