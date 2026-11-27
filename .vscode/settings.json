@@ -41,4 +41,10 @@
         "**/inits/**",
         "**/wkdrs/**",
     ],
+    "windsurfPyright.analysis.exclude": [
+        ".*/**",
+        "**/datas/**",
+        "**/inits/**",
+        "**/wkdrs/**",
+    ],
 }
